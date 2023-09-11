@@ -268,10 +268,6 @@ object Flags {
     val MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA =
         unreleasedFlag("migrate_split_keyguard_bottom_area", teamfood = true)
 
-    /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
-    // TODO(b/283260512): Tracking bug.
-    @JvmField val FP_LISTEN_OCCLUDING_APPS = releasedFlag("fp_listen_occluding_apps")
-
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
     @JvmField val KEYGUARD_TALKBACK_FIX = releasedFlag("keyguard_talkback_fix")
@@ -311,11 +307,6 @@ object Flags {
     @JvmField
     val KEYGUARD_WM_STATE_REFACTOR: UnreleasedFlag =
             unreleasedFlag("keyguard_wm_state_refactor")
-
-    /** Stop running face auth when the display state changes to OFF. */
-    // TODO(b/294221702): Tracking bug.
-    @JvmField val STOP_FACE_AUTH_ON_DISPLAY_OFF = resourceBooleanFlag(
-            R.bool.flag_stop_face_auth_on_display_off, "stop_face_auth_on_display_off")
 
     /** Flag to disable the face scanning animation pulsing. */
     // TODO(b/295245791): Tracking bug.

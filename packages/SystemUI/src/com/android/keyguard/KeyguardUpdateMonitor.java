@@ -35,7 +35,6 @@ import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.os.BatteryManager.CHARGING_POLICY_DEFAULT;
 import static android.os.PowerManager.WAKE_REASON_UNKNOWN;
-
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -161,8 +160,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.FaceAuthenticationListener;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.shared.constants.TrustAgentUiEvent;
@@ -417,7 +414,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final ActiveUnlockConfig mActiveUnlockConfig;
     private final IDreamManager mDreamManager;
     private final TelephonyManager mTelephonyManager;
-    private final FeatureFlags mFeatureFlags;
     @Nullable
     private final FingerprintManager mFpm;
     @Nullable
@@ -2365,7 +2361,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             FaceWakeUpTriggersConfig faceWakeUpTriggersConfig,
             DevicePostureController devicePostureController,
             Optional<FingerprintInteractiveToAuthProvider> interactiveToAuthProvider,
-            FeatureFlags featureFlags,
             TaskStackChangeListeners taskStackChangeListeners,
             IActivityTaskManager activityTaskManagerService,
             DisplayTracker displayTracker) {
@@ -2400,7 +2395,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mPackageManager = packageManager;
         mFpm = fingerprintManager;
         mFaceManager = faceManager;
-        mFeatureFlags = featureFlags;
         mActiveUnlockConfig.setKeyguardUpdateMonitor(this);
         mFaceAcquiredInfoIgnoreList = Arrays.stream(
                 mContext.getResources().getIntArray(
@@ -2417,9 +2411,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mTaskStackChangeListeners = taskStackChangeListeners;
         mActivityTaskManager = activityTaskManagerService;
         mDisplayTracker = displayTracker;
-        if (mFeatureFlags.isEnabled(Flags.STOP_FACE_AUTH_ON_DISPLAY_OFF)) {
-            mDisplayTracker.addDisplayChangeCallback(mDisplayCallback, mainExecutor);
-        }
+        mDisplayTracker.addDisplayChangeCallback(mDisplayCallback, mainExecutor);
 
         mHandler = new Handler(mainLooper) {
             @Override
@@ -4205,21 +4197,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         @Override
         public void onTaskStackChangedBackground() {
             try {
-                if (mFeatureFlags.isEnabled(Flags.FP_LISTEN_OCCLUDING_APPS)) {
-                    RootTaskInfo standardTask = mActivityTaskManager.getRootTaskInfo(
-                            WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-                    final boolean previousState = mAllowFingerprintOnCurrentOccludingActivity;
-                    mAllowFingerprintOnCurrentOccludingActivity =
-                            standardTask.topActivity != null
-                                    && !TextUtils.isEmpty(standardTask.topActivity.getPackageName())
-                                    && mAllowFingerprintOnOccludingActivitiesFromPackage.contains(
-                                            standardTask.topActivity.getPackageName())
-                                    && standardTask.visible;
-                    if (mAllowFingerprintOnCurrentOccludingActivity != previousState) {
-                        mLogger.allowFingerprintOnCurrentOccludingActivityChanged(
-                                mAllowFingerprintOnCurrentOccludingActivity);
-                        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
-                    }
+                RootTaskInfo standardTask = mActivityTaskManager.getRootTaskInfo(
+                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+                final boolean previousState = mAllowFingerprintOnCurrentOccludingActivity;
+                mAllowFingerprintOnCurrentOccludingActivity =
+                        standardTask.topActivity != null
+                                && !TextUtils.isEmpty(standardTask.topActivity.getPackageName())
+                                && mAllowFingerprintOnOccludingActivitiesFromPackage.contains(
+                                        standardTask.topActivity.getPackageName())
+                                && standardTask.visible;
+                if (mAllowFingerprintOnCurrentOccludingActivity != previousState) {
+                    mLogger.allowFingerprintOnCurrentOccludingActivityChanged(
+                            mAllowFingerprintOnCurrentOccludingActivity);
+                    updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
                 }
 
                 RootTaskInfo assistantTask = mActivityTaskManager.getRootTaskInfo(

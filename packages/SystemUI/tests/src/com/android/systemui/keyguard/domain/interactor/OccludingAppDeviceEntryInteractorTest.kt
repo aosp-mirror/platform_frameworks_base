@@ -159,7 +159,6 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                     screenOffAnimationController = mock(),
                     statusBarStateController = mock(),
                 ),
-                FakeFeatureFlags().apply { set(Flags.FP_LISTEN_OCCLUDING_APPS, true) },
             )
     }
 

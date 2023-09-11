@@ -22,8 +22,6 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
@@ -60,7 +58,6 @@ constructor(
     private val context: Context,
     activityStarter: ActivityStarter,
     powerInteractor: PowerInteractor,
-    featureFlags: FeatureFlags,
 ) {
     private val keyguardOccludedByApp: Flow<Boolean> =
         combine(
@@ -93,37 +90,35 @@ constructor(
             .ifKeyguardOccludedByApp(/* elseFlow */ flowOf(null))
 
     init {
-        if (featureFlags.isEnabled(Flags.FP_LISTEN_OCCLUDING_APPS)) {
-            scope.launch {
-                // On fingerprint success when the screen is on, go to the home screen
-                fingerprintUnlockSuccessEvents.sample(powerInteractor.isInteractive).collect {
-                    if (it) {
-                        goToHomeScreen()
-                    }
-                    // don't go to the home screen if the authentication is from AOD/dozing/off
+        scope.launch {
+            // On fingerprint success when the screen is on, go to the home screen
+            fingerprintUnlockSuccessEvents.sample(powerInteractor.isInteractive).collect {
+                if (it) {
+                    goToHomeScreen()
                 }
+                // don't go to the home screen if the authentication is from AOD/dozing/off
             }
+        }
 
-            scope.launch {
-                // On device fingerprint lockout, request the bouncer with a runnable to
-                // go to the home screen. Without this, the bouncer won't proceed to the home
-                // screen.
-                fingerprintLockoutEvents.collect {
-                    activityStarter.dismissKeyguardThenExecute(
-                        object : ActivityStarter.OnDismissAction {
-                            override fun onDismiss(): Boolean {
-                                goToHomeScreen()
-                                return false
-                            }
+        scope.launch {
+            // On device fingerprint lockout, request the bouncer with a runnable to
+            // go to the home screen. Without this, the bouncer won't proceed to the home
+            // screen.
+            fingerprintLockoutEvents.collect {
+                activityStarter.dismissKeyguardThenExecute(
+                    object : ActivityStarter.OnDismissAction {
+                        override fun onDismiss(): Boolean {
+                            goToHomeScreen()
+                            return false
+                        }
 
-                            override fun willRunAnimationOnKeyguard(): Boolean {
-                                return false
-                            }
-                        },
-                        /* cancel= */ null,
-                        /* afterKeyguardGone */ false
-                    )
-                }
+                        override fun willRunAnimationOnKeyguard(): Boolean {
+                            return false
+                        }
+                    },
+                    /* cancel= */ null,
+                    /* afterKeyguardGone */ false
+                )
             }
         }
     }
