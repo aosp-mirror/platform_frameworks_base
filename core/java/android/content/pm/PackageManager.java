@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.LongDef;
@@ -29,6 +30,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -9752,7 +9754,10 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED)
     @RequiresPermission(value=Manifest.permission.SUSPEND_APPS, conditional=true)
+    @SuppressLint("NullableCollection")
     @Nullable
     public String[] setPackagesSuspended(@Nullable String[] packageNames, boolean suspended,
             @Nullable PersistableBundle appExtras, @Nullable PersistableBundle launcherExtras,
