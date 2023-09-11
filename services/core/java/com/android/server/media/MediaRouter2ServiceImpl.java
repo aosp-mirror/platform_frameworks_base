@@ -22,7 +22,6 @@ import static android.content.Intent.ACTION_SCREEN_ON;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 import static android.media.MediaRouter2Utils.getOriginalId;
 import static android.media.MediaRouter2Utils.getProviderId;
-
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.media.MediaFeatureFlagManager.FEATURE_SCANNING_MINIMUM_PACKAGE_IMPORTANCE;
 
@@ -214,17 +213,16 @@ class MediaRouter2ServiceImpl {
     @NonNull
     public List<MediaRoute2Info> getSystemRoutes() {
         final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
-        final boolean hasModifyAudioRoutingPermission = mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-                == PackageManager.PERMISSION_GRANTED;
+        final boolean hasSystemRoutingPermission = checkCallerHasSystemRoutingPermissions(pid, uid);
 
         final long token = Binder.clearCallingIdentity();
         try {
             Collection<MediaRoute2Info> systemRoutes;
             synchronized (mLock) {
                 UserRecord userRecord = getOrCreateUserRecordLocked(userId);
-                if (hasModifyAudioRoutingPermission) {
+                if (hasSystemRoutingPermission) {
                     MediaRoute2ProviderInfo providerInfo =
                             userRecord.mHandler.mSystemProvider.getProviderInfo();
                     if (providerInfo != null) {
@@ -255,9 +253,8 @@ class MediaRouter2ServiceImpl {
         final boolean hasConfigureWifiDisplayPermission = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
                 == PackageManager.PERMISSION_GRANTED;
-        final boolean hasModifyAudioRoutingPermission = mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-                == PackageManager.PERMISSION_GRANTED;
+        final boolean hasModifyAudioRoutingPermission =
+                checkCallerHasModifyAudioRoutingPermission(pid, uid);
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -666,17 +663,17 @@ class MediaRouter2ServiceImpl {
     public RoutingSessionInfo getSystemSessionInfo(
             @Nullable String packageName, boolean setDeviceRouteSelected) {
         final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
-        final boolean hasModifyAudioRoutingPermission = mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-                == PackageManager.PERMISSION_GRANTED;
+        final boolean hasSystemRoutingPermissions =
+                checkCallerHasSystemRoutingPermissions(pid, uid);
 
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
                 UserRecord userRecord = getOrCreateUserRecordLocked(userId);
                 List<RoutingSessionInfo> sessionInfos;
-                if (hasModifyAudioRoutingPermission) {
+                if (hasSystemRoutingPermissions) {
                     if (setDeviceRouteSelected) {
                         // Return a fake system session that shows the device route as selected and
                         // available bluetooth routes as transferable.
@@ -705,6 +702,25 @@ class MediaRouter2ServiceImpl {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    private boolean checkCallerHasSystemRoutingPermissions(int pid, int uid) {
+        return checkCallerHasModifyAudioRoutingPermission(pid, uid);
+    }
+
+    private boolean checkCallerHasModifyAudioRoutingPermission(int pid, int uid) {
+        return mContext.checkPermission(Manifest.permission.MODIFY_AUDIO_ROUTING, pid, uid)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean checkCallerHasBluetoothPermissions(int pid, int uid) {
+        boolean hasBluetoothRoutingPermission = true;
+        for (String permission : BLUETOOTH_PERMISSIONS_FOR_SYSTEM_ROUTING) {
+            hasBluetoothRoutingPermission &=
+                    mContext.checkPermission(permission, pid, uid)
+                            == PackageManager.PERMISSION_GRANTED;
+        }
+        return hasBluetoothRoutingPermission;
     }
 
     // End of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.
@@ -1587,18 +1603,9 @@ class MediaRouter2ServiceImpl {
             mPid = pid;
             mHasConfigureWifiDisplayPermission = hasConfigureWifiDisplayPermission;
             mHasModifyAudioRoutingPermission = hasModifyAudioRoutingPermission;
-            mHasBluetoothRoutingPermission = new AtomicBoolean(fetchBluetoothPermission());
+            mHasBluetoothRoutingPermission =
+                    new AtomicBoolean(checkCallerHasBluetoothPermissions(mPid, mUid));
             mRouterId = mNextRouterOrManagerId.getAndIncrement();
-        }
-
-        private boolean fetchBluetoothPermission() {
-            boolean hasBluetoothRoutingPermission = true;
-            for (String permission : BLUETOOTH_PERMISSIONS_FOR_SYSTEM_ROUTING) {
-                hasBluetoothRoutingPermission &=
-                        mContext.checkPermission(permission, mPid, mUid)
-                                == PackageManager.PERMISSION_GRANTED;
-            }
-            return hasBluetoothRoutingPermission;
         }
 
         /**
@@ -1611,7 +1618,7 @@ class MediaRouter2ServiceImpl {
 
         public void maybeUpdateSystemRoutingPermissionLocked() {
             boolean oldSystemRoutingPermissionValue = hasSystemRoutingPermission();
-            mHasBluetoothRoutingPermission.set(fetchBluetoothPermission());
+            mHasBluetoothRoutingPermission.set(checkCallerHasBluetoothPermissions(mPid, mUid));
             boolean newSystemRoutingPermissionValue = hasSystemRoutingPermission();
             if (oldSystemRoutingPermissionValue != newSystemRoutingPermissionValue) {
                 Map<String, MediaRoute2Info> routesToReport =
