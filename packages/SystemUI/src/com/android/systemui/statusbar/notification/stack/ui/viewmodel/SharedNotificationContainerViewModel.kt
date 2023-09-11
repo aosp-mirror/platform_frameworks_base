@@ -44,7 +44,13 @@ constructor(
     shadeInteractor: ShadeInteractor,
 ) {
     private val statesForConstrainedNotifications =
-        setOf(KeyguardState.LOCKSCREEN, KeyguardState.AOD, KeyguardState.DOZING)
+        setOf(
+            KeyguardState.LOCKSCREEN,
+            KeyguardState.AOD,
+            KeyguardState.DOZING,
+            KeyguardState.ALTERNATE_BOUNCER,
+            KeyguardState.PRIMARY_BOUNCER
+        )
 
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
         interactor.configurationBasedDimensions
@@ -126,6 +132,7 @@ constructor(
     /**
      * When on keyguard, there is limited space to display notifications so calculate how many could
      * be shown. Otherwise, there is no limit since the vertical space will be scrollable.
+     *
      * TODO: b/296606746 - Need to rerun logic when notifs change
      */
     val maxNotifications: Flow<Int> =
