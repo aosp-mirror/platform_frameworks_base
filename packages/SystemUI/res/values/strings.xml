@@ -2403,6 +2403,16 @@
     <string name="accessibility_control_move_left">Move left</string>
     <!-- Action in accessibility menu to move the magnification window right. [CHAR LIMIT=30] -->
     <string name="accessibility_control_move_right">Move right</string>
+
+    <!-- Action in accessibility menu to increase the magnification window width. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_increase_window_width">Increase width of magnifier</string>
+    <!-- Action in accessibility menu to decrease the magnification window width. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_decrease_window_width">Decrease width of magnifier</string>
+    <!-- Action in accessibility menu to increase the magnification window height. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_increase_window_height">Increase height of magnifier</string>
+    <!-- Action in accessibility menu to decrease the magnification window height. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_decrease_window_height">Decrease height of magnifier</string>
+
     <!-- Content description for magnification mode switch. [CHAR LIMIT=NONE] -->
     <string name="magnification_mode_switch_description">Magnification switch</string>
     <!-- A11y state description for magnification mode switch that device is in full-screen mode. [CHAR LIMIT=NONE] -->
