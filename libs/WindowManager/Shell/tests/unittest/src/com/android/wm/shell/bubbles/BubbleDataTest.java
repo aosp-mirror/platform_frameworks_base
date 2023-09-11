@@ -111,6 +111,8 @@ public class BubbleDataTest extends ShellTestCase {
     @Mock
     private BubbleLogger mBubbleLogger;
     @Mock
+    private BubbleEducationController mEducationController;
+    @Mock
     private ShellExecutor mMainExecutor;
 
     @Captor
@@ -191,7 +193,7 @@ public class BubbleDataTest extends ShellTestCase {
 
         mPositioner = new TestableBubblePositioner(mContext,
                 mock(WindowManager.class));
-        mBubbleData = new BubbleData(getContext(), mBubbleLogger, mPositioner,
+        mBubbleData = new BubbleData(getContext(), mBubbleLogger, mPositioner, mEducationController,
                 mMainExecutor);
 
         // Used by BubbleData to set lastAccessedTime
@@ -383,6 +385,65 @@ public class BubbleDataTest extends ShellTestCase {
         mBubbleData.dismissBubbleWithKey(mEntryA2.getKey(), Bubbles.DISMISS_GROUP_CANCELLED);
         verifyUpdateReceived();
         assertOverflowChangedTo(ImmutableList.of());
+    }
+
+    /**
+     * Verifies that the update shouldn't show the user education, if the education is not required
+     */
+    @Test
+    public void test_shouldNotShowEducation() {
+        // Setup
+        when(mEducationController.shouldShowStackEducation(any())).thenReturn(false);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryUpdated(mBubbleA1, /* suppressFlyout */ true, /* showInShade */
+                true);
+
+        // Verify
+        verifyUpdateReceived();
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.shouldShowEducation).isFalse();
+    }
+
+    /**
+     * Verifies that the update should show the user education, if the education is required
+     */
+    @Test
+    public void test_shouldShowEducation() {
+        // Setup
+        when(mEducationController.shouldShowStackEducation(any())).thenReturn(true);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryUpdated(mBubbleA1, /* suppressFlyout */ true, /* showInShade */
+                true);
+
+        // Verify
+        verifyUpdateReceived();
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.shouldShowEducation).isTrue();
+    }
+
+    /**
+     * Verifies that the update shouldn't show the user education, if the education is required but
+     * the bubble should auto-expand
+     */
+    @Test
+    public void test_shouldShowEducation_shouldAutoExpand() {
+        // Setup
+        when(mEducationController.shouldShowStackEducation(any())).thenReturn(true);
+        mBubbleData.setListener(mListener);
+        mBubbleA1.setShouldAutoExpand(true);
+
+        // Test
+        mBubbleData.notificationEntryUpdated(mBubbleA1, /* suppressFlyout */ true, /* showInShade */
+                true);
+
+        // Verify
+        verifyUpdateReceived();
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.shouldShowEducation).isFalse();
     }
 
     // COLLAPSED / ADD

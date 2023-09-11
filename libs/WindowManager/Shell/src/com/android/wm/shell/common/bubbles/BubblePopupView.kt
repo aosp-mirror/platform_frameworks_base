@@ -29,7 +29,8 @@ constructor(
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr, defStyleRes) {
-    private var popupDrawable: BubblePopupDrawable? = null
+    var popupDrawable: BubblePopupDrawable? = null
+        private set
 
     /**
      * Sets up the popup drawable with the config provided. Required to remove dependency on local

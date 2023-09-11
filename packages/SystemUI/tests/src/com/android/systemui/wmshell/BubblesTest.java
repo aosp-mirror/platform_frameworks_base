@@ -134,6 +134,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
+import com.android.wm.shell.bubbles.BubbleEducationController;
 import com.android.wm.shell.bubbles.BubbleEntry;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflow;
@@ -277,6 +278,8 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private BubbleLogger mBubbleLogger;
     @Mock
+    private BubbleEducationController mEducationController;
+    @Mock
     private TaskStackListenerImpl mTaskStackListener;
     @Mock
     private KeyguardStateController mKeyguardStateController;
@@ -369,7 +372,8 @@ public class BubblesTest extends SysuiTestCase {
 
         mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
         mPositioner.setMaxBubbles(5);
-        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, syncExecutor);
+        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, mEducationController,
+                syncExecutor);
 
         when(mUserManager.getProfiles(ActivityManager.getCurrentUser())).thenReturn(
                 Collections.singletonList(mock(UserInfo.class)));

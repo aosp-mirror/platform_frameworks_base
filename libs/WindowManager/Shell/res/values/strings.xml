@@ -163,6 +163,10 @@
     <!-- [CHAR LIMIT=NONE] Empty overflow subtitle -->
     <string name="bubble_overflow_empty_subtitle">Recent bubbles and dismissed bubbles will appear here</string>
 
+    <!-- Title text for the bubble bar feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=60]-->
+    <string name="bubble_bar_education_stack_title">Chat using bubbles</string>
+    <!-- Descriptive text for the bubble bar feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=NONE] -->
+    <string name="bubble_bar_education_stack_text">New conversations appear as icons in a bottom corner of your screen. Tap to expand them or drag to dismiss them.</string>
     <!-- Title text for the bubble bar "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=60]-->
     <string name="bubble_bar_education_manage_title">Control bubbles anytime</string>
     <!-- Descriptive text for the bubble bar "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=80]-->

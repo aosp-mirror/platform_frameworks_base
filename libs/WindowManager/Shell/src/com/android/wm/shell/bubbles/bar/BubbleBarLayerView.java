@@ -21,6 +21,7 @@ import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.ColorDrawable;
@@ -35,6 +36,8 @@ import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 
 import java.util.function.Consumer;
+
+import kotlin.Unit;
 
 /**
  * Similar to {@link com.android.wm.shell.bubbles.BubbleStackView}, this view is added to window
@@ -111,7 +114,7 @@ public class BubbleBarLayerView extends FrameLayout
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
 
         if (mExpandedView != null) {
-            mEducationViewController.hideManageEducation(/* animated = */ false);
+            mEducationViewController.hideEducation(/* animated = */ false);
             removeView(mExpandedView);
             mExpandedView = null;
         }
@@ -171,7 +174,9 @@ public class BubbleBarLayerView extends FrameLayout
             mExpandedView.setListener(new BubbleBarExpandedView.Listener() {
                 @Override
                 public void onTaskCreated() {
-                    mEducationViewController.maybeShowManageEducation(b, mExpandedView);
+                    if (mEducationViewController != null && mExpandedView != null) {
+                        mEducationViewController.maybeShowManageEducation(b, mExpandedView);
+                    }
                 }
 
                 @Override
@@ -188,6 +193,10 @@ public class BubbleBarLayerView extends FrameLayout
             });
 
             addView(mExpandedView, new FrameLayout.LayoutParams(width, height));
+        }
+
+        if (mEducationViewController.isEducationVisible()) {
+            mEducationViewController.hideEducation(/* animated = */ true);
         }
 
         mIsExpanded = true;
@@ -210,12 +219,27 @@ public class BubbleBarLayerView extends FrameLayout
     public void collapse() {
         mIsExpanded = false;
         final BubbleBarExpandedView viewToRemove = mExpandedView;
-        mEducationViewController.hideManageEducation(/* animated = */ true);
+        mEducationViewController.hideEducation(/* animated = */ true);
         mAnimationHelper.animateCollapse(() -> removeView(viewToRemove));
         mBubbleController.getSysuiProxy().onStackExpandChanged(false);
         mExpandedView = null;
         setTouchDelegate(null);
         showScrim(false);
+    }
+
+    /**
+     * Show bubble bar user education relative to the reference position.
+     * @param position the reference position in Screen coordinates.
+     */
+    public void showUserEducation(Point position) {
+        mEducationViewController.showStackEducation(position, /* root = */ this, () -> {
+            // When the user education is clicked hide it and expand the selected bubble
+            mEducationViewController.hideEducation(/* animated = */ true, () -> {
+                mBubbleController.expandStackWithSelectedBubble();
+                return Unit.INSTANCE;
+            });
+            return Unit.INSTANCE;
+        });
     }
 
     /** Sets the function to call to un-bubble the given conversation. */
@@ -226,8 +250,8 @@ public class BubbleBarLayerView extends FrameLayout
 
     /** Hides the current modal education/menu view, expanded view or collapses the bubble stack */
     private void hideMenuOrCollapse() {
-        if (mEducationViewController.isManageEducationVisible()) {
-            mEducationViewController.hideManageEducation(/* animated = */ true);
+        if (mEducationViewController.isEducationVisible()) {
+            mEducationViewController.hideEducation(/* animated = */ true);
         } else if (isExpanded() && mExpandedView != null) {
             mExpandedView.hideMenuOrCollapse();
         } else {
@@ -275,7 +299,7 @@ public class BubbleBarLayerView extends FrameLayout
      */
     private void getTouchableRegion(Region outRegion) {
         mTempRect.setEmpty();
-        if (mIsExpanded) {
+        if (mIsExpanded || mEducationViewController.isEducationVisible()) {
             getBoundsOnScreen(mTempRect);
             outRegion.op(mTempRect, Region.Op.UNION);
         }
