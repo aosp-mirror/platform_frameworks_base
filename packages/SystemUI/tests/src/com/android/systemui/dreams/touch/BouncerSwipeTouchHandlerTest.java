@@ -17,7 +17,6 @@
 package com.android.systemui.dreams.touch;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -295,7 +294,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     }
 
     /**
-     * Makes sure the expansion amount is proportional to (1 - scroll).
+     * Verifies that swiping up when the lock pattern is not secure does not consume the scroll
+     * gesture or expand.
      */
     @Test
     public void testSwipeUp_keyguardNotSecure_doesNotExpand() {
@@ -314,8 +314,10 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 0, SCREEN_HEIGHT_PX - distanceY, 0);
 
         reset(mScrimController);
+
+        // Scroll gesture is not consumed.
         assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
-                .isTrue();
+                .isFalse();
         // We should not expand since the keyguard is not secure
         verify(mScrimController, never()).expand(any());
     }
