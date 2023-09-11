@@ -372,6 +372,10 @@ class TestPhoneWindowManager {
         mPhoneWindowManager.mDoubleTapOnHomeBehavior = behavior;
     }
 
+    void overrideShortPressOnSettingsBehavior(int behavior) {
+        mPhoneWindowManager.mShortPressOnSettingsBehavior = behavior;
+    }
+
     void overrideCanStartDreaming(boolean canDream) {
         doReturn(canDream).when(mDreamManagerInternal).canStartDreaming(anyBoolean());
     }
@@ -475,6 +479,10 @@ class TestPhoneWindowManager {
     void overrideStartActivity() {
         doNothing().when(mContext).startActivityAsUser(any(), any());
         doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+    }
+
+    void overrideSendBroadcast() {
+        doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
     }
 
     void overrideUserSetupComplete() {
