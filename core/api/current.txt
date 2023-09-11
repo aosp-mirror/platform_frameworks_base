@@ -27512,6 +27512,8 @@ package android.nfc {
     method @Nullable public android.nfc.NfcAntennaInfo getNfcAntennaInfo();
     method public boolean ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler);
     method public boolean isEnabled();
+    method @FlaggedApi("android.nfc.enable_nfc_reader_option") public boolean isReaderOptionEnabled();
+    method @FlaggedApi("android.nfc.enable_nfc_reader_option") public boolean isReaderOptionSupported();
     method public boolean isSecureNfcEnabled();
     method public boolean isSecureNfcSupported();
     field public static final String ACTION_ADAPTER_STATE_CHANGED = "android.nfc.action.ADAPTER_STATE_CHANGED";

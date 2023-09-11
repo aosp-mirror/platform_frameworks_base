@@ -79,4 +79,9 @@ interface INfcAdapter
     Map getTagIntentAppPreferenceForUser(int userId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
     int setTagIntentAppPreferenceForUser(int userId, String pkg, boolean allow);
+
+    boolean isReaderOptionEnabled();
+    boolean isReaderOptionSupported();
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+    boolean enableReaderOption(boolean enable);
 }
