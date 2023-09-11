@@ -614,6 +614,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     public void testWakeAndUnlockingOverDream() {
+        // Ensure ordering unlock and wake is enabled.
+        createAndStartViewMediator(true);
+
         // Send signal to wake
         mViewMediator.onWakeAndUnlocking(true);
 
@@ -643,6 +646,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     public void testWakeAndUnlockingOverDream_signalAuthenticateIfStillShowing() {
+        // Ensure ordering unlock and wake is enabled.
+        createAndStartViewMediator(true);
+
         // Send signal to wake
         mViewMediator.onWakeAndUnlocking(true);
 
@@ -797,6 +803,15 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     private void createAndStartViewMediator() {
+        createAndStartViewMediator(false);
+    }
+
+    private void createAndStartViewMediator(boolean orderUnlockAndWake) {
+        if (orderUnlockAndWake) {
+            mContext.getOrCreateTestableResources().addOverride(
+                    com.android.internal.R.bool.config_orderUnlockAndWake, orderUnlockAndWake);
+        }
+
         mViewMediator = new KeyguardViewMediator(
                 mContext,
                 mUiEventLogger,
