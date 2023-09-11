@@ -126,7 +126,6 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                     context,
                     keyguardUpdateMonitor,
                     FakeTrustRepository(),
-                    FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) },
                     testScope.backgroundScope,
                 ),
                 AlternateBouncerInteractor(

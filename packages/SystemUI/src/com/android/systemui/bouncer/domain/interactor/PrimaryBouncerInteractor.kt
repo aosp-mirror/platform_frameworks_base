@@ -38,8 +38,6 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.plugins.ActivityStarter
@@ -74,7 +72,6 @@ constructor(
     private val context: Context,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val trustRepository: TrustRepository,
-    private val featureFlags: FeatureFlags,
     @Application private val applicationScope: CoroutineScope,
 ) {
     private val passiveAuthBouncerDelay =
@@ -135,11 +132,9 @@ constructor(
 
     init {
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
-        if (featureFlags.isEnabled(Flags.DELAY_BOUNCER)) {
-            applicationScope.launch {
-                trustRepository.isCurrentUserActiveUnlockRunning.collect {
-                    currentUserActiveUnlockRunning = it
-                }
+        applicationScope.launch {
+            trustRepository.isCurrentUserActiveUnlockRunning.collect {
+                currentUserActiveUnlockRunning = it
             }
         }
     }
@@ -415,9 +410,7 @@ constructor(
             currentUserActiveUnlockRunning &&
                 keyguardUpdateMonitor.canTriggerActiveUnlockBasedOnDeviceState()
 
-        return featureFlags.isEnabled(Flags.DELAY_BOUNCER) &&
-            !needsFullscreenBouncer() &&
-            (canRunFaceAuth || canRunActiveUnlock)
+        return !needsFullscreenBouncer() && (canRunFaceAuth || canRunActiveUnlock)
     }
 
     companion object {
