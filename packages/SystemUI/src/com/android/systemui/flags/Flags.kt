@@ -785,7 +785,8 @@ object Flags {
 
     /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
     @JvmField
-    val ENABLE_CLOCK_KEYGUARD_PRESENTATION = unreleasedFlag("enable_clock_keyguard_presentation")
+    val ENABLE_CLOCK_KEYGUARD_PRESENTATION =
+        unreleasedFlag("enable_clock_keyguard_presentation", teamfood = true)
 
     /** Enable the Compose implementation of the PeopleSpaceActivity. */
     @JvmField
