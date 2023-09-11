@@ -113,6 +113,42 @@ public class UserManagerServiceUserInfoTest {
         assertUserInfoEquals(data.info, read.info, /* parcelCopy= */ false);
     }
 
+    /** Tests that device policy restrictions are written/read properly. */
+    @Test
+    public void testWriteReadDevicePolicyUserRestrictions() throws Exception {
+        final String globalRestriction = UserManager.DISALLOW_FACTORY_RESET;
+        final String localRestriction = UserManager.DISALLOW_CONFIG_DATE_TIME;
+
+        UserData data = new UserData();
+        data.info = createUser(100, FLAG_FULL, "A type");
+
+        mUserManagerService.putUserInfo(data.info);
+
+        // Set a global and user restriction so they get written out to the user file.
+        setUserRestrictions(data.info.id, globalRestriction, localRestriction, true);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(baos);
+        mUserManagerService.writeUserLP(data, out);
+        byte[] bytes = baos.toByteArray();
+
+        // Clear the restrictions to see if they are properly read in from the user file.
+        setUserRestrictions(data.info.id, globalRestriction, localRestriction, false);
+
+        mUserManagerService.readUserLP(data.info.id, new ByteArrayInputStream(bytes));
+        assertTrue(mUserManagerService.hasUserRestrictionOnAnyUser(globalRestriction));
+        assertTrue(mUserManagerService.hasUserRestrictionOnAnyUser(localRestriction));
+    }
+
+    /** Sets a global and local restriction and verifies they were set properly **/
+    private void setUserRestrictions(int id, String global, String local, boolean enabled) {
+        mUserManagerService.setUserRestrictionInner(UserHandle.USER_ALL, global, enabled);
+        assertEquals(mUserManagerService.hasUserRestrictionOnAnyUser(global), enabled);
+
+        mUserManagerService.setUserRestrictionInner(id, local, enabled);
+        assertEquals(mUserManagerService.hasUserRestrictionOnAnyUser(local), enabled);
+    }
+
     @Test
     public void testParcelUnparcelUserInfo() throws Exception {
         UserInfo info = createUser();
