@@ -75,6 +75,18 @@ class InsetsPolicy {
     /** Used to show system bars permanently. This will affect the layout. */
     private final InsetsControlTarget mPermanentControlTarget;
 
+    /**
+     * Used to override the visibility of {@link Type#statusBars()} when dispatching insets to
+     * clients.
+     */
+    private InsetsControlTarget mFakeStatusControlTarget;
+
+    /**
+     * Used to override the visibility of {@link Type#navigationBars()} when dispatching insets to
+     * clients.
+     */
+    private InsetsControlTarget mFakeNavControlTarget;
+
     private WindowState mFocusedWin;
     private final BarWindow mStatusBar = new BarWindow(StatusBarManager.WINDOW_STATUS_BAR);
     private final BarWindow mNavBar = new BarWindow(StatusBarManager.WINDOW_NAVIGATION_BAR);
@@ -101,25 +113,25 @@ class InsetsPolicy {
             abortTransient();
         }
         mFocusedWin = focusedWin;
-        final InsetsControlTarget statusControlTarget =
-                getStatusControlTarget(focusedWin, false /* fake */);
-        final InsetsControlTarget navControlTarget =
-                getNavControlTarget(focusedWin, false /* fake */);
         final WindowState notificationShade = mPolicy.getNotificationShade();
         final WindowState topApp = mPolicy.getTopFullscreenOpaqueWindow();
+        final InsetsControlTarget statusControlTarget =
+                getStatusControlTarget(focusedWin, false /* fake */);
+        mFakeStatusControlTarget = statusControlTarget == mTransientControlTarget
+                ? getStatusControlTarget(focusedWin, true /* fake */)
+                : statusControlTarget == notificationShade
+                        ? getStatusControlTarget(topApp, true /* fake */)
+                        : null;
+        final InsetsControlTarget navControlTarget =
+                getNavControlTarget(focusedWin, false /* fake */);
+        mFakeNavControlTarget = navControlTarget == mTransientControlTarget
+                ? getNavControlTarget(focusedWin, true /* fake */)
+                : navControlTarget == notificationShade
+                        ? getNavControlTarget(topApp, true /* fake */)
+                        : null;
         mStateController.onBarControlTargetChanged(
-                statusControlTarget,
-                statusControlTarget == mTransientControlTarget
-                        ? getStatusControlTarget(focusedWin, true /* fake */)
-                        : statusControlTarget == notificationShade
-                                ? getStatusControlTarget(topApp, true /* fake */)
-                                : null,
-                navControlTarget,
-                navControlTarget == mTransientControlTarget
-                        ? getNavControlTarget(focusedWin, true /* fake */)
-                        : navControlTarget == notificationShade
-                                ? getNavControlTarget(topApp, true /* fake */)
-                                : null);
+                statusControlTarget, mFakeStatusControlTarget,
+                navControlTarget, mFakeNavControlTarget);
         mStatusBar.updateVisibility(statusControlTarget, Type.statusBars());
         mNavBar.updateVisibility(navControlTarget, Type.navigationBars());
     }
@@ -204,7 +216,7 @@ class InsetsPolicy {
             boolean includesTransient) {
         InsetsState state;
         if (!includesTransient) {
-            state = adjustVisibilityForTransientTypes(originalState);
+            state = adjustVisibilityForFakeControllingSources(originalState);
         } else {
             state = originalState;
         }
@@ -319,21 +331,37 @@ class InsetsPolicy {
         return state;
     }
 
-    private InsetsState adjustVisibilityForTransientTypes(InsetsState originalState) {
+    private InsetsState adjustVisibilityForFakeControllingSources(InsetsState originalState) {
+        if (mFakeStatusControlTarget == null && mFakeNavControlTarget == null) {
+            return originalState;
+        }
         InsetsState state = originalState;
         for (int i = state.sourceSize() - 1; i >= 0; i--) {
             final InsetsSource source = state.sourceAt(i);
-            if (isTransient(source.getType()) && source.isVisible()) {
-                if (state == originalState) {
-                    // The source will be modified, create a non-deep copy to store the new one.
-                    state = new InsetsState(originalState);
-                }
-                // Replace the source with a copy in invisible state.
-                final InsetsSource outSource = new InsetsSource(source);
-                outSource.setVisible(false);
-                state.addSource(outSource);
-            }
+            state = adjustVisibilityForFakeControllingSource(state, Type.statusBars(), source,
+                    mFakeStatusControlTarget);
+            state = adjustVisibilityForFakeControllingSource(state, Type.navigationBars(), source,
+                    mFakeNavControlTarget);
         }
+        return state;
+    }
+
+    private static InsetsState adjustVisibilityForFakeControllingSource(InsetsState originalState,
+            @InsetsType int type, InsetsSource source, InsetsControlTarget target) {
+        if (source.getType() != type || target == null) {
+            return originalState;
+        }
+        final boolean isRequestedVisible = target.isRequestedVisible(type);
+        if (source.isVisible() == isRequestedVisible) {
+            return originalState;
+        }
+        // The source will be modified, create a non-deep copy to store the new one.
+        final InsetsState state = new InsetsState(originalState);
+
+        // Replace the source with a copy with the overridden visibility.
+        final InsetsSource outSource = new InsetsSource(source);
+        outSource.setVisible(isRequestedVisible);
+        state.addSource(outSource);
         return state;
     }
 
