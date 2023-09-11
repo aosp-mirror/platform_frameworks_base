@@ -38,7 +38,6 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
-import android.content.pm.PackageArchiver;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
@@ -75,7 +74,7 @@ import java.util.List;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class PackageArchiverServiceTest {
+public class PackageArchiverTest {
 
     private static final String PACKAGE = "com.example";
     private static final String CALLER_PACKAGE = "com.caller";
@@ -119,7 +118,7 @@ public class PackageArchiverServiceTest {
 
     private PackageSetting mPackageSetting;
 
-    private PackageArchiverService mArchiveService;
+    private PackageArchiver mArchiveManager;
 
     @Before
     public void setUp() throws Exception {
@@ -160,8 +159,8 @@ public class PackageArchiverServiceTest {
                 mock(Resources.class));
         when(mIcon.compress(eq(Bitmap.CompressFormat.PNG), eq(100), any())).thenReturn(true);
 
-        mArchiveService = spy(new PackageArchiverService(mContext, pm));
-        doReturn(ICON_PATH).when(mArchiveService).storeIcon(eq(PACKAGE),
+        mArchiveManager = spy(new PackageArchiver(mContext, pm));
+        doReturn(ICON_PATH).when(mArchiveManager).storeIcon(eq(PACKAGE),
                 any(LauncherActivityInfo.class), eq(mUserId));
     }
 
@@ -169,7 +168,7 @@ public class PackageArchiverServiceTest {
     public void archiveApp_callerPackageNameIncorrect() {
         Exception e = assertThrows(
                 SecurityException.class,
-                () -> mArchiveService.requestArchive(PACKAGE, "different", mIntentSender,
+                () -> mArchiveManager.requestArchive(PACKAGE, "different", mIntentSender,
                         UserHandle.CURRENT));
         assertThat(e).hasMessageThat().isEqualTo(
                 String.format(
@@ -186,7 +185,7 @@ public class PackageArchiverServiceTest {
 
         Exception e = assertThrows(
                 ParcelableException.class,
-                () -> mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender,
+                () -> mArchiveManager.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender,
                         UserHandle.CURRENT));
         assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
         assertThat(e.getCause()).hasMessageThat().isEqualTo(
@@ -197,7 +196,7 @@ public class PackageArchiverServiceTest {
     public void archiveApp_packageNotInstalledForUser() throws IntentSender.SendIntentException {
         mPackageSetting.modifyUserState(UserHandle.CURRENT.getIdentifier()).setInstalled(false);
 
-        mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
+        mArchiveManager.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
         rule.mocks().getHandler().flush();
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -226,7 +225,7 @@ public class PackageArchiverServiceTest {
 
         Exception e = assertThrows(
                 ParcelableException.class,
-                () -> mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender,
+                () -> mArchiveManager.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender,
                         UserHandle.CURRENT));
         assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
         assertThat(e.getCause()).hasMessageThat().isEqualTo("No installer found");
@@ -239,7 +238,7 @@ public class PackageArchiverServiceTest {
 
         Exception e = assertThrows(
                 ParcelableException.class,
-                () -> mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender,
+                () -> mArchiveManager.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender,
                         UserHandle.CURRENT));
         assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
         assertThat(e.getCause()).hasMessageThat().isEqualTo(
@@ -249,10 +248,10 @@ public class PackageArchiverServiceTest {
     @Test
     public void archiveApp_storeIconFails() throws IntentSender.SendIntentException, IOException {
         IOException e = new IOException("IO");
-        doThrow(e).when(mArchiveService).storeIcon(eq(PACKAGE),
+        doThrow(e).when(mArchiveManager).storeIcon(eq(PACKAGE),
                 any(LauncherActivityInfo.class), eq(mUserId));
 
-        mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
+        mArchiveManager.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
         rule.mocks().getHandler().flush();
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -268,7 +267,7 @@ public class PackageArchiverServiceTest {
 
     @Test
     public void archiveApp_success() {
-        mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
+        mArchiveManager.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
         rule.mocks().getHandler().flush();
 
         verify(mInstallerService).uninstall(
@@ -286,7 +285,7 @@ public class PackageArchiverServiceTest {
 
         Exception e = assertThrows(
                 SecurityException.class,
-                () -> mArchiveService.requestUnarchive(PACKAGE, "different",
+                () -> mArchiveManager.requestUnarchive(PACKAGE, "different",
                         UserHandle.CURRENT));
         assertThat(e).hasMessageThat().isEqualTo(
                 String.format(
@@ -304,7 +303,7 @@ public class PackageArchiverServiceTest {
 
         Exception e = assertThrows(
                 ParcelableException.class,
-                () -> mArchiveService.requestUnarchive(PACKAGE, CALLER_PACKAGE,
+                () -> mArchiveManager.requestUnarchive(PACKAGE, CALLER_PACKAGE,
                         UserHandle.CURRENT));
         assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
         assertThat(e.getCause()).hasMessageThat().isEqualTo(
@@ -315,7 +314,7 @@ public class PackageArchiverServiceTest {
     public void unarchiveApp_notArchived() {
         Exception e = assertThrows(
                 ParcelableException.class,
-                () -> mArchiveService.requestUnarchive(PACKAGE, CALLER_PACKAGE,
+                () -> mArchiveManager.requestUnarchive(PACKAGE, CALLER_PACKAGE,
                         UserHandle.CURRENT));
         assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
         assertThat(e.getCause()).hasMessageThat().isEqualTo(
@@ -338,7 +337,7 @@ public class PackageArchiverServiceTest {
 
         Exception e = assertThrows(
                 ParcelableException.class,
-                () -> mArchiveService.requestUnarchive(PACKAGE, CALLER_PACKAGE,
+                () -> mArchiveManager.requestUnarchive(PACKAGE, CALLER_PACKAGE,
                         UserHandle.CURRENT));
         assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
         assertThat(e.getCause()).hasMessageThat().isEqualTo(
@@ -349,7 +348,7 @@ public class PackageArchiverServiceTest {
     public void unarchiveApp_success() {
         mUserState.setArchiveState(createArchiveState()).setInstalled(false);
 
-        mArchiveService.requestUnarchive(PACKAGE, CALLER_PACKAGE, UserHandle.CURRENT);
+        mArchiveManager.requestUnarchive(PACKAGE, CALLER_PACKAGE, UserHandle.CURRENT);
         rule.mocks().getHandler().flush();
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -366,10 +365,10 @@ public class PackageArchiverServiceTest {
                 /* initialExtras= */ isNull());
         Intent intent = intentCaptor.getValue();
         assertThat(intent.getFlags() & FLAG_RECEIVER_FOREGROUND).isNotEqualTo(0);
-        assertThat(intent.getStringExtra(PackageArchiver.EXTRA_UNARCHIVE_PACKAGE_NAME)).isEqualTo(
+        assertThat(intent.getStringExtra(PackageInstaller.EXTRA_UNARCHIVE_PACKAGE_NAME)).isEqualTo(
                 PACKAGE);
         assertThat(
-                intent.getBooleanExtra(PackageArchiver.EXTRA_UNARCHIVE_ALL_USERS, true)).isFalse();
+                intent.getBooleanExtra(PackageInstaller.EXTRA_UNARCHIVE_ALL_USERS, true)).isFalse();
         assertThat(intent.getPackage()).isEqualTo(INSTALLER_PACKAGE);
     }
 

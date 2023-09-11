@@ -24,6 +24,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.content.IntentSender;
 import android.os.RemoteCallback;
+import android.os.UserHandle;
 
 import android.graphics.Bitmap;
 
@@ -75,4 +76,10 @@ interface IPackageInstaller {
     void waitForInstallConstraints(String installerPackageName, in List<String> packageNames,
             in PackageInstaller.InstallConstraints constraints, in IntentSender callback,
             long timeout);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES,android.Manifest.permission.REQUEST_DELETE_PACKAGES})")
+    void requestArchive(String packageName, String callerPackageName, in IntentSender statusReceiver, in UserHandle userHandle);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES,android.Manifest.permission.REQUEST_INSTALL_PACKAGES})")
+    void requestUnarchive(String packageName, String callerPackageName, in UserHandle userHandle);
 }

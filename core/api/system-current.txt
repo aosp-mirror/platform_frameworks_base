@@ -3798,13 +3798,6 @@ package android.content.pm {
     field @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS) public static final int FLAG_GET_PERSONS_DATA = 2048; // 0x800
   }
 
-  public class PackageArchiver {
-    method @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void requestArchive(@NonNull String, @NonNull android.content.IntentSender) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES, android.Manifest.permission.REQUEST_INSTALL_PACKAGES}) public void requestUnarchive(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
-    field public static final String EXTRA_UNARCHIVE_ALL_USERS = "android.content.pm.extra.UNARCHIVE_ALL_USERS";
-    field public static final String EXTRA_UNARCHIVE_PACKAGE_NAME = "android.content.pm.extra.UNARCHIVE_PACKAGE_NAME";
-  }
-
   public class PackageInfo implements android.os.Parcelable {
     field public boolean isArchived;
   }
@@ -3812,6 +3805,8 @@ package android.content.pm {
   public class PackageInstaller {
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
+    method @FlaggedApi(Flags.FLAG_ARCHIVING) @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void requestArchive(@NonNull String, @NonNull android.content.IntentSender) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @FlaggedApi(Flags.FLAG_ARCHIVING) @RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES, android.Manifest.permission.REQUEST_INSTALL_PACKAGES}) public void requestUnarchive(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
     field public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
     field public static final String ACTION_CONFIRM_PRE_APPROVAL = "android.content.pm.action.CONFIRM_PRE_APPROVAL";
@@ -3822,6 +3817,8 @@ package android.content.pm {
     field public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
     field public static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
     field public static final String EXTRA_RESOLVED_BASE_PATH = "android.content.pm.extra.RESOLVED_BASE_PATH";
+    field @FlaggedApi(Flags.FLAG_ARCHIVING) public static final String EXTRA_UNARCHIVE_ALL_USERS = "android.content.pm.extra.UNARCHIVE_ALL_USERS";
+    field @FlaggedApi(Flags.FLAG_ARCHIVING) public static final String EXTRA_UNARCHIVE_PACKAGE_NAME = "android.content.pm.extra.UNARCHIVE_PACKAGE_NAME";
     field public static final int LOCATION_DATA_APP = 0; // 0x0
     field public static final int LOCATION_MEDIA_DATA = 2; // 0x2
     field public static final int LOCATION_MEDIA_OBB = 1; // 0x1
@@ -3906,7 +3903,6 @@ package android.content.pm {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_INSTANT_APPS) public abstract java.util.List<android.content.pm.InstantAppInfo> getInstantApps();
     method @Deprecated @NonNull public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(@NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract int getIntentVerificationStatusAsUser(@NonNull String, int);
-    method @NonNull public android.content.pm.PackageArchiver getPackageArchiver();
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public int getPackageUidAsUser(@NonNull String, @NonNull android.content.pm.PackageManager.PackageInfoFlags, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @android.content.pm.PackageManager.PermissionFlags @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, android.Manifest.permission.GET_RUNTIME_PERMISSIONS}) public abstract int getPermissionFlags(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] getUnsuspendablePackages(@NonNull String[]);

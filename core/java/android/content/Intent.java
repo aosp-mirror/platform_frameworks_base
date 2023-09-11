@@ -5274,7 +5274,7 @@ public class Intent implements Parcelable, Cloneable {
      * Broadcast Action: Sent to the responsible installer of an archived package when unarchival
      * is requested.
      *
-     * @see android.content.pm.PackageArchiver
+     * @see android.content.pm.PackageInstaller#requestUnarchive(String)
      * @hide
      */
     @SystemApi

@@ -17,6 +17,7 @@
 package com.android.server.pm.pkg;
 
 import android.annotation.Nullable;
+import android.content.pm.Flags;
 import android.content.pm.SuspendDialogInfo;
 import android.os.BaseBundle;
 import android.os.PersistableBundle;
@@ -24,7 +25,6 @@ import android.util.Slog;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
-import com.android.server.pm.Flags;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

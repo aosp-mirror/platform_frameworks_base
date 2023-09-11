@@ -19,6 +19,7 @@ java_defaults {
     // Add java_aconfig_libraries to here to add them to the core framework
     srcs: [
         ":android.app.usage.flags-aconfig-java{.generated_srcjars}",
+        ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
         ":android.os.flags-aconfig-java{.generated_srcjars}",
         ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
         ":android.security.flags-aconfig-java{.generated_srcjars}",
@@ -212,6 +213,19 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.widget.flags-aconfig-java",
     aconfig_declarations: "android.widget.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Package Manager
+aconfig_declarations {
+    name: "android.content.pm.flags-aconfig",
+    package: "android.content.pm",
+    srcs: ["core/java/android/content/pm/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.content.pm.flags-aconfig-java",
+    aconfig_declarations: "android.content.pm.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
