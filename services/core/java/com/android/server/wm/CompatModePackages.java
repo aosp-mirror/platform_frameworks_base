@@ -451,7 +451,7 @@ public final class CompatModePackages {
         final float appScale = compatScale != null
                 ? compatScale.mScaleFactor
                 : getCompatScale(ai.packageName, ai.uid, /* checkProvider= */ false);
-        final float densityScale = compatScale != null ? compatScale.mDensityScaleFactor : 1f;
+        final float densityScale = compatScale != null ? compatScale.mDensityScaleFactor : appScale;
         final Configuration config = mService.getGlobalConfiguration();
         return new CompatibilityInfo(ai, config.screenLayout, config.smallestScreenWidthDp,
                 forceCompat, appScale, densityScale);
