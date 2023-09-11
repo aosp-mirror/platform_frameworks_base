@@ -5926,15 +5926,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     }
                 }
 
-                Signature[] callerSignature;
+                SigningDetails callerSigningDetails;
                 final int appId = UserHandle.getAppId(callingUid);
                 Pair<PackageStateInternal, SharedUserApi> either =
                         snapshot.getPackageOrSharedUser(appId);
                 if (either != null) {
                     if (either.first != null) {
-                        callerSignature = either.first.getSigningDetails().getSignatures();
+                        callerSigningDetails = either.first.getSigningDetails();
                     } else {
-                        callerSignature = either.second.getSigningDetails().getSignatures();
+                        callerSigningDetails = either.second.getSigningDetails();
                     }
                 } else {
                     throw new SecurityException("Unknown calling UID: " + callingUid);
@@ -5943,8 +5943,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // Verify: can't set installerPackageName to a package that is
                 // not signed with the same cert as the caller.
                 if (installerPackageState != null) {
-                    if (compareSignatures(callerSignature,
-                            installerPackageState.getSigningDetails().getSignatures())
+                    if (compareSignatures(callerSigningDetails,
+                            installerPackageState.getSigningDetails())
                             != PackageManager.SIGNATURE_MATCH) {
                         throw new SecurityException(
                                 "Caller does not have same cert as new installer package "
@@ -5960,8 +5960,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         ? null : snapshot.getPackageStateInternal(targetInstallerPackageName);
 
                 if (targetInstallerPkgSetting != null) {
-                    if (compareSignatures(callerSignature,
-                            targetInstallerPkgSetting.getSigningDetails().getSignatures())
+                    if (compareSignatures(callerSigningDetails,
+                            targetInstallerPkgSetting.getSigningDetails())
                             != PackageManager.SIGNATURE_MATCH) {
                         throw new SecurityException(
                                 "Caller does not have same cert as old installer package "

@@ -4728,8 +4728,7 @@ final class InstallPackageHelper {
                 synchronized (mPm.mLock) {
                     platformPkgSetting = mPm.mSettings.getPackageLPr("android");
                 }
-                if (!comparePackageSignatures(platformPkgSetting,
-                        pkg.getSigningDetails().getSignatures())) {
+                if (!comparePackageSignatures(platformPkgSetting, pkg.getSigningDetails())) {
                     throw PackageManagerException.ofInternalError("Overlay "
                             + pkg.getPackageName()
                             + " must target Q or later, "
@@ -4751,8 +4750,7 @@ final class InstallPackageHelper {
                     targetPkgSetting = mPm.mSettings.getPackageLPr(pkg.getOverlayTarget());
                 }
                 if (targetPkgSetting != null) {
-                    if (!comparePackageSignatures(targetPkgSetting,
-                            pkg.getSigningDetails().getSignatures())) {
+                    if (!comparePackageSignatures(targetPkgSetting, pkg.getSigningDetails())) {
                         // check reference signature
                         if (mPm.mOverlayConfigSignaturePackage == null) {
                             throw PackageManagerException.ofInternalError("Overlay "
@@ -4767,8 +4765,7 @@ final class InstallPackageHelper {
                             refPkgSetting = mPm.mSettings.getPackageLPr(
                                     mPm.mOverlayConfigSignaturePackage);
                         }
-                        if (!comparePackageSignatures(refPkgSetting,
-                                pkg.getSigningDetails().getSignatures())) {
+                        if (!comparePackageSignatures(refPkgSetting, pkg.getSigningDetails())) {
                             throw PackageManagerException.ofInternalError("Overlay "
                                     + pkg.getPackageName() + " signed with a different "
                                     + "certificate than both the reference package and "
@@ -4799,8 +4796,7 @@ final class InstallPackageHelper {
                 synchronized (mPm.mLock) {
                     platformPkgSetting = mPm.mSettings.getPackageLPr("android");
                 }
-                if (!comparePackageSignatures(platformPkgSetting,
-                        pkg.getSigningDetails().getSignatures())) {
+                if (!comparePackageSignatures(platformPkgSetting, pkg.getSigningDetails())) {
                     throw PackageManagerException.ofInternalError("Apps that share a user with a "
                             + "privileged app must themselves be marked as privileged. "
                             + pkg.getPackageName() + " shares privileged user "
@@ -4839,10 +4835,8 @@ final class InstallPackageHelper {
                     // to allowlist their privileged permissions just like other
                     // priv-apps.
                     PackageSetting platformPkgSetting = mPm.mSettings.getPackageLPr("android");
-                    if ((compareSignatures(
-                            platformPkgSetting.getSigningDetails().getSignatures(),
-                            pkg.getSigningDetails().getSignatures())
-                            != PackageManager.SIGNATURE_MATCH)) {
+                    if ((compareSignatures(platformPkgSetting.getSigningDetails(),
+                            pkg.getSigningDetails()) != PackageManager.SIGNATURE_MATCH)) {
                         scanFlags |= SCAN_AS_PRIVILEGED;
                     }
                 }

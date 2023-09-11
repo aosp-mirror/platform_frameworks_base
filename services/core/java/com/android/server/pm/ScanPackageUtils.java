@@ -911,8 +911,8 @@ final class ScanPackageUtils {
         parsedPackage.setSignedWithPlatformKey(
                 (PLATFORM_PACKAGE_NAME.equals(parsedPackage.getPackageName())
                         || (platformPkg != null && compareSignatures(
-                        platformPkg.getSigningDetails().getSignatures(),
-                        parsedPackage.getSigningDetails().getSignatures()
+                        platformPkg.getSigningDetails(),
+                        parsedPackage.getSigningDetails()
                 ) == PackageManager.SIGNATURE_MATCH))
         );
 

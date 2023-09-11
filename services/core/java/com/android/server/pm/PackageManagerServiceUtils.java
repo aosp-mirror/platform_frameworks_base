@@ -403,7 +403,11 @@ public class PackageManagerServiceUtils {
      * <br />
      * {@link PackageManager#SIGNATURE_NO_MATCH}: if the two signature sets differ.
      */
-    public static int compareSignatures(Signature[] s1, Signature[] s2) {
+    public static int compareSignatures(SigningDetails sd1, SigningDetails sd2) {
+        return compareSignatureArrays(sd1.getSignatures(), sd2.getSignatures());
+    }
+
+    static int compareSignatureArrays(Signature[] s1, Signature[] s2) {
         if (s1 == null) {
             return s2 == null
                     ? PackageManager.SIGNATURE_NEITHER_SIGNED
@@ -445,10 +449,10 @@ public class PackageManagerServiceUtils {
      * set or if the signing details of the package are unknown.
      */
     public static boolean comparePackageSignatures(PackageSetting pkgSetting,
-            Signature[] signatures) {
+            SigningDetails otherSigningDetails) {
         final SigningDetails signingDetails = pkgSetting.getSigningDetails();
         return signingDetails == SigningDetails.UNKNOWN
-                || compareSignatures(signingDetails.getSignatures(), signatures)
+                || compareSignatures(signingDetails, otherSigningDetails)
                 == PackageManager.SIGNATURE_MATCH;
     }
 
