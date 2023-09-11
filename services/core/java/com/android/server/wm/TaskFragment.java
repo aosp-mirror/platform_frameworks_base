@@ -1162,7 +1162,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     final boolean resumeTopActivity(ActivityRecord prev, ActivityOptions options,
-            boolean deferPause) {
+            boolean skipPause) {
         ActivityRecord next = topRunningActivity(true /* focusableOnly */);
         if (next == null || !next.canResumeByCompat()) {
             return false;
@@ -1170,11 +1170,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
         next.delayedResume = false;
 
-        // If we are currently pausing an activity, then don't do anything until that is done.
-        final boolean allPausedComplete = mRootWindowContainer.allPausedActivitiesComplete();
-        if (!allPausedComplete) {
-            ProtoLog.v(WM_DEBUG_STATES,
-                    "resumeTopActivity: Skip resume: some activity pausing.");
+        if (!skipPause && !mRootWindowContainer.allPausedActivitiesComplete()) {
+            // If we aren't skipping pause, then we have to wait for currently pausing activities.
+            ProtoLog.v(WM_DEBUG_STATES, "resumeTopActivity: Skip resume: some activity pausing.");
             return false;
         }
 
@@ -1238,7 +1236,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             lastResumed = lastFocusedRootTask.getTopResumedActivity();
         }
 
-        boolean pausing = !deferPause && taskDisplayArea.pauseBackTasks(next);
+        boolean pausing = !skipPause && taskDisplayArea.pauseBackTasks(next);
         if (mResumedActivity != null) {
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivity: Pausing %s", mResumedActivity);
             pausing |= startPausing(mTaskSupervisor.mUserLeaving, false /* uiSleeping */,
