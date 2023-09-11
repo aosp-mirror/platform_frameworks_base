@@ -137,7 +137,6 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
                 });
             }
         };
-        Transitions.setRunningRemoteTransitionDelegate(remote.getAppThread());
         try {
             // If the remote is actually in the same process, then make a copy of parameters since
             // remote impls assume that they have to clean-up native references.
@@ -149,6 +148,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             remote.getRemoteTransition().startAnimation(transition, remoteInfo, remoteStartT, cb);
             // assume that remote will apply the start transaction.
             startTransaction.clear();
+            Transitions.setRunningRemoteTransitionDelegate(remote.getAppThread());
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error running remote transition.", e);
             unhandleDeath(remote.asBinder(), finishCallback);
