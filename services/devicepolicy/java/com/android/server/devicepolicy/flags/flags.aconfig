@@ -1,0 +1,8 @@
+package: "com.android.server.devicepolicy.flags"
+
+flag {
+  name: "policy_engine_migration_v2_enabled"
+  namespace: "device_policy"
+  description: "V2 of the policy engine migrations for Android V"
+  bug: "289520697"
+}
