@@ -2212,6 +2212,7 @@ class UserController implements Handler.Callback {
                     final IRemoteCallback callback = new IRemoteCallback.Stub() {
                         @Override
                         public void sendResult(Bundle data) throws RemoteException {
+                            asyncTraceEnd("onUserSwitching-" + name, newUserId);
                             synchronized (mLock) {
                                 long delayForObserver = SystemClock.elapsedRealtime()
                                         - dispatchStartedTimeForObserver;
@@ -2229,8 +2230,6 @@ class UserController implements Handler.Callback {
                                             + " ms after dispatchUserSwitch.");
                                 }
 
-                                TimingsTraceAndSlog t2 = new TimingsTraceAndSlog(TAG);
-                                t2.traceBegin("onUserSwitchingReply-" + name);
                                 curWaitingUserSwitchCallbacks.remove(name);
                                 // Continue switching if all callbacks have been notified and
                                 // user switching session is still valid
@@ -2239,13 +2238,11 @@ class UserController implements Handler.Callback {
                                         == mCurWaitingUserSwitchCallbacks)) {
                                     sendContinueUserSwitchLU(uss, oldUserId, newUserId);
                                 }
-                                t2.traceEnd();
                             }
                         }
                     };
-                    t.traceBegin("onUserSwitching-" + name);
+                    asyncTraceBegin("onUserSwitching-" + name, newUserId);
                     mUserSwitchObservers.getBroadcastItem(i).onUserSwitching(newUserId, callback);
-                    t.traceEnd();
                 } catch (RemoteException e) {
                     // Ignore
                 }
