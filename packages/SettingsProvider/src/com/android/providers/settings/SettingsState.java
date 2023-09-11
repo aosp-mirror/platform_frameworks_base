@@ -1125,7 +1125,10 @@ final class SettingsState {
         } catch (FileNotFoundException fnfe) {
             final String message = "No fallback file found for: " + mStatePersistFile;
             Slog.wtf(LOG_TAG, message);
-            throw new IllegalStateException(message);
+            if (!isConfigSettingsKey(mKey)) {
+                // Allow partially deserialized config settings because they can be updated later
+                throw new IllegalStateException(message);
+            }
         }
         if (parseStateFromXmlStreamLocked(in)) {
             // Parsed state from fallback file. Restore original file with fallback file
@@ -1137,7 +1140,10 @@ final class SettingsState {
         } else {
             final String message = "Failed parsing settings file: " + mStatePersistFile;
             Slog.wtf(LOG_TAG, message);
-            throw new IllegalStateException(message);
+            if (!isConfigSettingsKey(mKey)) {
+                // Allow partially deserialized config settings because they can be updated later
+                throw new IllegalStateException(message);
+            }
         }
     }
 
