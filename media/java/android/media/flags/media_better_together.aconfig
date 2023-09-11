@@ -1,0 +1,8 @@
+package: "com.android.media.flags"
+
+flag {
+     namespace: "media_solutions"
+     name: "enable_rlp_callbacks_in_media_router2"
+     description: "Make RouteListingPreference getter and callbacks public in MediaRouter2."
+     bug: "281067101"
+}
