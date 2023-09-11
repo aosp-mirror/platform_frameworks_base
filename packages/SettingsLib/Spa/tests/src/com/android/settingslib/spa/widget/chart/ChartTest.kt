@@ -17,13 +17,17 @@
 package com.android.settingslib.spa.widget.chart
 
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.testutils.assertContainsColor
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,22 +65,21 @@ class ChartTest {
     @Test
     fun bar_chart_displayed() {
         composeTestRule.setContent {
-            BarChart(
-                chartDataList = listOf(
-                    BarChartData(x = 0f, y = 12f),
-                    BarChartData(x = 1f, y = 5f),
-                    BarChartData(x = 2f, y = 21f),
-                    BarChartData(x = 3f, y = 5f),
-                    BarChartData(x = 4f, y = 10f),
-                    BarChartData(x = 5f, y = 9f),
-                    BarChartData(x = 6f, y = 1f),
-                ),
-                yAxisMaxValue = 30f,
-                modifier = Modifier.semantics { chart = "bar" }
-            )
+            BarChart(object : BarChartModel {
+                override val chartDataList = listOf(
+                    BarChartData(x = 0f, y = listOf(12f)),
+                    BarChartData(x = 1f, y = listOf(5f)),
+                    BarChartData(x = 2f, y = listOf(21f)),
+                    BarChartData(x = 3f, y = listOf(5f)),
+                    BarChartData(x = 4f, y = listOf(10f)),
+                    BarChartData(x = 5f, y = listOf(9f)),
+                    BarChartData(x = 6f, y = listOf(1f)),
+                )
+                override val colors = listOf(Color.Blue)
+            })
         }
 
-        composeTestRule.onNode(hasChart("bar")).assertIsDisplayed()
+        composeTestRule.onRoot().captureToImage().assertContainsColor(Color.Blue)
     }
 
     @Test
