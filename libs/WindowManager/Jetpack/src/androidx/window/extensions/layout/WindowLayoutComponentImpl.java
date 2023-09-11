@@ -25,7 +25,6 @@ import static androidx.window.util.ExtensionHelper.rotateRectToDisplayRotation;
 import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.app.Activity;
-import android.app.ActivityClient;
 import android.app.Application;
 import android.app.WindowConfiguration;
 import android.content.ComponentCallbacks;
@@ -35,8 +34,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
-import android.view.WindowManager;
-import android.window.TaskFragmentOrganizer;
 
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
@@ -52,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -86,16 +82,12 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private final Map<java.util.function.Consumer<WindowLayoutInfo>, Consumer<WindowLayoutInfo>>
             mJavaToExtConsumers = new ArrayMap<>();
 
-    private final TaskFragmentOrganizer mTaskFragmentOrganizer;
-
     public WindowLayoutComponentImpl(@NonNull Context context,
-            @NonNull TaskFragmentOrganizer taskFragmentOrganizer,
             @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer) {
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
         mFoldingFeatureProducer = foldingFeatureProducer;
         mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
-        mTaskFragmentOrganizer = taskFragmentOrganizer;
     }
 
     /** Registers to listen to {@link CommonFoldingFeature} changes */
@@ -383,38 +375,11 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             // Display features are not supported on secondary displays.
             return false;
         }
-        final int windowingMode;
-        IBinder activityToken = context.getActivityToken();
-        if (activityToken != null) {
-            final Configuration taskConfig = ActivityClient.getInstance().getTaskConfiguration(
-                    activityToken);
-            if (taskConfig == null) {
-                // If we cannot determine the task configuration for any reason, it is likely that
-                // we won't be able to determine its position correctly as well. DisplayFeatures'
-                // bounds in this case can't be computed correctly, so we should skip.
-                return false;
-            }
-            final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
-            final WindowManager windowManager = Objects.requireNonNull(
-                    context.getSystemService(WindowManager.class));
-            final Rect maxBounds = windowManager.getMaximumWindowMetrics().getBounds();
-            boolean isTaskExpanded = maxBounds.equals(taskBounds);
-            /*
-             * We need to proxy being in full screen because when a user enters PiP and exits PiP
-             * the task windowingMode will report multi-window/pinned until the transition is
-             * finished in WM Shell.
-             * maxBounds == taskWindowBounds is a proxy check to verify the window is full screen
-             */
-            return isTaskExpanded;
-        } else {
-            // TODO(b/242674941): use task windowing mode for window context that associates with
-            //  activity.
-            windowingMode = context.getResources().getConfiguration().windowConfiguration
-                    .getWindowingMode();
-        }
-        // It is recommended not to report any display features in multi-window mode, since it
-        // won't be possible to synchronize the display feature positions with window movement.
-        return !WindowConfiguration.inMultiWindowMode(windowingMode);
+
+        // We do not report folding features for Activities in PiP because the bounds are
+        // not updated fast enough and the window is too small for the UI to adapt.
+        return context.getResources().getConfiguration().windowConfiguration
+                .getWindowingMode() != WindowConfiguration.WINDOWING_MODE_PINNED;
     }
 
     @GuardedBy("mLock")
