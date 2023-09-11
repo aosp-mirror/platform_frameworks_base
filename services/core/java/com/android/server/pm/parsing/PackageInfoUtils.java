@@ -378,7 +378,6 @@ public class PackageInfoUtils {
         ai.privateFlags |= flag(state.isInstantApp(), ApplicationInfo.PRIVATE_FLAG_INSTANT)
                 | flag(state.isVirtualPreload(), ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD)
                 | flag(state.isHidden(), ApplicationInfo.PRIVATE_FLAG_HIDDEN);
-
         if ((flags & PackageManager.FILTER_OUT_QUARANTINED_COMPONENTS) != 0
                 && state.isQuarantined()) {
             ai.enabled = false;
@@ -402,6 +401,14 @@ public class PackageInfoUtils {
             ai.resourceDirs = overlayPaths.getResourceDirs().toArray(new String[0]);
             ai.overlayPaths = overlayPaths.getOverlayPaths().toArray(new String[0]);
         }
+        ai.isArchived = isArchived(state);
+    }
+
+    // TODO(b/288142708) Check for userState.isInstalled() here once this bug is fixed.
+    // If an app has isInstalled() == true - it should not be filtered above in any case, currently
+    // it is.
+    private static boolean isArchived(PackageUserState userState) {
+        return userState.getArchiveState() != null;
     }
 
     @Nullable
