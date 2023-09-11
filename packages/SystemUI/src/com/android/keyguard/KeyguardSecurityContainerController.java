@@ -17,7 +17,6 @@
 package com.android.keyguard;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
-
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_BIOMETRIC;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_EXTENDED_ACCESS;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_NONE_SECURITY;
@@ -1058,12 +1057,15 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
      * one side).
      */
     private boolean canUseOneHandedBouncer() {
-        if (!(mCurrentSecurityMode == SecurityMode.Pattern
-                || mCurrentSecurityMode == SecurityMode.PIN)) {
-            return false;
+        switch(mCurrentSecurityMode) {
+            case PIN:
+            case Pattern:
+            case SimPin:
+            case SimPuk:
+                return getResources().getBoolean(R.bool.can_use_one_handed_bouncer);
+            default:
+                return false;
         }
-
-        return getResources().getBoolean(R.bool.can_use_one_handed_bouncer);
     }
 
     private boolean canDisplayUserSwitcher() {
