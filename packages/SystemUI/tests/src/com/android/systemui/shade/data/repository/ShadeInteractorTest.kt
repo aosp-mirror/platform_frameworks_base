@@ -35,6 +35,10 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
+import com.android.systemui.scene.shared.model.ObservableTransitionState
+import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
@@ -52,9 +56,8 @@ import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -67,9 +70,11 @@ import org.mockito.MockitoAnnotations
 class ShadeInteractorTest : SysuiTestCase() {
     private lateinit var underTest: ShadeInteractor
 
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
     private val featureFlags = FakeFeatureFlags()
+    private val sceneContainerFlags = FakeSceneContainerFlags()
+    private val sceneInteractor = utils.sceneInteractor()
     private val userSetupRepository = FakeUserSetupRepository()
     private val userRepository = FakeUserRepository()
     private val disableFlagsRepository = FakeDisableFlagsRepository()
@@ -103,7 +108,7 @@ class ShadeInteractorTest : SysuiTestCase() {
         val refreshUsersScheduler =
             RefreshUsersScheduler(
                 applicationScope = testScope.backgroundScope,
-                mainDispatcher = testDispatcher,
+                mainDispatcher = utils.testDispatcher,
                 repository = userRepository,
             )
 
@@ -141,7 +146,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                     ),
                 broadcastDispatcher = fakeBroadcastDispatcher,
                 keyguardUpdateMonitor = keyguardUpdateMonitor,
-                backgroundDispatcher = testDispatcher,
+                backgroundDispatcher = utils.testDispatcher,
                 activityManager = activityManager,
                 refreshUsersScheduler = refreshUsersScheduler,
                 guestUserInteractor = guestInteractor,
@@ -151,6 +156,8 @@ class ShadeInteractorTest : SysuiTestCase() {
             ShadeInteractor(
                 testScope.backgroundScope,
                 disableFlagsRepository,
+                sceneContainerFlags,
+                { sceneInteractor },
                 keyguardRepository,
                 userSetupRepository,
                 deviceProvisionedController,
@@ -556,5 +563,147 @@ class ShadeInteractorTest : SysuiTestCase() {
 
             // THEN anyExpanding is false
             assertThat(actual).isFalse()
+        }
+
+    @Test
+    fun lockscreenShadeExpansion_idle_onScene() =
+        testScope.runTest() {
+            // GIVEN an expansion flow based on transitions to and from a scene
+            val key = SceneKey.Shade
+            val expansion = underTest.sceneBasedExpansion(sceneInteractor, key)
+            val expansionAmount by collectLastValue(expansion)
+
+            // WHEN transition state is idle on the scene
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(key))
+            sceneInteractor.setTransitionState(transitionState)
+
+            // THEN expansion is 1
+            assertThat(expansionAmount).isEqualTo(1f)
+        }
+
+    @Test
+    fun lockscreenShadeExpansion_idle_onDifferentScene() =
+        testScope.runTest() {
+            // GIVEN an expansion flow based on transitions to and from a scene
+            val expansion = underTest.sceneBasedExpansion(sceneInteractor, SceneKey.Shade)
+            val expansionAmount by collectLastValue(expansion)
+
+            // WHEN transition state is idle on a different scene
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(SceneKey.Lockscreen)
+                )
+            sceneInteractor.setTransitionState(transitionState)
+
+            // THEN expansion is 0
+            assertThat(expansionAmount).isEqualTo(0f)
+        }
+
+    @Test
+    fun lockscreenShadeExpansion_transitioning_toScene() =
+        testScope.runTest() {
+            // GIVEN an expansion flow based on transitions to and from a scene
+            val key = SceneKey.QuickSettings
+            val expansion = underTest.sceneBasedExpansion(sceneInteractor, key)
+            val expansionAmount by collectLastValue(expansion)
+
+            // WHEN transition state is starting to move to the scene
+            val progress = MutableStateFlow(0f)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.Lockscreen,
+                        toScene = key,
+                        progress = progress,
+                    )
+                )
+            sceneInteractor.setTransitionState(transitionState)
+
+            // THEN expansion is 0
+            assertThat(expansionAmount).isEqualTo(0f)
+
+            // WHEN transition state is partially to the scene
+            progress.value = .4f
+
+            // THEN expansion matches the progress
+            assertThat(expansionAmount).isEqualTo(.4f)
+
+            // WHEN transition completes
+            progress.value = 1f
+
+            // THEN expansion is 1
+            assertThat(expansionAmount).isEqualTo(1f)
+        }
+
+    @Test
+    fun lockscreenShadeExpansion_transitioning_fromScene() =
+        testScope.runTest() {
+            // GIVEN an expansion flow based on transitions to and from a scene
+            val key = SceneKey.QuickSettings
+            val expansion = underTest.sceneBasedExpansion(sceneInteractor, key)
+            val expansionAmount by collectLastValue(expansion)
+
+            // WHEN transition state is starting to move to the scene
+            val progress = MutableStateFlow(0f)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = key,
+                        toScene = SceneKey.Lockscreen,
+                        progress = progress,
+                    )
+                )
+            sceneInteractor.setTransitionState(transitionState)
+
+            // THEN expansion is 1
+            assertThat(expansionAmount).isEqualTo(1f)
+
+            // WHEN transition state is partially to the scene
+            progress.value = .4f
+
+            // THEN expansion reflects the progress
+            assertThat(expansionAmount).isEqualTo(.6f)
+
+            // WHEN transition completes
+            progress.value = 1f
+
+            // THEN expansion is 0
+            assertThat(expansionAmount).isEqualTo(0f)
+        }
+
+    @Test
+    fun lockscreenShadeExpansion_transitioning_toAndFromDifferentScenes() =
+        testScope.runTest() {
+            // GIVEN an expansion flow based on transitions to and from a scene
+            val expansion = underTest.sceneBasedExpansion(sceneInteractor, SceneKey.QuickSettings)
+            val expansionAmount by collectLastValue(expansion)
+
+            // WHEN transition state is starting to between different scenes
+            val progress = MutableStateFlow(0f)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.Lockscreen,
+                        toScene = SceneKey.Shade,
+                        progress = progress,
+                    )
+                )
+            sceneInteractor.setTransitionState(transitionState)
+
+            // THEN expansion is 0
+            assertThat(expansionAmount).isEqualTo(0f)
+
+            // WHEN transition state is partially complete
+            progress.value = .4f
+
+            // THEN expansion is still 0
+            assertThat(expansionAmount).isEqualTo(0f)
+
+            // WHEN transition completes
+            progress.value = 1f
+
+            // THEN expansion is still 0
+            assertThat(expansionAmount).isEqualTo(0f)
         }
 }
