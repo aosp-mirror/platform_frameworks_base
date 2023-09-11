@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.R
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
@@ -27,7 +26,6 @@ import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
-import android.content.res.TypedArray
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
@@ -44,6 +42,7 @@ import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.annotation.BinderThread
+import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
@@ -696,10 +695,7 @@ class DesktopTasksController(
             finishTransaction: SurfaceControl.Transaction
     ) {
         // Add rounded corners to freeform windows
-        val ta: TypedArray = context.obtainStyledAttributes(
-                intArrayOf(R.attr.dialogCornerRadius))
-        val cornerRadius = ta.getDimensionPixelSize(0, 0).toFloat()
-        ta.recycle()
+        val cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
         info.changes
                 .filter { it.taskInfo?.windowingMode == WINDOWING_MODE_FREEFORM }
                 .forEach { finishTransaction.setCornerRadius(it.leash, cornerRadius) }
