@@ -17,9 +17,11 @@
 package com.android.server.display;
 
 import android.hardware.display.BrightnessInfo;
+import android.os.Handler;
 import android.os.IBinder;
 import android.provider.DeviceConfigInterface;
 
+import com.android.server.display.brightness.clamper.HdrClamper;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 
 import java.io.PrintWriter;
@@ -31,23 +33,30 @@ class BrightnessRangeController {
     private final NormalBrightnessModeController mNormalBrightnessModeController =
             new NormalBrightnessModeController();
 
+    private final HdrClamper mHdrClamper;
+
     private final Runnable mModeChangeCallback;
     private final boolean mUseNbmController;
 
+    private final boolean mUseHdrClamper;
+
 
     BrightnessRangeController(HighBrightnessModeController hbmController,
-            Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig) {
+            Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig, Handler handler) {
         this(hbmController, modeChangeCallback, displayDeviceConfig,
+                new HdrClamper(modeChangeCallback::run, new Handler(handler.getLooper())),
                 new DeviceConfigParameterProvider(DeviceConfigInterface.REAL));
     }
 
     BrightnessRangeController(HighBrightnessModeController hbmController,
             Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig,
-            DeviceConfigParameterProvider configParameterProvider) {
+            HdrClamper hdrClamper, DeviceConfigParameterProvider configParameterProvider) {
         mHbmController = hbmController;
         mModeChangeCallback = modeChangeCallback;
         mUseNbmController = configParameterProvider.isNormalBrightnessControllerFeatureEnabled();
+        mUseHdrClamper = false;
         mNormalBrightnessModeController.resetNbmData(displayDeviceConfig.getLuxThrottlingData());
+        mHdrClamper = hdrClamper;
     }
 
     void dump(PrintWriter pw) {
@@ -63,6 +72,9 @@ class BrightnessRangeController {
                 () -> mNormalBrightnessModeController.onAmbientLuxChange(ambientLux),
                 () -> mHbmController.onAmbientLuxChange(ambientLux)
         );
+        if (mUseHdrClamper) {
+            mHdrClamper.onAmbientLuxChange(ambientLux);
+        }
     }
 
     float getNormalBrightnessMax() {
@@ -118,7 +130,8 @@ class BrightnessRangeController {
     }
 
     float getHdrBrightnessValue() {
-        return mHbmController.getHdrBrightnessValue();
+        float hdrBrightness =  mHbmController.getHdrBrightnessValue();
+        return Math.min(hdrBrightness, mHdrClamper.getMaxBrightness());
     }
 
     float getTransitionPoint() {
@@ -137,5 +150,9 @@ class BrightnessRangeController {
         } else {
             hbmChangesFunc.run();
         }
+    }
+
+    public float getHdrTransitionRate() {
+        return mHdrClamper.getTransitionRate();
     }
 }
