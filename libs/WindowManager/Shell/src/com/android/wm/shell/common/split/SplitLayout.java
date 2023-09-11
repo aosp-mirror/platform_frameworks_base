@@ -23,13 +23,12 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
-
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE;
-import static com.android.wm.shell.common.split.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END;
-import static com.android.wm.shell.common.split.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START;
 import static com.android.wm.shell.animation.Interpolators.DIM_INTERPOLATOR;
 import static com.android.wm.shell.animation.Interpolators.SLOWDOWN_INTERPOLATOR;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -511,13 +510,13 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      * target indicates dismissing split.
      */
     public void snapToTarget(int currentPosition, DividerSnapAlgorithm.SnapTarget snapTarget) {
-        switch (snapTarget.flag) {
-            case FLAG_DISMISS_START:
+        switch (snapTarget.snapTo) {
+            case SNAP_TO_START_AND_DISMISS:
                 flingDividePosition(currentPosition, snapTarget.position, FLING_RESIZE_DURATION,
                         () -> mSplitLayoutHandler.onSnappedToDismiss(false /* bottomOrRight */,
                                 EXIT_REASON_DRAG_DIVIDER));
                 break;
-            case FLAG_DISMISS_END:
+            case SNAP_TO_END_AND_DISMISS:
                 flingDividePosition(currentPosition, snapTarget.position, FLING_RESIZE_DURATION,
                         () -> mSplitLayoutHandler.onSnappedToDismiss(true /* bottomOrRight */,
                                 EXIT_REASON_DRAG_DIVIDER));
