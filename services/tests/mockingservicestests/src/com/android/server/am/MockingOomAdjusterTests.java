@@ -1862,6 +1862,13 @@ public class MockingOomAdjusterTests {
         assertProcStates(app2, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
         assertBfsl(app2);
+
+        bindService(client2, app1, null, 0, mock(IBinder.class));
+        bindService(app1, client2, null, 0, mock(IBinder.class));
+        client2.mServices.setHasForegroundServices(false, 0, /* hasNoneType=*/false);
+        updateOomAdj(app1, client1, client2);
+        assertProcStates(app1, PROCESS_STATE_IMPORTANT_FOREGROUND, VISIBLE_APP_ADJ,
+                SCHED_GROUP_TOP_APP);
     }
 
     @SuppressWarnings("GuardedBy")
