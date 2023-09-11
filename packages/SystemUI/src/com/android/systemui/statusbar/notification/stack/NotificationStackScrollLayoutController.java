@@ -1659,8 +1659,9 @@ public class NotificationStackScrollLayoutController {
 
     @VisibleForTesting
     void onKeyguardTransitionChanged(TransitionStep transitionStep) {
-        boolean isTransitionToAod = transitionStep.getFrom().equals(KeyguardState.GONE)
-                && transitionStep.getTo().equals(KeyguardState.AOD);
+        boolean isTransitionToAod = transitionStep.getTo().equals(KeyguardState.AOD)
+                && (transitionStep.getFrom().equals(KeyguardState.GONE)
+                || transitionStep.getFrom().equals(KeyguardState.OCCLUDED));
         if (mIsInTransitionToAod != isTransitionToAod) {
             mIsInTransitionToAod = isTransitionToAod;
             updateShowEmptyShadeView();
