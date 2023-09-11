@@ -1024,7 +1024,7 @@ public class ComputerEngine implements Computer {
         if ("android".equals(packageName) || "system".equals(packageName)) {
             return androidApplication();
         }
-        if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
+        if ((flags & (MATCH_KNOWN_PACKAGES | MATCH_ARCHIVED_PACKAGES)) != 0) {
             // Already generates the external package name
             return generateApplicationInfoFromSettings(packageName,
                     flags, filterCallingUid, userId);
@@ -1518,7 +1518,6 @@ public class ComputerEngine implements Computer {
             pi.sharedUserId = (sharedUser != null) ? sharedUser.getName() : null;
             pi.firstInstallTime = state.getFirstInstallTimeMillis();
             pi.lastUpdateTime = ps.getLastUpdateTime();
-            pi.isArchived = isArchived(state);
 
             ApplicationInfo ai = new ApplicationInfo();
             ai.packageName = ps.getPackageName();
