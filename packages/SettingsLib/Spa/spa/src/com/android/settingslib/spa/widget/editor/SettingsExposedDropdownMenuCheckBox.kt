@@ -59,16 +59,16 @@ fun SettingsExposedDropdownMenuCheckBox(
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = it },
-        modifier = Modifier.width(350.dp).padding(
-            horizontal = SettingsDimension.itemPaddingEnd,
-            vertical = SettingsDimension.itemPaddingVertical
-        ).onSizeChanged {
-            dropDownWidth = it.width
-        },
+        modifier = Modifier
+            .width(350.dp)
+            .padding(SettingsDimension.itemPadding)
+            .onSizeChanged { dropDownWidth = it.width },
     ) {
         OutlinedTextField(
             // The `menuAnchor` modifier must be passed to the text field for correctness.
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth(),
             value = selectedOptionsState.joinToString(", "),
             onValueChange = onselectedOptionStateChange,
             label = { Text(text = label) },
@@ -83,12 +83,15 @@ fun SettingsExposedDropdownMenuCheckBox(
         if (options.isNotEmpty()) {
             ExposedDropdownMenu(
                 expanded = expanded,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .width(with(LocalDensity.current) { dropDownWidth.toDp() }),
                 onDismissRequest = { expanded = false },
             ) {
                 options.forEach { option ->
-                    TextButton(modifier = Modifier.fillMaxHeight().fillMaxWidth(), onClick = {
+                    TextButton(modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(), onClick = {
                         if (selectedOptionsState.contains(option)) {
                             selectedOptionsState.remove(
                                 option
@@ -100,7 +103,9 @@ fun SettingsExposedDropdownMenuCheckBox(
                         }
                     }) {
                         Row(
-                            modifier = Modifier.fillMaxHeight().fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(),
                             horizontalArrangement = Arrangement.Start,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
