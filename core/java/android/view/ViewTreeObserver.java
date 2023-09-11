@@ -315,6 +315,15 @@ public final class ViewTreeObserver {
         }
 
         @Override
+        public String toString() {
+            return "InternalInsetsInfo{contentInsets=" + contentInsets
+                    + " visibleInsets=" + visibleInsets
+                    + " touchableRegion=" + touchableRegion.getBounds()
+                    + "}";
+
+        }
+
+        @Override
         public int hashCode() {
             int result = contentInsets.hashCode();
             result = 31 * result + visibleInsets.hashCode();

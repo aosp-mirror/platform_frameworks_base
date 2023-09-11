@@ -685,7 +685,12 @@ public class InputMethodService extends AbstractInputMethodService {
     private ImeTracker.Token mCurStatsToken;
 
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
+        Log.i("b/297000797", "IME#OnComputeInternalInsetsListener, start info: " + info
+                + " before onComputeInsets, tmpInsets: " + mTmpInsets,
+                new Throwable());
         onComputeInsets(mTmpInsets);
+        Log.i("b/297000797", "IME#OnComputeInternalInsetsListener,"
+                + " after onComputeInsets, tmpInsets: " + mTmpInsets);
         if (!mViewsCreated) {
             // The IME views are not ready, keep visible insets untouched.
             mTmpInsets.visibleTopInsets = 0;
@@ -705,6 +710,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         mNavigationBarController.updateTouchableInsets(mTmpInsets, info);
 
+        Log.i("b/297000797", "IME#OnComputeInternalInsetsListener, end info: " + info);
         if (mInputFrame != null) {
             setImeExclusionRect(mTmpInsets.visibleTopInsets);
         }
@@ -1462,6 +1468,15 @@ public class InputMethodService extends AbstractInputMethodService {
             proto.write(TOUCHABLE_INSETS, touchableInsets);
             proto.write(TOUCHABLE_REGION, touchableRegion.toString());
             proto.end(token);
+        }
+
+        @Override
+        public String toString() {
+            return "Insets{contentTopInsets=" + contentTopInsets
+                    + " visibleTopInsets=" + visibleTopInsets
+                    + " touchableInsets=" + touchableInsets
+                    + " touchableRegion=" + touchableRegion.getBounds()
+                    + "}";
         }
     }
 
