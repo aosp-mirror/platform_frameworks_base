@@ -624,6 +624,27 @@ final class DevicePolicyEngine {
     }
 
     /**
+     * Retrieves the global policy set by the admin for the provided {@code policyDefinition} and
+     * if one was set, otherwise returns {@code null}.
+     */
+    @Nullable
+    <V> V getGlobalPolicySetByAdmin(
+            @NonNull PolicyDefinition<V> policyDefinition,
+            @NonNull EnforcingAdmin enforcingAdmin) {
+        Objects.requireNonNull(policyDefinition);
+        Objects.requireNonNull(enforcingAdmin);
+
+        synchronized (mLock) {
+            if (!hasGlobalPolicyLocked(policyDefinition)) {
+                return null;
+            }
+            PolicyValue<V> value = getGlobalPolicyStateLocked(policyDefinition)
+                    .getPoliciesSetByAdmins().get(enforcingAdmin);
+            return value == null ? null : value.getValue();
+        }
+    }
+
+    /**
      * Retrieves the values set for the provided {@code policyDefinition} by each admin.
      */
     @NonNull
