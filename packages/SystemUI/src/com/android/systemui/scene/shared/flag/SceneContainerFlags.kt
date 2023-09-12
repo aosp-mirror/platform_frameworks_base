@@ -69,7 +69,9 @@ constructor(
             listOf(ComposeMustBeAvailable(), CompileTimeFlagMustBeEnabled())
 
     override fun isEnabled(): Boolean {
-        return requirements.all { it.isMet() }
+        // SCENE_CONTAINER_ENABLED is an explicit static flag check that helps with downstream
+        // optimizations, e.g., unused code stripping. Do not remove!
+        return Flags.SCENE_CONTAINER_ENABLED && requirements.all { it.isMet() }
     }
 
     override fun requirementDescription(): String {
