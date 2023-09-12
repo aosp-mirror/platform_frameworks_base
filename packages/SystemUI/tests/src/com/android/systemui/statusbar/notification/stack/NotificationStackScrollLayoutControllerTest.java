@@ -628,6 +628,16 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(eq(false), anyBoolean());
     }
 
+    @Test
+    public void updateEmptyShadeView_onKeyguardOccludedTransitionToAod_hidesView() {
+        initController(/* viewIsAttached= */ true);
+        mController.onKeyguardTransitionChanged(
+                new TransitionStep(
+                        /* from= */ KeyguardState.OCCLUDED,
+                        /* to= */ KeyguardState.AOD));
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(eq(false), anyBoolean());
+    }
+
     private LogMaker logMatcher(int category, int type) {
         return argThat(new LogMatcher(category, type));
     }
