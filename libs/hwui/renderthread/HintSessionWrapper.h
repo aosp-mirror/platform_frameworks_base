@@ -29,6 +29,8 @@ namespace renderthread {
 
 class HintSessionWrapper {
 public:
+    friend class HintSessionWrapperTests;
+
     HintSessionWrapper(pid_t uiThreadId, pid_t renderThreadId);
     ~HintSessionWrapper();
 
@@ -55,6 +57,28 @@ private:
     static constexpr nsecs_t kResetHintTimeout = 100_ms;
     static constexpr int64_t kSanityCheckLowerBound = 100_us;
     static constexpr int64_t kSanityCheckUpperBound = 10_s;
+
+    // Allows easier stub when testing
+    class HintSessionBinding {
+    public:
+        virtual ~HintSessionBinding() = default;
+        virtual void init();
+        APerformanceHintManager* (*getManager)();
+        APerformanceHintSession* (*createSession)(APerformanceHintManager* manager,
+                                                  const int32_t* tids, size_t tidCount,
+                                                  int64_t defaultTarget) = nullptr;
+        void (*closeSession)(APerformanceHintSession* session) = nullptr;
+        void (*updateTargetWorkDuration)(APerformanceHintSession* session,
+                                         int64_t targetDuration) = nullptr;
+        void (*reportActualWorkDuration)(APerformanceHintSession* session,
+                                         int64_t actualDuration) = nullptr;
+        void (*sendHint)(APerformanceHintSession* session, int32_t hintId) = nullptr;
+
+    private:
+        bool mInitialized = false;
+    };
+
+    std::shared_ptr<HintSessionBinding> mBinding;
 };
 
 } /* namespace renderthread */
