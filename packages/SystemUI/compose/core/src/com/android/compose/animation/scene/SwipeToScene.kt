@@ -148,15 +148,19 @@ private class SwipeTransition(initialScene: Scene) : TransitionState.Transition 
     /** The animatable used to animate the offset once the user lifted its finger. */
     val offsetAnimatable = Animatable(0f, visibilityThreshold = OffsetVisibilityThreshold)
 
-    /**
-     * The job currently animating [offsetAnimatable], if it is animating. Note that setting this to
-     * a new job will automatically cancel the previous one.
-     */
-    var offsetAnimationJob: Job? = null
-        set(value) {
-            field?.cancel()
-            field = value
-        }
+    /** Job to check that there is at most one offset animation in progress. */
+    private var offsetAnimationJob: Job? = null
+
+    /** Ends any previous [offsetAnimationJob] and runs the new [job]. */
+    fun startOffsetAnimation(job: () -> Job) {
+        stopOffsetAnimation()
+        offsetAnimationJob = job()
+    }
+
+    /** Stops any ongoing offset animation. */
+    fun stopOffsetAnimation() {
+        offsetAnimationJob?.cancel()
+    }
 
     /** The absolute distance between [fromScene] and [toScene]. */
     var absoluteDistance = 0f
@@ -208,8 +212,7 @@ private fun onDragStarted(
         if (transition.isAnimatingOffset) {
             // Stop animating and start from where the current offset. Setting the animation job to
             // `null` will effectively cancel the animation.
-            transition.isAnimatingOffset = false
-            transition.offsetAnimationJob = null
+            transition.stopOffsetAnimation()
             transition.dragOffset = transition.offsetAnimatable.value
         }
 
@@ -227,9 +230,8 @@ private fun onDragStarted(
     // to fromScene, which will effectively be treated the same as Idle(fromScene).
     transition._toScene = fromScene
 
+    transition.stopOffsetAnimation()
     transition.dragOffset = 0f
-    transition.isAnimatingOffset = false
-    transition.offsetAnimationJob = null
 
     // Use the layout size in the swipe orientation for swipe distance.
     // TODO(b/290184746): Also handle custom distances for transitions. With smaller distances, we
@@ -450,31 +452,32 @@ private fun CoroutineScope.animateOffset(
     targetOffset: Float,
     targetScene: SceneKey,
 ) {
-    transition.offsetAnimationJob = launch {
-        if (!transition.isAnimatingOffset) {
-            transition.offsetAnimatable.snapTo(transition.dragOffset)
-        }
-        transition.isAnimatingOffset = true
+    transition.startOffsetAnimation {
+        launch {
+                if (!transition.isAnimatingOffset) {
+                    transition.offsetAnimatable.snapTo(transition.dragOffset)
+                }
+                transition.isAnimatingOffset = true
 
-        transition.offsetAnimatable.animateTo(
-            targetOffset,
-            // TODO(b/290184746): Make this spring spec configurable.
-            spring(
-                stiffness = Spring.StiffnessMediumLow,
-                visibilityThreshold = OffsetVisibilityThreshold
-            ),
-            initialVelocity = initialVelocity,
-        )
+                transition.offsetAnimatable.animateTo(
+                    targetOffset,
+                    // TODO(b/290184746): Make this spring spec configurable.
+                    spring(
+                        stiffness = Spring.StiffnessMediumLow,
+                        visibilityThreshold = OffsetVisibilityThreshold
+                    ),
+                    initialVelocity = initialVelocity,
+                )
 
-        // Now that the animation is done, the state should be idle. Note that if the state was
-        // changed since this animation started, some external code changed it and we shouldn't do
-        // anything here. Note also that this job will be cancelled in the case where the user
-        // intercepts this swipe.
-        if (layoutImpl.state.transitionState == transition) {
-            layoutImpl.state.transitionState = TransitionState.Idle(targetScene)
-        }
-
-        transition.offsetAnimationJob = null
+                // Now that the animation is done, the state should be idle. Note that if the state
+                // was changed since this animation started, some external code changed it and we
+                // shouldn't do anything here. Note also that this job will be cancelled in the case
+                // where the user intercepts this swipe.
+                if (layoutImpl.state.transitionState == transition) {
+                    layoutImpl.state.transitionState = TransitionState.Idle(targetScene)
+                }
+            }
+            .also { it.invokeOnCompletion { transition.isAnimatingOffset = false } }
     }
 }
 
@@ -509,9 +512,8 @@ private fun CoroutineScope.animateOverscroll(
     transition._toScene = layoutImpl.scene(target.sceneKey)
     transition._distance = target.distance
     transition.absoluteDistance = target.distance.absoluteValue
+    transition.stopOffsetAnimation()
     transition.dragOffset = 0f
-    transition.isAnimatingOffset = false
-    transition.offsetAnimationJob = null
 
     layoutImpl.state.transitionState = transition
 
