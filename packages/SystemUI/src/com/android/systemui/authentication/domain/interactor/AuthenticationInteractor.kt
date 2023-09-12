@@ -185,6 +185,9 @@ constructor(
     /** Whether the pattern should be visible for the currently-selected user. */
     val isPatternVisible: StateFlow<Boolean> = repository.isPatternVisible
 
+    /** The minimal length of a pattern. */
+    val minPatternLength: Int = repository.minPatternLength
+
     private var throttlingCountdownJob: Job? = null
 
     init {
