@@ -3046,7 +3046,7 @@ public class SyncManager {
 
     public static void sendMessage(Message message) {
         final SyncManager instance = getInstance();
-        if (instance != null) {
+        if (instance != null && instance.mSyncHandler != null) {
             instance.mSyncHandler.sendMessage(message);
         }
     }
