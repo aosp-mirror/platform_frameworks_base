@@ -5226,6 +5226,9 @@
   <!-- Whether we order unlocking and waking -->
   <java-symbol type="bool" name="config_orderUnlockAndWake" />
 
+  <!-- Allow windowIsFloating to fill screen. -->
+  <java-symbol type="bool" name="config_allowFloatingWindowsFillScreen" />
+
   <!-- External TV Input Logging Configs -->
   <java-symbol type="bool" name="config_tvExternalInputLoggingDisplayNameFilterEnabled" />
   <java-symbol type="array" name="config_tvExternalInputLoggingDeviceOnScreenDisplayNames" />
