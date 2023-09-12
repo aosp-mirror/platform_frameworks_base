@@ -151,6 +151,20 @@ final class ContentRecorder implements WindowContainerListener {
                 return;
             }
 
+            // TODO(b/297514518) Do not start capture if the app is in PIP, the bounds are
+            //  inaccurate.
+            if (mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK) {
+                final Task capturedTask = mRecordedWindowContainer.asTask();
+                if (capturedTask.inPinnedWindowingMode()) {
+                    ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                            "Content Recording: Display %d was already recording, but "
+                                    + "pause capture since the task is in PIP",
+                            mDisplayContent.getDisplayId());
+                    pauseRecording();
+                    return;
+                }
+            }
+
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                     "Content Recording: Display %d was already recording, so apply "
                             + "transformations if necessary",
@@ -292,6 +306,17 @@ final class ContentRecorder implements WindowContainerListener {
             return;
         }
 
+        // TODO(b/297514518) Do not start capture if the app is in PIP, the bounds are inaccurate.
+        if (mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK) {
+            if (mRecordedWindowContainer.asTask().inPinnedWindowingMode()) {
+                ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                        "Content Recording: Display %d should start recording, but "
+                                + "don't yet since the task is in PIP",
+                        mDisplayContent.getDisplayId());
+                return;
+            }
+        }
+
         final Point surfaceSize = fetchSurfaceSizeIfPresent();
         if (surfaceSize == null) {
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
@@ -304,9 +329,6 @@ final class ContentRecorder implements WindowContainerListener {
                 "Content Recording: Display %d has no content and is on, so start recording for "
                         + "state %d",
                 mDisplayContent.getDisplayId(), mDisplayContent.getDisplayInfo().state);
-
-        // TODO(b/274790702): Do not start recording if waiting for consent - for now,
-        //  go ahead.
 
         // Create a mirrored hierarchy for the SurfaceControl of the DisplayArea to capture.
         mRecordedSurface = SurfaceControl.mirrorSurface(
