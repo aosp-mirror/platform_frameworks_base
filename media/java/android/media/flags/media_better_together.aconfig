@@ -6,3 +6,10 @@ flag {
      description: "Make RouteListingPreference getter and callbacks public in MediaRouter2."
      bug: "281067101"
 }
+
+flag {
+     namespace: "media_solutions"
+     name: "enable_audio_policies_device_and_bluetooth_controller"
+     description: "Use Audio Policies implementation for device and Bluetooth route controllers."
+     bug: "280576228"
+}
