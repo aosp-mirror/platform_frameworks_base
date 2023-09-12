@@ -1757,6 +1757,8 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED)
     public static final int FLAG_SUSPEND_QUARANTINED = 0x00000001;
 
     /** @hide */

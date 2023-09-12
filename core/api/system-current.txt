@@ -3979,6 +3979,7 @@ package android.content.pm {
     field public static final int FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED = 512; // 0x200
     field public static final int FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED = 256; // 0x100
     field public static final int FLAG_PERMISSION_USER_SET = 1; // 0x1
+    field @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED) public static final int FLAG_SUSPEND_QUARANTINED = 1; // 0x1
     field public static final int INSTALL_FAILED_ALREADY_EXISTS = -1; // 0xffffffff
     field public static final int INSTALL_FAILED_CONFLICTING_PROVIDER = -13; // 0xfffffff3
     field public static final int INSTALL_FAILED_CONTAINER_ERROR = -18; // 0xffffffee
