@@ -16,6 +16,7 @@
 
 package com.android.settingslib;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doReturn;
@@ -118,5 +119,27 @@ public class RestrictedPreferenceHelperTest {
         mHelper.setDisabledByAdmin(new RestrictedLockUtils.EnforcedAdmin());
 
         verify(mRestrictedTopLevelPreference, never()).setEnabled(false);
+    }
+
+    /**
+     * Tests if the instance of {@link RestrictedLockUtils.EnforcedAdmin} is received by
+     * {@link RestrictedPreferenceHelper#setDisabledByAdmin(RestrictedLockUtils.EnforcedAdmin)} as a
+     * copy or as a reference.
+     */
+    @Test
+    public void setDisabledByAdmin_disablePreference_receivedEnforcedAdminIsNotAReference() {
+        RestrictedLockUtils.EnforcedAdmin enforcedAdmin =
+                new RestrictedLockUtils.EnforcedAdmin(/* component */ null,
+                        /* enforcedRestriction */ "some_restriction",
+                        /* userHandle */ null);
+
+        mHelper.setDisabledByAdmin(enforcedAdmin);
+
+        // If `setDisabledByAdmin` stored `enforcedAdmin` as a reference, then the following
+        // assignment would be propagated.
+        enforcedAdmin.enforcedRestriction = null;
+        assertThat(mHelper.mEnforcedAdmin.enforcedRestriction).isEqualTo("some_restriction");
+
+        assertThat(mHelper.isDisabledByAdmin()).isTrue();
     }
 }
