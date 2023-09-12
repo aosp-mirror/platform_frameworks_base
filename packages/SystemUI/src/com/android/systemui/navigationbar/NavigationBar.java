@@ -133,7 +133,6 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.shared.recents.utilities.Utilities;
@@ -156,6 +155,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.ViewController;
 import com.android.wm.shell.back.BackAnimation;
@@ -200,7 +200,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final SysUiState mSysUiFlagsContainer;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
-    private final ShadeController mShadeController;
+    private final KeyguardStateController mKeyguardStateController;
     private final ShadeViewController mShadeViewController;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final OverviewProxyService mOverviewProxyService;
@@ -262,7 +262,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     @VisibleForTesting
     public int mDisplayId;
     private boolean mIsOnDefaultDisplay;
-    public boolean mHomeBlockedThisTouch;
+    private boolean mHomeBlockedThisTouch;
 
     /**
      * When user is QuickSwitching between apps of different orientations, we'll draw a fake
@@ -531,7 +531,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     @Inject
     NavigationBar(
             NavigationBarView navigationBarView,
-            ShadeController shadeController,
             NavigationBarFrame navigationBarFrame,
             @Nullable Bundle savedState,
             @DisplayId Context context,
@@ -550,6 +549,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             Optional<Pip> pipOptional,
             Optional<Recents> recentsOptional,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            KeyguardStateController keyguardStateController,
             ShadeViewController shadeViewController,
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationShadeDepthController notificationShadeDepthController,
@@ -585,7 +585,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mSysUiFlagsContainer = sysUiFlagsContainer;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
-        mShadeController = shadeController;
+        mKeyguardStateController = keyguardStateController;
         mShadeViewController = shadeViewController;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mOverviewProxyService = overviewProxyService;
@@ -1326,8 +1326,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 mHomeBlockedThisTouch = false;
                 if (mTelecomManagerOptional.isPresent()
                         && mTelecomManagerOptional.get().isRinging()) {
-                    if (centralSurfacesOptional.map(CentralSurfaces::isKeyguardShowing)
-                            .orElse(false)) {
+                    if (mKeyguardStateController.isShowing()) {
                         Log.i(TAG, "Ignoring HOME; there's a ringing incoming call. " +
                                 "No heads up");
                         mHomeBlockedThisTouch = true;

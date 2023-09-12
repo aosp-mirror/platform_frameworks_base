@@ -17,7 +17,6 @@
 package com.android.systemui.accessibility;
 
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS;
-
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 
 import android.accessibilityservice.AccessibilityService;
@@ -57,8 +56,8 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Assert;
 
 import dagger.Lazy;
@@ -186,8 +185,8 @@ public class SystemActions implements CoreStartable {
     private final DisplayTracker mDisplayTracker;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final NotificationShadeWindowController mNotificationShadeController;
+    private final KeyguardStateController mKeyguardStateController;
     private final ShadeController mShadeController;
     private final Lazy<ShadeViewController> mShadeViewController;
     private final StatusBarWindowCallback mNotificationShadeCallback;
@@ -197,13 +196,14 @@ public class SystemActions implements CoreStartable {
     public SystemActions(Context context,
             UserTracker userTracker,
             NotificationShadeWindowController notificationShadeController,
+            KeyguardStateController keyguardStateController,
             ShadeController shadeController,
             Lazy<ShadeViewController> shadeViewController,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Optional<Recents> recentsOptional,
             DisplayTracker displayTracker) {
         mContext = context;
         mUserTracker = userTracker;
+        mKeyguardStateController = keyguardStateController;
         mShadeController = shadeController;
         mShadeViewController = shadeViewController;
         mRecentsOptional = recentsOptional;
@@ -219,7 +219,6 @@ public class SystemActions implements CoreStartable {
                 (keyguardShowing, keyguardOccluded, keyguardGoingAway, bouncerShowing, mDozing,
                         panelExpanded, isDreaming) ->
                         registerOrUnregisterDismissNotificationShadeAction();
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
     }
 
     @Override
@@ -307,8 +306,8 @@ public class SystemActions implements CoreStartable {
         mA11yManager.registerSystemAction(actionBack, SYSTEM_ACTION_ID_BACK);
         mA11yManager.registerSystemAction(actionHome, SYSTEM_ACTION_ID_HOME);
         mA11yManager.registerSystemAction(actionRecents, SYSTEM_ACTION_ID_RECENTS);
-        if (mCentralSurfacesOptionalLazy.get().isPresent()) {
-            // These two actions require the CentralSurfaces instance.
+        if (mShadeController.isShadeEnabled()) {
+            // These two actions require the shade to be enabled.
             mA11yManager.registerSystemAction(actionNotifications, SYSTEM_ACTION_ID_NOTIFICATIONS);
             mA11yManager.registerSystemAction(actionQuickSettings, SYSTEM_ACTION_ID_QUICK_SETTINGS);
         }
@@ -329,13 +328,8 @@ public class SystemActions implements CoreStartable {
     private void registerOrUnregisterDismissNotificationShadeAction() {
         Assert.isMainThread();
 
-        // Saving state in instance variable since this callback is called quite often to avoid
-        // binder calls
-        final Optional<CentralSurfaces> centralSurfacesOptional =
-                mCentralSurfacesOptionalLazy.get();
-        if (centralSurfacesOptional.isPresent()
-                && mShadeViewController.get().isPanelExpanded()
-                && !centralSurfacesOptional.get().isKeyguardShowing()) {
+        if (mShadeViewController.get().isPanelExpanded()
+                && !mKeyguardStateController.isShowing()) {
             if (!mDismissNotificationShadeActionRegistered) {
                 mA11yManager.registerSystemAction(
                         createRemoteAction(
