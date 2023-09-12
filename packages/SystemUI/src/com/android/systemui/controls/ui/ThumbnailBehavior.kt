@@ -84,7 +84,10 @@ class ThumbnailBehavior : Behavior {
                 cvh.uiExecutor.execute {
                     val radius = cvh.context.getResources()
                         .getDimensionPixelSize(R.dimen.control_corner_radius).toFloat()
-                    clipLayer.setDrawable(CornerDrawable(drawable, radius))
+                    // TODO(b/290037843): Add a placeholder
+                    drawable?.let {
+                        clipLayer.drawable = CornerDrawable(it, radius)
+                    }
                     clipLayer.setColorFilter(BlendModeColorFilter(cvh.context.resources
                         .getColor(R.color.control_thumbnail_tint), BlendMode.LUMINOSITY))
                     cvh.applyRenderInfo(enabled, colorOffset)
