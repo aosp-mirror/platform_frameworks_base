@@ -70,7 +70,7 @@ final class InputMethodBindingController {
     @NonNull private final WindowManagerInternal mWindowManagerInternal;
 
     @GuardedBy("ImfLock.class") private long mLastBindTime;
-    @GuardedBy("ImfLock.class") private boolean mHasConnection;
+    @GuardedBy("ImfLock.class") private boolean mHasMainConnection;
     @GuardedBy("ImfLock.class") @Nullable private String mCurId;
     @GuardedBy("ImfLock.class") @Nullable private String mSelectedMethodId;
     @GuardedBy("ImfLock.class") @Nullable private Intent mCurIntent;
@@ -137,8 +137,8 @@ final class InputMethodBindingController {
      * a service (whether or not we have gotten its IBinder back yet).
      */
     @GuardedBy("ImfLock.class")
-    boolean hasConnection() {
-        return mHasConnection;
+    boolean hasMainConnection() {
+        return mHasMainConnection;
     }
 
     /**
@@ -369,7 +369,7 @@ final class InputMethodBindingController {
             unbindVisibleConnection();
         }
 
-        if (hasConnection()) {
+        if (hasMainConnection()) {
             unbindMainConnection();
         }
 
@@ -464,7 +464,7 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class")
     private void unbindMainConnection() {
         mContext.unbindService(mMainConnection);
-        mHasConnection = false;
+        mHasMainConnection = false;
     }
 
     @GuardedBy("ImfLock.class")
@@ -485,8 +485,9 @@ final class InputMethodBindingController {
 
     @GuardedBy("ImfLock.class")
     private boolean bindCurrentInputMethodServiceMainConnection() {
-        mHasConnection = bindCurrentInputMethodService(mMainConnection, mImeConnectionBindFlags);
-        return mHasConnection;
+        mHasMainConnection = bindCurrentInputMethodService(mMainConnection,
+                mImeConnectionBindFlags);
+        return mHasMainConnection;
     }
 
     /**
@@ -499,7 +500,7 @@ final class InputMethodBindingController {
     void setCurrentMethodVisible() {
         if (mCurMethod != null) {
             if (DEBUG) Slog.d(TAG, "setCurrentMethodVisible: mCurToken=" + mCurToken);
-            if (hasConnection() && !isVisibleBound()) {
+            if (hasMainConnection() && !isVisibleBound()) {
                 mVisibleBound = bindCurrentInputMethodService(mVisibleConnection,
                         IME_VISIBLE_BIND_FLAGS);
             }
@@ -507,7 +508,7 @@ final class InputMethodBindingController {
         }
 
         // No IME is currently connected. Reestablish the main connection.
-        if (!hasConnection()) {
+        if (!hasMainConnection()) {
             if (DEBUG) {
                 Slog.d(TAG, "Cannot show input: no IME bound. Rebinding.");
             }
@@ -528,7 +529,7 @@ final class InputMethodBindingController {
             bindCurrentInputMethodServiceMainConnection();
         } else {
             if (DEBUG) {
-                Slog.d(TAG, "Can't show input: connection = " + mHasConnection + ", time = "
+                Slog.d(TAG, "Can't show input: connection = " + mHasMainConnection + ", time = "
                         + (TIME_TO_RECONNECT - bindingDuration));
             }
         }
