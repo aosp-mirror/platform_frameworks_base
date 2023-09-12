@@ -1,0 +1,8 @@
+package: "com.android.text.flags"
+
+flag {
+  name: "fix_double_underline"
+  namespace: "text"
+  description: "Feature flag for fixing double underline because of the multiple font used in the single line."
+  bug: "297336724"
+}
