@@ -45,6 +45,7 @@ public class AospPolicyModule {
             BroadcastDispatcher broadcastDispatcher,
             DemoModeController demoModeController,
             DumpManager dumpManager,
+            BatteryControllerLogger logger,
             @Main Handler mainHandler,
             @Background Handler bgHandler) {
         BatteryController bC = new BatteryControllerImpl(
@@ -54,6 +55,7 @@ public class AospPolicyModule {
                 broadcastDispatcher,
                 demoModeController,
                 dumpManager,
+                logger,
                 mainHandler,
                 bgHandler);
         bC.init();
