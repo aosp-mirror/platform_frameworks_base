@@ -624,7 +624,7 @@ final class DevicePolicyEngine {
     }
 
     /**
-     * Retrieves the global policy set by the admin for the provided {@code policyDefinition} and
+     * Retrieves the global policy set by the admin for the provided {@code policyDefinition}
      * if one was set, otherwise returns {@code null}.
      */
     @Nullable
