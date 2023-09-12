@@ -29,7 +29,10 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.ResultReceiver
 import android.os.UserHandle
+import android.util.Log
+import android.view.View
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityEvent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -40,6 +43,9 @@ import com.android.internal.app.ChooserActivity
 import com.android.internal.app.ResolverListController
 import com.android.internal.app.chooser.NotSelectableTargetInfo
 import com.android.internal.app.chooser.TargetInfo
+import com.android.internal.widget.RecyclerView
+import com.android.internal.widget.RecyclerViewAccessibilityDelegate
+import com.android.internal.widget.ResolverDrawerLayout
 import com.android.systemui.R
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorComponent
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorController
@@ -105,6 +111,10 @@ class MediaProjectionAppSelectorActivity(
 
         super.onCreate(bundle)
         controller.init()
+        // we override AppList's AccessibilityDelegate set in ResolverActivity.onCreate because in
+        // our case this delegate must extend RecyclerViewAccessibilityDelegate, otherwise
+        // RecyclerView scrolling is broken
+        setAppListAccessibilityDelegate()
     }
 
     override fun onStart() {
@@ -277,6 +287,8 @@ class MediaProjectionAppSelectorActivity(
         recentsViewController.createView(parent)
 
     companion object {
+        const val TAG = "MediaProjectionAppSelectorActivity"
+
         /**
          * When EXTRA_CAPTURE_REGION_RESULT_RECEIVER is passed as intent extra the activity will
          * send the [CaptureRegion] to the result receiver instead of returning media projection
@@ -311,6 +323,44 @@ class MediaProjectionAppSelectorActivity(
                     PROFILE_WORK
                 }
             putExtra(EXTRA_SELECTED_PROFILE, selectedProfile)
+        }
+    }
+
+    private fun setAppListAccessibilityDelegate() {
+        val rdl = requireViewById<ResolverDrawerLayout>(com.android.internal.R.id.contentPanel)
+        for (i in 0 until mMultiProfilePagerAdapter.count) {
+            val list =
+                mMultiProfilePagerAdapter
+                    .getItem(i)
+                    .rootView
+                    .findViewById<View>(com.android.internal.R.id.resolver_list)
+            if (list == null || list !is RecyclerView) {
+                Log.wtf(TAG, "MediaProjection only supports RecyclerView")
+            } else {
+                list.accessibilityDelegate = RecyclerViewExpandingAccessibilityDelegate(rdl, list)
+            }
+        }
+    }
+
+    /**
+     * An a11y delegate propagating all a11y events to [AppListAccessibilityDelegate] so that it can
+     * expand drawer when needed. It needs to extend [RecyclerViewAccessibilityDelegate] because
+     * that superclass handles RecyclerView scrolling while using a11y services.
+     */
+    private class RecyclerViewExpandingAccessibilityDelegate(
+        rdl: ResolverDrawerLayout,
+        view: RecyclerView
+    ) : RecyclerViewAccessibilityDelegate(view) {
+
+        private val delegate = AppListAccessibilityDelegate(rdl)
+
+        override fun onRequestSendAccessibilityEvent(
+            host: ViewGroup,
+            child: View,
+            event: AccessibilityEvent
+        ): Boolean {
+            super.onRequestSendAccessibilityEvent(host, child, event)
+            return delegate.onRequestSendAccessibilityEvent(host, child, event)
         }
     }
 }
