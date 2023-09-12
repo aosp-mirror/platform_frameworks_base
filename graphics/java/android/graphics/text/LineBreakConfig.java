@@ -16,6 +16,9 @@
 
 package android.graphics.text;
 
+import static com.android.text.flags.Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +35,56 @@ import java.util.Objects;
  * line-break property</a> for more information.
  */
 public final class LineBreakConfig {
+
+    /**
+     * No hyphenation preference is specified.
+     *
+     * This is a special value of hyphenation preference indicating no hyphenation preference is
+     * specified. When overriding a {@link LineBreakConfig} with another {@link LineBreakConfig}
+     * with {@link Builder#merge(LineBreakConfig)} function, the hyphenation preference of
+     * overridden config will be kept if the hyphenation preference of overriding config is
+     * {@link #HYPHENATION_UNSPECIFIED}.
+     *
+     * <pre>
+     *     val override = LineBreakConfig.Builder()
+     *          .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE)
+     *          .build();  // UNSPECIFIED if no setHyphenation is called.
+     *     val config = LineBreakConfig.Builder()
+     *          .setHyphenation(LineBreakConfig.HYPHENATION_DISABLED)
+     *          .merge(override)
+     *          .build()
+     *     // Here, config has HYPHENATION_DISABLED for line break config and
+     *     // LINE_BREAK_WORD_STYLE_PHRASE for line break word style.
+     * </pre>
+     *
+     * This value is resolved to {@link #HYPHENATION_ENABLED} if this value is used for text
+     * layout/rendering.
+     */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    public static final int HYPHENATION_UNSPECIFIED = -1;
+
+    /**
+     * The hyphenation is disabled.
+     */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    public static final int HYPHENATION_DISABLED = 0;
+
+    /**
+     * The hyphenation is enabled.
+     *
+     * Note: Even if the hyphenation is enabled with a line break strategy
+     * {@link LineBreaker#BREAK_STRATEGY_SIMPLE}, the hyphenation will not be performed unless a
+     * single word cannot meet width constraints.
+     */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    public static final int HYPHENATION_ENABLED = 1;
+
+    /** @hide */
+    @IntDef(prefix = { "HYPHENATION_" }, value = {
+            HYPHENATION_UNSPECIFIED, HYPHENATION_ENABLED, HYPHENATION_DISABLED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Hyphenation {}
 
     /**
      * No line break style is specified.
@@ -147,6 +200,8 @@ public final class LineBreakConfig {
         private @LineBreakWordStyle int mLineBreakWordStyle =
                 LineBreakConfig.LINE_BREAK_WORD_STYLE_UNSPECIFIED;
 
+        private @Hyphenation int mHyphenation = LineBreakConfig.HYPHENATION_UNSPECIFIED;
+
         /**
          * Builder constructor.
          */
@@ -188,6 +243,9 @@ public final class LineBreakConfig {
             if (config.mLineBreakWordStyle != LINE_BREAK_WORD_STYLE_UNSPECIFIED) {
                 mLineBreakWordStyle = config.mLineBreakWordStyle;
             }
+            if (config.mHyphenation != HYPHENATION_UNSPECIFIED) {
+                mHyphenation = config.mHyphenation;
+            }
             return this;
         }
 
@@ -201,9 +259,11 @@ public final class LineBreakConfig {
             if (config == null) {
                 mLineBreakStyle = LINE_BREAK_STYLE_UNSPECIFIED;
                 mLineBreakWordStyle = LINE_BREAK_WORD_STYLE_UNSPECIFIED;
+                mHyphenation = HYPHENATION_UNSPECIFIED;
             } else {
                 mLineBreakStyle = config.mLineBreakStyle;
                 mLineBreakWordStyle = config.mLineBreakWordStyle;
+                mHyphenation = config.mHyphenation;
             }
             return this;
         }
@@ -214,6 +274,11 @@ public final class LineBreakConfig {
          * Note: different from {@link #merge(LineBreakConfig)} if this function is called with
          * {@link #LINE_BREAK_STYLE_UNSPECIFIED}, the line break style is reset to
          * {@link #LINE_BREAK_STYLE_UNSPECIFIED}.
+         *
+         * @see <a href="https://unicode.org/reports/tr35/#UnicodeLineBreakStyleIdentifier">
+         *     Unicode Line Break Style Identifier</a>
+         * @see <a href="https://drafts.csswg.org/css-text/#line-break-property">
+         *     CSS Line Break Property</a>
          *
          * @param lineBreakStyle The new line-break style.
          * @return This {@code Builder}.
@@ -230,11 +295,37 @@ public final class LineBreakConfig {
          * with {@link #LINE_BREAK_WORD_STYLE_UNSPECIFIED}, the line break style is reset to
          * {@link #LINE_BREAK_WORD_STYLE_UNSPECIFIED}.
          *
+         * @see <a href="https://unicode.org/reports/tr35/#UnicodeLineBreakWordIdentifier">
+         *     Unicode Line Break Word Identifier</a>
+         * @see <a href="https://drafts.csswg.org/css-text/#word-break-property">
+         *     CSS Word Break Property</a>
+         *
          * @param lineBreakWordStyle The new line-break word style.
          * @return This {@code Builder}.
          */
         public @NonNull Builder setLineBreakWordStyle(@LineBreakWordStyle int lineBreakWordStyle) {
             mLineBreakWordStyle = lineBreakWordStyle;
+            return this;
+        }
+
+        /**
+         * Sets the hyphenation preference
+         *
+         * Note: Even if the {@link LineBreakConfig#HYPHENATION_ENABLED} is specified, the
+         * hyphenation will not be performed if the {@link android.widget.TextView} or underlying
+         * {@link android.text.StaticLayout}, {@link LineBreaker} are configured with
+         * {@link LineBreaker#HYPHENATION_FREQUENCY_NONE}.
+         *
+         * Note: Even if the hyphenation is enabled with a line break strategy
+         * {@link LineBreaker#BREAK_STRATEGY_SIMPLE}, the hyphenation will not be performed unless a
+         * single word cannot meet width constraints.
+         *
+         * @param hyphenation The hyphenation preference.
+         * @return This {@code Builder}.
+         */
+        @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+        public @NonNull Builder setHyphenation(@Hyphenation int hyphenation) {
+            mHyphenation = hyphenation;
             return this;
         }
 
@@ -247,7 +338,7 @@ public final class LineBreakConfig {
          * @return The {@code LineBreakConfig} instance.
          */
         public @NonNull LineBreakConfig build() {
-            return new LineBreakConfig(mLineBreakStyle, mLineBreakWordStyle);
+            return new LineBreakConfig(mLineBreakStyle, mLineBreakWordStyle, mHyphenation);
         }
     }
 
@@ -275,6 +366,7 @@ public final class LineBreakConfig {
 
     private final @LineBreakStyle int mLineBreakStyle;
     private final @LineBreakWordStyle int mLineBreakWordStyle;
+    private final @Hyphenation int mHyphenation;
 
     /**
      * Constructor with line-break parameters.
@@ -283,9 +375,11 @@ public final class LineBreakConfig {
      * {@code LineBreakConfig} instance.
      */
     private LineBreakConfig(@LineBreakStyle int lineBreakStyle,
-            @LineBreakWordStyle int lineBreakWordStyle) {
+            @LineBreakWordStyle int lineBreakWordStyle,
+            @Hyphenation int hyphenation) {
         mLineBreakStyle = lineBreakStyle;
         mLineBreakWordStyle = lineBreakWordStyle;
+        mHyphenation = hyphenation;
     }
 
     /**
@@ -340,6 +434,34 @@ public final class LineBreakConfig {
     }
 
     /**
+     * Returns a hyphenation preference.
+     *
+     * @return A hyphenation preference.
+     */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    public @Hyphenation  int getHyphenation() {
+        return mHyphenation;
+    }
+
+    /**
+     * Returns a hyphenation preference.
+     *
+     * This method never returns {@link #HYPHENATION_UNSPECIFIED}.
+     *
+     * @return A hyphenation preference.
+     * @hide
+     */
+    public static @Hyphenation int getResolvedHyphenation(
+            @Nullable LineBreakConfig config) {
+        if (config == null) {
+            return HYPHENATION_ENABLED;
+        }
+        return config.mHyphenation == HYPHENATION_UNSPECIFIED
+                ? HYPHENATION_ENABLED : config.mHyphenation;
+    }
+
+
+    /**
      * Generates a new {@link LineBreakConfig} instance merged with given {@code config}.
      *
      * If values of passing {@code config} are unspecified, the original values are kept. For
@@ -366,7 +488,9 @@ public final class LineBreakConfig {
                 config.mLineBreakStyle == LINE_BREAK_STYLE_UNSPECIFIED
                         ? mLineBreakStyle : config.mLineBreakStyle,
                 config.mLineBreakWordStyle == LINE_BREAK_WORD_STYLE_UNSPECIFIED
-                        ? mLineBreakWordStyle : config.mLineBreakWordStyle);
+                        ? mLineBreakWordStyle : config.mLineBreakWordStyle,
+                config.mHyphenation == HYPHENATION_UNSPECIFIED
+                        ? mHyphenation : config.mHyphenation);
     }
 
     @Override
@@ -376,12 +500,13 @@ public final class LineBreakConfig {
         if (!(o instanceof LineBreakConfig)) return false;
         LineBreakConfig that = (LineBreakConfig) o;
         return (mLineBreakStyle == that.mLineBreakStyle)
-                && (mLineBreakWordStyle == that.mLineBreakWordStyle);
+                && (mLineBreakWordStyle == that.mLineBreakWordStyle)
+                && (mHyphenation == that.mHyphenation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mLineBreakStyle, mLineBreakWordStyle);
+        return Objects.hash(mLineBreakStyle, mLineBreakWordStyle, mHyphenation);
     }
 
     @Override
@@ -389,6 +514,7 @@ public final class LineBreakConfig {
         return "LineBreakConfig{"
                 + "mLineBreakStyle=" + mLineBreakStyle
                 + ", mLineBreakWordStyle=" + mLineBreakWordStyle
+                + ", mHyphenation= " + mHyphenation
                 + '}';
     }
 }
