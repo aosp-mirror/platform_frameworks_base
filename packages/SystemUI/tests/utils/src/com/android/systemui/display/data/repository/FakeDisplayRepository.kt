@@ -22,11 +22,19 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import org.mockito.Mockito.`when` as whenever
 
 /** Creates a mock display. */
-fun display(type: Int, flags: Int = 0, id: Int = 0): Display {
+fun display(
+    type: Int,
+    flags: Int = 0,
+    id: Int = 0,
+    state: Int? = null,
+): Display {
     return mock {
         whenever(this.displayId).thenReturn(id)
         whenever(this.type).thenReturn(type)
         whenever(this.flags).thenReturn(flags)
+        if (state != null) {
+            whenever(this.state).thenReturn(state)
+        }
     }
 }
 
@@ -35,7 +43,7 @@ fun createPendingDisplay(id: Int = 0): DisplayRepository.PendingDisplay =
     mock<DisplayRepository.PendingDisplay> { whenever(this.id).thenReturn(id) }
 
 /** Fake [DisplayRepository] implementation for testing. */
-class FakeDisplayRepository : DisplayRepository {
+class FakeDisplayRepository() : DisplayRepository {
     private val flow = MutableSharedFlow<Set<Display>>()
     private val pendingDisplayFlow = MutableSharedFlow<DisplayRepository.PendingDisplay?>()
 
@@ -50,4 +58,8 @@ class FakeDisplayRepository : DisplayRepository {
 
     override val pendingDisplay: Flow<DisplayRepository.PendingDisplay?>
         get() = pendingDisplayFlow
+
+    private val _displayChangeEvent = MutableSharedFlow<Int>()
+    override val displayChangeEvent: Flow<Int> = _displayChangeEvent
+    suspend fun emitDisplayChangeEvent(displayId: Int) = _displayChangeEvent.emit(displayId)
 }

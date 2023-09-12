@@ -29,6 +29,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.display.data.DisplayEvent
 import com.android.systemui.util.Compile
 import com.android.systemui.util.traceSection
 import javax.inject.Inject
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -48,7 +50,13 @@ import kotlinx.coroutines.flow.stateIn
 
 /** Provides a [Flow] of [Display] as returned by [DisplayManager]. */
 interface DisplayRepository {
-    /** Provides a nullable set of displays. */
+    /** Display change event indicating a change to the given displayId has occurred. */
+    val displayChangeEvent: Flow<Int>
+
+    /**
+     * Provides a nullable set of displays. Updates when new displays have been added or removed but
+     * not when a display's info has changed.
+     */
     val displays: Flow<Set<Display>>
 
     /**
@@ -86,33 +94,36 @@ constructor(
     @Application applicationScope: CoroutineScope,
     @Background backgroundCoroutineDispatcher: CoroutineDispatcher
 ) : DisplayRepository {
-
     // Displays are enabled only after receiving them in [onDisplayAdded]
-    private val enabledDisplays: StateFlow<Set<Display>> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : DisplayListener {
-                        override fun onDisplayAdded(displayId: Int) {
-                            trySend(getDisplays())
-                        }
+    private val allDisplayEvents: Flow<DisplayEvent> = conflatedCallbackFlow {
+        val callback =
+            object : DisplayListener {
+                override fun onDisplayAdded(displayId: Int) {
+                    trySend(DisplayEvent.Added(displayId))
+                }
 
-                        override fun onDisplayRemoved(displayId: Int) {
-                            trySend(getDisplays())
-                        }
+                override fun onDisplayRemoved(displayId: Int) {
+                    trySend(DisplayEvent.Removed(displayId))
+                }
 
-                        override fun onDisplayChanged(displayId: Int) {
-                            trySend(getDisplays())
-                        }
-                    }
-                displayManager.registerDisplayListener(
-                    callback,
-                    backgroundHandler,
-                    EVENT_FLAG_DISPLAY_ADDED or
-                        EVENT_FLAG_DISPLAY_CHANGED or
-                        EVENT_FLAG_DISPLAY_REMOVED,
-                )
-                awaitClose { displayManager.unregisterDisplayListener(callback) }
+                override fun onDisplayChanged(displayId: Int) {
+                    trySend(DisplayEvent.Changed(displayId))
+                }
             }
+        displayManager.registerDisplayListener(
+            callback,
+            backgroundHandler,
+            EVENT_FLAG_DISPLAY_ADDED or EVENT_FLAG_DISPLAY_CHANGED or EVENT_FLAG_DISPLAY_REMOVED,
+        )
+        awaitClose { displayManager.unregisterDisplayListener(callback) }
+    }
+
+    override val displayChangeEvent: Flow<Int> =
+        allDisplayEvents.filter { it is DisplayEvent.Changed }.map { it.displayId }
+
+    private val enabledDisplays =
+        allDisplayEvents
+            .map { getDisplays() }
             .flowOn(backgroundCoroutineDispatcher)
             .stateIn(
                 applicationScope,

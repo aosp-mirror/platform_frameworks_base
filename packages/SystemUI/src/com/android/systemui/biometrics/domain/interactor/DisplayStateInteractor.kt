@@ -18,13 +18,16 @@ package com.android.systemui.biometrics.domain.interactor
 
 import android.content.Context
 import android.content.res.Configuration
+import android.view.Display
 import com.android.systemui.biometrics.data.repository.RearDisplayStateRepository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.unfold.compat.ScreenSizeFoldProvider
 import com.android.systemui.unfold.updates.FoldProvider
+import com.android.systemui.util.kotlin.sample
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -32,10 +35,14 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Aggregates display state information. */
 interface DisplayStateInteractor {
+    /** Whether the default display is currently off. */
+    val isDefaultDisplayOff: Flow<Boolean>
 
     /** Whether the device is currently in rear display mode. */
     val isInRearDisplayMode: StateFlow<Boolean>
@@ -55,6 +62,7 @@ constructor(
     @Application context: Context,
     @Main mainExecutor: Executor,
     rearDisplayStateRepository: RearDisplayStateRepository,
+    displayRepository: DisplayRepository,
 ) : DisplayStateInteractor {
     private var screenSizeFoldProvider: ScreenSizeFoldProvider = ScreenSizeFoldProvider(context)
 
@@ -95,6 +103,17 @@ constructor(
     override fun onConfigurationChanged(newConfig: Configuration) {
         screenSizeFoldProvider.onConfigurationChange(newConfig)
     }
+
+    private val defaultDisplay =
+        displayRepository.displays.map { displays ->
+            displays.firstOrNull { it.displayId == Display.DEFAULT_DISPLAY }
+        }
+
+    override val isDefaultDisplayOff =
+        displayRepository.displayChangeEvent
+            .filter { it == Display.DEFAULT_DISPLAY }
+            .sample(defaultDisplay)
+            .map { it?.state == Display.STATE_OFF }
 
     companion object {
         private const val TAG = "DisplayStateInteractor"
