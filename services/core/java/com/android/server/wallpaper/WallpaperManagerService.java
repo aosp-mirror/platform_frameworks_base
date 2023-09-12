@@ -326,9 +326,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             if (DEBUG) {
                                 Slog.d(TAG, "publish system wallpaper changed!");
                             }
-                            if (localSync != null) {
-                                localSync.complete();
-                            }
                             notifyWallpaperChanged(wallpaper);
                         }
                     };
@@ -336,7 +333,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     // If this was the system wallpaper, rebind...
                     bindWallpaperComponentLocked(mImageWallpaper, true, false, wallpaper,
                             callback);
-                    notifyColorsWhich |= FLAG_SYSTEM;
+                    notifyColorsWhich |= wallpaper.mWhich;
                 }
 
                 if (lockWallpaperChanged) {
@@ -349,9 +346,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         public void sendResult(Bundle data) throws RemoteException {
                             if (DEBUG) {
                                 Slog.d(TAG, "publish lock wallpaper changed!");
-                            }
-                            if (localSync != null) {
-                                localSync.complete();
                             }
                             notifyWallpaperChanged(wallpaper);
                         }
@@ -377,9 +371,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
 
                 saveSettingsLocked(wallpaper.userId);
-                // Notify the client immediately if only lockscreen wallpaper changed.
-                if (lockWallpaperChanged && !sysWallpaperChanged) {
-                    notifyWallpaperChanged(wallpaper);
+                if ((sysWallpaperChanged || lockWallpaperChanged) && localSync != null) {
+                    localSync.complete();
                 }
             }
 
@@ -1428,7 +1421,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             lockWp.connection.mWallpaper = lockWp;
                             mOriginalSystem.mWhich = FLAG_LOCK;
                             updateEngineFlags(mOriginalSystem);
-                            notifyWallpaperColorsChanged(lockWp, FLAG_LOCK);
                         } else {
                             // Failed rename, use current system wp for both
                             if (DEBUG) {
@@ -1448,7 +1440,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         updateEngineFlags(mOriginalSystem);
                         mLockWallpaperMap.put(mNewWallpaper.userId, mOriginalSystem);
                         mLastLockWallpaper = mOriginalSystem;
-                        notifyWallpaperColorsChanged(mOriginalSystem, FLAG_LOCK);
                     }
                 } else if (mNewWallpaper.mWhich == FLAG_LOCK) {
                     // New wp is lock only, so old system+lock is now system only
@@ -1462,10 +1453,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     }
                 }
             }
-
-            synchronized (mLock) {
-                saveSettingsLocked(mNewWallpaper.userId);
-            }
+            saveSettingsLocked(mNewWallpaper.userId);
 
             if (DEBUG) {
                 Slog.v(TAG, "--- wallpaper changed --");
@@ -3345,7 +3333,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         if (DEBUG) {
                             Slog.d(TAG, "publish system wallpaper changed!");
                         }
-                        liveSync.complete();
                     }
                 };
 
@@ -3401,6 +3388,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         }
                         mLockWallpaperMap.remove(newWallpaper.userId);
                     }
+                    if (liveSync != null) liveSync.complete();
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -3519,6 +3507,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
         // Has the component changed?
         if (!force && changingToSame(componentName, wallpaper)) {
+            try {
+                if (reply != null) reply.sendResult(null);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to send callback", e);
+            }
             return true;
         }
 
