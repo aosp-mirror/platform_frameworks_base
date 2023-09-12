@@ -381,6 +381,36 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun showSecurityScreen_oneHandedMode_flagEnabled_oneHandedMode_simpin() {
+        testableResources.addOverride(R.bool.can_use_one_handed_bouncer, true)
+        setupGetSecurityView(SecurityMode.SimPin)
+        verify(view)
+            .initMode(
+                eq(KeyguardSecurityContainer.MODE_ONE_HANDED),
+                eq(globalSettings),
+                eq(falsingManager),
+                eq(userSwitcherController),
+                any(),
+                eq(falsingA11yDelegate)
+            )
+    }
+
+    @Test
+    fun showSecurityScreen_oneHandedMode_flagEnabled_oneHandedMode_simpuk() {
+        testableResources.addOverride(R.bool.can_use_one_handed_bouncer, true)
+        setupGetSecurityView(SecurityMode.SimPuk)
+        verify(view)
+            .initMode(
+                eq(KeyguardSecurityContainer.MODE_ONE_HANDED),
+                eq(globalSettings),
+                eq(falsingManager),
+                eq(userSwitcherController),
+                any(),
+                eq(falsingA11yDelegate)
+            )
+    }
+
+    @Test
     fun showSecurityScreen_twoHandedMode_flagEnabled_noOneHandedMode() {
         testableResources.addOverride(R.bool.can_use_one_handed_bouncer, true)
         setupGetSecurityView(SecurityMode.Password)
