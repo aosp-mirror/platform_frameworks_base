@@ -327,17 +327,13 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             return features;
         }
 
-        // We will transform the feature bounds to the Activity window, so using the rotation
-        // from the same source (WindowConfiguration) to make sure they are synchronized.
-        final int rotation = windowConfiguration.getDisplayRotation();
-
         for (CommonFoldingFeature baseFeature : storedFeatures) {
             Integer state = convertToExtensionState(baseFeature.getState());
             if (state == null) {
                 continue;
             }
             Rect featureRect = baseFeature.getRect();
-            rotateRectToDisplayRotation(displayId, rotation, featureRect);
+            rotateRectToDisplayRotation(displayId, featureRect);
             transformToWindowSpaceRect(windowConfiguration, featureRect);
 
             if (isZero(featureRect)) {
