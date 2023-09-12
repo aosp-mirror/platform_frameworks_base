@@ -65,6 +65,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardClockSwitchController;
@@ -271,6 +272,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected KeyguardIndicationController mKeyguardIndicationController;
     @Mock protected FragmentService mFragmentService;
     @Mock protected FragmentHostManager mFragmentHostManager;
+    @Mock protected IStatusBarService mStatusBarService;
     @Mock protected NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock protected RecordingController mRecordingController;
     @Mock protected LockscreenGestureLogger mLockscreenGestureLogger;
@@ -621,6 +623,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mNavigationBarController,
                 mQsController,
                 mFragmentService,
+                mStatusBarService,
                 mContentResolver,
                 mShadeHeaderController,
                 mScreenOffAnimationController,

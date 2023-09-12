@@ -97,6 +97,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.SystemBarUtils;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.ActiveUnlockConfig;
 import com.android.keyguard.FaceAuthApiRequestReason;
@@ -336,6 +337,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponentFactory;
     private final KeyguardStatusBarViewComponent.Factory mKeyguardStatusBarViewComponentFactory;
     private final FragmentService mFragmentService;
+    private final IStatusBarService mStatusBarService;
     private final ScrimController mScrimController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final TapAgainViewController mTapAgainViewController;
@@ -744,6 +746,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             NavigationBarController navigationBarController,
             QuickSettingsController quickSettingsController,
             FragmentService fragmentService,
+            IStatusBarService statusBarService,
             ContentResolver contentResolver,
             ShadeHeaderController shadeHeaderController,
             ScreenOffAnimationController screenOffAnimationController,
@@ -874,6 +877,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardQsUserSwitchComponentFactory = keyguardQsUserSwitchComponentFactory;
         mKeyguardUserSwitcherComponentFactory = keyguardUserSwitcherComponentFactory;
         mFragmentService = fragmentService;
+        mStatusBarService = statusBarService;
         mSettingsChangeObserver = new SettingsChangeObserver(handler);
         mSplitShadeEnabled =
                 LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
@@ -3036,7 +3040,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         mHeadsUpManager = headsUpManager;
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
-        mHeadsUpTouchHelper = new HeadsUpTouchHelper(headsUpManager,
+        mHeadsUpTouchHelper = new HeadsUpTouchHelper(
+                headsUpManager,
+                mStatusBarService,
                 mNotificationStackScrollLayoutController.getHeadsUpCallback(),
                 new HeadsUpNotificationViewControllerImpl());
     }
@@ -5317,11 +5323,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         @Override
         public void startExpand(float x, float y, boolean startTracking, float expandedHeight) {
             startExpandMotion(x, y, startTracking, expandedHeight);
-        }
-
-        @Override
-        public void clearNotificationEffects() {
-            mCentralSurfaces.clearNotificationEffects();
         }
     }
 

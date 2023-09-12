@@ -303,8 +303,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void awakenDreams();
 
-    void clearNotificationEffects();
-
     boolean isBouncerShowing();
 
     boolean isBouncerShowingScrimmed();

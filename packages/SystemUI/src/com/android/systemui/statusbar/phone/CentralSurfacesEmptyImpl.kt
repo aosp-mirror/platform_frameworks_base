@@ -85,7 +85,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun shouldIgnoreTouch() = false
     override fun isDeviceInteractive() = false
     override fun awakenDreams() {}
-    override fun clearNotificationEffects() {}
     override fun isBouncerShowing() = false
     override fun isBouncerShowingScrimmed() = false
     override fun isBouncerShowingOverDream() = false
