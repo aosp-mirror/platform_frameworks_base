@@ -151,6 +151,27 @@
     <integer name="config_timeout_to_receive_delivered_ack_millis">300000</integer>
     <java-symbol type="integer" name="config_timeout_to_receive_delivered_ack_millis" />
 
+    <!-- The time duration in millis that the satellite will stay at listening state to wait for the
+         next incoming page before disabling listening and moving to IDLE state. This timeout
+         duration is used when transitioning from sending state to listening state.
+         -->
+    <integer name="config_satellite_stay_at_listening_from_sending_millis">180000</integer>
+    <java-symbol type="integer" name="config_satellite_stay_at_listening_from_sending_millis" />
+
+    <!-- The time duration in millis that the satellite will stay at listening state to wait for the
+         next incoming page before disabling listening and moving to IDLE state. This timeout
+         duration is used when transitioning from receiving state to listening state.
+         -->
+    <integer name="config_satellite_stay_at_listening_from_receiving_millis">30000</integer>
+    <java-symbol type="integer" name="config_satellite_stay_at_listening_from_receiving_millis" />
+
+    <!-- The time duration in millis after which cellular scanning will be enabled and satellite
+         will move to IDLE state. This timeout duration is used for satellite with NB IOT radio
+         technologies.
+         -->
+    <integer name="config_satellite_nb_iot_inactivity_timeout_millis">180000</integer>
+    <java-symbol type="integer" name="config_satellite_nb_iot_inactivity_timeout_millis" />
+
     <!-- Telephony config for services supported by satellite providers. The format of each config
          string in the array is as follows: "PLMN_1:service_1,service_2,..."
          where PLMN is the satellite PLMN of a provider and service is an integer with the
