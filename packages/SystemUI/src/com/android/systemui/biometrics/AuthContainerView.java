@@ -19,7 +19,6 @@ package com.android.systemui.biometrics;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_BIOMETRIC_PROMPT_TRANSITION;
 
 import android.animation.Animator;
@@ -70,7 +69,7 @@ import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController.ScaleFactorProvider;
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
-import com.android.systemui.biometrics.domain.model.BiometricModalities;
+import com.android.systemui.biometrics.shared.model.BiometricModalities;
 import com.android.systemui.biometrics.ui.BiometricPromptLayout;
 import com.android.systemui.biometrics.ui.CredentialView;
 import com.android.systemui.biometrics.ui.binder.BiometricViewBinder;

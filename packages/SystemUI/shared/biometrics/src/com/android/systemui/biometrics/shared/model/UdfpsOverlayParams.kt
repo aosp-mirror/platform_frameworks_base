@@ -1,4 +1,4 @@
-package com.android.settingslib.udfps
+package com.android.systemui.biometrics.shared.model
 
 import android.graphics.Rect
 import android.view.Surface

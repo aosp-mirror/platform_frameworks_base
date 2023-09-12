@@ -21,7 +21,7 @@ import android.util.RotationUtils
 import android.view.MotionEvent
 import android.view.MotionEvent.INVALID_POINTER_ID
 import android.view.Surface
-import com.android.settingslib.udfps.UdfpsOverlayParams
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.biometrics.udfps.TouchProcessorResult.Failure
 import com.android.systemui.biometrics.udfps.TouchProcessorResult.ProcessedTouch
 import com.android.systemui.dagger.SysUISingleton
@@ -41,7 +41,6 @@ class SinglePointerTouchProcessor @Inject constructor(val overlapDetector: Overl
         previousPointerOnSensorId: Int,
         overlayParams: UdfpsOverlayParams,
     ): TouchProcessorResult {
-
         fun preprocess(): PreprocessedTouch {
             val touchData = List(event.pointerCount) { event.normalize(it, overlayParams) }
             val pointersOnSensor =

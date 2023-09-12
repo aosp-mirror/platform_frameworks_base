@@ -16,7 +16,7 @@
 
 package com.android.systemui.biometrics.dagger
 
-import com.android.settingslib.udfps.UdfpsUtils
+import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.data.repository.FacePropertyRepositoryImpl
 import com.android.systemui.biometrics.data.repository.FaceSettingsRepository
@@ -33,10 +33,10 @@ import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractorImpl
-import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractor
-import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
+import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractor
+import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds

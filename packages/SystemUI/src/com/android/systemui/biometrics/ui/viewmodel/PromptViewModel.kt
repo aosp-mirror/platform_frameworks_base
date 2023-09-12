@@ -22,7 +22,7 @@ import android.view.MotionEvent
 import com.android.systemui.biometrics.AuthBiometricView
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
-import com.android.systemui.biometrics.domain.model.BiometricModalities
+import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.flags.FeatureFlags

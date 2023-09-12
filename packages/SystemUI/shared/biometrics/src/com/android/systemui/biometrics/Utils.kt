@@ -47,12 +47,12 @@ object Utils {
     const val CREDENTIAL_PATTERN = 2
     const val CREDENTIAL_PASSWORD = 3
 
-    /** Base set of layout flags for fingerprint overlay widgets.  */
+    /** Base set of layout flags for fingerprint overlay widgets. */
     const val FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS =
-        (WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-            or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-            or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-            or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+        (WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
 
     @JvmStatic
     fun dpToPixels(context: Context, dp: Float): Float {
@@ -61,9 +61,8 @@ object Utils {
     }
 
     /**
-     * Note: Talkback 14.0 has new rate-limitation design to reduce frequency
-     * of TYPE_WINDOW_CONTENT_CHANGED events to once every 30 seconds.
-     * (context: b/281765653#comment18)
+     * Note: Talkback 14.0 has new rate-limitation design to reduce frequency of
+     * TYPE_WINDOW_CONTENT_CHANGED events to once every 30 seconds. (context: b/281765653#comment18)
      * Using {@link View#announceForAccessibility} instead as workaround when sending events
      * exceeding this frequency is required.
      */
@@ -74,8 +73,7 @@ object Utils {
         }
         val event = AccessibilityEvent.obtain()
         event.eventType = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
-        event.contentChangeTypes =
-            AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE
+        event.contentChangeTypes = AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE
         view.sendAccessibilityEventUnchecked(event)
         view.notifySubtreeAccessibilityStateChanged(
             view,
@@ -119,8 +117,8 @@ object Utils {
     @JvmStatic
     fun isSystem(context: Context, clientPackage: String?): Boolean {
         val hasPermission =
-            (context.checkCallingOrSelfPermission(Manifest.permission.USE_BIOMETRIC_INTERNAL)
-                == PackageManager.PERMISSION_GRANTED)
+            (context.checkCallingOrSelfPermission(Manifest.permission.USE_BIOMETRIC_INTERNAL) ==
+                PackageManager.PERMISSION_GRANTED)
         return hasPermission && "android" == clientPackage
     }
 
@@ -134,5 +132,5 @@ object Utils {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(CREDENTIAL_PIN, CREDENTIAL_PATTERN, CREDENTIAL_PASSWORD)
-    internal annotation class CredentialType
+    annotation class CredentialType
 }

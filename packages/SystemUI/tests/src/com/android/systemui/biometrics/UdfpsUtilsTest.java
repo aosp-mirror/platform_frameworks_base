@@ -14,40 +14,45 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.udfps;
+package com.android.systemui.biometrics;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.view.Surface;
 
-import com.android.settingslib.R;
+import androidx.test.filters.SmallTest;
+
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
+import com.android.systemui.shared.biometrics.R;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
-
-@RunWith(RobolectricTestRunner.class)
-public class UdfpsUtilsTest {
+@RunWith(JUnit4.class)
+@SmallTest
+public class UdfpsUtilsTest extends SysuiTestCase {
     @Rule
     public final MockitoRule rule = MockitoJUnit.rule();
-
-    private Context mContext;
     private String[] mTouchHints;
     private UdfpsUtils mUdfpsUtils;
 
     @Before
     public void setUp() {
-        mContext = RuntimeEnvironment.application;
-        mTouchHints = mContext.getResources().getStringArray(
-                R.array.udfps_accessibility_touch_hints);
+        Resources resources = mContext.getResources();
+        mTouchHints = new String[]{
+                resources.getString(R.string.udfps_accessibility_touch_hints_left),
+                resources.getString(R.string.udfps_accessibility_touch_hints_down),
+                resources.getString(R.string.udfps_accessibility_touch_hints_right),
+                resources.getString(R.string.udfps_accessibility_touch_hints_up),
+        };
         mUdfpsUtils = new UdfpsUtils();
     }
 
@@ -86,7 +91,7 @@ public class UdfpsUtilsTest {
 
 
     @Test
-    public void testTouchOutsideAreaNoRotation90Degrees() {
+    public void testTouchOutsideAreaRotation90Degrees() {
         int rotation = Surface.ROTATION_90;
         // touch at 0 degrees -> 90 degrees
         assertThat(
@@ -120,7 +125,7 @@ public class UdfpsUtilsTest {
 
 
     @Test
-    public void testTouchOutsideAreaNoRotation270Degrees() {
+    public void testTouchOutsideAreaRotation270Degrees() {
         int rotation = Surface.ROTATION_270;
         // touch at 0 degrees -> 270 degrees
         assertThat(
