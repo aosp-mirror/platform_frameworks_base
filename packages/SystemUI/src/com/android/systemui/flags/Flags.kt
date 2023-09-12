@@ -746,8 +746,7 @@ object Flags {
     // 3000 - dream
     // TODO(b/285059790) : Tracking Bug
     @JvmField
-    val LOCKSCREEN_WALLPAPER_DREAM_ENABLED =
-        unreleasedFlag(name = "enable_lockscreen_wallpaper_dream", teamfood = true)
+    val LOCKSCREEN_WALLPAPER_DREAM_ENABLED = unreleasedFlag("enable_lockscreen_wallpaper_dream")
 
     // TODO(b/283084712): Tracking Bug
     @JvmField val IMPROVED_HUN_ANIMATIONS = unreleasedFlag("improved_hun_animations")
