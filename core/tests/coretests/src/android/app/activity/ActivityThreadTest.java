@@ -232,15 +232,9 @@ public class ActivityThreadTest {
 
             // Execute a local relaunch item with current scaled config (e.g. simulate recreate),
             // the config should not be scaled again.
-            final Configuration currentConfig = activity.getResources().getConfiguration();
-            final ClientTransaction localTransaction =
-                    newTransaction(activityThread, activity.getActivityToken());
-            localTransaction.addCallback(ActivityRelaunchItem.obtain(
-                    null /* pendingResults */, null /* pendingIntents */, 0 /* configChanges */,
-                    new MergedConfiguration(currentConfig, currentConfig),
-                    true /* preserveWindow */));
             InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                    () -> activityThread.executeTransaction(localTransaction));
+                    () -> activityThread.executeTransaction(
+                            newRelaunchResumeTransaction(activity)));
 
             assertScreenScale(scale, activity, originalActivityConfig, originalActivityMetrics);
         } finally {
@@ -784,8 +778,10 @@ public class ActivityThreadTest {
     }
 
     private static ClientTransaction newRelaunchResumeTransaction(Activity activity) {
+        final Configuration currentConfig = activity.getResources().getConfiguration();
         final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(null,
-                null, 0, new MergedConfiguration(), false /* preserveWindow */);
+                null, 0, new MergedConfiguration(currentConfig, currentConfig),
+                false /* preserveWindow */);
         final ResumeActivityItem resumeStateRequest =
                 ResumeActivityItem.obtain(true /* isForward */,
                         false /* shouldSendCompatFakeFocus*/);
