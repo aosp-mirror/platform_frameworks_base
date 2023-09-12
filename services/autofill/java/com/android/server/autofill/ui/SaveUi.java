@@ -435,7 +435,8 @@ final class SaveUi {
                     }
                     final BatchUpdates batchUpdates = pair.second;
                     // First apply the updates...
-                    final RemoteViews templateUpdates = batchUpdates.getUpdates();
+                    final RemoteViews templateUpdates =
+                            Helper.sanitizeRemoteView(batchUpdates.getUpdates());
                     if (templateUpdates != null) {
                         if (sDebug) Slog.d(TAG, "Applying template updates for batch update #" + i);
                         templateUpdates.reapply(context, customSubtitleView);
