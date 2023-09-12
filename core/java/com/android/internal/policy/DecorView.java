@@ -1123,7 +1123,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 final Insets systemInsets = clearsCompatInsets
                         ? Insets.NONE
                         : Insets.min(insets.getInsets(compatInsetsTypes), stableBarInsets);
-                Log.i("b/297000797", "DecorView#updateColorViews, systemInsets: " + systemInsets);
                 mLastTopInset = systemInsets.top;
                 mLastBottomInset = systemInsets.bottom;
                 mLastRightInset = systemInsets.right;

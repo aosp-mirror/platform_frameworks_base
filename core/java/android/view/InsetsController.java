@@ -1856,8 +1856,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return;
         }
         Rect newFrame = new Rect(mFrame.left, mFrame.bottom - height, mFrame.right, mFrame.bottom);
-        Log.i("b/297000797", "InsetsController#setImeCaptionBarInsetsHeight,"
-                + " height: " + height + " frame: " + mFrame);
         InsetsSource source = mState.peekSource(ID_IME_CAPTION_BAR);
         if (mImeCaptionBarInsetsHeight != height
                 || (source != null && !newFrame.equals(source.getFrame()))) {
