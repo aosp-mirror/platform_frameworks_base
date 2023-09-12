@@ -26,7 +26,6 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
 import static android.content.pm.PackageManager.RESTRICTION_HIDE_NOTIFICATIONS;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
-
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
@@ -381,6 +380,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runWaitForHandler(/* forBackgroundHandler= */ false);
                 case "wait-for-background-handler":
                     return runWaitForHandler(/* forBackgroundHandler= */ true);
+                case "archive":
+                    return runArchive();
+                case "request-unarchive":
+                    return runUnarchive();
                 default: {
                     if (ART_SERVICE_COMMANDS.contains(cmd)) {
                         if (DexOptHelper.useArtService()) {
@@ -4532,6 +4535,105 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
+    private int runArchive() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+                if (userId != UserHandle.USER_ALL && userId != UserHandle.USER_CURRENT) {
+                    UserManagerInternal umi =
+                            LocalServices.getService(UserManagerInternal.class);
+                    UserInfo userInfo = umi.getUserInfo(userId);
+                    if (userInfo == null) {
+                        pw.println("Failure [user " + userId + " doesn't exist]");
+                        return 1;
+                    }
+                }
+            } else {
+                pw.println("Error: Unknown option: " + opt);
+                return 1;
+            }
+        }
+
+        final String packageName = getNextArg();
+        if (packageName == null) {
+            pw.println("Error: package name not specified");
+            return 1;
+        }
+
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_SYSTEM, "runArchive");
+        final LocalIntentReceiver receiver = new LocalIntentReceiver();
+
+        try {
+            mInterface.getPackageInstaller().requestArchive(packageName,
+                    /* callerPackageName= */ "", receiver.getIntentSender(),
+                    new UserHandle(translatedUserId));
+        } catch (Exception e) {
+            pw.println("Failure [" + e.getMessage() + "]");
+            return 1;
+        }
+
+        final Intent result = receiver.getResult();
+        final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                PackageInstaller.STATUS_FAILURE);
+        if (status == PackageInstaller.STATUS_SUCCESS) {
+            pw.println("Success");
+            return 0;
+        } else {
+            pw.println("Failure ["
+                    + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
+            return 1;
+        }
+    }
+
+    private int runUnarchive() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+                if (userId != UserHandle.USER_ALL && userId != UserHandle.USER_CURRENT) {
+                    UserManagerInternal umi =
+                            LocalServices.getService(UserManagerInternal.class);
+                    UserInfo userInfo = umi.getUserInfo(userId);
+                    if (userInfo == null) {
+                        pw.println("Failure [user " + userId + " doesn't exist]");
+                        return 1;
+                    }
+                }
+            } else {
+                pw.println("Error: Unknown option: " + opt);
+                return 1;
+            }
+        }
+
+        final String packageName = getNextArg();
+        if (packageName == null) {
+            pw.println("Error: package name not specified");
+            return 1;
+        }
+
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_SYSTEM, "runArchive");
+
+        try {
+            mInterface.getPackageInstaller().requestUnarchive(packageName,
+                    /* callerPackageName= */ "", new UserHandle(translatedUserId));
+        } catch (Exception e) {
+            pw.println("Failure [" + e.getMessage() + "]");
+            return 1;
+        }
+
+        pw.println("Success");
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -4903,6 +5005,16 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    handler finishes handling all pending messages.");
         pw.println("      --timeout: wait for a given number of milliseconds. If the handler(s)");
         pw.println("        fail to finish before the timeout, the command returns error.");
+        pw.println("");
+        pw.println("  archive [--user USER_ID] PACKAGE ");
+        pw.println("    During the archival process, the apps APKs and cache are removed from the");
+        pw.println("    device while the user data is kept. Options are:");
+        pw.println("      --user: archive the app from the given user.");
+        pw.println("");
+        pw.println("  request-unarchive [--user USER_ID] PACKAGE ");
+        pw.println("    Requests to unarchive a currently archived package by sending a request");
+        pw.println("    to unarchive an app to the responsible installer. Options are:");
+        pw.println("      --user: request unarchival of the app from the given user.");
         pw.println("");
         if (DexOptHelper.useArtService()) {
             printArtServiceHelp();
