@@ -110,7 +110,9 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -121,10 +123,62 @@ import junitparams.Parameters;
 @SmallTest
 @RunWith(JUnitParamsRunner.class)
 public class DisplayModeDirectorTest {
-    // The tolerance within which we consider something approximately equals.
+    public static Collection<Object[]> getAppRequestedSizeTestCases() {
+        return Arrays.asList(new Object[][] {
+                {DEFAULT_MODE_75.getModeId(), Float.POSITIVE_INFINITY,
+                        DEFAULT_MODE_75.getRefreshRate(), Map.of()},
+                {APP_MODE_HIGH_90.getModeId(), Float.POSITIVE_INFINITY,
+                        APP_MODE_HIGH_90.getRefreshRate(),
+                        Map.of(
+                                Vote.PRIORITY_APP_REQUEST_SIZE,
+                                Vote.forSize(APP_MODE_HIGH_90.getPhysicalWidth(),
+                                        APP_MODE_HIGH_90.getPhysicalHeight()),
+                                Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+                                Vote.forBaseModeRefreshRate(APP_MODE_HIGH_90.getRefreshRate()))},
+                {LIMIT_MODE_70.getModeId(), Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY,
+                        Map.of(
+                                Vote.PRIORITY_APP_REQUEST_SIZE,
+                                Vote.forSize(APP_MODE_HIGH_90.getPhysicalWidth(),
+                                        APP_MODE_HIGH_90.getPhysicalHeight()),
+                                Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+                                Vote.forBaseModeRefreshRate(APP_MODE_HIGH_90.getRefreshRate()),
+                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.forSize(LIMIT_MODE_70.getPhysicalWidth(),
+                                        LIMIT_MODE_70.getPhysicalHeight()))},
+                {LIMIT_MODE_70.getModeId(), LIMIT_MODE_70.getRefreshRate(),
+                        LIMIT_MODE_70.getRefreshRate(),
+                        Map.of(
+                                Vote.PRIORITY_APP_REQUEST_SIZE,
+                                Vote.forSize(APP_MODE_65.getPhysicalWidth(),
+                                        APP_MODE_65.getPhysicalHeight()),
+                                Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+                                Vote.forBaseModeRefreshRate(APP_MODE_65.getRefreshRate()),
+                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.forSize(LIMIT_MODE_70.getPhysicalWidth(),
+                                        LIMIT_MODE_70.getPhysicalHeight()))}});
+    }
+
     private static final String TAG = "DisplayModeDirectorTest";
     private static final boolean DEBUG = false;
     private static final float FLOAT_TOLERANCE = 0.01f;
+
+    private static final Display.Mode APP_MODE_65 = new Display.Mode(
+            /*modeId=*/65, /*width=*/1900, /*height=*/1900, 65);
+    private static final Display.Mode LIMIT_MODE_70 = new Display.Mode(
+            /*modeId=*/70, /*width=*/2000, /*height=*/2000, 70);
+    private static final Display.Mode DEFAULT_MODE_75 = new Display.Mode(
+            /*modeId=*/75, /*width=*/2500, /*height=*/2500, 75);
+    private static final Display.Mode APP_MODE_HIGH_90 = new Display.Mode(
+            /*modeId=*/90, /*width=*/3000, /*height=*/3000, 90);
+    private static final Display.Mode[] TEST_MODES = new Display.Mode[] {
+        new Display.Mode(
+            /*modeId=*/60, /*width=*/1900, /*height=*/1900, 60),
+        APP_MODE_65,
+        LIMIT_MODE_70,
+        DEFAULT_MODE_75,
+        APP_MODE_HIGH_90
+    };
+
     private static final int DISPLAY_ID = Display.DEFAULT_DISPLAY;
     private static final int MODE_ID = 1;
     private static final float TRANSITION_POINT = 0.763f;
@@ -528,6 +582,30 @@ public class DisplayModeDirectorTest {
         assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(75);
         assertThat(desiredSpecs.appRequest.physical.min).isAtMost(60f);
         assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(90f);
+    }
+
+    /** Tests for app requested size */
+    @Parameters(method = "getAppRequestedSizeTestCases")
+    @Test
+    public void testAppRequestedSize(final int expectedBaseModeId,
+                final float expectedPhysicalRefreshRate,
+                final float expectedAppRequestedRefreshRate,
+                final Map<Integer, Vote> votesWithPriorities) {
+        DisplayModeDirector director = createDirectorFromModeArray(TEST_MODES, DEFAULT_MODE_75);
+
+        SparseArray<Vote> votes = new SparseArray<>();
+        votesWithPriorities.forEach(votes::put);
+
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(DISPLAY_ID, votes);
+        director.injectVotesByDisplay(votesByDisplay);
+
+        var desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.baseModeId).isEqualTo(expectedBaseModeId);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
+        assertThat(desiredSpecs.primary.physical.max).isAtLeast(expectedPhysicalRefreshRate);
+        assertThat(desiredSpecs.appRequest.physical.min).isAtMost(0);
+        assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(expectedAppRequestedRefreshRate);
     }
 
     void verifySpecsWithRefreshRateSettings(DisplayModeDirector director, float minFps,
