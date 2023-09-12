@@ -20,6 +20,8 @@ import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NO
 import static android.app.admin.DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 
+import static com.android.settingslib.Utils.getColorAttrDefaultColor;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -638,7 +640,8 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         removeExistingRestrictedSpans(sb);
 
         if (admin != null) {
-            final int disabledColor = context.getColor(R.color.disabled_text_color);
+            final int disabledColor = getColorAttrDefaultColor(context,
+                    android.R.attr.textColorHint);
             sb.setSpan(new ForegroundColorSpan(disabledColor), 0, sb.length(),
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             ImageSpan image = new RestrictedLockImageSpan(context);
