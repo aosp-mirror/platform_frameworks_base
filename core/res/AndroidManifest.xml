@@ -7777,8 +7777,9 @@
                 android:process=":ui">
         </activity>
         <activity android:name="com.android.internal.app.PlatLogoActivity"
-                android:theme="@style/Theme.Wallpaper.NoTitleBar.Fullscreen"
+                android:theme="@style/Theme.NoTitleBar.Fullscreen"
                 android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+                android:enableOnBackInvokedCallback="true"
                 android:icon="@drawable/platlogo"
                 android:process=":ui">
         </activity>
