@@ -9125,9 +9125,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         UserManager.DISALLOW_CAMERA);
         if (who != null) {
             EnforcingAdmin admin = getEnforcingAdminForCaller(who, callerPackageName);
-            return Boolean.TRUE.equals(
-                    mDevicePolicyEngine.getLocalPolicySetByAdmin(
-                            policy, admin, affectedUserId));
+            Boolean value = null;
+            if (isDeviceOwner(caller)) {
+                value = mDevicePolicyEngine.getGlobalPolicySetByAdmin(policy, admin);
+            } else {
+                value = mDevicePolicyEngine.getLocalPolicySetByAdmin(
+                        policy, admin, affectedUserId);
+            }
+            return Boolean.TRUE.equals(value);
+
         } else {
             return Boolean.TRUE.equals(
                     mDevicePolicyEngine.getResolvedPolicy(policy, affectedUserId));
