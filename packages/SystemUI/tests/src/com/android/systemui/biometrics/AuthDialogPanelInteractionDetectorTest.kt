@@ -28,6 +28,8 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
@@ -42,8 +44,6 @@ import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
 import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
 import com.android.systemui.user.domain.interactor.UserInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -56,12 +56,15 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
+    private val testDispatcher = utils.testDispatcher
     private val disableFlagsRepository = FakeDisableFlagsRepository()
     private val featureFlags = FakeFeatureFlags()
     private val keyguardRepository = FakeKeyguardRepository()
     private val shadeRepository = FakeShadeRepository()
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
+    private val sceneContainerFlags = FakeSceneContainerFlags()
+    private val sceneInteractor = utils.sceneInteractor()
     private val userSetupRepository = FakeUserSetupRepository()
     private val userRepository = FakeUserRepository()
     private val configurationRepository = FakeConfigurationRepository()
@@ -126,6 +129,8 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
             ShadeInteractor(
                 testScope.backgroundScope,
                 disableFlagsRepository,
+                sceneContainerFlags,
+                { sceneInteractor },
                 keyguardRepository,
                 userSetupRepository,
                 deviceProvisionedController,

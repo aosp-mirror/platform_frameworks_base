@@ -51,30 +51,6 @@ class RequestProcessorTest {
 
     /** Tests the Java-compatible function wrapper, ensures callback is invoked. */
     @Test
-    fun testProcessAsync() {
-        val request =
-            ScreenshotRequest.Builder(TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_KEY_OTHER)
-                .setBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
-                .build()
-        val processor = RequestProcessor(imageCapture, policy, flags, scope)
-
-        var result: ScreenshotRequest? = null
-        var callbackCount = 0
-        val callback: (ScreenshotRequest) -> Unit = { processedRequest: ScreenshotRequest ->
-            result = processedRequest
-            callbackCount++
-        }
-
-        // runs synchronously, using Unconfined Dispatcher
-        processor.processAsync(request, callback)
-
-        // Callback invoked once returning the same request (no changes)
-        assertThat(callbackCount).isEqualTo(1)
-        assertThat(result).isEqualTo(request)
-    }
-
-    /** Tests the Java-compatible function wrapper, ensures callback is invoked. */
-    @Test
     fun testProcessAsync_ScreenshotData() {
         val request =
             ScreenshotData.fromRequest(
@@ -112,13 +88,6 @@ class RequestProcessorTest {
             ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_OTHER).build()
         val processor = RequestProcessor(imageCapture, policy, flags, scope)
 
-        val processedRequest = processor.process(request)
-
-        // Request has topComponent added, but otherwise unchanged.
-        assertThat(processedRequest.type).isEqualTo(TAKE_SCREENSHOT_FULLSCREEN)
-        assertThat(processedRequest.source).isEqualTo(SCREENSHOT_OTHER)
-        assertThat(processedRequest.topComponent).isEqualTo(component)
-
         val processedData = processor.process(ScreenshotData.fromRequest(request))
 
         // Request has topComponent added, but otherwise unchanged.
@@ -144,18 +113,6 @@ class RequestProcessorTest {
             ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER).build()
         val processor = RequestProcessor(imageCapture, policy, flags, scope)
 
-        val processedRequest = processor.process(request)
-
-        // Expect a task snapshot is taken, overriding the full screen mode
-        assertThat(processedRequest.type).isEqualTo(TAKE_SCREENSHOT_PROVIDED_IMAGE)
-        assertThat(bitmap.equalsHardwareBitmap(processedRequest.bitmap)).isTrue()
-        assertThat(processedRequest.boundsInScreen).isEqualTo(bounds)
-        assertThat(processedRequest.insets).isEqualTo(Insets.NONE)
-        assertThat(processedRequest.taskId).isEqualTo(TASK_ID)
-        assertThat(imageCapture.requestedTaskId).isEqualTo(TASK_ID)
-        assertThat(processedRequest.userId).isEqualTo(USER_ID)
-        assertThat(processedRequest.topComponent).isEqualTo(component)
-
         val processedData = processor.process(ScreenshotData.fromRequest(request))
 
         // Expect a task snapshot is taken, overriding the full screen mode
@@ -165,8 +122,6 @@ class RequestProcessorTest {
         assertThat(processedData.insets).isEqualTo(Insets.NONE)
         assertThat(processedData.taskId).isEqualTo(TASK_ID)
         assertThat(imageCapture.requestedTaskId).isEqualTo(TASK_ID)
-        assertThat(processedRequest.userId).isEqualTo(USER_ID)
-        assertThat(processedRequest.topComponent).isEqualTo(component)
     }
 
     @Test
@@ -185,9 +140,6 @@ class RequestProcessorTest {
             ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER).build()
         val processor = RequestProcessor(imageCapture, policy, flags, scope)
 
-        Assert.assertThrows(IllegalStateException::class.java) {
-            runBlocking { processor.process(request) }
-        }
         Assert.assertThrows(IllegalStateException::class.java) {
             runBlocking { processor.process(ScreenshotData.fromRequest(request)) }
         }
@@ -211,11 +163,6 @@ class RequestProcessorTest {
                 .setBoundsOnScreen(bounds)
                 .setInsets(Insets.NONE)
                 .build()
-
-        val processedRequest = processor.process(request)
-
-        // No changes
-        assertThat(processedRequest).isEqualTo(request)
 
         val screenshotData = ScreenshotData.fromRequest(request)
         val processedData = processor.process(screenshotData)
@@ -243,14 +190,10 @@ class RequestProcessorTest {
                 .setInsets(Insets.NONE)
                 .build()
 
-        val processedRequest = processor.process(request)
-
-        // Work profile, but already a task snapshot, so no changes
-        assertThat(processedRequest).isEqualTo(request)
-
         val screenshotData = ScreenshotData.fromRequest(request)
         val processedData = processor.process(screenshotData)
 
+        // Work profile, but already a task snapshot, so no changes
         assertThat(processedData).isEqualTo(screenshotData)
     }
 

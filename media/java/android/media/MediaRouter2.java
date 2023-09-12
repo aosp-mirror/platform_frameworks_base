@@ -17,9 +17,11 @@
 package android.media;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+import static com.android.media.flags.Flags.FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -370,14 +372,14 @@ public final class MediaRouter2 {
     }
 
     /**
-     * Registers callback to be invoked when the {@link RouteListingPreference} of the target
-     * router changes.
+     * Registers the given callback to be invoked when the {@link RouteListingPreference} of the
+     * target router changes.
      *
-     * <p>Calls using a previously registered callback will overwrite the callback record.
+     * <p>Calls using a previously registered callback will overwrite the previous executor.
      *
      * @see #setRouteListingPreference(RouteListingPreference)
-     * @hide
      */
+    @FlaggedApi(FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2)
     public void registerRouteListingPreferenceCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull RouteListingPreferenceCallback routeListingPreferenceCallback) {
@@ -393,9 +395,8 @@ public final class MediaRouter2 {
 
     /**
      * Unregisters the given callback to not receive {@link RouteListingPreference} change events.
-     *
-     * @hide
      */
+    @FlaggedApi(FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2)
     public void unregisterRouteListingPreferenceCallback(
             @NonNull RouteListingPreferenceCallback callback) {
         Objects.requireNonNull(callback, "callback must not be null");
@@ -462,9 +463,12 @@ public final class MediaRouter2 {
     /**
      * Returns the current {@link RouteListingPreference} of the target router.
      *
+     * <p>If this instance was created using {@link #getInstance(Context, String)}, then it returns
+     * the last {@link RouteListingPreference} set by the process this router was created for.
+     *
      * @see #setRouteListingPreference(RouteListingPreference)
-     * @hide
      */
+    @FlaggedApi(FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2)
     @Nullable
     public RouteListingPreference getRouteListingPreference() {
         synchronized (mLock) {
@@ -1201,9 +1205,19 @@ public final class MediaRouter2 {
         public void onPreferredFeaturesChanged(@NonNull List<String> preferredFeatures) {}
     }
 
-    /** @hide */
+    /** Callback for receiving events related to {@link RouteListingPreference}. */
+    @FlaggedApi(FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2)
     public abstract static class RouteListingPreferenceCallback {
-        /** @hide */
+
+        @FlaggedApi(FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2)
+        public RouteListingPreferenceCallback() {}
+
+        /**
+         * Called when the {@link RouteListingPreference} changes.
+         *
+         * @see #getRouteListingPreference
+         */
+        @FlaggedApi(FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2)
         public void onRouteListingPreferenceChanged(@Nullable RouteListingPreference preference) {}
     }
 

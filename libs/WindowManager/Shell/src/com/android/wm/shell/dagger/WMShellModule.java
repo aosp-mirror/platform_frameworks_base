@@ -35,6 +35,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
+import com.android.wm.shell.bubbles.BubbleEducationController;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.properties.ProdBubbleProperties;
@@ -134,11 +135,18 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static BubbleEducationController provideBubbleEducationProvider(Context context) {
+        return new BubbleEducationController(context);
+    }
+
+    @WMSingleton
+    @Provides
     static BubbleData provideBubbleData(Context context,
             BubbleLogger logger,
             BubblePositioner positioner,
+            BubbleEducationController educationController,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new BubbleData(context, logger, positioner, mainExecutor);
+        return new BubbleData(context, logger, positioner, educationController, mainExecutor);
     }
 
     // Note: Handler needed for LauncherApps.register

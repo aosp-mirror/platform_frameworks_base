@@ -208,6 +208,14 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION =
             "settings_remote_device_credential_validation";
 
+    // TODO(b/295516544): Remove this when trunk stable feature flag is available.
+    /**
+     * Flag to enable / disable the Private Space Settings. It's disabled by default.
+     * @hide
+     */
+    public static final String SETTINGS_PRIVATE_SPACE_SETTINGS =
+            "settings_private_space_settings";
+
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -256,6 +264,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_FINGERPRINT_SETTINGS, "false");
         // TODO: b/298454866 Replace with Trunk Stable Feature Flag
         DEFAULT_FLAGS.put(SETTINGS_REMOTEAUTH_ENROLLMENT_SETTINGS, "false");
+        DEFAULT_FLAGS.put(SETTINGS_PRIVATE_SPACE_SETTINGS, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;

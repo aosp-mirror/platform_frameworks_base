@@ -109,7 +109,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private final ArraySet<WindowSurfaceController> mAlertWindowSurfaces = new ArraySet<>();
     private final DragDropController mDragDropController;
     final boolean mCanAddInternalSystemWindow;
-    final boolean mCanForceShowingInsets;
+    boolean mCanForceShowingInsets;
     private final boolean mCanStartTasksFromRecents;
 
     final boolean mCanCreateSystemApplicationOverlay;

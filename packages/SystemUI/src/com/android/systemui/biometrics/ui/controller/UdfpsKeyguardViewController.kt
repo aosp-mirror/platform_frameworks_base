@@ -19,11 +19,11 @@ package com.android.systemui.biometrics.ui.controller
 import com.android.systemui.biometrics.UdfpsAnimationViewController
 import com.android.systemui.biometrics.UdfpsKeyguardView
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -32,7 +32,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 open class UdfpsKeyguardViewController(
     val view: UdfpsKeyguardView,
     statusBarStateController: StatusBarStateController,
-    shadeExpansionStateManager: ShadeExpansionStateManager,
+    primaryBouncerInteractor: PrimaryBouncerInteractor,
     systemUIDialogManager: SystemUIDialogManager,
     dumpManager: DumpManager,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
@@ -41,7 +41,7 @@ open class UdfpsKeyguardViewController(
     UdfpsAnimationViewController<UdfpsKeyguardView>(
         view,
         statusBarStateController,
-        shadeExpansionStateManager,
+        primaryBouncerInteractor,
         systemUIDialogManager,
         dumpManager,
     ),

@@ -39,8 +39,10 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -51,6 +53,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -62,15 +65,15 @@ import org.mockito.MockitoAnnotations
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
     UdfpsKeyguardViewLegacyControllerBaseTest() {
-    lateinit var keyguardBouncerRepository: KeyguardBouncerRepository
-    @Mock private lateinit var bouncerLogger: TableLogBuffer
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
-    private lateinit var testScope: TestScope
+    private lateinit var keyguardBouncerRepository: KeyguardBouncerRepository
+
+    @Mock private lateinit var bouncerLogger: TableLogBuffer
 
     @Before
     override fun setUp() {
-        testScope = TestScope()
-
         allowTestableLooperAsMainThread() // repeatWhenAttached requires the main thread
         MockitoAnnotations.initMocks(this)
         keyguardBouncerRepository =
@@ -82,7 +85,7 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
         super.setUp()
     }
 
-    override fun createUdfpsKeyguardViewController(): UdfpsKeyguardViewControllerLegacy? {
+    override fun createUdfpsKeyguardViewController(): UdfpsKeyguardViewControllerLegacy {
         mPrimaryBouncerInteractor =
             PrimaryBouncerInteractor(
                 keyguardBouncerRepository,
@@ -113,6 +116,70 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
             false
         )
     }
+
+    @Test
+    fun bouncerExpansionChange_fadeIn() =
+        testScope.runTest {
+            // GIVEN view is attached
+            mController.onViewAttached()
+            captureKeyguardStateControllerCallback()
+            Mockito.reset(mView)
+
+            // WHEN status bar expansion is 0
+            val job = mController.listenForBouncerExpansion(this)
+            keyguardBouncerRepository.setPrimaryShow(true)
+            keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
+            runCurrent()
+
+            // THEN alpha is 0
+            verify(mView).unpausedAlpha = 0
+
+            job.cancel()
+        }
+
+    @Test
+    fun bouncerExpansionChange_pauseAuth() =
+        testScope.runTest {
+            // GIVEN view is attached + on the keyguard
+            mController.onViewAttached()
+            captureStatusBarStateListeners()
+            sendStatusBarStateChanged(StatusBarState.KEYGUARD)
+            Mockito.reset(mView)
+
+            // WHEN panelViewExpansion changes to hide
+            whenever(mView.unpausedAlpha).thenReturn(0)
+            val job = mController.listenForBouncerExpansion(this)
+            keyguardBouncerRepository.setPrimaryShow(true)
+            keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
+            runCurrent()
+
+            // THEN pause auth is updated to PAUSE
+            verify(mView, Mockito.atLeastOnce()).setPauseAuth(true)
+
+            job.cancel()
+        }
+
+    @Test
+    fun bouncerExpansionChange_unpauseAuth() =
+        testScope.runTest {
+            // GIVEN view is attached + on the keyguard + panel expansion is 0f
+            mController.onViewAttached()
+            captureStatusBarStateListeners()
+            sendStatusBarStateChanged(StatusBarState.KEYGUARD)
+            Mockito.reset(mView)
+
+            // WHEN panelViewExpansion changes to expanded
+            whenever(mView.unpausedAlpha).thenReturn(255)
+            val job = mController.listenForBouncerExpansion(this)
+            keyguardBouncerRepository.setPrimaryShow(true)
+            keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_HIDDEN)
+            runCurrent()
+
+            // THEN pause auth is updated to NOT pause
+            verify(mView, Mockito.atLeastOnce()).setPauseAuth(false)
+
+            job.cancel()
+        }
 
     @Test
     fun shadeLocked_showAlternateBouncer_unpauseAuth() =
@@ -151,6 +218,50 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
 
             // THEN UDFPS shouldPauseAuth == true
             assertTrue(mController.shouldPauseAuth())
+
+            job.cancel()
+        }
+
+    @Test
+    fun fadeFromDialogSuggestedAlpha() =
+        testScope.runTest {
+            // GIVEN view is attached and status bar expansion is 1f
+            mController.onViewAttached()
+            captureStatusBarStateListeners()
+            val job = mController.listenForBouncerExpansion(this)
+            keyguardBouncerRepository.setPrimaryShow(true)
+            keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_HIDDEN)
+            runCurrent()
+            Mockito.reset(mView)
+
+            // WHEN dialog suggested alpha is .6f
+            whenever(mView.dialogSuggestedAlpha).thenReturn(.6f)
+            sendStatusBarStateChanged(StatusBarState.KEYGUARD)
+
+            // THEN alpha is updated based on dialog suggested alpha
+            verify(mView).unpausedAlpha = (.6f * 255).toInt()
+
+            job.cancel()
+        }
+
+    @Test
+    fun transitionToFullShadeProgress() =
+        testScope.runTest {
+            // GIVEN view is attached and status bar expansion is 1f
+            mController.onViewAttached()
+            val job = mController.listenForBouncerExpansion(this)
+            keyguardBouncerRepository.setPrimaryShow(true)
+            keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_HIDDEN)
+            runCurrent()
+            Mockito.reset(mView)
+            whenever(mView.dialogSuggestedAlpha).thenReturn(1f)
+
+            // WHEN we're transitioning to the full shade
+            val transitionProgress = .6f
+            mController.setTransitionToFullShadeProgress(transitionProgress)
+
+            // THEN alpha is between 0 and 255
+            verify(mView).unpausedAlpha = ((1f - transitionProgress) * 255).toInt()
 
             job.cancel()
         }

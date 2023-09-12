@@ -15,23 +15,34 @@
  */
 package com.android.wm.shell.bubbles.bar
 
+import android.annotation.LayoutRes
 import android.content.Context
+import android.graphics.Point
+import android.graphics.Rect
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.core.view.doOnLayout
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.wm.shell.R
 import com.android.wm.shell.animation.PhysicsAnimator
+import com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_USER_EDUCATION
+import com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES
+import com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 import com.android.wm.shell.bubbles.BubbleEducationController
 import com.android.wm.shell.bubbles.BubbleViewProvider
 import com.android.wm.shell.bubbles.setup
+import com.android.wm.shell.common.bubbles.BubblePopupDrawable
 import com.android.wm.shell.common.bubbles.BubblePopupView
+import kotlin.math.roundToInt
 
 /** Manages bubble education presentation and animation */
 class BubbleEducationViewController(private val context: Context, private val listener: Listener) {
     interface Listener {
-        fun onManageEducationVisibilityChanged(isVisible: Boolean)
+        fun onEducationVisibilityChanged(isVisible: Boolean)
     }
 
     private var rootView: ViewGroup? = null
@@ -45,11 +56,75 @@ class BubbleEducationViewController(private val context: Context, private val li
         )
     }
 
+    private val scrimView by lazy {
+        View(context).apply {
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            setOnClickListener { hideEducation(animated = true) }
+        }
+    }
+
     private val controller by lazy { BubbleEducationController(context) }
 
     /** Whether the education view is visible or being animated */
-    val isManageEducationVisible: Boolean
+    val isEducationVisible: Boolean
         get() = educationView != null && rootView != null
+
+    /**
+     * Hide the current education view if visible
+     *
+     * @param animated whether should hide with animation
+     */
+    @JvmOverloads
+    fun hideEducation(animated: Boolean, endActions: () -> Unit = {}) {
+        log { "hideEducation animated: $animated" }
+
+        if (animated) {
+            animateTransition(show = false) {
+                cleanUp()
+                endActions()
+                listener.onEducationVisibilityChanged(isVisible = false)
+            }
+        } else {
+            cleanUp()
+            endActions()
+            listener.onEducationVisibilityChanged(isVisible = false)
+        }
+    }
+
+    /**
+     * Show bubble bar stack user education.
+     *
+     * @param position the reference position for the user education in Screen coordinates.
+     * @param root the view to show user education in.
+     * @param educationClickHandler the on click handler for the user education view
+     */
+    fun showStackEducation(position: Point, root: ViewGroup, educationClickHandler: () -> Unit) {
+        hideEducation(animated = false)
+        log { "showStackEducation at: $position" }
+
+        educationView =
+            createEducationView(R.layout.bubble_bar_stack_education, root).apply {
+                setArrowDirection(BubblePopupDrawable.ArrowDirection.DOWN)
+                setArrowPosition(BubblePopupDrawable.ArrowPosition.End)
+                updateEducationPosition(view = this, position, root)
+                val arrowToEdgeOffset = popupDrawable?.config?.cornerRadius ?: 0f
+                doOnLayout {
+                    it.pivotX = it.width - arrowToEdgeOffset
+                    it.pivotY = it.height.toFloat()
+                }
+                setOnClickListener { educationClickHandler() }
+            }
+
+        rootView = root
+        animator = createAnimator()
+
+        root.addView(scrimView)
+        root.addView(educationView)
+        animateTransition(show = true) {
+            controller.hasSeenStackEducation = true
+            listener.onEducationVisibilityChanged(isVisible = true)
+        }
+    }
 
     /**
      * Show manage bubble education if hasn't been shown before
@@ -58,29 +133,9 @@ class BubbleEducationViewController(private val context: Context, private val li
      * @param root the view to show manage education in
      */
     fun maybeShowManageEducation(bubble: BubbleViewProvider, root: ViewGroup) {
+        log { "maybeShowManageEducation bubble: $bubble" }
         if (!controller.shouldShowManageEducation(bubble)) return
         showManageEducation(root)
-    }
-
-    /**
-     * Hide the manage education view if visible
-     *
-     * @param animated whether should hide with animation
-     */
-    fun hideManageEducation(animated: Boolean) {
-        rootView?.let {
-            fun cleanUp() {
-                it.removeView(educationView)
-                rootView = null
-                listener.onManageEducationVisibilityChanged(isVisible = false)
-            }
-
-            if (animated) {
-                animateTransition(show = false, ::cleanUp)
-            } else {
-                cleanUp()
-            }
-        }
     }
 
     /**
@@ -89,17 +144,24 @@ class BubbleEducationViewController(private val context: Context, private val li
      * @param root the view to show manage education in
      */
     private fun showManageEducation(root: ViewGroup) {
-        hideManageEducation(animated = false)
-        if (educationView == null) {
-            val eduView = createEducationView(root)
-            educationView = eduView
-            animator = createAnimation(eduView)
-        }
-        root.addView(educationView)
+        hideEducation(animated = false)
+        log { "showManageEducation" }
+
+        educationView =
+            createEducationView(R.layout.bubble_bar_manage_education, root).apply {
+                pivotY = 0f
+                doOnLayout { it.pivotX = it.width / 2f }
+                setOnClickListener { hideEducation(animated = true) }
+            }
+
         rootView = root
+        animator = createAnimator()
+
+        root.addView(scrimView)
+        root.addView(educationView)
         animateTransition(show = true) {
             controller.hasSeenManageEducation = true
-            listener.onManageEducationVisibilityChanged(isVisible = true)
+            listener.onEducationVisibilityChanged(isVisible = true)
         }
     }
 
@@ -110,39 +172,75 @@ class BubbleEducationViewController(private val context: Context, private val li
      * @param endActions a closure to be called when the animation completes
      */
     private fun animateTransition(show: Boolean, endActions: () -> Unit) {
-        animator?.let { animator ->
-            animator
-                .spring(DynamicAnimation.ALPHA, if (show) 1f else 0f)
-                .spring(DynamicAnimation.SCALE_X, if (show) 1f else EDU_SCALE_HIDDEN)
-                .spring(DynamicAnimation.SCALE_Y, if (show) 1f else EDU_SCALE_HIDDEN)
-                .withEndActions(endActions)
-                .start()
-        } ?: endActions()
+        animator
+            ?.spring(DynamicAnimation.ALPHA, if (show) 1f else 0f)
+            ?.spring(DynamicAnimation.SCALE_X, if (show) 1f else EDU_SCALE_HIDDEN)
+            ?.spring(DynamicAnimation.SCALE_Y, if (show) 1f else EDU_SCALE_HIDDEN)
+            ?.withEndActions(endActions)
+            ?.start()
+            ?: endActions()
     }
 
-    private fun createEducationView(root: ViewGroup): BubblePopupView {
-        val view =
-            LayoutInflater.from(context).inflate(R.layout.bubble_bar_manage_education, root, false)
-                as BubblePopupView
+    /** Remove education view from the root and clean up all relative properties */
+    private fun cleanUp() {
+        log { "cleanUp" }
+        rootView?.removeView(educationView)
+        rootView?.removeView(scrimView)
+        educationView = null
+        rootView = null
+        animator = null
+    }
 
-        return view.apply {
-            setup()
-            alpha = 0f
-            pivotY = 0f
-            scaleX = EDU_SCALE_HIDDEN
-            scaleY = EDU_SCALE_HIDDEN
-            doOnLayout { it.pivotX = it.width / 2f }
-            setOnClickListener { hideManageEducation(animated = true) }
+    /**
+     * Create education view by inflating layout provided.
+     *
+     * @param layout layout resource id to inflate. The root view should be [BubblePopupView]
+     * @param root view group to use as root for inflation, is not attached to root
+     */
+    private fun createEducationView(@LayoutRes layout: Int, root: ViewGroup): BubblePopupView {
+        val view = LayoutInflater.from(context).inflate(layout, root, false) as BubblePopupView
+        view.setup()
+        view.alpha = 0f
+        view.scaleX = EDU_SCALE_HIDDEN
+        view.scaleY = EDU_SCALE_HIDDEN
+        return view
+    }
+
+    /** Create animator for the user education transitions */
+    private fun createAnimator(): PhysicsAnimator<BubblePopupView>? {
+        return educationView?.let {
+            PhysicsAnimator.getInstance(it).apply { setDefaultSpringConfig(springConfig) }
         }
     }
 
-    private fun createAnimation(view: BubblePopupView): PhysicsAnimator<BubblePopupView> {
-        val animator = PhysicsAnimator.getInstance(view)
-        animator.setDefaultSpringConfig(springConfig)
-        return animator
+    /**
+     * Update user education view position relative to the reference position
+     *
+     * @param view the user education view to layout
+     * @param position the reference position in Screen coordinates
+     * @param root the root view to use for the layout
+     */
+    private fun updateEducationPosition(view: BubblePopupView, position: Point, root: ViewGroup) {
+        val rootBounds = Rect()
+        // Get root bounds on screen as position is in screen coordinates
+        root.getBoundsOnScreen(rootBounds)
+        // Get the offset to the arrow from the edge of the education view
+        val arrowToEdgeOffset =
+            view.popupDrawable?.config?.let { it.cornerRadius + it.arrowWidth / 2f }?.roundToInt()
+                ?: 0
+        // Calculate education view margins
+        val params = view.layoutParams as FrameLayout.LayoutParams
+        params.bottomMargin = rootBounds.bottom - position.y
+        params.rightMargin = rootBounds.right - position.x - arrowToEdgeOffset
+        view.layoutParams = params
+    }
+
+    private fun log(msg: () -> String) {
+        if (DEBUG_USER_EDUCATION) Log.d(TAG, msg())
     }
 
     companion object {
+        private val TAG = if (TAG_WITH_CLASS_NAME) "BubbleEducationViewController" else TAG_BUBBLES
         private const val EDU_SCALE_HIDDEN = 0.5f
     }
 }

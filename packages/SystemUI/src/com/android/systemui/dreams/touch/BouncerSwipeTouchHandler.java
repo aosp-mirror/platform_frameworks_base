@@ -155,9 +155,12 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                         return true;
                     }
 
-                    // Don't set expansion if the user doesn't have a pin/password set.
+                    // Don't set expansion if the user doesn't have a pin/password set so that no
+                    // animations are played we're not transitioning to the bouncer.
                     if (!mLockPatternUtils.isSecure(mUserTracker.getUserId())) {
-                        return true;
+                        // Return false so the gesture is not consumed, allowing the dream to wake
+                        // if it wants instead of doing nothing.
+                        return false;
                     }
 
                     // For consistency, we adopt the expansion definition found in the

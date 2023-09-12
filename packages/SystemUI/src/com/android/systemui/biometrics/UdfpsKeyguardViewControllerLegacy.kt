@@ -37,8 +37,6 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeExpansionListener
-import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
@@ -55,11 +53,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /** Class that coordinates non-HBM animations during keyguard authentication. */
-open class UdfpsKeyguardViewControllerLegacy
-constructor(
+open class UdfpsKeyguardViewControllerLegacy(
     private val view: UdfpsKeyguardViewLegacy,
     statusBarStateController: StatusBarStateController,
-    shadeExpansionStateManager: ShadeExpansionStateManager,
     private val keyguardViewManager: StatusBarKeyguardViewManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     dumpManager: DumpManager,
@@ -71,14 +67,14 @@ constructor(
     private val udfpsController: UdfpsController,
     private val activityLaunchAnimator: ActivityLaunchAnimator,
     featureFlags: FeatureFlags,
-    private val primaryBouncerInteractor: PrimaryBouncerInteractor,
+    primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
 ) :
     UdfpsAnimationViewController<UdfpsKeyguardViewLegacy>(
         view,
         statusBarStateController,
-        shadeExpansionStateManager,
+        primaryBouncerInteractor,
         systemUIDialogManager,
         dumpManager,
     ),
@@ -158,17 +154,6 @@ constructor(
                 view.updateColor()
             }
         }
-
-    private val shadeExpansionListener = ShadeExpansionListener { (fraction) ->
-        panelExpansionFraction =
-            if (keyguardViewManager.isPrimaryBouncerInTransit) {
-                aboutToShowBouncerProgress(fraction)
-            } else {
-                fraction
-            }
-        updateAlpha()
-        updatePauseAuth()
-    }
 
     private val keyguardStateControllerCallback: KeyguardStateController.Callback =
         object : KeyguardStateController.Callback {
@@ -262,10 +247,17 @@ constructor(
     }
 
     @VisibleForTesting
-    suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
+    override suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
         return scope.launch {
             primaryBouncerInteractor.bouncerExpansion.collect { bouncerExpansion: Float ->
                 inputBouncerExpansion = bouncerExpansion
+
+                panelExpansionFraction =
+                    if (keyguardViewManager.isPrimaryBouncerInTransit) {
+                        aboutToShowBouncerProgress(1f - bouncerExpansion)
+                    } else {
+                        1f - bouncerExpansion
+                    }
                 updateAlpha()
                 updatePauseAuth()
             }
@@ -295,8 +287,6 @@ constructor(
         qsExpansion = keyguardViewManager.qsExpansion
         keyguardViewManager.addCallback(statusBarKeyguardViewManagerCallback)
         configurationController.addCallback(configurationListener)
-        val currentState = shadeExpansionStateManager.addExpansionListener(shadeExpansionListener)
-        shadeExpansionListener.onPanelExpansionChanged(currentState)
         updateScaleFactor()
         view.updatePadding()
         updateAlpha()
@@ -321,7 +311,6 @@ constructor(
         keyguardViewManager.removeOccludingAppBiometricUI(occludingAppBiometricUI)
         keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false)
         configurationController.removeCallback(configurationListener)
-        shadeExpansionStateManager.removeExpansionListener(shadeExpansionListener)
         if (lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy === this) {
             lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = null
         }

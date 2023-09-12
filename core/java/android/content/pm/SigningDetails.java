@@ -656,7 +656,7 @@ public final class SigningDetails implements Parcelable {
                 }
             }
         } else {
-            return Signature.areEffectiveMatch(oldDetails.mSignatures, mSignatures);
+            return Signature.areEffectiveMatch(oldDetails, this);
         }
         return false;
     }
@@ -800,7 +800,7 @@ public final class SigningDetails implements Parcelable {
 
     /** Returns true if the signatures in this and other match exactly. */
     public boolean signaturesMatchExactly(@NonNull SigningDetails other) {
-        return Signature.areExactMatch(mSignatures, other.mSignatures);
+        return Signature.areExactMatch(this, other);
     }
 
     @Override
@@ -853,7 +853,7 @@ public final class SigningDetails implements Parcelable {
         final SigningDetails that = (SigningDetails) o;
 
         if (mSignatureSchemeVersion != that.mSignatureSchemeVersion) return false;
-        if (!Signature.areExactMatch(mSignatures, that.mSignatures)) return false;
+        if (!Signature.areExactMatch(this, that)) return false;
         if (mPublicKeys != null) {
             if (!mPublicKeys.equals((that.mPublicKeys))) {
                 return false;

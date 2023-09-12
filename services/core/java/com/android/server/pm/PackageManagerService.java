@@ -84,6 +84,7 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.DataLoaderType;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
+import android.content.pm.Flags;
 import android.content.pm.IDexModuleRegisterCallback;
 import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.IPackageDataObserver;
@@ -799,9 +800,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     final SparseArray<VerifyingSession> mPendingEnableRollback = new SparseArray<>();
 
     final PackageInstallerService mInstallerService;
-
-    final PackageArchiverService mArchiverService;
-
     final ArtManagerService mArtManagerService;
 
     // TODO(b/260124949): Remove these.
@@ -1630,8 +1628,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new CrossProfileIntentFilterHelper(i.getSettings(),
                         i.getUserManagerService(), i.getLock(), i.getUserManagerInternal(),
                         context),
-                (i, pm) -> new UpdateOwnershipHelper(),
-                (i, pm) -> new PackageArchiverService(i.getContext(), pm));
+                (i, pm) -> new UpdateOwnershipHelper());
 
         if (Build.VERSION.SDK_INT <= 0) {
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
@@ -1776,7 +1773,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mFactoryTest = testParams.factoryTest;
         mIncrementalManager = testParams.incrementalManager;
         mInstallerService = testParams.installerService;
-        mArchiverService = testParams.archiverService;
         mInstantAppRegistry = testParams.instantAppRegistry;
         mChangedPackagesTracker = testParams.changedPackagesTracker;
         mInstantAppResolverConnection = testParams.instantAppResolverConnection;
@@ -2356,7 +2352,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             });
 
             mInstallerService = mInjector.getPackageInstallerService();
-            mArchiverService = mInjector.getPackageArchiverService();
             final ComponentName instantAppResolverComponent = getInstantAppResolver(computer);
             if (instantAppResolverComponent != null) {
                 if (DEBUG_INSTANT) {
@@ -4621,7 +4616,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     mDomainVerificationConnection, mInstallerService, mPackageProperty,
                     mResolveComponentName, mInstantAppResolverSettingsComponent,
                     mRequiredSdkSandboxPackage, mServicesExtensionPackageName,
-                    mSharedSystemSharedLibraryPackageName, mArchiverService);
+                    mSharedSystemSharedLibraryPackageName);
         }
 
         @Override
@@ -5926,15 +5921,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     }
                 }
 
-                Signature[] callerSignature;
+                SigningDetails callerSigningDetails;
                 final int appId = UserHandle.getAppId(callingUid);
                 Pair<PackageStateInternal, SharedUserApi> either =
                         snapshot.getPackageOrSharedUser(appId);
                 if (either != null) {
                     if (either.first != null) {
-                        callerSignature = either.first.getSigningDetails().getSignatures();
+                        callerSigningDetails = either.first.getSigningDetails();
                     } else {
-                        callerSignature = either.second.getSigningDetails().getSignatures();
+                        callerSigningDetails = either.second.getSigningDetails();
                     }
                 } else {
                     throw new SecurityException("Unknown calling UID: " + callingUid);
@@ -5943,8 +5938,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // Verify: can't set installerPackageName to a package that is
                 // not signed with the same cert as the caller.
                 if (installerPackageState != null) {
-                    if (compareSignatures(callerSignature,
-                            installerPackageState.getSigningDetails().getSignatures())
+                    if (compareSignatures(callerSigningDetails,
+                            installerPackageState.getSigningDetails())
                             != PackageManager.SIGNATURE_MATCH) {
                         throw new SecurityException(
                                 "Caller does not have same cert as new installer package "
@@ -5960,8 +5955,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         ? null : snapshot.getPackageStateInternal(targetInstallerPackageName);
 
                 if (targetInstallerPkgSetting != null) {
-                    if (compareSignatures(callerSignature,
-                            targetInstallerPkgSetting.getSigningDetails().getSignatures())
+                    if (compareSignatures(callerSigningDetails,
+                            targetInstallerPkgSetting.getSigningDetails())
                             != PackageManager.SIGNATURE_MATCH) {
                         throw new SecurityException(
                                 "Caller does not have same cert as old installer package "

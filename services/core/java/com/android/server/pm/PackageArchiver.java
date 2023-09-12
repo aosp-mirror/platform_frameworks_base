@@ -31,10 +31,8 @@ import android.app.BroadcastOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.IPackageArchiverService;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
-import android.content.pm.PackageArchiver;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
@@ -74,7 +72,7 @@ import java.util.concurrent.CompletableFuture;
  * while the data directory is kept. Archived apps are included in the list of launcher apps where
  * tapping them re-installs the full app.
  */
-public class PackageArchiverService extends IPackageArchiverService.Stub {
+public class PackageArchiver {
 
     private static final String TAG = "PackageArchiverService";
 
@@ -93,13 +91,12 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
     @Nullable
     private LauncherApps mLauncherApps;
 
-    public PackageArchiverService(Context context, PackageManagerService mPm) {
+    PackageArchiver(Context context, PackageManagerService mPm) {
         this.mContext = context;
         this.mPm = mPm;
     }
 
-    @Override
-    public void requestArchive(
+    void requestArchive(
             @NonNull String packageName,
             @NonNull String callerPackageName,
             @NonNull IntentSender intentSender,
@@ -233,8 +230,7 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
         return true;
     }
 
-    @Override
-    public void requestUnarchive(
+    void requestUnarchive(
             @NonNull String packageName,
             @NonNull String callerPackageName,
             @NonNull UserHandle userHandle) {
@@ -290,8 +286,8 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
         int userId = userHandle.getIdentifier();
         Intent unarchiveIntent = new Intent(Intent.ACTION_UNARCHIVE_PACKAGE);
         unarchiveIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        unarchiveIntent.putExtra(PackageArchiver.EXTRA_UNARCHIVE_PACKAGE_NAME, packageName);
-        unarchiveIntent.putExtra(PackageArchiver.EXTRA_UNARCHIVE_ALL_USERS,
+        unarchiveIntent.putExtra(PackageInstaller.EXTRA_UNARCHIVE_PACKAGE_NAME, packageName);
+        unarchiveIntent.putExtra(PackageInstaller.EXTRA_UNARCHIVE_ALL_USERS,
                 userId == UserHandle.USER_ALL);
         unarchiveIntent.setPackage(installerPackage);
 

@@ -26,7 +26,6 @@ import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.ChangedPackages;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
-import android.content.pm.IPackageArchiverService;
 import android.content.pm.IDexModuleRegisterCallback;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.IOnChecksumsReadyListener;
@@ -651,8 +650,6 @@ interface IPackageManager {
 
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     IPackageInstaller getPackageInstaller();
-
-    IPackageArchiverService getPackageArchiverService();
 
     @EnforcePermission("DELETE_PACKAGES")
     boolean setBlockUninstallForUser(String packageName, boolean blockUninstall, int userId);

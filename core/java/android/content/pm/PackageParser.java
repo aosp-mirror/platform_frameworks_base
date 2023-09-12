@@ -1445,7 +1445,7 @@ public class PackageParser {
                     verified.getPublicKeys(),
                     verified.getPastSigningCertificates());
         } else {
-            if (!Signature.areExactMatch(pkg.mSigningDetails.signatures,
+            if (!Signature.areExactArraysMatch(pkg.mSigningDetails.signatures,
                     verified.getSignatures())) {
                 throw new PackageParserException(
                         INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
@@ -6468,7 +6468,7 @@ public class PackageParser {
                     }
                 }
             } else {
-                return Signature.areEffectiveMatch(oldDetails.signatures, signatures);
+                return Signature.areEffectiveArraysMatch(oldDetails.signatures, signatures);
             }
             return false;
         }
@@ -6616,7 +6616,7 @@ public class PackageParser {
 
         /** Returns true if the signatures in this and other match exactly. */
         public boolean signaturesMatchExactly(SigningDetails other) {
-            return Signature.areExactMatch(this.signatures, other.signatures);
+            return Signature.areExactArraysMatch(this.signatures, other.signatures);
         }
 
         @Override
@@ -6668,7 +6668,7 @@ public class PackageParser {
             SigningDetails that = (SigningDetails) o;
 
             if (signatureSchemeVersion != that.signatureSchemeVersion) return false;
-            if (!Signature.areExactMatch(signatures, that.signatures)) return false;
+            if (!Signature.areExactArraysMatch(signatures, that.signatures)) return false;
             if (publicKeys != null) {
                 if (!publicKeys.equals((that.publicKeys))) {
                     return false;
@@ -6677,7 +6677,8 @@ public class PackageParser {
                 return false;
             }
 
-            // can't use Signature.areExactMatch() because order matters with the past signing certs
+            // can't use Signature.areExactArraysMatch() because order matters with the past
+            // signing certs
             if (!Arrays.equals(pastSigningCertificates, that.pastSigningCertificates)) {
                 return false;
             }

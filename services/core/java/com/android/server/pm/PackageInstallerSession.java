@@ -3396,7 +3396,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             if (!isInstalledByAdb(getInstallSource().mInitiatingPackageName)
-                    && !mPm.mArchiverService.verifySupportsUnarchival(
+                    && !mPm.mInstallerService.mPackageArchiver.verifySupportsUnarchival(
                     getInstallSource().mInstallerPackageName)) {
                 throw new PackageManagerException(
                         PackageManager.INSTALL_FAILED_SESSION_INVALID,

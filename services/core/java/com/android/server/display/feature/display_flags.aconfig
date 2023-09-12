@@ -7,4 +7,5 @@ flag {
     namespace: "display_manager"
     description: "Feature flag for Connected Display managment"
     bug: "280739508"
+    is_fixed_read_only: true
 }

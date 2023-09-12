@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Trace
 import android.util.Log
 import android.view.Display
+import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.dagger.SysUISingleton
@@ -55,7 +56,7 @@ constructor(
         onSaved: (Uri) -> Unit,
         requestCallback: RequestCallback
     ) {
-        val displayIds = getDisplaysToScreenshot()
+        val displayIds = getDisplaysToScreenshot(screenshotRequest.type)
         val resultCallbackWrapper = MultiResultCallbackWrapper(requestCallback)
         screenshotRequest.oneForEachDisplay(displayIds).forEach { screenshotData: ScreenshotData ->
             dispatchToController(
@@ -93,8 +94,13 @@ constructor(
             .handleScreenshot(screenshotData, onSaved, callback)
     }
 
-    private fun getDisplaysToScreenshot(): List<Int> {
-        return displays.value.filter { it.type in ALLOWED_DISPLAY_TYPES }.map { it.displayId }
+    private fun getDisplaysToScreenshot(requestType: Int): List<Int> {
+        return if (requestType == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
+            // If this is a provided image, let's show the UI on the default display only.
+            listOf(Display.DEFAULT_DISPLAY)
+        } else {
+            displays.value.filter { it.type in ALLOWED_DISPLAY_TYPES }.map { it.displayId }
+        }
     }
 
     /**

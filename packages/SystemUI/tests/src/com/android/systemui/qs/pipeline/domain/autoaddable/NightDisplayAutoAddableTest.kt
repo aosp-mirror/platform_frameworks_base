@@ -17,8 +17,9 @@
 package com.android.systemui.qs.pipeline.domain.autoaddable
 
 import android.hardware.display.NightDisplayListener
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dagger.NightDisplayListenerModule
@@ -49,7 +50,8 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 class NightDisplayAutoAddableTest : SysuiTestCase() {
 
     @Mock(answer = Answers.RETURNS_SELF)
@@ -121,6 +123,6 @@ class NightDisplayAutoAddableTest : SysuiTestCase() {
     }
 
     companion object {
-        private val SPEC = TileSpec.create(NightDisplayTile.TILE_SPEC)
+        private val SPEC by lazy { TileSpec.create(NightDisplayTile.TILE_SPEC) }
     }
 }

@@ -420,7 +420,7 @@ public class PowerExemptionManager {
     public static final int REASON_SYSTEM_EXEMPT_APP_OP = 327;
 
     /**
-     * Granted by {@link com.android.server.pm.PackageArchiverService} to the installer responsible
+     * Granted by {@link com.android.server.pm.PackageArchiver} to the installer responsible
      * for unarchiving an app.
      *
      * @hide

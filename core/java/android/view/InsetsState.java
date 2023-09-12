@@ -45,6 +45,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
@@ -380,6 +381,9 @@ public class InsetsState implements Parcelable {
             @InternalInsetsSide @Nullable SparseIntArray idSideMap,
             @Nullable boolean[] typeVisibilityMap, Insets insets, int type) {
         int index = indexOf(type);
+        if (source.getId() == InsetsSource.ID_IME) {
+            Log.i("b/297000797", "InsetsState#processSourceAsPublicType, ime insets: " + insets);
+        }
 
         // Don't put Insets.NONE into typeInsetsMap. Otherwise, two WindowInsets can be considered
         // as non-equal while they provide the same insets of each type from WindowInsets#getInsets

@@ -35,6 +35,7 @@ public class BubbleBarUpdate implements Parcelable {
 
     public boolean expandedChanged;
     public boolean expanded;
+    public boolean shouldShowEducation;
     @Nullable
     public String selectedBubbleKey;
     @Nullable
@@ -61,6 +62,7 @@ public class BubbleBarUpdate implements Parcelable {
     public BubbleBarUpdate(Parcel parcel) {
         expandedChanged = parcel.readBoolean();
         expanded = parcel.readBoolean();
+        shouldShowEducation = parcel.readBoolean();
         selectedBubbleKey = parcel.readString();
         addedBubble = parcel.readParcelable(BubbleInfo.class.getClassLoader(),
                 BubbleInfo.class);
@@ -95,6 +97,7 @@ public class BubbleBarUpdate implements Parcelable {
         return "BubbleBarUpdate{ expandedChanged=" + expandedChanged
                 + " expanded=" + expanded
                 + " selectedBubbleKey=" + selectedBubbleKey
+                + " shouldShowEducation=" + shouldShowEducation
                 + " addedBubble=" + addedBubble
                 + " updatedBubble=" + updatedBubble
                 + " suppressedBubbleKey=" + suppressedBubbleKey
@@ -114,6 +117,7 @@ public class BubbleBarUpdate implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeBoolean(expandedChanged);
         parcel.writeBoolean(expanded);
+        parcel.writeBoolean(shouldShowEducation);
         parcel.writeString(selectedBubbleKey);
         parcel.writeParcelable(addedBubble, flags);
         parcel.writeParcelable(updatedBubble, flags);

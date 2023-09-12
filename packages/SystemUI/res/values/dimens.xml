@@ -1232,6 +1232,7 @@
     <dimen name="magnification_setting_image_button_open_in_full_padding_horizontal">28dp</dimen>
     <dimen name="magnification_setting_drag_corner_radius">28dp</dimen>
     <dimen name="magnification_setting_drag_size">56dp</dimen>
+    <fraction name="magnification_resize_window_size_amount">10%</fraction>
 
     <!-- Seekbar with icon buttons -->
     <dimen name="seekbar_icon_size">24dp</dimen>

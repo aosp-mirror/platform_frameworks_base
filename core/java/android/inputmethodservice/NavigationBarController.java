@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.inputmethodservice.navigationbar.NavigationBarFrame;
 import android.inputmethodservice.navigationbar.NavigationBarView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -114,6 +115,8 @@ final class NavigationBarController {
     }
 
     void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
+        Log.i("b/297000797", "NavigationBarController#onNavButtonFlagsChanged: " + navButtonFlags,
+                new Throwable());
         mImpl.onNavButtonFlagsChanged(navButtonFlags);
     }
 
@@ -235,6 +238,10 @@ final class NavigationBarController {
 
             if (ENABLE_HIDE_IME_CAPTION_BAR) {
                 mNavigationBarFrame.setOnApplyWindowInsetsListener((view, insets) -> {
+                    Log.i("b/297000797", "NavigationBarController#onApplyWindowInsetsListener:"
+                            + " mNavigationBarFrame: " + mNavigationBarFrame
+                            + " captionBar visible: " + insets.isVisible(captionBar())
+                            + " insets: " + insets);
                     if (mNavigationBarFrame != null) {
                         boolean visible = insets.isVisible(captionBar());
                         mNavigationBarFrame.setVisibility(visible ? View.VISIBLE : View.GONE);
@@ -453,6 +460,10 @@ final class NavigationBarController {
             mShouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherWhenImeIsShown;
 
             if (ENABLE_HIDE_IME_CAPTION_BAR) {
+                Log.i("b/297000797", "NavigationBarController#onNavButtonFlagsChanged,"
+                                + " calling setImeCaptionBarInsetsHeight"
+                                + " with: " + getImeCaptionBarHeight(),
+                        new Throwable());
                 mService.mWindow.getWindow().getDecorView().getWindowInsetsController()
                         .setImeCaptionBarInsetsHeight(getImeCaptionBarHeight());
             }

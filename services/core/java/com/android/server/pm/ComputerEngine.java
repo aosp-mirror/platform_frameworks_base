@@ -58,6 +58,7 @@ import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
 import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.HIDE_EPHEMERAL_APIS;
 import static com.android.server.pm.PackageManagerService.TAG;
+import static com.android.server.pm.PackageManagerServiceUtils.compareSignatureArrays;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.isSystemOrRootOrShell;
 import static com.android.server.pm.resolution.ComponentResolver.RESOLVE_PRIORITY_SORTER;
@@ -4215,8 +4216,7 @@ public class ComputerEngine implements Computer {
         if (p2SigningDetails == null) {
             return PackageManager.SIGNATURE_SECOND_NOT_SIGNED;
         }
-        int result = compareSignatures(p1SigningDetails.getSignatures(),
-                p2SigningDetails.getSignatures());
+        int result = compareSignatures(p1SigningDetails, p2SigningDetails);
         if (result == PackageManager.SIGNATURE_MATCH) {
             return result;
         }
@@ -4231,7 +4231,7 @@ public class ComputerEngine implements Computer {
             Signature[] p2Signatures = p2SigningDetails.hasPastSigningCertificates()
                     ? new Signature[]{p2SigningDetails.getPastSigningCertificates()[0]}
                     : p2SigningDetails.getSignatures();
-            result = compareSignatures(p1Signatures, p2Signatures);
+            result = compareSignatureArrays(p1Signatures, p2Signatures);
         }
         return result;
     }
