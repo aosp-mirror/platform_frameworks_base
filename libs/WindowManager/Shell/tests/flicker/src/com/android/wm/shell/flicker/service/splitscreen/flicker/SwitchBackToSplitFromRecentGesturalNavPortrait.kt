@@ -31,7 +31,7 @@ import org.junit.runner.RunWith
 class SwitchBackToSplitFromRecentGesturalNavPortrait :
     SwitchBackToSplitFromRecent(Rotation.ROTATION_0) {
 
-    @ExpectedScenarios(["QUICKSWITCH"])
+    @ExpectedScenarios(["SPLIT_SCREEN_ENTER"])
     @Test
     override fun switchBackToSplitFromRecent() = super.switchBackToSplitFromRecent()
 

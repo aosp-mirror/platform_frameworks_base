@@ -29,7 +29,7 @@ import org.junit.runner.RunWith
 @RunWith(FlickerServiceJUnit4ClassRunner::class)
 class UnlockKeyguardToSplitScreenGesturalNavPortrait : UnlockKeyguardToSplitScreen() {
 
-    @ExpectedScenarios(["QUICKSWITCH"])
+    @ExpectedScenarios(["LOCKSCREEN_UNLOCK_ANIMATION"])
     @Test
     override fun unlockKeyguardToSplitScreen() = super.unlockKeyguardToSplitScreen()
 
