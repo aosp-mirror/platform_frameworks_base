@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.pip
+package com.android.wm.shell.flicker.pip.apps
 
 import android.os.Handler
 import android.os.Looper

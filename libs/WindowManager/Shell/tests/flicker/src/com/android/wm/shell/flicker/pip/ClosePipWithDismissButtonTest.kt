@@ -20,6 +20,7 @@ import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
+import com.android.wm.shell.flicker.pip.common.ClosePipTransition
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
