@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -80,6 +81,8 @@ public class HandwritingInitiator {
      */
     private int mConnectionCount = 0;
     private final InputMethodManager mImm;
+
+    private final int[] mTempLocation = new int[2];
 
     private final Rect mTempRect = new Rect();
 
@@ -429,7 +432,19 @@ public class HandwritingInitiator {
         return null;
     }
 
-    private static void requestFocusWithoutReveal(View view) {
+    private void requestFocusWithoutReveal(View view) {
+        if (view instanceof EditText editText && !mState.mStylusDownWithinEditorBounds) {
+            // If the stylus down point was inside the EditText's bounds, then the EditText will
+            // automatically set its cursor position nearest to the stylus down point when it
+            // gains focus. If the stylus down point was outside the EditText's bounds (within
+            // the extended handwriting bounds), then we must calculate and set the cursor
+            // position manually.
+            view.getLocationInWindow(mTempLocation);
+            int offset = editText.getOffsetForPosition(
+                    mState.mStylusDownX - mTempLocation[0],
+                    mState.mStylusDownY - mTempLocation[1]);
+            editText.setSelection(offset);
+        }
         if (view.getRevealOnFocusHint()) {
             view.setRevealOnFocusHint(false);
             view.requestFocus();
@@ -457,6 +472,10 @@ public class HandwritingInitiator {
             if (getViewHandwritingArea(connectedView, handwritingArea)
                     && isInHandwritingArea(handwritingArea, x, y, connectedView, isHover)
                     && shouldTriggerStylusHandwritingForView(connectedView)) {
+                if (!isHover && mState != null) {
+                    mState.mStylusDownWithinEditorBounds =
+                            contains(handwritingArea, x, y, 0f, 0f, 0f, 0f);
+                }
                 return connectedView;
             }
         }
@@ -475,7 +494,12 @@ public class HandwritingInitiator {
             }
 
             final float distance = distance(handwritingArea, x, y);
-            if (distance == 0f) return view;
+            if (distance == 0f) {
+                if (!isHover && mState != null) {
+                    mState.mStylusDownWithinEditorBounds = true;
+                }
+                return view;
+            }
             if (distance < minDistance) {
                 minDistance = distance;
                 bestCandidate = view;
@@ -656,6 +680,12 @@ public class HandwritingInitiator {
          * built InputConnection.
          */
         private boolean mExceedHandwritingSlop;
+
+        /**
+         * Whether the stylus down point of the MotionEvent sequence was within the editor's bounds
+         * (not including the extended handwriting bounds).
+         */
+        private boolean mStylusDownWithinEditorBounds;
 
         /**
          * A view which has requested focus and is pending input connection creation. When an input
