@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_BIOMETRIC;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_EXTENDED_ACCESS;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_NONE_SECURITY;
@@ -375,7 +376,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 public void onOrientationChanged(int orientation) {
                     if (mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)
                             && getResources().getBoolean(R.bool.update_bouncer_constraints)) {
-                        mSecurityViewFlipperController.updateConstraints(orientation);
+                        boolean useSplitBouncer = orientation == ORIENTATION_LANDSCAPE;
+                        mSecurityViewFlipperController.updateConstraints(useSplitBouncer);
                     }
                 }
             };

@@ -16,12 +16,15 @@
 
 package com.android.keyguard;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_APPEAR;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_DISAPPEAR;
+import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_CLOSED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
 
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
@@ -30,6 +33,7 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
@@ -46,12 +50,15 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     ValueAnimator mAppearAnimator = ValueAnimator.ofFloat(0f, 1f);
     private final DisappearAnimationUtils mDisappearAnimationUtils;
     private final DisappearAnimationUtils mDisappearAnimationUtilsLocked;
-    private ConstraintLayout mContainer;
+    @Nullable private MotionLayout mContainerMotionLayout;
+    @Nullable private ConstraintLayout mContainerConstraintLayout;
     private int mDisappearYTranslation;
     private View[][] mViews;
     private int mYTrans;
     private int mYTransOffset;
     private View mBouncerMessageArea;
+    private boolean mAlreadyUsingSplitBouncer = false;
+    private boolean mIsLockScreenLandscapeEnabled = false;
     @DevicePostureInt private int mLastDevicePosture = DEVICE_POSTURE_UNKNOWN;
     public static final long ANIMATION_DURATION = 650;
 
@@ -76,6 +83,22 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         mYTransOffset = getResources().getDimensionPixelSize(R.dimen.pin_view_trans_y_entry_offset);
     }
 
+    /** Use motion layout (new bouncer implementation) if LOCKSCREEN_ENABLE_LANDSCAPE flag is
+     *  enabled, instead of constraint layout (old bouncer implementation) */
+    public void setIsLockScreenLandscapeEnabled(boolean isLockScreenLandscapeEnabled) {
+        mIsLockScreenLandscapeEnabled = isLockScreenLandscapeEnabled;
+        findContainerLayout();
+    }
+
+    private void findContainerLayout() {
+        if (mIsLockScreenLandscapeEnabled) {
+            mContainerMotionLayout = findViewById(R.id.pin_container);
+        } else {
+            mContainerConstraintLayout = findViewById(R.id.pin_container);
+        }
+    }
+
+
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         updateMargins();
@@ -84,6 +107,17 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     void onDevicePostureChanged(@DevicePostureInt int posture) {
         if (mLastDevicePosture != posture) {
             mLastDevicePosture = posture;
+
+            if (mIsLockScreenLandscapeEnabled) {
+                boolean useSplitBouncerAfterFold =
+                        mLastDevicePosture == DEVICE_POSTURE_CLOSED
+                        &&  getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE;
+
+                if (mAlreadyUsingSplitBouncer != useSplitBouncerAfterFold) {
+                    updateConstraints(useSplitBouncerAfterFold);
+                }
+            }
+
             updateMargins();
         }
     }
@@ -135,18 +169,40 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         float halfOpenPercentage =
                 mContext.getResources().getFloat(R.dimen.half_opened_bouncer_height_ratio);
 
-        ConstraintSet cs = new ConstraintSet();
-        cs.clone(mContainer);
-        cs.setGuidelinePercent(R.id.pin_pad_top_guideline,
-                mLastDevicePosture == DEVICE_POSTURE_HALF_OPENED ? halfOpenPercentage : 0.0f);
-        cs.applyTo(mContainer);
+        if (mIsLockScreenLandscapeEnabled) {
+            ConstraintSet cs = mContainerMotionLayout.getConstraintSet(R.id.single_constraints);
+            cs.setGuidelinePercent(R.id.pin_pad_top_guideline,
+                    mLastDevicePosture == DEVICE_POSTURE_HALF_OPENED ? halfOpenPercentage : 0.0f);
+            cs.applyTo(mContainerMotionLayout);
+        } else {
+            ConstraintSet cs = new ConstraintSet();
+            cs.clone(mContainerConstraintLayout);
+            cs.setGuidelinePercent(R.id.pin_pad_top_guideline,
+                    mLastDevicePosture == DEVICE_POSTURE_HALF_OPENED ? halfOpenPercentage : 0.0f);
+            cs.applyTo(mContainerConstraintLayout);
+        }
+    }
+
+    /** Updates the keyguard view's constraints (single or split constraints).
+     *  Split constraints are only used for small landscape screens.
+     *  Only called when flag LANDSCAPE_ENABLE_LOCKSCREEN is enabled. */
+    @Override
+    protected void updateConstraints(boolean useSplitBouncer) {
+        mAlreadyUsingSplitBouncer = useSplitBouncer;
+        if (useSplitBouncer) {
+            mContainerMotionLayout.jumpToState(R.id.split_constraints);
+            mContainerMotionLayout.setMaxWidth(Integer.MAX_VALUE);
+        } else {
+            mContainerMotionLayout.jumpToState(R.id.single_constraints);
+            mContainerMotionLayout.setMaxWidth(getResources()
+                    .getDimensionPixelSize(R.dimen.keyguard_security_width));
+        }
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mContainer = findViewById(R.id.pin_container);
         mBouncerMessageArea = findViewById(R.id.bouncer_message_area);
         mViews = new View[][]{
                 new View[]{
