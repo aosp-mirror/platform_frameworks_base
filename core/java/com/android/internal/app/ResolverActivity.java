@@ -2623,13 +2623,13 @@ public class ResolverActivity extends Activity implements
      * An a11y delegate that expands resolver drawer when gesture navigation reaches a partially
      * invisible target in the list.
      */
-    private static class AppListAccessibilityDelegate extends View.AccessibilityDelegate {
+    public static class AppListAccessibilityDelegate extends View.AccessibilityDelegate {
         private final ResolverDrawerLayout mDrawer;
         @Nullable
         private final View mBottomBar;
         private final Rect mRect = new Rect();
 
-        private AppListAccessibilityDelegate(ResolverDrawerLayout drawer) {
+        public AppListAccessibilityDelegate(ResolverDrawerLayout drawer) {
             mDrawer = drawer;
             mBottomBar = mDrawer.findViewById(R.id.button_bar_container);
         }
