@@ -43,6 +43,7 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate
 import com.android.systemui.biometrics.SideFpsController
 import com.android.systemui.biometrics.SideFpsUiRequestSource
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.classifier.FalsingA11yDelegate
 import com.android.systemui.classifier.FalsingCollector
@@ -72,6 +73,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.GlobalSettings
 import com.google.common.truth.Truth
+import dagger.Lazy
 import java.util.Optional
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -154,6 +156,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     private lateinit var sceneInteractor: SceneInteractor
     private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     private lateinit var authenticationInteractor: AuthenticationInteractor
+    @Mock private lateinit var primaryBouncerInteractor: Lazy<PrimaryBouncerInteractor>
     private lateinit var sceneTransitionStateFlow: MutableStateFlow<ObservableTransitionState>
 
     private lateinit var underTest: KeyguardSecurityContainerController
@@ -193,6 +196,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
         featureFlags.set(Flags.BOUNCER_USER_SWITCHER, false)
         featureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
+        featureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
 
         keyguardPasswordViewController =
             KeyguardPasswordViewController(
@@ -257,7 +261,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 userInteractor,
                 deviceProvisionedController,
                 faceAuthAccessibilityDelegate,
-                keyguardTransitionInteractor
+                keyguardTransitionInteractor,
+                primaryBouncerInteractor,
             ) {
                 authenticationInteractor
             }

@@ -19,27 +19,36 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_DURATION
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.statusbar.SysuiStatusBarStateController
+import dagger.Lazy
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 /**
  * Breaks down PRIMARY_BOUNCER->GONE transition into discrete steps for corresponding views to
  * consume.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class PrimaryBouncerToGoneTransitionViewModel
 @Inject
 constructor(
-    private val interactor: KeyguardTransitionInteractor,
+    interactor: KeyguardTransitionInteractor,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
+    keyguardDismissActionInteractor: Lazy<KeyguardDismissActionInteractor>,
+    featureFlags: FeatureFlagsClassic,
 ) {
     private val transitionAnimation =
         KeyguardTransitionAnimationFlow(
@@ -52,11 +61,18 @@ constructor(
 
     /** Bouncer container alpha */
     val bouncerAlpha: Flow<Float> =
-        transitionAnimation.createFlow(
+        if (featureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+            keyguardDismissActionInteractor
+                .get()
+                .willAnimateDismissActionOnLockscreen
+                .flatMapLatest { createBouncerAlphaFlow { it } }
+        } else {
+            createBouncerAlphaFlow(primaryBouncerInteractor::willRunDismissFromKeyguard)
+        }
+    private fun createBouncerAlphaFlow(willRunAnimationOnKeyguard: () -> Boolean): Flow<Float> {
+        return transitionAnimation.createFlow(
             duration = 200.milliseconds,
-            onStart = {
-                willRunDismissFromKeyguard = primaryBouncerInteractor.willRunDismissFromKeyguard()
-            },
+            onStart = { willRunDismissFromKeyguard = willRunAnimationOnKeyguard() },
             onStep = {
                 if (willRunDismissFromKeyguard) {
                     0f
@@ -65,14 +81,24 @@ constructor(
                 }
             },
         )
+    }
 
     /** Lockscreen alpha */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.createFlow(
+        if (featureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+            keyguardDismissActionInteractor
+                .get()
+                .willAnimateDismissActionOnLockscreen
+                .flatMapLatest { createLockscreenAlpha { it } }
+        } else {
+            createLockscreenAlpha(primaryBouncerInteractor::willRunDismissFromKeyguard)
+        }
+    private fun createLockscreenAlpha(willRunAnimationOnKeyguard: () -> Boolean): Flow<Float> {
+        return transitionAnimation.createFlow(
             duration = 50.milliseconds,
             onStart = {
                 leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
-                willRunDismissFromKeyguard = primaryBouncerInteractor.willRunDismissFromKeyguard()
+                willRunDismissFromKeyguard = willRunAnimationOnKeyguard()
             },
             onStep = {
                 if (willRunDismissFromKeyguard || leaveShadeOpen) {
@@ -82,17 +108,26 @@ constructor(
                 }
             },
         )
+    }
 
     /** Scrim alpha values */
     val scrimAlpha: Flow<ScrimAlpha> =
-        transitionAnimation
+        if (featureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+            keyguardDismissActionInteractor
+                .get()
+                .willAnimateDismissActionOnLockscreen
+                .flatMapLatest { createScrimAlphaFlow { it } }
+        } else {
+            createScrimAlphaFlow(primaryBouncerInteractor::willRunDismissFromKeyguard)
+        }
+    private fun createScrimAlphaFlow(willRunAnimationOnKeyguard: () -> Boolean): Flow<ScrimAlpha> {
+        return transitionAnimation
             .createFlow(
                 duration = TO_GONE_DURATION,
                 interpolator = EMPHASIZED_ACCELERATE,
                 onStart = {
                     leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
-                    willRunDismissFromKeyguard =
-                        primaryBouncerInteractor.willRunDismissFromKeyguard()
+                    willRunDismissFromKeyguard = willRunAnimationOnKeyguard()
                 },
                 onStep = { 1f - it },
             )
@@ -108,4 +143,5 @@ constructor(
                     ScrimAlpha(behindAlpha = it)
                 }
             }
+    }
 }

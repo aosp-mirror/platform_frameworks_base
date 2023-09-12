@@ -34,9 +34,11 @@ import com.android.systemui.dreams.DreamMonitor
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
-import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.KeyguardViewConfigurator
+import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.data.quickaffordance.MuteQuickAffordanceCoreStartable
+import com.android.systemui.keyguard.ui.binder.KeyguardDismissActionBinder
+import com.android.systemui.keyguard.ui.binder.KeyguardDismissBinder
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.media.RingtonePlayer
 import com.android.systemui.media.dialog.MediaOutputSwitcherDialogUI
@@ -74,12 +76,14 @@ import dagger.multibindings.IntoMap
 /**
  * Collection of {@link CoreStartable}s that should be run on AOSP.
  */
-@Module(includes = [
-    MultiUserUtilsModule::class,
-    StartControlsStartableModule::class,
-    StartBinderLoggerModule::class,
-    WallpaperModule::class,
-])
+@Module(
+    includes = [
+        MultiUserUtilsModule::class,
+        StartControlsStartableModule::class,
+        StartBinderLoggerModule::class,
+        WallpaperModule::class,
+    ]
+)
 abstract class SystemUICoreStartableModule {
     /** Inject into AuthController.  */
     @Binds
@@ -352,4 +356,14 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(BackActionInteractor::class)
     abstract fun bindBackActionInteractor(impl: BackActionInteractor): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardDismissActionBinder::class)
+    abstract fun bindKeyguardDismissActionBinder(impl: KeyguardDismissActionBinder): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardDismissBinder::class)
+    abstract fun bindKeyguardDismissBinder(impl: KeyguardDismissBinder): CoreStartable
 }
