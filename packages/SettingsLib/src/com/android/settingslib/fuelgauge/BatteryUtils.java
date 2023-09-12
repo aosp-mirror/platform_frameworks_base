@@ -22,6 +22,9 @@ import android.content.IntentFilter;
 
 public final class BatteryUtils {
 
+    /** The key to get the time to full from Settings.Global */
+    public static final String GLOBAL_TIME_TO_FULL_MILLIS = "time_to_full_millis";
+
     /** Gets the latest sticky battery intent from the Android system. */
     public static Intent getBatteryIntent(Context context) {
         return context.registerReceiver(
