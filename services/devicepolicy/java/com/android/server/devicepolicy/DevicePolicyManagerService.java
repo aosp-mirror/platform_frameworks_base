@@ -3347,6 +3347,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mOwners.systemReady();
                 applyManagedSubscriptionsPolicyIfRequired();
                 break;
+            case SystemService.PHASE_SYSTEM_SERVICES_READY:
+                synchronized (getLockObject()) {
+                    mDevicePolicyEngine.reapplyAllPoliciesLocked();
+                }
+                break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 synchronized (getLockObject()) {
                     migrateToProfileOnOrganizationOwnedDeviceIfCompLocked();

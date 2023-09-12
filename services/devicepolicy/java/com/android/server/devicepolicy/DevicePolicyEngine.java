@@ -1472,11 +1472,10 @@ final class DevicePolicyEngine {
         synchronized (mLock) {
             clear();
             new DevicePoliciesReaderWriter().readFromFileLocked();
-            reapplyAllPoliciesLocked();
         }
     }
 
-    private <V> void reapplyAllPoliciesLocked() {
+    <V> void reapplyAllPoliciesLocked() {
         for (PolicyKey policy : mGlobalPolicies.keySet()) {
             PolicyState<?> policyState = mGlobalPolicies.get(policy);
             // Policy definition and value will always be of the same type
