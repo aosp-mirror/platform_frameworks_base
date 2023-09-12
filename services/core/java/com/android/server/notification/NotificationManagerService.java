@@ -6631,8 +6631,7 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
-    @VisibleForTesting
-    static boolean isBigPictureWithBitmapOrIcon(Notification n) {
+    private static boolean isBigPictureWithBitmapOrIcon(Notification n) {
         final boolean isBigPicture = n.isStyle(Notification.BigPictureStyle.class);
         if (!isBigPicture) {
             return false;
@@ -6650,15 +6649,12 @@ public class NotificationManagerService extends SystemService {
         return false;
     }
 
-    @VisibleForTesting
-    // TODO(b/298414239) Unit test via public API
-    static boolean isBitmapExpired(long timePostedMs, long timeNowMs, long timeToLiveMs) {
+    private static boolean isBitmapExpired(long timePostedMs, long timeNowMs, long timeToLiveMs) {
         final long timeDiff = timeNowMs - timePostedMs;
         return timeDiff > timeToLiveMs;
     }
 
-    @VisibleForTesting
-    void removeBitmapAndRepost(NotificationRecord r) {
+    private void removeBitmapAndRepost(NotificationRecord r) {
         if (!isBigPictureWithBitmapOrIcon(r.getNotification())) {
             return;
         }
