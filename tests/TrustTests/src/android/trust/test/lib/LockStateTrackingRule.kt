@@ -96,6 +96,9 @@ class LockStateTrackingRule : TestRule {
 
         override fun onTrustError(message: CharSequence) {
         }
+
+        override fun onEnabledTrustAgentsChanged(userId: Int) {
+        }
     }
 
     data class TrustState(
