@@ -5,7 +5,7 @@ package: "com.android.server.display.feature.flags"
 flag {
     name: "enable_connected_display_management"
     namespace: "display_manager"
-    description: "Feature flag for Connected Display managment"
+    description: "Feature flag for Connected Display management"
     bug: "280739508"
     is_fixed_read_only: true
 }
@@ -34,3 +34,10 @@ flag {
     is_fixed_read_only: true
 }
 
+flag {
+    name: "enable_display_resolution_range_voting"
+    namespace: "display_manager"
+    description: "Feature flag to enable voting for ranges of resolutions"
+    bug: "299297058"
+    is_fixed_read_only: true
+}

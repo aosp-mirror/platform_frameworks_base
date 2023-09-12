@@ -47,6 +47,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_ADAPTIVE_TONE_IMPROVEMENTS_1,
             Flags::enableAdaptiveToneImprovements1);
 
+    private final FlagState mDisplayResolutionRangeVotingState = new FlagState(
+            Flags.FLAG_ENABLE_DISPLAY_RESOLUTION_RANGE_VOTING,
+            Flags::enableDisplayResolutionRangeVoting);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -66,6 +70,11 @@ public class DisplayManagerFlags {
      */
     public boolean isAdaptiveTone1Enabled() {
         return mAdaptiveToneImprovements1.isEnabled();
+    }
+
+    /** Returns whether resolution range voting feature is enabled or not. */
+    public boolean isDisplayResolutionRangeVotingEnabled() {
+        return mDisplayResolutionRangeVotingState.isEnabled();
     }
 
     private static class FlagState {

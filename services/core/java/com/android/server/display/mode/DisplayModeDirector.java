@@ -71,6 +71,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.utils.AmbientFilter;
 import com.android.server.display.utils.AmbientFilterFactory;
 import com.android.server.display.utils.DeviceConfigParsingUtils;
@@ -151,12 +152,21 @@ public class DisplayModeDirector {
     @DisplayManager.SwitchingType
     private int mModeSwitchingType = DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS;
 
-    public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler) {
-        this(context, handler, new RealInjector(context));
+    /**
+     * Whether resolution range voting feature is enabled.
+     */
+    private final boolean mIsDisplayResolutionRangeVotingEnabled;
+
+    public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler,
+            @NonNull DisplayManagerFlags displayManagerFlags) {
+        this(context, handler, new RealInjector(context), displayManagerFlags);
     }
 
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler,
-            @NonNull Injector injector) {
+            @NonNull Injector injector,
+            @NonNull DisplayManagerFlags displayManagerFlags) {
+        mIsDisplayResolutionRangeVotingEnabled = displayManagerFlags
+                .isDisplayResolutionRangeVotingEnabled();
         mContext = context;
         mHandler = new DisplayModeDirectorHandler(handler.getLooper());
         mInjector = injector;
@@ -230,6 +240,8 @@ public class DisplayModeDirector {
         public float maxRenderFrameRate;
         public int width;
         public int height;
+        public int minWidth;
+        public int minHeight;
         public boolean disableRefreshRateSwitching;
         public float appRequestBaseModeRefreshRate;
 
@@ -244,6 +256,8 @@ public class DisplayModeDirector {
             maxRenderFrameRate = Float.POSITIVE_INFINITY;
             width = Vote.INVALID_SIZE;
             height = Vote.INVALID_SIZE;
+            minWidth = 0;
+            minHeight = 0;
             disableRefreshRateSwitching = false;
             appRequestBaseModeRefreshRate = 0f;
         }
@@ -256,6 +270,8 @@ public class DisplayModeDirector {
                     + ", maxRenderFrameRate=" + maxRenderFrameRate
                     + ", width=" + width
                     + ", height=" + height
+                    + ", minWidth=" + minWidth
+                    + ", minHeight=" + minHeight
                     + ", disableRefreshRateSwitching=" + disableRefreshRateSwitching
                     + ", appRequestBaseModeRefreshRate=" + appRequestBaseModeRefreshRate;
         }
@@ -277,7 +293,6 @@ public class DisplayModeDirector {
                 continue;
             }
 
-
             // For physical refresh rates, just use the tightest bounds of all the votes.
             // The refresh rate cannot be lower than the minimal render frame rate.
             final float minPhysicalRefreshRate = Math.max(vote.refreshRateRanges.physical.min,
@@ -298,10 +313,18 @@ public class DisplayModeDirector {
             // For display size, disable refresh rate switching and base mode refresh rate use only
             // the first vote we come across (i.e. the highest priority vote that includes the
             // attribute).
-            if (summary.height == Vote.INVALID_SIZE && summary.width == Vote.INVALID_SIZE
-                    && vote.height > 0 && vote.width > 0) {
-                summary.width = vote.width;
-                summary.height = vote.height;
+            if (vote.height > 0 && vote.width > 0) {
+                if (summary.width == Vote.INVALID_SIZE && summary.height == Vote.INVALID_SIZE) {
+                    summary.width = vote.width;
+                    summary.height = vote.height;
+                    summary.minWidth = vote.minWidth;
+                    summary.minHeight = vote.minHeight;
+                } else if (mIsDisplayResolutionRangeVotingEnabled) {
+                    summary.width = Math.min(summary.width, vote.width);
+                    summary.height = Math.min(summary.height, vote.height);
+                    summary.minWidth = Math.max(summary.minWidth, vote.minWidth);
+                    summary.minHeight = Math.max(summary.minHeight, vote.minHeight);
+                }
             }
             if (!summary.disableRefreshRateSwitching && vote.disableRefreshRateSwitching) {
                 summary.disableRefreshRateSwitching = true;
@@ -413,6 +436,8 @@ public class DisplayModeDirector {
                         || primarySummary.width == Vote.INVALID_SIZE) {
                     primarySummary.width = defaultMode.getPhysicalWidth();
                     primarySummary.height = defaultMode.getPhysicalHeight();
+                } else if (mIsDisplayResolutionRangeVotingEnabled) {
+                    updateSummaryWithBestAllowedResolution(modes, primarySummary);
                 }
 
                 availableModes = filterModes(modes, primarySummary);
@@ -652,6 +677,38 @@ public class DisplayModeDirector {
         }
 
         return availableModes;
+    }
+
+    private void updateSummaryWithBestAllowedResolution(final Display.Mode[] supportedModes,
+            VoteSummary outSummary) {
+        final int maxAllowedWidth = outSummary.width;
+        final int maxAllowedHeight = outSummary.height;
+        if (mLoggingEnabled) {
+            Slog.i(TAG, "updateSummaryWithBestAllowedResolution " + outSummary);
+        }
+        outSummary.width = Vote.INVALID_SIZE;
+        outSummary.height = Vote.INVALID_SIZE;
+
+        int maxNumberOfPixels = 0;
+        for (Display.Mode mode : supportedModes) {
+            if (mode.getPhysicalWidth() > maxAllowedWidth
+                    || mode.getPhysicalHeight() > maxAllowedHeight
+                    || mode.getPhysicalWidth() < outSummary.minWidth
+                    || mode.getPhysicalHeight() < outSummary.minHeight) {
+                continue;
+            }
+
+            int numberOfPixels = mode.getPhysicalHeight() * mode.getPhysicalWidth();
+            if (numberOfPixels > maxNumberOfPixels || (mode.getPhysicalWidth() == maxAllowedWidth
+                    && mode.getPhysicalHeight() == maxAllowedHeight)) {
+                if (mLoggingEnabled) {
+                    Slog.i(TAG, "updateSummaryWithBestAllowedResolution updated with " + mode);
+                }
+                maxNumberOfPixels = numberOfPixels;
+                outSummary.width = mode.getPhysicalWidth();
+                outSummary.height = mode.getPhysicalHeight();
+            }
+        }
     }
 
     /**

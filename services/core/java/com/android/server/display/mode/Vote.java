@@ -127,6 +127,14 @@ final class Vote {
      */
     public final int height;
     /**
+     * Min requested width of the display in pixels, or 0;
+     */
+    public final int minWidth;
+    /**
+     * Min requested height of the display in pixels, or 0;
+     */
+    public final int minHeight;
+    /**
      * Information about the refresh rate frame rate ranges DM would like to set the display to.
      */
     public final SurfaceControl.RefreshRateRanges refreshRateRanges;
@@ -144,42 +152,82 @@ final class Vote {
     public final float appRequestBaseModeRefreshRate;
 
     static Vote forPhysicalRefreshRates(float minRefreshRate, float maxRefreshRate) {
-        return new Vote(INVALID_SIZE, INVALID_SIZE, minRefreshRate, maxRefreshRate, 0,
-                Float.POSITIVE_INFINITY,
-                minRefreshRate == maxRefreshRate, 0f);
+        return new Vote(/* minWidth= */ 0, /* minHeight= */ 0,
+                /* width= */ INVALID_SIZE, /* height= */ INVALID_SIZE,
+                /* minPhysicalRefreshRate= */ minRefreshRate,
+                /* maxPhysicalRefreshRate= */ maxRefreshRate,
+                /* minRenderFrameRate= */ 0,
+                /* maxRenderFrameRate= */ Float.POSITIVE_INFINITY,
+                /* disableRefreshRateSwitching= */ minRefreshRate == maxRefreshRate,
+                /* baseModeRefreshRate= */ 0f);
     }
 
     static Vote forRenderFrameRates(float minFrameRate, float maxFrameRate) {
-        return new Vote(INVALID_SIZE, INVALID_SIZE, 0, Float.POSITIVE_INFINITY, minFrameRate,
+        return new Vote(/* minWidth= */ 0, /* minHeight= */ 0,
+                /* width= */ INVALID_SIZE, /* height= */ INVALID_SIZE,
+                /* minPhysicalRefreshRate= */ 0,
+                /* maxPhysicalRefreshRate= */ Float.POSITIVE_INFINITY,
+                minFrameRate,
                 maxFrameRate,
-                false, 0f);
+                /* disableRefreshRateSwitching= */ false,
+                /* baseModeRefreshRate= */ 0f);
     }
 
     static Vote forSize(int width, int height) {
-        return new Vote(width, height, 0, Float.POSITIVE_INFINITY, 0, Float.POSITIVE_INFINITY,
-                false,
-                0f);
+        return new Vote(/* minWidth= */ width, /* minHeight= */ height,
+                width, height,
+                /* minPhysicalRefreshRate= */ 0,
+                /* maxPhysicalRefreshRate= */ Float.POSITIVE_INFINITY,
+                /* minRenderFrameRate= */ 0,
+                /* maxRenderFrameRate= */ Float.POSITIVE_INFINITY,
+                /* disableRefreshRateSwitching= */ false,
+                /* baseModeRefreshRate= */ 0f);
+    }
+
+    static Vote forSizeAndPhysicalRefreshRatesRange(int minWidth, int minHeight,
+            int width, int height, float minRefreshRate, float maxRefreshRate) {
+        return new Vote(minWidth, minHeight,
+                width, height,
+                minRefreshRate,
+                maxRefreshRate,
+                /* minRenderFrameRate= */ 0,
+                /* maxRenderFrameRate= */ Float.POSITIVE_INFINITY,
+                /* disableRefreshRateSwitching= */ minRefreshRate == maxRefreshRate,
+                /* baseModeRefreshRate= */ 0f);
     }
 
     static Vote forDisableRefreshRateSwitching() {
-        return new Vote(INVALID_SIZE, INVALID_SIZE, 0, Float.POSITIVE_INFINITY, 0,
-                Float.POSITIVE_INFINITY, true,
-                0f);
+        return new Vote(/* minWidth= */ 0, /* minHeight= */ 0,
+                /* width= */ INVALID_SIZE, /* height= */ INVALID_SIZE,
+                /* minPhysicalRefreshRate= */ 0,
+                /* maxPhysicalRefreshRate= */ Float.POSITIVE_INFINITY,
+                /* minRenderFrameRate= */ 0,
+                /* maxRenderFrameRate= */ Float.POSITIVE_INFINITY,
+                /* disableRefreshRateSwitching= */ true,
+                /* baseModeRefreshRate= */ 0f);
     }
 
     static Vote forBaseModeRefreshRate(float baseModeRefreshRate) {
-        return new Vote(INVALID_SIZE, INVALID_SIZE, 0, Float.POSITIVE_INFINITY, 0,
-                Float.POSITIVE_INFINITY, false,
-                baseModeRefreshRate);
+        return new Vote(/* minWidth= */ 0, /* minHeight= */ 0,
+                /* width= */ INVALID_SIZE, /* height= */ INVALID_SIZE,
+                /* minPhysicalRefreshRate= */ 0,
+                /* maxPhysicalRefreshRate= */ Float.POSITIVE_INFINITY,
+                /* minRenderFrameRate= */ 0,
+                /* maxRenderFrameRate= */ Float.POSITIVE_INFINITY,
+                /* disableRefreshRateSwitching= */ false,
+                /* baseModeRefreshRate= */ baseModeRefreshRate);
     }
 
-    private Vote(int width, int height,
+    private Vote(int minWidth, int minHeight,
+            int width, int height,
             float minPhysicalRefreshRate,
             float maxPhysicalRefreshRate,
             float minRenderFrameRate,
             float maxRenderFrameRate,
             boolean disableRefreshRateSwitching,
             float baseModeRefreshRate) {
+        this.minWidth = minWidth;
+        this.minHeight = minHeight;
         this.width = width;
         this.height = height;
         this.refreshRateRanges = new SurfaceControl.RefreshRateRanges(
@@ -229,7 +277,8 @@ final class Vote {
     @Override
     public String toString() {
         return "Vote: {"
-                + "width: " + width + ", height: " + height
+                + "minWidth: " + minWidth + ", minHeight: " + minHeight
+                + ", width: " + width + ", height: " + height
                 + ", refreshRateRanges: " + refreshRateRanges
                 + ", disableRefreshRateSwitching: " + disableRefreshRateSwitching
                 + ", appRequestBaseModeRefreshRate: "  + appRequestBaseModeRefreshRate + "}";
