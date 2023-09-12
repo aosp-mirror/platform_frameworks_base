@@ -832,5 +832,5 @@ interface IPackageManager {
 
     void unregisterPackageMonitorCallback(IRemoteCallback callback);
 
-    ArchivedPackageParcel getArchivedPackage(in String apkPath);
+    ArchivedPackageParcel getArchivedPackage(in String packageName, int userId);
 }

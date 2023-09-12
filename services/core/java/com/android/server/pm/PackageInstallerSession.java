@@ -40,6 +40,7 @@ import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.util.XmlUtils.readBitmapAttribute;
 import static com.android.internal.util.XmlUtils.readByteArrayAttribute;
@@ -1165,11 +1166,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IllegalArgumentException(
                         "Archived installation can only use Streaming System DataLoader.");
             }
-            if (!TextUtils.isEmpty(params.appPackageName) && !isArchivedInstallationAllowed(
-                    params.appPackageName)) {
-                throw new IllegalArgumentException(
-                        "Archived installation of this package is not allowed.");
-            }
         }
     }
 
@@ -1548,6 +1544,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             var archPkg = metadata.getArchivedPackage();
+            if (archPkg == null) {
+                throw new PackageManagerException(INSTALL_FAILED_VERIFICATION_FAILURE,
+                        "Metadata does not contain ArchivedPackage: " + file);
+            }
             if (archPkg.packageName == null || archPkg.signingDetails == null) {
                 throw new PackageManagerException(INSTALL_FAILED_VERIFICATION_FAILURE,
                         "ArchivedPackage does not contain required info: " + file);

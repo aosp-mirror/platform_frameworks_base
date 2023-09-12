@@ -31,12 +31,14 @@ import android.app.BroadcastOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.ArchivedActivityParcel;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -56,6 +58,7 @@ import com.android.server.pm.pkg.ArchiveState.ArchiveActivityInfo;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -158,7 +161,8 @@ public class PackageArchiver {
         String responsibleInstallerPackage = getResponsibleInstallerPackage(ps);
         verifyInstaller(responsibleInstallerPackage);
 
-        List<LauncherActivityInfo> mainActivities = getLauncherActivityInfos(ps, userId);
+        List<LauncherActivityInfo> mainActivities = getLauncherActivityInfos(ps.getPackageName(),
+                userId);
         final CompletableFuture<ArchiveState> archiveState = new CompletableFuture<>();
         mPm.mHandler.post(() -> {
             try {
@@ -172,11 +176,11 @@ public class PackageArchiver {
         return archiveState;
     }
 
-    private ArchiveState createArchiveStateInternal(String packageName, int userId,
+    static ArchiveState createArchiveStateInternal(String packageName, int userId,
             List<LauncherActivityInfo> mainActivities, String installerPackage)
             throws IOException {
-        List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>();
-        for (int i = 0; i < mainActivities.size(); i++) {
+        List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>(mainActivities.size());
+        for (int i = 0, size = mainActivities.size(); i < size; i++) {
             LauncherActivityInfo mainActivity = mainActivities.get(i);
             Path iconPath = storeIcon(packageName, mainActivity, userId);
             ArchiveActivityInfo activityInfo = new ArchiveActivityInfo(
@@ -189,7 +193,7 @@ public class PackageArchiver {
 
     // TODO(b/298452477) Handle monochrome icons.
     @VisibleForTesting
-    Path storeIcon(String packageName, LauncherActivityInfo mainActivity,
+    static Path storeIcon(String packageName, LauncherActivityInfo mainActivity,
             @UserIdInt int userId)
             throws IOException {
         int iconResourceId = mainActivity.getActivityInfo().getIconResource();
@@ -310,16 +314,16 @@ public class PackageArchiver {
                 /* initialExtras= */ null);
     }
 
-    private List<LauncherActivityInfo> getLauncherActivityInfos(PackageStateInternal ps,
+    List<LauncherActivityInfo> getLauncherActivityInfos(String packageName,
             int userId) throws PackageManager.NameNotFoundException {
         List<LauncherActivityInfo> mainActivities =
                 Binder.withCleanCallingIdentity(() -> getLauncherApps().getActivityList(
-                        ps.getPackageName(),
+                        packageName,
                         new UserHandle(userId)));
         if (mainActivities.isEmpty()) {
             throw new PackageManager.NameNotFoundException(
                     TextUtils.formatSimple("The app %s does not have a main activity.",
-                            ps.getPackageName()));
+                            packageName));
         }
 
         return mainActivities;
@@ -423,7 +427,7 @@ public class PackageArchiver {
         }
     }
 
-    private File createIconsDir(@UserIdInt int userId) throws IOException {
+    private static File createIconsDir(@UserIdInt int userId) throws IOException {
         File iconsDir = getIconsDir(userId);
         if (!iconsDir.isDirectory()) {
             iconsDir.delete();
@@ -436,7 +440,7 @@ public class PackageArchiver {
         return iconsDir;
     }
 
-    private File getIconsDir(int userId) {
+    private static File getIconsDir(int userId) {
         return new File(Environment.getDataSystemCeDirectory(userId), ARCHIVE_ICONS_DIR);
     }
 
@@ -462,4 +466,89 @@ public class PackageArchiver {
         drawable.draw(canvas);
         return bitmap;
     }
-}
+
+    private static byte[] bytesFromBitmapFile(Path path) throws IOException {
+        if (path == null) {
+            return null;
+        }
+        // Technically we could just read the bytes, but we want to be sure we store the
+        // right format.
+        return bytesFromBitmap(BitmapFactory.decodeFile(path.toString()));
+    }
+
+    private static byte[] bytesFromBitmap(Bitmap bitmap) throws IOException {
+        if (bitmap == null) {
+            return null;
+        }
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(
+                bitmap.getByteCount())) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            return baos.toByteArray();
+        }
+    }
+
+    /**
+     * Creates serializable archived activities from existing ArchiveState.
+     */
+    static ArchivedActivityParcel[] createArchivedActivities(ArchiveState archiveState)
+            throws IOException {
+        var infos = archiveState.getActivityInfos();
+        if (infos == null || infos.isEmpty()) {
+            throw new IllegalArgumentException("No activities in archive state");
+        }
+
+        List<ArchivedActivityParcel> activities = new ArrayList<>(infos.size());
+        for (int i = 0, size = infos.size(); i < size; ++i) {
+            var info = infos.get(i);
+            if (info == null) {
+                continue;
+            }
+            var archivedActivity = new ArchivedActivityParcel();
+            archivedActivity.title = info.getTitle();
+            archivedActivity.iconBitmap = bytesFromBitmapFile(info.getIconBitmap());
+            archivedActivity.monochromeIconBitmap = bytesFromBitmapFile(
+                    info.getMonochromeIconBitmap());
+            activities.add(archivedActivity);
+        }
+
+        if (activities.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Failed to extract title and icon of main activities");
+        }
+
+        return activities.toArray(new ArchivedActivityParcel[activities.size()]);
+    }
+
+    /**
+     * Creates serializable archived activities from launcher activities.
+     */
+    static ArchivedActivityParcel[] createArchivedActivities(List<LauncherActivityInfo> infos)
+            throws IOException {
+        if (infos == null || infos.isEmpty()) {
+            throw new IllegalArgumentException("No launcher activities");
+        }
+
+        List<ArchivedActivityParcel> activities = new ArrayList<>(infos.size());
+        for (int i = 0, size = infos.size(); i < size; ++i) {
+            var info = infos.get(i);
+            if (info == null) {
+                continue;
+            }
+            var archivedActivity = new ArchivedActivityParcel();
+            archivedActivity.title = info.getLabel().toString();
+            archivedActivity.iconBitmap =
+                    info.getActivityInfo().getIconResource() == 0 ? null : bytesFromBitmap(
+                            drawableToBitmap(info.getIcon(/* density= */ 0)));
+            // TODO(b/298452477) Handle monochrome icons.
+            archivedActivity.monochromeIconBitmap = null;
+            activities.add(archivedActivity);
+        }
+
+        if (activities.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Failed to extract title and icon of main activities");
+        }
+
+        return activities.toArray(new ArchivedActivityParcel[activities.size()]);
+    }}

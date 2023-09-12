@@ -16,22 +16,12 @@
 
 package android.content.pm;
 
-import android.content.pm.ArchivedActivityParcel;
-import android.content.pm.SigningDetails;
+import android.graphics.Bitmap;
 
-/**
- * Contains fields required for archived package installation,
- * i.e. installation without an APK.
- * @hide
- */
-parcelable ArchivedPackageParcel {
-    String packageName;
-    SigningDetails signingDetails;
-    int versionCode;
-    int versionCodeMajor;
-    int targetSdkVersion;
-    String defaultToDeviceProtectedStorage;
-    String requestLegacyExternalStorage;
-    String userDataFragile;
-    ArchivedActivityParcel[] archivedActivities;
+/** @hide */
+parcelable ArchivedActivityParcel {
+    String title;
+    // PNG compressed bitmaps.
+    byte[] iconBitmap;
+    byte[] monochromeIconBitmap;
 }

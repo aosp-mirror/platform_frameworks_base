@@ -654,6 +654,16 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return (getFlags() & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
+    public boolean isRequestLegacyExternalStorage() {
+        return (getPrivateFlags() & ApplicationInfo.PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE)
+                != 0;
+    }
+
+    public boolean isUserDataFragile() {
+        return (getPrivateFlags() & ApplicationInfo.PRIVATE_FLAG_HAS_FRAGILE_USER_DATA)
+                != 0;
+    }
+
     public SigningDetails getSigningDetails() {
         return signatures.mSigningDetails;
     }

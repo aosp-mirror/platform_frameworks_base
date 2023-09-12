@@ -36,6 +36,7 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME;
 import static com.android.server.pm.DexOptHelper.useArtService;
@@ -116,11 +117,7 @@ import android.content.pm.UserPackage;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
 import android.content.pm.overlay.OverlayPaths;
-import android.content.pm.parsing.ApkLite;
-import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
-import android.content.pm.parsing.result.ParseResult;
-import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -228,6 +225,7 @@ import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
@@ -6301,33 +6299,60 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public ArchivedPackageParcel getArchivedPackage(String apkPath) {
-            ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
-            ParseResult<ApkLite> result = ApkLiteParseUtils.parseApkLite(input.reset(),
-                    new File(apkPath), ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES);
-            if (result.isError()) {
-                throw new IllegalArgumentException(result.getErrorMessage(), result.getException());
-            }
-            final ApkLite apk = result.getResult();
+        public ArchivedPackageParcel getArchivedPackage(@NonNull String packageName, int userId) {
+            Objects.requireNonNull(packageName);
+            int binderUid = Binder.getCallingUid();
+
+            Computer snapshot = snapshotComputer();
+            snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
+                    "getArchivedPackage");
 
             ArchivedPackageParcel archPkg = new ArchivedPackageParcel();
-            archPkg.packageName = apk.getPackageName();
-            archPkg.signingDetails = apk.getSigningDetails();
+            archPkg.packageName = packageName;
 
-            archPkg.versionCodeMajor = apk.getVersionCodeMajor();
-            archPkg.versionCode = apk.getVersionCode();
+            ArchiveState archiveState;
+            synchronized (mLock) {
+                PackageSetting ps = mSettings.getPackageLPr(packageName);
+                if (ps == null) {
+                    return null;
+                }
+                var psi = ps.getUserStateOrDefault(userId);
+                archiveState = psi.getArchiveState();
+                if (archiveState == null && !psi.isInstalled()) {
+                    return null;
+                }
 
-            archPkg.targetSdkVersion = apk.getTargetSdkVersion();
+                archPkg.signingDetails = ps.getSigningDetails();
 
-            // These get translated in flags important for user data management.
-            archPkg.backupAllowed = String.valueOf(apk.isBackupAllowed());
-            archPkg.defaultToDeviceProtectedStorage = String.valueOf(
-                    apk.isDefaultToDeviceProtectedStorage());
-            archPkg.requestLegacyExternalStorage = String.valueOf(
-                    apk.isRequestLegacyExternalStorage());
-            archPkg.userDataFragile = String.valueOf(apk.isUserDataFragile());
-            archPkg.clearUserDataOnFailedRestoreAllowed = String.valueOf(
-                    apk.isClearUserDataOnFailedRestoreAllowed());
+                long longVersionCode = ps.getVersionCode();
+                archPkg.versionCodeMajor = (int) (longVersionCode >> 32);
+                archPkg.versionCode = (int) longVersionCode;
+
+                // TODO(b/297916136): extract target sdk version.
+                archPkg.targetSdkVersion = MIN_INSTALLABLE_TARGET_SDK;
+
+                // These get translated in flags important for user data management.
+                archPkg.defaultToDeviceProtectedStorage = String.valueOf(
+                        ps.isDefaultToDeviceProtectedStorage());
+                archPkg.requestLegacyExternalStorage = String.valueOf(
+                        ps.isRequestLegacyExternalStorage());
+                archPkg.userDataFragile = String.valueOf(ps.isUserDataFragile());
+            }
+
+            try {
+                if (archiveState != null) {
+                    archPkg.archivedActivities = PackageArchiver.createArchivedActivities(
+                            archiveState);
+                } else {
+                    var mainActivities =
+                            mInstallerService.mPackageArchiver.getLauncherActivityInfos(packageName,
+                                    userId);
+                    archPkg.archivedActivities = PackageArchiver.createArchivedActivities(
+                            mainActivities);
+                }
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Package does not have a main activity", e);
+            }
 
             return archPkg;
         }

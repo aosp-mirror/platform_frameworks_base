@@ -26,6 +26,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
 import static android.content.pm.PackageManager.RESTRICTION_HIDE_NOTIFICATIONS;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
+
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
@@ -82,9 +83,9 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.os.IUserManager;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.PersistableBundle;
@@ -130,6 +131,7 @@ import dalvik.system.DexFile;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;
+import libcore.util.HexEncoding;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -248,8 +250,6 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runStreamingInstall();
                 case "install-incremental":
                     return runIncrementalInstall();
-                case "install-archived":
-                    return runArchivedInstall();
                 case "install-abandon":
                 case "install-destroy":
                     return runInstallAbandon();
@@ -277,6 +277,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runUninstall();
                 case "clear":
                     return runClear();
+                case "get-archived-package-metadata":
+                    return runGetArchivedPackageMetadata();
+                case "install-archived":
+                    return runArchivedInstall();
                 case "enable":
                     return runSetEnabledSetting(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
                 case "disable":
@@ -1806,6 +1810,56 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
         return doRemoveSplits(sessionId, splitNames, true /*logSuccess*/);
+    }
+
+    private int runGetArchivedPackageMetadata() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
+        final String packageName = getNextArg();
+        if (packageName == null) {
+            pw.println("Error: package name not specified");
+            return 1;
+        }
+        final int translatedUserId = translateUserId(userId, UserHandle.USER_NULL,
+                "runGetArchivedPackageMetadata");
+
+        try {
+            var archivedPackage = mInterface.getArchivedPackage(packageName, translatedUserId);
+            if (archivedPackage == null) {
+                pw.write("Package not found " + packageName);
+                return -1;
+            }
+
+            Parcel parcel = Parcel.obtain();
+            byte[] bytes;
+            try {
+                parcel.writeParcelable(archivedPackage, 0);
+                bytes = parcel.marshall();
+            } finally {
+                parcel.recycle();
+            }
+
+            String encoded = HexEncoding.encodeToString(bytes);
+            pw.write(encoded);
+        } catch (Exception e) {
+            getErrPrintWriter().println("Failed to get archived package, reason: " + e);
+            pw.println("Failure [failed to get archived package], reason: " + e);
+            return -1;
+        }
+        return 0;
     }
 
     private int runInstallExisting() throws RemoteException {
@@ -4146,28 +4200,24 @@ class PackageManagerShellCommand extends ShellCommand {
             throw new IllegalArgumentException("Error: Can't open file: " + inPath);
         }
 
-        File tmpFile = null;
+        final String encoded;
         final ParcelFileDescriptor fd = fdWithSize.first;
+        final int size = (int) (long) fdWithSize.second;
         try (InputStream inStream = new AutoCloseInputStream(fd)) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                File tmpStagingDir = Environment.getDataAppDirectory(null);
-                tmpFile = new File(tmpStagingDir, "tmdl" + RANDOM.nextInt() + ".tmp");
-
-                try (OutputStream outStream = new FileOutputStream(tmpFile)) {
-                    Streams.copy(inStream, outStream);
-                }
-
-                return mInterface.getArchivedPackage(tmpFile.getAbsolutePath());
-            } finally {
-                if (tmpFile != null) {
-                    tmpFile.delete();
-                }
-                Binder.restoreCallingIdentity(identity);
-            }
+            byte[] bytes = new byte[size];
+            Streams.readFully(inStream, bytes);
+            encoded = new String(bytes);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Error: Can't stage file: " + inPath, e);
+            throw new IllegalArgumentException("Error: Can't load archived package from: " + inPath,
+                    e);
         }
+
+        var result = Metadata.readArchivedPackageParcel(HexEncoding.decode(encoded));
+        if (result == null) {
+            throw new IllegalArgumentException(
+                    "Error: Can't parse archived package from: " + inPath);
+        }
+        return result;
     }
 
     private void processArgForLocalFile(String arg, PackageInstaller.Session session,

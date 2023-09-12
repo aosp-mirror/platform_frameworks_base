@@ -258,15 +258,14 @@ public class ApkLite {
         mHasDeviceAdminReceiver = false;
         mIsSdkLibrary = false;
         // @see ParsingPackageUtils#parseBaseAppBasicFlags
-        mBackupAllowed = XmlUtils.convertValueToBoolean(archivedPackage.backupAllowed, true);
+        mBackupAllowed = true;
         mDefaultToDeviceProtectedStorage = XmlUtils.convertValueToBoolean(
                 archivedPackage.defaultToDeviceProtectedStorage, false);
         mRequestLegacyExternalStorage = XmlUtils.convertValueToBoolean(
                 archivedPackage.requestLegacyExternalStorage,
                 mTargetSdkVersion < Build.VERSION_CODES.Q);
         mUserDataFragile = XmlUtils.convertValueToBoolean(archivedPackage.userDataFragile, false);
-        mClearUserDataOnFailedRestoreAllowed = XmlUtils.convertValueToBoolean(
-                archivedPackage.clearUserDataOnFailedRestoreAllowed, true);
+        mClearUserDataOnFailedRestoreAllowed = true;
     }
 
     /**
