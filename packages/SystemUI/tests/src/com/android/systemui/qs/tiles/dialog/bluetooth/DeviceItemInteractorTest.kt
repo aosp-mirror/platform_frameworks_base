@@ -24,8 +24,13 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
+import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -60,11 +65,27 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var adapter: BluetoothAdapter
 
+    @Mock private lateinit var localBluetoothManager: LocalBluetoothManager
+
     private lateinit var interactor: DeviceItemInteractor
+
+    private lateinit var dispatcher: CoroutineDispatcher
+
+    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
-        interactor = DeviceItemInteractor(bluetoothTileDialogRepository, audioManager, adapter)
+        dispatcher = StandardTestDispatcher()
+        testScope = TestScope(dispatcher)
+        interactor =
+            DeviceItemInteractor(
+                bluetoothTileDialogRepository,
+                audioManager,
+                adapter,
+                localBluetoothManager,
+                testScope.backgroundScope,
+                dispatcher
+            )
 
         `when`(deviceItem1.cachedBluetoothDevice).thenReturn(cachedDevice1)
         `when`(deviceItem2.cachedBluetoothDevice).thenReturn(cachedDevice2)
@@ -75,88 +96,109 @@ class DeviceItemInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testGetDeviceItems_noCachedDevice_returnEmpty() {
-        `when`(bluetoothTileDialogRepository.cachedDevices).thenReturn(emptyList())
-        interactor.setDeviceItemFactoryListForTesting(listOf(createFactory({ true }, deviceItem1)))
-
-        val deviceItems = interactor.getDeviceItems(mContext)
-
-        assertThat(deviceItems).isEmpty()
-    }
-
-    @Test
-    fun testGetDeviceItems_hasCachedDevice_filterNotMatch_returnEmpty() {
-        `when`(bluetoothTileDialogRepository.cachedDevices).thenReturn(listOf(cachedDevice1))
-        interactor.setDeviceItemFactoryListForTesting(listOf(createFactory({ false }, deviceItem1)))
-
-        val deviceItems = interactor.getDeviceItems(mContext)
-
-        assertThat(deviceItems).isEmpty()
-    }
-
-    @Test
-    fun testGetDeviceItems_hasCachedDevice_filterMatch_returnDeviceItem() {
-        `when`(bluetoothTileDialogRepository.cachedDevices).thenReturn(listOf(cachedDevice1))
-        interactor.setDeviceItemFactoryListForTesting(listOf(createFactory({ true }, deviceItem1)))
-
-        val deviceItems = interactor.getDeviceItems(mContext)
-
-        assertThat(deviceItems).hasSize(1)
-        assertThat(deviceItems[0]).isEqualTo(deviceItem1)
-    }
-
-    @Test
-    fun testGetDeviceItems_hasCachedDevice_filterMatch_returnMultipleDeviceItem() {
-        `when`(adapter.mostRecentlyConnectedDevices).thenReturn(null)
-        interactor.setDeviceItemFactoryListForTesting(
-            listOf(createFactory({ false }, deviceItem1), createFactory({ true }, deviceItem2))
-        )
-
-        val deviceItems = interactor.getDeviceItems(mContext)
-
-        assertThat(deviceItems).hasSize(2)
-        assertThat(deviceItems[0]).isEqualTo(deviceItem2)
-        assertThat(deviceItems[1]).isEqualTo(deviceItem2)
-    }
-
-    @Test
-    fun testGetDeviceItems_sortByDisplayPriority() {
-        `when`(adapter.mostRecentlyConnectedDevices).thenReturn(null)
-        interactor.setDeviceItemFactoryListForTesting(
-            listOf(
-                createFactory({ cachedDevice -> cachedDevice.device == device1 }, deviceItem1),
-                createFactory({ cachedDevice -> cachedDevice.device == device2 }, deviceItem2)
+    fun testUpdateDeviceItems_noCachedDevice_returnEmpty() {
+        testScope.runTest {
+            `when`(bluetoothTileDialogRepository.cachedDevices).thenReturn(emptyList())
+            interactor.setDeviceItemFactoryListForTesting(
+                listOf(createFactory({ true }, deviceItem1))
             )
-        )
-        interactor.setDisplayPriorityForTesting(
-            listOf(DeviceItemType.SAVED_BLUETOOTH_DEVICE, DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
-        )
-        `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
-        `when`(deviceItem2.type).thenReturn(DeviceItemType.SAVED_BLUETOOTH_DEVICE)
 
-        val deviceItems = interactor.getDeviceItems(mContext)
+            interactor.updateDeviceItems(mContext)
 
-        assertThat(deviceItems).isEqualTo(listOf(deviceItem2, deviceItem1))
+            assertThat(interactor.deviceItemFlow.value).isEmpty()
+        }
     }
 
     @Test
-    fun testGetDeviceItems_sameType_sortByRecentlyConnected() {
-        `when`(adapter.mostRecentlyConnectedDevices).thenReturn(listOf(device2, device1))
-        interactor.setDeviceItemFactoryListForTesting(
-            listOf(
-                createFactory({ cachedDevice -> cachedDevice.device == device1 }, deviceItem1),
-                createFactory({ cachedDevice -> cachedDevice.device == device2 }, deviceItem2)
+    fun testUpdateDeviceItems_hasCachedDevice_filterNotMatch_returnEmpty() {
+        testScope.runTest {
+            `when`(bluetoothTileDialogRepository.cachedDevices).thenReturn(listOf(cachedDevice1))
+            interactor.setDeviceItemFactoryListForTesting(
+                listOf(createFactory({ false }, deviceItem1))
             )
-        )
-        interactor.setDisplayPriorityForTesting(
-            listOf(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
-        )
-        `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
-        `when`(deviceItem2.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
 
-        val deviceItems = interactor.getDeviceItems(mContext)
+            interactor.updateDeviceItems(mContext)
 
-        assertThat(deviceItems).isEqualTo(listOf(deviceItem2, deviceItem1))
+            assertThat(interactor.deviceItemFlow.value).isEmpty()
+        }
+    }
+
+    @Test
+    fun testUpdateDeviceItems_hasCachedDevice_filterMatch_returnDeviceItem() {
+        testScope.runTest {
+            `when`(bluetoothTileDialogRepository.cachedDevices).thenReturn(listOf(cachedDevice1))
+            interactor.setDeviceItemFactoryListForTesting(
+                listOf(createFactory({ true }, deviceItem1))
+            )
+
+            interactor.updateDeviceItems(mContext)
+
+            assertThat(interactor.deviceItemFlow.value).hasSize(1)
+            assertThat(interactor.deviceItemFlow.value!![0]).isEqualTo(deviceItem1)
+        }
+    }
+
+    @Test
+    fun testUpdateDeviceItems_hasCachedDevice_filterMatch_returnMultipleDeviceItem() {
+        testScope.runTest {
+            `when`(adapter.mostRecentlyConnectedDevices).thenReturn(null)
+            interactor.setDeviceItemFactoryListForTesting(
+                listOf(createFactory({ false }, deviceItem1), createFactory({ true }, deviceItem2))
+            )
+
+            interactor.updateDeviceItems(mContext)
+
+            assertThat(interactor.deviceItemFlow.value).hasSize(2)
+            assertThat(interactor.deviceItemFlow.value!![0]).isEqualTo(deviceItem2)
+            assertThat(interactor.deviceItemFlow.value!![1]).isEqualTo(deviceItem2)
+        }
+    }
+
+    @Test
+    fun testUpdateDeviceItems_sortByDisplayPriority() {
+        testScope.runTest {
+            `when`(adapter.mostRecentlyConnectedDevices).thenReturn(null)
+            interactor.setDeviceItemFactoryListForTesting(
+                listOf(
+                    createFactory({ cachedDevice -> cachedDevice.device == device1 }, deviceItem1),
+                    createFactory({ cachedDevice -> cachedDevice.device == device2 }, deviceItem2)
+                )
+            )
+            interactor.setDisplayPriorityForTesting(
+                listOf(
+                    DeviceItemType.SAVED_BLUETOOTH_DEVICE,
+                    DeviceItemType.CONNECTED_BLUETOOTH_DEVICE
+                )
+            )
+            `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
+            `when`(deviceItem2.type).thenReturn(DeviceItemType.SAVED_BLUETOOTH_DEVICE)
+
+            interactor.updateDeviceItems(mContext)
+
+            assertThat(interactor.deviceItemFlow.value).isEqualTo(listOf(deviceItem2, deviceItem1))
+        }
+    }
+
+    @Test
+    fun testUpdateDeviceItems_sameType_sortByRecentlyConnected() {
+        testScope.runTest {
+            `when`(adapter.mostRecentlyConnectedDevices).thenReturn(listOf(device2, device1))
+            interactor.setDeviceItemFactoryListForTesting(
+                listOf(
+                    createFactory({ cachedDevice -> cachedDevice.device == device1 }, deviceItem1),
+                    createFactory({ cachedDevice -> cachedDevice.device == device2 }, deviceItem2)
+                )
+            )
+            interactor.setDisplayPriorityForTesting(
+                listOf(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
+            )
+            `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
+            `when`(deviceItem2.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
+
+            interactor.updateDeviceItems(mContext)
+
+            assertThat(interactor.deviceItemFlow.value).isEqualTo(listOf(deviceItem2, deviceItem1))
+        }
     }
 
     private fun createFactory(

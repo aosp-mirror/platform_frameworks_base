@@ -20,9 +20,25 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.media.AudioManager
+import com.android.settingslib.bluetooth.BluetoothCallback
 import com.android.settingslib.bluetooth.BluetoothUtils
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
+import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.withContext
 
 /** Holds business logic for the Bluetooth Dialog after clicking on the Bluetooth QS tile. */
 @SysUISingleton
@@ -31,8 +47,59 @@ internal class DeviceItemInteractor
 constructor(
     private val bluetoothTileDialogRepository: BluetoothTileDialogRepository,
     private val audioManager: AudioManager,
-    private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+    private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter(),
+    private val localBluetoothManager: LocalBluetoothManager?,
+    @Application private val coroutineScope: CoroutineScope,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
+
+    private val mutableDeviceItemFlow: MutableStateFlow<List<DeviceItem>?> = MutableStateFlow(null)
+    internal val deviceItemFlow
+        get() = mutableDeviceItemFlow.asStateFlow()
+
+    internal val updateDeviceItemsFlow: SharedFlow<Unit> =
+        conflatedCallbackFlow {
+                val listener =
+                    object : BluetoothCallback {
+                        override fun onActiveDeviceChanged(
+                            activeDevice: CachedBluetoothDevice?,
+                            bluetoothProfile: Int
+                        ) {
+                            super.onActiveDeviceChanged(activeDevice, bluetoothProfile)
+                            trySendWithFailureLogging(Unit, TAG, "onActiveDeviceChanged")
+                        }
+
+                        override fun onConnectionStateChanged(
+                            cachedDevice: CachedBluetoothDevice?,
+                            state: Int
+                        ) {
+                            super.onConnectionStateChanged(cachedDevice, state)
+                            trySendWithFailureLogging(Unit, TAG, "onConnectionStateChanged")
+                        }
+
+                        override fun onDeviceAdded(cachedDevice: CachedBluetoothDevice) {
+                            super.onDeviceAdded(cachedDevice)
+                            trySendWithFailureLogging(Unit, TAG, "onDeviceAdded")
+                        }
+
+                        override fun onProfileConnectionStateChanged(
+                            cachedDevice: CachedBluetoothDevice,
+                            state: Int,
+                            bluetoothProfile: Int
+                        ) {
+                            super.onProfileConnectionStateChanged(
+                                cachedDevice,
+                                state,
+                                bluetoothProfile
+                            )
+                            trySendWithFailureLogging(Unit, TAG, "onProfileConnectionStateChanged")
+                        }
+                    }
+                localBluetoothManager?.eventManager?.registerCallback(listener)
+                awaitClose { localBluetoothManager?.eventManager?.unregisterCallback(listener) }
+            }
+            .shareIn(coroutineScope, SharingStarted.WhileSubscribed(replayExpirationMillis = 0))
+
     private var deviceItemFactoryList: List<DeviceItemFactory> =
         listOf(
             AvailableMediaDeviceItemFactory(),
@@ -47,16 +114,19 @@ constructor(
             DeviceItemType.SAVED_BLUETOOTH_DEVICE,
         )
 
-    internal fun getDeviceItems(context: Context): List<DeviceItem> {
-        val mostRecentlyConnectedDevices = bluetoothAdapter?.mostRecentlyConnectedDevices
+    internal suspend fun updateDeviceItems(context: Context) {
+        withContext(backgroundDispatcher) {
+            val mostRecentlyConnectedDevices = bluetoothAdapter?.mostRecentlyConnectedDevices
 
-        return bluetoothTileDialogRepository.cachedDevices
-            .mapNotNull { cachedDevice ->
-                deviceItemFactoryList
-                    .firstOrNull { it.isFilterMatched(cachedDevice, audioManager) }
-                    ?.create(context, cachedDevice)
-            }
-            .sort(displayPriority, mostRecentlyConnectedDevices)
+            mutableDeviceItemFlow.value =
+                bluetoothTileDialogRepository.cachedDevices
+                    .mapNotNull { cachedDevice ->
+                        deviceItemFactoryList
+                            .firstOrNull { it.isFilterMatched(cachedDevice, audioManager) }
+                            ?.create(context, cachedDevice)
+                    }
+                    .sort(displayPriority, mostRecentlyConnectedDevices)
+        }
     }
 
     private fun List<DeviceItem>.sort(
@@ -99,5 +169,9 @@ constructor(
 
     internal fun setDisplayPriorityForTesting(list: List<DeviceItemType>) {
         displayPriority = list
+    }
+
+    companion object {
+        private const val TAG = "DeviceItemInteractor"
     }
 }

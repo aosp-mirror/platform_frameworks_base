@@ -114,7 +114,8 @@
             android:id="@+id/see_all_layout"
             style="@style/BluetoothTileDialog.Device"
             android:layout_height="64dp"
-            android:paddingStart="20dp">
+            android:paddingStart="20dp"
+            android:visibility="gone">
 
             <FrameLayout
                 android:layout_width="24dp"

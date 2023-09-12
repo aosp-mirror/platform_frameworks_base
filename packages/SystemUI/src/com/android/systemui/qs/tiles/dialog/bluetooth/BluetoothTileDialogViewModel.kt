@@ -17,13 +17,22 @@
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
 import android.content.Context
-import android.os.Handler
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.MAX_DEVICE_ITEM_ENTRY
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 /** ViewModel for Bluetooth Dialog after clicking on the Bluetooth QS tile. */
 @SysUISingleton
@@ -31,13 +40,15 @@ internal class BluetoothTileDialogViewModel
 @Inject
 constructor(
     private val deviceItemInteractor: DeviceItemInteractor,
+    private val bluetoothStateInteractor: BluetoothStateInteractor,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
-    @Main private val uiHandler: Handler
-) : DeviceItemOnClickCallback {
-    private var deviceItems: List<DeviceItem> = emptyList()
+    @Application private val coroutineScope: CoroutineScope,
+    @Main private val mainDispatcher: CoroutineDispatcher,
+) : BluetoothTileDialogCallback {
 
-    @VisibleForTesting
-    var dialog: BluetoothTileDialog? = null
+    private var job: Job? = null
+
+    @VisibleForTesting internal var dialog: BluetoothTileDialog? = null
 
     /**
      * Shows the dialog.
@@ -48,27 +59,79 @@ constructor(
     fun showDialog(context: Context, view: View?) {
         dismissDialog()
 
-        deviceItems = deviceItemInteractor.getDeviceItems(context)
+        var updateDeviceItemJob: Job? = null
 
-        uiHandler.post {
-            dialog = BluetoothTileDialog(deviceItems, this, context)
+        job =
+            coroutineScope.launch(mainDispatcher) {
+                dialog = createBluetoothTileDialog(context)
+                view?.let { dialogLaunchAnimator.showFromView(dialog!!, it) } ?: dialog!!.show()
+                updateDeviceItemJob?.cancel()
+                updateDeviceItemJob = launch { deviceItemInteractor.updateDeviceItems(context) }
 
-            view?.let { dialogLaunchAnimator.showFromView(dialog!!, it) } ?: dialog!!.show()
-        }
+                bluetoothStateInteractor.updateBluetoothStateFlow
+                    .filterNotNull()
+                    .onEach {
+                        dialog!!.onBluetoothStateUpdated(it)
+                        updateDeviceItemJob?.cancel()
+                        updateDeviceItemJob = launch {
+                            deviceItemInteractor.updateDeviceItems(context)
+                        }
+                    }
+                    .launchIn(this)
+
+                deviceItemInteractor.updateDeviceItemsFlow
+                    .onEach {
+                        updateDeviceItemJob?.cancel()
+                        updateDeviceItemJob = launch {
+                            deviceItemInteractor.updateDeviceItems(context)
+                        }
+                    }
+                    .launchIn(this)
+
+                deviceItemInteractor.deviceItemFlow
+                    .filterNotNull()
+                    .onEach {
+                        dialog!!.onDeviceItemUpdated(
+                            it.take(MAX_DEVICE_ITEM_ENTRY),
+                            showSeeAll = it.size > MAX_DEVICE_ITEM_ENTRY
+                        )
+                    }
+                    .launchIn(this)
+
+                dialog!!
+                    .bluetoothStateSwitchedFlow
+                    .filterNotNull()
+                    .onEach { bluetoothStateInteractor.isBluetoothEnabled = it }
+                    .launchIn(this)
+
+                dialog!!
+                    .deviceItemClickedFlow
+                    .onEach {
+                        if (deviceItemInteractor.updateDeviceItemOnClick(it.first)) {
+                            dialog!!.onDeviceItemUpdatedAtPosition(it.first, it.second)
+                        }
+                    }
+                    .launchIn(this)
+            }
     }
 
-    override fun onDeviceItemClicked(deviceItem: DeviceItem, position: Int) {
-        if (deviceItemInteractor.updateDeviceItemOnClick(deviceItem)) {
-            dialog?.onDeviceItemUpdated(deviceItem, position)
-        }
+    private fun createBluetoothTileDialog(context: Context): BluetoothTileDialog {
+        return BluetoothTileDialog(
+                bluetoothStateInteractor.isBluetoothEnabled,
+                this@BluetoothTileDialogViewModel,
+                context
+            )
+            .apply { SystemUIDialog.registerDismissListener(this) { dismissDialog() } }
     }
 
     private fun dismissDialog() {
+        job?.cancel()
+        job = null
         dialog?.dismiss()
         dialog = null
     }
 }
 
-internal interface DeviceItemOnClickCallback {
-    fun onDeviceItemClicked(deviceItem: DeviceItem, position: Int)
+internal interface BluetoothTileDialogCallback {
+    // TODO(b/298124674): Add click events for gear, see all and pair new device.
 }

@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
-import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.widget.LinearLayout
@@ -28,7 +27,13 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import org.junit.After
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -52,56 +57,87 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     private lateinit var bluetoothTileDialogViewModel: BluetoothTileDialogViewModel
 
+    @Mock private lateinit var bluetoothStateInteractor: BluetoothStateInteractor
+
     @Mock private lateinit var deviceItemInteractor: DeviceItemInteractor
 
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
 
-    private lateinit var testableLooper: TestableLooper
+    private lateinit var scheduler: TestCoroutineScheduler
+    private lateinit var dispatcher: CoroutineDispatcher
+    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
-        testableLooper = TestableLooper.get(this)
-        `when`(deviceItemInteractor.getDeviceItems(any())).thenReturn(emptyList())
+        scheduler = TestCoroutineScheduler()
+        dispatcher = UnconfinedTestDispatcher(scheduler)
+        testScope = TestScope(dispatcher)
         bluetoothTileDialogViewModel =
             BluetoothTileDialogViewModel(
                 deviceItemInteractor,
+                bluetoothStateInteractor,
                 dialogLaunchAnimator,
-                Handler(testableLooper.looper)
+                testScope.backgroundScope,
+                dispatcher,
             )
-    }
-
-    @After
-    fun tearDown() {
-        testableLooper.processAllMessages()
+        `when`(deviceItemInteractor.deviceItemFlow).thenReturn(MutableStateFlow(null).asStateFlow())
+        `when`(bluetoothStateInteractor.updateBluetoothStateFlow)
+            .thenReturn(MutableStateFlow(null).asStateFlow())
+        `when`(deviceItemInteractor.updateDeviceItemsFlow)
+            .thenReturn(MutableStateFlow(Unit).asStateFlow())
+        `when`(bluetoothStateInteractor.isBluetoothEnabled).thenReturn(true)
     }
 
     @Test
     fun testShowDialog_noAnimation() {
-        bluetoothTileDialogViewModel.showDialog(context, null)
-        testableLooper.processAllMessages()
+        testScope.runTest {
+            bluetoothTileDialogViewModel.showDialog(context, null)
 
-        assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
-        verify(dialogLaunchAnimator, never()).showFromView(any(), any(), any(), any())
-        assertThat(bluetoothTileDialogViewModel.dialog?.isShowing).isTrue()
+            assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
+            verify(dialogLaunchAnimator, never()).showFromView(any(), any(), any(), any())
+            assertThat(bluetoothTileDialogViewModel.dialog?.isShowing).isTrue()
+        }
     }
 
     @Test
     fun testShowDialog_animated() {
-        bluetoothTileDialogViewModel.showDialog(mContext, LinearLayout(mContext))
-        testableLooper.processAllMessages()
+        testScope.runTest {
+            bluetoothTileDialogViewModel.showDialog(mContext, LinearLayout(mContext))
 
-        assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
-        verify(dialogLaunchAnimator).showFromView(any(), any(), nullable(), anyBoolean())
+            assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
+            verify(dialogLaunchAnimator).showFromView(any(), any(), nullable(), anyBoolean())
+        }
     }
 
     @Test
     fun testShowDialog_animated_callInBackgroundThread() {
-        backgroundExecutor.execute {
-            bluetoothTileDialogViewModel.showDialog(mContext, LinearLayout(mContext))
-            testableLooper.processAllMessages()
+        testScope.runTest {
+            backgroundExecutor.execute {
+                bluetoothTileDialogViewModel.showDialog(mContext, LinearLayout(mContext))
+
+                assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
+                verify(dialogLaunchAnimator).showFromView(any(), any(), nullable(), anyBoolean())
+            }
+        }
+    }
+
+    @Test
+    fun testShowDialog_fetchDeviceItem() {
+        testScope.runTest {
+            bluetoothTileDialogViewModel.showDialog(context, null)
 
             assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
-            verify(dialogLaunchAnimator).showFromView(any(), any(), nullable(), anyBoolean())
+            verify(deviceItemInteractor).deviceItemFlow
+        }
+    }
+
+    @Test
+    fun testShowDialog_withBluetoothStateValue() {
+        testScope.runTest {
+            bluetoothTileDialogViewModel.showDialog(context, null)
+
+            assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
+            verify(bluetoothStateInteractor).updateBluetoothStateFlow
         }
     }
 }

@@ -21,6 +21,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -47,13 +48,14 @@ class BluetoothTileDialogTest : SysuiTestCase() {
     companion object {
         const val DEVICE_NAME = "device"
         const val DEVICE_CONNECTION_SUMMARY = "active"
+        const val ENABLED = true
     }
 
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var cachedBluetoothDevice: CachedBluetoothDevice
 
-    @Mock private lateinit var deviceItemOnClickCallback: DeviceItemOnClickCallback
+    @Mock private lateinit var bluetoothTileDialogCallback: BluetoothTileDialogCallback
 
     @Mock private lateinit var drawable: Drawable
 
@@ -63,7 +65,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        bluetoothTileDialog = BluetoothTileDialog(emptyList(), deviceItemOnClickCallback, mContext)
+        bluetoothTileDialog = BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, mContext)
         icon = Pair(drawable, DEVICE_NAME)
         deviceItem =
             DeviceItem(
@@ -92,10 +94,9 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     @Test
     fun testShowDialog_displayBluetoothDevice() {
-        bluetoothTileDialog =
-            BluetoothTileDialog(listOf(deviceItem), deviceItemOnClickCallback, mContext)
-
+        bluetoothTileDialog = BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, mContext)
         bluetoothTileDialog.show()
+        bluetoothTileDialog.onDeviceItemUpdated(listOf(deviceItem), false)
 
         val recyclerView = bluetoothTileDialog.findViewById<RecyclerView>(R.id.device_list)
         val adapter = recyclerView?.adapter as BluetoothTileDialog.Adapter
@@ -112,8 +113,11 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
         val view =
             LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
-        val viewHolder = BluetoothTileDialog.Adapter.DeviceItemViewHolder(view)
-        viewHolder.bind(deviceItem, 0, deviceItemOnClickCallback)
+        val viewHolder =
+            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, mContext)
+                .Adapter()
+                .DeviceItemViewHolder(view)
+        viewHolder.bind(deviceItem, 0)
         val container = view.findViewById<View>(R.id.bluetooth_device)
 
         assertThat(container).isNotNull()
@@ -129,13 +133,31 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
         val view =
             LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
-        val viewHolder = BluetoothTileDialog.Adapter.DeviceItemViewHolder(view)
-        viewHolder.bind(deviceItem, 0, deviceItemOnClickCallback)
+        val viewHolder =
+            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, mContext)
+                .Adapter()
+                .DeviceItemViewHolder(view)
+        viewHolder.bind(deviceItem, 0)
         val container = view.findViewById<View>(R.id.bluetooth_device)
 
         assertThat(container).isNotNull()
         assertThat(container!!.isEnabled).isFalse()
         assertThat(container.alpha).isEqualTo(DISABLED_ALPHA)
         assertThat(container.hasOnClickListeners()).isTrue()
+    }
+
+    @Test
+    fun testOnDeviceUpdated_hideSeeAll() {
+        bluetoothTileDialog = BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, mContext)
+        bluetoothTileDialog.show()
+        bluetoothTileDialog.onDeviceItemUpdated(listOf(deviceItem), false)
+
+        val seeAllLayout = bluetoothTileDialog.findViewById<View>(R.id.see_all_layout)
+        val recyclerView = bluetoothTileDialog.findViewById<RecyclerView>(R.id.device_list)
+        val adapter = recyclerView?.adapter as BluetoothTileDialog.Adapter
+
+        assertThat(seeAllLayout).isNotNull()
+        assertThat(seeAllLayout!!.visibility).isEqualTo(GONE)
+        assertThat(adapter.itemCount).isEqualTo(1)
     }
 }
