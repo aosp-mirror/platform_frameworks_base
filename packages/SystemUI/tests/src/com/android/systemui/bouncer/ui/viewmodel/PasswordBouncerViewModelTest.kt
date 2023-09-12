@@ -185,6 +185,41 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
+    @Test
+    fun onShown_againAfterSceneChange_resetsPassword() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val password by collectLastValue(underTest.password)
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Password
+            )
+            utils.authenticationRepository.setUnlocked(false)
+            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            underTest.onShown()
+
+            // The user types a password.
+            underTest.onPasswordInputChanged("password")
+            assertThat(password).isEqualTo("password")
+
+            // The user doesn't confirm the password, but navigates back to the lockscreen instead.
+            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen), "reason")
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+
+            // The user navigates to the bouncer again.
+            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+
+            underTest.onShown()
+
+            // Ensure the previously-entered password is not shown.
+            assertThat(password).isEmpty()
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+        }
+
     companion object {
         private const val ENTER_YOUR_PASSWORD = "Enter your password"
         private const val WRONG_PASSWORD = "Wrong password"

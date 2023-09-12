@@ -314,6 +314,42 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun onShown_againAfterSceneChange_resetsPin() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val pin by collectLastValue(underTest.pinInput.map { it.getPin() })
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setUnlocked(false)
+            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
+
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            underTest.onShown()
+
+            // The user types a PIN.
+            FakeAuthenticationRepository.DEFAULT_PIN.forEach { digit ->
+                underTest.onPinButtonClicked(digit)
+            }
+            assertThat(pin).isNotEmpty()
+
+            // The user doesn't confirm the PIN, but navigates back to the lockscreen instead.
+            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen), "reason")
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+
+            // The user navigates to the bouncer again.
+            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+
+            underTest.onShown()
+
+            // Ensure the previously-entered PIN is not shown.
+            assertThat(pin).isEmpty()
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+        }
+
+    @Test
     fun backspaceButtonAppearance_withoutAutoConfirm_alwaysShown() =
         testScope.runTest {
             val backspaceButtonAppearance by collectLastValue(underTest.backspaceButtonAppearance)
