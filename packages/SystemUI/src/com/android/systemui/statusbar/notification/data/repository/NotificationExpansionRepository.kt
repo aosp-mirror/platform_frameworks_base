@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.data.repository
 
 import android.util.Log
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -40,8 +41,9 @@ class NotificationExpansionRepository @Inject constructor() {
 
     /** Sets whether the notification expansion animation is currently running. */
     fun setIsExpandAnimationRunning(running: Boolean) {
-        // TODO(b/288507023): Remove this log.
-        Log.d(TAG, "setIsExpandAnimationRunning(running=$running)")
+        if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
+            Log.d(TAG, "setIsExpandAnimationRunning(running=$running)")
+        }
         _isExpandAnimationRunning.value = running
     }
 }
