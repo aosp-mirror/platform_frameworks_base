@@ -43,3 +43,9 @@ java_test_host {
         "AndroidUtilsLintChecker",
     ],
 }
+
+python_binary_host {
+    name: "enforce_permission_counter",
+    srcs: ["enforce_permission_counter.py"],
+    libs: ["soong_lint_fix"],
+}
