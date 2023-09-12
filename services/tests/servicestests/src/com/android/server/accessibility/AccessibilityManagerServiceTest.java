@@ -33,6 +33,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -53,12 +54,18 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Icon;
 import android.hardware.display.DisplayManagerGlobal;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.UserHandle;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.testing.TestableContext;
 import android.view.Display;
@@ -93,8 +100,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * APCT tests for {@link AccessibilityManagerService}.
@@ -103,6 +115,10 @@ public class AccessibilityManagerServiceTest {
     @Rule
     public final A11yTestableContext mTestableContext = new A11yTestableContext(
             ApplicationProvider.getApplicationContext());
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final int ACTION_ID = 20;
     private static final String LABEL = "label";
@@ -204,6 +220,8 @@ public class AccessibilityManagerServiceTest {
                 mA11yms.getCurrentUserIdLocked());
         when(mMockServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
         mMockResolveInfo.serviceInfo = mock(ServiceInfo.class);
+        mMockResolveInfo.serviceInfo.packageName = "packageName";
+        mMockResolveInfo.serviceInfo.name = "className";
         mMockResolveInfo.serviceInfo.applicationInfo = mock(ApplicationInfo.class);
 
         when(mMockBinder.queryLocalInterface(any())).thenReturn(mMockServiceClient);
@@ -579,6 +597,73 @@ public class AccessibilityManagerServiceTest {
 
         assertStartActivityWithExpectedComponentName(mTestableContext.getMockContext(),
                 ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_SCAN_PACKAGES_WITHOUT_LOCK)
+    // Test old behavior to validate lock detection for the old (locked access) case.
+    public void testPackageMonitorScanPackages_scansWhileHoldingLock() {
+        setupAccessibilityServiceConnection(0);
+        final AtomicReference<Set<Boolean>> lockState = collectLockStateWhilePackageScanning();
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), anyInt(), anyInt()))
+                .thenReturn(List.of(mMockResolveInfo));
+        when(mMockSecurityPolicy.canRegisterService(any())).thenReturn(true);
+
+        final Intent packageIntent = new Intent(Intent.ACTION_PACKAGE_ADDED);
+        packageIntent.setData(Uri.parse("test://package"));
+        packageIntent.putExtra(Intent.EXTRA_USER_HANDLE, mA11yms.getCurrentUserIdLocked());
+        packageIntent.putExtra(Intent.EXTRA_REPLACING, true);
+        mA11yms.getPackageMonitor().doHandlePackageEvent(packageIntent);
+
+        assertThat(lockState.get()).containsExactly(true);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_SCAN_PACKAGES_WITHOUT_LOCK)
+    public void testPackageMonitorScanPackages_scansWithoutHoldingLock() {
+        setupAccessibilityServiceConnection(0);
+        final AtomicReference<Set<Boolean>> lockState = collectLockStateWhilePackageScanning();
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), anyInt(), anyInt()))
+                .thenReturn(List.of(mMockResolveInfo));
+        when(mMockSecurityPolicy.canRegisterService(any())).thenReturn(true);
+
+        final Intent packageIntent = new Intent(Intent.ACTION_PACKAGE_ADDED);
+        packageIntent.setData(Uri.parse("test://package"));
+        packageIntent.putExtra(Intent.EXTRA_USER_HANDLE, mA11yms.getCurrentUserIdLocked());
+        packageIntent.putExtra(Intent.EXTRA_REPLACING, true);
+        mA11yms.getPackageMonitor().doHandlePackageEvent(packageIntent);
+
+        assertThat(lockState.get()).containsExactly(false);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_SCAN_PACKAGES_WITHOUT_LOCK)
+    public void testSwitchUserScanPackages_scansWithoutHoldingLock() {
+        setupAccessibilityServiceConnection(0);
+        final AtomicReference<Set<Boolean>> lockState = collectLockStateWhilePackageScanning();
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), anyInt(), anyInt()))
+                .thenReturn(List.of(mMockResolveInfo));
+        when(mMockSecurityPolicy.canRegisterService(any())).thenReturn(true);
+
+        mA11yms.switchUser(mA11yms.getCurrentUserIdLocked() + 1);
+
+        assertThat(lockState.get()).containsExactly(false);
+    }
+
+    // Single package intents can trigger multiple PackageMonitor callbacks.
+    // Collect the state of the lock in a set, since tests only care if calls
+    // were all locked or all unlocked.
+    private AtomicReference<Set<Boolean>> collectLockStateWhilePackageScanning() {
+        final AtomicReference<Set<Boolean>> lockState =
+                new AtomicReference<>(new HashSet<Boolean>());
+        doAnswer((Answer<XmlResourceParser>) invocation -> {
+            lockState.updateAndGet(set -> {
+                set.add(mA11yms.unsafeIsLockHeld());
+                return set;
+            });
+            return null;
+        }).when(mMockResolveInfo.serviceInfo).loadXmlMetaData(any(), any());
+        return lockState;
     }
 
     private void mockManageAccessibilityGranted(TestableContext context) {
