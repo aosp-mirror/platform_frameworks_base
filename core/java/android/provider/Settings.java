@@ -10505,6 +10505,14 @@ public final class Settings {
                 "search_press_hold_nav_handle_enabled";
 
         /**
+         * Whether long-pressing on the home button can trigger search.
+         *
+         * @hide
+         */
+        public static final String SEARCH_LONG_PRESS_HOME_ENABLED =
+                "search_long_press_home_enabled";
+
+        /**
          * Control whether Trust Agents are in active unlock or extend unlock mode.
          * @hide
          */
