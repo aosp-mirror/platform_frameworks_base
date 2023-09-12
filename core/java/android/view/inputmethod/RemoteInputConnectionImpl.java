@@ -28,7 +28,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UiThread;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -373,11 +372,8 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             return;
         }
         dispatch(() -> {
-            notifyTypingHint(false /* isTyping */);
             // Deactivate the notifier when finishing typing.
-            if (mTypingHintNotifier != null) {
-                mTypingHintNotifier.deactivate();
-            }
+            notifyTypingHint(false /* isTyping */, true /* deactivate */);
 
             // Note that we do not need to worry about race condition here, because 1) mFinished is
             // updated only inside this block, and 2) the code here is running on a Handler hence we
@@ -643,7 +639,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;
             }
             ic.commitText(text, newCursorPosition);
-            notifyTypingHint(true /* isTyping */);
+            notifyTypingHint(true /* isTyping */, false /* deactivate */);
         });
     }
 
@@ -799,7 +795,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;
             }
             ic.setComposingText(text, newCursorPosition);
-            notifyTypingHint(true /* isTyping */);
+            notifyTypingHint(true /* isTyping */, false /* deactivate */);
         });
     }
 
@@ -927,7 +923,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;
             }
             ic.deleteSurroundingText(beforeLength, afterLength);
-            notifyTypingHint(true /* isTyping */);
+            notifyTypingHint(true /* isTyping */, false /* deactivate */);
         });
     }
 
@@ -1497,10 +1493,9 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
      * The input connection indicates that the user is typing when {@link #commitText} or
      * {@link #setComposingText)} and the user finish typing when {@link #deactivate()}.
      */
-    @UiThread
-    private void notifyTypingHint(boolean isTyping) {
+    private void notifyTypingHint(boolean isTyping, boolean deactivate) {
         if (mTypingHintNotifier != null) {
-            mTypingHintNotifier.onTypingHintChanged(isTyping);
+            mTypingHintNotifier.onTypingHintChanged(isTyping, deactivate);
         }
     }
 }
