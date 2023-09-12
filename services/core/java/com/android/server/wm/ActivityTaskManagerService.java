@@ -2220,7 +2220,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             callerApp = getProcessController(appThread);
         }
         final BackgroundActivityStartController balController =
-                getActivityStartController().getBackgroundActivityLaunchController();
+                mTaskSupervisor.getBackgroundActivityLaunchController();
         if (balController.shouldAbortBackgroundActivityStart(
                 callingUid,
                 callingPid,
