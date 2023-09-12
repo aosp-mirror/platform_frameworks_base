@@ -1,0 +1,8 @@
+package: "android.os"
+
+flag {
+    name: "disallow_cellular_null_ciphers_restriction"
+    namespace: "cellular_security"
+    description: "Guards a new UserManager user restriction that admins can use to require cellular encryption on their managed devices."
+    bug: "276752881"
+}
