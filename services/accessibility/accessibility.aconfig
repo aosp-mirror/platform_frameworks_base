@@ -1,7 +1,15 @@
 package: "com.android.server.accessibility"
+
 flag {
     name: "proxy_use_apps_on_virtual_device_listener"
     namespace: "accessibility"
     description: "Fixes race condition described in b/286587811"
     bug: "286587811"
+}
+
+flag {
+    name: "enable_magnification_multiple_finger_multiple_tap_gesture"
+    namespace: "accessibility"
+    description: "Whether to enable multi-finger-multi-tap gesture for magnification"
+    bug: "257274411"
 }
