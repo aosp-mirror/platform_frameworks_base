@@ -380,7 +380,7 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Heshtje\ne plotë"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Vetëm\nme prioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Vetëm\nalarmet"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet me valë • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet në mënyrë wireless • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet shpejt • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet ngadalë • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
@@ -861,6 +861,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Lëvize poshtë"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Lëvize majtas"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Lëvize djathtas"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Ndërrimi i zmadhimit"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Zmadho ekranin e plotë"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zmadho një pjesë të ekranit"</string>

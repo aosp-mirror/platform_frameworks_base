@@ -861,6 +861,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Pomerite nadole"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Pomerite nalevo"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Pomerite nadesno"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Prelazak na drugi režim uvećanja"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Uvećajte ceo ekran"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Uvećajte deo ekrana"</string>
@@ -1180,10 +1188,10 @@
     <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Upravljaj pristupom"</string>
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Koristi telefonski poziv"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Nedavno korišćeno u telefonskom pozivu"</string>
-    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Koristi <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Koriste <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Nedavno koristila aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Koristi <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Koriste <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Nedavno koristila aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
-    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Koristi <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Koriste <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Nedavno koristila aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
 </resources>
