@@ -70,8 +70,10 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewTreeLifecycleOwner
-import androidx.lifecycle.ViewTreeViewModelStoreOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.max
@@ -368,13 +370,10 @@ private fun AnimatedContentInOverlay(
                     context,
                     overlay,
                 )
-            ViewTreeLifecycleOwner.set(
-                overlayViewGroup,
-                ViewTreeLifecycleOwner.get(composeViewRoot),
-            )
-            ViewTreeViewModelStoreOwner.set(
-                overlayViewGroup,
-                ViewTreeViewModelStoreOwner.get(composeViewRoot),
+
+            overlayViewGroup.setViewTreeLifecycleOwner(composeViewRoot.findViewTreeLifecycleOwner())
+            overlayViewGroup.setViewTreeViewModelStoreOwner(
+                composeViewRoot.findViewTreeViewModelStoreOwner()
             )
             ViewTreeSavedStateRegistryOwner.set(
                 overlayViewGroup,
