@@ -29,6 +29,7 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.FeatureFlags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -89,13 +90,6 @@ final class LetterboxConfiguration {
     private static final String KEY_ENABLE_USER_ASPECT_RATIO_FULLSCREEN =
             "enable_app_compat_user_aspect_ratio_fullscreen";
     private static final boolean DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_FULLSCREEN = true;
-
-    // Whether the letterbox wallpaper style is enabled by default
-    private static final String KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER =
-            "enable_letterbox_background_wallpaper";
-
-    // TODO(b/290048978): Enable wallpaper as default letterbox background.
-    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER = false;
 
     /**
      * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
@@ -184,6 +178,9 @@ final class LetterboxConfiguration {
     // Responsible for the persistence of letterbox[Horizontal|Vertical]PositionMultiplier
     @NonNull
     private final LetterboxConfigurationPersister mLetterboxConfigurationPersister;
+
+    @NonNull
+    private final FeatureFlags mFeatureFlags;
 
     // Aspect ratio of letterbox for fixed orientation, values <=
     // MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO will be ignored.
@@ -301,7 +298,8 @@ final class LetterboxConfiguration {
     // Flags dynamically updated with {@link android.provider.DeviceConfig}.
     @NonNull private final SynchedDeviceConfig mDeviceConfig;
 
-    LetterboxConfiguration(@NonNull final Context systemUiContext) {
+    LetterboxConfiguration(@NonNull final Context systemUiContext,
+                           @NonNull FeatureFlags featureFags) {
         this(systemUiContext, new LetterboxConfigurationPersister(
                 () -> readLetterboxHorizontalReachabilityPositionFromConfig(
                         systemUiContext, /* forBookMode */ false),
@@ -310,14 +308,16 @@ final class LetterboxConfiguration {
                 () -> readLetterboxHorizontalReachabilityPositionFromConfig(
                         systemUiContext, /* forBookMode */ true),
                 () -> readLetterboxVerticalReachabilityPositionFromConfig(
-                        systemUiContext, /* forTabletopMode */ true)));
+                        systemUiContext, /* forTabletopMode */ true)),
+                featureFags);
     }
 
     @VisibleForTesting
     LetterboxConfiguration(@NonNull final Context systemUiContext,
-            @NonNull final LetterboxConfigurationPersister letterboxConfigurationPersister) {
+            @NonNull final LetterboxConfigurationPersister letterboxConfigurationPersister,
+            @NonNull FeatureFlags featureFags) {
         mContext = systemUiContext;
-
+        mFeatureFlags = featureFags;
         mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
                 R.dimen.config_fixedOrientationLetterboxAspectRatio);
         mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(mContext);
@@ -385,8 +385,6 @@ final class LetterboxConfiguration {
                         DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_SETTINGS,
                         mContext.getResources().getBoolean(
                                 R.bool.config_appCompatUserAppAspectRatioSettingsIsEnabled))
-                .addDeviceConfigEntry(KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER,
-                        DEFAULT_VALUE_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER, /* enabled */ true)
                 .addDeviceConfigEntry(KEY_ENABLE_USER_ASPECT_RATIO_FULLSCREEN,
                         DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_FULLSCREEN,
                         mContext.getResources().getBoolean(
@@ -544,8 +542,7 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Resets letterbox background type value depending on the
-     * {@link #KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER} built time and runtime flags.
+     * Resets letterbox background type value depending on the built time and runtime flags.
      *
      * <p>If enabled, the letterbox background type value is set toZ
      * {@link #LETTERBOX_BACKGROUND_WALLPAPER}. When disabled the letterbox background type value
@@ -555,12 +552,11 @@ final class LetterboxConfiguration {
         mLetterboxBackgroundTypeOverride = LETTERBOX_BACKGROUND_OVERRIDE_UNSET;
     }
 
-    // Returns KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER if the DeviceConfig flag is enabled
-    // or the value in com.android.internal.R.integer.config_letterboxBackgroundType if the flag
-    // is disabled.
+    // Returns LETTERBOX_BACKGROUND_WALLPAPER if the flag is enabled or the value in
+    // com.android.internal.R.integer.config_letterboxBackgroundType if the flag is disabled.
     @LetterboxBackgroundType
     private int getDefaultLetterboxBackgroundType() {
-        return mDeviceConfig.getFlagValue(KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER)
+        return mFeatureFlags.letterboxBackgroundWallpaperFlag()
                 ? LETTERBOX_BACKGROUND_WALLPAPER : mLetterboxBackgroundType;
     }
 
