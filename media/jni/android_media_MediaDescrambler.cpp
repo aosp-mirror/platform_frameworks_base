@@ -368,7 +368,7 @@ static jthrowable createServiceSpecificException(
 
     ScopedLocalRef<jstring> msgObj(
             env, env->NewStringUTF(msg != NULL ?
-                    msg : String8::format("Error %#x", serviceSpecificError)));
+                    msg : String8::format("Error %#x", serviceSpecificError).c_str()));
 
     return (jthrowable)env->NewObject(
             clazz.get(), ctor, serviceSpecificError, msgObj.get());
