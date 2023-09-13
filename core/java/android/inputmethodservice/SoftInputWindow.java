@@ -176,7 +176,8 @@ final class SoftInputWindow extends Dialog {
                 try {
                     super.show();
                     updateWindowState(WindowState.SHOWN_AT_LEAST_ONCE);
-                } catch (WindowManager.BadTokenException e) {
+                } catch (WindowManager.BadTokenException
+                         | WindowManager.InvalidDisplayException e) {
                     // Just ignore this exception.  Since show() can be requested from other
                     // components such as the system and there could be multiple event queues before
                     // the request finally arrives here, the system may have already invalidated the
