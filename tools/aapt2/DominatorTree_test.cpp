@@ -50,8 +50,8 @@ class PrettyPrinter : public DominatorTree::Visitor {
  private:
   void VisitConfig(const DominatorTree::Node* node, const int indent) {
     auto config_string = node->value()->config.toString();
-    buffer_ << std::string(indent, ' ') << (config_string.empty() ? "<default>" : config_string)
-            << std::endl;
+    buffer_ << std::string(indent, ' ')
+            << (config_string.empty() ? "<default>" : config_string.c_str()) << std::endl;
   }
 
   void VisitNode(const DominatorTree::Node* node, const int indent) {
