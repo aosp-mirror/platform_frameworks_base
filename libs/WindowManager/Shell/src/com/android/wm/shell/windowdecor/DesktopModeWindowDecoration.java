@@ -92,7 +92,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private Drawable mAppIcon;
     private CharSequence mAppName;
 
-    private TaskCornersListener mCornersListener;
+    private ExclusionRegionListener mExclusionRegionListener;
 
     private final Set<IBinder> mTransitionsPausingRelayout = new HashSet<>();
     private int mRelayoutBlock;
@@ -128,8 +128,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mOnCaptionLongClickListener = onLongClickListener;
     }
 
-    void setCornersListener(TaskCornersListener cornersListener) {
-        mCornersListener = cornersListener;
+    void setExclusionRegionListener(ExclusionRegionListener exclusionRegionListener) {
+        mExclusionRegionListener = exclusionRegionListener;
     }
 
     void setDragPositioningCallback(DragPositioningCallback dragPositioningCallback) {
@@ -229,6 +229,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
 
         if (!isDragResizeable) {
+            if (!mTaskInfo.positionInParent.equals(mPositionInParent)) {
+                // We still want to track caption bar's exclusion region on a non-resizeable task.
+                updateExclusionRegion();
+            }
             closeDragResizeListener();
             return;
         }
@@ -256,13 +260,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final int resize_corner = mResult.mRootView.getResources()
                 .getDimensionPixelSize(R.dimen.freeform_resize_corner);
 
-        // If either task geometry or position have changed, update this task's cornersListener
+        // If either task geometry or position have changed, update this task's
+        // exclusion region listener
         if (mDragResizeListener.setGeometry(
                 mResult.mWidth, mResult.mHeight, resize_handle, resize_corner, touchSlop)
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
-            mCornersListener.onTaskCornersChanged(mTaskInfo.taskId, getGlobalCornersRegion());
+            updateExclusionRegion();
         }
-        mPositionInParent.set(mTaskInfo.positionInParent);
 
         if (isMaximizeMenuActive()) {
             if (!mTaskInfo.isVisible()) {
@@ -282,8 +286,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         final int displayWidth = displayLayout.width();
         final int displayHeight = displayLayout.height();
-        final int captionHeight = loadDimensionPixelSize(
-                resources, R.dimen.freeform_decor_caption_height);
+        final int captionHeight = getCaptionHeight();
 
         final ImageButton maximizeWindowButton =
                 mResult.mRootView.findViewById(R.id.maximize_window);
@@ -537,7 +540,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     public void close() {
         closeDragResizeListener();
         closeHandleMenu();
-        mCornersListener.onTaskCornersRemoved(mTaskInfo.taskId);
+        mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
         disposeResizeVeil();
         super.close();
     }
@@ -548,13 +551,32 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 : R.layout.desktop_mode_focused_window_decor;
     }
 
+    private void updatePositionInParent() {
+        mPositionInParent.set(mTaskInfo.positionInParent);
+    }
+
+    private void updateExclusionRegion() {
+        // An outdated position in parent is one reason for this to be called; update it here.
+        updatePositionInParent();
+        mExclusionRegionListener
+                .onExclusionRegionChanged(mTaskInfo.taskId, getGlobalExclusionRegion());
+    }
+
     /**
-     * Create a new region out of the corner rects of this task.
+     * Create a new exclusion region from the corner rects (if resizeable) and caption bounds
+     * of this task.
      */
-    Region getGlobalCornersRegion() {
-        Region cornersRegion = mDragResizeListener.getCornersRegion();
-        cornersRegion.translate(mPositionInParent.x, mPositionInParent.y);
-        return cornersRegion;
+    private Region getGlobalExclusionRegion() {
+        Region exclusionRegion;
+        if (mTaskInfo.isResizeable) {
+            exclusionRegion = mDragResizeListener.getCornersRegion();
+        } else {
+            exclusionRegion = new Region();
+        }
+        exclusionRegion.union(new Rect(0, 0, mResult.mWidth,
+                getCaptionHeight()));
+        exclusionRegion.translate(mPositionInParent.x, mPositionInParent.y);
+        return exclusionRegion;
     }
 
     /**
@@ -570,6 +592,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     @Override
     int getCaptionHeightId() {
         return R.dimen.freeform_decor_caption_height;
+    }
+
+    private int getCaptionHeight() {
+        return loadDimensionPixelSize(mContext.getResources(), getCaptionHeightId());
     }
 
     /**
@@ -626,12 +652,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
     }
 
-    interface TaskCornersListener {
-        /** Inform the implementing class of this task's change in corner resize handles */
-        void onTaskCornersChanged(int taskId, Region corner);
+    interface ExclusionRegionListener {
+        /** Inform the implementing class of this task's change in region resize handles */
+        void onExclusionRegionChanged(int taskId, Region region);
 
-        /** Inform the implementing class that this task no longer needs its corners tracked,
-         * likely due to it closing. */
-        void onTaskCornersRemoved(int taskId);
+        /**
+         * Inform the implementing class that this task no longer needs an exclusion region,
+         * likely due to it closing.
+         */
+        void onExclusionRegionDismissed(int taskId);
     }
 }
