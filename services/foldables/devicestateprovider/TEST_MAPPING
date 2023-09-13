@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "foldable-services-tests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ]
+}
