@@ -116,7 +116,6 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
-import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
@@ -285,7 +284,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private PluginManager mPluginManager;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
-    @Mock private ScreenPinningRequest mScreenPinningRequest;
     @Mock private PluginDependencyProvider mPluginDependencyProvider;
     @Mock private ExtensionController mExtensionController;
     @Mock private UserInfoControllerImpl mUserInfoControllerImpl;
@@ -508,7 +506,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mDozeServiceHost,
                 mBackActionInteractor,
                 mPowerManager,
-                mScreenPinningRequest,
                 mDozeScrimController,
                 mVolumeComponent,
                 mCommandQueue,

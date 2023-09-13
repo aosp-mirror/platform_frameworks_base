@@ -50,6 +50,7 @@ import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
@@ -79,6 +80,7 @@ import java.util.Optional;
 public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
     @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private ScreenPinningRequest mScreenPinningRequest;
     @Mock private ShadeController mShadeController;
     @Mock private CommandQueue mCommandQueue;
     @Mock private QuickSettingsController mQuickSettingsController;
@@ -116,6 +118,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mQuickSettingsController,
                 mContext,
                 mContext.getResources(),
+                mScreenPinningRequest,
                 mShadeController,
                 mCommandQueue,
                 mShadeViewController,

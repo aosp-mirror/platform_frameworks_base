@@ -71,7 +71,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun isOverviewEnabled() = false
     override fun setBouncerShowing(bouncerShowing: Boolean) {}
     override fun isScreenFullyOff() = false
-    override fun showScreenPinningRequest(taskId: Int, allowCancel: Boolean) {}
     override fun getEmergencyActionIntent(): Intent? = null
     override fun isCameraAllowedByAdmin() = false
     override fun isGoingToSleep() = false

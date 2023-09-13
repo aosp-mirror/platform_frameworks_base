@@ -168,7 +168,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
-import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.UserTracker;
@@ -507,8 +506,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         ? new GestureRecorder("/sdcard/statusbar_gestures.dat")
         : null;
 
-    private final ScreenPinningRequest mScreenPinningRequest;
-
     private final MetricsLogger mMetricsLogger;
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
@@ -692,7 +689,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             DozeServiceHost dozeServiceHost,
             BackActionInteractor backActionInteractor,
             PowerManager powerManager,
-            ScreenPinningRequest screenPinningRequest,
             DozeScrimController dozeScrimController,
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
@@ -799,7 +795,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mDozeParameters = dozeParameters;
         mScrimController = scrimController;
         mLockscreenWallpaperLazy = lockscreenWallpaperLazy;
-        mScreenPinningRequest = screenPinningRequest;
         mDozeScrimController = dozeScrimController;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
         mAuthRippleController = authRippleController;
@@ -2815,11 +2810,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_OFF;
     }
 
-    @Override
-    public void showScreenPinningRequest(int taskId, boolean allowCancel) {
-        mScreenPinningRequest.showPrompt(taskId, allowCancel);
-    }
-
     @Nullable
     @Override
     public Intent getEmergencyActionIntent() {
@@ -3251,8 +3241,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             if (DEBUG) {
                 Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
             }
-
-            mScreenPinningRequest.onConfigurationChanged();
         }
 
         @Override
