@@ -1443,7 +1443,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     config);
 
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    MoveToDisplayItem.obtain(displayId, config));
+                    MoveToDisplayItem.obtain(token, displayId, config));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -1460,7 +1460,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     + "config: %s", this, config);
 
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    ActivityConfigurationChangeItem.obtain(config));
+                    ActivityConfigurationChangeItem.obtain(token, config));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -1481,7 +1481,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     this, onTop);
 
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    TopResumedActivityChangeItem.obtain(onTop));
+                    TopResumedActivityChangeItem.obtain(token, onTop));
         } catch (RemoteException e) {
             // If process died, whatever.
             Slog.w(TAG, "Failed to send top-resumed=" + onTop + " to " + this, e);
@@ -2728,7 +2728,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         try {
             mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_ATTACH_TO_CLIENT;
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    TransferSplashScreenViewStateItem.obtain(parcelable,
+                    TransferSplashScreenViewStateItem.obtain(token, parcelable,
                             windowAnimationLeash));
             scheduleTransferSplashScreenTimeout();
         } catch (Exception e) {
@@ -3895,7 +3895,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             try {
                 if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "Destroying: " + this);
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                        DestroyActivityItem.obtain(finishing, configChangeFlags));
+                        DestroyActivityItem.obtain(token, finishing, configChangeFlags));
             } catch (Exception e) {
                 // We can just ignore exceptions here...  if the process has crashed, our death
                 // notification will clean things up.
@@ -4803,7 +4803,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 final ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
                 list.add(new ResultInfo(resultWho, requestCode, resultCode, data));
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                        ActivityResultItem.obtain(list));
+                        ActivityResultItem.obtain(token, list));
                 return;
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending result to " + this, e);
@@ -4816,7 +4816,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final ClientTransaction transaction = ClientTransaction.obtain(app.getThread(), token);
             // Build result to be returned immediately.
             transaction.addCallback(ActivityResultItem.obtain(
-                    List.of(new ResultInfo(resultWho, requestCode, resultCode, data))));
+                    token, List.of(new ResultInfo(resultWho, requestCode, resultCode, data))));
             // When the activity result is delivered, the activity will transition to RESUMED.
             // Since the activity is only resumed so the result can be immediately delivered,
             // return it to its original lifecycle state.
@@ -4857,13 +4857,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private ActivityLifecycleItem getLifecycleItemForCurrentStateForResult() {
         switch (mState) {
             case STARTED:
-                return StartActivityItem.obtain(null);
+                return StartActivityItem.obtain(token, null);
             case PAUSING:
             case PAUSED:
-                return PauseActivityItem.obtain();
+                return PauseActivityItem.obtain(token);
             case STOPPING:
             case STOPPED:
-                return StopActivityItem.obtain(configChangeFlags);
+                return StopActivityItem.obtain(token, configChangeFlags);
             default:
                 // Do not send a result immediately if the activity is in state INITIALIZING,
                 // RESTARTING_PROCESS, FINISHING, DESTROYING, or DESTROYED.
@@ -4909,7 +4909,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // so only if activity is currently RESUMED. Otherwise, client may have extra
                 // life-cycle calls to RESUMED (and PAUSED later).
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                        NewIntentItem.obtain(ar, mState == RESUMED));
+                        NewIntentItem.obtain(token, ar, mState == RESUMED));
                 unsent = false;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending new intent to " + this, e);
@@ -6144,7 +6144,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     shortComponentName, "userLeaving=false", "make-active");
             try {
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                        PauseActivityItem.obtain(finishing, false /* userLeaving */,
+                        PauseActivityItem.obtain(token, finishing, false /* userLeaving */,
                                 configChangeFlags, false /* dontReport */, mAutoEnteringPip));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending pause: " + intent.getComponent(), e);
@@ -6157,7 +6157,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             try {
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                        StartActivityItem.obtain(takeOptions()));
+                        StartActivityItem.obtain(token, takeOptions()));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending start: " + intent.getComponent(), e);
             }
@@ -6455,7 +6455,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             EventLogTags.writeWmStopActivity(
                     mUserId, System.identityHashCode(this), shortComponentName);
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    StopActivityItem.obtain(configChangeFlags));
+                    StopActivityItem.obtain(token, configChangeFlags));
 
             mAtmService.mH.postDelayed(mStopTimeoutRunnable, STOP_TIMEOUT);
         } catch (Exception e) {
@@ -9870,17 +9870,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     (andResume ? "RESUMED" : "PAUSED"), this, Debug.getCallers(6));
             forceNewConfig = false;
             startRelaunching();
-            final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(pendingResults,
-                    pendingNewIntents, configChangeFlags,
+            final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(token,
+                    pendingResults, pendingNewIntents, configChangeFlags,
                     new MergedConfiguration(getProcessGlobalConfiguration(),
                             getMergedOverrideConfiguration()),
                     preserveWindow);
             final ActivityLifecycleItem lifecycleItem;
             if (andResume) {
-                lifecycleItem = ResumeActivityItem.obtain(isTransitionForward(),
+                lifecycleItem = ResumeActivityItem.obtain(token, isTransitionForward(),
                         shouldSendCompatFakeFocus());
             } else {
-                lifecycleItem = PauseActivityItem.obtain();
+                lifecycleItem = PauseActivityItem.obtain(token);
             }
             final ClientTransaction transaction = ClientTransaction.obtain(app.getThread(), token);
             transaction.addCallback(callbackItem);
@@ -9977,7 +9977,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // {@link ActivityTaskManagerService.activityStopped}).
         try {
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    StopActivityItem.obtain(0 /* configChanges */));
+                    StopActivityItem.obtain(token, 0 /* configChanges */));
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception thrown during restart " + this, e);
         }

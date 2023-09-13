@@ -65,7 +65,7 @@ public class ActivityConfigurationChangeItemTest {
         doReturn(mActivity).when(mHandler).getActivity(mToken);
 
         final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem
-                .obtain(mConfiguration);
+                .obtain(mToken, mConfiguration);
         final Context context = item.getContextToUpdate(mHandler, mToken);
 
         assertEquals(mActivity, context);

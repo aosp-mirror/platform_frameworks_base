@@ -929,8 +929,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 final IBinder fragmentToken = r.getTaskFragment().getFragmentToken();
 
                 final int deviceId = getDeviceIdForDisplayId(r.getDisplayId());
-                clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
-                        System.identityHashCode(r), r.info,
+                clientTransaction.addCallback(LaunchActivityItem.obtain(r.token,
+                        new Intent(r.intent), System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
                         // and override configs.
                         mergedConfiguration.getGlobalConfiguration(),
@@ -944,10 +944,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = ResumeActivityItem.obtain(isTransitionForward,
+                    lifecycleItem = ResumeActivityItem.obtain(r.token, isTransitionForward,
                             r.shouldSendCompatFakeFocus());
                 } else {
-                    lifecycleItem = PauseActivityItem.obtain();
+                    lifecycleItem = PauseActivityItem.obtain(r.token);
                 }
                 clientTransaction.setLifecycleStateRequest(lifecycleItem);
 

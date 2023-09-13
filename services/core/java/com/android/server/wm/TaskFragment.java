@@ -1466,13 +1466,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         if (DEBUG_RESULTS) {
                             Slog.v(TAG_RESULTS, "Delivering results to " + next + ": " + a);
                         }
-                        transaction.addCallback(ActivityResultItem.obtain(a));
+                        transaction.addCallback(ActivityResultItem.obtain(next.token, a));
                     }
                 }
 
                 if (next.newIntents != null) {
                     transaction.addCallback(
-                            NewIntentItem.obtain(next.newIntents, true /* resume */));
+                            NewIntentItem.obtain(next.token, next.newIntents, true /* resume */));
                 }
 
                 // Well the app will no longer be stopped.
@@ -1486,7 +1486,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(mAtmService.mTopProcessState);
                 next.abortAndClearOptionsAnimation();
                 transaction.setLifecycleStateRequest(
-                        ResumeActivityItem.obtain(next.app.getReportedProcState(),
+                        ResumeActivityItem.obtain(next.token, next.app.getReportedProcState(),
                                 dc.isNextTransitionForward(), next.shouldSendCompatFakeFocus()));
                 mAtmService.getLifecycleManager().scheduleTransaction(transaction);
 
@@ -1726,7 +1726,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     prev.shortComponentName, "userLeaving=" + userLeaving, reason);
 
             mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
-                    prev.token, PauseActivityItem.obtain(prev.finishing, userLeaving,
+                    prev.token, PauseActivityItem.obtain(prev.token, prev.finishing, userLeaving,
                             prev.configChangeFlags, pauseImmediately, autoEnteringPip));
         } catch (Exception e) {
             // Ignore exception, if process died other code will cleanup.
