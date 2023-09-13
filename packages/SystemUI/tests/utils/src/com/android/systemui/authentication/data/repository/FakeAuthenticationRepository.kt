@@ -51,6 +51,8 @@ class FakeAuthenticationRepository(
     override val authenticationMethod: StateFlow<AuthenticationMethodModel> =
         _authenticationMethod.asStateFlow()
 
+    override val minPatternLength: Int = 4
+
     private var isLockscreenEnabled = true
     private var failedAttemptCount = 0
     private var throttlingEndTimestamp = 0L

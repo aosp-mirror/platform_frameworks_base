@@ -203,6 +203,49 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun onDragEnd_whenPatternTooShort() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val message by collectLastValue(bouncerViewModel.message)
+            val selectedDots by collectLastValue(underTest.selectedDots)
+            val currentDot by collectLastValue(underTest.currentDot)
+            val throttlingDialogMessage by
+                collectLastValue(bouncerViewModel.throttlingDialogMessage)
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pattern
+            )
+            utils.authenticationRepository.setUnlocked(false)
+            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            underTest.onShown()
+
+            // Enter a pattern that's too short more than enough times that would normally trigger
+            // throttling if the pattern were not too short and wrong:
+            val attempts = FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING + 1
+            repeat(attempts) { attempt ->
+                underTest.onDragStart()
+                CORRECT_PATTERN.subList(
+                        0,
+                        authenticationInteractor.minPatternLength - 1,
+                    )
+                    .forEach { coordinate ->
+                        underTest.onDrag(
+                            xPx = 30f * coordinate.x + 15,
+                            yPx = 30f * coordinate.y + 15,
+                            containerSizePx = 90,
+                            verticalOffsetPx = 0f,
+                        )
+                    }
+
+                underTest.onDragEnd()
+
+                assertWithMessage("Attempt #$attempt").that(message?.text).isEqualTo(WRONG_PATTERN)
+                assertWithMessage("Attempt #$attempt").that(throttlingDialogMessage).isNull()
+            }
+        }
+
+    @Test
     fun onDragEnd_correctAfterWrong() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.desiredScene)
