@@ -3453,13 +3453,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @Override
     public void startStylusHandwriting(IInputMethodClient client) {
+        startStylusHandwriting(client, false /* usesDelegation */);
+    }
+
+    private void startStylusHandwriting(IInputMethodClient client, boolean usesDelegation) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.startStylusHandwriting");
         try {
             ImeTracing.getInstance().triggerManagerServiceDump(
                     "InputMethodManagerService#startStylusHandwriting");
             int uid = Binder.getCallingUid();
             synchronized (ImfLock.class) {
-                mHwController.clearPendingHandwritingDelegation();
+                if (!usesDelegation) {
+                    mHwController.clearPendingHandwritingDelegation();
+                }
                 if (!canInteractWithImeLocked(uid, client, "startStylusHandwriting",
                         null /* statsToken */)) {
                     return;
@@ -3541,7 +3547,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
 
-        startStylusHandwriting(client);
+        startStylusHandwriting(client, true /* usesDelegation */);
         return true;
     }
 

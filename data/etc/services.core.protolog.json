@@ -1015,6 +1015,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/NonAppWindowAnimationAdapter.java"
     },
+    "-1152771606": {
+      "message": "Content Recording: Display %d was already recording, but pause capture since the task is in PIP",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
     "-1145384901": {
       "message": "shouldWaitAnimatingExit: isTransition: %s",
       "level": "DEBUG",
@@ -2322,6 +2328,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_SYNC_ENGINE",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "1877956": {
+      "message": "Content Recording: Display %d should start recording, but don't yet since the task is in PIP",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
     },
     "3593205": {
       "message": "commitVisibility: %s: visible=%b mVisibleRequested=%b",
