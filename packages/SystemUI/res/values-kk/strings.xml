@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Төмен қарай жылжыту"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Солға жылжыту"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Оңға жылжыту"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Ұлғайту режиміне ауыстырғыш"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Толық экранды ұлғайту"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Экранның бөлігін ұлғайту"</string>
@@ -927,7 +935,7 @@
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Үйлесімді басқару элементтері қолжетімді емес."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Басқа"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Құрылғы басқару элементтеріне қосу"</string>
-    <string name="controls_dialog_ok" msgid="2770230012857881822">"Енгізу"</string>
+    <string name="controls_dialog_ok" msgid="2770230012857881822">"Қосу"</string>
     <string name="controls_dialog_remove" msgid="3775288002711561936">"Жою"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ұсынған"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Құрылғы құлыпталды."</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant қосулы."</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Параметрлерден әдепкі жазба қолданбасын орнатыңыз."</string>
     <string name="install_app" msgid="5066668100199613936">"Қолданбаны орнату"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Сыртқы экран арқылы да көрсету керек пе?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"Дисплейді қосу"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Микрофон және камера"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Соңғы рет қолданбаның датчикті пайдалануы"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Соңғы рет пайдаланғандар"</string>

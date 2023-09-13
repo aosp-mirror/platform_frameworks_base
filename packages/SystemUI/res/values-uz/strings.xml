@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Pastga siljitish"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Chapga siljitish"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Oʻngga siljitish"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Kattalashtirish rejimini almashtirish"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ekranni toʻliq kattalashtirish"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ekran qismini kattalashtirish"</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistent diqqati yoniq"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Standart qaydlar ilovasini Sozlamalar orqali tanlang"</string>
     <string name="install_app" msgid="5066668100199613936">"Ilovani oʻrnatish"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Tashqi displeyda aks ettirilsinmi?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"Displeyni yoqish"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofon va kamera"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Ilovadan oxirgi foydalanish"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Oxirgi ruxsatni koʻrish"</string>

@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"নিচে নামান"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"বাঁদিকে সরান"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"ডানদিকে সরান"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"বড় করে দেখার সুইচ"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"সম্পূর্ণ স্ক্রিন বড় করে দেখা"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"স্ক্রিনের কিছুটা অংশ বড় করুন"</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"অ্যাসিস্ট্যান্ট আপনার কথা শোনার জন্য চালু করা আছে"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"\'সেটিংস\' থেকে ডিফল্ট নোট নেওয়ার অ্যাপ সেট করুন"</string>
     <string name="install_app" msgid="5066668100199613936">"অ্যাপ ইনস্টল করুন"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"এক্সটার্নাল ডিসপ্লে আয়না?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"ডিসপ্লে চালু করুন"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"মাইক্রোফোন ও ক্যামেরা"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"সম্প্রতি ব্যবহার করা অ্যাপ"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"সাম্প্রতিক অ্যাক্সেস দেখুন"</string>

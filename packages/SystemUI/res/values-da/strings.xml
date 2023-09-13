@@ -174,12 +174,12 @@
     <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Konfigurer"</string>
     <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Ikke nu"</string>
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Dette er påkrævet for at forbedre sikkerheden og ydeevnen"</string>
-    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Konfigurer oplåsning med fingeraftryk igen"</string>
-    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Oplåsning med fingeraftryk"</string>
-    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Konfigurer oplåsning med fingeraftryk"</string>
-    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Hvis du vil konfigurere oplåsning med fingeraftryk igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere oplåsning med fingeraftryk igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
-    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Hvis du vil konfigurere oplåsning med fingeraftryk igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere oplåsning med fingeraftryk igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
-    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Oplåsning med fingeraftryk kunne ikke konfigureres. Gå til Indstillinger for at prøve igen."</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Konfigurer fingeroplåsning igen"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Fingeroplåsning"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Konfigurer fingeroplåsning"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Hvis du vil konfigurere fingeroplåsning igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere fingeroplåsning igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Hvis du vil konfigurere fingeroplåsning igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere fingeroplåsning igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Fingeroplåsning kunne ikke konfigureres. Gå til Indstillinger for at prøve igen."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Konfigurer ansigtsoplåsning igen"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Ansigtsoplåsning"</string>
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Konfigurer ansigtsoplåsning"</string>
@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Flyt ned"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Flyt til venstre"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Flyt til højre"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Skift forstørrelsestilstand"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Forstør hele skærmen"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Forstør en del af skærmen"</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistent lytter"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Angiv standardapp til noter i Indstillinger"</string>
     <string name="install_app" msgid="5066668100199613936">"Installer app"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Vil du spejle til ekstern skærm?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"Aktivér skærm"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofon og kamera"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Seneste brug af apps"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Se seneste adgang"</string>

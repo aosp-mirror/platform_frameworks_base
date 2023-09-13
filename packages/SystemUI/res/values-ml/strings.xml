@@ -299,7 +299,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ഔദ്യോഗിക ആപ്പുകൾ"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"തൽക്കാലം നിർത്തി"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"നൈറ്റ് ലൈറ്റ്"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"സൂര്യാസ്‌തമയത്തിന്"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"അസ്‌തമയത്തിന്"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"സൂര്യോദയം വരെ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>-ന്"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> വരെ"</string>
@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"താഴേക്ക് നീക്കുക"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ഇടത്തേക്ക് നീക്കുക"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"വലത്തേക്ക് നീക്കുക"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"മാഗ്നിഫിക്കേഷൻ മോഡ് മാറുക"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"സ്ക്രീൻ പൂർണ്ണമായും മാഗ്നിഫൈ ചെയ്യുക"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"സ്‌ക്രീനിന്റെ ഭാഗം മാഗ്നിഫൈ ചെയ്യുക"</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant സജീവമാണ്"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ക്രമീകരണത്തിൽ കുറിപ്പുകൾക്കുള്ള ഡിഫോൾട്ട് ആപ്പ് സജ്ജീകരിക്കുക"</string>
     <string name="install_app" msgid="5066668100199613936">"ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യൂ"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ബാഹ്യ ഡിസ്‌പ്ലേയിലേക്ക് മിറർ ചെയ്യണോ?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"ഡിസ്‌പ്ലേ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"മൈക്രോഫോണും ക്യാമറയും"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"അടുത്തിടെയുള്ള ആപ്പ് ഉപയോഗം"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"അടുത്തിടെയുള്ള ആക്‌സസ് കാണുക"</string>
