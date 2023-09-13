@@ -139,6 +139,13 @@ public class SystemDataTransferProcessor {
             @UserIdInt int userId, int associationId) {
         if (PackageUtils.isPackageAllowlisted(mContext, mPackageManager, packageName)) {
             Slog.i(LOG_TAG, "User consent Intent should be skipped. Returning null.");
+            // Auto enable perm sync for the whitelisted packages, but don't override user decision
+            PermissionSyncRequest request = getPermissionSyncRequest(associationId);
+            if (request == null) {
+                PermissionSyncRequest newRequest = new PermissionSyncRequest(associationId);
+                newRequest.setUserConsented(true);
+                mSystemDataTransferRequestStore.writeRequest(userId, newRequest);
+            }
             return null;
         }
 
@@ -185,29 +192,17 @@ public class SystemDataTransferProcessor {
         final AssociationInfo association = resolveAssociation(packageName, userId, associationId);
 
         // Check if the request has been consented by the user.
-        if (PackageUtils.isPackageAllowlisted(mContext, mPackageManager, packageName)) {
-            Slog.i(LOG_TAG, "Skip user consent check due to the same OEM package.");
-        } else {
-            List<SystemDataTransferRequest> storedRequests =
-                    mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
-                            associationId);
-            boolean hasConsented = false;
-            for (SystemDataTransferRequest storedRequest : storedRequests) {
-                if (storedRequest instanceof PermissionSyncRequest
-                        && storedRequest.isUserConsented()) {
-                    hasConsented = true;
-                    break;
-                }
+        PermissionSyncRequest request = getPermissionSyncRequest(associationId);
+        if (request == null || !request.isUserConsented()) {
+            String message =
+                    "User " + userId + " hasn't consented permission sync for associationId ["
+                            + associationId + ".";
+            Slog.e(LOG_TAG, message);
+            try {
+                callback.onError(message);
+            } catch (RemoteException ignored) {
             }
-            if (!hasConsented) {
-                String message = "User " + userId + " hasn't consented permission sync.";
-                Slog.e(LOG_TAG, message);
-                try {
-                    callback.onError(message);
-                } catch (RemoteException ignored) {
-                }
-                return;
-            }
+            return;
         }
 
         // Start permission sync
@@ -223,6 +218,50 @@ public class SystemDataTransferProcessor {
         } finally {
             Binder.restoreCallingIdentity(callingIdentityToken);
         }
+    }
+
+    /**
+     * Enable perm sync for the association
+     */
+    public void enablePermissionsSync(int associationId) {
+        int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+        PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+        request.setUserConsented(true);
+        mSystemDataTransferRequestStore.writeRequest(userId, request);
+    }
+
+    /**
+     * Disable perm sync for the association
+     */
+    public void disablePermissionsSync(int associationId) {
+        int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+        PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+        request.setUserConsented(false);
+        mSystemDataTransferRequestStore.writeRequest(userId, request);
+    }
+
+    /**
+     * Get perm sync request for the association.
+     */
+    @Nullable
+    public PermissionSyncRequest getPermissionSyncRequest(int associationId) {
+        int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+        List<SystemDataTransferRequest> requests =
+                mSystemDataTransferRequestStore.readRequestsByAssociationId(userId, associationId);
+        for (SystemDataTransferRequest request : requests) {
+            if (request instanceof PermissionSyncRequest) {
+                return (PermissionSyncRequest) request;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Remove perm sync request for the association.
+     */
+    public void removePermissionSyncRequest(int associationId) {
+        int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+        mSystemDataTransferRequestStore.removeRequestsByAssociationId(userId, associationId);
     }
 
     private void onReceivePermissionRestore(byte[] message) {

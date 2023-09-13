@@ -24,6 +24,7 @@ import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
+import android.companion.datatransfer.PermissionSyncRequest;
 import android.content.ComponentName;
 
 /**
@@ -112,6 +113,12 @@ interface ICompanionDeviceManager {
     void enableSystemDataSync(int associationId, int flags);
 
     void disableSystemDataSync(int associationId, int flags);
+
+    void enablePermissionsSync(int associationId);
+
+    void disablePermissionsSync(int associationId);
+
+    PermissionSyncRequest getPermissionSyncRequest(int associationId);
 
     @EnforcePermission("MANAGE_COMPANION_DEVICES")
     void enableSecureTransport(boolean enabled);
