@@ -821,7 +821,7 @@
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Змінити спосіб розблокування екрана."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Блокувати екран"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Контролювати, як і коли блокується екран."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Видалити всі дані"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Видаляти всі дані"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Стирати дані планшетного ПК без попередження, відновлюючи заводські налаштування."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Видаляйте дані пристрою Android TV без попередження шляхом відновлення заводських налаштувань."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Видаляйте всі дані інформаційно-розважальної системи без попередження, відновлюючи заводські налаштування."</string>
@@ -1869,8 +1869,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2-а робота: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3-я робота: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Копія додатка <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
-    <skip />
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"<xliff:g id="LABEL">%1$s</xliff:g> (приватний профіль)"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"PIN-код для відкріплення"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Запитувати ключ розблокування перед відкріпленням"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Запитувати пароль перед відкріпленням"</string>
