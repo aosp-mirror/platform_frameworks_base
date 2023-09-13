@@ -163,9 +163,6 @@ object CustomizationProviderContract {
         const val TABLE_NAME = "flags"
         val URI: Uri = BASE_URI.buildUpon().path(TABLE_NAME).build()
 
-        /** Flag denoting whether the Wallpaper Picker should use the new, revamped UI. */
-        const val FLAG_NAME_REVAMPED_WALLPAPER_UI = "revamped_wallpaper_ui"
-
         /**
          * Flag denoting whether the customizable lock screen quick affordances feature is enabled.
          */

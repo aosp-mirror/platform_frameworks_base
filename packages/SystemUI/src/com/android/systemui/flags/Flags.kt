@@ -188,9 +188,6 @@ object Flags {
     // TODO(b/244313043): Tracking bug
     @JvmField val BIOMETRICS_ANIMATION_REVAMP = unreleasedFlag("biometrics_animation_revamp")
 
-    // TODO(b/262780002): Tracking Bug
-    @JvmField val REVAMPED_WALLPAPER_UI = releasedFlag("revamped_wallpaper_ui")
-
     // flag for controlling auto pin confirmation and material u shapes in bouncer
     @JvmField
     val AUTO_PIN_CONFIRMATION = releasedFlag("auto_pin_confirmation", "auto_pin_confirmation")
