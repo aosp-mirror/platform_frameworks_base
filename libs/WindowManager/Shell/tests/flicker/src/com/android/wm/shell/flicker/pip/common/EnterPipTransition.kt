@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.pip
+package com.android.wm.shell.flicker.pip.common
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation

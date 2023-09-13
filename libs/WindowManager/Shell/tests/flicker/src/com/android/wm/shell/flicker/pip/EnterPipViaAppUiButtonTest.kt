@@ -19,6 +19,7 @@ package com.android.wm.shell.flicker.pip
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
+import com.android.wm.shell.flicker.pip.common.EnterPipTransition
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
