@@ -563,7 +563,7 @@ status_t IncidentService::command(FILE* in, FILE* out, FILE* err, Vector<String8
                 fprintf(out, "Not enough arguments for section\n");
                 return NO_ERROR;
             }
-            int id = atoi(args[1]);
+            int id = atoi(args[1].c_str());
             int idx = 0;
             while (SECTION_LIST[idx] != NULL) {
                 const Section* section = SECTION_LIST[idx];
