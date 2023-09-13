@@ -18,6 +18,8 @@ package android.app.servertransaction;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
@@ -90,129 +92,175 @@ class TestUtils {
     }
 
     static class LaunchActivityItemBuilder {
+        @Nullable
+        private IBinder mActivityToken;
+        @Nullable
         private Intent mIntent;
         private int mIdent;
+        @Nullable
         private ActivityInfo mInfo;
+        @Nullable
         private Configuration mCurConfig;
+        @Nullable
         private Configuration mOverrideConfig;
         private int mDeviceId;
+        @Nullable
         private String mReferrer;
+        @Nullable
         private IVoiceInteractor mVoiceInteractor;
         private int mProcState;
+        @Nullable
         private Bundle mState;
+        @Nullable
         private PersistableBundle mPersistentState;
+        @Nullable
         private List<ResultInfo> mPendingResults;
+        @Nullable
         private List<ReferrerIntent> mPendingNewIntents;
+        @Nullable
         private ActivityOptions mActivityOptions;
         private boolean mIsForward;
+        @Nullable
         private ProfilerInfo mProfilerInfo;
+        @Nullable
         private IBinder mAssistToken;
+        @Nullable
         private IBinder mShareableActivityToken;
         private boolean mLaunchedFromBubble;
+        @Nullable
         private IBinder mTaskFragmentToken;
 
-        LaunchActivityItemBuilder setIntent(Intent intent) {
+        @NonNull
+        LaunchActivityItemBuilder setActivityToken(@Nullable IBinder activityToken) {
+            mActivityToken = activityToken;
+            return this;
+        }
+
+        @NonNull
+        LaunchActivityItemBuilder setIntent(@Nullable Intent intent) {
             mIntent = intent;
             return this;
         }
 
+        @NonNull
         LaunchActivityItemBuilder setIdent(int ident) {
             mIdent = ident;
             return this;
         }
 
-        LaunchActivityItemBuilder setInfo(ActivityInfo info) {
+        @NonNull
+        LaunchActivityItemBuilder setInfo(@Nullable ActivityInfo info) {
             mInfo = info;
             return this;
         }
 
-        LaunchActivityItemBuilder setCurConfig(Configuration curConfig) {
+        @NonNull
+        LaunchActivityItemBuilder setCurConfig(@Nullable Configuration curConfig) {
             mCurConfig = curConfig;
             return this;
         }
 
-        LaunchActivityItemBuilder setOverrideConfig(Configuration overrideConfig) {
+        @NonNull
+        LaunchActivityItemBuilder setOverrideConfig(@Nullable Configuration overrideConfig) {
             mOverrideConfig = overrideConfig;
             return this;
         }
 
+        @NonNull
         LaunchActivityItemBuilder setDeviceId(int deviceId) {
             mDeviceId = deviceId;
             return this;
         }
 
-        LaunchActivityItemBuilder setReferrer(String referrer) {
+        @NonNull
+        LaunchActivityItemBuilder setReferrer(@Nullable String referrer) {
             mReferrer = referrer;
             return this;
         }
 
-        LaunchActivityItemBuilder setVoiceInteractor(IVoiceInteractor voiceInteractor) {
+        @NonNull
+        LaunchActivityItemBuilder setVoiceInteractor(@Nullable IVoiceInteractor voiceInteractor) {
             mVoiceInteractor = voiceInteractor;
             return this;
         }
 
+        @NonNull
         LaunchActivityItemBuilder setProcState(int procState) {
             mProcState = procState;
             return this;
         }
 
-        LaunchActivityItemBuilder setState(Bundle state) {
+        @NonNull
+        LaunchActivityItemBuilder setState(@Nullable Bundle state) {
             mState = state;
             return this;
         }
 
-        LaunchActivityItemBuilder setPersistentState(PersistableBundle persistentState) {
+        @NonNull
+        LaunchActivityItemBuilder setPersistentState(@Nullable PersistableBundle persistentState) {
             mPersistentState = persistentState;
             return this;
         }
 
-        LaunchActivityItemBuilder setPendingResults(List<ResultInfo> pendingResults) {
+        @NonNull
+        LaunchActivityItemBuilder setPendingResults(@Nullable List<ResultInfo> pendingResults) {
             mPendingResults = pendingResults;
             return this;
         }
 
-        LaunchActivityItemBuilder setPendingNewIntents(List<ReferrerIntent> pendingNewIntents) {
+        @NonNull
+        LaunchActivityItemBuilder setPendingNewIntents(
+                @Nullable List<ReferrerIntent> pendingNewIntents) {
             mPendingNewIntents = pendingNewIntents;
             return this;
         }
 
-        LaunchActivityItemBuilder setActivityOptions(ActivityOptions activityOptions) {
+        @NonNull
+        LaunchActivityItemBuilder setActivityOptions(@Nullable ActivityOptions activityOptions) {
             mActivityOptions = activityOptions;
             return this;
         }
 
+        @NonNull
         LaunchActivityItemBuilder setIsForward(boolean isForward) {
             mIsForward = isForward;
             return this;
         }
 
-        LaunchActivityItemBuilder setProfilerInfo(ProfilerInfo profilerInfo) {
+        @NonNull
+        LaunchActivityItemBuilder setProfilerInfo(@Nullable ProfilerInfo profilerInfo) {
             mProfilerInfo = profilerInfo;
             return this;
         }
 
-        LaunchActivityItemBuilder setAssistToken(IBinder assistToken) {
+        @NonNull
+        LaunchActivityItemBuilder setAssistToken(@Nullable IBinder assistToken) {
             mAssistToken = assistToken;
             return this;
         }
 
-        LaunchActivityItemBuilder setShareableActivityToken(IBinder shareableActivityToken) {
+        @NonNull
+        LaunchActivityItemBuilder setShareableActivityToken(
+                @Nullable IBinder shareableActivityToken) {
             mShareableActivityToken = shareableActivityToken;
             return this;
         }
 
+        @NonNull
         LaunchActivityItemBuilder setLaunchedFromBubble(boolean launchedFromBubble) {
             mLaunchedFromBubble = launchedFromBubble;
             return this;
         }
 
-        LaunchActivityItemBuilder setTaskFragmentToken(IBinder taskFragmentToken) {
+        @NonNull
+        LaunchActivityItemBuilder setTaskFragmentToken(@Nullable IBinder taskFragmentToken) {
             mTaskFragmentToken = taskFragmentToken;
             return this;
         }
 
+        @NonNull
         LaunchActivityItem build() {
-            return LaunchActivityItem.obtain(mIntent, mIdent, mInfo,
+            return LaunchActivityItem.obtain(mActivityToken, mIntent, mIdent, mInfo,
                     mCurConfig, mOverrideConfig, mDeviceId, mReferrer, mVoiceInteractor,
                     mProcState, mState, mPersistentState, mPendingResults, mPendingNewIntents,
                     mActivityOptions, mIsForward, mProfilerInfo, mAssistToken,

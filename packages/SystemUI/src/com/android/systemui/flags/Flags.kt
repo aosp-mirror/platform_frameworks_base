@@ -122,7 +122,7 @@ object Flags {
     // TODO(b/292213543): Tracking Bug
     @JvmField
     val NOTIFICATION_GROUP_EXPANSION_CHANGE =
-            unreleasedFlag("notification_group_expansion_change", teamfood = true)
+            unreleasedFlag("notification_group_expansion_change")
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
@@ -738,8 +738,7 @@ object Flags {
     // 3000 - dream
     // TODO(b/285059790) : Tracking Bug
     @JvmField
-    val LOCKSCREEN_WALLPAPER_DREAM_ENABLED =
-        unreleasedFlag(name = "enable_lockscreen_wallpaper_dream", teamfood = true)
+    val LOCKSCREEN_WALLPAPER_DREAM_ENABLED = unreleasedFlag("enable_lockscreen_wallpaper_dream")
 
     // TODO(b/283084712): Tracking Bug
     @JvmField val IMPROVED_HUN_ANIMATIONS = unreleasedFlag("improved_hun_animations")
@@ -799,4 +798,8 @@ object Flags {
     // TODO(b/287205379): Tracking bug
     @JvmField
     val QS_CONTAINER_GRAPH_OPTIMIZER = unreleasedFlag( "qs_container_graph_optimizer")
+
+    /** Enable showing a dialog when clicking on Quick Settings bluetooth tile. */
+    @JvmField
+    val BLUETOOTH_QS_TILE_DIALOG = unreleasedFlag("bluetooth_qs_tile_dialog")
 }

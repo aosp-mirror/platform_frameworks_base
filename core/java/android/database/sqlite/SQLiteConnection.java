@@ -1096,7 +1096,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         seqNum = mPreparedStatementCache.getLastSeqNum();
         try {
             final int numParameters = nativeGetParameterCount(mConnectionPtr, statementPtr);
-            final int type = DatabaseUtils.getSqlStatementType(sql);
+            final int type = DatabaseUtils.getSqlStatementTypeExtended(sql);
             final boolean readOnly = nativeIsReadOnly(mConnectionPtr, statementPtr);
             statement = obtainPreparedStatement(sql, statementPtr, numParameters, type, readOnly,
                     seqNum);
@@ -1279,7 +1279,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
     private static boolean isCacheable(int statementType) {
         if (statementType == DatabaseUtils.STATEMENT_UPDATE
-                || statementType == DatabaseUtils.STATEMENT_SELECT) {
+            || statementType == DatabaseUtils.STATEMENT_SELECT
+            || statementType == DatabaseUtils.STATEMENT_WITH) {
             return true;
         }
         return false;

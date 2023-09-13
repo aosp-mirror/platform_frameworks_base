@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 
 import android.util.Log;
@@ -136,12 +137,14 @@ public class KeyguardSecurityViewFlipperController
                         if (onViewInflatedListener != null) {
                             onViewInflatedListener.onViewInflated(childController);
 
-                            // Portrait constrains are default
+                            // Single bouncer constrains are default
                             if (mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)
                                     &&
                                     getResources().getBoolean(R.bool.update_bouncer_constraints)) {
-                                // updateConstraints based on orientation (only on small screens)
-                                updateConstraints(getResources().getConfiguration().orientation);
+                                boolean useSplitBouncer =
+                                        getResources().getConfiguration().orientation
+                                                == ORIENTATION_LANDSCAPE;
+                                updateConstraints(useSplitBouncer);
                             }
                         }
                     });
@@ -152,7 +155,7 @@ public class KeyguardSecurityViewFlipperController
         // TODO (b/297863911, b/297864907) - implement motion layout for other bouncers
         switch (securityMode) {
             case Pattern: return R.layout.keyguard_pattern_view;
-            case PIN: return R.layout.keyguard_pin_view;
+            case PIN: return R.layout.keyguard_pin_motion_layout;
             case Password: return R.layout.keyguard_password_view;
             case SimPin: return R.layout.keyguard_sim_pin_view;
             case SimPuk: return R.layout.keyguard_sim_puk_view;
@@ -173,9 +176,11 @@ public class KeyguardSecurityViewFlipperController
         }
     }
 
-    /** Updates the keyguard view's constraints based on orientation */
-    public void updateConstraints(int orientation) {
-        mView.updateConstraints(orientation);
+    /** Updates the keyguard view's constraints (single or split constraints).
+     *  Split constraints are only used for small landscape screens.
+     *  Only called when flag LANDSCAPE_ENABLE_LOCKSCREEN is enabled. */
+    public void updateConstraints(boolean useSplitBouncer) {
+        mView.updateConstraints(useSplitBouncer);
     }
 
     /** Makes the supplied child visible if it is contained win this view, */

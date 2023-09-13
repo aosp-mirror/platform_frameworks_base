@@ -77,4 +77,8 @@
 
     <!-- Default hyphenation frequency setting (0=NONE, 1=NORMAL, 2=FULL). -->
     <item name="config_preferredHyphenationFrequency" format="integer" type="dimen">1</item>
+
+    <!-- Floating windows can be fullscreen (i.e. windowIsFloating can still have fullscreen
+         window that does not wrap content). -->
+    <bool name="config_allowFloatingWindowsFillScreen">true</bool>
 </resources>

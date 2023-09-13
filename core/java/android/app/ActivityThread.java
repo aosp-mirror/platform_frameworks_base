@@ -3655,15 +3655,16 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @UnsupportedAppUsage
-    public final void sendActivityResult(
-            IBinder token, String id, int requestCode,
+    public void sendActivityResult(
+            IBinder activityToken, String id, int requestCode,
             int resultCode, Intent data) {
         if (DEBUG_RESULTS) Slog.v(TAG, "sendActivityResult: id=" + id
                 + " req=" + requestCode + " res=" + resultCode + " data=" + data);
         ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
         list.add(new ResultInfo(id, requestCode, resultCode, data));
-        final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread, token);
-        clientTransaction.addCallback(ActivityResultItem.obtain(list));
+        final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread,
+                activityToken);
+        clientTransaction.addCallback(ActivityResultItem.obtain(activityToken, list));
         try {
             mAppThread.scheduleTransaction(clientTransaction);
         } catch (RemoteException e) {
@@ -4365,16 +4366,16 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private void schedulePauseWithUserLeavingHint(ActivityClientRecord r) {
         final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
-        transaction.setLifecycleStateRequest(PauseActivityItem.obtain(r.activity.isFinishing(),
-                /* userLeaving */ true, r.activity.mConfigChangeFlags, /* dontReport */ false,
-                /* autoEnteringPip */ false));
+        transaction.setLifecycleStateRequest(PauseActivityItem.obtain(r.token,
+                r.activity.isFinishing(), /* userLeaving */ true, r.activity.mConfigChangeFlags,
+                /* dontReport */ false, /* autoEnteringPip */ false));
         executeTransaction(transaction);
     }
 
     private void scheduleResume(ActivityClientRecord r) {
         final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
-        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(/* isForward */ false,
-                /* shouldSendCompatFakeFocus */ false));
+        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(r.token,
+                /* isForward */ false, /* shouldSendCompatFakeFocus */ false));
         executeTransaction(transaction);
     }
 
@@ -5958,8 +5959,8 @@ public final class ActivityThread extends ClientTransactionHandler
                         ? r.createdConfig : mConfigurationController.getConfiguration(),
                 r.overrideConfig);
         final ActivityRelaunchItem activityRelaunchItem = ActivityRelaunchItem.obtain(
-                null /* pendingResults */, null /* pendingIntents */, 0 /* configChanges */,
-                mergedConfiguration, r.mPreserveWindow);
+                r.token, null /* pendingResults */, null /* pendingIntents */,
+                0 /* configChanges */, mergedConfiguration, r.mPreserveWindow);
         // Make sure to match the existing lifecycle state in the end of the transaction.
         final ActivityLifecycleItem lifecycleRequest =
                 TransactionExecutorHelper.getLifecycleRequestForCurrentState(r);

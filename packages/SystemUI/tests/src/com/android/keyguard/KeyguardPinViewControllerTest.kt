@@ -113,6 +113,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         // For posture tests:
         `when`(mockKeyguardPinView.buttons).thenReturn(arrayOf())
         `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
+        `when`(featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)).thenReturn(false)
 
         objectKeyguardPINView =
             View.inflate(mContext, R.layout.keyguard_pin_view, null)
@@ -122,6 +123,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     private fun constructPinViewController(
         mKeyguardPinView: KeyguardPINView
     ): KeyguardPinViewController {
+        mKeyguardPinView.setIsLockScreenLandscapeEnabled(false)
         return KeyguardPinViewController(
             mKeyguardPinView,
             keyguardUpdateMonitor,

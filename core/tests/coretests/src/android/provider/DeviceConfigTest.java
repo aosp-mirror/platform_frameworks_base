@@ -20,6 +20,7 @@ import static android.provider.DeviceConfig.Properties;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertThrows;
 
 import android.app.ActivityThread;
@@ -28,6 +29,7 @@ import android.os.Bundle;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -625,6 +627,7 @@ public class DeviceConfigTest {
     }
 
     @Test
+    @FlakyTest(bugId = 299483542)
     public void setProperties_multipleNamespaces() throws DeviceConfig.BadConfigException {
         final String namespace2 = "namespace2";
         Properties properties1 = new Properties.Builder(NAMESPACE).setString(KEY, VALUE)
@@ -632,8 +635,8 @@ public class DeviceConfigTest {
         Properties properties2 = new Properties.Builder(namespace2).setString(KEY2, VALUE)
                 .setString(KEY3, VALUE2).build();
 
-        DeviceConfig.setProperties(properties1);
-        DeviceConfig.setProperties(properties2);
+        assertTrue(DeviceConfig.setProperties(properties1));
+        assertTrue(DeviceConfig.setProperties(properties2));
 
         Properties properties = DeviceConfig.getProperties(NAMESPACE);
         assertThat(properties.getKeyset()).containsExactly(KEY, KEY2);
