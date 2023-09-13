@@ -303,7 +303,6 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/LaunchAnimationParameters.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/NotifPipelineFlags.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/NotificationClickerLogger.kt
--packages/SystemUI/src/com/android/systemui/statusbar/notification/NotificationLaunchAnimatorController.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/NotificationSectionsFeatureManager.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/NotificationUtils.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/NotificationWakeUpCoordinator.kt
