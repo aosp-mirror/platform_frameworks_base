@@ -34,6 +34,7 @@ java_defaults {
         ":android.view.inputmethod.flags-aconfig-java{.generated_srcjars}",
         ":android.widget.flags-aconfig-java{.generated_srcjars}",
         ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
+        ":sdk_sandbox_flags_lib{.generated_srcjars}",
     ],
     // Add aconfig-annotations-lib as a dependency for the optimization
     libs: ["aconfig-annotations-lib"],
