@@ -22,7 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
@@ -38,47 +38,50 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class GroupMembershipManagerImpl implements GroupMembershipManager {
-    FeatureFlags mFeatureFlags;
+    FeatureFlagsClassic mFeatureFlags;
 
     @Inject
-    public GroupMembershipManagerImpl(FeatureFlags featureFlags) {
+    public GroupMembershipManagerImpl(FeatureFlagsClassic featureFlags) {
         mFeatureFlags = featureFlags;
     }
 
     @Override
     public boolean isGroupSummary(@NonNull NotificationEntry entry) {
-        return getGroupSummary(entry) == entry;
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)) {
+            if (entry.getParent() == null) {
+                // The entry is not attached, so it doesn't count.
+                return false;
+            }
+            // If entry is a summary, its parent is a GroupEntry with summary = entry.
+            return entry.getParent().getSummary() == entry;
+        } else {
+            return getGroupSummary(entry) == entry;
+        }
     }
 
     @Nullable
     @Override
     public NotificationEntry getGroupSummary(@NonNull NotificationEntry entry) {
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)) {
-            if (!isChildInGroup(entry)) {
-                return entry.getRepresentativeEntry();
-            }
-        } else {
-            if (isEntryTopLevel(entry) || entry.getParent() == null) {
-                return null;
-            }
+        if (isTopLevelEntry(entry) || entry.getParent() == null) {
+            return null;
         }
-
-        return entry.getParent().getRepresentativeEntry();
+        return entry.getParent().getSummary();
     }
 
     @Override
     public boolean isChildInGroup(@NonNull NotificationEntry entry) {
         if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)) {
-            return !isEntryTopLevel(entry) && entry.getParent() != null;
+            // An entry is a child if it's not a summary or top level entry, but it is attached.
+            return !isGroupSummary(entry) && !isTopLevelEntry(entry) && entry.getParent() != null;
         } else {
-            return !isEntryTopLevel(entry);
+            return !isTopLevelEntry(entry);
         }
     }
 
     @Override
     public boolean isOnlyChildInGroup(@NonNull NotificationEntry entry) {
         if (entry.getParent() == null) {
-            return false;
+            return false; // The entry is not attached.
         }
 
         return !isGroupSummary(entry) && entry.getParent().getChildren().size() == 1;
@@ -103,7 +106,7 @@ public class GroupMembershipManagerImpl implements GroupMembershipManager {
         return null;
     }
 
-    private boolean isEntryTopLevel(@NonNull NotificationEntry entry) {
+    private boolean isTopLevelEntry(@NonNull NotificationEntry entry) {
         return entry.getParent() == ROOT_ENTRY;
     }
 }

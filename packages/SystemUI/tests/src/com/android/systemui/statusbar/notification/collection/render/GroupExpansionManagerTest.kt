@@ -31,6 +31,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.never
@@ -123,6 +124,22 @@ class GroupExpansionManagerTest : SysuiTestCase() {
         assertThat(listenerCalledCount).isEqualTo(4)
         gem.setGroupExpanded(summary2, false)
         assertThat(listenerCalledCount).isEqualTo(5)
+    }
+
+    @Test
+    fun testExpandUnattachedEntry() {
+        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
+
+        // First, expand the entry when it is attached.
+        gem.setGroupExpanded(summary1, true)
+        assertThat(gem.isGroupExpanded(summary1)).isTrue()
+
+        // Un-attach it, and un-expand it.
+        NotificationEntryBuilder.setNewParent(summary1, null)
+        gem.setGroupExpanded(summary1, false)
+
+        // Expanding again should throw.
+        assertThrows(IllegalArgumentException::class.java) { gem.setGroupExpanded(summary1, true) }
     }
 
     @Test
