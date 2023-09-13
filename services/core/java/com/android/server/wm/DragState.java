@@ -21,7 +21,6 @@ import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
-
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.DragDropController.MSG_ANIMATION_END;
@@ -33,7 +32,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACT
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.MY_PID;
 import static com.android.server.wm.WindowManagerService.MY_UID;
-
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
 import android.animation.Animator;
@@ -48,7 +46,6 @@ import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.InputConfig;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -186,8 +183,13 @@ class DragState {
         // Crop the input surface to the display size.
         mTmpClipRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
 
+        // Make trusted overlay to not block any touches while D&D ongoing and allowing
+        // touches to pass through to windows underneath. This allows user to interact with the
+        // UI to navigate while dragging.
+        h.setTrustedOverlay(mTransaction, mInputSurface, true);
         mTransaction.show(mInputSurface)
                 .setInputWindowInfo(mInputSurface, h)
+                .setTrustedOverlay(mInputSurface, true)
                 .setLayer(mInputSurface, Integer.MAX_VALUE)
                 .setCrop(mInputSurface, mTmpClipRect);
 
@@ -376,11 +378,6 @@ class DragState {
             mDragWindowHandle.ownerPid = MY_PID;
             mDragWindowHandle.ownerUid = MY_UID;
             mDragWindowHandle.scaleFactor = 1.0f;
-
-            // InputConfig.TRUSTED_OVERLAY: To not block any touches while D&D ongoing and allowing
-            // touches to pass through to windows underneath. This allows user to interact with the
-            // UI to navigate while dragging.
-            mDragWindowHandle.inputConfig = InputConfig.TRUSTED_OVERLAY;
 
             // The drag window cannot receive new touches.
             mDragWindowHandle.touchableRegion.setEmpty();
