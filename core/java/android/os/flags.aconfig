@@ -6,3 +6,10 @@ flag {
     description: "Guards a new UserManager user restriction that admins can use to require cellular encryption on their managed devices."
     bug: "276752881"
 }
+
+flag {
+    name: "remove_app_profiler_pss_collection"
+    namespace: "android_platform_power_optimization"
+    description: "Replaces background PSS collection in AppProfiler with RSS"
+    bug: "297542292"
+}
