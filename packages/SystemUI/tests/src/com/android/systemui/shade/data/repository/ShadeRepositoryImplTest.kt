@@ -151,6 +151,24 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun updateLegacyShadeTracking() =
+        testScope.runTest {
+            assertThat(underTest.legacyShadeTracking.value).isEqualTo(false)
+
+            underTest.setLegacyShadeTracking(true)
+            assertThat(underTest.legacyShadeTracking.value).isEqualTo(true)
+        }
+
+    @Test
+    fun updateLegacyQsTracking() =
+        testScope.runTest {
+            assertThat(underTest.legacyQsTracking.value).isEqualTo(false)
+
+            underTest.setLegacyQsTracking(true)
+            assertThat(underTest.legacyQsTracking.value).isEqualTo(true)
+        }
+
+    @Test
     fun updateUdfpsTransitionToFullShadeProgress() =
         testScope.runTest {
             assertThat(underTest.udfpsTransitionToFullShadeProgress.value).isEqualTo(0f)

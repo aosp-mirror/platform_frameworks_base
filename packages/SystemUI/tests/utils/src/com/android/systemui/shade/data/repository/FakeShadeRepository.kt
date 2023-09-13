@@ -40,6 +40,23 @@ class FakeShadeRepository : ShadeRepository {
     @Deprecated("Use ShadeInteractor instead")
     override val legacyShadeExpansion = _legacyShadeExpansion
 
+    private val _legacyShadeTracking = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyShadeTracking = _legacyShadeTracking
+
+    private val _legacyQsTracking = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead") override val legacyQsTracking = _legacyQsTracking
+
+    @Deprecated("Should only be called by NPVC and tests")
+    override fun setLegacyQsTracking(legacyQsTracking: Boolean) {
+        _legacyQsTracking.value = legacyQsTracking
+    }
+
+    @Deprecated("Should only be called by NPVC and tests")
+    override fun setLegacyShadeTracking(tracking: Boolean) {
+        _legacyShadeTracking.value = tracking
+    }
+
     fun setShadeModel(model: ShadeModel) {
         _shadeModel.value = model
     }
