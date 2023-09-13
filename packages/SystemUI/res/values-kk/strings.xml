@@ -911,7 +911,7 @@
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Үйлесімді басқару элементтері қолжетімді емес."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Басқа"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Құрылғы басқару элементтеріне қосу"</string>
-    <string name="controls_dialog_ok" msgid="2770230012857881822">"Енгізу"</string>
+    <string name="controls_dialog_ok" msgid="2770230012857881822">"Қосу"</string>
     <string name="controls_dialog_remove" msgid="3775288002711561936">"Жою"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ұсынған"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Құрылғы құлыпталды."</string>
