@@ -288,7 +288,7 @@ public class NotificationShadeWindowViewController {
                 }
                 if (mExpandAnimationRunning) {
                     if (isDown && mClock.uptimeMillis() > mLaunchAnimationTimeout) {
-                        mShadeLogger.d("NSWVC: launch animation timed out");
+                        Log.wtf(TAG, "NSWVC: launch animation timed out");
                         setExpandAnimationRunning(false);
                     } else {
                         return logDownDispatch(ev, "expand animation running", false);
