@@ -140,8 +140,9 @@ class NotificationLaunchAnimatorController(
     }
 
     override fun onIntentStarted(willAnimate: Boolean) {
-        // TODO(b/288507023): Remove this log.
-        Log.d(TAG, "onIntentStarted(willAnimate=$willAnimate)")
+        if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
+            Log.d(TAG, "onIntentStarted(willAnimate=$willAnimate)")
+        }
         notificationExpansionRepository.setIsExpandAnimationRunning(willAnimate)
         notificationEntry.isExpandAnimationRunning = willAnimate
 
@@ -172,8 +173,9 @@ class NotificationLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
-        // TODO(b/288507023): Remove this log.
-        Log.d(TAG, "onLaunchAnimationCancelled()")
+        if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
+            Log.d(TAG, "onLaunchAnimationCancelled()")
+        }
 
         // TODO(b/184121838): Should we call InteractionJankMonitor.cancel if the animation started
         // here?
@@ -191,8 +193,9 @@ class NotificationLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-        // TODO(b/288507023): Remove this log.
-        Log.d(TAG, "onLaunchAnimationEnd()")
+        if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
+            Log.d(TAG, "onLaunchAnimationEnd()")
+        }
         jankMonitor.end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
 
         notification.isExpandAnimationRunning = false
