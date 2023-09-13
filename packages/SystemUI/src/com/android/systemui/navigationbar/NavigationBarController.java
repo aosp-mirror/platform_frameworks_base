@@ -287,6 +287,30 @@ public class NavigationBarController implements
                 navigationBar.setNavigationBarLumaSamplingEnabled(enable);
             }
         }
+
+        @Override
+        public void showPinningEnterExitToast(boolean entering) {
+            int displayId = mContext.getDisplayId();
+            final NavigationBarView navBarView = getNavigationBarView(displayId);
+            if (navBarView != null) {
+                navBarView.showPinningEnterExitToast(entering);
+            } else if (displayId == mDisplayTracker.getDefaultDisplayId()
+                    && mTaskbarDelegate.isInitialized()) {
+                mTaskbarDelegate.showPinningEnterExitToast(entering);
+            }
+        }
+
+        @Override
+        public void showPinningEscapeToast() {
+            int displayId = mContext.getDisplayId();
+            final NavigationBarView navBarView = getNavigationBarView(displayId);
+            if (navBarView != null) {
+                navBarView.showPinningEscapeToast();
+            } else if (displayId == mDisplayTracker.getDefaultDisplayId()
+                    && mTaskbarDelegate.isInitialized()) {
+                mTaskbarDelegate.showPinningEscapeToast();
+            }
+        }
     };
 
     /**
@@ -443,26 +467,6 @@ public class NavigationBarController implements
 
     private @Nullable NavigationBar getNavigationBar(int displayId) {
         return mNavigationBars.get(displayId);
-    }
-
-    public void showPinningEnterExitToast(int displayId, boolean entering) {
-        final NavigationBarView navBarView = getNavigationBarView(displayId);
-        if (navBarView != null) {
-            navBarView.showPinningEnterExitToast(entering);
-        } else if (displayId == mDisplayTracker.getDefaultDisplayId()
-                && mTaskbarDelegate.isInitialized()) {
-            mTaskbarDelegate.showPinningEnterExitToast(entering);
-        }
-    }
-
-    public void showPinningEscapeToast(int displayId) {
-        final NavigationBarView navBarView = getNavigationBarView(displayId);
-        if (navBarView != null) {
-            navBarView.showPinningEscapeToast();
-        } else if (displayId == mDisplayTracker.getDefaultDisplayId()
-                && mTaskbarDelegate.isInitialized()) {
-            mTaskbarDelegate.showPinningEscapeToast();
-        }
     }
 
     public boolean isOverviewEnabled(int displayId) {
