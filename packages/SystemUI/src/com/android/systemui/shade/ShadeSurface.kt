@@ -43,24 +43,6 @@ interface ShadeSurface : ShadeViewController {
     /** Cancels the views current animation. */
     fun cancelAnimation()
 
-    /** Input focus transfer is about to happen. */
-    fun startWaitingForExpandGesture()
-
-    /**
-     * Called when this view is no longer waiting for input focus transfer.
-     *
-     * There are two scenarios behind this function call. First, input focus transfer has
-     * successfully happened and this view already received synthetic DOWN event.
-     * (mExpectingSynthesizedDown == false). Do nothing.
-     *
-     * Second, before input focus transfer finished, user may have lifted finger in previous window
-     * and this window never received synthetic DOWN event. (mExpectingSynthesizedDown == true). In
-     * this case, we use the velocity to trigger fling event.
-     *
-     * @param velocity unit is in px / millis
-     */
-    fun stopWaitingForExpandGesture(cancel: Boolean, velocity: Float)
-
     /** Animates the view from its current alpha to zero then runs the runnable. */
     fun fadeOut(startDelayMs: Long, durationMs: Long, endAction: Runnable): ViewPropertyAnimator
 

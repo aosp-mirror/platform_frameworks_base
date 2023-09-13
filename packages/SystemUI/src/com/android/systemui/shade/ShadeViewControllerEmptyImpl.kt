@@ -85,6 +85,9 @@ class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
     override fun handleExternalTouch(event: MotionEvent): Boolean {
         return false
     }
+    override fun startInputFocusTransfer() {}
+    override fun cancelInputFocusTransfer() {}
+    override fun finishInputFocusTransfer(velocity: Float) {}
     override fun performHapticFeedback(constant: Int) {}
 
     override val shadeHeadsUpTracker = ShadeHeadsUpTrackerEmptyImpl()

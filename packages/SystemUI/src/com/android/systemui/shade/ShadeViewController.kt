@@ -239,8 +239,33 @@ interface ShadeViewController {
     )
     fun isFullyExpanded(): Boolean
 
-    /** Sends an external (e.g. Status Bar) touch event to the Shade touch handler. */
+    /**
+     * Sends an external (e.g. Status Bar) touch event to the Shade touch handler.
+     *
+     * This is different from [startInputFocusTransfer] as it doesn't rely on setting the launcher
+     * window slippery to allow the frameworks to route those events after passing the initial
+     * threshold.
+     */
     fun handleExternalTouch(event: MotionEvent): Boolean
+
+    /**
+     * Triggered when an input focus transfer gesture has started.
+     *
+     * Used to dispatch initial touch events before crossing the threshold to pull down the
+     * notification shade. After that, since the launcher window is set to slippery, input
+     * frameworks take care of routing the events to the notification shade.
+     */
+    fun startInputFocusTransfer()
+
+    /** Triggered when the input focus transfer was cancelled. */
+    fun cancelInputFocusTransfer()
+
+    /**
+     * Triggered when the input focus transfer has finished successfully.
+     *
+     * @param velocity unit is in px / millis
+     */
+    fun finishInputFocusTransfer(velocity: Float)
 
     /**
      * Performs haptic feedback from a view with a haptic feedback constant.

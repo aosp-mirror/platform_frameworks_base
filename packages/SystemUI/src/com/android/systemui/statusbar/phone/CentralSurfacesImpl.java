@@ -87,7 +87,6 @@ import android.util.MathUtils;
 import android.view.Display;
 import android.view.IRemoteAnimationRunner;
 import android.view.IWindowManager;
-import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.WindowInsets;
@@ -1680,27 +1679,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
         });
         mHeadsUpManager.releaseAllImmediately();
-    }
-
-    /**
-     * Called when another window is about to transfer it's input focus.
-     */
-    @Override
-    public void onInputFocusTransfer(boolean start, boolean cancel, float velocity) {
-        if (!mCommandQueue.panelsEnabled()) {
-            return;
-        }
-
-        if (start) {
-            mShadeSurface.startWaitingForExpandGesture();
-        } else {
-            mShadeSurface.stopWaitingForExpandGesture(cancel, velocity);
-        }
-    }
-
-    @Override
-    public void onStatusBarTrackpadEvent(MotionEvent event) {
-        mShadeSurface.handleExternalTouch(event);
     }
 
     private void onExpandedInvisible() {
