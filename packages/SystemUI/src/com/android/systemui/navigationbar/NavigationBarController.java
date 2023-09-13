@@ -19,7 +19,6 @@ package com.android.systemui.navigationbar;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
-
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
 import static com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen;
 
@@ -58,7 +57,6 @@ import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -75,7 +73,6 @@ import javax.inject.Inject;
 /** A controller to handle navigation bars. */
 @SysUISingleton
 public class NavigationBarController implements
-        Callbacks,
         ConfigurationController.ConfigurationListener,
         NavigationModeController.ModeChangedListener,
         Dumpable {
@@ -130,7 +127,7 @@ public class NavigationBarController implements
         mSecureSettings = secureSettings;
         mDisplayTracker = displayTracker;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
-        commandQueue.addCallback(this);
+        commandQueue.addCallback(mCommandQueueCallbacks);
         configurationController.addCallback(this);
         mConfigChanges.applyNewConfig(mContext.getResources());
         mNavMode = navigationModeController.addListener(this);
@@ -270,25 +267,51 @@ public class NavigationBarController implements
         return taskbarEnabled;
     }
 
-    @Override
-    public void onDisplayRemoved(int displayId) {
-        removeNavigationBar(displayId);
-    }
-
-    @Override
-    public void onDisplayReady(int displayId) {
-        Display display = mDisplayManager.getDisplay(displayId);
-        mIsLargeScreen = isLargeScreen(mContext);
-        createNavigationBar(display, null /* savedState */, null /* result */);
-    }
-
-    @Override
-    public void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
-        final NavigationBar navigationBar = getNavigationBar(displayId);
-        if (navigationBar != null) {
-            navigationBar.setNavigationBarLumaSamplingEnabled(enable);
+    private final CommandQueue.Callbacks mCommandQueueCallbacks = new CommandQueue.Callbacks() {
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            removeNavigationBar(displayId);
         }
-    }
+
+        @Override
+        public void onDisplayReady(int displayId) {
+            Display display = mDisplayManager.getDisplay(displayId);
+            mIsLargeScreen = isLargeScreen(mContext);
+            createNavigationBar(display, null /* savedState */, null /* result */);
+        }
+
+        @Override
+        public void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
+            final NavigationBar navigationBar = getNavigationBar(displayId);
+            if (navigationBar != null) {
+                navigationBar.setNavigationBarLumaSamplingEnabled(enable);
+            }
+        }
+
+        @Override
+        public void showPinningEnterExitToast(boolean entering) {
+            int displayId = mContext.getDisplayId();
+            final NavigationBarView navBarView = getNavigationBarView(displayId);
+            if (navBarView != null) {
+                navBarView.showPinningEnterExitToast(entering);
+            } else if (displayId == mDisplayTracker.getDefaultDisplayId()
+                    && mTaskbarDelegate.isInitialized()) {
+                mTaskbarDelegate.showPinningEnterExitToast(entering);
+            }
+        }
+
+        @Override
+        public void showPinningEscapeToast() {
+            int displayId = mContext.getDisplayId();
+            final NavigationBarView navBarView = getNavigationBarView(displayId);
+            if (navBarView != null) {
+                navBarView.showPinningEscapeToast();
+            } else if (displayId == mDisplayTracker.getDefaultDisplayId()
+                    && mTaskbarDelegate.isInitialized()) {
+                mTaskbarDelegate.showPinningEscapeToast();
+            }
+        }
+    };
 
     /**
      * Recreates the navigation bar for the given display.
@@ -444,26 +467,6 @@ public class NavigationBarController implements
 
     private @Nullable NavigationBar getNavigationBar(int displayId) {
         return mNavigationBars.get(displayId);
-    }
-
-    public void showPinningEnterExitToast(int displayId, boolean entering) {
-        final NavigationBarView navBarView = getNavigationBarView(displayId);
-        if (navBarView != null) {
-            navBarView.showPinningEnterExitToast(entering);
-        } else if (displayId == mDisplayTracker.getDefaultDisplayId()
-                && mTaskbarDelegate.isInitialized()) {
-            mTaskbarDelegate.showPinningEnterExitToast(entering);
-        }
-    }
-
-    public void showPinningEscapeToast(int displayId) {
-        final NavigationBarView navBarView = getNavigationBarView(displayId);
-        if (navBarView != null) {
-            navBarView.showPinningEscapeToast();
-        } else if (displayId == mDisplayTracker.getDefaultDisplayId()
-                && mTaskbarDelegate.isInitialized()) {
-            mTaskbarDelegate.showPinningEscapeToast();
-        }
     }
 
     public boolean isOverviewEnabled(int displayId) {
