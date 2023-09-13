@@ -1495,8 +1495,7 @@ public class PackageInstaller {
          * This returns all names which have been previously written through
          * {@link #openWrite(String, long, long)} as part of this session.
          *
-         * @throws SecurityException if called after the session has been
-         *             committed or abandoned.
+         * @throws SecurityException if called after the session has been abandoned.
          */
         public @NonNull String[] getNames() throws IOException {
             try {
