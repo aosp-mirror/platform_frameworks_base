@@ -459,7 +459,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         // insets should keep original position before the start transaction is applied.
         return mTransitionOp != OP_LEGACY && (mTransitionOp == OP_APP_SWITCH
                 || TransitionController.SYNC_METHOD == BLASTSyncEngine.METHOD_BLAST)
-                && !mIsStartTransactionCommitted && isTargetToken(w.mToken);
+                && !mIsStartTransactionCommitted && canBeAsync(w.mToken) && isTargetToken(w.mToken);
     }
 
     /**
