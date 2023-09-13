@@ -13,3 +13,10 @@ flag {
     description: "Whether to enable multi-finger-multi-tap gesture for magnification"
     bug: "257274411"
 }
+
+flag {
+    name: "enable_magnification_joystick"
+    namespace: "accessibility"
+    description: "Whether to enable joystick controls for magnification"
+    bug: "297211257"
+}
