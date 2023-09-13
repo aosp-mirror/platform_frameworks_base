@@ -85,6 +85,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -452,7 +453,9 @@ public class UsageStatsService extends SystemService implements
 
             // Read pending reported events from disk and merge them with those stored in memory
             final LinkedList<Event> pendingEvents = new LinkedList<>();
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "loadPendingEvents");
             loadPendingEventsLocked(userId, pendingEvents);
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             final LinkedList<Event> eventsInMem = mReportedEvents.get(userId);
             if (eventsInMem != null) {
                 pendingEvents.addAll(eventsInMem);
@@ -967,6 +970,12 @@ public class UsageStatsService extends SystemService implements
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
             return;
         }
+
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+            final String traceTag = "usageStatsQueueEvent(" + userId + ") #"
+                    + UserUsageStatsService.eventToString(event.mEventType);
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, traceTag);
+        }
         synchronized (mLock) {
             LinkedList<Event> events = mReportedEvents.get(userId);
             if (events == null) {
@@ -980,6 +989,7 @@ public class UsageStatsService extends SystemService implements
                 mHandler.sendEmptyMessageDelayed(MSG_FLUSH_TO_DISK, FLUSH_INTERVAL);
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
     /**
@@ -1944,17 +1954,23 @@ public class UsageStatsService extends SystemService implements
                 case MSG_FLUSH_TO_DISK:
                     flushToDisk();
                     break;
-                case MSG_UNLOCKED_USER:
+                case MSG_UNLOCKED_USER: {
+                    final int userId = msg.arg1;
                     try {
-                        onUserUnlocked(msg.arg1);
+                        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                                "usageStatsHandleUserUnlocked(" + userId + ")");
+                        onUserUnlocked(userId);
                     } catch (Exception e) {
-                        if (mUserManager.isUserUnlocked(msg.arg1)) {
+                        if (mUserManager.isUserUnlocked(userId)) {
                             throw e; // rethrow exception - user is unlocked
                         } else {
                             Slog.w(TAG, "Attempted to unlock stopped or removed user " + msg.arg1);
                         }
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
                     }
                     break;
+                }
                 case MSG_REMOVE_USER:
                     onUserRemoved(msg.arg1);
                     break;
@@ -1986,7 +2002,10 @@ public class UsageStatsService extends SystemService implements
                     break;
                 case MSG_HANDLE_LAUNCH_TIME_ON_USER_UNLOCK: {
                     final int userId = msg.arg1;
+                    Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                            "usageStatsHandleEstimatedLaunchTimesOnUser(" + userId + ")");
                     handleEstimatedLaunchTimesOnUserUnlock(userId);
+                    Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
                 }
                 break;
                 case MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED: {
