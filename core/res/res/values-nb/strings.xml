@@ -806,7 +806,7 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Lar innehaveren oppdatere appen hen tidligere installerte, uten brukerhandling"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrollerer tillatt lengde og tillatte tegn i passord og PIN-koder for opplåsing av skjermen."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Overvåk forsøk på å låse opp skjermen"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Overvåking av forsøk på å låse opp skjermen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Overvåk antall feil passordforsøk ved opplåsing av skjerm, og lås nettbrettet eller slett alle data fra nettbrettet ved for mange feil passordforsøk."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Følg med på hvor mange ganger feil passord skrives inn når skjermen skal låses opp, og lås Android TV-enheten eller tøm alle dataene når feil passord skrives inn for mange ganger."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Overvåk antall feil passord som er skrevet inn ved opplåsing av skjermen, og lås infotainment-systemet eller tøm alle dataene i infotainment-systemet hvis feil passord skrives inn for mange ganger."</string>
@@ -1288,13 +1288,13 @@
     <string name="volume_call" msgid="7625321655265747433">"Samtalevolum"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Bluetooth-samtalevolum"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Alarmvolum"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Varslingsvolum"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Varselvolum"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volum"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth-volum"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Ringetonevolum"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Samtalevolum"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Medievolum"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Varslingsvolum"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Varselvolum"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Standard ringetone"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Standard (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Ingen"</string>

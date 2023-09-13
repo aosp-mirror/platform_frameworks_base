@@ -329,7 +329,7 @@
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Lichaamssensoren"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"toegang krijgen tot sensorgegevens over je vitale functies"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Meldingen"</string>
-    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"meldingen laten zien"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"meldingen tonen"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Content van vensters ophalen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"De content inspecteren van een venster waarmee je interactie hebt."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Verkennen via aanraking aanzetten"</string>
@@ -594,8 +594,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Hiermee kan de app de toetsenblokkering en bijbehorende wachtwoordbeveiliging uitzetten. Zo kan de telefoon de toetsenblokkering uitzetten als je wordt gebeld en de toetsenblokkering weer aanzetten als het gesprek is beëindigd."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"complexiteit van schermvergrendeling opvragen"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Hiermee krijgt de app toestemming om het complexiteitsniveau van de schermvergrendeling te achterhalen (hoog, midden, laag of geen). Dat geeft een indicatie van het mogelijke lengtebereik en type van de schermvergrendeling. De app kan gebruikers ook voorstellen de schermvergrendeling naar een bepaald niveau te updaten, maar gebruikers kunnen dit altijd negeren en de app verlaten. De schermvergrendeling wordt niet opgeslagen als platte tekst, zodat de app het precieze wachtwoord niet weet."</string>
-    <string name="permlab_postNotification" msgid="4875401198597803658">"meldingen laten zien"</string>
-    <string name="permdesc_postNotification" msgid="5974977162462877075">"Hiermee kan de app meldingen laten zien"</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"meldingen tonen"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Hiermee kan de app meldingen tonen"</string>
     <string name="permlab_turnScreenOn" msgid="219344053664171492">"het scherm aanzetten"</string>
     <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Hiermee kan de app het scherm aanzetten."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"biometrische hardware gebruiken"</string>
@@ -2096,7 +2096,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Uitzetten"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Meer informatie"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"In Android 12 hebben verbeterde meldingen aanpasbare Android-meldingen vervangen. Deze functie laat voorgestelde acties en antwoorden zien en ordent je meldingen.\n\nVerbeterde meldingen hebben toegang tot meldingscontent, waaronder persoonlijke informatie zoals contactnamen en berichten. Deze functie kan ook meldingen sluiten of erop reageren, zoals telefoongesprekken aannemen, en Niet storen beheren."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"In Android 12 hebben verbeterde meldingen aanpasbare Android-meldingen vervangen. Deze functie toont voorgestelde acties en antwoorden en ordent je meldingen.\n\nVerbeterde meldingen hebben toegang tot meldingscontent, waaronder persoonlijke informatie zoals contactnamen en berichten. Deze functie kan ook meldingen sluiten of erop reageren, zoals telefoongesprekken aannemen, en Niet storen beheren."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatiemelding voor routinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Batterijbesparing staat aan"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Het batterijgebruik wordt beperkt om de batterijduur te verlengen"</string>
