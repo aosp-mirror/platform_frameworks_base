@@ -76,6 +76,10 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Het dit"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Geen onlangse borrels nie"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Onlangse borrels en borrels wat toegemaak is, sal hier verskyn"</string>
+    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
+    <skip />
+    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
+    <skip />
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Beheer borrels enige tyd"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Tik hier om te bestuur watter apps en gesprekke in borrels kan verskyn"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Borrel"</string>

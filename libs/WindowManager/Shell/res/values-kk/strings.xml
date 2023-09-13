@@ -76,6 +76,10 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Түсінікті"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Жақындағы қалқыма хабарлар жоқ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Соңғы және жабылған қалқыма хабарлар осы жерде көрсетіледі."</string>
+    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
+    <skip />
+    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
+    <skip />
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Қалқыма хабарларды кез келген уақытта басқарыңыз"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Қалқыма хабарда көрсетілетін қолданбалар мен әңгімелерді реттеу үшін осы жерді түртіңіз."</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Көпіршік"</string>
