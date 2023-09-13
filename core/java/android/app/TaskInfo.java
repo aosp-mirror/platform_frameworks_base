@@ -583,6 +583,7 @@ public class TaskInfo {
                     == that.configuration.getLayoutDirection())
                 && (!hasCompatUI() || configuration.uiMode == that.configuration.uiMode)
                 && (!hasCompatUI() || isVisible == that.isVisible)
+                && isFocused == that.isFocused
                 && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled;
     }
 
