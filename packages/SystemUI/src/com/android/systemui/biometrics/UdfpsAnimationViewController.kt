@@ -27,6 +27,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.util.ViewController
 import kotlinx.coroutines.CoroutineScope
@@ -102,9 +103,11 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     open suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
         return scope.launch {
             primaryBouncerInteractor.bouncerExpansion.map { 1f - it }.collect { expansion: Float ->
-                notificationShadeVisible = expansion > 0f
-                view.onExpansionChanged(expansion)
-                updatePauseAuth()
+                if (statusBarStateController.state != SHADE) {
+                    notificationShadeVisible = expansion > 0f
+                    view.onExpansionChanged(expansion)
+                    updatePauseAuth()
+                }
             }
         }
     }
