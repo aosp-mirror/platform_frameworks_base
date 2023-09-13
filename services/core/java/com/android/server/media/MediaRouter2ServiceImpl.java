@@ -22,6 +22,7 @@ import static android.content.Intent.ACTION_SCREEN_ON;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 import static android.media.MediaRouter2Utils.getOriginalId;
 import static android.media.MediaRouter2Utils.getProviderId;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.media.MediaFeatureFlagManager.FEATURE_SCANNING_MINIMUM_PACKAGE_IMPORTANCE;
 
@@ -705,7 +706,8 @@ class MediaRouter2ServiceImpl {
     }
 
     private boolean checkCallerHasSystemRoutingPermissions(int pid, int uid) {
-        return checkCallerHasModifyAudioRoutingPermission(pid, uid);
+        return checkCallerHasModifyAudioRoutingPermission(pid, uid)
+                || checkCallerHasBluetoothPermissions(pid, uid);
     }
 
     private boolean checkCallerHasModifyAudioRoutingPermission(int pid, int uid) {
