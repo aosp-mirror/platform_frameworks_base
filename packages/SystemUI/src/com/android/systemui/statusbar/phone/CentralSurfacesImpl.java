@@ -3146,11 +3146,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
-    /**
-     * Clear Buzz/Beep/Blink.
-     */
-    @Override
-    public void clearNotificationEffects() {
+    private void clearNotificationEffects() {
         try {
             mBarService.clearNotificationEffects();
         } catch (RemoteException e) {
