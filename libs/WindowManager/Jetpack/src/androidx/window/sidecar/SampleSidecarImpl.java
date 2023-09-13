@@ -120,12 +120,10 @@ class SampleSidecarImpl extends StubSidecar {
         }
 
         List<SidecarDisplayFeature> features = new ArrayList<>();
-        final int rotation = activity.getResources().getConfiguration().windowConfiguration
-                .getDisplayRotation();
         for (CommonFoldingFeature baseFeature : mStoredFeatures) {
             SidecarDisplayFeature feature = new SidecarDisplayFeature();
             Rect featureRect = baseFeature.getRect();
-            rotateRectToDisplayRotation(displayId, rotation, featureRect);
+            rotateRectToDisplayRotation(displayId, featureRect);
             transformToWindowSpaceRect(activity, featureRect);
             feature.setRect(featureRect);
             feature.setType(baseFeature.getType());

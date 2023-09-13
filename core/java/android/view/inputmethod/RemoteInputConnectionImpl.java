@@ -28,7 +28,12 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.UriGrantsManager;
+import android.content.ContentProvider;
+import android.content.Intent;
 import android.graphics.RectF;
+import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.CancellationSignalBeamer;
@@ -37,6 +42,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
@@ -1193,7 +1199,22 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     public void commitContent(InputConnectionCommandHeader header,
             InputContentInfo inputContentInfo, int flags, Bundle opts,
             AndroidFuture future /* T=Boolean */) {
+        final int imeUid = Binder.getCallingUid();
         dispatchWithTracing("commitContent", future, () -> {
+            // Check if the originator IME has the right permissions
+            try {
+                final int contentUriOwnerUserId = ContentProvider.getUserIdFromUri(
+                        inputContentInfo.getContentUri(), UserHandle.getUserId(imeUid));
+                final Uri contentUriWithoutUserId = ContentProvider.getUriWithoutUserId(
+                        inputContentInfo.getContentUri());
+                UriGrantsManager.getService().checkGrantUriPermission_ignoreNonSystem(imeUid, null,
+                        contentUriWithoutUserId, Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                        contentUriOwnerUserId);
+            } catch (Exception e) {
+                Log.w(TAG, "commitContent with invalid Uri permission from IME:", e);
+                return false;
+            }
+
             if (header.mSessionId != mCurrentSessionId.get()) {
                 return false;  // cancelled
             }
