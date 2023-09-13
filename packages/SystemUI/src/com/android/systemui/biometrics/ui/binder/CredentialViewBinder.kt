@@ -9,7 +9,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.systemui.R
-import com.android.systemui.biometrics.AuthDialog
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.ui.CredentialPasswordView
 import com.android.systemui.biometrics.ui.CredentialPatternView
@@ -21,6 +20,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+
+private const val ANIMATE_CREDENTIAL_INITIAL_DURATION_MS = 150
 
 /**
  * View binder for all credential variants of BiometricPrompt, including [CredentialPatternView] and
@@ -147,7 +148,7 @@ private fun View.animateCredentialViewIn() {
     postOnAnimation {
         animate()
             .translationY(0f)
-            .setDuration(AuthDialog.ANIMATE_CREDENTIAL_INITIAL_DURATION_MS.toLong())
+            .setDuration(ANIMATE_CREDENTIAL_INITIAL_DURATION_MS.toLong())
             .alpha(1f)
             .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
             .withLayer()

@@ -105,9 +105,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Mock
     lateinit var vibrator: VibratorHelper
 
-    // TODO(b/278622168): remove with flag
-    open val useNewBiometricPrompt = false
-
     private val testScope = TestScope(StandardTestDispatcher())
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val biometricPromptRepository = FakePromptRepository()
@@ -137,7 +134,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Before
     fun setup() {
         displayRepository = FakeDisplayRepository()
-        featureFlags.set(Flags.BIOMETRIC_BP_STRONG, useNewBiometricPrompt)
         featureFlags.set(Flags.ONE_WAY_HAPTICS_API_MIGRATION, false)
 
         displayStateInteractor =
@@ -235,9 +231,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Test
     fun testActionCancel_panelInteractionDetectorDisable() {
         val container = initializeFingerprintContainer()
-        container.mBiometricCallback.onAction(
-                AuthBiometricView.Callback.ACTION_USER_CANCELED
-        )
+        container.mBiometricCallback.onUserCanceled()
         waitForIdleSync()
         verify(panelInteractionDetector).disable()
     }
@@ -246,9 +240,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Test
     fun testActionAuthenticated_sendsDismissedAuthenticated() {
         val container = initializeFingerprintContainer()
-        container.mBiometricCallback.onAction(
-            AuthBiometricView.Callback.ACTION_AUTHENTICATED
-        )
+        container.mBiometricCallback.onAuthenticated()
         waitForIdleSync()
 
         verify(callback).onDismissed(
@@ -262,9 +254,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Test
     fun testActionUserCanceled_sendsDismissedUserCanceled() {
         val container = initializeFingerprintContainer()
-        container.mBiometricCallback.onAction(
-            AuthBiometricView.Callback.ACTION_USER_CANCELED
-        )
+        container.mBiometricCallback.onUserCanceled()
         waitForIdleSync()
 
         verify(callback).onSystemEvent(
@@ -282,9 +272,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Test
     fun testActionButtonNegative_sendsDismissedButtonNegative() {
         val container = initializeFingerprintContainer()
-        container.mBiometricCallback.onAction(
-            AuthBiometricView.Callback.ACTION_BUTTON_NEGATIVE
-        )
+        container.mBiometricCallback.onButtonNegative()
         waitForIdleSync()
 
         verify(callback).onDismissed(
@@ -300,9 +288,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
         val container = initializeFingerprintContainer(
             authenticators = BiometricManager.Authenticators.BIOMETRIC_WEAK
         )
-        container.mBiometricCallback.onAction(
-            AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN
-        )
+        container.mBiometricCallback.onButtonTryAgain()
         waitForIdleSync()
 
         verify(callback).onTryAgainPressed(authContainer?.requestId ?: 0L)
@@ -311,9 +297,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Test
     fun testActionError_sendsDismissedError() {
         val container = initializeFingerprintContainer()
-        container.mBiometricCallback.onAction(
-            AuthBiometricView.Callback.ACTION_ERROR
-        )
+        container.mBiometricCallback.onError()
         waitForIdleSync()
 
         verify(callback).onDismissed(
@@ -331,9 +315,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             authenticators = BiometricManager.Authenticators.BIOMETRIC_WEAK or
                     BiometricManager.Authenticators.DEVICE_CREDENTIAL
         )
-        container.mBiometricCallback.onAction(
-            AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL
-        )
+        container.mBiometricCallback.onUseDeviceCredential()
         waitForIdleSync()
 
         verify(callback).onDeviceCredentialPressed(authContainer?.requestId ?: 0L)

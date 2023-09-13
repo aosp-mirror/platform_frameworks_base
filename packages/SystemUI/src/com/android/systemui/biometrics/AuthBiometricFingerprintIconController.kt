@@ -27,14 +27,15 @@ import androidx.annotation.VisibleForTesting
 import com.airbnb.lottie.LottieAnimationView
 import com.android.settingslib.widget.LottieColorUtils
 import com.android.systemui.R
-import com.android.systemui.biometrics.AuthBiometricView.BiometricState
-import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATED
-import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATING
-import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATING_ANIMATING_IN
-import com.android.systemui.biometrics.AuthBiometricView.STATE_ERROR
-import com.android.systemui.biometrics.AuthBiometricView.STATE_HELP
-import com.android.systemui.biometrics.AuthBiometricView.STATE_IDLE
-import com.android.systemui.biometrics.AuthBiometricView.STATE_PENDING_CONFIRMATION
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_AUTHENTICATED
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_AUTHENTICATING
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_AUTHENTICATING_ANIMATING_IN
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_ERROR
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_HELP
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_IDLE
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_PENDING_CONFIRMATION
+
 
 /** Fingerprint only icon animator for BiometricPrompt.  */
 open class AuthBiometricFingerprintIconController(
@@ -76,7 +77,7 @@ open class AuthBiometricFingerprintIconController(
         }
     }
 
-    private fun updateIconSideFps(@BiometricState lastState: Int, @BiometricState newState: Int) {
+    private fun updateIconSideFps(lastState: BiometricState, newState: BiometricState) {
         val displayInfo = DisplayInfo()
         context.display?.getDisplayInfo(displayInfo)
         val rotation = getRotationFromDefault(displayInfo.rotation)
@@ -106,7 +107,7 @@ open class AuthBiometricFingerprintIconController(
         LottieColorUtils.applyDynamicColors(context, iconViewOverlay)
     }
 
-    private fun updateIconNormal(@BiometricState lastState: Int, @BiometricState newState: Int) {
+    private fun updateIconNormal(lastState: BiometricState, newState: BiometricState) {
         val icon = getAnimationForTransition(lastState, newState) ?: return
 
         if (!(lastState == STATE_AUTHENTICATING_ANIMATING_IN && newState == STATE_AUTHENTICATING)) {
@@ -125,7 +126,7 @@ open class AuthBiometricFingerprintIconController(
         LottieColorUtils.applyDynamicColors(context, iconView)
     }
 
-    override fun updateIcon(@BiometricState lastState: Int, @BiometricState newState: Int) {
+    override fun updateIcon(lastState: BiometricState, newState: BiometricState) {
         if (isSideFps) {
             updateIconSideFps(lastState, newState)
         } else {
@@ -135,7 +136,7 @@ open class AuthBiometricFingerprintIconController(
     }
 
     @VisibleForTesting
-    fun getIconContentDescription(@BiometricState newState: Int): CharSequence? {
+    fun getIconContentDescription(newState: BiometricState): CharSequence? {
         val id = when (newState) {
             STATE_IDLE,
             STATE_AUTHENTICATING_ANIMATING_IN,
@@ -160,8 +161,8 @@ open class AuthBiometricFingerprintIconController(
     }
 
     protected open fun shouldAnimateIconViewForTransition(
-            @BiometricState oldState: Int,
-            @BiometricState newState: Int
+            oldState: BiometricState,
+            newState: BiometricState
     ) = when (newState) {
         STATE_HELP,
         STATE_ERROR -> true
@@ -172,8 +173,8 @@ open class AuthBiometricFingerprintIconController(
     }
 
     private fun shouldAnimateSfpsIconViewForTransition(
-            @BiometricState oldState: Int,
-            @BiometricState newState: Int
+            oldState: BiometricState,
+            newState: BiometricState
     ) = when (newState) {
         STATE_HELP,
         STATE_ERROR -> true
@@ -185,8 +186,8 @@ open class AuthBiometricFingerprintIconController(
     }
 
     protected open fun shouldAnimateIconViewOverlayForTransition(
-            @BiometricState oldState: Int,
-            @BiometricState newState: Int
+            oldState: BiometricState,
+            newState: BiometricState
     ) = when (newState) {
         STATE_HELP,
         STATE_ERROR -> true
@@ -198,8 +199,8 @@ open class AuthBiometricFingerprintIconController(
 
     @RawRes
     protected open fun getAnimationForTransition(
-            @BiometricState oldState: Int,
-            @BiometricState newState: Int
+            oldState: BiometricState,
+            newState: BiometricState
     ): Int? {
         val id = when (newState) {
             STATE_HELP,
@@ -231,8 +232,8 @@ open class AuthBiometricFingerprintIconController(
 
     @RawRes
     private fun getSideFpsOverlayAnimationForTransition(
-            @BiometricState oldState: Int,
-            @BiometricState newState: Int,
+            oldState: BiometricState,
+            newState: BiometricState,
             rotation: Int
     ): Int? = when (newState) {
         STATE_HELP,

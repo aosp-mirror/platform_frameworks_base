@@ -24,7 +24,7 @@ import android.graphics.drawable.Drawable
 import android.util.Log
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieCompositionFactory
-import com.android.systemui.biometrics.AuthBiometricView.BiometricState
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState
 
 private const val TAG = "AuthIconController"
 
@@ -76,7 +76,7 @@ abstract class AuthIconController(
     }
 
     /** Update the icon to reflect the [newState]. */
-    fun updateState(@BiometricState lastState: Int, @BiometricState newState: Int) {
+    fun updateState(lastState: BiometricState, newState: BiometricState) {
         if (deactivated) {
             Log.w(TAG, "Ignoring updateState when deactivated: $newState")
         } else {
@@ -85,7 +85,7 @@ abstract class AuthIconController(
     }
 
     /** Call during [updateState] if the controller is not [deactivated]. */
-    abstract fun updateIcon(@BiometricState lastState: Int, @BiometricState newState: Int)
+    abstract fun updateIcon(lastState: BiometricState, newState: BiometricState)
 
     /** Called during [onAnimationEnd] if the controller is not [deactivated]. */
     open fun handleAnimationEnd(drawable: Drawable) {}
