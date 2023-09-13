@@ -401,7 +401,7 @@ static void printUsesImpliedPermission(const String8& name, const String8& reaso
 Vector<String8> getNfcAidCategories(AssetManager& assets, const String8& xmlPath, bool offHost,
         String8 *outError = NULL)
 {
-    Asset* aidAsset = assets.openNonAsset(xmlPath, Asset::ACCESS_BUFFER);
+    Asset* aidAsset = assets.openNonAsset(xmlPath.c_str(), Asset::ACCESS_BUFFER);
     if (aidAsset == NULL) {
         if (outError != NULL) *outError = "xml resource does not exist";
         return Vector<String8>();
@@ -2760,7 +2760,7 @@ int doPackage(Bundle* bundle)
             appendPath(dependencyFile, "R.java.d");
         }
         // Make sure we have a clean dependency file to start with
-        fp = fopen(dependencyFile, "w");
+        fp = fopen(dependencyFile.c_str(), "w");
         fclose(fp);
     }
 
@@ -2849,7 +2849,7 @@ int doPackage(Bundle* bundle)
     if (bundle->getGenDependencies()) {
         // Now that writeResourceSymbols or writeAPK has taken care of writing
         // the targets to our dependency file, we'll write the prereqs
-        fp = fopen(dependencyFile, "a+");
+        fp = fopen(dependencyFile.c_str(), "a+");
         fprintf(fp, " : ");
         bool includeRaw = (outputAPKFile != NULL);
         err = writeDependencyPreReqs(bundle, assets, fp, includeRaw);

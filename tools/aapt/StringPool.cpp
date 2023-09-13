@@ -472,13 +472,13 @@ status_t StringPool::writeStringBlock(const sp<AaptFile>& pool)
 
             ENCODE_LENGTH(strings, sizeof(uint8_t), encSize)
 
-            strncpy((char*)strings, encStr, encSize+1);
+            strncpy((char*)strings, encStr.c_str(), encSize + 1);
         } else {
             char16_t* strings = (char16_t*)dat;
 
             ENCODE_LENGTH(strings, sizeof(char16_t), strSize)
 
-            strcpy16_htod(strings, ent.value);
+            strcpy16_htod(strings, ent.value.c_str());
         }
 
         strPos += totalSize;
@@ -592,7 +592,7 @@ ssize_t StringPool::offsetForString(const String16& val) const
     ssize_t res = indices != NULL && indices->size() > 0 ? indices->itemAt(0) : -1;
     if (kIsDebug) {
         printf("Offset for string %s: %zd (%s)\n", String8(val).c_str(), res,
-                res >= 0 ? String8(mEntries[mEntryArray[res]].value).c_str() : String8());
+               res >= 0 ? String8(mEntries[mEntryArray[res]].value).c_str() : "");
     }
     return res;
 }
