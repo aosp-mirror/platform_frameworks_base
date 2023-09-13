@@ -16,6 +16,9 @@
 
 package android.view.stylus;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -26,22 +29,23 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
 public class HandwritingTestUtil {
-    public static View createView(Rect handwritingArea) {
+    public static EditText createView(Rect handwritingArea) {
         return createView(handwritingArea, true /* autoHandwritingEnabled */,
                 true /* isStylusHandwritingAvailable */);
     }
 
-    public static View createView(Rect handwritingArea, boolean autoHandwritingEnabled,
+    public static EditText createView(Rect handwritingArea, boolean autoHandwritingEnabled,
             boolean isStylusHandwritingAvailable) {
         return createView(handwritingArea, autoHandwritingEnabled, isStylusHandwritingAvailable,
                 0, 0, 0, 0);
     }
 
-    public static View createView(Rect handwritingArea, boolean autoHandwritingEnabled,
+    public static EditText createView(Rect handwritingArea, boolean autoHandwritingEnabled,
             boolean isStylusHandwritingAvailable,
             float handwritingBoundsOffsetLeft, float handwritingBoundsOffsetTop,
             float handwritingBoundsOffsetRight, float handwritingBoundsOffsetBottom) {
@@ -68,7 +72,7 @@ public class HandwritingTestUtil {
             }
         };
 
-        View view = spy(new View(context));
+        EditText view = spy(new EditText(context));
         when(view.isAttachedToWindow()).thenReturn(true);
         when(view.isAggregatedVisible()).thenReturn(true);
         when(view.isStylusHandwritingAvailable()).thenReturn(isStylusHandwritingAvailable);
@@ -77,6 +81,13 @@ public class HandwritingTestUtil {
         when(view.getHandwritingBoundsOffsetTop()).thenReturn(handwritingBoundsOffsetTop);
         when(view.getHandwritingBoundsOffsetRight()).thenReturn(handwritingBoundsOffsetRight);
         when(view.getHandwritingBoundsOffsetBottom()).thenReturn(handwritingBoundsOffsetBottom);
+        doAnswer(invocation -> {
+            int[] outLocation = invocation.getArgument(0);
+            outLocation[0] = handwritingArea.left;
+            outLocation[1] = handwritingArea.top;
+            return null;
+        }).when(view).getLocationInWindow(any());
+        when(view.getOffsetForPosition(anyFloat(), anyFloat())).thenReturn(0);
         view.setAutoHandwritingEnabled(autoHandwritingEnabled);
         parent.addView(view);
         return view;
