@@ -70,7 +70,7 @@ import com.android.server.display.RampAnimator.DualRampAnimator;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.clamper.HdrClamper;
 import com.android.server.display.color.ColorDisplayService;
-import com.android.server.display.feature.DeviceConfigParameterProvider;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 import com.android.server.policy.WindowManagerPolicy;
@@ -1294,15 +1294,14 @@ public final class DisplayPowerController2Test {
                 mock(ScreenOffBrightnessSensorController.class);
         final HighBrightnessModeController hbmController = mock(HighBrightnessModeController.class);
         final HdrClamper hdrClamper = mock(HdrClamper.class);
-        final DeviceConfigParameterProvider deviceConfigParameterProvider =
-                mock(DeviceConfigParameterProvider.class);
+        final DisplayManagerFlags flags = mock(DisplayManagerFlags.class);
 
         when(hbmController.getCurrentBrightnessMax()).thenReturn(PowerManager.BRIGHTNESS_MAX);
 
         TestInjector injector = spy(new TestInjector(displayPowerState, animator,
                 automaticBrightnessController, wakelockController, brightnessMappingStrategy,
                 hysteresisLevels, screenOffBrightnessSensorController, hbmController, hdrClamper,
-                deviceConfigParameterProvider));
+                flags));
 
         final LogicalDisplay display = mock(LogicalDisplay.class);
         final DisplayDevice device = mock(DisplayDevice.class);
@@ -1316,7 +1315,7 @@ public final class DisplayPowerController2Test {
                 mContext, injector, mDisplayPowerCallbacksMock, mHandler,
                 mSensorManagerMock, mDisplayBlankerMock, display,
                 mBrightnessTrackerMock, brightnessSetting, () -> {},
-                hbmMetadata, /* bootCompleted= */ false);
+                hbmMetadata, /* bootCompleted= */ false, flags);
 
         return new DisplayPowerControllerHolder(dpc, display, displayPowerState, brightnessSetting,
                 animator, automaticBrightnessController, wakelockController,
@@ -1383,7 +1382,7 @@ public final class DisplayPowerController2Test {
 
         private final HdrClamper mHdrClamper;
 
-        private final DeviceConfigParameterProvider mDeviceConfigParameterProvider;
+        private final DisplayManagerFlags mFlags;
 
         TestInjector(DisplayPowerState dps, DualRampAnimator<DisplayPowerState> animator,
                 AutomaticBrightnessController automaticBrightnessController,
@@ -1393,7 +1392,7 @@ public final class DisplayPowerController2Test {
                 ScreenOffBrightnessSensorController screenOffBrightnessSensorController,
                 HighBrightnessModeController highBrightnessModeController,
                 HdrClamper hdrClamper,
-                DeviceConfigParameterProvider deviceConfigParameterProvider) {
+                DisplayManagerFlags flags) {
             mDisplayPowerState = dps;
             mAnimator = animator;
             mAutomaticBrightnessController = automaticBrightnessController;
@@ -1403,7 +1402,7 @@ public final class DisplayPowerController2Test {
             mScreenOffBrightnessSensorController = screenOffBrightnessSensorController;
             mHighBrightnessModeController = highBrightnessModeController;
             mHdrClamper = hdrClamper;
-            mDeviceConfigParameterProvider = deviceConfigParameterProvider;
+            mFlags = flags;
         }
 
         @Override
@@ -1512,9 +1511,10 @@ public final class DisplayPowerController2Test {
         @Override
         BrightnessRangeController getBrightnessRangeController(
                 HighBrightnessModeController hbmController, Runnable modeChangeCallback,
-                DisplayDeviceConfig displayDeviceConfig, Handler handler) {
+                DisplayDeviceConfig displayDeviceConfig, Handler handler,
+                DisplayManagerFlags flags) {
             return new BrightnessRangeController(hbmController, modeChangeCallback,
-                    displayDeviceConfig, mHdrClamper, mDeviceConfigParameterProvider);
+                    displayDeviceConfig, mHdrClamper, mFlags);
         }
 
         @Override

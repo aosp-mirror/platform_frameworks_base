@@ -19,10 +19,9 @@ package com.android.server.display;
 import android.hardware.display.BrightnessInfo;
 import android.os.Handler;
 import android.os.IBinder;
-import android.provider.DeviceConfigInterface;
 
 import com.android.server.display.brightness.clamper.HdrClamper;
-import com.android.server.display.feature.DeviceConfigParameterProvider;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
 import java.util.function.BooleanSupplier;
@@ -42,19 +41,19 @@ class BrightnessRangeController {
 
 
     BrightnessRangeController(HighBrightnessModeController hbmController,
-            Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig, Handler handler) {
+            Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig, Handler handler,
+            DisplayManagerFlags flags) {
         this(hbmController, modeChangeCallback, displayDeviceConfig,
-                new HdrClamper(modeChangeCallback::run, new Handler(handler.getLooper())),
-                new DeviceConfigParameterProvider(DeviceConfigInterface.REAL));
+                new HdrClamper(modeChangeCallback::run, new Handler(handler.getLooper())), flags);
     }
 
     BrightnessRangeController(HighBrightnessModeController hbmController,
             Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig,
-            HdrClamper hdrClamper, DeviceConfigParameterProvider configParameterProvider) {
+            HdrClamper hdrClamper, DisplayManagerFlags flags) {
         mHbmController = hbmController;
         mModeChangeCallback = modeChangeCallback;
-        mUseNbmController = configParameterProvider.isNormalBrightnessControllerFeatureEnabled();
         mUseHdrClamper = false;
+        mUseNbmController = flags.isNbmControllerEnabled();
         mNormalBrightnessModeController.resetNbmData(displayDeviceConfig.getLuxThrottlingData());
         mHdrClamper = hdrClamper;
     }
@@ -64,7 +63,6 @@ class BrightnessRangeController {
         pw.println("  mUseNormalBrightnessController=" + mUseNbmController);
         mHbmController.dump(pw);
         mNormalBrightnessModeController.dump(pw);
-
     }
 
     void onAmbientLuxChange(float ambientLux) {
