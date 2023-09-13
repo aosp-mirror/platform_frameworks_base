@@ -3798,10 +3798,6 @@ package android.content.pm {
     field @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS) public static final int FLAG_GET_PERSONS_DATA = 2048; // 0x800
   }
 
-  public class PackageInfo implements android.os.Parcelable {
-    field public boolean isArchived;
-  }
-
   public class PackageInstaller {
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
@@ -3879,6 +3875,7 @@ package android.content.pm {
     method public static void forceSafeLabels();
     method @Deprecated @NonNull public CharSequence loadSafeLabel(@NonNull android.content.pm.PackageManager);
     method @NonNull public CharSequence loadSafeLabel(@NonNull android.content.pm.PackageManager, @FloatRange(from=0) float, int);
+    field @FlaggedApi(Flags.FLAG_ARCHIVING) public boolean isArchived;
   }
 
   public abstract class PackageManager {
