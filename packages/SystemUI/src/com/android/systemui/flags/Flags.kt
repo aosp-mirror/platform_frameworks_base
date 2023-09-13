@@ -356,6 +356,10 @@ object Flags {
     @JvmField
     val QS_PIPELINE_AUTO_ADD = unreleasedFlag("qs_pipeline_auto_add", teamfood = true)
 
+    // TODO(b/296357483): Tracking Bug
+    @JvmField
+    val QS_PIPELINE_NEW_TILES = unreleasedFlag("qs_pipeline_new_tiles")
+
     // TODO(b/254512383): Tracking Bug
     @JvmField
     val FULL_SCREEN_USER_SWITCHER =
@@ -379,9 +383,6 @@ object Flags {
 
     // TODO(b/265892345): Tracking Bug
     val PLUG_IN_STATUS_BAR_CHIP = releasedFlag("plug_in_status_bar_chip")
-
-    // TODO(b/280426085): Tracking Bug
-    @JvmField val NEW_BLUETOOTH_REPOSITORY = releasedFlag("new_bluetooth_repository")
 
     // TODO(b/292533677): Tracking Bug
     val WIFI_TRACKER_LIB_FOR_WIFI_ICON = releasedFlag("wifi_tracker_lib_for_wifi_icon")

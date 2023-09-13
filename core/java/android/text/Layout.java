@@ -16,6 +16,9 @@
 
 package android.text;
 
+import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
+
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -1010,6 +1013,7 @@ public abstract class Layout {
      * @return bounding rectangle
      */
     @NonNull
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public RectF computeDrawingBoundingBox() {
         float left = 0;
         float right = 0;
@@ -3436,6 +3440,7 @@ public abstract class Layout {
      *
      * @see StaticLayout.Builder
      */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public static final class Builder {
         /**
          * Construct a builder class.
@@ -3776,6 +3781,7 @@ public abstract class Layout {
         // The corresponding getter is getUseBoundsForWidth
         @NonNull
         @SuppressLint("MissingGetterMatchingBuilder")
+        @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
         public Builder setUseBoundsForWidth(boolean useBoundsForWidth) {
             mUseBoundsForWidth = useBoundsForWidth;
             return this;
@@ -3865,6 +3871,7 @@ public abstract class Layout {
      * @see Layout.Builder
      */
     @NonNull
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final CharSequence getText() {
         return mText;
     }
@@ -3914,6 +3921,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setTextDirection(TextDirectionHeuristic)
      */
     @NonNull
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final TextDirectionHeuristic getTextDirectionHeuristic() {
         return mTextDir;
     }
@@ -3940,6 +3948,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setLineSpacing(float, float)
      * @see Layout#getSpacingMultiplier()
      */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final float getLineSpacingMultiplier() {
         return mSpacingMult;
     }
@@ -3966,6 +3975,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setLineSpacing(float, float)
      * @see Layout#getSpacingAdd()
      */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final float getLineSpacingAmount() {
         return mSpacingAdd;
     }
@@ -3977,6 +3987,7 @@ public abstract class Layout {
      * @see Layout.Builder#setFontPaddingIncluded(boolean)
      * @see StaticLayout.Builder#setIncludePad(boolean)
      */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final boolean isFontPaddingIncluded() {
         return mIncludePad;
     }
@@ -4024,6 +4035,7 @@ public abstract class Layout {
      * @see Layout#getEllipsizedWidth()
      */
     @Nullable
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final TextUtils.TruncateAt getEllipsize() {
         return mEllipsize;
     }
@@ -4039,6 +4051,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setMaxLines(int)
      */
     @IntRange(from = 1)
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int getMaxLines() {
         return mMaxLines;
     }
@@ -4051,6 +4064,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setBreakStrategy(int)
      */
     @BreakStrategy
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int getBreakStrategy() {
         return mBreakStrategy;
     }
@@ -4063,6 +4077,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setHyphenationFrequency(int)
      */
     @HyphenationFrequency
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int getHyphenationFrequency() {
         return mHyphenationFrequency;
     }
@@ -4078,6 +4093,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setIndents(int[], int[])
      */
     @Nullable
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int[] getLeftIndents() {
         if (mLeftIndents == null) {
             return null;
@@ -4098,6 +4114,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setIndents(int[], int[])
      */
     @Nullable
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int[] getRightIndents() {
         if (mRightIndents == null) {
             return null;
@@ -4115,6 +4132,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setJustificationMode(int)
      */
     @JustificationMode
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int getJustificationMode() {
         return mJustificationMode;
     }
@@ -4128,6 +4146,7 @@ public abstract class Layout {
      */
     // not being final because of subclass has already published API.
     @NonNull
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public LineBreakConfig getLineBreakConfig() {
         return mLineBreakConfig;
     }
@@ -4141,6 +4160,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setUseBoundsForWidth(boolean)
      * @see DynamicLayout.Builder#setUseBoundsForWidth(boolean)
      */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public boolean getUseBoundsForWidth() {
         return mUseBoundsForWidth;
     }

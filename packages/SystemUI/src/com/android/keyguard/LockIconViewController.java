@@ -18,7 +18,6 @@ package com.android.keyguard;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
-
 import static com.android.keyguard.LockIconView.ICON_FINGERPRINT;
 import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
@@ -54,12 +53,12 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
-import com.android.settingslib.udfps.UdfpsOverlayParams;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.biometrics.UdfpsController;
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;

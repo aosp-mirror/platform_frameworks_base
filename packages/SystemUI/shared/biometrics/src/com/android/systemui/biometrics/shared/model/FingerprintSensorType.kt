@@ -25,7 +25,7 @@ enum class FingerprintSensorType {
     UDFPS_ULTRASONIC,
     UDFPS_OPTICAL,
     POWER_BUTTON,
-    HOME_BUTTON,
+    HOME_BUTTON
 }
 
 /** Convert [this] to corresponding [FingerprintSensorType] */

@@ -24,11 +24,9 @@ import static android.app.StatusBarManager.windowStateToString;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS;
-
 import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_AUTO;
 import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS;
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
-
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
@@ -1433,7 +1431,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // - QS is expanded and we're swiping - swiping up now will hide QS, not dismiss the
         //   keyguard.
         // - Shade is in QQS over keyguard - swiping up should take us back to keyguard
-        if (!isKeyguardShowing()
+        if (!mKeyguardStateController.isShowing()
                 || mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
                 || mKeyguardStateController.isOccluded()
                 || !mKeyguardStateController.canDismissLockScreen()
@@ -2883,7 +2881,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mDevicePolicyManager.getCameraDisabled(null,
                 mLockscreenUserManager.getCurrentUserId())) {
             return false;
-        } else if (isKeyguardShowing() && mStatusBarKeyguardViewManager.isSecure()) {
+        } else if (mKeyguardStateController.isShowing()
+                && mStatusBarKeyguardViewManager.isSecure()) {
             // Check if the admin has disabled the camera specifically for the keyguard
             return (mDevicePolicyManager.getKeyguardDisabledFeatures(null,
                     mLockscreenUserManager.getCurrentUserId())
@@ -2999,12 +2998,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         Trace.endSection();
     }
-
-    @Override
-    public boolean isKeyguardShowing() {
-        return mKeyguardStateController.isShowing();
-    }
-
     @Override
     public boolean shouldIgnoreTouch() {
         return (mStatusBarStateController.isDozing()

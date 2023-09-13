@@ -17,7 +17,6 @@
 package com.android.systemui.biometrics.shared.model
 
 import com.android.systemui.biometrics.Utils
-import com.android.systemui.biometrics.domain.model.BiometricModalities
 
 // TODO(b/251476085): this should eventually replace Utils.CredentialType
 /** Credential options for biometric prompt. Shadows [Utils.CredentialType]. */

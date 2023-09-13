@@ -36,6 +36,7 @@ android_app {
         "androidx.preference_preference",
         "androidx.viewpager_viewpager",
         "SettingsLibDisplayUtils",
+        "com_android_a11y_menu_flags_lib",
     ],
 
     optimize: {

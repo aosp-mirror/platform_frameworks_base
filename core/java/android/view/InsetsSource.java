@@ -31,7 +31,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.WindowInsets.Type.InsetsType;
 
@@ -197,12 +196,6 @@ public class InsetsSource implements Parcelable {
      *         source.
      */
     public Insets calculateInsets(Rect relativeFrame, boolean ignoreVisibility) {
-        if (getType() == WindowInsets.Type.ime()) {
-            Log.i("b/297000797", "InsetsSource#calculateInsets tmpFrame: " + mTmpFrame
-                    + " ignoreVisibility: " + ignoreVisibility
-                    + " frame: " + mFrame
-                    + " relativeFrame: " + relativeFrame, new Throwable());
-        }
         return calculateInsets(relativeFrame, mFrame, ignoreVisibility);
     }
 
@@ -210,12 +203,6 @@ public class InsetsSource implements Parcelable {
      * Like {@link #calculateInsets(Rect, boolean)}, but will return visible insets.
      */
     public Insets calculateVisibleInsets(Rect relativeFrame) {
-        if (getType() == WindowInsets.Type.ime()) {
-            Log.i("b/297000797", "InsetsSource#calculateVisibleInsets tmpFrame: " + mTmpFrame
-                    + " frame: " + mFrame
-                    + " visibleFrame: " + mVisibleFrame
-                    + " relativeFrame: " + relativeFrame, new Throwable());
-        }
         return calculateInsets(relativeFrame, mVisibleFrame != null ? mVisibleFrame : mFrame,
                 false /* ignoreVisibility */);
     }

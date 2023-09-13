@@ -48,7 +48,7 @@ import com.android.systemui.biometrics.AuthBiometricView.Callback
 import com.android.systemui.biometrics.AuthBiometricViewAdapter
 import com.android.systemui.biometrics.AuthIconController
 import com.android.systemui.biometrics.AuthPanelController
-import com.android.systemui.biometrics.domain.model.BiometricModalities
+import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.biometrics.shared.model.asBiometricModality

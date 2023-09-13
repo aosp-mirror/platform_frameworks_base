@@ -2100,34 +2100,36 @@ class MediaRouter2ServiceImpl {
             if (!hasAddedOrModifiedRoutes && !hasRemovedRoutes) {
                 return;
             }
-            List<RouterRecord> routerRecordsWithModifyAudioRoutingPermission =
-                    getRouterRecords(true);
-            List<RouterRecord> routerRecordsWithoutModifyAudioRoutingPermission =
-                    getRouterRecords(false);
+            List<RouterRecord> routerRecordsWithSystemRoutingPermission =
+                    getRouterRecords(/* hasSystemRoutingPermission= */ true);
+            List<RouterRecord> routerRecordsWithoutSystemRoutingPermission =
+                    getRouterRecords(/* hasSystemRoutingPermission= */ false);
             List<IMediaRouter2Manager> managers = getManagers();
 
             // Managers receive all provider updates with all routes.
             notifyRoutesUpdatedToManagers(
                     managers, new ArrayList<>(mLastNotifiedRoutesToPrivilegedRouters.values()));
 
-            // Routers with modify audio permission (usually system routers) receive all provider
-            // updates with all routes.
+            // Routers with system routing access (either via {@link MODIFY_AUDIO_ROUTING} or
+            // {@link BLUETOOTH_CONNECT} + {@link BLUETOOTH_SCAN}) receive all provider updates
+            // with all routes.
             notifyRoutesUpdatedToRouterRecords(
-                    routerRecordsWithModifyAudioRoutingPermission,
+                    routerRecordsWithSystemRoutingPermission,
                     new ArrayList<>(mLastNotifiedRoutesToPrivilegedRouters.values()));
 
             if (!isSystemProvider) {
                 // Regular routers receive updates from all non-system providers with all non-system
                 // routes.
                 notifyRoutesUpdatedToRouterRecords(
-                        routerRecordsWithoutModifyAudioRoutingPermission,
+                        routerRecordsWithoutSystemRoutingPermission,
                         new ArrayList<>(mLastNotifiedRoutesToNonPrivilegedRouters.values()));
             } else if (hasAddedOrModifiedRoutes) {
-                // On system provider updates, regular routers receive the updated default route.
-                // This is the only system route they should receive.
+                // On system provider updates, routers without system routing access
+                // receive the updated default route. This is the only system route they should
+                // receive.
                 mLastNotifiedRoutesToNonPrivilegedRouters.put(defaultRoute.getId(), defaultRoute);
                 notifyRoutesUpdatedToRouterRecords(
-                        routerRecordsWithoutModifyAudioRoutingPermission,
+                        routerRecordsWithoutSystemRoutingPermission,
                         new ArrayList<>(mLastNotifiedRoutesToNonPrivilegedRouters.values()));
             }
         }
@@ -2533,7 +2535,7 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private List<RouterRecord> getRouterRecords(boolean hasModifyAudioRoutingPermission) {
+        private List<RouterRecord> getRouterRecords(boolean hasSystemRoutingPermission) {
             MediaRouter2ServiceImpl service = mServiceRef.get();
             List<RouterRecord> routerRecords = new ArrayList<>();
             if (service == null) {
@@ -2541,7 +2543,7 @@ class MediaRouter2ServiceImpl {
             }
             synchronized (service.mLock) {
                 for (RouterRecord routerRecord : mUserRecord.mRouterRecords) {
-                    if (hasModifyAudioRoutingPermission
+                    if (hasSystemRoutingPermission
                             == routerRecord.hasSystemRoutingPermission()) {
                         routerRecords.add(routerRecord);
                     }

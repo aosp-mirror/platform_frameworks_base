@@ -15,8 +15,6 @@
  */
 package com.android.credentialmanager.logging
 
-import com.android.internal.logging.UiEventLogger.UiEventEnum.RESERVE_NEW_UI_EVENT_ID
-
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 

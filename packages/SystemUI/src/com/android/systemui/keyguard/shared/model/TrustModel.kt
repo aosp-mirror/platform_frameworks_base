@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.shared.model
 
+import com.android.keyguard.TrustGrantFlags
+
 sealed class TrustMessage
 
 /** Represents the trust state */
@@ -24,6 +26,7 @@ data class TrustModel(
     val isTrusted: Boolean,
     /** The user, for which the trust changed. */
     val userId: Int,
+    val flags: TrustGrantFlags,
 ) : TrustMessage()
 
 /** Represents where trust agents are enabled for a particular user. */

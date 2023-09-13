@@ -1,0 +1,12 @@
+aconfig_declarations {
+    name: "com_android_a11y_menu_flags",
+    package: "com.android.systemui.accessibility.accessibilitymenu",
+    srcs: [
+        "accessibility.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "com_android_a11y_menu_flags_lib",
+    aconfig_declarations: "com_android_a11y_menu_flags",
+}

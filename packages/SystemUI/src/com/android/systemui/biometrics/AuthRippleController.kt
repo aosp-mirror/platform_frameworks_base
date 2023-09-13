@@ -25,14 +25,14 @@ import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.BiometricSourceType
 import android.util.DisplayMetrics
 import androidx.annotation.VisibleForTesting
+import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.settingslib.Utils
-import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
-import com.android.app.animation.Interpolators
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags

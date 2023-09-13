@@ -81,7 +81,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun setTransitionToFullShadeProgress(transitionToFullShadeProgress: Float) {}
     override fun setPrimaryBouncerHiddenFraction(expansion: Float) {}
     override fun updateScrimController() {}
-    override fun isKeyguardShowing() = false
     override fun shouldIgnoreTouch() = false
     override fun isDeviceInteractive() = false
     override fun awakenDreams() {}

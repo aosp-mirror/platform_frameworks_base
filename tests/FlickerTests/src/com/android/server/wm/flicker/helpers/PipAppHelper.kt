@@ -244,12 +244,16 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         action: String? = null,
         stringExtras: Map<String, String>
     ) {
-        launchViaIntentAndWaitShown(
+        launchViaIntent(
             wmHelper,
             launchedAppComponentMatcherOverride,
             action,
             stringExtras,
-            waitConditions = arrayOf(ConditionsFactory.hasPipWindow())
+            waitConditionsBuilder = wmHelper
+                .StateSyncBuilder()
+                .add(ConditionsFactory.isWMStateComplete())
+                .withAppTransitionIdle()
+                .add(ConditionsFactory.hasPipWindow())
         )
 
         wmHelper
@@ -261,7 +265,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
 
     /** Expand the PIP window back to full screen via intent and wait until the app is visible */
     fun exitPipToFullScreenViaIntent(wmHelper: WindowManagerStateHelper) =
-        launchViaIntentAndWaitShown(wmHelper)
+        launchViaIntent(wmHelper)
 
     fun clickEnterPipButton(wmHelper: WindowManagerStateHelper) {
         clickObject(ENTER_PIP_BUTTON_ID)

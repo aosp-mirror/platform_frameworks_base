@@ -18,8 +18,6 @@ package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
 import android.tools.common.Rotation
-import android.tools.common.traces.Condition
-import android.tools.common.traces.DeviceStateDump
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.IComponentMatcher
 import android.tools.device.helpers.FIND_TIMEOUT
@@ -54,14 +52,14 @@ constructor(
         launchedAppComponentMatcherOverride: IComponentMatcher?,
         action: String?,
         stringExtras: Map<String, String>,
-        waitConditions: Array<Condition<DeviceStateDump>>
+        waitConditionsBuilder: WindowManagerStateHelper.StateSyncBuilder
     ) {
         super.launchViaIntent(
             wmHelper,
             launchedAppComponentMatcherOverride,
             action,
             stringExtras,
-            waitConditions
+            waitConditionsBuilder
         )
         waitIMEShown(wmHelper)
     }

@@ -59,7 +59,7 @@ constructor(
     val bouncerShowMessage: Flow<BouncerShowMessageModel> = interactor.showMessage
 
     /** Observe whether keyguard is authenticated already. */
-    val keyguardAuthenticated: Flow<Boolean> = interactor.keyguardAuthenticated
+    val keyguardAuthenticated: Flow<Boolean> = interactor.keyguardAuthenticatedBiometrics
 
     /** Observe whether the side fps is showing. */
     val sideFpsShowing: Flow<Boolean> = interactor.sideFpsShowing

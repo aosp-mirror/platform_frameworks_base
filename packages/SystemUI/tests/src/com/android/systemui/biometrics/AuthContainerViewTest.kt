@@ -42,12 +42,14 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
 import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
+import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -125,13 +127,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
         )
     }
 
-    private val displayStateInteractor = DisplayStateInteractorImpl(
-        testScope.backgroundScope,
-        mContext,
-        fakeExecutor,
-        rearDisplayStateRepository
-    )
-
+    private lateinit var displayRepository: FakeDisplayRepository
+    private lateinit var displayStateInteractor: DisplayStateInteractor
 
     private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
 
@@ -139,8 +136,18 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        displayRepository = FakeDisplayRepository()
         featureFlags.set(Flags.BIOMETRIC_BP_STRONG, useNewBiometricPrompt)
         featureFlags.set(Flags.ONE_WAY_HAPTICS_API_MIGRATION, false)
+
+        displayStateInteractor =
+            DisplayStateInteractorImpl(
+                    testScope.backgroundScope,
+                    mContext,
+                    fakeExecutor,
+                    rearDisplayStateRepository,
+                    displayRepository,
+            )
     }
 
     @After

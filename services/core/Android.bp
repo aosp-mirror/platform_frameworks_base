@@ -193,6 +193,7 @@ java_library_static {
         "power_optimization_flags_lib",
         "notification_flags_lib",
         "camera_platform_flags_core_java_lib",
+        "biometrics_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [

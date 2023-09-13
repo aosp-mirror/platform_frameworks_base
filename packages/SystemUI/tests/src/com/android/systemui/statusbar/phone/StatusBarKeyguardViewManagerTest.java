@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,7 +33,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.service.trust.TrustAgentService;
@@ -73,8 +71,9 @@ import com.android.systemui.bouncer.ui.BouncerView;
 import com.android.systemui.bouncer.ui.BouncerViewDelegate;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -131,7 +130,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private SysUIUnfoldComponent mSysUiUnfoldComponent;
     @Mock private DreamOverlayStateController mDreamOverlayStateController;
     @Mock private LatencyTracker mLatencyTracker;
-    @Mock private FeatureFlags mFeatureFlags;
+    private FakeFeatureFlags mFeatureFlags;
     @Mock private KeyguardSecurityModel mKeyguardSecurityModel;
     @Mock private PrimaryBouncerCallbackInteractor mPrimaryBouncerCallbackInteractor;
     @Mock private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
@@ -171,9 +170,11 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .thenReturn(mKeyguardMessageAreaController);
         when(mBouncerView.getDelegate()).thenReturn(mBouncerViewDelegate);
         when(mBouncerViewDelegate.getBackCallback()).thenReturn(mBouncerViewDelegateBackCallback);
-        when(mFeatureFlags
-                .isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM))
-                .thenReturn(true);
+        mFeatureFlags = new FakeFeatureFlags();
+        mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM, true);
+        mFeatureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false);
+        mFeatureFlags.set(Flags.UDFPS_NEW_TOUCH_DETECTION, true);
+        mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
 
         when(mNotificationShadeWindowController.getWindowRootView())
                 .thenReturn(mNotificationShadeWindowView);
@@ -208,7 +209,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mActivityStarter,
                         mock(KeyguardTransitionInteractor.class),
                         StandardTestDispatcher(null, null),
-                        () -> mock(WindowManagerLockscreenVisibilityInteractor.class)) {
+                        () -> mock(WindowManagerLockscreenVisibilityInteractor.class),
+                        () -> mock(KeyguardDismissActionInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -711,7 +713,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mActivityStarter,
                         mock(KeyguardTransitionInteractor.class),
                         StandardTestDispatcher(null, null),
-                        () -> mock(WindowManagerLockscreenVisibilityInteractor.class)) {
+                        () -> mock(WindowManagerLockscreenVisibilityInteractor.class),
+                        () -> mock(KeyguardDismissActionInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;

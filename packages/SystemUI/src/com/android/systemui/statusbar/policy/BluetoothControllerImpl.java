@@ -38,8 +38,6 @@ import com.android.systemui.bluetooth.BluetoothLogger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.bluetooth.BluetoothRepository;
 import com.android.systemui.statusbar.policy.bluetooth.ConnectionStatusModel;
@@ -64,7 +62,6 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         CachedBluetoothDevice.Callback, LocalBluetoothProfileManager.ServiceListener {
     private static final String TAG = "BluetoothController";
 
-    private final FeatureFlags mFeatureFlags;
     private final DumpManager mDumpManager;
     private final BluetoothLogger mLogger;
     private final BluetoothRepository mBluetoothRepository;
@@ -89,7 +86,6 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     @Inject
     public BluetoothControllerImpl(
             Context context,
-            FeatureFlags featureFlags,
             UserTracker userTracker,
             DumpManager dumpManager,
             BluetoothLogger logger,
@@ -97,7 +93,6 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
             @Main Looper mainLooper,
             @Nullable LocalBluetoothManager localBluetoothManager,
             @Nullable BluetoothAdapter bluetoothAdapter) {
-        mFeatureFlags = featureFlags;
         mDumpManager = dumpManager;
         mLogger = logger;
         mBluetoothRepository = bluetoothRepository;
@@ -252,37 +247,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     }
 
     private void updateConnected() {
-        if (mFeatureFlags.isEnabled(Flags.NEW_BLUETOOTH_REPOSITORY)) {
-            mBluetoothRepository.fetchConnectionStatusInBackground(
-                    getDevices(), this::onConnectionStatusFetched);
-        } else {
-            updateConnectedOld();
-        }
-    }
-
-    /** Used only if {@link Flags.NEW_BLUETOOTH_REPOSITORY} is *not* enabled. */
-    private void updateConnectedOld() {
-        // Make sure our connection state is up to date.
-        int state = mLocalBluetoothManager.getBluetoothAdapter().getConnectionState();
-        List<CachedBluetoothDevice> newList = new ArrayList<>();
-        // If any of the devices are in a higher state than the adapter, move the adapter into
-        // that state.
-        for (CachedBluetoothDevice device : getDevices()) {
-            int maxDeviceState = device.getMaxConnectionState();
-            if (maxDeviceState > state) {
-                state = maxDeviceState;
-            }
-            if (device.isConnected()) {
-                newList.add(device);
-            }
-        }
-
-        if (newList.isEmpty() && state == BluetoothAdapter.STATE_CONNECTED) {
-            // If somehow we think we are connected, but have no connected devices, we aren't
-            // connected.
-            state = BluetoothAdapter.STATE_DISCONNECTED;
-        }
-        onConnectionStatusFetched(new ConnectionStatusModel(state, newList));
+        mBluetoothRepository.fetchConnectionStatusInBackground(
+                getDevices(), this::onConnectionStatusFetched);
     }
 
     private void onConnectionStatusFetched(ConnectionStatusModel status) {

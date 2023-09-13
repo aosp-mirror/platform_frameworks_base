@@ -295,8 +295,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     @VisibleForTesting
     void updateScrimController();
 
-    boolean isKeyguardShowing();
-
     boolean shouldIgnoreTouch();
 
     boolean isDeviceInteractive();

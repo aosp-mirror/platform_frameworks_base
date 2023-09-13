@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.udfps;
+package com.android.systemui.biometrics;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.util.DisplayUtils;
 import android.util.Log;
@@ -26,7 +27,8 @@ import android.view.DisplayInfo;
 import android.view.MotionEvent;
 import android.view.Surface;
 
-import com.android.settingslib.R;
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
+import com.android.systemui.shared.biometrics.R;
 
 /** Utility class for working with udfps. */
 public class UdfpsUtils {
@@ -95,12 +97,13 @@ public class UdfpsUtils {
             return null;
         }
 
-        String[] touchHints = context.getResources().getStringArray(
-                R.array.udfps_accessibility_touch_hints);
-        if (touchHints.length != 4) {
-            Log.e(TAG, "expected exactly 4 touch hints, got " + touchHints.length + "?");
-            return null;
-        }
+        Resources resources = context.getResources();
+        String[] touchHints = new String[] {
+                resources.getString(R.string.udfps_accessibility_touch_hints_left),
+                resources.getString(R.string.udfps_accessibility_touch_hints_down),
+                resources.getString(R.string.udfps_accessibility_touch_hints_right),
+                resources.getString(R.string.udfps_accessibility_touch_hints_up),
+        };
 
         // Scale the coordinates to native resolution.
         float scale = udfpsOverlayParams.getScaleFactor();

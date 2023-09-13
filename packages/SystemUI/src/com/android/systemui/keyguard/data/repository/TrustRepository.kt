@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.app.trust.TrustManager
+import com.android.keyguard.TrustGrantFlags
 import com.android.keyguard.logging.TrustRepositoryLogger
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -50,6 +52,9 @@ interface TrustRepository {
 
     /** Reports that whether trust is managed has changed for the current user. */
     val isCurrentUserTrustManaged: StateFlow<Boolean>
+
+    /** A trust agent is requesting to dismiss the keyguard from a trust change. */
+    val trustAgentRequestingToDismissKeyguard: Flow<TrustModel>
 }
 
 @SysUISingleton
@@ -78,7 +83,7 @@ constructor(
                         ) {
                             logger.onTrustChanged(enabled, newlyUnlocked, userId, flags, grantMsgs)
                             trySendWithFailureLogging(
-                                TrustModel(enabled, userId),
+                                TrustModel(enabled, userId, TrustGrantFlags(flags)),
                                 TrustRepositoryLogger.TAG,
                                 "onTrustChanged"
                             )
@@ -157,6 +162,17 @@ constructor(
                     started = SharingStarted.WhileSubscribed(),
                     initialValue = false
                 )
+
+    override val trustAgentRequestingToDismissKeyguard: Flow<TrustModel>
+        get() =
+            combine(trust, userRepository.selectedUserInfo, ::Pair)
+                .map { latestTrustModelForUser[it.second.id] }
+                .distinctUntilChanged()
+                .filter {
+                    it != null &&
+                        (it.flags.isInitiatedByUser || it.flags.dismissKeyguardRequested())
+                }
+                .map { it!! }
 
     private fun isUserTrustManaged(userId: Int) =
         trustManagedForUser[userId]?.isTrustManaged ?: false

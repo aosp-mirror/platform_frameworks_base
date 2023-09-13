@@ -109,10 +109,11 @@ public class PackageArchiver {
         Computer snapshot = mPm.snapshotComputer();
         int userId = userHandle.getIdentifier();
         int binderUid = Binder.getCallingUid();
-        int providedUid = snapshot.getPackageUid(callerPackageName, 0, userId);
+        if (!PackageManagerServiceUtils.isRootOrShell(binderUid)) {
+            verifyCaller(snapshot.getPackageUid(callerPackageName, 0, userId), binderUid);
+        }
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
                 "archiveApp");
-        verifyCaller(providedUid, binderUid);
         CompletableFuture<ArchiveState> archiveStateFuture;
         try {
             archiveStateFuture = createArchiveState(packageName, userId);
@@ -241,10 +242,11 @@ public class PackageArchiver {
         Computer snapshot = mPm.snapshotComputer();
         int userId = userHandle.getIdentifier();
         int binderUid = Binder.getCallingUid();
-        int providedUid = snapshot.getPackageUid(callerPackageName, 0, userId);
+        if (!PackageManagerServiceUtils.isRootOrShell(binderUid)) {
+            verifyCaller(snapshot.getPackageUid(callerPackageName, 0, userId), binderUid);
+        }
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
                 "unarchiveApp");
-        verifyCaller(providedUid, binderUid);
         PackageStateInternal ps;
         try {
             ps = getPackageState(packageName, snapshot, binderUid, userId);

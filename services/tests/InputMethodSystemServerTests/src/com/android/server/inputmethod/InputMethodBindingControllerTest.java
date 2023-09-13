@@ -158,7 +158,7 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
         assertThat(result.result).isEqualTo(InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING);
         assertThat(result.id).isEqualTo(info.getId());
         synchronized (ImfLock.class) {
-            assertThat(mBindingController.hasConnection()).isTrue();
+            assertThat(mBindingController.hasMainConnection()).isTrue();
             assertThat(mBindingController.getCurId()).isEqualTo(info.getId());
             assertThat(mBindingController.getCurToken()).isNotNull();
         }
@@ -202,7 +202,7 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
 
         synchronized (ImfLock.class) {
             // Unbind both main connection and visible connection
-            assertThat(mBindingController.hasConnection()).isFalse();
+            assertThat(mBindingController.hasMainConnection()).isFalse();
             assertThat(mBindingController.isVisibleBound()).isFalse();
             verify(mContext, times(2)).unbindService(any(ServiceConnection.class));
             assertThat(mBindingController.getCurToken()).isNull();

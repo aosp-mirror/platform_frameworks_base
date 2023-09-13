@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.domain.model
+package com.android.systemui.biometrics.shared.model
 
 import android.hardware.biometrics.SensorProperties
 import android.hardware.face.FaceSensorPropertiesInternal

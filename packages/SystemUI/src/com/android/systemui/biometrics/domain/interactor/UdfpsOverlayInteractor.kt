@@ -18,8 +18,8 @@ package com.android.systemui.biometrics.domain.interactor
 
 import android.view.MotionEvent
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
