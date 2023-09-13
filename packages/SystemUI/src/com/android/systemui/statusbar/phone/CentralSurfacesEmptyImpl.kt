@@ -68,7 +68,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
         cancelAction: Runnable?,
     ) {}
     override fun getNavigationBarView(): NavigationBarView? = null
-    override fun isOverviewEnabled() = false
     override fun setBouncerShowing(bouncerShowing: Boolean) {}
     override fun isScreenFullyOff() = false
     override fun getEmergencyActionIntent(): Intent? = null

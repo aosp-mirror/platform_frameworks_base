@@ -263,8 +263,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     // TODO: Figure out way to remove these.
     NavigationBarView getNavigationBarView();
 
-    boolean isOverviewEnabled();
-
     void setBouncerShowing(boolean bouncerShowing);
 
     boolean isScreenFullyOff();

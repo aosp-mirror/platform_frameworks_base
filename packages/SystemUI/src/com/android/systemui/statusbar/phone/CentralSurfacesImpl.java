@@ -2536,11 +2536,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mNavigationBarController.getNavigationBarView(mDisplayId);
     }
 
-    @Override
-    public boolean isOverviewEnabled() {
-        return mNavigationBarController.isOverviewEnabled(mDisplayId);
-    }
-
     /**
      * Propagation of the bouncer state, indicating that it's fully visible.
      */
