@@ -13,3 +13,10 @@ flag {
     description: "Replaces background PSS collection in AppProfiler with RSS"
     bug: "297542292"
 }
+
+flag {
+    name: "allow_private_profile"
+    namespace: "private_profile"
+    description: "Guards a new Private Profile type in UserManager - everything from its setup to config to deletion."
+    bug: "299069460"
+}
