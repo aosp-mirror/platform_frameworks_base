@@ -58,10 +58,10 @@
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\' मा जडान गर्न सकिँदैन"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"पासवर्ड जाँच गरेर फेरि प्रयास गर्नुहोस्"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"दायराभित्र छैन"</string>
-    <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"स्वतः जडान हुने छैन"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"अटो कनेक्ट हुने छैन"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"इन्टरनेटमाथिको पहुँच छैन"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> द्वारा सेभ गरियो"</string>
-    <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s मार्फत् स्वतः जडान गरिएको"</string>
+    <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s मार्फत् अटो कनेक्ट गरिएको"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"नेटवर्क मूल्याङ्कनकर्ता मार्फत स्वत: जडान गरिएको"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> मार्फत जडान गरिएको"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"साइन अप गर्न ट्याप गर्नुहोस्"</string>
@@ -580,12 +580,12 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"प्रतिबन्धित प्रोफाइल"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"नयाँ प्रयोगकर्ता हाल्ने हो?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"तपाईं थप प्रयोगकर्ताहरू सिर्जना गरेर ती प्रयोगकर्तालाई यो डिभाइस प्रयोग गर्न दिन सक्नुहुन्छ। हरेक प्रयोगकर्ताको आफ्नै ठाउँ हुन्छ। उनीहरू यो ठाउँमा आफ्नै एप, वालपेपर आदिका लागि प्रयोग गर्न सक्छन्। उनीहरू सबैजनालाई असर पार्ने Wi-Fi जस्ता डिभाइसका सेटिङहरू पनि परिवर्तन गर्न सक्छन्।\n\nतपाईंले नयाँ प्रयोगकर्ता थप्दा उक्त व्यक्तिले आफ्नो ठाउँ सेटअप गर्नु पर्ने हुन्छ।\n\nसबै प्रयोगकर्ता अन्य सबै प्रयोगकर्ताले प्रयोग गर्ने एपहरू अद्यावधिक गर्न सक्छन्। तपाईं थप प्रयोगकर्ताहरू सिर्जना गरेर ती प्रयोगकर्तालाई यो डिभाइस प्रयोग गर्न दिन सक्नुहुन्छ। हरेक प्रयोगकर्ताको आफ्नै ठाउँ हुन्छ। उनीहरू यो ठाउँमा आफ्नै एप, वालपेपर आदिका लागि प्रयोग गर्न सक्छन्। उनीहरू सबैजनालाई असर पार्ने Wi-Fi जस्ता डिभाइसका सेटिङहरू पनि परिवर्तन गर्न सक्छन्।BREAK_0BREAK_1तपाईंले नयाँ प्रयोगकर्ता थप्दा उक्त व्यक्तिले आफ्नो ठाउँ सेटअप गर्नु पर्ने हुन्छ।BREAK_2BREAK_3सबै प्रयोगकर्ता अन्य सबै प्रयोगकर्ताले प्रयोग गर्ने एपहरू अद्यावधिक गर्न सक्छन्। तर पहुँचसम्बन्धी सेटिङ तथा सेवाहरू नयाँ प्रयोगकर्तामा नसर्न सक्छन्।"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"तपाईंले नयाँ प्रयोगकर्ता थप्नुभयो भने ती प्रयोगकर्ताले आफ्नो स्पेस सेट गर्नु पर्ने हुन्छ।\n\nसबै प्रयोगकर्ताले अरू प्रयोगकर्ताका एपहरू अपडेट गर्न सक्छन्।"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"तपाईंले नयाँ प्रयोगकर्ता हाल्नुभयो भने ती प्रयोगकर्ताले आफ्नो स्पेस सेट गर्नु पर्ने हुन्छ।\n\nसबै प्रयोगकर्ताले अरू प्रयोगकर्ताका एपहरू अपडेट गर्न सक्छन्।"</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"यी प्रयोगकर्तालाई एड्मिन बनाउने हो?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"एड्मिनहरूसँग अन्य प्रयोगकर्तासँग नभएका विशेषाधिकारहरू हुन्छन्। एड्मिन सबै प्रयोगकर्ताहरूलाई व्यवस्थापन गर्न, यो डिभाइस अपडेट वा रिसेट गर्न, सेटिङ परिमार्जन गर्न, इन्स्टल गरिएका सबै एपहरू हेर्न र अरूलाई एड्मिनका विशेषाधिकारहरू दिन वा अरूलाई दिइएका एड्मिनका विशेषाधिकारहरू खारेज गर्न सक्नुहुन्छ।"</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"एड्मिन बनाउनुहोस्"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"अहिले प्रयोगकर्ता सेटअप गर्ने हो?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"यी व्यक्ति यन्त्र यो डिभाइस चलाउन र आफ्नो ठाउँ सेट गर्न उपलब्ध छन् भन्ने कुरा सुनिश्चित गर्नुहोस्"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"यी व्यक्ति यो डिभाइस चलाउन र आफ्नो ठाउँ सेट गर्न उपलब्ध छन् भन्ने कुरा सुनिश्चित गर्नुहोस्"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"अहिले प्रोफाइल सेटअप गर्ने हो?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"अब सेटअप गर्नुहोस्"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"अहिले होइन"</string>
@@ -602,8 +602,8 @@
     <string name="add_user_failed" msgid="4809887794313944872">"नयाँ प्रयोगकर्ता सिर्जना गर्न सकिएन"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"नयाँ अतिथि बनाउन सकिएन"</string>
     <string name="user_nickname" msgid="262624187455825083">"उपनाम"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"प्रयोगकर्ता थप्नुहोस्"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि थप्नुहोस्"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"प्रयोगकर्ता कनेक्ट गर्नुहोस्"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि कनेक्ट गर्नुहोस्"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"गेस्ट मोडबाट बाहिर निस्कियोस्"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"अतिथि सत्र रिसेट गर्नुहोस्"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"अतिथिका रूपमा ब्राउज गर्ने सेसन रिसेट गर्ने हो?"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"पूर्वानुमानयुक्त ब्याक एनिमेसनहरू"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"पूर्वानुमानयुक्त ब्याक एनिमेसनका हकमा सिस्टम एनिमेसनहरू लागू गर्नुहोस्।"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"यो सेटिङले पूर्वानुमानयुक्त जेस्चर एनिमेसनका हकमा सिस्टम एनिमेनसहरू लागू गर्छ। म्यानिफेस्ट फाइलमा हरेक एपका हकमा enableOnBackInvokedCallback सेट गरी TRUE बनाएपछि मात्र यो सेटिङ अन गर्न मिल्छ।"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"बायाँतिर सार्नुहोस्"</item>
-    <item msgid="5425394847942513942">"तलतिर सार्नुहोस्"</item>
-    <item msgid="7728484337962740316">"दायाँतिर सार्नुहोस्"</item>
-    <item msgid="324200556467459329">"माथितिर सार्नुहोस्"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"नतोकिएको"</string>
     <string name="neuter" msgid="2075249330106127310">"नपुंसक लिङ्ग"</string>

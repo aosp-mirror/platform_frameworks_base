@@ -356,7 +356,7 @@
     <string name="show_touches" msgid="8437666942161289025">"ສະແດງການແຕະ"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"ສະແດງຄໍາຕິຊົມທາງຮູບພາບສຳລັບການແຕະ"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"ສະແດງການກົດປຸ່ມ"</string>
-    <string name="show_key_presses_summary" msgid="725387457373015024">"ສະແດງຄຳຕິຊົມພາບສຳລັບການກົດປຸ່ມຈິງ"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"ສະແດງການຕອບສະໜອງທີ່ເປັນພາບສຳລັບການກົດປຸ່ມຈິງ"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"ສະແດງການອັບເດດພື້ນຜິວ"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"ກະພິບໜ້າຈໍທັງໜ້າເມື່ອມີການອັບເດດ"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"ສະແດງອັບເດດມຸມມອງ"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ອະນິເມຊັນກັບຫຼັງແບບຄາດເດົາ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ເປີດການນຳໃຊ້ອະນິເມຊັນລະບົບສຳລັບການກັບຫຼັງແບບຄາດເດົາ."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ການຕັ້ງຄ່ານີ້ຈະເປີດການນຳໃຊ້ອະນິເມຊັນລະບົບສຳລັບອະນິເມຊັນທ່າທາງແບບຄາດເດົາ. ມັນຕ້ອງໃຊ້ການຕັ້ງຄ່າຕໍ່ແອັບ enableOnBackInvokedCallback ເປັນ true ໃນໄຟລ໌ manifest."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"ຍ້າຍໄປຊ້າຍ"</item>
-    <item msgid="5425394847942513942">"ຍ້າຍລົງ"</item>
-    <item msgid="7728484337962740316">"ຍ້າຍໄປຂວາ"</item>
-    <item msgid="324200556467459329">"ຍ້າຍຂຶ້ນ"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"ບໍ່ໄດ້ລະບຸ"</string>
     <string name="neuter" msgid="2075249330106127310">"ບໍ່ມີເພດ"</string>

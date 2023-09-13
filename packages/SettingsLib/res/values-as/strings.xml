@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"প্ৰেডিক্টিভ বেক এনিমেশ্বন"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"প্ৰেডিক্টিভ বেকৰ বাবে ছিষ্টেম এনিমেশ্বন সক্ষম কৰক।"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"এই ছেটিংটোৱে প্ৰেডিক্টিভ বেক এনিমেশ্বনৰ বাবে ছিষ্টেম এনিমেশ্বন সক্ষম কৰে। ইয়াৰ বাবে মেনিফেষ্ট ফাইলত প্ৰতি এপত enableOnBackInvokedCallback সত্য বুলি ছেট কৰাৰ প্ৰয়োজন।"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"বাওঁফাললৈ নিয়ক"</item>
-    <item msgid="5425394847942513942">"তললৈ নিয়ক"</item>
-    <item msgid="7728484337962740316">"সোঁফাললৈ নিয়ক"</item>
-    <item msgid="324200556467459329">"ওপৰলৈ নিয়ক"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"নিৰ্দিষ্ট কৰা হোৱা নাই"</string>
     <string name="neuter" msgid="2075249330106127310">"ক্লীৱ লিংগ"</string>

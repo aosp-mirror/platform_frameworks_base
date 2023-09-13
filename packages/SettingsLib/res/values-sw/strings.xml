@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Uhuishaji wa utabiri wa kurudi nyuma"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ruhusu uhuishaji wa mfumo wa utabiri wa kurudi nyuma."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Mipangilio hii inaruhusu uhuishaji wa mfumo wa uhuishaji wa utabiri wa ishara. Inahitaji kuweka mipangilio kwa kila programu enableOnBackInvokedCallback kuwa true katika faili ya maelezo."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Sogeza kushoto"</item>
-    <item msgid="5425394847942513942">"Sogeza chini"</item>
-    <item msgid="7728484337962740316">"Sogeza kulia"</item>
-    <item msgid="324200556467459329">"Sogeza juu"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"Asilimia <xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
     <string name="not_specified" msgid="5423502443185110328">"Haijabainishwa"</string>
     <string name="neuter" msgid="2075249330106127310">"Isiyobainika"</string>

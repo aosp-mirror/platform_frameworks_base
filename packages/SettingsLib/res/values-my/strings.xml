@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"နောက်ခလုတ်၏ ရှေ့ပြေးလှုပ်ရှားသက်ဝင်ပုံ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"နောက်ခလုတ်ရှေ့ပြေးအတွက် စနစ်လှုပ်ရှားသက်ဝင်ပုံများကို ဖွင့်ပါသည်။"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ဤဆက်တင်သည် လက်ဟန် ရှေ့ပြေးလှုပ်ရှားသက်ဝင်ပုံအတွက် စနစ်လှုပ်ရှားသက်ဝင်ပုံများကို ဖွင့်ပါသည်။ အက်ပ်တစ်ခုစီ၏ ဆက်တင်အတွက် enableOnBackInvokedCallback ကို မန်နီးဖက်စ် (manifest) ဖိုင်၌ ဖွင့်ထားရန်လိုအပ်သည်။"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"ဘယ်သို့ရွှေ့ရန်"</item>
-    <item msgid="5425394847942513942">"အောက်သို့ရွှေ့ရန်"</item>
-    <item msgid="7728484337962740316">"ညာသို့ရွှေ့ရန်"</item>
-    <item msgid="324200556467459329">"အပေါ်သို့ရွှေ့ရန်"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"သတ်မှတ်မထားပါ"</string>
     <string name="neuter" msgid="2075249330106127310">"နပုလ္လိင်"</string>

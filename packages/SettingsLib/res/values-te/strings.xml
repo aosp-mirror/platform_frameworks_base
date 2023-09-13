@@ -587,7 +587,7 @@
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"యూజర్‌ను ఇప్పుడే సెటప్ చేయాలా?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"పరికరాన్ని తీసుకోవడానికి వ్యక్తి అందుబాటులో ఉన్నారని నిర్ధారించుకొని, ఆపై వారికి స్టోరేజ్‌ స్థలాన్ని సెటప్ చేయండి"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ఇప్పుడు ప్రొఫైల్‌ను సెటప్ చేయాలా?"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ఇప్పుడే సెట‌ప్ చేయి"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ఇప్పుడే సెట‌ప్ చేయండి"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ఇప్పుడు కాదు"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"జోడించండి"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"కొత్త యూజర్"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ప్రివ్యూ గల బ్యాక్ యానిమేషన్‌లు"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ప్రివ్యూ గల బ్యాక్ యానిమేషన్‌ల కోసం సిస్టమ్ యానిమేషన్‌లను ఎనేబుల్ చేయండి."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ఊహించదగిన సంజ్ఞ యానిమేషన్ కోసం ఈ సెట్టింగ్ సిస్టమ్ యానిమేషన్‌లను ఎనేబుల్ చేస్తుంది. దీనికి మ్యానిఫెస్ట్ ఫైల్‌లో ఒక్కో యాప్‌లో enableOnBackInvokedCallback సెట్టింగ్‌ను ఒప్పునకు సెట్ చేయవలసి ఉంటుంది."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"ఎడమ వైపుగా జరపండి"</item>
-    <item msgid="5425394847942513942">"కిందికి జరపండి"</item>
-    <item msgid="7728484337962740316">"కుడి వైపుగా జరపండి"</item>
-    <item msgid="324200556467459329">"పైకి జరపండి"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"పేర్కొనబడలేదు"</string>
     <string name="neuter" msgid="2075249330106127310">"తటస్థం"</string>

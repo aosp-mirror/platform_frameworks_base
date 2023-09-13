@@ -585,7 +585,7 @@
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Οι διαχειριστές έχουν ειδικά προνόμια που δεν έχουν οι υπόλοιποι χρήστες Ένας διαχειριστής μπορεί να διαχειριστεί όλους τους χρήστες, να ενημερώσει ή να επαναφέρει αυτήν τη συσκευή, να τροποποιήσει τις ρυθμίσεις, να δει όλες τις εγκατεστημένες εφαρμογές και να εκχωρήσει ή να ανακαλέσει προνόμια διαχειριστή άλλων χρηστών."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Εκχώρηση δικαιωμάτων διαχειριστή"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Να γίνει ρύθμιση χρήστη τώρα;"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Βεβαιωθείτε ότι ο χρήστης μπορεί να πάρει τη συσκευή και ρυθμίστε τον χώρο του"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Βεβαιωθείτε ότι ο χρήστης μπορεί να πάρει τη συσκευή για τη ρύθμιση του χώρου του"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Να γίνει ρύθμιση προφίλ τώρα;"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Ρύθμιση τώρα"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Όχι τώρα"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Κινούμ. εικόνες μετάβασης προς τα πίσω με πρόβλεψη"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ενεργοποίηση κινούμενων εικόνων συστήματος για μετάβαση προς τα πίσω με πρόβλεψη."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Αυτή η ρύθμιση ενεργοποιεί τις κινούμενες εικόνες συστήματος για τις κινούμενες εικόνες κινήσεων με πρόβλεψη. Απαιτεί τη ρύθμιση της παραμέτρου enableOnBackInvokedCallback ως αληθούς σε κάθε εφαρμογή στο αρχείο μανιφέστου."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Μετακίνηση αριστερά"</item>
-    <item msgid="5425394847942513942">"Μετακίνηση προς τα κάτω"</item>
-    <item msgid="7728484337962740316">"Μετακίνηση δεξιά"</item>
-    <item msgid="324200556467459329">"Μετακίνηση προς τα επάνω"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="not_specified" msgid="5423502443185110328">"Δεν έχει καθοριστεί"</string>
     <string name="neuter" msgid="2075249330106127310">"Ουδέτερο"</string>

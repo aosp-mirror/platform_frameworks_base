@@ -355,7 +355,7 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"திரையின் மேல் அடுக்கானது தற்போது தொடப்பட்டிருக்கும் தரவைக் காண்பிக்கிறது"</string>
     <string name="show_touches" msgid="8437666942161289025">"தட்டல்களைக் காட்டு"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"தட்டல்களின் போது காட்சி அறிகுறிகளைக் காட்டும்"</string>
-    <string name="show_key_presses" msgid="6360141722735900214">"பட்டன் அழுத்தத்தை காட்டவா"</string>
+    <string name="show_key_presses" msgid="6360141722735900214">"பட்டன் அழுத்தத்தை காட்டு"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"பட்டன் அழுத்தங்களைக் காட்சி மூலம் உறுதிப்படுத்தும்"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"மேலோட்ட புதுப்பிப்புகளைக் காட்டு"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"சாளரத்தின் பரப்புநிலைகள் புதுப்பிக்கப்படும்போது, அவற்றை முழுவதுமாகக் காட்டும்"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"கணிக்கக்கூடிய பின்செல் சைகைக்கான அனிமேஷன்கள்"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"கணிக்கக்கூடிய பின்செல் சைகைக்காகச் சிஸ்டம் அனிமேஷன்களை இயக்கும்."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"கணிக்கக்கூடிய சைகைக்கான அனிமேஷனுக்காக இந்த அமைப்பு சிஸ்டம் அனிமேஷன்களை இயக்கும். மெனிஃபெஸ்ட் ஃபைலில் ஒவ்வொரு ஆப்ஸுக்கும் enableOnBackInvokedCallbackகை \'சரி\' என அமைக்க வேண்டும்."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"இடதுபுறம் நகர்த்துங்கள்"</item>
-    <item msgid="5425394847942513942">"கீழே நகர்த்துங்கள்"</item>
-    <item msgid="7728484337962740316">"வலதுபுறம் நகர்த்துங்கள்"</item>
-    <item msgid="324200556467459329">"மேலே நகர்த்துங்கள்"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"குறிப்பிடப்படவில்லை"</string>
     <string name="neuter" msgid="2075249330106127310">"அஃறிணை"</string>
