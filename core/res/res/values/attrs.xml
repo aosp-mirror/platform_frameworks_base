@@ -10090,6 +10090,15 @@
     <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
     <attr name="lStar" format="float"/>
 
+    <!-- The attributes of the {@code <locale-config>} tag. -->
+    <!-- @FlaggedApi("android.content.res.default_locale") -->
+    <declare-styleable name="LocaleConfig">
+        <!-- The <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 language tag</a>
+       the strings in values/strings.xml (the default strings in the directory with no locale
+       qualifier) are in. -->
+        <attr name="defaultLocale" format="string"/>
+    </declare-styleable>
+
     <!-- The attributes of the {@code <locale>} tag within {@code <locale-config>}. -->
     <declare-styleable name="LocaleConfig_Locale">
         <!-- The <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 language tag</a>

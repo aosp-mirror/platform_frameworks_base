@@ -81,4 +81,49 @@ public class LocaleListTest extends TestCase {
         // restore the original values
         LocaleList.setDefault(originalLocaleList, originalLocaleIndex);
     }
+
+    @SmallTest
+    public void testIntersection() {
+        LocaleList localesWithN = new LocaleList(
+                Locale.ENGLISH,
+                Locale.FRENCH,
+                Locale.GERMAN,
+                Locale.ITALIAN,
+                Locale.JAPANESE,
+                Locale.KOREAN,
+                Locale.CHINESE,
+                Locale.SIMPLIFIED_CHINESE,
+                Locale.TRADITIONAL_CHINESE,
+                Locale.FRANCE,
+                Locale.GERMANY,
+                Locale.JAPAN,
+                Locale.CANADA,
+                Locale.CANADA_FRENCH);
+        LocaleList localesWithE = new LocaleList(
+                Locale.ENGLISH,
+                Locale.FRENCH,
+                Locale.GERMAN,
+                Locale.JAPANESE,
+                Locale.KOREAN,
+                Locale.CHINESE,
+                Locale.SIMPLIFIED_CHINESE,
+                Locale.TRADITIONAL_CHINESE,
+                Locale.FRANCE,
+                Locale.GERMANY,
+                Locale.CANADA_FRENCH);
+        LocaleList localesWithNAndE = new LocaleList(
+                Locale.ENGLISH,
+                Locale.FRENCH,
+                Locale.GERMAN,
+                Locale.JAPANESE,
+                Locale.KOREAN,
+                Locale.CHINESE,
+                Locale.SIMPLIFIED_CHINESE,
+                Locale.TRADITIONAL_CHINESE,
+                Locale.FRANCE,
+                Locale.GERMANY,
+                Locale.CANADA_FRENCH);
+
+        assertEquals(localesWithNAndE, new LocaleList(localesWithE.getIntersection(localesWithN)));
+    }
 }

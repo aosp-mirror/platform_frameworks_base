@@ -785,7 +785,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
       has_locale = true;
     }
 
-    // if we don't have a result yet
+      // if we don't have a result yet
     if (!final_result ||
         // or this config is better before the locale than the existing result
         result->config.isBetterThanBeforeLocale(final_result->config, desired_config) ||
@@ -863,9 +863,12 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
 
       // We can skip calling ResTable_config::match() if the caller does not care for the
       // configuration to match or if we're using the list of types that have already had their
-      // configuration matched.
+      // configuration matched. The exception to this is when the user has multiple locales set
+      // because the filtered list will then have values from multiple locales and we will need to
+      // call match() to make sure the current entry matches the config we are currently checking.
       const ResTable_config& this_config = type_entry->config;
-      if (!(use_filtered || ignore_configuration || this_config.match(desired_config))) {
+      if (!((use_filtered && (configurations_.size() == 1))
+          || ignore_configuration || this_config.match(desired_config))) {
         continue;
       }
 

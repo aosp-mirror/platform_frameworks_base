@@ -3483,12 +3483,10 @@ class ContextImpl extends Context {
 
         // only do this if the user already has more than one preferred locale
         if (r.getConfiguration().getLocales().size() > 1) {
-            LocaleConfig lc = LocaleConfig.fromContextIgnoringOverride(this);
-            mResourcesManager.setLocaleList(lc != null
-                    && lc.getSupportedLocales() != null
-                    && !lc.getSupportedLocales().isEmpty()
-                    ? lc.getSupportedLocales()
-                    : null);
+            LocaleConfig lc = getUserId() < 0
+                    ? LocaleConfig.fromContextIgnoringOverride(this)
+                    : new LocaleConfig(this);
+            mResourcesManager.setLocaleConfig(lc);
         }
     }
 
