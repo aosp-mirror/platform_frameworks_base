@@ -259,19 +259,16 @@ public final class ImeTrackerService extends IImeTracker.Stub {
                     .withZone(ZoneId.systemDefault());
 
             pw.print(prefix);
-            pw.println("ImeTrackerService#History.mLiveEntries: "
-                    + mLiveEntries.size() + " elements");
+            pw.println("mLiveEntries: " + mLiveEntries.size() + " elements");
 
             for (final var entry: mLiveEntries.values()) {
-                dumpEntry(entry, pw, prefix, formatter);
+                dumpEntry(entry, pw, prefix + "  ", formatter);
             }
-
             pw.print(prefix);
-            pw.println("ImeTrackerService#History.mEntries: "
-                    + mEntries.size() + " elements");
+            pw.println("mEntries: " + mEntries.size() + " elements");
 
             for (final var entry: mEntries) {
-                dumpEntry(entry, pw, prefix, formatter);
+                dumpEntry(entry, pw, prefix + "  ", formatter);
             }
         }
 
@@ -279,22 +276,22 @@ public final class ImeTrackerService extends IImeTracker.Stub {
         private void dumpEntry(@NonNull Entry entry, @NonNull PrintWriter pw,
                 @NonNull String prefix, @NonNull DateTimeFormatter formatter) {
             pw.print(prefix);
-            pw.print(" #" + entry.mSequenceNumber);
+            pw.print("#" + entry.mSequenceNumber);
             pw.print(" " + ImeTracker.Debug.typeToString(entry.mType));
             pw.print(" - " + ImeTracker.Debug.statusToString(entry.mStatus));
             pw.print(" - " + entry.mTag);
             pw.println(" (" + entry.mDuration + "ms):");
 
             pw.print(prefix);
-            pw.print("   startTime=" + formatter.format(Instant.ofEpochMilli(entry.mStartTime)));
+            pw.print("  startTime=" + formatter.format(Instant.ofEpochMilli(entry.mStartTime)));
             pw.println(" " + ImeTracker.Debug.originToString(entry.mOrigin));
 
             pw.print(prefix);
-            pw.print("   reason=" + InputMethodDebug.softInputDisplayReasonToString(entry.mReason));
+            pw.print("  reason=" + InputMethodDebug.softInputDisplayReasonToString(entry.mReason));
             pw.println(" " + ImeTracker.Debug.phaseToString(entry.mPhase));
 
             pw.print(prefix);
-            pw.println("   requestWindowName=" + entry.mRequestWindowName);
+            pw.println("  requestWindowName=" + entry.mRequestWindowName);
         }
 
         /** A history entry. */
