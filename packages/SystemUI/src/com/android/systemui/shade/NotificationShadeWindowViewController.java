@@ -37,7 +37,9 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.back.domain.interactor.BackActionInteractor;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.bouncer.ui.binder.KeyguardBouncerViewBinder;
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.classifier.FalsingCollector;
@@ -105,6 +107,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final boolean mIsTrackpadCommonEnabled;
     private final FeatureFlags mFeatureFlags;
     private final KeyEventInteractor mKeyEventInteractor;
+    private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
+    private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private GestureDetector mPulsingWakeupGestureHandler;
     private GestureDetector mDreamingWakeupGestureHandler;
     private View mBrightnessMirror;
@@ -181,7 +185,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
             SystemClock clock,
             BouncerMessageInteractor bouncerMessageInteractor,
             BouncerLogger bouncerLogger,
-            KeyEventInteractor keyEventInteractor) {
+            KeyEventInteractor keyEventInteractor,
+            PrimaryBouncerInteractor primaryBouncerInteractor,
+            AlternateBouncerInteractor alternateBouncerInteractor) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -209,6 +215,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mIsTrackpadCommonEnabled = featureFlags.isEnabled(TRACKPAD_GESTURE_COMMON);
         mFeatureFlags = featureFlags;
         mKeyEventInteractor = keyEventInteractor;
+        mPrimaryBouncerInteractor = primaryBouncerInteractor;
+        mAlternateBouncerInteractor = alternateBouncerInteractor;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -431,8 +439,15 @@ public class NotificationShadeWindowViewController implements Dumpable {
                     return true;
                 }
 
+                boolean bouncerShowing;
+                if (mFeatureFlags.isEnabled(Flags.ALTERNATE_BOUNCER_VIEW)) {
+                    bouncerShowing = mPrimaryBouncerInteractor.isBouncerShowing()
+                            || mAlternateBouncerInteractor.isVisibleState();
+                } else {
+                    bouncerShowing = mService.isBouncerShowing();
+                }
                 if (mNotificationPanelViewController.isFullyExpanded()
-                        && !mService.isBouncerShowing()
+                        && !bouncerShowing
                         && !mStatusBarStateController.isDozing()) {
                     if (mDragDownHelper.isDragDownEnabled()) {
                         // This handles drag down over lockscreen

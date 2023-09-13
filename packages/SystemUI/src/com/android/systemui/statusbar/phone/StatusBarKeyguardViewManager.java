@@ -1573,6 +1573,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * notification shade's child views.
      */
     public boolean shouldInterceptTouchEvent(MotionEvent event) {
+        if (mFlags.isEnabled(Flags.ALTERNATE_BOUNCER_VIEW)) {
+            return false;
+        }
         return mAlternateBouncerInteractor.isVisibleState();
     }
 
@@ -1581,6 +1584,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * showing.
      */
     public boolean onTouch(MotionEvent event) {
+        if (mFlags.isEnabled(Flags.ALTERNATE_BOUNCER_VIEW)) {
+            return false;
+        }
+
         boolean handleTouch = shouldInterceptTouchEvent(event);
         if (handleTouch) {
             final boolean actionDown = event.getActionMasked() == MotionEvent.ACTION_DOWN;

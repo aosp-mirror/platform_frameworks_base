@@ -85,7 +85,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.InitController;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -117,6 +116,7 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
@@ -343,6 +343,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.LIGHT_REVEAL_MIGRATION, true);
         // Turn AOD on and toggle feature flag for jank fixes
         mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);
+        mFeatureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, false);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
 
         IThermalService thermalService = mock(IThermalService.class);

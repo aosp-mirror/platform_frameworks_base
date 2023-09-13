@@ -18,6 +18,9 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
+
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +36,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.service.trust.TrustAgentService;
 import android.testing.AndroidTestingRunner;
@@ -175,6 +177,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false);
         mFeatureFlags.set(Flags.UDFPS_NEW_TOUCH_DETECTION, true);
         mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
+        mFeatureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, false);
 
         when(mNotificationShadeWindowController.getWindowRootView())
                 .thenReturn(mNotificationShadeWindowView);
@@ -758,6 +761,30 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.reset(true);
 
         verify(mPrimaryBouncerInteractor, never()).hide();
+    }
+
+    @Test
+    public void handleDispatchTouchEvent_alternateBouncerViewFlagEnabled() {
+        mStatusBarKeyguardViewManager.addCallback(mCallback);
+
+        // GIVEN alternate bouncer view flag enabled & the alternate bouncer is visible
+        mFeatureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, true);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // THEN the touch is not acted upon
+        verify(mCallback, never()).onTouch(any());
+    }
+
+    @Test
+    public void onInterceptTouch_alternateBouncerViewFlagEnabled() {
+        // GIVEN alternate bouncer view flag enabled & the alternate bouncer is visible
+        mFeatureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, true);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // THEN the touch is not intercepted
+        assertFalse(mStatusBarKeyguardViewManager.shouldInterceptTouchEvent(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+        ));
     }
 
     @Test
