@@ -108,7 +108,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sons do dispositivo, como música, chamadas e toques"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Microfone"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Áudio e microfone do dispositivo"</string>
-    <string name="screenrecord_continue" msgid="4055347133700593164">"Início"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Iniciar"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Gravando tela"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Gravando tela e áudio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostrar toques na tela"</string>
@@ -893,7 +893,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# controle adicionado.}one{# controle adicionado.}many{# de controles adicionados.}other{# controles adicionados.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Removido"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Adicionar o app <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> pode escolher quais controles e conteúdos aparecem aqui."</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"O app <xliff:g id="APPNAME">%s</xliff:g> pode escolher quais controles e conteúdos aparecem aqui."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Remover controles do app <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Adicionado como favorito"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Adicionado como favorito (posição <xliff:g id="NUMBER">%d</xliff:g>)"</string>
@@ -1115,7 +1115,7 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Permitir que o app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acesse todos os registros do dispositivo?"</string>
-    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Permitir o acesso único"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Permitir acesso único"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Não permitir"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Os registros do dispositivo gravam o que acontece nele. Os apps podem usar esses registros para encontrar e corrigir problemas.\n\nAlguns registros podem conter informações sensíveis, então autorize o acesso a eles apenas para os apps em que você confia. \n\nSe você não permitir que esse app acesse todos os registros do dispositivo, ele ainda vai poder acessar os dele. O fabricante do dispositivo também pode ter acesso a alguns registros ou informações."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Saiba mais"</string>
