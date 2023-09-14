@@ -1,0 +1,8 @@
+package: "android.permission.flags"
+
+flag {
+  name: "device_aware_permission_apis"
+  namespace: "permissions"
+  description: "enable device aware permission APIs"
+  bug: "274852670"
+}

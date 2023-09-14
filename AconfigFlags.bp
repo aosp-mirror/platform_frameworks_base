@@ -35,6 +35,7 @@ java_defaults {
         ":android.widget.flags-aconfig-java{.generated_srcjars}",
         ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
         ":sdk_sandbox_flags_lib{.generated_srcjars}",
+        ":android.permission.flags-aconfig-java{.generated_srcjars}",
     ],
     // Add aconfig-annotations-lib as a dependency for the optimization
     libs: ["aconfig-annotations-lib"],
@@ -248,5 +249,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com.android.media.flags.bettertogether-aconfig-java",
     aconfig_declarations: "com.android.media.flags.bettertogether-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Permissions
+aconfig_declarations {
+    name: "android.permission.flags-aconfig",
+    package: "android.permission.flags",
+    srcs: ["core/java/android/permission/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.permission.flags-aconfig-java",
+    aconfig_declarations: "android.permission.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
