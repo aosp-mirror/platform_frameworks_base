@@ -32,7 +32,6 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
-import com.android.systemui.util.animation.requiresRemeasuring
 
 /**
  * Renders the bottom area of the lock-screen. Concerned primarily with the quick affordance UI
@@ -61,6 +60,7 @@ constructor(
     }
 
     private var ambientIndicationArea: View? = null
+    private var keyguardIndicationArea: View? = null
     private var binding: KeyguardBottomAreaViewBinder.Binding? = null
     private var lockIconViewController: LockIconViewController? = null
 
@@ -124,7 +124,19 @@ constructor(
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         binding?.onConfigurationChanged()
+
+        keyguardIndicationArea?.let {
+            val params = it.layoutParams as FrameLayout.LayoutParams
+            params.bottomMargin =
+                resources.getDimensionPixelSize(R.dimen.keyguard_indication_margin_bottom)
+            it.layoutParams = params
+        }
     }
+
+    /** Returns a list of animators to use to animate the indication areas. */
+    @Deprecated("Deprecated as part of b/278057014")
+    val indicationAreaAnimators: List<ViewPropertyAnimator>
+        get() = checkNotNull(binding).getIndicationAreaAnimators()
 
     override fun hasOverlappingRendering(): Boolean {
         return false
