@@ -15,3 +15,10 @@ flag {
     description: "Whether the overlay presentation feature is enabled"
     bug: "243518738"
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "task_fragment_system_organizer_flag"
+    description: "Whether the TaskFragment system organizer feature is enabled"
+    bug: "284050041"
+}
