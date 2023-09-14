@@ -31,6 +31,7 @@ import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUE
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Insets;
@@ -131,6 +132,11 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
         mPasswordEntry = findViewById(getPasswordTextViewId());
         mPasswordEntryDisabler = new TextViewInputDisabler(mPasswordEntry);
+
+        // EditText cursor can fail screenshot tests, so disable it when testing
+        if (ActivityManager.isRunningInTestHarness()) {
+            mPasswordEntry.setCursorVisible(false);
+        }
     }
 
     @Override
