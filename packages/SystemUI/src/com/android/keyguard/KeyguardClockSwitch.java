@@ -108,6 +108,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private int mWeatherClockSmartspaceTranslateY = 0;
     private int mDrawAlpha = 255;
 
+    private int mStatusBarHeight = 0;
+
     /**
      * Maintain state so that a newly connected plugin can be initialized.
      */
@@ -150,6 +152,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 R.dimen.weather_clock_smartspace_translateX);
         mWeatherClockSmartspaceTranslateY = mContext.getResources().getDimensionPixelSize(
                 R.dimen.weather_clock_smartspace_translateY);
+        mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
+                R.dimen.status_bar_height);
         updateStatusArea(/* animate= */false);
     }
 
@@ -295,6 +299,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mStatusAreaAnim = null;
 
         View in, out;
+        // statusAreaYTranslation uses for the translation for both mStatusArea and mSmallClockFrame
+        // statusAreaClockTranslateY only uses for mStatusArea
         float statusAreaYTranslation, statusAreaClockScale = 1f;
         float statusAreaClockTranslateX = 0f, statusAreaClockTranslateY = 0f;
         float clockInYTranslation, clockOutYTranslation;
@@ -309,10 +315,21 @@ public class KeyguardClockSwitch extends RelativeLayout {
                     && mClock.getLargeClock().getConfig().getHasCustomWeatherDataDisplay()) {
                 statusAreaClockScale = mWeatherClockSmartspaceScaling;
                 statusAreaClockTranslateX = mWeatherClockSmartspaceTranslateX;
-                statusAreaClockTranslateY = mWeatherClockSmartspaceTranslateY - mSmartspaceTop;
                 if (mSplitShadeCentered) {
                     statusAreaClockTranslateX *= SMARTSPACE_TRANSLATION_CENTER_MULTIPLIER;
                 }
+
+                // On large weather clock,
+                // top padding for time is status bar height from top of the screen.
+                // On small one,
+                // it's screenOffsetYPadding (translationY for KeyguardStatusView),
+                // Cause smartspace is positioned according to the smallClockFrame
+                // we need to translate the difference between bottom of large clock and small clock
+                // Also, we need to counter offset the empty date weather view, mSmartspaceTop
+                // mWeatherClockSmartspaceTranslateY is only for Felix
+                statusAreaClockTranslateY = mStatusBarHeight - 0.6F *  mSmallClockFrame.getHeight()
+                        - mSmartspaceTop - screenOffsetYPadding
+                        - statusAreaYTranslation + mWeatherClockSmartspaceTranslateY;
             }
             clockInYTranslation = 0;
             clockOutYTranslation = 0; // Small clock translation is handled with statusArea
