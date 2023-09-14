@@ -73,7 +73,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
         return false
     }
     override fun transitionToExpandedShade(delay: Long) {}
-    override val isUnlockHintRunning: Boolean = false
 
     override fun resetViewGroupFade() {}
     override fun setKeyguardTransitionProgress(keyguardAlpha: Float, keyguardTranslationY: Int) {}

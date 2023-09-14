@@ -268,7 +268,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void onPanelExpansionChanged_neverShowsDuringHintAnimation() {
-        when(mShadeViewController.isUnlockHintRunning()).thenReturn(true);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
         verify(mPrimaryBouncerInteractor, never()).setPanelExpansion(anyFloat());
     }
