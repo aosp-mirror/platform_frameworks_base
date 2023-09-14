@@ -92,7 +92,8 @@ class WindowlessSnapshotWindowCreator {
 
         final SnapshotWindowRecord record = new SnapshotWindowRecord(mViewHost, wlw.mChildSurface,
                 taskDescription.getBackgroundColor(), snapshot.hasImeSurface(),
-                runningTaskInfo.topActivityType, removeExecutor);
+                runningTaskInfo.topActivityType, removeExecutor,
+                taskId, mStartingWindowRecordManager);
         mStartingWindowRecordManager.addRecord(taskId, record);
         info.notifyAddComplete(wlw.mChildSurface);
     }
@@ -104,8 +105,9 @@ class WindowlessSnapshotWindowCreator {
 
         SnapshotWindowRecord(SurfaceControlViewHost viewHost, SurfaceControl childSurface,
                 int bgColor, boolean hasImeSurface, int activityType,
-                ShellExecutor removeExecutor) {
-            super(activityType, removeExecutor);
+                ShellExecutor removeExecutor, int id,
+                StartingSurfaceDrawer.StartingWindowRecordManager recordManager) {
+            super(activityType, removeExecutor, id, recordManager);
             mViewHost = viewHost;
             mChildSurface = childSurface;
             mBGColor = bgColor;
