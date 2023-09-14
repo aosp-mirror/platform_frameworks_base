@@ -16,6 +16,7 @@
 
 package com.android.packageinstaller;
 
+import static com.android.packageinstaller.PackageInstallerActivity.EXTRA_APP_SNIPPET;
 import static com.android.packageinstaller.PackageInstallerActivity.EXTRA_STAGED_SESSION_ID;
 
 import android.app.PendingIntent;
@@ -86,7 +87,8 @@ public class InstallInstalling extends AlertActivity {
             // ContentResolver.SCHEME_FILE
             // STAGED_SESSION_ID extra contains an ID of a previously staged install session.
             final File sourceFile = new File(mPackageURI.getPath());
-            PackageUtil.AppSnippet as = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
+            PackageUtil.AppSnippet as = getIntent()
+                    .getParcelableExtra(EXTRA_APP_SNIPPET, PackageUtil.AppSnippet.class);
 
             mAlert.setIcon(as.icon);
             mAlert.setTitle(as.label);
