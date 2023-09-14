@@ -981,7 +981,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Shto një kartë SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"Karta SIM mungon ose është e palexueshme. Shto një kartë SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Kartë SIM e papërdorshme."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Karta jote SIM është çaktivizuar përgjithmonë.\n Kontakto me ofruesin e shërbimit me valë për një kartë tjetër SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Karta jote SIM është çaktivizuar përgjithmonë.\n Kontakto me ofruesin e shërbimit wireless për një tjetër kartë SIM."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Kënga e mëparshme"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Kënga tjetër"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pauzë"</string>
@@ -1196,7 +1196,7 @@
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Redakto me %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"Redakto"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"Ndaj"</string>
-    <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Shpërndaj me %1$s"</string>
+    <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Ndaj me %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Ndaj"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"Dërgo me"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"Dërgo me %1$s"</string>
@@ -1521,7 +1521,7 @@
     <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# përputhje}other{# nga {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"U krye"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Po fshin hapësirën ruajtëse të brendshme…"</string>
-    <string name="share" msgid="4157615043345227321">"Shpërndaj"</string>
+    <string name="share" msgid="4157615043345227321">"Ndaj"</string>
     <string name="find" msgid="5015737188624767706">"Gjej"</string>
     <string name="websearch" msgid="5624340204512793290">"Kërkim në internet"</string>
     <string name="find_next" msgid="5341217051549648153">"Gjej tjetrën"</string>
@@ -1566,8 +1566,8 @@
     <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="3500574466367891463">"Zgjidh një aplikacion"</string>
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Nuk mundi ta hapte <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Shpërndaj me"</string>
-    <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Shpërndaj me <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
+    <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Ndaj me"</string>
+    <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Ndaj me <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Dorezë me rrëshqitje. Preke dhe mbaje të shtypur."</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Rrëshqit për të shkyçur."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Orientohu për në shtëpi"</string>
@@ -1611,7 +1611,7 @@
     <string name="sha1_fingerprint" msgid="2339915142825390774">"Gjurma e gishtit SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Shikoji të gjitha"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Zgjidh aktivitetin"</string>
-    <string name="share_action_provider_share_with" msgid="1904096863622941880">"Shpërndaj me"</string>
+    <string name="share_action_provider_share_with" msgid="1904096863622941880">"Ndaj me"</string>
     <string name="sending" msgid="206925243621664438">"Po dërgon…"</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Të hapet shfletuesi?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Dëshiron ta pranosh telefonatën?"</string>
@@ -1627,7 +1627,7 @@
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistemi"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Audioja e \"bluetooth-it\""</string>
-    <string name="wireless_display_route_description" msgid="8297563323032966831">"Ekran pa tel"</string>
+    <string name="wireless_display_route_description" msgid="8297563323032966831">"Ekran wireless"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Transmeto"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Lidhu me pajisjen"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Transmeto ekranin në pajisje"</string>
@@ -1885,9 +1885,9 @@
     <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Për 1 min.}other{Për # min.}}"</string>
     <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Për 1 orë}other{Për # orë}}"</string>
     <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Për 1 orë}other{Për # orë}}"</string>
-    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_until" msgid="2250286190237669079">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_alarm" msgid="7046911727540499275">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarmi tjetër)"</string>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Deri: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_until" msgid="2250286190237669079">"Deri: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="7046911727540499275">"Deri: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarmi tjetër)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Derisa ta çaktivizosh"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Deri sa të çaktivizosh gjendjen \"Mos shqetëso\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
