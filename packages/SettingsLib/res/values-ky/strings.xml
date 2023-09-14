@@ -585,8 +585,8 @@
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Бул колдонуучуну админ кыласызбы?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Админдердин өзгөчө укуктары бар. Админ бардык колдонуучуларды тескеп, бул түзмөктү жаңыртып же баштапкы абалга келтирип, параметрлерди өзгөртүп, орнотулган колдонмолордун баарын көрүп, башкаларга админ укуктарын берип же жокко чыгара алат."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Админ кылуу"</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профилди жөндөйсүзбү?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Өз мейкиндигин жөндөп алышы үчүн, түзмөктү колдонуучуга беришиңиз керек."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профиль түзөсүзбү?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Колдонуучу өз мейкиндигин түзүп алышы үчүн түзмөктү ага беришиңиз керек."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайл азыр түзүлсүнбү?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Азыр түзүү"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Азыр эмес"</string>
@@ -677,7 +677,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Демейки"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Экранды күйгүзүү"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Экранды күйгүзүүгө уруксат берүү"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Колдонмого экранды күйгүзүүгө уруксат бериңиз. Уруксат берилсе, колдонмо экранды каалаган убакта сизден уруксат сурабастан күйгүзүшү мүмкүн."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Колдонмого экранды күйгүзүүгө уруксат бересиз. Колдонмо экранды каалаган убакта сизден уруксат сурабастан күйгүзө берет."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда кабарлоо токтотулсунбу?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Эгер <xliff:g id="SWITCHAPP">%1$s</xliff:g> колдонмосунда кабарласаңыз же аудионун чыгуусун өзгөртсөңүз, учурдагы кабарлоо токтотулат"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> колдонмосунда кабарлоо"</string>

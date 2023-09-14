@@ -1677,18 +1677,6 @@ public class DisplayPolicy {
     }
 
     private boolean shouldBeHiddenByKeyguard(WindowState win, WindowState imeTarget) {
-        // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
-        // hidden because it's in the process of hiding, but it's still being shown on screen.
-        // In that case, we want to continue hiding the IME until the windows have completed
-        // drawing. This way, we know that the IME can be safely shown since the other windows are
-        // now shown.
-        final boolean hideIme = win.mIsImWindow
-                && (mDisplayContent.isAodShowing()
-                        || (mDisplayContent.isDefaultDisplay && !mWindowManagerDrawComplete));
-        if (hideIme) {
-            return true;
-        }
-
         if (!mDisplayContent.isDefaultDisplay || !isKeyguardShowing()) {
             return false;
         }

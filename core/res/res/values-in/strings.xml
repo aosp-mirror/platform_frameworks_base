@@ -804,7 +804,7 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Mengizinkan pemegang mengupdate aplikasi yang sebelumnya diinstal tanpa tindakan pengguna"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Pantau upaya pembukaan kunci layar"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Memantau upaya pembukaan kunci layar"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci perangkat Android TV atau menghapus semua data perangkat Android TV jika terlalu banyak sandi salah diketikkan."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci sistem infotainmen atau menghapus semua data sistem infotainmen jika terlalu banyak kesalahan memasukkan sandi."</string>

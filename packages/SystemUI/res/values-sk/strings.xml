@@ -297,7 +297,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Pracovné aplikácie"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Pozastavené"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nočný režim"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Zapne sa pri západe slnka"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Zap. pri záp. slnka"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do východu slnka"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Od <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -861,6 +861,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Posunúť nadol"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Posunúť doľava"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Posunúť doprava"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Prepínač zväčenia"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Zväčšenie celej obrazovky"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zväčšiť časť obrazovky"</string>
