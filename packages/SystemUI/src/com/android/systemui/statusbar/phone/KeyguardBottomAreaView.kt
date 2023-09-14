@@ -20,7 +20,6 @@ import android.content.res.Configuration
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.annotation.StringRes
@@ -132,11 +131,6 @@ constructor(
             it.layoutParams = params
         }
     }
-
-    /** Returns a list of animators to use to animate the indication areas. */
-    @Deprecated("Deprecated as part of b/278057014")
-    val indicationAreaAnimators: List<ViewPropertyAnimator>
-        get() = checkNotNull(binding).getIndicationAreaAnimators()
 
     override fun hasOverlappingRendering(): Boolean {
         return false
