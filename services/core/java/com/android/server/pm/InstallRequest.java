@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.INSTALL_SCENARIO_DEFAULT;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.os.Process.INVALID_UID;
+import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.TAG;
 
@@ -43,6 +44,7 @@ import android.util.ArrayMap;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.art.model.DexoptResult;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -52,6 +54,7 @@ import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 final class InstallRequest {
@@ -69,8 +72,8 @@ final class InstallRequest {
     private int mParseFlags;
     private boolean mReplace;
 
-    @Nullable /* The original Package if it is being replaced, otherwise {@code null} */
-    private AndroidPackage mExistingPackage;
+    @Nullable /* The original package's name if it is being replaced, otherwise {@code null} */
+    private String mExistingPackageName;
     /** parsed package to be scanned */
     @Nullable
     private ParsedPackage mParsedPackage;
@@ -131,6 +134,15 @@ final class InstallRequest {
     private final int mRequireUserAction;
 
     private int mDexoptStatus;
+
+    @NonNull
+    private int[] mFirstTimeBroadcastUserIds = EMPTY_INT_ARRAY;
+    @NonNull
+    private int[] mFirstTimeBroadcastInstantUserIds = EMPTY_INT_ARRAY;
+    @NonNull
+    private int[] mUpdateBroadcastUserIds = EMPTY_INT_ARRAY;
+    @NonNull
+    private int[] mUpdateBroadcastInstantUserIds = EMPTY_INT_ARRAY;
 
     // New install
     InstallRequest(InstallingSession params) {
@@ -413,11 +425,6 @@ final class InstallRequest {
     }
 
     @Nullable
-    public AndroidPackage getExistingPackage() {
-        return mExistingPackage;
-    }
-
-    @Nullable
     public List<String> getAllowlistedRestrictedPermissions() {
         return mInstallArgs == null ? null : mInstallArgs.mAllowlistedRestrictedPermissions;
     }
@@ -453,10 +460,7 @@ final class InstallRequest {
 
     @Nullable
     public String getExistingPackageName() {
-        if (mExistingPackage != null) {
-            return mExistingPackage.getPackageName();
-        }
-        return null;
+        return mExistingPackageName;
     }
 
     @Nullable
@@ -627,6 +631,25 @@ final class InstallRequest {
         return mDexoptStatus;
     }
 
+    public boolean isAllNewUsers() {
+        return mOrigUsers == null || mOrigUsers.length == 0;
+    }
+    public int[] getFirstTimeBroadcastUserIds() {
+        return mFirstTimeBroadcastUserIds;
+    }
+
+    public int[] getFirstTimeBroadcastInstantUserIds() {
+        return mFirstTimeBroadcastInstantUserIds;
+    }
+
+    public int[] getUpdateBroadcastUserIds() {
+        return mUpdateBroadcastUserIds;
+    }
+
+    public int[] getUpdateBroadcastInstantUserIds() {
+        return mUpdateBroadcastInstantUserIds;
+    }
+
     public void setScanFlags(int scanFlags) {
         mScanFlags = scanFlags;
     }
@@ -729,13 +752,14 @@ final class InstallRequest {
     }
 
     public void setPrepareResult(boolean replace, int scanFlags,
-            int parseFlags, AndroidPackage existingPackage,
+            int parseFlags, PackageState existingPackageState,
             ParsedPackage packageToScan, boolean clearCodeCache, boolean system,
             PackageSetting originalPs, PackageSetting disabledPs) {
         mReplace = replace;
         mScanFlags = scanFlags;
         mParseFlags = parseFlags;
-        mExistingPackage = existingPackage;
+        mExistingPackageName =
+                existingPackageState != null ? existingPackageState.getPackageName() : null;
         mParsedPackage = packageToScan;
         mClearCodeCache = clearCodeCache;
         mSystem = system;
@@ -766,6 +790,58 @@ final class InstallRequest {
     public void setRemovedAppId(int appId) {
         if (mRemovedInfo != null) {
             mRemovedInfo.mRemovedAppId = appId;
+        }
+    }
+
+    /**
+     *  Determine the set of users who are adding this package for the first time vs. those who are
+     *  seeing an update.
+     */
+    public void populateBroadcastUsers() {
+        assertScanResultExists();
+        mFirstTimeBroadcastUserIds = EMPTY_INT_ARRAY;
+        mFirstTimeBroadcastInstantUserIds = EMPTY_INT_ARRAY;
+        mUpdateBroadcastUserIds = EMPTY_INT_ARRAY;
+        mUpdateBroadcastInstantUserIds = EMPTY_INT_ARRAY;
+
+        final boolean allNewUsers = isAllNewUsers();
+        if (allNewUsers) {
+            // App was not currently installed on any user
+            for (int newUser : mNewUsers) {
+                final boolean isInstantApp =
+                        mScanResult.mPkgSetting.getUserStateOrDefault(newUser).isInstantApp();
+                if (isInstantApp) {
+                    mFirstTimeBroadcastInstantUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastInstantUserIds, newUser);
+                } else {
+                    mFirstTimeBroadcastUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastUserIds, newUser);
+                }
+            }
+            return;
+        }
+        // App was already installed on some users, but is new to some other users
+        for (int newUser : mNewUsers) {
+            boolean isFirstTimeUser = !ArrayUtils.contains(mOrigUsers, newUser);
+            final boolean isInstantApp =
+                    mScanResult.mPkgSetting.getUserStateOrDefault(newUser).isInstantApp();
+            if (isFirstTimeUser) {
+                if (isInstantApp) {
+                    mFirstTimeBroadcastInstantUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastInstantUserIds, newUser);
+                } else {
+                    mFirstTimeBroadcastUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastUserIds, newUser);
+                }
+            } else {
+                if (isInstantApp) {
+                    mUpdateBroadcastInstantUserIds =
+                            ArrayUtils.appendInt(mUpdateBroadcastInstantUserIds, newUser);
+                } else {
+                    mUpdateBroadcastUserIds =
+                            ArrayUtils.appendInt(mUpdateBroadcastUserIds, newUser);
+                }
+            }
         }
     }
 

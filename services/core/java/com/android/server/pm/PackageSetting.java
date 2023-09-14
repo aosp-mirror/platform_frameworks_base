@@ -844,6 +844,24 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return res;
     }
 
+    int[] queryUsersInstalledOrHasData(int[] users) {
+        int num = 0;
+        for (int user : users) {
+            if (getInstalled(user) || readUserState(user).dataExists()) {
+                num++;
+            }
+        }
+        int[] res = new int[num];
+        num = 0;
+        for (int user : users) {
+            if (getInstalled(user) || readUserState(user).dataExists()) {
+                res[num] = user;
+                num++;
+            }
+        }
+        return res;
+    }
+
     long getCeDataInode(int userId) {
         return readUserState(userId).getCeDataInode();
     }
