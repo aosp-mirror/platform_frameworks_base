@@ -355,7 +355,7 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"திரையின் மேல் அடுக்கானது தற்போது தொடப்பட்டிருக்கும் தரவைக் காண்பிக்கிறது"</string>
     <string name="show_touches" msgid="8437666942161289025">"தட்டல்களைக் காட்டு"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"தட்டல்களின் போது காட்சி அறிகுறிகளைக் காட்டும்"</string>
-    <string name="show_key_presses" msgid="6360141722735900214">"பட்டன் அழுத்தத்தை காட்டவா"</string>
+    <string name="show_key_presses" msgid="6360141722735900214">"பட்டன் அழுத்தத்தை காட்டு"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"பட்டன் அழுத்தங்களைக் காட்சி மூலம் உறுதிப்படுத்தும்"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"மேலோட்ட புதுப்பிப்புகளைக் காட்டு"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"சாளரத்தின் பரப்புநிலைகள் புதுப்பிக்கப்படும்போது, அவற்றை முழுவதுமாகக் காட்டும்"</string>
