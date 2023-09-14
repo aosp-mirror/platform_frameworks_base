@@ -297,7 +297,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Робочі додатки"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Призупинено"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нічний екран"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Вмикається ввечері"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Запуск увечері"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До сходу сонця"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Вмикається о <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"До <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -861,6 +861,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Перемістити вниз"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Перемістити ліворуч"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Перемістити праворуч"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Перемикач режиму збільшення"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Збільшення всього екрана"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Збільшити частину екрана"</string>
