@@ -1867,8 +1867,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"Công việc thứ 2 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"Công việc thứ 2 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Sao chép <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
-    <skip />
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"<xliff:g id="LABEL">%1$s</xliff:g> riêng tư"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Hỏi mã PIN trước khi bỏ ghim"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Hỏi hình mở khóa trước khi bỏ ghim"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Hỏi mật khẩu trước khi bỏ ghim"</string>

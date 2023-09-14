@@ -672,8 +672,8 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icono de huella digital"</string>
     <string name="device_unlock_notification_name" msgid="2632928999862915709">"Desbloqueo del dispositivo"</string>
     <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Prueba otro método de desbloqueo"</string>
-    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Usa Desbloqueo facial cuando no se reconozca tu huella digital (por ejemplo, cuando tus dedos estén húmedos)"</string>
-    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Usa Desbloqueo con huella digital cuando no se reconozca tu cara (por ejemplo, cuando no haya suficiente luz)"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Usa Desbloqueo facial cuando no se reconozca tu huella (p. ej., si tienes los dedos mojados)"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Usa Desbloqueo con huella digital cuando no se reconozca tu cara (p. ej., si hay poca luz)"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueo facial"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema con Desbloqueo facial"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toca para eliminar tu modelo facial y luego añade de nuevo tu cara"</string>
@@ -1868,8 +1868,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 3"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Clon de <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
-    <skip />
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"<xliff:g id="LABEL">%1$s</xliff:g> privado"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Solicitar PIN para desactivar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pedir patrón de desbloqueo para dejar de fijar"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Solicitar contraseña para desactivar"</string>
