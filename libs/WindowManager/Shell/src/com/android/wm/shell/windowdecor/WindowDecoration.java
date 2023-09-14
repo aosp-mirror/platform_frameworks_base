@@ -17,6 +17,7 @@
 package com.android.wm.shell.windowdecor;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
@@ -223,6 +224,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         final Resources resources = mDecorWindowContext.getResources();
         final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
+        final boolean isFullscreen = taskConfig.windowConfiguration.getWindowingMode()
+                == WINDOWING_MODE_FULLSCREEN;
         outResult.mWidth = taskBounds.width();
         outResult.mHeight = taskBounds.height();
 
@@ -282,13 +285,24 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mTmpColor[1] = (float) Color.green(backgroundColorInt) / 255.f;
         mTmpColor[2] = (float) Color.blue(backgroundColorInt) / 255.f;
         final Point taskPosition = mTaskInfo.positionInParent;
-        startT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight)
-                .setShadowRadius(mTaskSurface, shadowRadius)
+        if (isFullscreen) {
+            // Setting the task crop to the width/height stops input events from being sent to
+            // some regions of the app window. See b/300324920
+            // TODO(b/296921174): investigate whether crop/position needs to be set by window
+            // decorations at all when transition handlers are already taking ownership of the task
+            // surface placement/crop, especially when in fullscreen where tasks cannot be
+            // drag-resized by the window decoration.
+            startT.setWindowCrop(mTaskSurface, null);
+            finishT.setWindowCrop(mTaskSurface, null);
+        } else {
+            startT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
+            finishT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
+        }
+        startT.setShadowRadius(mTaskSurface, shadowRadius)
                 .setColor(mTaskSurface, mTmpColor)
                 .show(mTaskSurface);
         finishT.setPosition(mTaskSurface, taskPosition.x, taskPosition.y)
-                .setShadowRadius(mTaskSurface, shadowRadius)
-                .setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
+                .setShadowRadius(mTaskSurface, shadowRadius);
         if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             startT.setCornerRadius(mTaskSurface, params.mCornerRadius);
             finishT.setCornerRadius(mTaskSurface, params.mCornerRadius);
