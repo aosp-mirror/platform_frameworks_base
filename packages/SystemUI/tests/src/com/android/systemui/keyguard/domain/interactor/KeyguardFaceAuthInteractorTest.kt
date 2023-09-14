@@ -224,23 +224,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun faceAuthIsPausedWhenUserSwitchingIsInProgress() =
-        testScope.runTest {
-            underTest.start()
-
-            fakeUserRepository.setSelectedUserInfo(primaryUser, SelectionStatus.SELECTION_COMPLETE)
-            runCurrent()
-            fakeUserRepository.setSelectedUserInfo(
-                secondaryUser,
-                SelectionStatus.SELECTION_IN_PROGRESS
-            )
-            runCurrent()
-
-            assertThat(faceAuthRepository.isFaceAuthPaused()).isTrue()
-        }
-
-    @Test
-    fun faceAuthIsUnpausedWhenUserSwitchingIsInComplete() =
+    fun faceAuthLockedOutStateIsUpdatedAfterUserSwitch() =
         testScope.runTest {
             underTest.start()
 
@@ -251,7 +235,6 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 SelectionStatus.SELECTION_IN_PROGRESS
             )
             runCurrent()
-            assertThat(faceAuthRepository.isFaceAuthPaused()).isTrue()
 
             bouncerRepository.setPrimaryShow(true)
             // New user is not locked out.
@@ -262,7 +245,6 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(faceAuthRepository.isFaceAuthPaused()).isFalse()
             assertThat(faceAuthRepository.isLockedOut.value).isFalse()
 
             runCurrent()
