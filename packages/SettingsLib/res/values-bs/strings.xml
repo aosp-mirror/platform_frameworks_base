@@ -675,8 +675,8 @@
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Odaberite raspored tastature"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Zadano"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Uključivanje ekrana"</string>
-    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dozvolite uključivanje ekrana"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dozvolite aplikaciji da uključi ekran. Ako se odobri, aplikacija može uključiti ekran bilo kada bez vaše izričite namjere."</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dozvoli uključivanje ekrana"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dozvolite aplikaciji da uključuje ekran. Ako se odobri, aplikacija može uključiti ekran bilo kada bez vaše izričite namjere."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zaustaviti emitiranje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ako emitirate aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promijenite izlaz, trenutno emitiranje će se zaustaviti"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitiraj aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije predvidljivog pokreta unazad"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogućava animacije sistema za predvidljivi pokret unazad."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ova postavka omogućava animacije sistema za animaciju predvidljivih pokreta. Potrebno je po aplikaciji postaviti vrijednost za enableOnBackInvokedCallback na tačno u fajlu deklaracije."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Pomjeranje ulijevo"</item>
-    <item msgid="5425394847942513942">"Pomjeranje nadolje"</item>
-    <item msgid="7728484337962740316">"Pomjeranje udesno"</item>
-    <item msgid="324200556467459329">"Pomjeranje nagore"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"Nije navedeno"</string>
     <string name="neuter" msgid="2075249330106127310">"Srednji rod"</string>

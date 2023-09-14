@@ -560,7 +560,7 @@
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"连接时遇到问题。请关闭并重新开启设备"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有线音频设备"</string>
     <string name="help_label" msgid="3528360748637781274">"帮助和反馈"</string>
-    <string name="storage_category" msgid="2287342585424631813">"存储"</string>
+    <string name="storage_category" msgid="2287342585424631813">"存储空间"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"共享数据"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"查看和修改共享数据"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"此用户没有共享数据。"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"预见式返回动画"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"启用系统动画作为预见式返回动画。"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"此设置将启用系统动画作为预测性手势动画。这要求在清单文件中将单个应用的 enableOnBackInvokedCallback 设为 true。"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"左移"</item>
-    <item msgid="5425394847942513942">"下移"</item>
-    <item msgid="7728484337962740316">"右移"</item>
-    <item msgid="324200556467459329">"上移"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="not_specified" msgid="5423502443185110328">"未指定"</string>
     <string name="neuter" msgid="2075249330106127310">"中性"</string>

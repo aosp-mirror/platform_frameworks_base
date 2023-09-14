@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Otkaži"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Uparivanje omogućava pristup kontaktima i istoriji poziva nakon povezivanja."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Uparivanje sa uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguće."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguće zbog netačnog PIN-a ili pristupnog koda."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguće zbog netačnog PIN-a ili pristupnog ključa."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nije moguće komunicirati sa uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> je odbio/la uparivanje"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Računar"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije za pokret povratka sa predviđanjem"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogućite animacije sistema za pokret povratka sa predviđanjem."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ovo podešavanje omogućava animacije sistema za pokret povratka sa predviđanjem. Zahteva podešavanje dozvole enableOnBackInvokedCallback po aplikaciji na true u fajlu manifesta."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Pomerite nalevo"</item>
-    <item msgid="5425394847942513942">"Pomerite nadole"</item>
-    <item msgid="7728484337962740316">"Pomerite nadesno"</item>
-    <item msgid="324200556467459329">"Pomerite nagore"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"Nije navedeno"</string>
     <string name="neuter" msgid="2075249330106127310">"Srednji rod"</string>

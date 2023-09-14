@@ -355,7 +355,7 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Показувати на екрані жести й натискання"</string>
     <string name="show_touches" msgid="8437666942161289025">"Показувати дотики"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Показувати візуальну реакцію на торкання"</string>
-    <string name="show_key_presses" msgid="6360141722735900214">"Показувати натиск. клавіш"</string>
+    <string name="show_key_presses" msgid="6360141722735900214">"Показувати натискання клавіш"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Показувати візуальний відгук на натискання клавіш"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Показ. оновлення поверхні"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Підсвічувати вікна повністю під час оновлення"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Анімації з підказками для жесту \"Назад\""</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Увімкнути системну анімацію з підказками для жесту \"Назад\"."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Якщо вибрати це налаштування, для жесту \"Назад\" відображатиметься анімація з підказками. У файлі маніфесту атрибуту enableOnBackInvokedCallback додатка потрібно присвоїти значення true."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Перемістіть палець ліворуч"</item>
-    <item msgid="5425394847942513942">"Перемістіть палець униз"</item>
-    <item msgid="7728484337962740316">"Перемістіть палець праворуч"</item>
-    <item msgid="324200556467459329">"Перемістіть палець угору"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="not_specified" msgid="5423502443185110328">"Не вказано"</string>
     <string name="neuter" msgid="2075249330106127310">"Середній рід"</string>

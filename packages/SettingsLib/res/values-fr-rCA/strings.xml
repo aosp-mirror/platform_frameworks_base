@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animations pour le retour prédictif"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activer les animations système pour le retour prédictif."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ce paramètre permet d\'activer les animations du système pour l\'animation des gestes prédictifs. Cela exige de définir le paramètre enableOnBackInvokedCallback à Vrai pour chaque application dans le fichier de configuration."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Déplacez vers la gauche"</item>
-    <item msgid="5425394847942513942">"Déplacez vers le bas"</item>
-    <item msgid="7728484337962740316">"Déplacez vers la droite"</item>
-    <item msgid="324200556467459329">"Déplacez vers le haut"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"Non précisé"</string>
     <string name="neuter" msgid="2075249330106127310">"Neutre"</string>

@@ -268,7 +268,7 @@
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Nuk është vendosur asnjë aplikacion që simulon vendndodhjen"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikacioni për simulimin e vendndodhjes: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Rrjetet"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikimi i ekranit pa tel"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikimi i ekranit wireless"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivizo regjistrimin Wi-Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Përshpejtimi i skanimit të Wi‑Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Renditje e rastësishme jo e përhershme e MAC për Wi‑Fi"</string>
@@ -300,7 +300,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Emri i pritësit të ofruesit të DNS-së private"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Fut emrin e pritësit të ofruesit të DNS-së"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nuk mund të lidhej"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Shfaq opsionet për certifikimin e ekranit pa tel"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Shfaq opsionet për certifikimin e ekranit wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zvogëlon shkarkimin e baterisë dhe përmirëson cilësinë e funksionimit të rrjetit"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Kur ky modalitet është i aktivizuar, adresa MAC e kësaj pajisjeje mund të ndryshojë çdo herë që lidhet me një rrjet që ka të aktivizuar renditjen e rastësishme të adresave MAC."</string>
@@ -356,7 +356,7 @@
     <string name="show_touches" msgid="8437666942161289025">"Shfaq trokitjet"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Shfaq reagimet vizuale për trokitjet"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Shfaq shtypjet e tasteve"</string>
-    <string name="show_key_presses_summary" msgid="725387457373015024">"Shfaq reagime vizuale për shtypjen e tasteve fizike"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"Shfaq reagim vizual për shtypjet fizike të tasteve"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Shfaq përditësimet e sipërfaqes"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Ndriço të gjitha sipërfaqet e dritares kur ato të përditësohen"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Shfaq përditësimet e pamjes"</string>
@@ -477,7 +477,7 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Po karikohet"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Karikim i shpejtë"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Po karikohet ngadalë"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Po karikohet pa tel"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Po karikohet wireless"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Po karikohet"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nuk po karikohet"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Lidhur, jo në karikim"</string>
@@ -584,7 +584,7 @@
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Të bëhet administrator ky përdorues?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratorët kanë privilegje të veçanta që nuk i kanë përdoruesit e tjerë. Një administrator mund të menaxhojë të gjithë përdoruesit, të përditësojë ose të rivendosë këtë pajisje, të modifikojë cilësimet, të shikojë të gjitha aplikacionet e instaluara dhe të japë ose të revokojë privilegjet e administratorit për të tjerët."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Bëje administrator"</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Të konfig. përdoruesi tani?"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Të konfigurohet përdoruesi?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Sigurohu që personi të jetë i gatshëm të marrë pajisjen dhe të caktojë hapësirën e vet"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Të konfigurohet tani profili?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Konfiguro tani"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animacionet për gjestin e parashikuar të kthimit prapa"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Aktivizo animacionet e sistemit për gjestin e parashikuar të kthimit prapa."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ky cilësim aktivizon animacionet e sistemit për animacionin e gjestit të parashikuar. Ai kërkon që enableOnBackInvokedCallback për aplikacionin të jetë caktuar si i vërtetë në skedarin e manifestit."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Lëvize majtas"</item>
-    <item msgid="5425394847942513942">"Lëvize poshtë"</item>
-    <item msgid="7728484337962740316">"Lëvize djathtas"</item>
-    <item msgid="324200556467459329">"Lëvize lart"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"E papërcaktuar"</string>
     <string name="neuter" msgid="2075249330106127310">"Asnjanëse"</string>
