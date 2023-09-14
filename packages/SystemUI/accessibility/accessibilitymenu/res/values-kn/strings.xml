@@ -11,7 +11,7 @@
     <string name="recent_apps_label" msgid="6583276995616385847">"ಇತ್ತೀಚಿನ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
     <string name="lockscreen_label" msgid="648347953557887087">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು"</string>
-    <string name="notifications_label" msgid="6829741046963013567">"ಅಧಿಸೂಚನೆಗಳು"</string>
+    <string name="notifications_label" msgid="6829741046963013567">"ನೋಟಿಫಿಕೇಶನ್‌ಗಳು"</string>
     <string name="screenshot_label" msgid="863978141223970162">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
     <string name="screenshot_utterance" msgid="1430760563401895074">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಿ"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"ವಾಲ್ಯೂಮ್ ಜಾಸ್ತಿ"</string>
