@@ -129,7 +129,12 @@ class PatternBouncerViewModel(
                     buildList {
                         var dot = previousDot
                         while (dot != hitDot) {
-                            add(dot)
+                            // Move along the direction of the line connecting the previously
+                            // selected dot and current hit dot, and see if they were skipped over
+                            // but fall on that line.
+                            if (dot.isOnLineSegment(previousDot, hitDot)) {
+                                add(dot)
+                            }
                             dot =
                                 PatternDotViewModel(
                                     x =
@@ -206,6 +211,34 @@ class PatternBouncerViewModel(
     companion object {
         private const val MIN_DOT_HIT_FACTOR = 0.2f
     }
+}
+
+/**
+ * Determines whether [this] dot is present on the line segment connecting [first] and [second]
+ * dots.
+ */
+private fun PatternDotViewModel.isOnLineSegment(
+    first: PatternDotViewModel,
+    second: PatternDotViewModel
+): Boolean {
+    val anotherPoint = this
+    // No need to consider any points outside the bounds of two end points
+    val isWithinBounds =
+        anotherPoint.x.isBetween(first.x, second.x) && anotherPoint.y.isBetween(first.y, second.y)
+    if (!isWithinBounds) {
+        return false
+    }
+
+    // Uses the 2 point line equation: (y-y1)/(x-x1) = (y2-y1)/(x2-x1)
+    // which can be rewritten as:      (y-y1)*(x2-x1) = (x-x1)*(y2-y1)
+    // This is true for any point on the line passing through these two points
+    return (anotherPoint.y - first.y) * (second.x - first.x) ==
+        (anotherPoint.x - first.x) * (second.y - first.y)
+}
+
+/** Is [this] Int between [a] and [b] */
+private fun Int.isBetween(a: Int, b: Int): Boolean {
+    return (this in a..b) || (this in b..a)
 }
 
 data class PatternDotViewModel(
