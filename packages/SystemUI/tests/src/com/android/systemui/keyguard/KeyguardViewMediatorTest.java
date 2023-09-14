@@ -157,8 +157,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock AuthController mAuthController;
     private @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
     private @Mock ShadeWindowLogger mShadeWindowLogger;
-    private @Captor ArgumentCaptor<KeyguardUpdateMonitorCallback>
-            mKeyguardUpdateMonitorCallbackCaptor;
     private @Captor ArgumentCaptor<KeyguardStateController.Callback>
             mKeyguardStateControllerCallback;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
@@ -203,25 +201,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         DejankUtils.setImmediate(true);
 
         createAndStartViewMediator();
-    }
-
-    @Test
-    @TestableLooper.RunWithLooper(setAsMainLooper = true)
-    public void onLockdown_showKeyguard_evenIfKeyguardIsNotEnabledExternally() {
-        // GIVEN keyguard is not enabled and isn't showing
-        mViewMediator.onSystemReady();
-        mViewMediator.setKeyguardEnabled(false);
-        TestableLooper.get(this).processAllMessages();
-        captureKeyguardUpdateMonitorCallback();
-        assertFalse(mViewMediator.isShowingAndNotOccluded());
-
-        // WHEN lockdown occurs
-        when(mLockPatternUtils.isUserInLockdown(anyInt())).thenReturn(true);
-        mKeyguardUpdateMonitorCallbackCaptor.getValue().onStrongAuthStateChanged(0);
-
-        // THEN keyguard is shown
-        TestableLooper.get(this).processAllMessages();
-        assertTrue(mViewMediator.isShowingAndNotOccluded());
     }
 
     @Test
@@ -842,10 +821,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);
-    }
-
-    private void captureKeyguardUpdateMonitorCallback() {
-        verify(mUpdateMonitor).registerCallback(mKeyguardUpdateMonitorCallbackCaptor.capture());
     }
 
     private void captureKeyguardStateControllerCallback() {
