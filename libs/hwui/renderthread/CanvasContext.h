@@ -363,7 +363,7 @@ private:
     std::function<bool(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
     std::function<void()> mPrepareSurfaceControlForWebviewCallback;
 
-    HintSessionWrapper mHintSessionWrapper;
+    std::shared_ptr<HintSessionWrapper> mHintSessionWrapper;
     nsecs_t mLastDequeueBufferDuration = 0;
     nsecs_t mSyncDelayDuration = 0;
     nsecs_t mIdleDuration = 0;
