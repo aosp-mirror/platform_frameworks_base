@@ -203,14 +203,22 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         }
         return false;
     }
-    
+
+    /**
+     * Direct reflection of {@link Intent#ACTION_PACKAGE_CHANGED
+     * Intent.ACTION_PACKAGE_CHANGED} being received, this callback
+     * has extras passed in.
+     */
+    public void onPackageChangedWithExtras(String packageName, Bundle extras) {
+    }
+
     public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
         return false;
     }
 
     public void onHandleUserStop(Intent intent, int userHandle) {
     }
-    
+
     public void onUidRemoved(int uid) {
     }
     
@@ -238,9 +246,22 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     }
 
     /**
+     * Called when a package disappears with extras passed in.
+     */
+    public void onPackageDisappearedWithExtras(String packageName, Bundle extras) {
+    }
+
+    /**
      * Called when a package appears for any reason.
      */
     public void onPackageAppeared(String packageName, int reason) {
+    }
+
+
+    /**
+     * Called when a package appears with extras passed in.
+     */
+    public void onPackageAppearedWithExtras(String packageName, Bundle extras) {
     }
 
     /**
@@ -248,11 +269,11 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
      */
     public void onPackageModified(@NonNull String packageName) {
     }
-    
+
     public boolean didSomePackagesChange() {
         return mSomePackagesChanged;
     }
-    
+
     public int isPackageAppearing(String packageName) {
         if (mAppearingPackages != null) {
             for (int i=mAppearingPackages.length-1; i>=0; i--) {
@@ -381,6 +402,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                     mChangeType = PACKAGE_PERMANENT_CHANGE;
                     onPackageAdded(pkg, uid);
                 }
+                onPackageAppearedWithExtras(pkg, intent.getExtras());
                 onPackageAppeared(pkg, mChangeType);
             }
         } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
@@ -403,6 +425,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                         onPackageRemovedAllUsers(pkg, uid);
                     }
                 }
+                onPackageDisappearedWithExtras(pkg, intent.getExtras());
                 onPackageDisappeared(pkg, mChangeType);
             }
         } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
@@ -417,6 +440,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                 if (onPackageChanged(pkg, uid, mModifiedComponents)) {
                     mSomePackagesChanged = true;
                 }
+                onPackageChangedWithExtras(pkg, intent.getExtras());
                 onPackageModified(pkg);
             }
         } else if (Intent.ACTION_PACKAGE_DATA_CLEARED.equals(action)) {

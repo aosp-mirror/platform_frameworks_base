@@ -17,7 +17,6 @@
 package com.android.internal.content;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
 
@@ -36,6 +36,7 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -45,6 +46,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class PackageMonitorTest {
     private static final String FAKE_PACKAGE_NAME = "com.android.internal.content.fakeapp";
+    private static final String FAKE_EXTRA_REASON = "android.intent.extra.fakereason";
     private static final int FAKE_PACKAGE_UID = 123;
     private static final int FAKE_USER_ID = 0;
     private static final int WAIT_CALLBACK_CALLED_IN_MS = 300;
@@ -245,6 +247,7 @@ public class PackageMonitorTest {
         intent.setData(Uri.fromParts("package", FAKE_PACKAGE_NAME, null));
         intent.putExtra(Intent.EXTRA_USER_HANDLE, FAKE_USER_ID);
         intent.putExtra(Intent.EXTRA_UID, FAKE_PACKAGE_UID);
+        intent.putExtra(Intent.EXTRA_REASON, FAKE_EXTRA_REASON);
         String [] packageList = new String[]{FAKE_PACKAGE_NAME};
         intent.putExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST, packageList);
         spyPackageMonitor.doHandlePackageEvent(intent);
@@ -253,6 +256,20 @@ public class PackageMonitorTest {
         verify(spyPackageMonitor, times(1))
                 .onPackageChanged(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID), eq(packageList));
         verify(spyPackageMonitor, times(1)).onPackageModified(eq(FAKE_PACKAGE_NAME));
+
+        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(spyPackageMonitor, times(1)).onPackageChangedWithExtras(eq(FAKE_PACKAGE_NAME),
+                argumentCaptor.capture());
+
+        Bundle capturedExtras = argumentCaptor.getValue();
+        Bundle expectedExtras = intent.getExtras();
+        assertThat(capturedExtras.getInt(Intent.EXTRA_USER_HANDLE))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_USER_HANDLE));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_UID))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_UID));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_REASON))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_REASON));
+
         verify(spyPackageMonitor, times(1)).onSomePackagesChanged();
         verify(spyPackageMonitor, times(1)).onFinishPackageChanges();
     }
@@ -272,6 +289,21 @@ public class PackageMonitorTest {
         verify(spyPackageMonitor, times(1)).onBeginPackageChanges();
         verify(spyPackageMonitor, times(1))
                 .onPackageUpdateStarted(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
+
+        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(spyPackageMonitor, times(1)).onPackageDisappearedWithExtras(eq(FAKE_PACKAGE_NAME),
+                argumentCaptor.capture());
+        Bundle capturedExtras = argumentCaptor.getValue();
+        Bundle expectedExtras = intent.getExtras();
+        assertThat(capturedExtras.getInt(Intent.EXTRA_USER_HANDLE))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_USER_HANDLE));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_UID))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_UID));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_REPLACING))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_REPLACING));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_REMOVED_FOR_ALL_USERS))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_REMOVED_FOR_ALL_USERS));
+
         verify(spyPackageMonitor, times(1))
                 .onPackageDisappeared(eq(FAKE_PACKAGE_NAME), eq(PackageMonitor.PACKAGE_UPDATING));
         verify(spyPackageMonitor, times(1)).onFinishPackageChanges();
@@ -295,6 +327,21 @@ public class PackageMonitorTest {
                 .onPackageRemoved(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
         verify(spyPackageMonitor, times(1))
                 .onPackageRemovedAllUsers(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
+
+        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(spyPackageMonitor, times(1)).onPackageDisappearedWithExtras(eq(FAKE_PACKAGE_NAME),
+                argumentCaptor.capture());
+        Bundle capturedExtras = argumentCaptor.getValue();
+        Bundle expectedExtras = intent.getExtras();
+        assertThat(capturedExtras.getInt(Intent.EXTRA_USER_HANDLE))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_USER_HANDLE));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_UID))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_UID));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_REPLACING))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_REPLACING));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_REMOVED_FOR_ALL_USERS))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_REMOVED_FOR_ALL_USERS));
+
         verify(spyPackageMonitor, times(1)).onPackageDisappeared(eq(FAKE_PACKAGE_NAME),
                 eq(PackageMonitor.PACKAGE_PERMANENT_CHANGE));
         verify(spyPackageMonitor, times(1)).onSomePackagesChanged();
@@ -316,6 +363,19 @@ public class PackageMonitorTest {
         verify(spyPackageMonitor, times(1))
                 .onPackageUpdateFinished(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
         verify(spyPackageMonitor, times(1)).onPackageModified(eq(FAKE_PACKAGE_NAME));
+
+        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(spyPackageMonitor, times(1)).onPackageAppearedWithExtras(eq(FAKE_PACKAGE_NAME),
+                argumentCaptor.capture());
+        Bundle capturedExtras = argumentCaptor.getValue();
+        Bundle expectedExtras = intent.getExtras();
+        assertThat(capturedExtras.getInt(Intent.EXTRA_USER_HANDLE))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_USER_HANDLE));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_UID))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_UID));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_REPLACING))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_REPLACING));
+
         verify(spyPackageMonitor, times(1))
                 .onPackageAppeared(eq(FAKE_PACKAGE_NAME), eq(PackageMonitor.PACKAGE_UPDATING));
         verify(spyPackageMonitor, times(1)).onSomePackagesChanged();
@@ -336,6 +396,19 @@ public class PackageMonitorTest {
         verify(spyPackageMonitor, times(1)).onBeginPackageChanges();
         verify(spyPackageMonitor, times(1))
                 .onPackageAdded(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
+
+        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(spyPackageMonitor, times(1)).onPackageAppearedWithExtras(eq(FAKE_PACKAGE_NAME),
+                argumentCaptor.capture());
+        Bundle capturedExtras = argumentCaptor.getValue();
+        Bundle expectedExtras = intent.getExtras();
+        assertThat(capturedExtras.getInt(Intent.EXTRA_USER_HANDLE))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_USER_HANDLE));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_UID))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_UID));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_REPLACING))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_REPLACING));
+
         verify(spyPackageMonitor, times(1)).onPackageAppeared(eq(FAKE_PACKAGE_NAME),
                 eq(PackageMonitor.PACKAGE_PERMANENT_CHANGE));
         verify(spyPackageMonitor, times(1)).onSomePackagesChanged();
