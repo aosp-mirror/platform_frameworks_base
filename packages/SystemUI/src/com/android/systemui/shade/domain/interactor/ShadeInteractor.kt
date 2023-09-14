@@ -35,15 +35,20 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.isActive
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.isActive
 
 /** Business logic for shade interactions. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -119,17 +124,40 @@ constructor(
             repository.qsExpansion
         }
 
-    /** The amount [0-1] either QS or the shade has been opened */
+    /** The amount [0-1] either QS or the shade has been opened. */
     val anyExpansion: StateFlow<Float> =
         combine(shadeExpansion, qsExpansion) { shadeExp, qsExp -> maxOf(shadeExp, qsExp) }
             .stateIn(scope, SharingStarted.Eagerly, 0f)
 
     /** Whether either the shade or QS is expanding from a fully collapsed state. */
-    val anyExpanding =
+    val isAnyExpanding =
         anyExpansion
             .pairwise(1f)
             .map { (prev, curr) -> curr > 0f && curr < 1f && prev < 1f }
             .distinctUntilChanged()
+
+    /**
+     * Whether the user is expanding or collapsing the shade with user input. This will be true even
+     * if the user's input gesture has ended but a transition they initiated is animating.
+     */
+    val isUserInteractingWithShade: Flow<Boolean> =
+        userInteractingFlow(repository.legacyShadeTracking, repository.legacyShadeExpansion)
+
+    /**
+     * Whether the user is expanding or collapsing quick settings with user input. This will be true
+     * even if the user's input gesture has ended but a transition they initiated is still
+     * animating.
+     */
+    val isUserInteractingWithQs: Flow<Boolean> =
+        userInteractingFlow(repository.legacyQsTracking, repository.qsExpansion)
+
+    /**
+     * Whether the user is expanding or collapsing either the shade or quick settings with user
+     * input (i.e. dragging a pointer). This will be true even if the user's input gesture had ended
+     * but a transition they initiated is still animating.
+     */
+    val isUserInteracting: Flow<Boolean> =
+        combine(isUserInteractingWithShade, isUserInteractingWithShade) { shade, qs -> shade || qs }
 
     /** Emits true if the shade can be expanded from QQS to QS and false otherwise. */
     val isExpandToQsEnabled: Flow<Boolean> =
@@ -169,4 +197,30 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+
+    /**
+     * Return a flow for whether a user is interacting with an expandable shade component using
+     * tracking and expansion flows. NOTE: expansion must be a `StateFlow` to guarantee that
+     * [expansion.first] checks the current value of the flow.
+     */
+    private fun userInteractingFlow(
+        tracking: Flow<Boolean>,
+        expansion: StateFlow<Float>
+    ): Flow<Boolean> {
+        return flow {
+            // initial value is false
+            emit(false)
+            while (currentCoroutineContext().isActive) {
+                // wait for tracking to become true
+                tracking.first { it }
+                emit(true)
+                // wait for tracking to become false
+                tracking.first { !it }
+                // wait for expansion to complete in either direction
+                expansion.first { it <= 0f || it >= 1f }
+                // interaction complete
+                emit(false)
+            }
+        }
+    }
 }
