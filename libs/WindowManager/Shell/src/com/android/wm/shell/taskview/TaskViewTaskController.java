@@ -260,6 +260,9 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     private void updateTaskVisibility() {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setHidden(mTaskToken, !mSurfaceCreated /* hidden */);
+        if (!mSurfaceCreated) {
+            wct.reorder(mTaskToken, false /* onTop */);
+        }
         mSyncQueue.queue(wct);
         if (mListener == null) {
             return;
