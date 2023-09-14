@@ -821,7 +821,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Kustutage tahvelarvuti andmed hoiatamata, lähtestades arvuti tehaseandmetele."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Kustutatakse teie Android TV seadme andmed ilma hoiatamata, lähtestades seadme tehase andmetele."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Teabe ja meelelahutuse süsteemi andmete hoiatamata kustutamine tehase andmetele lähtestamise abil."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Telefoniandmete hoiatuseta kustutamine, lähtestades telefoni tehaseseadetele."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Kustutab telefoniandmed hoiatuseta, lähtestades telefoni tehaseseadetele."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profiili andmete kustutamine"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Kasutaja andmete kustutamine"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Kustutatakse selle kasutaja andmed sellest tahvelarvutist ilma hoiatamata."</string>

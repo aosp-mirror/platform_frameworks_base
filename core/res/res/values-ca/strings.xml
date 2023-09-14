@@ -1887,8 +1887,8 @@
     <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durant 1 hora}many{Durant # hores}other{Durant # hores}}"</string>
     <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durant 1 h}many{Durant # h}other{Durant # h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_until" msgid="2250286190237669079">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_alarm" msgid="7046911727540499275">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
+    <string name="zen_mode_until" msgid="2250286190237669079">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="7046911727540499275">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no el desactivis"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Fins que desactivis el mode No molestis"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

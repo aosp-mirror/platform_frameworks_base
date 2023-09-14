@@ -861,6 +861,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Eraman behera"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Eraman ezkerrera"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Eraman eskuinera"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Lupa aplikatzeko botoia"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Handitu pantaila osoa"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Handitu pantailaren zati bat"</string>
@@ -1078,7 +1086,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Oraingoz ez da automatikoki konektatuko wifira"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Ikusi guztiak"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Sarea aldatzeko, deskonektatu Etherneta"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Gailuaren funtzionamendua hobetzeko, aplikazioek eta zerbitzuek wifi-sareak bilatzen jarraituko dute, baita wifi-konexioa desaktibatuta dagoenean ere. Aukera hori aldatzeko, joan wifi-sareen bilaketaren ezarpenetara. "<annotation id="link">"Aldatu"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Gailuaren funtzionamendua hobetzeko, aplikazioek eta zerbitzuek wifi-sareak bilatzen jarraituko dute, baita wifi-konexioa desaktibatuta dagoenean ere. Aukera hori aldatzeko, joan wifi-sareak bilatzeko eginbidearen ezarpenetara. "<annotation id="link">"Aldatu"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Desaktibatu hegaldi modua"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioak lauza hau gehitu nahi du Ezarpen bizkorrak menuan:"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Gehitu lauza"</string>
@@ -1130,7 +1138,7 @@
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Gailuko erregistro guztiak erabiltzeko baimena eman nahi diozu <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> aplikazioari?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Eman behin erabiltzeko baimena"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Ez eman baimenik"</string>
-    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Gailuko erregistroetan gailuan gertatzen den guztia gordetzen da. Arazoak bilatu eta konpontzeko erabil ditzakete aplikazioek erregistro horiek.\n\nBaliteke erregistro batzuek kontuzko informazioa edukitzea. Beraz, eman gailuko erregistro guztiak erabiltzeko baimena fidagarritzat jotzen dituzun aplikazioei bakarrik. \n\nNahiz eta gailuko erregistro guztiak erabiltzeko baimena ez eman aplikazio honi, aplikazioak hari dagozkion erregistroak atzitu ahalko ditu. Gainera, baliteke gailuaren fabrikatzaileak gailuko erregistro edo datu batzuk atzitu ahal izatea."</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Gailuko erregistroetan gailuan gertatzen den guztia gordetzen da. Arazoak bilatu eta konpontzeko erabil ditzakete aplikazioek erregistro horiek.\n\nBaliteke erregistro batzuek kontuzko informazioa edukitzea. Beraz, eman gailuko erregistro guztiak erabiltzeko baimena fidagarritzat jotzen dituzun aplikazioei bakarrik. \n\nNahiz eta gailuko erregistro guztiak erabiltzeko baimena ez eman aplikazio honi, aplikazioak hari dagozkion erregistroak erabili ahalko ditu. Gainera, baliteke gailuaren fabrikatzaileak gailuko erregistro edo datu batzuk erabili ahal izatea."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Lortu informazio gehiago"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Lortu informazio gehiago <xliff:g id="URL">%s</xliff:g> helbidean"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Ireki <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
