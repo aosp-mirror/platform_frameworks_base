@@ -1989,12 +1989,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             WallpaperData wallpaper, IRemoteCallback reply, ServiceInfo serviceInfo) {
 
         if (serviceInfo == null) {
-            if (wallpaper.mWhich == (FLAG_LOCK | FLAG_SYSTEM)) {
-                clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, null);
-                clearWallpaperLocked(false, FLAG_LOCK, wallpaper.userId, reply);
-            } else {
-                clearWallpaperLocked(false, wallpaper.mWhich, wallpaper.userId, reply);
-            }
+            clearWallpaperLocked(false, wallpaper.mWhich, wallpaper.userId, reply);
             return;
         }
         Slog.w(TAG, "Wallpaper isn't direct boot aware; using fallback until unlocked");
@@ -2015,7 +2010,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     @Override
     public void clearWallpaper(String callingPackage, int which, int userId) {
-        if (DEBUG) Slog.v(TAG, "clearWallpaper");
+        if (DEBUG) Slog.v(TAG, "clearWallpaper: " + which);
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
         if (!isWallpaperSupported(callingPackage) || !isSetWallpaperAllowed(callingPackage)) {
             return;
@@ -2026,7 +2021,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData data = null;
         synchronized (mLock) {
             if (mIsLockscreenLiveWallpaperEnabled) {
-                clearWallpaperLocked(callingPackage, false, which, userId);
+                boolean fromForeground = isFromForegroundApp(callingPackage);
+                clearWallpaperLocked(false, which, userId, fromForeground, null);
             } else {
                 clearWallpaperLocked(false, which, userId, null);
             }
@@ -2046,8 +2042,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void clearWallpaperLocked(String callingPackage, boolean defaultFailed,
-            int which, int userId) {
+    private void clearWallpaperLocked(boolean defaultFailed,
+            int which, int userId, boolean fromForeground, IRemoteCallback reply) {
 
         // Might need to bring it in the first time to establish our rewrite
         if (!mWallpaperMap.contains(userId)) {
@@ -2086,8 +2082,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 finalWhich = which;
             }
 
-            boolean success = withCleanCallingIdentity(() -> setWallpaperComponent(
-                    component, callingPackage, finalWhich, userId));
+            // except for the lock case (for which we keep the system wallpaper as-is), force rebind
+            boolean force = which != FLAG_LOCK;
+            boolean success = withCleanCallingIdentity(() -> setWallpaperComponentInternal(
+                    component, finalWhich, userId, force, fromForeground, reply));
             if (success) return;
         } catch (IllegalArgumentException e1) {
             e = e1;
@@ -2099,11 +2097,24 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         // wallpaper.
         Slog.e(TAG, "Default wallpaper component not found!", e);
         withCleanCallingIdentity(() -> clearWallpaperComponentLocked(wallpaper));
+        if (reply != null) {
+            try {
+                reply.sendResult(null);
+            } catch (RemoteException e1) {
+                Slog.w(TAG, "Failed to notify callback after wallpaper clear", e1);
+            }
+        }
     }
 
-    // TODO(b/266818039) remove this version of the method
+    // TODO(b/266818039) remove
     private void clearWallpaperLocked(boolean defaultFailed, int which, int userId,
             IRemoteCallback reply) {
+
+        if (mIsLockscreenLiveWallpaperEnabled) {
+            clearWallpaperLocked(defaultFailed, which, userId, false, reply);
+            return;
+        }
+
         if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
             throw new IllegalArgumentException("Must specify exactly one kind of wallpaper to clear");
         }
@@ -3277,15 +3288,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     boolean setWallpaperComponent(ComponentName name, String callingPackage,
             @SetWallpaperFlags int which, int userId) {
         if (mIsLockscreenLiveWallpaperEnabled) {
-            return setWallpaperComponentInternal(name, callingPackage, which, userId);
+            boolean fromForeground = isFromForegroundApp(callingPackage);
+            return setWallpaperComponentInternal(name, which, userId, false, fromForeground, null);
         } else {
             setWallpaperComponentInternalLegacy(name, callingPackage, which, userId);
             return true;
         }
     }
 
-    private boolean setWallpaperComponentInternal(ComponentName name, String callingPackage,
-            @SetWallpaperFlags int which, int userIdIn) {
+    private boolean setWallpaperComponentInternal(ComponentName name,  @SetWallpaperFlags int which,
+            int userIdIn, boolean force, boolean fromForeground, IRemoteCallback reply) {
         if (DEBUG) {
             Slog.v(TAG, "Setting new live wallpaper: which=" + which + ", component: " + name);
         }
@@ -3299,7 +3311,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         final WallpaperData newWallpaper;
 
         synchronized (mLock) {
-            Slog.v(TAG, "setWallpaperComponent name=" + name);
+            Slog.v(TAG, "setWallpaperComponent name=" + name + ", which = " + which);
             final WallpaperData originalSystemWallpaper = mWallpaperMap.get(userId);
             if (originalSystemWallpaper == null) {
                 throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
@@ -3322,29 +3334,21 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 newWallpaper.imageWallpaperPending = false;
                 newWallpaper.mWhich = which;
                 newWallpaper.mSystemWasBoth = systemIsBoth;
-                newWallpaper.fromForegroundApp = isFromForegroundApp(callingPackage);
+                newWallpaper.fromForegroundApp = fromForeground;
                 final WallpaperDestinationChangeHandler
                         liveSync = new WallpaperDestinationChangeHandler(
                         newWallpaper);
                 boolean same = changingToSame(name, newWallpaper);
-                IRemoteCallback.Stub callback = new IRemoteCallback.Stub() {
-                    @Override
-                    public void sendResult(Bundle data) throws RemoteException {
-                        if (DEBUG) {
-                            Slog.d(TAG, "publish system wallpaper changed!");
-                        }
-                    }
-                };
 
                 /*
                  * If we have a shared system+lock wallpaper, and we reapply the same wallpaper
                  * to system only, force rebind: the current wallpaper will be migrated to lock
                  * and a new engine with the same wallpaper will be applied to system.
                  */
-                boolean forceRebind = same && systemIsBoth && which == FLAG_SYSTEM;
+                boolean forceRebind = force || (same && systemIsBoth && which == FLAG_SYSTEM);
 
                 bindSuccess = bindWallpaperComponentLocked(name, /* force */
-                        forceRebind, /* fromUser */ true, newWallpaper, callback);
+                        forceRebind, /* fromUser */ true, newWallpaper, reply);
                 if (bindSuccess) {
                     if (!same) {
                         newWallpaper.primaryColors = null;
@@ -3414,7 +3418,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData wallpaper;
 
         synchronized (mLock) {
-            Slog.v(TAG, "setWallpaperComponent name=" + name + ", which=" + which);
+            Slog.v(TAG, "setWallpaperComponentLegacy name=" + name + ", which=" + which);
             wallpaper = mWallpaperMap.get(userId);
             if (wallpaper == null) {
                 throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
