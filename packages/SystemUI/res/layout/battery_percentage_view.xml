@@ -27,4 +27,5 @@
         android:gravity="center_vertical|start"
         android:paddingStart="@dimen/battery_level_padding_start"
         android:importantForAccessibility="no"
+        android:includeFontPadding="false"
         />

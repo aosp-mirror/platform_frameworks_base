@@ -356,11 +356,13 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 if (mPercentageStyleId != 0) { // Only set if specified as attribute
                     mBatteryPercentView.setTextAppearance(mPercentageStyleId);
                 }
+                float fontHeight = mBatteryPercentView.getPaint().getFontMetricsInt(null);
+                mBatteryPercentView.setLineHeight(TypedValue.COMPLEX_UNIT_PX, fontHeight);
                 if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);
                 updatePercentText();
                 addView(mBatteryPercentView, new LayoutParams(
                         LayoutParams.WRAP_CONTENT,
-                        LayoutParams.WRAP_CONTENT));
+                        (int) Math.ceil(fontHeight)));
             }
         } else {
             if (showing) {
