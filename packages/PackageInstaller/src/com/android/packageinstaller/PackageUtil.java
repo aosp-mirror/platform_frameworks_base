@@ -27,8 +27,13 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.View;
@@ -115,7 +120,7 @@ public class PackageUtil {
                 icon);
     }
 
-    static final class AppSnippet {
+    static final class AppSnippet implements Parcelable {
         @NonNull public CharSequence label;
         @Nullable public Drawable icon;
         public AppSnippet(@NonNull CharSequence label, @Nullable Drawable icon) {
@@ -123,10 +128,52 @@ public class PackageUtil {
             this.icon = icon;
         }
 
+        private AppSnippet(Parcel in) {
+            label = in.readString();
+            Bitmap bmp = in.readParcelable(getClass().getClassLoader(), Bitmap.class);
+            icon = new BitmapDrawable(Resources.getSystem(), bmp);
+        }
+
         @Override
         public String toString() {
             return "AppSnippet[" + label + (icon != null ? "(has" : "(no ") + " icon)]";
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeString(label.toString());
+            Bitmap bmp = getBitmapFromDrawable(icon);
+            dest.writeParcelable(bmp, 0);
+        }
+
+        private Bitmap getBitmapFromDrawable(Drawable drawable) {
+            // Create an empty bitmap with the dimensions of our drawable
+            final Bitmap bmp = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                    drawable.getIntrinsicHeight(),
+                    Bitmap.Config.ARGB_8888);
+            // Associate it with a canvas. This canvas will draw the icon on the bitmap
+            final Canvas canvas = new Canvas(bmp);
+            // Draw the drawable in the canvas. The canvas will ultimately paint the drawable in the
+            // bitmap held within
+            drawable.draw(canvas);
+
+            return bmp;
+        }
+
+        public static final Parcelable.Creator<AppSnippet> CREATOR = new Parcelable.Creator<>() {
+            public AppSnippet createFromParcel(Parcel in) {
+                return new AppSnippet(in);
+            }
+
+            public AppSnippet[] newArray(int size) {
+                return new AppSnippet[size];
+            }
+        };
     }
 
     /**
