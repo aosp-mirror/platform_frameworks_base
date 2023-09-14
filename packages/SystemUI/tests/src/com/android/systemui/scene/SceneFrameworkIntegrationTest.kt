@@ -99,6 +99,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             sceneInteractor = sceneInteractor,
         )
 
+    private val communalInteractor = utils.communalInteractor()
+
     private val transitionState =
         MutableStateFlow<ObservableTransitionState>(
             ObservableTransitionState.Idle(sceneContainerConfig.initialSceneKey)
@@ -125,6 +127,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         LockscreenSceneViewModel(
             applicationScope = testScope.backgroundScope,
             authenticationInteractor = authenticationInteractor,
+            communalInteractor = communalInteractor,
             longPress =
                 KeyguardLongPressViewModel(
                     interactor = mock(),

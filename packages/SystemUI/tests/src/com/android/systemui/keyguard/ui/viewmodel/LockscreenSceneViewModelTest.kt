@@ -42,15 +42,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             repository = utils.authenticationRepository(),
         )
 
-    private val underTest =
-        LockscreenSceneViewModel(
-            applicationScope = testScope.backgroundScope,
-            authenticationInteractor = authenticationInteractor,
-            longPress =
-                KeyguardLongPressViewModel(
-                    interactor = mock(),
-                ),
-        )
+    private val underTest = createLockscreenSceneViewModel()
 
     @Test
     fun upTransitionSceneKey_canSwipeToUnlock_gone() =
@@ -74,4 +66,34 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Bouncer)
         }
+
+    @Test
+    fun leftTransitionSceneKey_communalIsEnabled_communal() =
+        testScope.runTest {
+            utils.communalRepository.setIsCommunalEnabled(true)
+            val underTest = createLockscreenSceneViewModel()
+
+            assertThat(underTest.leftDestinationSceneKey).isEqualTo(SceneKey.Communal)
+        }
+
+    @Test
+    fun leftTransitionSceneKey_communalIsDisabled_null() =
+        testScope.runTest {
+            utils.communalRepository.setIsCommunalEnabled(false)
+            val underTest = createLockscreenSceneViewModel()
+
+            assertThat(underTest.leftDestinationSceneKey).isNull()
+        }
+
+    private fun createLockscreenSceneViewModel(): LockscreenSceneViewModel {
+        return LockscreenSceneViewModel(
+            applicationScope = testScope.backgroundScope,
+            authenticationInteractor = authenticationInteractor,
+            communalInteractor = utils.communalInteractor(),
+            longPress =
+                KeyguardLongPressViewModel(
+                    interactor = mock(),
+                ),
+        )
+    }
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.domain.interactor
 
+import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.shared.CommunalAppWidgetInfo
 import com.android.systemui.dagger.SysUISingleton
@@ -27,8 +28,12 @@ import kotlinx.coroutines.flow.Flow
 class CommunalInteractor
 @Inject
 constructor(
+    communalRepository: CommunalRepository,
     widgetRepository: CommunalWidgetRepository,
 ) {
+    /** Whether communal features are enabled. */
+    val isCommunalEnabled: Boolean = communalRepository.isCommunalEnabled
+
     /** A flow of info about the widget to be displayed, or null if widget is unavailable. */
     val appWidgetInfo: Flow<CommunalAppWidgetInfo?> = widgetRepository.stopwatchAppWidgetInfo
 }
