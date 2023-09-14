@@ -72,15 +72,16 @@ internal class PunchHole(
     }
 
     private fun DrawScope.drawHole(bounds: Element) {
+        val boundsSize = bounds.lastSize.toSize()
         if (shape == RectangleShape) {
-            drawRect(Color.Black, blendMode = BlendMode.DstOut)
+            drawRect(Color.Black, size = boundsSize, blendMode = BlendMode.DstOut)
             return
         }
 
         // TODO(b/290184746): Cache outline if the size of bounds does not change.
         drawOutline(
             shape.createOutline(
-                bounds.lastSize.toSize(),
+                boundsSize,
                 layoutDirection,
                 this,
             ),
