@@ -50,7 +50,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserManager;
@@ -966,7 +965,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             skipAnimation = true;
         }
 
-        showDialog(args, skipAnimation, null /* savedState */, mPromptViewModelProvider.get());
+        showDialog(args, skipAnimation, mPromptViewModelProvider.get());
     }
 
     /**
@@ -1198,7 +1197,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         return mFpEnrolledForUser.getOrDefault(userId, false);
     }
 
-    private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState,
+    private void showDialog(SomeArgs args, boolean skipAnimation,
             @Nullable PromptViewModel viewModel) {
         mCurrentDialogArgs = args;
 
@@ -1238,7 +1237,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
 
         if (DEBUG) {
             Log.d(TAG, "userId: " + userId
-                    + " savedState: " + savedState
                     + " mCurrentDialog: " + mCurrentDialog
                     + " newDialog: " + newDialog);
         }
@@ -1260,7 +1258,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         if (!promptInfo.isAllowBackgroundAuthentication() && !isOwnerInForeground()) {
             cancelIfOwnerIsNotInForeground();
         } else {
-            mCurrentDialog.show(mWindowManager, savedState);
+            mCurrentDialog.show(mWindowManager);
         }
     }
 
@@ -1282,29 +1280,12 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     public void onConfigurationChanged(Configuration newConfig) {
         updateSensorLocations();
 
-        // Save the state of the current dialog (buttons showing, etc)
+        // TODO(b/287311775): consider removing this to retain the UI cleanly vs re-creating
         if (mCurrentDialog != null) {
             final PromptViewModel viewModel = mCurrentDialog.getViewModel();
-            final Bundle savedState = new Bundle();
-            mCurrentDialog.onSaveState(savedState);
             mCurrentDialog.dismissWithoutCallback(false /* animate */);
             mCurrentDialog = null;
-
-            // Only show the dialog if necessary. If it was animating out, the dialog is supposed
-            // to send its pending callback immediately.
-            if (!savedState.getBoolean(AuthDialog.KEY_CONTAINER_GOING_AWAY, false)) {
-                final boolean credentialShowing =
-                        savedState.getBoolean(AuthDialog.KEY_CREDENTIAL_SHOWING);
-                if (credentialShowing) {
-                    // There may be a cleaner way to do this, rather than altering the current
-                    // authentication's parameters. This gets the job done and should be clear
-                    // enough for now.
-                    PromptInfo promptInfo = (PromptInfo) mCurrentDialogArgs.arg1;
-                    promptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);
-                }
-
-                showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState, viewModel);
-            }
+            showDialog(mCurrentDialogArgs, true /* skipAnimation */, viewModel);
         }
     }
 

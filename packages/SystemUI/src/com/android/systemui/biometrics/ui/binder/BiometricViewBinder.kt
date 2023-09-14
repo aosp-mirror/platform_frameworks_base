@@ -23,7 +23,6 @@ import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricPrompt
 import android.hardware.face.FaceManager
-import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.HapticFeedbackConstants
@@ -43,9 +42,6 @@ import com.android.systemui.R
 import com.android.systemui.biometrics.AuthBiometricFaceIconController
 import com.android.systemui.biometrics.AuthBiometricFingerprintAndFaceIconController
 import com.android.systemui.biometrics.AuthBiometricFingerprintIconController
-import com.android.systemui.biometrics.AuthBiometricView
-import com.android.systemui.biometrics.AuthBiometricView.Callback
-import com.android.systemui.biometrics.AuthBiometricViewAdapter
 import com.android.systemui.biometrics.AuthIconController
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.shared.model.BiometricModalities
@@ -63,7 +59,6 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.VibratorHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -83,11 +78,11 @@ object BiometricViewBinder {
         panelViewController: AuthPanelController,
         jankListener: BiometricJankListener,
         backgroundView: View,
-        legacyCallback: Callback,
+        legacyCallback: Spaghetti.Callback,
         applicationScope: CoroutineScope,
         vibratorHelper: VibratorHelper,
         featureFlags: FeatureFlags,
-    ): AuthBiometricViewAdapter {
+    ): Spaghetti {
         val accessibilityManager = view.context.getSystemService(AccessibilityManager::class.java)!!
 
         val textColorError =
@@ -141,24 +136,20 @@ object BiometricViewBinder {
             subtitleView.text = viewModel.subtitle.first()
 
             // set button listeners
-            negativeButton.setOnClickListener {
-                legacyCallback.onAction(Callback.ACTION_BUTTON_NEGATIVE)
-            }
-            cancelButton.setOnClickListener {
-                legacyCallback.onAction(Callback.ACTION_USER_CANCELED)
-            }
+            negativeButton.setOnClickListener { legacyCallback.onButtonNegative() }
+            cancelButton.setOnClickListener { legacyCallback.onUserCanceled() }
             credentialFallbackButton.setOnClickListener {
                 viewModel.onSwitchToCredential()
-                legacyCallback.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL)
+                legacyCallback.onUseDeviceCredential()
             }
             confirmationButton.setOnClickListener { viewModel.confirmAuthenticated() }
             retryButton.setOnClickListener {
                 viewModel.showAuthenticating(isRetry = true)
-                legacyCallback.onAction(Callback.ACTION_BUTTON_TRY_AGAIN)
+                legacyCallback.onButtonTryAgain()
             }
 
             // TODO(b/251476085): migrate legacy icon controllers and remove
-            var legacyState: Int = viewModel.legacyState.value
+            var legacyState = viewModel.legacyState.value
             val iconController =
                 modalities.asIconController(
                     view.context,
@@ -219,7 +210,7 @@ object BiometricViewBinder {
                         oldMode == FingerprintStartMode.Pending &&
                             newMode == FingerprintStartMode.Delayed
                     ) {
-                        legacyCallback.onAction(Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR)
+                        legacyCallback.onStartDelayedFingerprintSensor()
                     }
 
                     if (newMode.isStarted) {
@@ -246,7 +237,7 @@ object BiometricViewBinder {
                         .collect { dismissOnClick ->
                             backgroundView.setOnClickListener {
                                 if (dismissOnClick) {
-                                    legacyCallback.onAction(Callback.ACTION_USER_CANCELED)
+                                    legacyCallback.onUserCanceled()
                                 } else {
                                     Log.w(TAG, "Ignoring background click")
                                 }
@@ -360,13 +351,11 @@ object BiometricViewBinder {
 
                             launch {
                                 delay(authState.delay)
-                                legacyCallback.onAction(
-                                    if (authState.isAuthenticatedAndExplicitlyConfirmed) {
-                                        Callback.ACTION_AUTHENTICATED_AND_CONFIRMED
-                                    } else {
-                                        Callback.ACTION_AUTHENTICATED
-                                    }
-                                )
+                                if (authState.isAuthenticatedAndExplicitlyConfirmed) {
+                                    legacyCallback.onAuthenticatedAndConfirmed()
+                                } else {
+                                    legacyCallback.onAuthenticated()
+                                }
                             }
                         }
                     }
@@ -428,21 +417,50 @@ object BiometricViewBinder {
  * the view model (which will be retained) via the application scope.
  *
  * Do not reference the [view] for anything other than [asView].
- *
- * TODO(b/251476085): remove after replacing AuthContainerView
  */
-private class Spaghetti(
+@Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+class Spaghetti(
     private val view: View,
     private val viewModel: PromptViewModel,
     private val applicationContext: Context,
     private val applicationScope: CoroutineScope,
-) : AuthBiometricViewAdapter {
+) {
+
+    @Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+    interface Callback {
+        fun onAuthenticated()
+        fun onUserCanceled()
+        fun onButtonNegative()
+        fun onButtonTryAgain()
+        fun onError()
+        fun onUseDeviceCredential()
+        fun onStartDelayedFingerprintSensor()
+        fun onAuthenticatedAndConfirmed()
+    }
+
+    @Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+    enum class BiometricState {
+        /** Authentication hardware idle. */
+        STATE_IDLE,
+        /** UI animating in, authentication hardware active. */
+        STATE_AUTHENTICATING_ANIMATING_IN,
+        /** UI animated in, authentication hardware active. */
+        STATE_AUTHENTICATING,
+        /** UI animated in, authentication hardware active. */
+        STATE_HELP,
+        /** Hard error, e.g. ERROR_TIMEOUT. Authentication hardware idle. */
+        STATE_ERROR,
+        /** Authenticated, waiting for user confirmation. Authentication hardware idle. */
+        STATE_PENDING_CONFIRMATION,
+        /** Authenticated, dialog animating away soon. */
+        STATE_AUTHENTICATED,
+    }
 
     private var lifecycleScope: CoroutineScope? = null
     private var modalities: BiometricModalities = BiometricModalities()
     private var legacyCallback: Callback? = null
 
-    override var legacyIconController: AuthIconController? = null
+    var legacyIconController: AuthIconController? = null
         private set
 
     // hacky way to suppress lockout errors
@@ -478,7 +496,7 @@ private class Spaghetti(
         )
     }
 
-    override fun onDialogAnimatedIn(fingerprintWasStarted: Boolean) {
+    fun onDialogAnimatedIn(fingerprintWasStarted: Boolean) {
         if (fingerprintWasStarted) {
             viewModel.ensureFingerprintHasStarted(isDelayed = false)
             viewModel.showAuthenticating(modalities.asDefaultHelpMessage(applicationContext))
@@ -487,7 +505,7 @@ private class Spaghetti(
         }
     }
 
-    override fun onAuthenticationSucceeded(@BiometricAuthenticator.Modality modality: Int) {
+    fun onAuthenticationSucceeded(@BiometricAuthenticator.Modality modality: Int) {
         applicationScope.launch {
             val authenticatedModality = modality.asBiometricModality()
             val msgId = getHelpForSuccessfulAuthentication(authenticatedModality)
@@ -511,7 +529,7 @@ private class Spaghetti(
             else -> null
         }
 
-    override fun onAuthenticationFailed(
+    fun onAuthenticationFailed(
         @BiometricAuthenticator.Modality modality: Int,
         failureReason: String,
     ) {
@@ -533,7 +551,7 @@ private class Spaghetti(
         }
     }
 
-    override fun onError(modality: Int, error: String) {
+    fun onError(modality: Int, error: String) {
         val errorModality = modality.asBiometricModality()
         if (ignoreUnsuccessfulEventsFrom(errorModality, error)) {
             return
@@ -546,11 +564,11 @@ private class Spaghetti(
                 authenticateAfterError = modalities.hasFingerprint,
             )
             delay(BiometricPrompt.HIDE_DIALOG_DELAY.toLong())
-            legacyCallback?.onAction(Callback.ACTION_ERROR)
+            legacyCallback?.onError()
         }
     }
 
-    override fun onHelp(modality: Int, help: String) {
+    fun onHelp(modality: Int, help: String) {
         if (ignoreUnsuccessfulEventsFrom(modality.asBiometricModality(), "")) {
             return
         }
@@ -574,36 +592,20 @@ private class Spaghetti(
             else -> false
         }
 
-    override fun startTransitionToCredentialUI(isError: Boolean) {
+    fun startTransitionToCredentialUI(isError: Boolean) {
         applicationScope.launch {
             viewModel.onSwitchToCredential()
-            legacyCallback?.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL)
+            legacyCallback?.onUseDeviceCredential()
         }
     }
 
-    override fun requestLayout() {
-        // nothing, for legacy view...
-    }
-
-    override fun restoreState(bundle: Bundle?) {
-        // nothing, for legacy view...
-    }
-
-    override fun onSaveState(bundle: Bundle?) {
-        // nothing, for legacy view...
-    }
-
-    override fun onOrientationChanged() {
-        // nothing, for legacy view...
-    }
-
-    override fun cancelAnimation() {
+    fun cancelAnimation() {
         view.animate()?.cancel()
     }
 
-    override fun isCoex() = modalities.hasFaceAndFingerprint
+    fun isCoex() = modalities.hasFaceAndFingerprint
 
-    override fun asView() = view
+    fun asView() = view
 }
 
 private fun BiometricModalities.asDefaultHelpMessage(context: Context): String =
@@ -638,7 +640,7 @@ private class HackyCoexIconController(
     iconViewOverlay: LottieAnimationView,
 ) : AuthBiometricFingerprintAndFaceIconController(context, iconView, iconViewOverlay) {
 
-    private var state: Int? = null
+    private var state: Spaghetti.BiometricState? = null
     private val faceController = AuthBiometricFaceIconController(context, iconView)
 
     var faceMode: Boolean = true
@@ -649,11 +651,14 @@ private class HackyCoexIconController(
                 faceController.deactivated = !value
                 iconView.setImageIcon(null)
                 iconViewOverlay.setImageIcon(null)
-                state?.let { updateIcon(AuthBiometricView.STATE_IDLE, it) }
+                state?.let { updateIcon(Spaghetti.BiometricState.STATE_IDLE, it) }
             }
         }
 
-    override fun updateIcon(lastState: Int, newState: Int) {
+    override fun updateIcon(
+        lastState: Spaghetti.BiometricState,
+        newState: Spaghetti.BiometricState,
+    ) {
         if (deactivated) {
             return
         }

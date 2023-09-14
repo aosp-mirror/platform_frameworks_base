@@ -170,7 +170,9 @@ class PatternBouncerViewModel(
         _selectedDots.value = linkedSetOf()
 
         applicationScope.launch {
-            if (interactor.authenticate(pattern) != true) {
+            if (pattern.size < interactor.minPatternLength) {
+                interactor.showErrorMessage()
+            } else if (interactor.authenticate(pattern) != true) {
                 showFailureAnimation()
             }
         }

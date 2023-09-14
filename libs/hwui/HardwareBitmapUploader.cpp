@@ -22,6 +22,7 @@
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
 #include <GrDirectContext.h>
+#include <GrTypes.h>
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkImage.h>
@@ -265,7 +266,7 @@ private:
           sk_sp<SkImage> image =
               SkImages::TextureFromAHardwareBufferWithData(mGrContext.get(), bitmap.pixmap(),
                                                            ahb);
-          mGrContext->submit(true);
+          mGrContext->submit(GrSyncCpu::kYes);
 
           uploadSucceeded = (image.get() != nullptr);
         });

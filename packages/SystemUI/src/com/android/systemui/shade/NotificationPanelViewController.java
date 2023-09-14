@@ -97,6 +97,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.SystemBarUtils;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.ActiveUnlockConfig;
 import com.android.keyguard.FaceAuthApiRequestReason;
@@ -165,7 +166,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.transition.ShadeTransitionController;
-import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -336,6 +336,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponentFactory;
     private final KeyguardStatusBarViewComponent.Factory mKeyguardStatusBarViewComponentFactory;
     private final FragmentService mFragmentService;
+    private final IStatusBarService mStatusBarService;
     private final ScrimController mScrimController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final TapAgainViewController mTapAgainViewController;
@@ -370,7 +371,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     /** The current squish amount for the predictive back animation */
     private float mCurrentBackProgress = 0.0f;
     private boolean mTracking;
-    private boolean mIsTrackingExpansionFromStatusBar;
     private boolean mHintAnimationRunning;
     @Deprecated
     private KeyguardBottomAreaView mKeyguardBottomArea;
@@ -744,6 +744,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             NavigationBarController navigationBarController,
             QuickSettingsController quickSettingsController,
             FragmentService fragmentService,
+            IStatusBarService statusBarService,
             ContentResolver contentResolver,
             ShadeHeaderController shadeHeaderController,
             ScreenOffAnimationController screenOffAnimationController,
@@ -874,6 +875,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardQsUserSwitchComponentFactory = keyguardQsUserSwitchComponentFactory;
         mKeyguardUserSwitcherComponentFactory = keyguardUserSwitcherComponentFactory;
         mFragmentService = fragmentService;
+        mStatusBarService = statusBarService;
         mSettingsChangeObserver = new SettingsChangeObserver(handler);
         mSplitShadeEnabled =
                 LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
@@ -2845,7 +2847,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private void onTrackingStopped(boolean expand) {
         mTracking = false;
-        maybeStopTrackingExpansionFromStatusBar(expand);
 
         updateExpansionAndVisibility();
         if (expand) {
@@ -3036,7 +3037,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         mHeadsUpManager = headsUpManager;
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
-        mHeadsUpTouchHelper = new HeadsUpTouchHelper(headsUpManager,
+        mHeadsUpTouchHelper = new HeadsUpTouchHelper(
+                headsUpManager,
+                mStatusBarService,
                 mNotificationStackScrollLayoutController.getHeadsUpCallback(),
                 new HeadsUpNotificationViewControllerImpl());
     }
@@ -4244,42 +4247,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     @Override
-    public void startTrackingExpansionFromStatusBar() {
-        mIsTrackingExpansionFromStatusBar = true;
-        InteractionJankMonitorWrapper.begin(
-                mView, InteractionJankMonitorWrapper.CUJ_SHADE_EXPAND_FROM_STATUS_BAR);
-    }
-
-    /**
-     * Stops tracking an expansion that originated from the status bar (if we had started tracking
-     * it).
-     *
-     * @param expand the expand boolean passed to {@link #onTrackingStopped(boolean)}.
-     */
-    private void maybeStopTrackingExpansionFromStatusBar(boolean expand) {
-        if (!mIsTrackingExpansionFromStatusBar) {
-            return;
-        }
-        mIsTrackingExpansionFromStatusBar = false;
-
-        // Determine whether the shade actually expanded due to the status bar touch:
-        // - If the user just taps on the status bar, then #isExpanded is false but
-        // #onTrackingStopped is called with `true`.
-        // - If the user drags down on the status bar but doesn't drag down far enough, then
-        // #onTrackingStopped is called with `false` but #isExpanded is true.
-        // So, we need *both* #onTrackingStopped called with `true` *and* #isExpanded to be true in
-        // order to confirm that the shade successfully opened.
-        boolean shadeExpansionFromStatusBarSucceeded = expand && isExpanded();
-        if (shadeExpansionFromStatusBarSucceeded) {
-            InteractionJankMonitorWrapper.end(
-                    InteractionJankMonitorWrapper.CUJ_SHADE_EXPAND_FROM_STATUS_BAR);
-        } else {
-            InteractionJankMonitorWrapper.cancel(
-                    InteractionJankMonitorWrapper.CUJ_SHADE_EXPAND_FROM_STATUS_BAR);
-        }
-    }
-
-    @Override
     public void updateTouchableRegion() {
         //A layout will ensure that onComputeInternalInsets will be called and after that we can
         // resize the layout. Make sure that the window stays small for one frame until the
@@ -5317,11 +5284,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         @Override
         public void startExpand(float x, float y, boolean startTracking, float expandedHeight) {
             startExpandMotion(x, y, startTracking, expandedHeight);
-        }
-
-        @Override
-        public void clearNotificationEffects() {
-            mCentralSurfaces.clearNotificationEffects();
         }
     }
 

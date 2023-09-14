@@ -20,11 +20,11 @@ import android.annotation.RawRes
 import android.content.Context
 import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.R
-import com.android.systemui.biometrics.AuthBiometricView.BiometricState
-import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATED
-import com.android.systemui.biometrics.AuthBiometricView.STATE_ERROR
-import com.android.systemui.biometrics.AuthBiometricView.STATE_HELP
-import com.android.systemui.biometrics.AuthBiometricView.STATE_PENDING_CONFIRMATION
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_AUTHENTICATED
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_ERROR
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_HELP
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_PENDING_CONFIRMATION
 
 /** Face/Fingerprint combined icon animator for BiometricPrompt. */
 open class AuthBiometricFingerprintAndFaceIconController(
@@ -36,8 +36,8 @@ open class AuthBiometricFingerprintAndFaceIconController(
     override val actsAsConfirmButton: Boolean = true
 
     override fun shouldAnimateIconViewForTransition(
-        @BiometricState oldState: Int,
-        @BiometricState newState: Int
+            oldState: BiometricState,
+            newState: BiometricState
     ): Boolean = when (newState) {
         STATE_PENDING_CONFIRMATION -> true
         else -> super.shouldAnimateIconViewForTransition(oldState, newState)
@@ -45,8 +45,8 @@ open class AuthBiometricFingerprintAndFaceIconController(
 
     @RawRes
     override fun getAnimationForTransition(
-        @BiometricState oldState: Int,
-        @BiometricState newState: Int
+        oldState: BiometricState,
+        newState: BiometricState
     ): Int? = when (newState) {
         STATE_AUTHENTICATED -> {
            if (oldState == STATE_PENDING_CONFIRMATION) {

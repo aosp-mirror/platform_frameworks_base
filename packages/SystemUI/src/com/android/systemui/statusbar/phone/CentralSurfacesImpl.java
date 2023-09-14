@@ -2546,16 +2546,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mNavigationBarController.isOverviewEnabled(mDisplayId);
     }
 
-    @Override
-    public void showPinningEnterExitToast(boolean entering) {
-        mNavigationBarController.showPinningEnterExitToast(mDisplayId, entering);
-    }
-
-    @Override
-    public void showPinningEscapeToast() {
-        mNavigationBarController.showPinningEscapeToast(mDisplayId);
-    }
-
     /**
      * Propagation of the bouncer state, indicating that it's fully visible.
      */
@@ -3146,11 +3136,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
-    /**
-     * Clear Buzz/Beep/Blink.
-     */
-    @Override
-    public void clearNotificationEffects() {
+    private void clearNotificationEffects() {
         try {
             mBarService.clearNotificationEffects();
         } catch (RemoteException e) {

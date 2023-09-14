@@ -265,10 +265,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     boolean isOverviewEnabled();
 
-    void showPinningEnterExitToast(boolean entering);
-
-    void showPinningEscapeToast();
-
     void setBouncerShowing(boolean bouncerShowing);
 
     boolean isScreenFullyOff();
@@ -300,8 +296,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     boolean isDeviceInteractive();
 
     void awakenDreams();
-
-    void clearNotificationEffects();
 
     boolean isBouncerShowing();
 

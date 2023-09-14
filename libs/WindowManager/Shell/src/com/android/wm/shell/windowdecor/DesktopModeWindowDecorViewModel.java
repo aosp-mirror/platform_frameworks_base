@@ -21,7 +21,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FINAL_FREEFORM_SCALE;
@@ -79,7 +78,7 @@ import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.TaskCornersListener;
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionRegionListener;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -106,7 +105,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
 
-    private final TaskCornersListener mCornersListener = new TaskCornersListenerImpl();
+    private final ExclusionRegionListener mExclusionRegionListener =
+            new ExclusionRegionListenerImpl();
 
     private final SparseArray<DesktopModeWindowDecoration> mWindowDecorByTaskId =
             new SparseArray<>();
@@ -920,7 +920,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         windowDecoration.setCaptionListeners(
                 touchEventListener, touchEventListener, touchEventListener);
-        windowDecoration.setCornersListener(mCornersListener);
+        windowDecoration.setExclusionRegionListener(mExclusionRegionListener);
         windowDecoration.setDragPositioningCallback(dragPositioningCallback);
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.relayout(taskInfo, startT, finishT,
@@ -958,17 +958,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
     }
 
-    private class TaskCornersListenerImpl
-            implements DesktopModeWindowDecoration.TaskCornersListener {
+    private class ExclusionRegionListenerImpl
+            implements ExclusionRegionListener {
 
         @Override
-        public void onTaskCornersChanged(int taskId, Region corner) {
-            mDesktopTasksController.ifPresent(d -> d.onTaskCornersChanged(taskId, corner));
+        public void onExclusionRegionChanged(int taskId, Region region) {
+            mDesktopTasksController.ifPresent(d -> d.onExclusionRegionChanged(taskId, region));
         }
 
         @Override
-        public void onTaskCornersRemoved(int taskId) {
-            mDesktopTasksController.ifPresent(d -> d.removeCornersForTask(taskId));
+        public void onExclusionRegionDismissed(int taskId) {
+            mDesktopTasksController.ifPresent(d -> d.removeExclusionRegionForTask(taskId));
         }
     }
 

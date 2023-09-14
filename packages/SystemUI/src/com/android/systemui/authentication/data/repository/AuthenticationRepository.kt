@@ -109,6 +109,9 @@ interface AuthenticationRepository {
      */
     val authenticationMethod: Flow<AuthenticationMethodModel>
 
+    /** The minimal length of a pattern. */
+    val minPatternLength: Int
+
     /**
      * Returns the currently-configured authentication method. This determines how the
      * authentication challenge needs to be completed in order to unlock an otherwise locked device.
@@ -226,6 +229,8 @@ constructor(
                     blockingAuthenticationMethodInternal(selectedUserId)
                 }
             }
+
+    override val minPatternLength: Int = LockPatternUtils.MIN_LOCK_PATTERN_SIZE
 
     override suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
         return withContext(backgroundDispatcher) {

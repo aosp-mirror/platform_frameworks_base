@@ -19,7 +19,6 @@ package com.android.server.media;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.os.UserHandle.ALL;
 import static android.os.UserHandle.CURRENT;
-
 import static com.android.server.media.MediaKeyDispatcher.KEY_EVENT_LONG_PRESS;
 import static com.android.server.media.MediaKeyDispatcher.isDoubleTapOverridden;
 import static com.android.server.media.MediaKeyDispatcher.isLongPressOverridden;
@@ -85,6 +84,7 @@ import android.view.ViewConfiguration;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.media.flags.Flags;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -2191,6 +2191,21 @@ public class MediaSessionService extends SystemService implements Monitor {
             boolean preferSuggestedStream =
                     isValidLocalStreamType(suggestedStream)
                             && AudioSystem.isStreamActive(suggestedStream, 0);
+
+            if (session != null && session.getUid() != uid
+                    && mAudioPlayerStateMonitor.hasUidPlayedAudioLast(uid)) {
+                if (Flags.adjustVolumeForForegroundAppPlayingAudioWithoutMediaSession()) {
+                    // The app in the foreground has been the last app to play media locally.
+                    // Therefore, We ignore the chosen session so that volume events affect the
+                    // local music stream instead. See b/275185436 for details.
+                    Log.d(TAG, "Ignoring session=" + session + " and adjusting suggestedStream="
+                            + suggestedStream + " instead");
+                    session = null;
+                } else {
+                    Log.d(TAG, "Session=" + session + " will not be not ignored and will receive"
+                            + " the volume adjustment event");
+                }
+            }
 
             if (session == null || preferSuggestedStream) {
                 if (DEBUG_KEY_EVENT) {

@@ -16,58 +16,19 @@
 
 package com.android.systemui.biometrics;
 
-import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
-import android.os.Bundle;
 import android.view.WindowManager;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 /**
  * Interface for the biometric dialog UI.
  *
- * TODO(b/251476085): remove along with legacy controller once flag is removed
+ * TODO(b/287311775): remove along with legacy controller once flag is removed
  */
 @Deprecated
 public interface AuthDialog extends Dumpable {
-
-    String KEY_CONTAINER_GOING_AWAY = "container_going_away";
-    String KEY_BIOMETRIC_SHOWING = "biometric_showing";
-    String KEY_CREDENTIAL_SHOWING = "credential_showing";
-
-    String KEY_BIOMETRIC_CONFIRM_VISIBILITY = "confirm_visibility";
-    String KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY = "try_agian_visibility";
-    String KEY_BIOMETRIC_STATE = "state";
-    String KEY_BIOMETRIC_INDICATOR_STRING = "indicator_string"; // error / help / hint
-    String KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING = "error_is_temporary";
-    String KEY_BIOMETRIC_INDICATOR_HELP_SHOWING = "hint_is_temporary";
-    String KEY_BIOMETRIC_DIALOG_SIZE = "size";
-
-    String KEY_BIOMETRIC_SENSOR_TYPE = "sensor_type";
-    String KEY_BIOMETRIC_SENSOR_PROPS = "sensor_props";
-
-    int SIZE_UNKNOWN = 0;
-    /**
-     * Minimal UI, showing only biometric icon.
-     */
-    int SIZE_SMALL = 1;
-    /**
-     * Normal-sized biometric UI, showing title, icon, buttons, etc.
-     */
-    int SIZE_MEDIUM = 2;
-    /**
-     * Full-screen credential UI.
-     */
-    int SIZE_LARGE = 3;
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({SIZE_UNKNOWN, SIZE_SMALL, SIZE_MEDIUM, SIZE_LARGE})
-    @interface DialogSize {}
 
     /**
      * Parameters used when laying out {@link AuthBiometricView}, its subclasses, and
@@ -84,27 +45,10 @@ public interface AuthDialog extends Dumpable {
     }
 
     /**
-     * Animation duration, from small to medium dialog, including back panel, icon translation, etc
-     */
-    int ANIMATE_SMALL_TO_MEDIUM_DURATION_MS = 150;
-    /**
-     * Animation duration from medium to large dialog, including biometric fade out, back panel, etc
-     */
-    int ANIMATE_MEDIUM_TO_LARGE_DURATION_MS = 450;
-    /**
-     * Delay before notifying {@link AuthCredentialView} to start animating in.
-     */
-    int ANIMATE_CREDENTIAL_START_DELAY_MS = ANIMATE_MEDIUM_TO_LARGE_DURATION_MS * 2 / 3;
-    /**
-     * Animation duration when sliding in credential UI
-     */
-    int ANIMATE_CREDENTIAL_INITIAL_DURATION_MS = 150;
-
-    /**
      * Show the dialog.
      * @param wm
      */
-    void show(WindowManager wm, @Nullable Bundle savedState);
+    void show(WindowManager wm);
 
     /**
      * Dismiss the dialog without sending a callback.
@@ -144,12 +88,6 @@ public interface AuthDialog extends Dumpable {
 
     /** UDFPS pointer down event. */
     void onPointerDown();
-
-    /**
-     * Save the current state.
-     * @param outState
-     */
-    void onSaveState(@NonNull Bundle outState);
 
     /**
      * Get the client's package name

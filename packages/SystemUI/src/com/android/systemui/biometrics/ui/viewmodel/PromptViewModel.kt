@@ -19,12 +19,12 @@ import android.hardware.biometrics.BiometricPrompt
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
-import com.android.systemui.biometrics.AuthBiometricView
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.PromptKind
+import com.android.systemui.biometrics.ui.binder.Spaghetti
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.statusbar.VibratorHelper
@@ -62,8 +62,8 @@ constructor(
             .distinctUntilChanged()
 
     // TODO(b/251476085): remove after icon controllers are migrated - do not keep this state
-    private var _legacyState = MutableStateFlow(AuthBiometricView.STATE_IDLE)
-    val legacyState: StateFlow<Int> = _legacyState.asStateFlow()
+    private var _legacyState = MutableStateFlow(Spaghetti.BiometricState.STATE_IDLE)
+    val legacyState: StateFlow<Spaghetti.BiometricState> = _legacyState.asStateFlow()
 
     private val _isAuthenticating: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -270,7 +270,7 @@ constructor(
         _isAuthenticated.value = PromptAuthState(false)
         _forceMediumSize.value = true
         _message.value = PromptMessage.Error(message)
-        _legacyState.value = AuthBiometricView.STATE_ERROR
+        _legacyState.value = Spaghetti.BiometricState.STATE_ERROR
 
         if (hapticFeedback) {
             vibrator.error(failedModality)
@@ -322,13 +322,13 @@ constructor(
         _forceMediumSize.value = true
         _legacyState.value =
             if (alreadyAuthenticated && isConfirmationRequired.first()) {
-                AuthBiometricView.STATE_PENDING_CONFIRMATION
+                Spaghetti.BiometricState.STATE_PENDING_CONFIRMATION
             } else if (alreadyAuthenticated && !isConfirmationRequired.first()) {
-                AuthBiometricView.STATE_AUTHENTICATED
+                Spaghetti.BiometricState.STATE_AUTHENTICATED
             } else if (clearIconError) {
-                AuthBiometricView.STATE_IDLE
+                Spaghetti.BiometricState.STATE_IDLE
             } else {
-                AuthBiometricView.STATE_HELP
+                Spaghetti.BiometricState.STATE_HELP
             }
 
         messageJob?.cancel()
@@ -353,7 +353,7 @@ constructor(
         _message.value =
             if (message.isNotBlank()) PromptMessage.Help(message) else PromptMessage.Empty
         _forceMediumSize.value = true
-        _legacyState.value = AuthBiometricView.STATE_HELP
+        _legacyState.value = Spaghetti.BiometricState.STATE_HELP
 
         messageJob?.cancel()
         messageJob = launch {
@@ -373,7 +373,7 @@ constructor(
         _isAuthenticating.value = true
         _isAuthenticated.value = PromptAuthState(false)
         _message.value = if (message.isBlank()) PromptMessage.Empty else PromptMessage.Help(message)
-        _legacyState.value = AuthBiometricView.STATE_AUTHENTICATING
+        _legacyState.value = Spaghetti.BiometricState.STATE_AUTHENTICATING
 
         // reset the try again button(s) after the user attempts a retry
         if (isRetry) {
@@ -406,9 +406,9 @@ constructor(
         _message.value = PromptMessage.Empty
         _legacyState.value =
             if (needsUserConfirmation) {
-                AuthBiometricView.STATE_PENDING_CONFIRMATION
+                Spaghetti.BiometricState.STATE_PENDING_CONFIRMATION
             } else {
-                AuthBiometricView.STATE_AUTHENTICATED
+                Spaghetti.BiometricState.STATE_AUTHENTICATED
             }
 
         if (!needsUserConfirmation) {
@@ -449,7 +449,7 @@ constructor(
 
         _isAuthenticated.value = authState.asExplicitlyConfirmed()
         _message.value = PromptMessage.Empty
-        _legacyState.value = AuthBiometricView.STATE_AUTHENTICATED
+        _legacyState.value = Spaghetti.BiometricState.STATE_AUTHENTICATED
 
         vibrator.success(authState.authenticatedModality)
 

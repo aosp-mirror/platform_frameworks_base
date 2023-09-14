@@ -4139,13 +4139,13 @@ public class InputMethodService extends AbstractInputMethodService {
         p.println("  mExtractedToken=" + mExtractedToken);
         p.println("  mIsInputViewShown=" + mIsInputViewShown
                 + " mStatusIcon=" + mStatusIcon);
-        p.println("Last computed insets:");
-        p.println("  contentTopInsets=" + mTmpInsets.contentTopInsets
+        p.println("  Last computed insets:");
+        p.println("    contentTopInsets=" + mTmpInsets.contentTopInsets
                 + " visibleTopInsets=" + mTmpInsets.visibleTopInsets
                 + " touchableInsets=" + mTmpInsets.touchableInsets
                 + " touchableRegion=" + mTmpInsets.touchableRegion);
-        p.println(" mSettingsObserver=" + mSettingsObserver);
-        p.println(" mNavigationBarController=" + mNavigationBarController.toDebugString());
+        p.println("  mSettingsObserver=" + mSettingsObserver);
+        p.println("  mNavigationBarController=" + mNavigationBarController.toDebugString());
     }
 
     private final ImeTracing.ServiceDumper mDumper = new ImeTracing.ServiceDumper() {

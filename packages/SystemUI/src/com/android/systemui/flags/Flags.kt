@@ -268,6 +268,10 @@ object Flags {
     val MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA =
         unreleasedFlag("migrate_split_keyguard_bottom_area", teamfood = true)
 
+    // TODO(b/297037052): Tracking bug.
+    @JvmField
+    val REMOVE_NPVC_BOTTOM_AREA_USAGE = unreleasedFlag("remove_npvc_bottom_area_usage")
+
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
     @JvmField val KEYGUARD_TALKBACK_FIX = releasedFlag("keyguard_talkback_fix")
@@ -659,8 +663,6 @@ object Flags {
     // TODO(b/259264861): Tracking Bug
     @JvmField val UDFPS_NEW_TOUCH_DETECTION = releasedFlag("udfps_new_touch_detection")
     @JvmField val UDFPS_ELLIPSE_DETECTION = releasedFlag("udfps_ellipse_detection")
-    // TODO(b/278622168): Tracking Bug
-    @JvmField val BIOMETRIC_BP_STRONG = releasedFlag("biometric_bp_strong")
 
     // 2300 - stylus
     @JvmField val TRACK_STYLUS_EVER_USED = releasedFlag("track_stylus_ever_used")

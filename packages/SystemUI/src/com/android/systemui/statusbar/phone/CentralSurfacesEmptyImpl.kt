@@ -69,8 +69,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     ) {}
     override fun getNavigationBarView(): NavigationBarView? = null
     override fun isOverviewEnabled() = false
-    override fun showPinningEnterExitToast(entering: Boolean) {}
-    override fun showPinningEscapeToast() {}
     override fun setBouncerShowing(bouncerShowing: Boolean) {}
     override fun isScreenFullyOff() = false
     override fun showScreenPinningRequest(taskId: Int, allowCancel: Boolean) {}
@@ -84,7 +82,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun shouldIgnoreTouch() = false
     override fun isDeviceInteractive() = false
     override fun awakenDreams() {}
-    override fun clearNotificationEffects() {}
     override fun isBouncerShowing() = false
     override fun isBouncerShowingScrimmed() = false
     override fun isBouncerShowingOverDream() = false

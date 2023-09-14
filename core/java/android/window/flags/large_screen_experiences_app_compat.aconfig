@@ -1,0 +1,8 @@
+package: "com.android.window.flags"
+
+flag {
+  name: "letterbox_background_wallpaper_flag"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the letterbox wallpaper style is enabled by default"
+  bug: "297195682"
+}

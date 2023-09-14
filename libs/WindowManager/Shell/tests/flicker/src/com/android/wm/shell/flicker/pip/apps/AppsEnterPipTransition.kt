@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.pip
+package com.android.wm.shell.flicker.pip.apps
 
 import android.platform.test.annotations.Postsubmit
 import android.tools.common.Rotation
@@ -22,6 +22,7 @@ import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import com.android.wm.shell.flicker.pip.common.EnterPipTransition
 import org.junit.Test
 import org.junit.runners.Parameterized
 

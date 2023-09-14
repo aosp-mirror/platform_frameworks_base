@@ -588,12 +588,12 @@ public final class ImeVisibilityStateComputer {
         proto.write(INPUT_SHOWN, mInputShown);
     }
 
-    void dump(PrintWriter pw) {
+    void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         final Printer p = new PrintWriterPrinter(pw);
-        p.println(" mRequestedShowExplicitly=" + mRequestedShowExplicitly
+        p.println(prefix + "mRequestedShowExplicitly=" + mRequestedShowExplicitly
                 + " mShowForced=" + mShowForced);
-        p.println("  mImeHiddenByDisplayPolicy=" + mPolicy.isImeHiddenByDisplayPolicy());
-        p.println("  mInputShown=" + mInputShown);
+        p.println(prefix + "mImeHiddenByDisplayPolicy=" + mPolicy.isImeHiddenByDisplayPolicy());
+        p.println(prefix + "mInputShown=" + mInputShown);
     }
 
     /**

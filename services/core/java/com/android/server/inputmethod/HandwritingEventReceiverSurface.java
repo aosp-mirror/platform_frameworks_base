@@ -57,13 +57,13 @@ final class HandwritingEventReceiverSurface {
                 InputConfig.NOT_FOCUSABLE
                         | InputConfig.NOT_TOUCHABLE
                         | InputConfig.SPY
-                        | InputConfig.INTERCEPTS_STYLUS
-                        | InputConfig.TRUSTED_OVERLAY;
+                        | InputConfig.INTERCEPTS_STYLUS;
 
         // Configure the surface to receive stylus events across the entire display.
         mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
 
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        mWindowHandle.setTrustedOverlay(t, mInputSurface, true);
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
         t.setLayer(mInputSurface, InputManagerService.INPUT_OVERLAY_LAYER_HANDWRITING_SURFACE);
         t.setPosition(mInputSurface, 0, 0);

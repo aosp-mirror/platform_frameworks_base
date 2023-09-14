@@ -92,6 +92,9 @@ constructor(
     /** Whether the pattern should be visible for the currently-selected user. */
     val isPatternVisible: StateFlow<Boolean> = authenticationInteractor.isPatternVisible
 
+    /** The minimal length of a pattern. */
+    val minPatternLength = authenticationInteractor.minPatternLength
+
     init {
         if (flags.isEnabled()) {
             // Clear the message if moved from throttling to no-longer throttling.
@@ -204,10 +207,22 @@ constructor(
                 loggingReason = "successful authentication",
             )
         } else {
-            repository.setMessage(errorMessage(authenticationInteractor.getAuthenticationMethod()))
+            showErrorMessage()
         }
 
         return isAuthenticated
+    }
+
+    /**
+     * Shows the error message.
+     *
+     * Callers should use this instead of [authenticate] when they know ahead of time that an auth
+     * attempt will fail but aren't interested in the other side effects like triggering throttling.
+     * For example, if the user entered a pattern that's too short, the system can show the error
+     * message without having the attempt trigger throttling.
+     */
+    suspend fun showErrorMessage() {
+        repository.setMessage(errorMessage(authenticationInteractor.getAuthenticationMethod()))
     }
 
     private fun promptMessage(authMethod: AuthenticationMethodModel): String {

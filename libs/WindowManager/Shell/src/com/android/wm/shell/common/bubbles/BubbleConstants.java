@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics
+package com.android.wm.shell.common.bubbles;
 
-import android.testing.TestableLooper
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SmallTest
-import org.junit.runner.RunWith
+/**
+ * Constants shared between bubbles in shell & things we have to do for bubbles in launcher.
+ */
+public class BubbleConstants {
 
-// TODO(b/278622168): remove with flag
-@RunWith(AndroidJUnit4::class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
-@SmallTest
-class AuthContainerViewTest2 : AuthContainerViewTest() {
-    override val useNewBiometricPrompt = true
+    /** The alpha for the scrim shown when bubbles are expanded. */
+    public static float BUBBLE_EXPANDED_SCRIM_ALPHA = .32f;
 }

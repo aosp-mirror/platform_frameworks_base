@@ -510,16 +510,6 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     }
 
     @Override
-    public void showPinningEnterExitToast(boolean entering) {
-        mCentralSurfaces.showPinningEnterExitToast(entering);
-    }
-
-    @Override
-    public void showPinningEscapeToast() {
-        mCentralSurfaces.showPinningEscapeToast();
-    }
-
-    @Override
     public void showScreenPinningRequest(int taskId) {
         if (mKeyguardStateController.isShowing()) {
             // Don't allow apps to trigger this from keyguard.

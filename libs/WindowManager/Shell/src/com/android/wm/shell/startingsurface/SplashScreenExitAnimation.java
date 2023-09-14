@@ -20,6 +20,7 @@ import static android.view.View.GONE;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLASHSCREEN_EXIT_ANIM;
 
 import android.animation.Animator;
+import android.annotation.IntDef;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.Slog;
@@ -46,6 +47,8 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
     private final int mIconFadeOutDuration;
     private final int mAppRevealDelay;
     private final int mAppRevealDuration;
+    @ExitAnimationType
+    private final int mAnimationType;
     private final int mAnimationDuration;
     private final float mIconStartAlpha;
     private final float mBrandingStartAlpha;
@@ -54,6 +57,24 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
     private final float mRoundedCornerRadius;
 
     private Runnable mFinishCallback;
+
+    /**
+    * This splash screen exit animation type uses a radial vanish to hide
+    * the starting window and slides up the main window content.
+    */
+    private static final int TYPE_RADIAL_VANISH_SLIDE_UP = 0;
+
+    /**
+    * This splash screen exit animation type fades out the starting window
+    * to reveal the main window content.
+    */
+    private static final int TYPE_FADE_OUT = 1;
+
+    @IntDef(prefix = { "TYPE_" }, value = {
+        TYPE_RADIAL_VANISH_SLIDE_UP,
+        TYPE_FADE_OUT,
+    })
+    private @interface ExitAnimationType {}
 
     SplashScreenExitAnimation(Context context, SplashScreenView view, SurfaceControl leash,
             Rect frame, int mainWindowShiftLength, TransactionPool pool, Runnable handleFinish,
@@ -91,6 +112,8 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
         }
         mAppRevealDuration = context.getResources().getInteger(
                 R.integer.starting_window_app_reveal_anim_duration);
+        mAnimationType = context.getResources().getInteger(
+                R.integer.starting_window_exit_animation_type);
         mAnimationDuration = Math.max(mIconFadeOutDuration, mAppRevealDelay + mAppRevealDuration);
         mMainWindowShiftLength = mainWindowShiftLength;
         mFinishCallback = handleFinish;
@@ -98,10 +121,15 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
     }
 
     void startAnimations() {
-        SplashScreenExitAnimationUtils.startAnimations(mSplashScreenView, mFirstWindowSurface,
-                mMainWindowShiftLength, mTransactionPool, mFirstWindowFrame, mAnimationDuration,
-                mIconFadeOutDuration, mIconStartAlpha, mBrandingStartAlpha, mAppRevealDelay,
-                mAppRevealDuration, this, mRoundedCornerRadius);
+        if (mAnimationType == TYPE_FADE_OUT) {
+            SplashScreenExitAnimationUtils.startFadeOutAnimation(mSplashScreenView,
+                    mAnimationDuration, this);
+        } else {
+            SplashScreenExitAnimationUtils.startAnimations(mSplashScreenView, mFirstWindowSurface,
+                    mMainWindowShiftLength, mTransactionPool, mFirstWindowFrame, mAnimationDuration,
+                    mIconFadeOutDuration, mIconStartAlpha, mBrandingStartAlpha, mAppRevealDelay,
+                    mAppRevealDuration, this, mRoundedCornerRadius);
+        }
     }
 
     private void reset() {
