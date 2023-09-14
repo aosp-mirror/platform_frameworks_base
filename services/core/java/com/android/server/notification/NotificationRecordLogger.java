@@ -39,6 +39,7 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.FrameworkStatsLog;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -497,6 +498,7 @@ interface NotificationRecordLogger {
         final boolean is_non_dismissible;
         final int fsi_state;
         final boolean is_locked;
+        final int age_in_minutes;
         @DurationMillisLong long post_duration_millis; // Not final; calculated at the end.
 
         NotificationReported(NotificationRecordPair p,
@@ -541,6 +543,9 @@ interface NotificationRecordLogger {
                     hasFullScreenIntent, hasFsiRequestedButDeniedFlag, eventType);
 
             this.is_locked = p.r.isLocked();
+
+            this.age_in_minutes = NotificationRecordLogger.getAgeInMinutes(
+                    p.r.getSbn().getPostTime(), p.r.getSbn().getNotification().when);
         }
     }
 
@@ -600,5 +605,14 @@ interface NotificationRecordLogger {
             return FrameworkStatsLog.NOTIFICATION_REPORTED__FSI_STATE__FSI_DENIED;
         }
         return FrameworkStatsLog.NOTIFICATION_REPORTED__FSI_STATE__NO_FSI;
+    }
+
+    /**
+     * @param postTimeMs time (in {@link System#currentTimeMillis} time) the notification was posted
+     * @param whenMs A timestamp related to this notification, in milliseconds since the epoch.
+     * @return difference in duration as an integer in minutes
+     */
+    static int getAgeInMinutes(long postTimeMs, long whenMs) {
+        return (int) Duration.ofMillis(postTimeMs - whenMs).toMinutes();
     }
 }

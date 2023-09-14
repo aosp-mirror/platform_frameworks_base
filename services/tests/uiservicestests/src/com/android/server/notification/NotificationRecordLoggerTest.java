@@ -28,6 +28,7 @@ import static com.android.server.notification.NotificationRecordLogger.Notificat
 import static com.android.server.notification.NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_USER_OTHER;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_UPDATED;
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -47,6 +48,8 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.time.Duration;
 
 
 @SmallTest
@@ -229,5 +232,13 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
         assertEquals(NOTIFICATION_CANCEL_USER_OTHER,
                 NotificationRecordLogger.NotificationCancelledEvent.fromCancelReason(
                         REASON_CANCEL, DISMISSAL_OTHER));
+    }
+
+    @Test
+    public void testGetAgeInMinutes() {
+        long postTimeMs = Duration.ofMinutes(5).toMillis();
+        long whenMs = Duration.ofMinutes(2).toMillis();
+        int age = NotificationRecordLogger.getAgeInMinutes(postTimeMs, whenMs);
+        assertThat(age).isEqualTo(3);
     }
 }
