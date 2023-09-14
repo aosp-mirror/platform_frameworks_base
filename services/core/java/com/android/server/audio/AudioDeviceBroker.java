@@ -539,6 +539,62 @@ public class AudioDeviceBroker {
             }
         }
     }
+
+    // check playback or record activity after 6 seconds for UIDs
+    private static final int CHECK_CLIENT_STATE_DELAY_MS = 6000;
+
+    /*package */
+    void postCheckCommunicationRouteClientState(int uid, boolean wasActive, int delay) {
+        CommunicationRouteClient client = getCommunicationRouteClientForUid(uid);
+        if (client != null) {
+            sendMsgForCheckClientState(MSG_CHECK_COMMUNICATION_ROUTE_CLIENT_STATE,
+                                        SENDMSG_REPLACE,
+                                        uid,
+                                        wasActive ? 1 : 0,
+                                        client,
+                                        delay);
+        }
+    }
+
+    @GuardedBy("mDeviceStateLock")
+    void onCheckCommunicationRouteClientState(int uid, boolean wasActive) {
+        CommunicationRouteClient client = getCommunicationRouteClientForUid(uid);
+        if (client == null) {
+            return;
+        }
+        updateCommunicationRouteClientState(client, wasActive);
+    }
+
+    @GuardedBy("mDeviceStateLock")
+    /*package*/ void updateCommunicationRouteClientState(
+                            CommunicationRouteClient client, boolean wasActive) {
+        boolean wasBtScoRequested = isBluetoothScoRequested();
+        client.setPlaybackActive(mAudioService.isPlaybackActiveForUid(client.getUid()));
+        client.setRecordingActive(mAudioService.isRecordingActiveForUid(client.getUid()));
+        if (wasActive != client.isActive()) {
+            postUpdateCommunicationRouteClient(
+                    wasBtScoRequested, "updateCommunicationRouteClientState");
+        }
+    }
+
+    @GuardedBy("mDeviceStateLock")
+    /*package*/ void setForceCommunicationClientStateAndDelayedCheck(
+                            CommunicationRouteClient client,
+                            boolean forcePlaybackActive,
+                            boolean forceRecordingActive) {
+        if (client == null) {
+            return;
+        }
+        if (forcePlaybackActive) {
+            client.setPlaybackActive(true);
+        }
+        if (forceRecordingActive) {
+            client.setRecordingActive(true);
+        }
+        postCheckCommunicationRouteClientState(
+                client.getUid(), client.isActive(), CHECK_CLIENT_STATE_DELAY_MS);
+    }
+
     /* package */ static List<AudioDeviceInfo> getAvailableCommunicationDevices() {
         ArrayList<AudioDeviceInfo> commDevices = new ArrayList<>();
         AudioDeviceInfo[] allDevices =
@@ -1901,6 +1957,12 @@ public class AudioDeviceBroker {
                 case MSG_PERSIST_AUDIO_DEVICE_SETTINGS:
                     onPersistAudioDeviceSettings();
                     break;
+
+                case MSG_CHECK_COMMUNICATION_ROUTE_CLIENT_STATE: {
+                    synchronized (mDeviceStateLock) {
+                        onCheckCommunicationRouteClientState(msg.arg1, msg.arg2 == 1);
+                    }
+                } break;
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
             }
@@ -1981,6 +2043,8 @@ public class AudioDeviceBroker {
     private static final int MSG_PERSIST_AUDIO_DEVICE_SETTINGS = 54;
 
     private static final int MSG_L_RECEIVED_BT_EVENT = 55;
+
+    private static final int MSG_CHECK_COMMUNICATION_ROUTE_CLIENT_STATE = 56;
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {
@@ -2093,6 +2157,23 @@ public class AudioDeviceBroker {
             mBrokerHandler.sendMessageAtTime(mBrokerHandler.obtainMessage(msg, arg1, arg2, obj),
                     time);
         }
+    }
+
+    private void removeMsgForCheckClientState(int uid) {
+        CommunicationRouteClient crc = getCommunicationRouteClientForUid(uid);
+        if (crc != null) {
+            mBrokerHandler.removeEqualMessages(MSG_CHECK_COMMUNICATION_ROUTE_CLIENT_STATE, crc);
+        }
+    }
+
+    private void sendMsgForCheckClientState(int msg, int existingMsgPolicy,
+                                            int arg1, int arg2, Object obj, int delay) {
+        if ((existingMsgPolicy == SENDMSG_REPLACE) && (obj != null)) {
+            mBrokerHandler.removeEqualMessages(msg, obj);
+        }
+
+        long time = SystemClock.uptimeMillis() + delay;
+        mBrokerHandler.sendMessageAtTime(mBrokerHandler.obtainMessage(msg, arg1, arg2, obj), time);
     }
 
     /** List of messages for which music is muted while processing is pending */
@@ -2367,6 +2448,7 @@ public class AudioDeviceBroker {
                 if (unregister) {
                     cl.unregisterDeathRecipient();
                 }
+                removeMsgForCheckClientState(cl.getUid());
                 mCommunicationRouteClients.remove(cl);
                 return cl;
             }
@@ -2383,6 +2465,13 @@ public class AudioDeviceBroker {
                 new CommunicationRouteClient(cb, uid, device, isPrivileged);
         if (client.registerDeathRecipient()) {
             mCommunicationRouteClients.add(0, client);
+            if (!client.isActive()) {
+                // initialize the inactive client's state as active and check it after 6 seconds
+                setForceCommunicationClientStateAndDelayedCheck(
+                        client,
+                        !mAudioService.isPlaybackActiveForUid(client.getUid()),
+                        !mAudioService.isRecordingActiveForUid(client.getUid()));
+            }
             return client;
         }
         return null;
@@ -2439,16 +2528,16 @@ public class AudioDeviceBroker {
             List<AudioRecordingConfiguration> recordConfigs) {
         synchronized (mSetModeLock) {
             synchronized (mDeviceStateLock) {
-                final boolean wasBtScoRequested = isBluetoothScoRequested();
-                boolean updateCommunicationRoute = false;
                 for (CommunicationRouteClient crc : mCommunicationRouteClients) {
                     boolean wasActive = crc.isActive();
+                    boolean updateClientState = false;
                     if (playbackConfigs != null) {
                         crc.setPlaybackActive(false);
                         for (AudioPlaybackConfiguration config : playbackConfigs) {
                             if (config.getClientUid() == crc.getUid()
                                     && config.isActive()) {
                                 crc.setPlaybackActive(true);
+                                updateClientState = true;
                                 break;
                             }
                         }
@@ -2459,17 +2548,22 @@ public class AudioDeviceBroker {
                             if (config.getClientUid() == crc.getUid()
                                     && !config.isClientSilenced()) {
                                 crc.setRecordingActive(true);
+                                updateClientState = true;
                                 break;
                             }
                         }
                     }
-                    if (wasActive != crc.isActive()) {
-                        updateCommunicationRoute = true;
+                    if (updateClientState) {
+                        removeMsgForCheckClientState(crc.getUid());
+                        updateCommunicationRouteClientState(crc, wasActive);
+                    } else {
+                        if (wasActive) {
+                            setForceCommunicationClientStateAndDelayedCheck(
+                                    crc,
+                                    playbackConfigs != null /* forcePlaybackActive */,
+                                    recordConfigs != null /* forceRecordingActive */);
+                        }
                     }
-                }
-                if (updateCommunicationRoute) {
-                    postUpdateCommunicationRouteClient(
-                            wasBtScoRequested, "updateCommunicationRouteClientsActivity");
                 }
             }
         }

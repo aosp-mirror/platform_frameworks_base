@@ -24,6 +24,7 @@ import android.graphics.Matrix
 import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
+import android.os.Build
 import android.os.Looper
 import android.os.RemoteException
 import android.util.Log
@@ -87,6 +88,9 @@ class ActivityLaunchAnimator(
                 contentBeforeFadeOutInterpolator = Interpolators.LINEAR_OUT_SLOW_IN,
                 contentAfterFadeInInterpolator = PathInterpolator(0f, 0f, 0.6f, 1f)
             )
+
+        // TODO(b/288507023): Remove this flag.
+        @JvmField val DEBUG_LAUNCH_ANIMATION = Build.IS_DEBUGGABLE
 
         private val DEFAULT_LAUNCH_ANIMATOR = LaunchAnimator(TIMINGS, INTERPOLATORS)
         private val DEFAULT_DIALOG_TO_APP_ANIMATOR = LaunchAnimator(DIALOG_TIMINGS, INTERPOLATORS)
@@ -240,8 +244,17 @@ class ActivityLaunchAnimator(
 
     private fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            this.launchContainer.context.mainExecutor.execute { this.onIntentStarted(willAnimate) }
+            this.launchContainer.context.mainExecutor.execute {
+                callOnIntentStartedOnMainThread(willAnimate)
+            }
         } else {
+            if (DEBUG_LAUNCH_ANIMATION) {
+                Log.d(
+                    TAG,
+                    "Calling controller.onIntentStarted(willAnimate=$willAnimate) " +
+                            "[controller=$this]"
+                )
+            }
             this.onIntentStarted(willAnimate)
         }
     }
@@ -542,6 +555,13 @@ class ActivityLaunchAnimator(
                 Log.i(TAG, "Aborting the animation as no window is opening")
                 removeTimeout()
                 iCallback?.invoke()
+
+                if (DEBUG_LAUNCH_ANIMATION) {
+                    Log.d(
+                        TAG,
+                        "Calling controller.onLaunchAnimationCancelled() [no window opening]"
+                    )
+                }
                 controller.onLaunchAnimationCancelled()
                 return
             }
@@ -759,6 +779,10 @@ class ActivityLaunchAnimator(
 
             Log.i(TAG, "Remote animation timed out")
             timedOut = true
+
+            if (DEBUG_LAUNCH_ANIMATION) {
+                Log.d(TAG, "Calling controller.onLaunchAnimationCancelled() [animation timed out]")
+            }
             controller.onLaunchAnimationCancelled()
         }
 
@@ -773,6 +797,13 @@ class ActivityLaunchAnimator(
             removeTimeout()
 
             animation?.cancel()
+
+            if (DEBUG_LAUNCH_ANIMATION) {
+                Log.d(
+                    TAG,
+                    "Calling controller.onLaunchAnimationCancelled() [remote animation cancelled]",
+                )
+            }
             controller.onLaunchAnimationCancelled()
         }
 
