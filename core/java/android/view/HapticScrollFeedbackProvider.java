@@ -17,20 +17,34 @@
 package android.view;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.view.flags.Flags;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * {@link ScrollFeedbackProvider} that performs haptic feedback when scrolling.
  *
  * <p>Each scrolling widget should have its own instance of this class to ensure that scroll state
  * is isolated.
+ *
+ * <p>Check {@link ScrollFeedbackProvider} for details on the arguments that should be passed to the
+ * methods in this class. To check if your input device ID, source, and motion axis are valid for
+ * haptic feedback, you can use the
+ * {@link ViewConfiguration#isHapticScrollFeedbackEnabled(int, int, int)} API.
  */
 @FlaggedApi(Flags.FLAG_SCROLL_FEEDBACK_API)
 public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
     private static final String TAG = "HapticScrollFeedbackProvider";
+
+    /** @hide */
+    @IntDef(value = {MotionEvent.AXIS_SCROLL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HapticScrollFeedbackAxis {}
 
     private static final int TICK_INTERVAL_NO_TICK = 0;
 
@@ -46,10 +60,6 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
     /** The {@link InputDevice} source from which the latest scroll event happened. */
     private int mSource = -1;
 
-    /**
-     * Cache for tick interval for scroll tick caused by a {@link InputDevice#SOURCE_ROTARY_ENCODER}
-     * on {@link MotionEvent#AXIS_SCROLL}. Set to -1 if the value has not been fetched and cached.
-     */
     /** The tick interval corresponding to the current InputDevice/source/axis. */
     private int mTickIntervalPixels = TICK_INTERVAL_NO_TICK;
     private int mTotalScrollPixels = 0;
@@ -68,7 +78,8 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
     }
 
     @Override
-    public void onScrollProgress(int inputDeviceId, int source, int axis, int deltaInPixels) {
+    public void onScrollProgress(
+            int inputDeviceId, int source, @HapticScrollFeedbackAxis int axis, int deltaInPixels) {
         maybeUpdateCurrentConfig(inputDeviceId, source, axis);
         if (!mHapticScrollFeedbackEnabled) {
             return;
@@ -95,7 +106,8 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
     }
 
     @Override
-    public void onScrollLimit(int inputDeviceId, int source, int axis, boolean isStart) {
+    public void onScrollLimit(
+            int inputDeviceId, int source, @HapticScrollFeedbackAxis int axis, boolean isStart) {
         maybeUpdateCurrentConfig(inputDeviceId, source, axis);
         if (!mHapticScrollFeedbackEnabled) {
             return;
@@ -112,7 +124,7 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
     }
 
     @Override
-    public void onSnapToItem(int inputDeviceId, int source, int axis) {
+    public void onSnapToItem(int inputDeviceId, int source, @HapticScrollFeedbackAxis int axis) {
         maybeUpdateCurrentConfig(inputDeviceId, source, axis);
         if (!mHapticScrollFeedbackEnabled) {
             return;

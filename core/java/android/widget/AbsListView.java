@@ -4520,7 +4520,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     if (!trackMotionScroll(delta, delta)) {
                         if (Flags.platformWidgetHapticScrollFeedback()) {
                             initHapticScrollFeedbackProviderIfNotExists();
-                            mHapticScrollFeedbackProvider.onScrollProgress(event, axis, delta);
+                            mHapticScrollFeedbackProvider.onScrollProgress(
+                                    event.getDeviceId(), event.getSource(), axis, delta);
                         }
                         initDifferentialFlingHelperIfNotExists();
                         mDifferentialMotionFlingHelper.onMotionEvent(event, axis);
@@ -4536,7 +4537,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         if (Flags.platformWidgetHapticScrollFeedback()) {
                             initHapticScrollFeedbackProviderIfNotExists();
                             mHapticScrollFeedbackProvider.onScrollLimit(
-                                    event, axis, /* isStart= */ hitTopLimit);
+                                    event.getDeviceId(), event.getSource(), axis,
+                                    /* isStart= */ hitTopLimit);
                         }
                         if (hitTopLimit) {
                             mEdgeGlowTop.onPullDistance(overscroll, 0.5f);
