@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"નીચે ખસેડો"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ડાબી બાજુ ખસેડો"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"જમણી બાજુ ખસેડો"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"મોટું કરવાની સુવિધાવાળી સ્વિચ"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"પૂર્ણ સ્ક્રીનને મોટી કરો"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"સ્ક્રીનનો કોઈ ભાગ મોટો કરો"</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant સક્રિય છે"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"સેટિંગમાં નોંધની ડિફૉલ્ટ ઍપ સેટ કરો"</string>
     <string name="install_app" msgid="5066668100199613936">"ઍપ ઇન્સ્ટૉલ કરો"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"શું બાહ્ય ડિસ્પ્લે પર મિરર કરીએ?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"ડિસ્પ્લે ચાલુ કરો"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"માઇક્રોફોન અને કૅમેરા"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"તાજેતરનો ઍપનો વપરાશ"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"તાજેતરનો ઍક્સેસ મેનેજ કરો"</string>

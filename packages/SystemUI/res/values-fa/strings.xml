@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"انتقال به پایین"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"انتقال به راست"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"انتقال به چپ"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"کلید درشت‌نمایی"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"درشت‌نمایی تمام‌صفحه"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"درشت‌نمایی بخشی از صفحه"</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"توجه «دستیار» روشن است"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"برنامه پیش‌فرض یادداشت را در «تنظیمات» تنظیم کنید"</string>
     <string name="install_app" msgid="5066668100199613936">"نصب برنامه"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"در نمایشگر خارجی پخش شود؟"</string>
+    <string name="enable_display" msgid="8308309634883321977">"فعال کردن نمایشگر"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"میکروفون و دوربین"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"استفاده اخیر از برنامه"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"دیدن دسترسی اخیر"</string>

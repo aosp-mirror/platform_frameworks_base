@@ -232,7 +232,7 @@
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"ಮೊಬೈಲ್ ಡೇಟಾವನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"ಡೇಟಾ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"ಡೇಟಾ ಬಳಕೆಯು ನೀವು ಹೊಂದಿಸಿರುವ ಮಿತಿಯನ್ನು ತಲುಪಿದೆ. ಹೀಗಾಗಿ ನೀವು ಈಗ ಮೊಬೈಲ್ ಡೇಟಾ ಬಳಸುತ್ತಿಲ್ಲ.\n\nನೀವು ಮುಂದುವರಿದರೆ, ಡೇಟಾ ಬಳಕೆಗೆ ಶುಲ್ಕ ತೆರಬೇಕಾಗಬಹುದು."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"ಮುಂದುವರಿಸು"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"ಮುಂದುವರಿಸಿ"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"ಸ್ಥಳ ವಿನಂತಿಗಳು ಸಕ್ರಿಯವಾಗಿವೆ"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"ಸೆನ್ಸರ್‌ಗಳು ಆಫ್ ಆಗಿವೆ"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರವುಗೊಳಿಸು."</string>
@@ -504,7 +504,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಮೇಲೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಅನ್‌ಪಿನ್ ಮಾಡಲು ಹೋಲ್ಡ್ ಮಾಡಿ."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅವಲೋಕನವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹೋಲ್ಡ್ ಮಾಡಿ."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಮುಖಪುಟವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿಹಿಡಿಯಿರಿ."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು (ಉದಾ, ಸಂಪರ್ಕಗಳು ಮತ್ತು ಇಮೇಲ್ ವಿಷಯ)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಬಹುದು(ಉದಾ, ಸಂಪರ್ಕಗಳು ಮತ್ತು ಇಮೇಲ್ ಕಂಟೆಂಟ್‍)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ಪಿನ್ ಮಾಡಲಾದ ಆ್ಯಪ್ ಇತರ ಆ್ಯಪ್‌ಗಳನ್ನು ತೆರೆಯಬಹುದು."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಸಮಗ್ರ ನೋಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ &amp; ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಮುಖಪುಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ &amp; ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
@@ -651,7 +651,7 @@
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ಮುಖಪುಟ"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"ಇತ್ತೀಚಿನವುಗಳು"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"ಹಿಂದೆ"</string>
-    <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"ಅಧಿಸೂಚನೆಗಳು"</string>
+    <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"ನೋಟಿಫಿಕೇಶನ್‌ಗಳು"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"ಕೀಬೋರ್ಡ್‌ ಲೇಔಟ್‌ ಬದಲಾಯಿಸಿ"</string>
     <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"ಪಠ್ಯ ತೆರವುಗೊಳಿಸಿ"</string>
@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"ಕೆಳಗೆ ಸರಿಸಿ"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ಎಡಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"ಬಲಕ್ಕೆ ಸರಿಸಿ"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ಝೂಮ್ ಮಾಡುವ ಸ್ವಿಚ್"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಹಿಗ್ಗಿಸಿ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ಸ್ಕ್ರೀನ್‌ನ ಅರ್ಧಭಾಗವನ್ನು ಝೂಮ್ ಮಾಡಿ"</string>
@@ -1129,7 +1137,7 @@
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"ಅಪರಿಚಿತ"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
-    <string name="log_access_confirmation_title" msgid="4843557604739943395">"ಎಲ್ಲಾ ಸಾಧನದ ಲಾಗ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ಗೆ ಅನುಮತಿಸುವುದೇ?"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"ಎಲ್ಲಾ ಸಾಧನದ ಲಾಗ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ಗೆ ಅನುಮತಿಸಬೇಕೆ?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"ಒಂದು ಬಾರಿಯ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸಿ"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ಅನುಮತಿಸಬೇಡಿ"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಕಾರ್ಯಾಚರಣೆಗಳನ್ನು ಸಾಧನದ ಲಾಗ್‌ಗಳು ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತವೆ. ಸಮಸ್ಯೆಗಳನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಮತ್ತು ಪರಿಹರಿಸಲು ಆ್ಯಪ್‌ಗಳು ಈ ಲಾಗ್ ಅನ್ನು ಬಳಸಬಹುದು.\n\nಕೆಲವು ಲಾಗ್‌ಗಳು ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು, ಆದ್ದರಿಂದ ನಿಮ್ಮ ವಿಶ್ವಾಸಾರ್ಹ ಆ್ಯಪ್‌ಗಳಿಗೆ ಮಾತ್ರ ಸಾಧನದ ಎಲ್ಲಾ ಲಾಗ್‌ಗಳಿಗೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸಿ. \n\nಎಲ್ಲಾ ಸಾಧನ ಲಾಗ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ನೀವು ಈ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸದಿದ್ದರೆ, ಅದು ಆಗಲೂ ತನ್ನದೇ ಆದ ಲಾಗ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಬಹುದು. ನಿಮ್ಮ ಸಾಧನ ತಯಾರಕರಿಗೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಕೆಲವು ಲಾಗ್‌ಗಳು ಅಥವಾ ಮಾಹಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಲು ಈಗಲೂ ಸಾಧ್ಯವಾಗುತ್ತದೆ."</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant ನಿಮ್ಮ ಮಾತನ್ನು ಆಲಿಸುತ್ತಿದೆ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಅನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="install_app" msgid="5066668100199613936">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ಬಾಹ್ಯ ಡಿಸ್‌ಪ್ಲೇಗೆ ಪ್ರತಿಬಿಂಬಿಸಬೇಕೆ?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"ಮೈಕ್ರೊಫೋನ್ ಮತ್ತು ಕ್ಯಾಮರಾ"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್ ಬಳಕೆ"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"ಇತ್ತೀಚಿನ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ನೋಡಿ"</string>

@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"向下移"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"向左移"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"向右移"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"放大開關"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"放大成個畫面"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"放大部分螢幕畫面"</string>
@@ -1130,7 +1138,7 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"要允許「<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>」存取所有裝置記錄嗎？"</string>
-    <string name="log_access_confirmation_allow" msgid="752147861593202968">"允許存取一次"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"允許單次存取"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"不允許"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"裝置記錄會記下裝置的活動。應用程式可透過這些記錄找出並修正問題。\n\n部分記錄可能包含敏感資料，因此請只允許信任的應用程式存取所有裝置記錄。\n\n如果不允許此應用程式存取所有裝置記錄，此應用程式仍能存取自己的記錄，且裝置製造商可能仍可存取裝置上的部分記錄或資料。"</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"瞭解詳情"</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"「Google 助理」感應功能已開啟"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"在「設定」中指定預設筆記應用程式"</string>
     <string name="install_app" msgid="5066668100199613936">"安裝應用程式"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"要鏡像投射至外部顯示屏嗎？"</string>
+    <string name="enable_display" msgid="8308309634883321977">"啟用顯示屏"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"麥克風和相機"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"近期應用程式使用情況"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"查看近期存取記錄"</string>

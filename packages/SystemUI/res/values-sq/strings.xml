@@ -299,7 +299,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Aplikacionet e punës"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Vendosur në pauzë"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Drita e natës"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Në perëndim të diellit"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Aktiv në perëndim"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Deri në lindje të diellit"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Aktive në <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Deri në <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -382,7 +382,7 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Heshtje\ne plotë"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Vetëm\nme prioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Vetëm\nalarmet"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet me valë • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet në mënyrë wireless • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet shpejt • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet ngadalë • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Lëvize poshtë"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Lëvize majtas"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Lëvize djathtas"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Ndërrimi i zmadhimit"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Zmadho ekranin e plotë"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zmadho një pjesë të ekranit"</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Vëmendja e \"Asistentit\" aktive"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Cakto aplikacionin e parazgjedhur të shënimeve te \"Cilësimet\""</string>
     <string name="install_app" msgid="5066668100199613936">"Instalo aplikacionin"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Të pasqyrohet në ekranin e jashtëm?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"Aktivizo ekranin"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofoni dhe kamera"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Përdorimi i fundit i aplikacionit"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Shiko qasjen e fundit"</string>
