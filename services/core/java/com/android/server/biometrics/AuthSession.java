@@ -275,7 +275,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
             }
             sensor.goToStateWaitingForCookie(requireConfirmation, mToken, mOperationId,
                     mUserId, mSensorReceiver, mOpPackageName, mRequestId, cookie,
-                    mPromptInfo.isAllowBackgroundAuthentication());
+                    mPromptInfo.isAllowBackgroundAuthentication(),
+                    mPromptInfo.isForLegacyFingerprintManager());
         }
     }
 
@@ -747,7 +748,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                 Slog.v(TAG, "Confirmed! Modality: " + statsModality()
                         + ", User: " + mUserId
                         + ", IsCrypto: " + isCrypto()
-                        + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
+                        + ", Client: " + getStatsClient()
                         + ", RequireConfirmation: " + mPreAuthInfo.confirmationRequested
                         + ", State: " + FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED
                         + ", Latency: " + latency
@@ -758,7 +759,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     mOperationContext,
                     statsModality(),
                     BiometricsProtoEnums.ACTION_UNKNOWN,
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                    getStatsClient(),
                     mDebugEnabled,
                     latency,
                     FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
@@ -784,7 +785,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", User: " + mUserId
                         + ", IsCrypto: " + isCrypto()
                         + ", Action: " + BiometricsProtoEnums.ACTION_AUTHENTICATE
-                        + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
+                        + ", Client: " + getStatsClient()
                         + ", Reason: " + reason
                         + ", Error: " + error
                         + ", Latency: " + latency
@@ -796,7 +797,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         mOperationContext,
                         statsModality(),
                         BiometricsProtoEnums.ACTION_AUTHENTICATE,
-                        BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                        getStatsClient(),
                         mDebugEnabled,
                         latency,
                         error,
@@ -996,6 +997,12 @@ public final class AuthSession implements IBinder.DeathRecipient {
             default:
                 return null;
         }
+    }
+
+    private int getStatsClient() {
+        return mPromptInfo.isForLegacyFingerprintManager()
+                ? BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER
+                : BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT;
     }
 
     @Override

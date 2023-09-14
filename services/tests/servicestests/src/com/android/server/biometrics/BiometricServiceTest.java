@@ -598,7 +598,8 @@ public class BiometricServiceTest {
                 anyString() /* opPackageName */,
                 eq(TEST_REQUEST_ID),
                 cookieCaptor.capture() /* cookie */,
-                anyBoolean() /* allowBackgroundAuthentication */);
+                anyBoolean() /* allowBackgroundAuthentication */,
+                anyBoolean() /* isForLegacyFingerprintManager */);
 
         // onReadyForAuthentication, mAuthSession state OK
         mBiometricService.mImpl.onReadyForAuthentication(TEST_REQUEST_ID, cookieCaptor.getValue());
