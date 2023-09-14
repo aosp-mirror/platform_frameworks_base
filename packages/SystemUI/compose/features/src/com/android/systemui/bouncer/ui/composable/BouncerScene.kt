@@ -48,13 +48,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.systemui.res.R
 import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -104,7 +104,8 @@ private fun SceneScope.BouncerScene(
     modifier: Modifier = Modifier,
 ) {
     val message: BouncerViewModel.MessageViewModel by viewModel.message.collectAsState()
-    val authMethodViewModel: AuthMethodBouncerViewModel? by viewModel.authMethod.collectAsState()
+    val authMethodViewModel: AuthMethodBouncerViewModel? by
+        viewModel.authMethodViewModel.collectAsState()
     val dialogMessage: String? by viewModel.throttlingDialogMessage.collectAsState()
     var dialog: Dialog? by remember { mutableStateOf(null) }
     val backgroundColor = MaterialTheme.colorScheme.surface

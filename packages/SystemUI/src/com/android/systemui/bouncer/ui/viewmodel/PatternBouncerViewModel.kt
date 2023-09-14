@@ -18,8 +18,10 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
 import android.util.TypedValue
+import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.res.R
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
@@ -31,18 +33,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the pattern bouncer UI. */
 class PatternBouncerViewModel(
     private val applicationContext: Context,
-    private val applicationScope: CoroutineScope,
-    private val interactor: BouncerInteractor,
+    viewModelScope: CoroutineScope,
+    interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
 ) :
     AuthMethodBouncerViewModel(
-        isInputEnabled = isInputEnabled,
+        viewModelScope = viewModelScope,
         interactor = interactor,
+        isInputEnabled = isInputEnabled,
     ) {
 
     /** The number of columns in the dot grid. */
@@ -58,7 +60,7 @@ class PatternBouncerViewModel(
         _selectedDots
             .map { it.toList() }
             .stateIn(
-                scope = applicationScope,
+                scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = emptyList(),
             )
@@ -76,15 +78,9 @@ class PatternBouncerViewModel(
     /** Whether the pattern itself should be rendered visibly. */
     val isPatternVisible: StateFlow<Boolean> = interactor.isPatternVisible
 
-    /** Notifies that the UI has been shown to the user. */
-    fun onShown() {
-        interactor.resetMessage()
-    }
+    override val authenticationMethod = AuthenticationMethodModel.Pattern
 
-    /** Notifies that the user has placed down a pointer, not necessarily dragging just yet. */
-    fun onDown() {
-        interactor.onDown()
-    }
+    override val throttlingMessageId = R.string.kg_too_many_failed_pattern_attempts_dialog_message
 
     /** Notifies that the user has started a drag gesture across the dot grid. */
     fun onDragStart() {
@@ -164,24 +160,23 @@ class PatternBouncerViewModel(
 
     /** Notifies that the user has ended the drag gesture across the dot grid. */
     fun onDragEnd() {
-        val pattern = _selectedDots.value.map { it.toCoordinate() }
-
+        val pattern = getInput()
         if (pattern.size == 1) {
             // Single dot patterns are treated as erroneous/false taps:
             interactor.onFalseUserInput()
         }
 
+        tryAuthenticate()
+    }
+
+    override fun clearInput() {
         _dots.value = defaultDots()
         _currentDot.value = null
         _selectedDots.value = linkedSetOf()
+    }
 
-        applicationScope.launch {
-            if (pattern.size < interactor.minPatternLength) {
-                interactor.showErrorMessage()
-            } else if (interactor.authenticate(pattern) != true) {
-                showFailureAnimation()
-            }
-        }
+    override fun getInput(): List<Any> {
+        return _selectedDots.value.map(PatternDotViewModel::toCoordinate)
     }
 
     private fun defaultDots(): List<PatternDotViewModel> {

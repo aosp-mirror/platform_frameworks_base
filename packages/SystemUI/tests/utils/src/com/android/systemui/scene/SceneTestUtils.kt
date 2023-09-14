@@ -206,6 +206,7 @@ class SceneTestUtils(
         return BouncerViewModel(
             applicationContext = context,
             applicationScope = applicationScope(),
+            mainDispatcher = testDispatcher,
             bouncerInteractor = bouncerInteractor,
             authenticationInteractor = authenticationInteractor,
             flags = sceneContainerFlags,

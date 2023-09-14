@@ -16,22 +16,24 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.res.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the password bouncer UI. */
 class PasswordBouncerViewModel(
-    private val applicationScope: CoroutineScope,
-    private val interactor: BouncerInteractor,
+    viewModelScope: CoroutineScope,
+    interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
 ) :
     AuthMethodBouncerViewModel(
-        isInputEnabled = isInputEnabled,
+        viewModelScope = viewModelScope,
         interactor = interactor,
+        isInputEnabled = isInputEnabled,
     ) {
 
     private val _password = MutableStateFlow("")
@@ -39,10 +41,16 @@ class PasswordBouncerViewModel(
     /** The password entered so far. */
     val password: StateFlow<String> = _password.asStateFlow()
 
-    /** Notifies that the UI has been shown to the user. */
-    fun onShown() {
+    override val authenticationMethod = AuthenticationMethodModel.Password
+
+    override val throttlingMessageId = R.string.kg_too_many_failed_password_attempts_dialog_message
+
+    override fun clearInput() {
         _password.value = ""
-        interactor.resetMessage()
+    }
+
+    override fun getInput(): List<Any> {
+        return _password.value.toCharArray().toList()
     }
 
     /** Notifies that the user has changed the password input. */
@@ -60,17 +68,8 @@ class PasswordBouncerViewModel(
 
     /** Notifies that the user has pressed the key for attempting to authenticate the password. */
     fun onAuthenticateKeyPressed() {
-        val password = _password.value.toCharArray().toList()
-        if (password.isEmpty()) {
-            return
-        }
-
-        _password.value = ""
-
-        applicationScope.launch {
-            if (interactor.authenticate(password) != true) {
-                showFailureAnimation()
-            }
+        if (_password.value.isNotEmpty()) {
+            tryAuthenticate()
         }
     }
 }
