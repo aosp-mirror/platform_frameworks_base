@@ -6525,14 +6525,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * @return whether AOD is showing on this display
-     */
-    boolean isAodShowing() {
-        return mRootWindowContainer.mTaskSupervisor
-                .getKeyguardController().isAodShowing(mDisplayId);
-    }
-
-    /**
      * @return whether this display maintains its own focus and touch mode.
      */
     boolean hasOwnFocus() {
