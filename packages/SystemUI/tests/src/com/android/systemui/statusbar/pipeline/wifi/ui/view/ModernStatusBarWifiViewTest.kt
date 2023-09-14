@@ -22,6 +22,7 @@ import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -138,7 +139,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
 
-        assertThat(view.getIconGroupView().visibility).isEqualTo(View.GONE)
+        assertThat(view.getIconGroupView().visibility).isEqualTo(View.INVISIBLE)
         assertThat(view.getDotView().visibility).isEqualTo(View.VISIBLE)
 
         ViewUtils.detachView(view)
@@ -153,8 +154,36 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
 
-        assertThat(view.getIconGroupView().visibility).isEqualTo(View.GONE)
-        assertThat(view.getDotView().visibility).isEqualTo(View.GONE)
+        assertThat(view.getIconGroupView().visibility).isEqualTo(View.INVISIBLE)
+        assertThat(view.getDotView().visibility).isEqualTo(View.INVISIBLE)
+
+        ViewUtils.detachView(view)
+    }
+
+    /* Regression test for b/296864006. When STATE_HIDDEN we need to ensure the wifi view width
+     * would not break the StatusIconContainer translation calculation. */
+    @Test
+    fun setVisibleState_hidden_keepWidth() {
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
+
+        view.setVisibleState(STATE_ICON, /* animate= */ false)
+
+        // get the view width when it's in visible state
+        ViewUtils.attachView(view)
+        val lp = view.layoutParams
+        lp.width = ViewGroup.LayoutParams.WRAP_CONTENT
+        lp.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        view.layoutParams = lp
+        testableLooper.processAllMessages()
+        val currentWidth = view.width
+
+        view.setVisibleState(STATE_HIDDEN, /* animate= */ false)
+        testableLooper.processAllMessages()
+
+        // the view width when STATE_HIDDEN should be at least the width when STATE_ICON. Because
+        // when STATE_HIDDEN the invisible dot view width might be larger than group view width,
+        // then the wifi view width would be enlarged.
+        assertThat(view.width).isAtLeast(currentWidth)
 
         ViewUtils.detachView(view)
     }
