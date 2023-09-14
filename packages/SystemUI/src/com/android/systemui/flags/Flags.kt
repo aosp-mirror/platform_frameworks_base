@@ -774,7 +774,8 @@ object Flags {
 
     // TODO(b/290213663): Tracking Bug
     @JvmField
-    val ONE_WAY_HAPTICS_API_MIGRATION = unreleasedFlag("oneway_haptics_api_migration")
+    val ONE_WAY_HAPTICS_API_MIGRATION =
+            unreleasedFlag("oneway_haptics_api_migration", teamfood = true)
 
     /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
     @JvmField
