@@ -2047,7 +2047,6 @@ public class NotificationManagerService extends SystemService {
     protected class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
 
         SparseBooleanArray mUserInLockDownMode = new SparseBooleanArray();
-        boolean mIsInLockDownMode = false;
 
         StrongAuthTracker(Context context) {
             super(context);
