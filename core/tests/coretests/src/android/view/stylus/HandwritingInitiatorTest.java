@@ -88,8 +88,8 @@ public class HandwritingInitiatorTest {
     }
 
     private HandwritingInitiator mHandwritingInitiator;
-    private View mTestView1;
-    private View mTestView2;
+    private EditText mTestView1;
+    private EditText mTestView2;
     private Context mContext;
 
     @Before
@@ -123,6 +123,9 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onTouchEvent_startHandwriting_when_stylusMoveOnce_withinHWArea() {
+        mTestView1.setText("hello");
+        when(mTestView1.getOffsetForPosition(anyFloat(), anyFloat())).thenReturn(4);
+
         mHandwritingInitiator.onInputConnectionCreated(mTestView1);
         final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
         final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
@@ -141,6 +144,9 @@ public class HandwritingInitiatorTest {
         // After IMM.startHandwriting is triggered, onTouchEvent should return true for ACTION_MOVE
         // events so that the events are not dispatched to the view tree.
         assertThat(onTouchEventResult2).isTrue();
+        // Since the stylus down point was inside the TextView's bounds, the handwriting initiator
+        // does not need to set the cursor position.
+        verify(mTestView1, never()).setSelection(anyInt());
     }
 
     @Test
@@ -185,6 +191,9 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onTouchEvent_startHandwriting_when_stylusMove_withinExtendedHWArea() {
+        mTestView1.setText("hello");
+        when(mTestView1.getOffsetForPosition(anyFloat(), anyFloat())).thenReturn(4);
+
         mHandwritingInitiator.onInputConnectionCreated(mTestView1);
         final int x1 = sHwArea1.left - HW_BOUNDS_OFFSETS_LEFT_PX / 2;
         final int y1 = sHwArea1.top - HW_BOUNDS_OFFSETS_TOP_PX / 2;
@@ -199,6 +208,9 @@ public class HandwritingInitiatorTest {
 
         // Stylus movement within extended HandwritingArea should trigger IMM.startHandwriting once.
         verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView1);
+        // Since the stylus down point was outside the TextView's bounds, the handwriting initiator
+        // sets the cursor position.
+        verify(mTestView1).setSelection(4);
     }
 
     @Test
@@ -221,6 +233,8 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onTouchEvent_startHandwriting_inputConnectionBuilt_stylusMoveInExtendedHWArea() {
+        mTestView1.setText("hello");
+        when(mTestView1.getOffsetForPosition(anyFloat(), anyFloat())).thenReturn(4);
         // The stylus down point is between mTestView1 and  mTestView2, but it is within the
         // extended handwriting area of both views. It is closer to mTestView1.
         final int x1 = sHwArea1.right + HW_BOUNDS_OFFSETS_RIGHT_PX / 2;
@@ -241,6 +255,9 @@ public class HandwritingInitiatorTest {
         // the stylus down point is closest to this view.
         mHandwritingInitiator.onInputConnectionCreated(mTestView1);
         verify(mHandwritingInitiator).startHandwriting(mTestView1);
+        // Since the stylus down point was outside the TextView's bounds, the handwriting initiator
+        // sets the cursor position.
+        verify(mTestView1).setSelection(4);
     }
 
     @Test
