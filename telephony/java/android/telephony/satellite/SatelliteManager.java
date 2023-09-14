@@ -18,6 +18,7 @@ package android.telephony.satellite;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,6 +40,7 @@ import android.telephony.TelephonyFrameworkInitializer;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.IVoidConsumer;
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -769,6 +771,16 @@ public final class SatelliteManager {
      */
     public static final int SATELLITE_MODEM_STATE_UNAVAILABLE = 5;
     /**
+     * The satellite modem is powered on but the device is not registered to a satellite cell.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_MODEM_STATE_NOT_CONNECTED = 6;
+    /**
+     * The satellite modem is powered on and the device is registered to a satellite cell.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_MODEM_STATE_CONNECTED = 7;
+    /**
      * Satellite modem state is unknown. This generic modem state should be used only when the
      * modem state cannot be mapped to other specific modem states.
      */
@@ -782,6 +794,8 @@ public final class SatelliteManager {
             SATELLITE_MODEM_STATE_DATAGRAM_RETRYING,
             SATELLITE_MODEM_STATE_OFF,
             SATELLITE_MODEM_STATE_UNAVAILABLE,
+            SATELLITE_MODEM_STATE_NOT_CONNECTED,
+            SATELLITE_MODEM_STATE_CONNECTED,
             SATELLITE_MODEM_STATE_UNKNOWN
     })
     @Retention(RetentionPolicy.SOURCE)
