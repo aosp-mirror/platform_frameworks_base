@@ -24,9 +24,9 @@ import android.view.MotionEvent
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
@@ -82,7 +82,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     private lateinit var fingerprintRepository: FakeFingerprintPropertyRepository
     private lateinit var promptRepository: FakePromptRepository
-    private lateinit var rearDisplayStateRepository: FakeRearDisplayStateRepository
+    private lateinit var displayStateRepository: FakeDisplayStateRepository
     private lateinit var displayRepository: FakeDisplayRepository
     private lateinit var displayStateInteractor: DisplayStateInteractor
 
@@ -94,21 +94,22 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     fun setup() {
         fingerprintRepository = FakeFingerprintPropertyRepository()
         promptRepository = FakePromptRepository()
-        rearDisplayStateRepository = FakeRearDisplayStateRepository()
+        displayStateRepository = FakeDisplayStateRepository()
         displayRepository = FakeDisplayRepository()
         displayStateInteractor =
             DisplayStateInteractorImpl(
                 testScope.backgroundScope,
                 mContext,
                 fakeExecutor,
-                rearDisplayStateRepository,
+                displayStateRepository,
                 displayRepository,
             )
         selector =
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
 
-        viewModel = PromptViewModel(displayStateInteractor, selector, vibrator, featureFlags)
+        viewModel =
+            PromptViewModel(displayStateInteractor, selector, vibrator, mContext, featureFlags)
         featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
     }
 

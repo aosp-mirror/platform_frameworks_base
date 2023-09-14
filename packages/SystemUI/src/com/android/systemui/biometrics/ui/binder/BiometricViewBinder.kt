@@ -252,6 +252,18 @@ object BiometricViewBinder {
                     }
                 }
 
+                // set padding
+                launch {
+                    viewModel.promptPadding.collect { promptPadding ->
+                        view.setPadding(
+                            promptPadding.left,
+                            promptPadding.top,
+                            promptPadding.right,
+                            promptPadding.bottom
+                        )
+                    }
+                }
+
                 // configure & hide/disable buttons
                 launch {
                     viewModel.credentialKind
