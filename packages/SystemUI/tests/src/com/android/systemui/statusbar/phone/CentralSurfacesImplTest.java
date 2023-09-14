@@ -82,6 +82,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
@@ -146,6 +147,7 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
+import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -178,6 +180,7 @@ import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -454,6 +457,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         emptySet()),
                 mStatusBarWindowController,
                 mStatusBarWindowStateController,
+                new FakeStatusBarModeRepository(),
                 mKeyguardUpdateMonitor,
                 mStatusBarSignalPolicy,
                 mPulseExpansionHandler,
@@ -472,6 +476,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 new DisplayMetrics(),
                 mMetricsLogger,
                 mShadeLogger,
+                new JavaAdapter(TestScopeProvider.getTestScope()),
                 mUiBgExecutor,
                 mNotificationPanelViewController,
                 mNotificationMediaManager,

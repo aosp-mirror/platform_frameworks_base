@@ -310,10 +310,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     @VisibleForTesting
     void setBarStateForTest(int state);
 
-    void showTransientUnchecked();
-
-    void clearTransient();
-
     void acquireGestureWakeLock(long time);
 
     boolean setAppearance(int appearance);
