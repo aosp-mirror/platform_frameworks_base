@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.res.Configuration
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.LargeScreenUtils
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 
 /** Interpolator responsible for the shade when on large screens. */
@@ -32,6 +32,7 @@ internal constructor(
     private val context: Context,
     private val splitShadeInterpolator: SplitShadeInterpolator,
     private val portraitShadeInterpolator: LargeScreenPortraitShadeInterpolator,
+    private val splitShadeStateController: SplitShadeStateController
 ) : LargeScreenShadeInterpolator {
 
     private var inSplitShade = false
@@ -48,7 +49,7 @@ internal constructor(
     }
 
     private fun updateResources() {
-        inSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
+        inSplitShade = splitShadeStateController.shouldUseSplitNotificationShade(context.resources)
     }
 
     private val impl: LargeScreenShadeInterpolator

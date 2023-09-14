@@ -66,6 +66,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.animation.UniqueObjectHostView;
 
@@ -524,7 +525,10 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         return new QSFragment(
                 new RemoteInputQuickSettingsDisabler(
-                        context, commandQueue, mock(ConfigurationController.class)),
+                        context,
+                        commandQueue,
+                        new ResourcesSplitShadeStateController(),
+                        mock(ConfigurationController.class)),
                 mStatusBarStateController,
                 commandQueue,
                 mQSMediaHost,

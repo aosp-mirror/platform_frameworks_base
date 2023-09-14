@@ -18,6 +18,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.settings.brightness.BrightnessController
 import com.android.systemui.settings.brightness.BrightnessSliderController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -91,7 +92,8 @@ class QSPanelControllerTest : SysuiTestCase() {
             brightnessControllerFactory,
             brightnessSliderFactory,
             falsingManager,
-            statusBarKeyguardViewManager
+            statusBarKeyguardViewManager,
+                ResourcesSplitShadeStateController()
         )
     }
 

@@ -21,6 +21,7 @@ import android.content.Context
 import com.android.systemui.R
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +37,7 @@ class SharedNotificationContainerInteractor
 constructor(
     configurationRepository: ConfigurationRepository,
     private val context: Context,
+    private val splitShadeStateController: SplitShadeStateController
 ) {
 
     private val _topPosition = MutableStateFlow(0f)
@@ -47,7 +49,10 @@ constructor(
             .map { _ ->
                 with(context.resources) {
                     ConfigurationBasedDimensions(
-                        useSplitShade = getBoolean(R.bool.config_use_split_notification_shade),
+                        useSplitShade =
+                            splitShadeStateController.shouldUseSplitNotificationShade(
+                                context.resources
+                            ),
                         useLargeScreenHeader =
                             getBoolean(R.bool.config_use_large_screen_shade_header),
                         marginHorizontal =

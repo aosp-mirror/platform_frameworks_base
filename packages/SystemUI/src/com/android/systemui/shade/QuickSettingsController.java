@@ -100,6 +100,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
@@ -150,6 +151,7 @@ public class QuickSettingsController implements Dumpable {
     private final ShadeLogger mShadeLog;
     private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     private final CastController mCastController;
+    private final SplitShadeStateController mSplitShadeStateController;
     private final FeatureFlags mFeatureFlags;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final ShadeRepository mShadeRepository;
@@ -344,14 +346,16 @@ public class QuickSettingsController implements Dumpable {
             ShadeRepository shadeRepository,
             ShadeInteractor shadeInteractor,
             JavaAdapter javaAdapter,
-            CastController castController
+            CastController castController,
+            SplitShadeStateController splitShadeStateController
     ) {
         mPanelViewControllerLazy = panelViewControllerLazy;
         mPanelView = panelView;
         mQsFrame = mPanelView.findViewById(R.id.qs_frame);
         mKeyguardStatusBar = mPanelView.findViewById(R.id.keyguard_header);
         mResources = mPanelView.getResources();
-        mSplitShadeEnabled = LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
+        mSplitShadeStateController = splitShadeStateController;
+        mSplitShadeEnabled = mSplitShadeStateController.shouldUseSplitNotificationShade(mResources);
         mQsFrameTranslateController = qsFrameTranslateController;
         mShadeTransitionController = shadeTransitionController;
         mPulseExpansionHandler = pulseExpansionHandler;
@@ -437,7 +441,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     void updateResources() {
-        mSplitShadeEnabled = LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
+        mSplitShadeEnabled = mSplitShadeStateController.shouldUseSplitNotificationShade(mResources);
         if (mQs != null) {
             mQs.setInSplitShade(mSplitShadeEnabled);
         }

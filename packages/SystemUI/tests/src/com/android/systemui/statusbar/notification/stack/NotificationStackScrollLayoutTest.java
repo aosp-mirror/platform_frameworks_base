@@ -87,6 +87,7 @@ import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -845,6 +846,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void testSplitShade_hasTopOverscroll() {
         mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
+        mStackScroller.passSplitShadeStateController(new ResourcesSplitShadeStateController());
         mStackScroller.updateSplitNotificationShade();
         mAmbientState.setExpansionFraction(1f);
 
@@ -860,6 +862,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void testNormalShade_hasNoTopOverscroll() {
         mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ false);
+        mStackScroller.passSplitShadeStateController(new ResourcesSplitShadeStateController());
         mStackScroller.updateSplitNotificationShade();
         mAmbientState.setExpansionFraction(1f);
 

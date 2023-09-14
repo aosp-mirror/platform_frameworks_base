@@ -42,7 +42,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.LargeScreenUtils
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.wm.shell.animation.Interpolators
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -79,6 +79,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     private val shadeRepository: ShadeRepository,
     private val shadeInteractor: ShadeInteractor,
     private val powerInteractor: PowerInteractor,
+    private val splitShadeStateController: SplitShadeStateController
 ) : Dumpable {
     private var pulseHeight: Float = 0f
 
@@ -267,7 +268,9 @@ class LockscreenShadeTransitionController @Inject constructor(
             R.dimen.lockscreen_shade_udfps_keyguard_transition_distance)
         statusBarTransitionDistance = context.resources.getDimensionPixelSize(
             R.dimen.lockscreen_shade_status_bar_transition_distance)
-        useSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
+
+        useSplitShade = splitShadeStateController
+                .shouldUseSplitNotificationShade(context.resources)
     }
 
     fun setStackScroller(nsslController: NotificationStackScrollLayoutController) {

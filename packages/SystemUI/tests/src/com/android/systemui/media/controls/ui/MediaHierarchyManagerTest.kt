@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -120,6 +121,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 notifPanelEvents,
                 settings,
                 fakeHandler,
+                ResourcesSplitShadeStateController()
             )
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
