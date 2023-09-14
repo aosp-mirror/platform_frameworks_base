@@ -283,7 +283,11 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
                 }
 
                 try {
-                    listener.onAuthenticationFailed(getSensorId());
+                    if (listener != null) {
+                        listener.onAuthenticationFailed(getSensorId());
+                    } else {
+                        Slog.e(TAG, "Received failed auth, but client was not listening");
+                    }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to notify listener", e);
                     mCallback.onClientFinished(this, false);
