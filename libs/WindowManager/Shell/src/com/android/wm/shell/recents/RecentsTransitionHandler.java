@@ -134,6 +134,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         }
         final IBinder transition = mTransitions.startTransition(TRANSIT_TO_FRONT, wct,
                 mixedHandler == null ? this : mixedHandler);
+        for (int i = 0; i < mStateListeners.size(); i++) {
+            mStateListeners.get(i).onTransitionStarted(transition);
+        }
         if (mixer != null) {
             mixer.setRecentsTransition(transition);
         }
