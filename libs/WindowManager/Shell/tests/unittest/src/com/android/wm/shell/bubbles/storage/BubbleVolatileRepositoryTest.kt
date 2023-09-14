@@ -27,15 +27,13 @@ import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.never
-import org.mockito.Mockito.reset
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.reset
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -66,7 +64,7 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
 
     @Before
     fun setup() {
-        launcherApps = mock(LauncherApps::class.java)
+        launcherApps = mock<LauncherApps>()
         repository = BubbleVolatileRepository(launcherApps)
     }
 
@@ -98,7 +96,7 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
         repository.addBubbles(user11.identifier, listOf(bubble12))
         assertEquals(listOf(bubble11, bubble12), repository.getEntities(user11.identifier))
 
-        Mockito.verifyNoMoreInteractions(launcherApps)
+        verifyNoMoreInteractions(launcherApps)
     }
 
     @Test
@@ -167,9 +165,8 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
         assertThat(ret).isTrue() // bubbles were removed
 
         assertThat(repository.getEntities(user0.identifier).toList()).isEmpty()
-        verify(launcherApps, never()).uncacheShortcuts(anyString(),
-                any(),
-                any(UserHandle::class.java), anyInt())
+        verify(launcherApps, never())
+                .uncacheShortcuts(any<String>(), any(), any<UserHandle>(), any<Int>())
     }
 
     @Test
@@ -184,9 +181,8 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
 
         assertThat(repository.getEntities(user0.identifier).toList())
                 .isEqualTo(listOf(bubble1, bubble3))
-        verify(launcherApps, never()).uncacheShortcuts(anyString(),
-                any(),
-                any(UserHandle::class.java), anyInt())
+        verify(launcherApps, never())
+                .uncacheShortcuts(any<String>(), any(), any<UserHandle>(), any<Int>())
     }
 
     @Test
@@ -200,9 +196,8 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
 
         assertThat(repository.getEntities(user0.identifier).toList())
                 .isEqualTo(listOf(bubble1, bubble2, bubble3))
-        verify(launcherApps, never()).uncacheShortcuts(anyString(),
-                any(),
-                any(UserHandle::class.java), anyInt())
+        verify(launcherApps, never())
+                .uncacheShortcuts(any<String>(), any(), any<UserHandle>(), any<Int>())
     }
 
     @Test
@@ -219,9 +214,8 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
                 user11.identifier))
         assertThat(ret).isFalse() // bubbles were NOT removed
 
-        verify(launcherApps, never()).uncacheShortcuts(anyString(),
-                any(),
-                any(UserHandle::class.java), anyInt())
+        verify(launcherApps, never())
+                .uncacheShortcuts(any<String>(), any(), any<UserHandle>(), any<Int>())
     }
 
     @Test
@@ -237,9 +231,8 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
         assertThat(ret).isTrue() // bubbles were removed
 
         assertThat(repository.getEntities(user0.identifier).toList()).isEmpty()
-        verify(launcherApps, never()).uncacheShortcuts(anyString(),
-                any(),
-                any(UserHandle::class.java), anyInt())
+        verify(launcherApps, never())
+                .uncacheShortcuts(any<String>(), any(), any<UserHandle>(), any<Int>())
 
         // User 11 bubbles should still be here
         assertThat(repository.getEntities(user11.identifier).toList())
@@ -261,9 +254,8 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
         // bubble2 is the work profile bubble and should be removed
         assertThat(repository.getEntities(user0.identifier).toList())
                 .isEqualTo(listOf(bubble1, bubble3))
-        verify(launcherApps, never()).uncacheShortcuts(anyString(),
-                any(),
-                any(UserHandle::class.java), anyInt())
+        verify(launcherApps, never())
+                .uncacheShortcuts(any<String>(), any(), any<UserHandle>(), any<Int>())
 
         // User 11 bubbles should still be here
         assertThat(repository.getEntities(user11.identifier).toList())
