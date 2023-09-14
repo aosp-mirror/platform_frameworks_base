@@ -16,7 +16,9 @@
 
 package com.android.server.broadcastradio.aidl;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyLong;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 
 import android.app.compat.CompatChanges;
 import android.hardware.broadcastradio.AmFmBandRange;
@@ -43,14 +45,16 @@ import com.google.common.truth.Expect;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.stubbing.Answer;
 
 import java.util.Map;
 import java.util.Set;
 
 public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
 
-    private static final int U_APP_UID = 1001;
-    private static final int T_APP_UID = 1002;
+    private static final int T_APP_UID = 1001;
+    private static final int U_APP_UID = 1002;
+    private static final int V_APP_UID = 1003;
 
     private static final int FM_LOWER_LIMIT = 87_500;
     private static final int FM_UPPER_LIMIT = 108_000;
@@ -133,10 +137,18 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
 
     @Before
     public void setUp() {
-        doReturn(true).when(() -> CompatChanges.isChangeEnabled(
-                ConversionUtils.RADIO_U_VERSION_REQUIRED, U_APP_UID));
-        doReturn(false).when(() -> CompatChanges.isChangeEnabled(
-                ConversionUtils.RADIO_U_VERSION_REQUIRED, T_APP_UID));
+        doAnswer((Answer<Boolean>) invocationOnMock -> {
+                    long changeId = invocationOnMock.getArgument(0);
+                    int uid = invocationOnMock.getArgument(1);
+                    if (uid == V_APP_UID) {
+                        return changeId == ConversionUtils.RADIO_V_VERSION_REQUIRED
+                                || changeId == ConversionUtils.RADIO_U_VERSION_REQUIRED;
+                    } else if (uid == U_APP_UID) {
+                        return changeId == ConversionUtils.RADIO_U_VERSION_REQUIRED;
+                    }
+                    return false;
+                }
+        ).when(() -> CompatChanges.isChangeEnabled(anyLong(), anyInt()));
     }
 
     @Test
