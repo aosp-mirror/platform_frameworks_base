@@ -101,10 +101,9 @@ class BroadcastProcessQueue {
     boolean runningOomAdjusted;
 
     /**
-     * Snapshotted value of {@link ProcessRecord#getCpuDelayTime()}, typically
-     * used when deciding if we should extend the soft ANR timeout.
+     * True if a timer has been started against this queue.
      */
-    long lastCpuDelayTime;
+    private boolean mTimeoutScheduled;
 
     /**
      * Snapshotted value of {@link ProcessStateRecord#getCurProcState()} before
@@ -1342,6 +1341,21 @@ class BroadcastProcessQueue {
         item.runnableAtNext = null;
         item.runnableAtPrev = null;
         return head;
+    }
+
+    /**
+     * Set the timeout flag to indicate that an ANR timer has been started.  A value of true means a
+     * timer is running; a value of false means there is no timer running.
+     */
+    void setTimeoutScheduled(boolean timeoutStarted) {
+        mTimeoutScheduled = timeoutStarted;
+    }
+
+    /**
+     * Get the timeout flag
+     */
+    boolean timeoutScheduled() {
+        return mTimeoutScheduled;
     }
 
     @Override

@@ -149,6 +149,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // We configure runnable size only once at boot; it'd be too complex to
         // try resizing dynamically at runtime
         mRunning = new BroadcastProcessQueue[mConstants.getMaxRunningQueues()];
+
+        mAnrTimer = new BroadcastAnrTimer(mLocalHandler);
     }
 
     /**
@@ -242,14 +244,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     private @UptimeMillisLong long mLastTestFailureTime;
 
+    /**
+     * The ANR timer service for broadcasts.
+     */
+    @GuardedBy("mService")
+    private final BroadcastAnrTimer mAnrTimer;
+
     private static final int MSG_UPDATE_RUNNING_LIST = 1;
-    private static final int MSG_DELIVERY_TIMEOUT_SOFT = 2;
-    private static final int MSG_DELIVERY_TIMEOUT_HARD = 3;
-    private static final int MSG_BG_ACTIVITY_START_TIMEOUT = 4;
-    private static final int MSG_CHECK_HEALTH = 5;
-    private static final int MSG_CHECK_PENDING_COLD_START_VALIDITY = 6;
-    private static final int MSG_PROCESS_FREEZABLE_CHANGED = 7;
-    private static final int MSG_UID_STATE_CHANGED = 8;
+    private static final int MSG_DELIVERY_TIMEOUT = 2;
+    private static final int MSG_BG_ACTIVITY_START_TIMEOUT = 3;
+    private static final int MSG_CHECK_HEALTH = 4;
+    private static final int MSG_CHECK_PENDING_COLD_START_VALIDITY = 5;
+    private static final int MSG_PROCESS_FREEZABLE_CHANGED = 6;
+    private static final int MSG_UID_STATE_CHANGED = 7;
 
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
@@ -264,12 +271,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 updateRunningList();
                 return true;
             }
-            case MSG_DELIVERY_TIMEOUT_SOFT: {
-                deliveryTimeoutSoft((BroadcastProcessQueue) msg.obj, msg.arg1);
-                return true;
-            }
-            case MSG_DELIVERY_TIMEOUT_HARD: {
-                deliveryTimeoutHard((BroadcastProcessQueue) msg.obj);
+            case MSG_DELIVERY_TIMEOUT: {
+                deliveryTimeout((BroadcastProcessQueue) msg.obj);
                 return true;
             }
             case MSG_BG_ACTIVITY_START_TIMEOUT: {
@@ -1024,12 +1027,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // immediately assume delivery success
         final boolean assumeDelivered = r.isAssumedDelivered(index);
         if (mService.mProcessesReady && !r.timeoutExempt && !assumeDelivered) {
-            queue.lastCpuDelayTime = queue.app.getCpuDelayTime();
-
+            queue.setTimeoutScheduled(true);
             final int softTimeoutMillis = (int) (r.isForeground() ? mFgConstants.TIMEOUT
                     : mBgConstants.TIMEOUT);
-            mLocalHandler.sendMessageDelayed(Message.obtain(mLocalHandler,
-                    MSG_DELIVERY_TIMEOUT_SOFT, softTimeoutMillis, 0, queue), softTimeoutMillis);
+            mAnrTimer.start(queue, softTimeoutMillis);
+        } else {
+            queue.setTimeoutScheduled(false);
         }
 
         if (r.mBackgroundStartPrivileges.allowsAny()) {
@@ -1107,7 +1110,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 // If we were trying to deliver a manifest broadcast, throw the error as we need
                 // to try redelivering the broadcast to this receiver.
                 if (receiver instanceof ResolveInfo) {
-                    mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_SOFT, queue);
+                    mAnrTimer.cancel(queue);
                     throw new BroadcastDeliveryFailedException(e);
                 }
                 finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_FAILURE,
@@ -1156,39 +1159,27 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.resultTo = null;
     }
 
-    private void deliveryTimeoutSoft(@NonNull BroadcastProcessQueue queue,
-            int softTimeoutMillis) {
+    private void deliveryTimeout(@NonNull BroadcastProcessQueue queue) {
         synchronized (mService) {
-            deliveryTimeoutSoftLocked(queue, softTimeoutMillis);
+            deliveryTimeoutLocked(queue);
         }
     }
 
-    private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue,
-            int softTimeoutMillis) {
-        if (queue.app != null) {
-            // Instead of immediately triggering an ANR, extend the timeout by
-            // the amount of time the process was runnable-but-waiting; we're
-            // only willing to do this once before triggering an hard ANR
-            final long cpuDelayTime = queue.app.getCpuDelayTime() - queue.lastCpuDelayTime;
-            final long hardTimeoutMillis = MathUtils.constrain(cpuDelayTime, 0, softTimeoutMillis);
-            mLocalHandler.sendMessageDelayed(
-                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_HARD, queue),
-                    hardTimeoutMillis);
-        } else {
-            deliveryTimeoutHardLocked(queue);
-        }
-    }
-
-    private void deliveryTimeoutHard(@NonNull BroadcastProcessQueue queue) {
-        synchronized (mService) {
-            deliveryTimeoutHardLocked(queue);
-        }
-    }
-
-    private void deliveryTimeoutHardLocked(@NonNull BroadcastProcessQueue queue) {
+    private void deliveryTimeoutLocked(@NonNull BroadcastProcessQueue queue) {
         finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_TIMEOUT,
-                "deliveryTimeoutHardLocked");
+                "deliveryTimeoutLocked");
         demoteFromRunningLocked(queue);
+    }
+
+    private class BroadcastAnrTimer extends AnrTimer<BroadcastProcessQueue> {
+        BroadcastAnrTimer(Handler handler) {
+            super(Objects.requireNonNull(handler),
+                    MSG_DELIVERY_TIMEOUT, "BROADCAST_TIMEOUT", true);
+        }
+
+        void start(@NonNull BroadcastProcessQueue queue, long timeoutMillis) {
+            start(queue, queue.app.getPid(), queue.app.uid, timeoutMillis);
+        }
     }
 
     @Override
@@ -1292,14 +1283,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (deliveryState == BroadcastRecord.DELIVERY_TIMEOUT) {
             r.anrCount++;
             if (app != null && !app.isDebugging()) {
+                mAnrTimer.accept(queue);
                 final String packageName = getReceiverPackageName(receiver);
                 final String className = getReceiverClassName(receiver);
                 mService.appNotResponding(queue.app,
                         TimeoutRecord.forBroadcastReceiver(r.intent, packageName, className));
+            } else {
+                mAnrTimer.discard(queue);
             }
-        } else {
-            mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_SOFT, queue);
-            mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_HARD, queue);
+        } else if (queue.timeoutScheduled()) {
+            mAnrTimer.cancel(queue);
         }
 
         // Given that a receiver just finished, check if the "waitingFor" conditions are met.
