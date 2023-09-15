@@ -309,7 +309,11 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
             BatteryStats.HistoryTag tag = new BatteryStats.HistoryTag();
             tag.readFromParcel(src);
             tag.poolIdx = index & ~BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG;
-            mHistoryTags.put(tag.poolIdx, tag);
+            if (tag.poolIdx < BatteryStatsHistory.HISTORY_TAG_INDEX_LIMIT) {
+                mHistoryTags.put(tag.poolIdx, tag);
+            } else {
+                tag.poolIdx = BatteryStats.HistoryTag.HISTORY_TAG_POOL_OVERFLOW;
+            }
 
             outTag.setTo(tag);
         } else {
