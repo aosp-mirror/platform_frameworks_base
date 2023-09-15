@@ -16,21 +16,22 @@
 
 package androidx.window.util;
 
-import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
+import android.annotation.SuppressLint;
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
+import android.util.RotationUtils;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.UiContext;
+import androidx.annotation.VisibleForTesting;
 
 /**
  * Util class for both Sidecar and Extensions.
@@ -44,47 +45,39 @@ public final class ExtensionHelper {
     /**
      * Rotates the input rectangle specified in default display orientation to the current display
      * rotation.
+     *
+     * @param displayId the display id.
+     * @param rotation the target rotation relative to the default display orientation.
+     * @param inOutRect the input/output Rect as specified in the default display orientation.
      */
-    public static void rotateRectToDisplayRotation(int displayId, Rect inOutRect) {
-        DisplayManagerGlobal dmGlobal = DisplayManagerGlobal.getInstance();
-        DisplayInfo displayInfo = dmGlobal.getDisplayInfo(displayId);
-        int rotation = displayInfo.rotation;
+    public static void rotateRectToDisplayRotation(
+            int displayId, @Surface.Rotation int rotation, @NonNull Rect inOutRect) {
+        final DisplayManagerGlobal dmGlobal = DisplayManagerGlobal.getInstance();
+        final DisplayInfo displayInfo = dmGlobal.getDisplayInfo(displayId);
 
-        boolean isSideRotation = rotation == ROTATION_90 || rotation == ROTATION_270;
-        int displayWidth = isSideRotation ? displayInfo.logicalHeight : displayInfo.logicalWidth;
-        int displayHeight = isSideRotation ? displayInfo.logicalWidth : displayInfo.logicalHeight;
-
-        inOutRect.intersect(0, 0, displayWidth, displayHeight);
-
-        rotateBounds(inOutRect, displayWidth, displayHeight, rotation);
+        rotateRectToDisplayRotation(displayInfo, rotation, inOutRect);
     }
 
-    /**
-     * Rotates the input rectangle within parent bounds for a given delta.
-     */
-    private static void rotateBounds(Rect inOutRect, int parentWidth, int parentHeight,
-            @Surface.Rotation int delta) {
-        int origLeft = inOutRect.left;
-        switch (delta) {
-            case ROTATION_0:
-                return;
-            case ROTATION_90:
-                inOutRect.left = inOutRect.top;
-                inOutRect.top = parentWidth - inOutRect.right;
-                inOutRect.right = inOutRect.bottom;
-                inOutRect.bottom = parentWidth - origLeft;
-                return;
-            case ROTATION_180:
-                inOutRect.left = parentWidth - inOutRect.right;
-                inOutRect.right = parentWidth - origLeft;
-                return;
-            case ROTATION_270:
-                inOutRect.left = parentHeight - inOutRect.bottom;
-                inOutRect.bottom = inOutRect.right;
-                inOutRect.right = parentHeight - inOutRect.top;
-                inOutRect.top = origLeft;
-                return;
-        }
+    // We suppress the Lint error CheckResult for Rect#intersect because in case the displayInfo and
+    // folding features are out of sync, e.g. when a foldable devices is unfolding, it is acceptable
+    // to provide the original folding feature Rect even if they don't intersect.
+    @SuppressLint("RectIntersectReturnValueIgnored")
+    @VisibleForTesting
+    static void rotateRectToDisplayRotation(@NonNull DisplayInfo displayInfo,
+            @Surface.Rotation int rotation, @NonNull Rect inOutRect) {
+        // The inOutRect is specified in the default display orientation, so here we need to get
+        // the display width and height in the default orientation to perform the intersection and
+        // rotation.
+        final boolean isSideRotation =
+                displayInfo.rotation == ROTATION_90 || displayInfo.rotation == ROTATION_270;
+        final int baseDisplayWidth =
+                isSideRotation ? displayInfo.logicalHeight : displayInfo.logicalWidth;
+        final int baseDisplayHeight =
+                isSideRotation ? displayInfo.logicalWidth : displayInfo.logicalHeight;
+
+        inOutRect.intersect(0, 0, baseDisplayWidth, baseDisplayHeight);
+
+        RotationUtils.rotateBounds(inOutRect, baseDisplayWidth, baseDisplayHeight, rotation);
     }
 
     /** Transforms rectangle from absolute coordinate space to the window coordinate space. */
