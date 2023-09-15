@@ -36,20 +36,11 @@ import java.lang.annotation.Target;
     @StringDef(
             prefix = "FEATURE_",
             value = {
-                FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER,
                 FEATURE_SCANNING_MINIMUM_PACKAGE_IMPORTANCE
             })
     @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @Retention(RetentionPolicy.SOURCE)
     /* package */ @interface MediaFeatureFlag {}
-
-    /**
-     * Whether to use old legacy implementation of BluetoothRouteController or new
-     * 'Audio Strategies'-aware controller.
-     */
-    /* package */ static final @MediaFeatureFlag String
-            FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER =
-            "BluetoothRouteController__enable_legacy_bluetooth_routes_controller";
 
     /**
      * Whether to use IMPORTANCE_FOREGROUND (i.e. 100) or IMPORTANCE_FOREGROUND_SERVICE (i.e. 125)

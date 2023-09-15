@@ -13,3 +13,10 @@ flag {
     description: "Gates whether to adjust local stream volume when the app in the foreground is the last app to play audio or adjust the volume of the last active media session that the user interacted with."
     bug: "275185436"
 }
+
+flag {
+     namespace: "media_solutions"
+     name: "enable_audio_policies_device_and_bluetooth_controller"
+     description: "Use Audio Policies implementation for device and Bluetooth route controllers."
+     bug: "280576228"
+}
