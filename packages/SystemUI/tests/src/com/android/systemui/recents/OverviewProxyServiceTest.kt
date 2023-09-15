@@ -33,7 +33,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.model.SysUiState
-import com.android.systemui.navigationbar.NavigationBarControllerImpl
+import com.android.systemui.navigationbar.NavigationBarController
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.recents.OverviewProxyService.ACTION_QUICKSTEP
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
@@ -93,7 +93,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     // The following mocks belong to not-yet-tested parts of OverviewProxyService.
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var shellInterface: ShellInterface
-    @Mock private lateinit var navBarController: NavigationBarControllerImpl
+    @Mock private lateinit var navBarController: NavigationBarController
     @Mock private lateinit var centralSurfaces: CentralSurfaces
     @Mock private lateinit var shadeViewController: ShadeViewController
     @Mock private lateinit var screenPinningRequest: ScreenPinningRequest

@@ -250,7 +250,7 @@ public class NavigationBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(AssistManager.class, mAssistManager);
         mDependency.injectMockDependency(KeyguardStateController.class);
         mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
-        mDependency.injectMockDependency(NavigationBarControllerImpl.class);
+        mDependency.injectMockDependency(NavigationBarController.class);
         mDependency.injectTestDependency(OverviewProxyService.class, mOverviewProxyService);
         mDependency.injectTestDependency(NavigationModeController.class, mNavigationModeController);
         TestableLooper.get(this).runWithLooper(() -> {

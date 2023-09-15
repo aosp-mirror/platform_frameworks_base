@@ -55,7 +55,7 @@ public class NavigationBarInflaterViewTest extends SysuiTestCase {
         mDependency.injectMockDependency(AssistManager.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
         mDependency.injectMockDependency(NavigationModeController.class);
-        mDependency.injectMockDependency(NavigationBarControllerImpl.class);
+        mDependency.injectMockDependency(NavigationBarController.class);
 
         mNavBarInflaterView = spy(new NavigationBarInflaterView(mContext, null));
         doNothing().when(mNavBarInflaterView).createInflaters();

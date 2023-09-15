@@ -70,12 +70,11 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-/** A controller to handle navigation bars. */
 @SysUISingleton
 public class NavigationBarControllerImpl implements
         ConfigurationController.ConfigurationListener,
         NavigationModeController.ModeChangedListener,
-        Dumpable {
+        Dumpable, NavigationBarController {
 
     private static final String TAG = NavigationBarControllerImpl.class.getSimpleName();
 
@@ -328,13 +327,7 @@ public class NavigationBarControllerImpl implements
         createNavigationBar(mDisplayManager.getDisplay(displayId), savedState, null /* result */);
     }
 
-    // TODO(b/117478341): I use {@code includeDefaultDisplay} to make this method compatible to
-    // CarStatusBar because they have their own nav bar. Think about a better way for it.
-    /**
-     * Creates navigation bars when car/status bar initializes.
-     *
-     * @param includeDefaultDisplay {@code true} to create navigation bar on default display.
-     */
+    @Override
     public void createNavigationBars(final boolean includeDefaultDisplay,
             RegisterStatusBarResult result) {
         updateAccessibilityButtonModeIfNeeded();
@@ -358,7 +351,8 @@ public class NavigationBarControllerImpl implements
      * @param display the display to add navigation bar on.
      */
     @VisibleForTesting
-    void createNavigationBar(Display display, Bundle savedState, RegisterStatusBarResult result) {
+    void createNavigationBar(Display display, Bundle savedState,
+            RegisterStatusBarResult result) {
         if (display == null) {
             return;
         }
@@ -402,7 +396,8 @@ public class NavigationBarControllerImpl implements
         });
     }
 
-    void removeNavigationBar(int displayId) {
+    @Override
+    public void removeNavigationBar(int displayId) {
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
             navBar.destroyView();
@@ -410,7 +405,7 @@ public class NavigationBarControllerImpl implements
         }
     }
 
-    /** @see NavigationBar#checkNavBarModes() */
+    @Override
     public void checkNavBarModes(int displayId) {
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
@@ -418,7 +413,7 @@ public class NavigationBarControllerImpl implements
         }
     }
 
-    /** @see NavigationBar#finishBarAnimations() */
+    @Override
     public void finishBarAnimations(int displayId) {
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
@@ -426,7 +421,7 @@ public class NavigationBarControllerImpl implements
         }
     }
 
-    /** @see NavigationBar#touchAutoDim() */
+    @Override
     public void touchAutoDim(int displayId) {
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
@@ -434,7 +429,7 @@ public class NavigationBarControllerImpl implements
         }
     }
 
-    /** @see NavigationBar#transitionTo(int, boolean) */
+    @Override
     public void transitionTo(int displayId, @TransitionMode int barMode, boolean animate) {
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
@@ -442,7 +437,7 @@ public class NavigationBarControllerImpl implements
         }
     }
 
-    /** @see NavigationBar#disableAnimationsDuringHide(long) */
+    @Override
     public void disableAnimationsDuringHide(int displayId, long delay) {
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
@@ -450,16 +445,12 @@ public class NavigationBarControllerImpl implements
         }
     }
 
-    /** @return {@link NavigationBarView} on the default display. */
+    @Override
     public @Nullable NavigationBarView getDefaultNavigationBarView() {
         return getNavigationBarView(mDisplayTracker.getDefaultDisplayId());
     }
 
-    /**
-     * @param displayId the ID of display which Navigation bar is on
-     * @return {@link NavigationBarView} on the display with {@code displayId}.
-     *         {@code null} if no navigation bar on that display.
-     */
+    @Override
     public @Nullable NavigationBarView getNavigationBarView(int displayId) {
         NavigationBar navBar = getNavigationBar(displayId);
         return (navBar == null) ? null : navBar.getView();
@@ -469,6 +460,7 @@ public class NavigationBarControllerImpl implements
         return mNavigationBars.get(displayId);
     }
 
+    @Override
     public boolean isOverviewEnabled(int displayId) {
         final NavigationBarView navBarView = getNavigationBarView(displayId);
         if (navBarView != null) {
@@ -478,7 +470,7 @@ public class NavigationBarControllerImpl implements
         }
     }
 
-    /** @return {@link NavigationBar} on the default display. */
+    @Override
     @Nullable
     public NavigationBar getDefaultNavigationBar() {
         return mNavigationBars.get(mDisplayTracker.getDefaultDisplayId());

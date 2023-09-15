@@ -89,7 +89,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBar;
-import com.android.systemui.navigationbar.NavigationBarControllerImpl;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
@@ -150,7 +150,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Lazy<ShadeViewController> mShadeViewControllerLazy;
     private SysUiState mSysUiState;
     private final Handler mHandler;
-    private final Lazy<NavigationBarControllerImpl> mNavBarControllerLazy;
+    private final Lazy<NavigationBarController> mNavBarControllerLazy;
     private final ScreenPinningRequest mScreenPinningRequest;
     private final NotificationShadeWindowController mStatusBarWinController;
     private final Provider<SceneInteractor> mSceneInteractor;
@@ -568,7 +568,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             @Main Executor mainExecutor,
             CommandQueue commandQueue,
             ShellInterface shellInterface,
-            Lazy<NavigationBarControllerImpl> navBarControllerLazy,
+            Lazy<NavigationBarController> navBarControllerLazy,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<ShadeViewController> shadeViewControllerLazy,
             ScreenPinningRequest screenPinningRequest,

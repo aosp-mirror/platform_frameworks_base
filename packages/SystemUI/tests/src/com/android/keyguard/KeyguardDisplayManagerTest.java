@@ -40,7 +40,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.navigationbar.NavigationBarControllerImpl;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -58,7 +58,7 @@ import java.util.concurrent.Executor;
 public class KeyguardDisplayManagerTest extends SysuiTestCase {
 
     @Mock
-    private NavigationBarControllerImpl mNavigationBarController;
+    private NavigationBarController mNavigationBarController;
     @Mock
     private KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     @Mock

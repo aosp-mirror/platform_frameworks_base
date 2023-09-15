@@ -53,7 +53,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.NavigationBarControllerImpl;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.ActivityStarter;
@@ -294,7 +294,7 @@ public class Dependency {
     @Inject Lazy<ShadeController> mShadeController;
     @Inject Lazy<NotificationRemoteInputManager.Callback> mNotificationRemoteInputManagerCallback;
     @Inject Lazy<AppOpsController> mAppOpsController;
-    @Inject Lazy<NavigationBarControllerImpl> mNavigationBarController;
+    @Inject Lazy<NavigationBarController> mNavigationBarController;
     @Inject Lazy<AccessibilityFloatingMenuController> mAccessibilityFloatingMenuController;
     @Inject Lazy<StatusBarStateController> mStatusBarStateController;
     @Inject Lazy<NotificationLockscreenUserManager> mNotificationLockscreenUserManager;
@@ -489,7 +489,7 @@ public class Dependency {
 
         mProviders.put(AppOpsController.class, mAppOpsController::get);
 
-        mProviders.put(NavigationBarControllerImpl.class, mNavigationBarController::get);
+        mProviders.put(NavigationBarController.class, mNavigationBarController::get);
 
         mProviders.put(AccessibilityFloatingMenuController.class,
                 mAccessibilityFloatingMenuController::get);

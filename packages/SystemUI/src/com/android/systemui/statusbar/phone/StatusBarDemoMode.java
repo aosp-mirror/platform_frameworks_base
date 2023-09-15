@@ -31,7 +31,7 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.demomode.DemoModeController;
-import com.android.systemui.navigationbar.NavigationBarControllerImpl;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.util.ViewController;
@@ -54,7 +54,7 @@ public class StatusBarDemoMode extends ViewController<View> implements DemoMode 
     private final View mOperatorNameView;
     private final DemoModeController mDemoModeController;
     private final PhoneStatusBarTransitions mPhoneStatusBarTransitions;
-    private final NavigationBarControllerImpl mNavigationBarController;
+    private final NavigationBarController mNavigationBarController;
     private final int mDisplayId;
 
     @Inject
@@ -63,7 +63,7 @@ public class StatusBarDemoMode extends ViewController<View> implements DemoMode 
             @Named(OPERATOR_NAME_VIEW) View operatorNameView,
             DemoModeController demoModeController,
             PhoneStatusBarTransitions phoneStatusBarTransitions,
-            NavigationBarControllerImpl navigationBarController,
+            NavigationBarController navigationBarController,
             @DisplayId int displayId) {
         super(clockView);
         mClockView = clockView;

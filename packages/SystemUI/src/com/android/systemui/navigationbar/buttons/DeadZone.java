@@ -27,7 +27,7 @@ import android.view.Surface;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.navigationbar.NavigationBarControllerImpl;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 
 import javax.inject.Inject;
@@ -61,7 +61,7 @@ public class DeadZone {
         }
     };
 
-    private final NavigationBarControllerImpl mNavBarController;
+    private final NavigationBarController mNavBarController;
     private final NavigationBarView mNavigationBarView;
 
     private boolean mShouldFlash;
@@ -87,7 +87,7 @@ public class DeadZone {
     @Inject
     public DeadZone(NavigationBarView view) {
         mNavigationBarView = view;
-        mNavBarController = Dependency.get(NavigationBarControllerImpl.class);
+        mNavBarController = Dependency.get(NavigationBarController.class);
         mDisplayId = view.getContext().getDisplayId();
         onConfigurationChanged(HORIZONTAL);
     }

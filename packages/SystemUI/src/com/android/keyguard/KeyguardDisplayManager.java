@@ -45,7 +45,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.navigationbar.NavigationBarControllerImpl;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -65,7 +65,7 @@ public class KeyguardDisplayManager {
     private MediaRouter mMediaRouter = null;
     private final DisplayManager mDisplayService;
     private final DisplayTracker mDisplayTracker;
-    private final Lazy<NavigationBarControllerImpl> mNavigationBarControllerLazy;
+    private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
     private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     private final ConnectedDisplayKeyguardPresentation.Factory
             mConnectedDisplayKeyguardPresentationFactory;
@@ -105,7 +105,7 @@ public class KeyguardDisplayManager {
 
     @Inject
     public KeyguardDisplayManager(Context context,
-            Lazy<NavigationBarControllerImpl> navigationBarControllerLazy,
+            Lazy<NavigationBarController> navigationBarControllerLazy,
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
             DisplayTracker displayTracker,
             @Main Executor mainExecutor,

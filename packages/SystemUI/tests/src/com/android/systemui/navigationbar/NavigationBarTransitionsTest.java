@@ -73,7 +73,7 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
         mDependency.injectMockDependency(OverviewProxyService.class);
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(KeyguardStateController.class);
-        mDependency.injectMockDependency(NavigationBarControllerImpl.class);
+        mDependency.injectMockDependency(NavigationBarController.class);
         mDependency.injectTestDependency(EdgeBackGestureHandler.Factory.class,
                 mEdgeBackGestureHandlerFactory);
         doReturn(mContext)

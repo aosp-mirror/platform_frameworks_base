@@ -33,7 +33,7 @@ import android.view.View;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.navigationbar.NavigationBarControllerImpl;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarTransitions;
 
@@ -279,7 +279,7 @@ public class InvocationLightsView extends View
 
     private void attemptRegisterNavBarListener() {
         if (!mRegistered) {
-            NavigationBarControllerImpl controller = Dependency.get(NavigationBarControllerImpl.class);
+            NavigationBarController controller = Dependency.get(NavigationBarController.class);
             if (controller == null) {
                 return;
             }
@@ -296,7 +296,7 @@ public class InvocationLightsView extends View
 
     private void attemptUnregisterNavBarListener() {
         if (mRegistered) {
-            NavigationBarControllerImpl controller = Dependency.get(NavigationBarControllerImpl.class);
+            NavigationBarController controller = Dependency.get(NavigationBarController.class);
             if (controller == null) {
                 return;
             }

@@ -81,7 +81,7 @@ public class NavigationBarButtonTest extends SysuiTestCase {
         mDependency.injectMockDependency(AssistManager.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
         mDependency.injectMockDependency(KeyguardStateController.class);
-        mDependency.injectMockDependency(NavigationBarControllerImpl.class);
+        mDependency.injectMockDependency(NavigationBarController.class);
         mDependency.injectTestDependency(EdgeBackGestureHandler.Factory.class,
                 mEdgeBackGestureHandlerFactory);
         mNavBar = new NavigationBarView(context, null);
