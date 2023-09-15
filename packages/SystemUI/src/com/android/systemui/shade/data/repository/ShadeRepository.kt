@@ -56,6 +56,30 @@ interface ShadeRepository {
     @Deprecated("Use ShadeInteractor.shadeExpansion instead")
     val legacyShadeExpansion: StateFlow<Float>
 
+    /**
+     * NotificationPanelViewController.mTracking as a flow. "Tracking" means that the user is moving
+     * the shade up or down with a pointer. Going forward, this concept will be replaced by checks
+     * for whether a transition was driven by user input instead of whether a pointer is currently
+     * touching the screen, i.e. after the user has lifted their finger to fling the shade, these
+     * values would be different.
+     */
+    @Deprecated("Use ShadeInteractor instead") val legacyShadeTracking: StateFlow<Boolean>
+
+    /**
+     * QuickSettingsController.mTracking as a flow. "Tracking" means that the user is moving quick
+     * settings up or down with a pointer. Going forward, this concept will be replaced by checks
+     * for whether a transition was driven by user input instead of whether a pointer is currently
+     * touching the screen, i.e. after the user has lifted their finger to fling the QS, these
+     * values would be different.
+     */
+    @Deprecated("Use ShadeInteractor instead") val legacyQsTracking: StateFlow<Boolean>
+
+    /** Sets whether the user is moving Quick Settings with a pointer */
+    fun setLegacyQsTracking(legacyQsTracking: Boolean)
+
+    /** Sets whether the user is moving the shade with a pointer */
+    fun setLegacyShadeTracking(tracking: Boolean)
+
     /** Amount shade has expanded with regard to the UDFPS location */
     val udfpsTransitionToFullShadeProgress: StateFlow<Float>
 
@@ -122,6 +146,24 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     private val _legacyShadeExpansion = MutableStateFlow(0f)
     @Deprecated("Use ShadeInteractor.shadeExpansion instead")
     override val legacyShadeExpansion: StateFlow<Float> = _legacyShadeExpansion.asStateFlow()
+
+    private val _legacyShadeTracking = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyShadeTracking: StateFlow<Boolean> = _legacyShadeTracking.asStateFlow()
+
+    private val _legacyQsTracking = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyQsTracking: StateFlow<Boolean> = _legacyQsTracking.asStateFlow()
+
+    @Deprecated("Should only be called by NPVC and tests")
+    override fun setLegacyQsTracking(legacyQsTracking: Boolean) {
+        _legacyQsTracking.value = legacyQsTracking
+    }
+
+    @Deprecated("Should only be called by NPVC and tests")
+    override fun setLegacyShadeTracking(tracking: Boolean) {
+        _legacyShadeTracking.value = tracking
+    }
 
     override fun setQsExpansion(qsExpansion: Float) {
         _qsExpansion.value = qsExpansion
