@@ -1436,6 +1436,92 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return extras;
     }
 
+    ArchivedPackageParcel getArchivedPackageInternal(@NonNull String packageName, int userId) {
+        Objects.requireNonNull(packageName);
+        int binderUid = Binder.getCallingUid();
+
+        Computer snapshot = snapshotComputer();
+        snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
+                "getArchivedPackage");
+
+        ArchivedPackageParcel archPkg = new ArchivedPackageParcel();
+        archPkg.packageName = packageName;
+
+        ArchiveState archiveState;
+        synchronized (mLock) {
+            PackageSetting ps = mSettings.getPackageLPr(packageName);
+            if (ps == null) {
+                return null;
+            }
+            var psi = ps.getUserStateOrDefault(userId);
+            archiveState = psi.getArchiveState();
+            if (archiveState == null && !psi.isInstalled()) {
+                return null;
+            }
+
+            archPkg.signingDetails = ps.getSigningDetails();
+
+            long longVersionCode = ps.getVersionCode();
+            archPkg.versionCodeMajor = (int) (longVersionCode >> 32);
+            archPkg.versionCode = (int) longVersionCode;
+
+            // TODO(b/297916136): extract target sdk version.
+            archPkg.targetSdkVersion = MIN_INSTALLABLE_TARGET_SDK;
+
+            // These get translated in flags important for user data management.
+            archPkg.defaultToDeviceProtectedStorage = String.valueOf(
+                    ps.isDefaultToDeviceProtectedStorage());
+            archPkg.requestLegacyExternalStorage = String.valueOf(
+                    ps.isRequestLegacyExternalStorage());
+            archPkg.userDataFragile = String.valueOf(ps.isUserDataFragile());
+        }
+
+        try {
+            if (archiveState != null) {
+                archPkg.archivedActivities = PackageArchiver.createArchivedActivities(
+                        archiveState);
+            } else {
+                var mainActivities =
+                        mInstallerService.mPackageArchiver.getLauncherActivityInfos(packageName,
+                                userId);
+                archPkg.archivedActivities = PackageArchiver.createArchivedActivities(
+                        mainActivities);
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Package does not have a main activity", e);
+        }
+
+        return archPkg;
+    }
+
+    void createArchiveStateIfNeeded(PackageSetting pkgSetting, ArchivedPackageParcel archivePackage,
+            int[] userIds) {
+        if (pkgSetting == null || archivePackage == null
+                || archivePackage.archivedActivities == null || userIds == null
+                || userIds.length == 0) {
+            return;
+        }
+
+        String responsibleInstallerPackage = PackageArchiver.getResponsibleInstallerPackage(
+                pkgSetting);
+        // TODO(b/278553670) Check if responsibleInstallerPackage supports unarchival.
+        if (TextUtils.isEmpty(responsibleInstallerPackage)) {
+            Slog.e(TAG, "Can't create archive state: responsible installer is empty");
+            return;
+        }
+        for (int userId : userIds) {
+            var archiveState = PackageArchiver.createArchiveState(archivePackage, userId,
+                    responsibleInstallerPackage);
+            if (archiveState == null) {
+                continue;
+            }
+            pkgSetting
+                    .modifyUserState(userId)
+                    .setArchiveState(archiveState);
+        }
+    }
+
+
     void scheduleWriteSettings() {
         // We normally invalidate when we write settings, but in cases where we delay and
         // coalesce settings writes, this strategy would have us invalidate the cache too late.
@@ -6300,61 +6386,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public ArchivedPackageParcel getArchivedPackage(@NonNull String packageName, int userId) {
-            Objects.requireNonNull(packageName);
-            int binderUid = Binder.getCallingUid();
-
-            Computer snapshot = snapshotComputer();
-            snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
-                    "getArchivedPackage");
-
-            ArchivedPackageParcel archPkg = new ArchivedPackageParcel();
-            archPkg.packageName = packageName;
-
-            ArchiveState archiveState;
-            synchronized (mLock) {
-                PackageSetting ps = mSettings.getPackageLPr(packageName);
-                if (ps == null) {
-                    return null;
-                }
-                var psi = ps.getUserStateOrDefault(userId);
-                archiveState = psi.getArchiveState();
-                if (archiveState == null && !psi.isInstalled()) {
-                    return null;
-                }
-
-                archPkg.signingDetails = ps.getSigningDetails();
-
-                long longVersionCode = ps.getVersionCode();
-                archPkg.versionCodeMajor = (int) (longVersionCode >> 32);
-                archPkg.versionCode = (int) longVersionCode;
-
-                // TODO(b/297916136): extract target sdk version.
-                archPkg.targetSdkVersion = MIN_INSTALLABLE_TARGET_SDK;
-
-                // These get translated in flags important for user data management.
-                archPkg.defaultToDeviceProtectedStorage = String.valueOf(
-                        ps.isDefaultToDeviceProtectedStorage());
-                archPkg.requestLegacyExternalStorage = String.valueOf(
-                        ps.isRequestLegacyExternalStorage());
-                archPkg.userDataFragile = String.valueOf(ps.isUserDataFragile());
-            }
-
-            try {
-                if (archiveState != null) {
-                    archPkg.archivedActivities = PackageArchiver.createArchivedActivities(
-                            archiveState);
-                } else {
-                    var mainActivities =
-                            mInstallerService.mPackageArchiver.getLauncherActivityInfos(packageName,
-                                    userId);
-                    archPkg.archivedActivities = PackageArchiver.createArchivedActivities(
-                            mainActivities);
-                }
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Package does not have a main activity", e);
-            }
-
-            return archPkg;
+            return getArchivedPackageInternal(packageName, userId);
         }
 
         /**

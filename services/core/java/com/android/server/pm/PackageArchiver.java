@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ArchivedActivityParcel;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageInstaller;
@@ -176,13 +177,34 @@ public class PackageArchiver {
         return archiveState;
     }
 
-    static ArchiveState createArchiveStateInternal(String packageName, int userId,
+    static ArchiveState createArchiveState(@NonNull ArchivedPackageParcel archivedPackage,
+            int userId, String installerPackage) {
+        try {
+            var packageName = archivedPackage.packageName;
+            var mainActivities = archivedPackage.archivedActivities;
+            List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>(mainActivities.length);
+            for (int i = 0, size = mainActivities.length; i < size; ++i) {
+                var mainActivity = mainActivities[i];
+                Path iconPath = storeIconForParcel(packageName, mainActivity, userId, i);
+                ArchiveActivityInfo activityInfo = new ArchiveActivityInfo(
+                        mainActivity.title, iconPath, null);
+                archiveActivityInfos.add(activityInfo);
+            }
+
+            return new ArchiveState(archiveActivityInfos, installerPackage);
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to create archive state", e);
+            return null;
+        }
+    }
+
+    ArchiveState createArchiveStateInternal(String packageName, int userId,
             List<LauncherActivityInfo> mainActivities, String installerPackage)
             throws IOException {
         List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>(mainActivities.size());
         for (int i = 0, size = mainActivities.size(); i < size; i++) {
             LauncherActivityInfo mainActivity = mainActivities.get(i);
-            Path iconPath = storeIcon(packageName, mainActivity, userId);
+            Path iconPath = storeIcon(packageName, mainActivity, userId, i);
             ArchiveActivityInfo activityInfo = new ArchiveActivityInfo(
                     mainActivity.getLabel().toString(), iconPath, null);
             archiveActivityInfos.add(activityInfo);
@@ -192,17 +214,30 @@ public class PackageArchiver {
     }
 
     // TODO(b/298452477) Handle monochrome icons.
+    private static Path storeIconForParcel(String packageName, ArchivedActivityParcel mainActivity,
+            @UserIdInt int userId, int index) throws IOException {
+        if (mainActivity.iconBitmap == null) {
+            return null;
+        }
+        File iconsDir = createIconsDir(userId);
+        File iconFile = new File(iconsDir, packageName + "-" + index + ".png");
+        try (FileOutputStream out = new FileOutputStream(iconFile)) {
+            out.write(mainActivity.iconBitmap);
+            out.flush();
+        }
+        return iconFile.toPath();
+    }
+
     @VisibleForTesting
-    static Path storeIcon(String packageName, LauncherActivityInfo mainActivity,
-            @UserIdInt int userId)
-            throws IOException {
+    Path storeIcon(String packageName, LauncherActivityInfo mainActivity,
+            @UserIdInt int userId, int index) throws IOException {
         int iconResourceId = mainActivity.getActivityInfo().getIconResource();
         if (iconResourceId == 0) {
             // The app doesn't define an icon. No need to store anything.
             return null;
         }
         File iconsDir = createIconsDir(userId);
-        File iconFile = new File(iconsDir, packageName + "-" + mainActivity.getName() + ".png");
+        File iconFile = new File(iconsDir, packageName + "-" + index + ".png");
         Bitmap icon = drawableToBitmap(mainActivity.getIcon(/* density= */ 0));
         try (FileOutputStream out = new FileOutputStream(iconFile)) {
             // Note: Quality is ignored for PNGs.
@@ -232,6 +267,9 @@ public class PackageArchiver {
      */
     public boolean verifySupportsUnarchival(String installerPackage) {
         // TODO(b/278553670) Check if installerPackage supports unarchival.
+        if (TextUtils.isEmpty(installerPackage)) {
+            return false;
+        }
         return true;
     }
 
@@ -344,7 +382,7 @@ public class PackageArchiver {
         return DEFAULT_UNARCHIVE_FOREGROUND_TIMEOUT_MS;
     }
 
-    private String getResponsibleInstallerPackage(PackageStateInternal ps) {
+    static String getResponsibleInstallerPackage(PackageStateInternal ps) {
         return TextUtils.isEmpty(ps.getInstallSource().mUpdateOwnerPackageName)
                 ? ps.getInstallSource().mInstallerPackageName
                 : ps.getInstallSource().mUpdateOwnerPackageName;
@@ -551,4 +589,5 @@ public class PackageArchiver {
         }
 
         return activities.toArray(new ArchivedActivityParcel[activities.size()]);
-    }}
+    }
+}

@@ -3395,8 +3395,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         "Archived installation of this package is not allowed.");
             }
 
-            if (!isInstalledByAdb(getInstallSource().mInitiatingPackageName)
-                    && !mPm.mInstallerService.mPackageArchiver.verifySupportsUnarchival(
+            if (!mPm.mInstallerService.mPackageArchiver.verifySupportsUnarchival(
                     getInstallSource().mInstallerPackageName)) {
                 throw new PackageManagerException(
                         PackageManager.INSTALL_FAILED_SESSION_INVALID,

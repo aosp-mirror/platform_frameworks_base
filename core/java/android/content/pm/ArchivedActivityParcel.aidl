@@ -16,8 +16,6 @@
 
 package android.content.pm;
 
-import android.graphics.Bitmap;
-
 /** @hide */
 parcelable ArchivedActivityParcel {
     String title;

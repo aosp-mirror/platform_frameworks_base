@@ -18,6 +18,7 @@ package android.content.pm.parsing;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.PackageInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.VerifierInfo;
@@ -112,29 +113,11 @@ public class PackageLite {
      * Indicates if this package is a sdk.
      */
     private final boolean mIsSdkLibrary;
+
     /**
-     *  Set to <code>false</code> if the application does not wish to permit any OS-driven
-     *  backups of its data; <code>true</code> otherwise.
+     * Archival install info.
      */
-    private final boolean mBackupAllowed;
-    /**
-     * When set, the default data storage directory for this app is pointed at
-     * the device-protected location.
-     */
-    private final boolean mDefaultToDeviceProtectedStorage;
-    /**
-     * If {@code true} this app requests full external storage access.
-     */
-    private final boolean mRequestLegacyExternalStorage;
-    /**
-     * Indicates whether this application has declared its user data as fragile, causing the
-     * system to prompt the user on whether to keep the user data on uninstall.
-     */
-    private final boolean mUserDataFragile;
-    /**
-     * Indicates whether this application's data will be cleared on a failed restore.
-     */
-    private final boolean mClearUserDataOnFailedRestoreAllowed;
+    private final @Nullable ArchivedPackageParcel mArchivedPackage;
 
     public PackageLite(String path, String baseApkPath, ApkLite baseApk,
             String[] splitNames, boolean[] isFeatureSplits, String[] usesSplitNames,
@@ -171,11 +154,7 @@ public class PackageLite {
         mSplitApkPaths = splitApkPaths;
         mSplitRevisionCodes = splitRevisionCodes;
         mTargetSdk = targetSdk;
-        mBackupAllowed = baseApk.isBackupAllowed();
-        mDefaultToDeviceProtectedStorage = baseApk.isDefaultToDeviceProtectedStorage();
-        mRequestLegacyExternalStorage = baseApk.isRequestLegacyExternalStorage();
-        mUserDataFragile = baseApk.isUserDataFragile();
-        mClearUserDataOnFailedRestoreAllowed = baseApk.isClearUserDataOnFailedRestoreAllowed();
+        mArchivedPackage = baseApk.getArchivedPackage();
     }
 
     /**
@@ -455,53 +434,18 @@ public class PackageLite {
     }
 
     /**
-     *  Set to <code>false</code> if the application does not wish to permit any OS-driven
-     *  backups of its data; <code>true</code> otherwise.
+     * Archival install info.
      */
     @DataClass.Generated.Member
-    public boolean isBackupAllowed() {
-        return mBackupAllowed;
-    }
-
-    /**
-     * When set, the default data storage directory for this app is pointed at
-     * the device-protected location.
-     */
-    @DataClass.Generated.Member
-    public boolean isDefaultToDeviceProtectedStorage() {
-        return mDefaultToDeviceProtectedStorage;
-    }
-
-    /**
-     * If {@code true} this app requests full external storage access.
-     */
-    @DataClass.Generated.Member
-    public boolean isRequestLegacyExternalStorage() {
-        return mRequestLegacyExternalStorage;
-    }
-
-    /**
-     * Indicates whether this application has declared its user data as fragile, causing the
-     * system to prompt the user on whether to keep the user data on uninstall.
-     */
-    @DataClass.Generated.Member
-    public boolean isUserDataFragile() {
-        return mUserDataFragile;
-    }
-
-    /**
-     * Indicates whether this application's data will be cleared on a failed restore.
-     */
-    @DataClass.Generated.Member
-    public boolean isClearUserDataOnFailedRestoreAllowed() {
-        return mClearUserDataOnFailedRestoreAllowed;
+    public @Nullable ArchivedPackageParcel getArchivedPackage() {
+        return mArchivedPackage;
     }
 
     @DataClass.Generated(
-            time = 1693513525097L,
+            time = 1694792176268L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/PackageLite.java",
-            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.NonNull java.lang.String mBaseApkPath\nprivate final @android.annotation.Nullable java.lang.String[] mSplitApkPaths\nprivate final @android.annotation.Nullable java.lang.String[] mSplitNames\nprivate final @android.annotation.Nullable java.lang.String[] mUsesSplitNames\nprivate final @android.annotation.Nullable java.lang.String[] mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mBaseRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String>[] mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String>[] mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mTargetSdk\nprivate final  int mBaseRevisionCode\nprivate final @android.annotation.Nullable int[] mSplitRevisionCodes\nprivate final  int mInstallLocation\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.NonNull android.content.pm.SigningDetails mSigningDetails\nprivate final @android.annotation.Nullable boolean[] mIsFeatureSplits\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mProfileableByShell\nprivate final  boolean mUseEmbeddedDex\nprivate final  boolean mIsSdkLibrary\nprivate final  boolean mBackupAllowed\nprivate final  boolean mDefaultToDeviceProtectedStorage\nprivate final  boolean mRequestLegacyExternalStorage\nprivate final  boolean mUserDataFragile\nprivate final  boolean mClearUserDataOnFailedRestoreAllowed\npublic  java.util.List<java.lang.String> getAllApkPaths()\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass PackageLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.NonNull java.lang.String mBaseApkPath\nprivate final @android.annotation.Nullable java.lang.String[] mSplitApkPaths\nprivate final @android.annotation.Nullable java.lang.String[] mSplitNames\nprivate final @android.annotation.Nullable java.lang.String[] mUsesSplitNames\nprivate final @android.annotation.Nullable java.lang.String[] mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mBaseRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String>[] mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String>[] mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mTargetSdk\nprivate final  int mBaseRevisionCode\nprivate final @android.annotation.Nullable int[] mSplitRevisionCodes\nprivate final  int mInstallLocation\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.NonNull android.content.pm.SigningDetails mSigningDetails\nprivate final @android.annotation.Nullable boolean[] mIsFeatureSplits\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mProfileableByShell\nprivate final  boolean mUseEmbeddedDex\nprivate final  boolean mIsSdkLibrary\nprivate final @android.annotation.Nullable android.content.pm.ArchivedPackageParcel mArchivedPackage\npublic  java.util.List<java.lang.String> getAllApkPaths()\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass PackageLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
     @Deprecated
     private void __metadata() {}
 
