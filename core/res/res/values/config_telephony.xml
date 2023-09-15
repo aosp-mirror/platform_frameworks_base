@@ -225,4 +225,8 @@
     <bool name="telephony_analytics_switch">true</bool>
     <java-symbol type="bool" name="telephony_analytics_switch" />
 
+    <!-- Whether to enable modem on boot if behavior is not defined -->
+    <bool name="config_enable_cellular_on_boot_default">true</bool>
+    <java-symbol type="bool" name="config_enable_cellular_on_boot_default" />
+
 </resources>
