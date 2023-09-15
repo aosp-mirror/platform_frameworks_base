@@ -376,7 +376,7 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Heshtje\ne plotë"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Vetëm\nme prioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Vetëm\nalarmet"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet me valë • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet në mënyrë wireless • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet shpejt • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet ngadalë • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>

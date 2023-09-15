@@ -169,17 +169,17 @@
     <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Configura"</string>
     <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Non ora"</string>
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"L\'operazione è necessaria per migliorare la sicurezza e le prestazioni"</string>
-    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Riconfigura lo sblocco con l\'impronta"</string>
-    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Sblocco con l\'impronta"</string>
-    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Configura lo sblocco con l\'impronta"</string>
-    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Per riconfigurare lo sblocco con l\'impronta, i modelli e le immagini dell\'impronta correnti verranno eliminati.\n\nDopo la cancellazione, dovrai riconfigurare la funzionalità per usare l\'impronta per sbloccare il telefono o verificare la tua identità."</string>
-    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Per riconfigurare lo sblocco con l\'impronta, il modello e le immagini dell\'impronta correnti verranno eliminati.\n\nDopo la cancellazione, dovrai riconfigurare la funzionalità per usare l\'impronta per sbloccare il telefono o verificare la tua identità."</string>
-    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Impossibile configurare lo sblocco con l\'impronta. Vai alle Impostazioni e riprova."</string>
-    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Riconfigura lo sblocco con il volto"</string>
-    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Sblocco con il volto"</string>
-    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Configura lo sblocco con il volto"</string>
-    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Per riconfigurare lo sblocco con il volto, l\'attuale modello del volto verrà eliminato.\n\nDovrai riconfigurare questa funzionalità per usare il volto per sbloccare il telefono."</string>
-    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Impossibile configurare lo sblocco con il volto. Vai alle Impostazioni e riprova."</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Riconfigura lo Sblocco con l\'Impronta"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Sblocco con l\'Impronta"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Configura lo Sblocco con l\'Impronta"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Per riconfigurare lo Sblocco con l\'Impronta, i modelli e le immagini dell\'impronta correnti verranno eliminati.\n\nDopo la cancellazione, dovrai riconfigurare la funzionalità per usare l\'impronta per sbloccare il telefono o verificare la tua identità."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Per riconfigurare lo Sblocco con l\'Impronta, il modello e le immagini dell\'impronta correnti verranno eliminati.\n\nDopo la cancellazione, dovrai riconfigurare la funzionalità per usare l\'impronta per sbloccare il telefono o verificare la tua identità."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Impossibile configurare lo Sblocco con l\'Impronta. Vai alle Impostazioni e riprova."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Riconfigura lo Sblocco con il Volto"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Sblocco con il Volto"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Configura lo Sblocco con il Volto"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Per riconfigurare lo Sblocco con il Volto, l\'attuale modello del volto verrà eliminato.\n\nDovrai riconfigurare questa funzionalità per usare il volto per sbloccare il telefono."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Impossibile configurare lo Sblocco con il Volto. Vai alle Impostazioni e riprova."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Tocca il sensore di impronte"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Premi l\'icona Sblocca per continuare"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Impossibile riconoscere il volto. Usa l\'impronta."</string>
@@ -187,7 +187,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Volto non riconosciuto"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Usa l\'impronta"</string>
-    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Sblocco con il volto non disponibile"</string>
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Sblocco con il Volto non disponibile"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth collegato."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Percentuale della batteria sconosciuta."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Connesso a <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -361,7 +361,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Sbloccato con il volto"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Volto riconosciuto"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Scorri verso l\'alto per riprovare"</string>
-    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Scorri verso l\'alto per riprovare lo sblocco con il volto"</string>
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Scorri verso l\'alto per riprovare lo Sblocco con il Volto"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Sblocca per usare NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Questo dispositivo appartiene alla tua organizzazione"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Questo dispositivo appartiene a <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
