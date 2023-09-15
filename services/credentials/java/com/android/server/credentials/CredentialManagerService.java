@@ -35,11 +35,13 @@ import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
+import android.credentials.GetCandidateCredentialsRequest;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
+import android.credentials.IGetCandidateCredentialsCallback;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.IPrepareGetCredentialCallback;
 import android.credentials.ISetEnabledProvidersCallback;
@@ -460,6 +462,17 @@ public final class CredentialManagerService
     }
 
     final class CredentialManagerServiceStub extends ICredentialManager.Stub {
+        @Override
+        public ICancellationSignal getCandidateCredentials(
+                GetCandidateCredentialsRequest request,
+                IGetCandidateCredentialsCallback callback,
+                final String callingPackage) {
+            Slog.i(TAG, "starting getCandidateCredentials with callingPackage: "
+                    + callingPackage);
+            // TODO(): Implement
+            return CancellationSignal.createTransport();
+        }
+
         @Override
         public ICancellationSignal executeGetCredential(
                 GetCredentialRequest request,
