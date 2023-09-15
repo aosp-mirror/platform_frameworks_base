@@ -41,7 +41,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
@@ -109,7 +109,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val biometricPromptRepository = FakePromptRepository()
     private val fingerprintRepository = FakeFingerprintPropertyRepository()
-    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
+    private val displayStateRepository = FakeDisplayStateRepository()
     private val credentialInteractor = FakeCredentialInteractor()
     private val bpCredentialInteractor = PromptCredentialInteractor(
         Dispatchers.Main.immediate,
@@ -141,7 +141,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
                     testScope.backgroundScope,
                     mContext,
                     fakeExecutor,
-                    rearDisplayStateRepository,
+                    displayStateRepository,
                     displayRepository,
             )
     }
@@ -520,6 +520,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             displayStateInteractor,
             promptSelectorInteractor,
             vibrator,
+            context,
             featureFlags
         ),
         { credentialViewModel },

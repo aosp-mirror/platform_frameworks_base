@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import android.util.Property;
 import android.view.View;
@@ -124,7 +125,16 @@ public class KeyguardVisibilityHelper {
                     true /* animate */);
             log("keyguardFadingAway transition w/ Y Aniamtion");
         } else if (statusBarState == KEYGUARD) {
-            if (keyguardFadingAway) {
+            // Sometimes, device will be unlocked and then locked very quickly.
+            // keyguardFadingAway hasn't been set to false cause unlock animation hasn't finished
+            // So we should not animate keyguard fading away in this case (when oldState is SHADE)
+            if (oldStatusBarState != SHADE) {
+                log("statusBarState == KEYGUARD && oldStatusBarState != SHADE");
+            } else {
+                log("statusBarState == KEYGUARD && oldStatusBarState == SHADE");
+            }
+
+            if (keyguardFadingAway && oldStatusBarState != SHADE) {
                 mKeyguardViewVisibilityAnimating = true;
                 AnimationProperties animProps = new AnimationProperties()
                         .setDelay(0)

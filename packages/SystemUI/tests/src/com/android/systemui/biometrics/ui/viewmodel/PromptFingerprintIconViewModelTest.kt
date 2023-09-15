@@ -4,9 +4,9 @@ import android.content.res.Configuration
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
@@ -43,7 +43,7 @@ class PromptFingerprintIconViewModelTest : SysuiTestCase() {
     private lateinit var displayRepository: FakeDisplayRepository
     private lateinit var fingerprintRepository: FakeFingerprintPropertyRepository
     private lateinit var promptRepository: FakePromptRepository
-    private lateinit var rearDisplayStateRepository: FakeRearDisplayStateRepository
+    private lateinit var displayStateRepository: FakeDisplayStateRepository
 
     private val testScope = TestScope(StandardTestDispatcher())
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
@@ -57,7 +57,7 @@ class PromptFingerprintIconViewModelTest : SysuiTestCase() {
         displayRepository = FakeDisplayRepository()
         fingerprintRepository = FakeFingerprintPropertyRepository()
         promptRepository = FakePromptRepository()
-        rearDisplayStateRepository = FakeRearDisplayStateRepository()
+        displayStateRepository = FakeDisplayStateRepository()
 
         promptSelectorInteractor =
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
@@ -66,7 +66,7 @@ class PromptFingerprintIconViewModelTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 mContext,
                 fakeExecutor,
-                rearDisplayStateRepository,
+                displayStateRepository,
                 displayRepository,
             )
         viewModel = PromptFingerprintIconViewModel(displayStateInteractor, promptSelectorInteractor)

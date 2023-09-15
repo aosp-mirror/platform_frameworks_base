@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.binder
 import android.content.res.ColorStateList
 import android.view.View
 import android.view.View.GONE
-import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -34,12 +33,11 @@ import com.android.systemui.common.ui.binder.ContentDescriptionViewBinder
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
-import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewBinding
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewVisibilityHelper
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -106,20 +104,11 @@ object MobileIconBinder {
 
                     launch {
                         visibilityState.collect { state ->
-                            when (state) {
-                                STATE_ICON -> {
-                                    mobileGroupView.visibility = VISIBLE
-                                    dotView.visibility = GONE
-                                }
-                                STATE_DOT -> {
-                                    mobileGroupView.visibility = INVISIBLE
-                                    dotView.visibility = VISIBLE
-                                }
-                                STATE_HIDDEN -> {
-                                    mobileGroupView.visibility = INVISIBLE
-                                    dotView.visibility = INVISIBLE
-                                }
-                            }
+                            ModernStatusBarViewVisibilityHelper.setVisibilityState(
+                                state,
+                                mobileGroupView,
+                                dotView,
+                            )
                         }
                     }
 

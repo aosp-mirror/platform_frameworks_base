@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Voorspellende animaties voor gebaren voor terug"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Systeemanimaties aanzetten voor voorspellende animaties voor gebaren voor terug."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Met deze instelling zet je systeemanimaties aan voor voorspellende gebaaranimaties. Je moet enableOnBackInvokedCallback per app instellen op True in het manifestbestand."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Naar links verplaatsen"</item>
-    <item msgid="5425394847942513942">"Omlaag verplaatsen"</item>
-    <item msgid="7728484337962740316">"Naar rechts verplaatsen"</item>
-    <item msgid="324200556467459329">"Omhoog verplaatsen"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="not_specified" msgid="5423502443185110328">"Niet opgegeven"</string>
     <string name="neuter" msgid="2075249330106127310">"Onzijdig"</string>

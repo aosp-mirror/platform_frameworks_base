@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Kanselleer"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Saambinding bied toegang tot jou kontakte en oproepgeskiedenis wanneer dit gekoppel is."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Kon nie saambind met <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nie."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Kon nie met <xliff:g id="DEVICE_NAME">%1$s</xliff:g> saambind nie weens \'n verkeerde PIN of wagwoordsleutel."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Kon nie met <xliff:g id="DEVICE_NAME">%1$s</xliff:g> saambind nie weens \'n verkeerde PIN of toegangsleutel."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Kan nie met <xliff:g id="DEVICE_NAME">%1$s</xliff:g> kommunikeer nie."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Saambinding verwerp deur <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Rekenaar"</string>
@@ -580,7 +580,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Beperkte profiel"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Voeg nuwe gebruiker by?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Jy kan hierdie toestel met ander mense deel deur bykomende gebruikers te skep. Elke gebruiker het hulle eie spasie wat hulle kan pasmaak met programme, muurpapier en so meer. Gebruikers kan ook toestelinstellings wat almal raak, soos wi-fi, aanpas.\n\nWanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul eie spasie opstel.\n\nEnige gebruiker kan programme vir alle ander gebruikers opdateer. Toeganklikheidinstellings en -dienste sal dalk nie na die nuwe gebruiker oorgedra word nie."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul spasie opstel.\n\nEnige gebruiker kan programme vir al die ander gebruikers opdateer."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul spasie opstel.\n\nEnige gebruiker kan apps vir al die ander gebruikers opdateer."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Maak hierdie gebruiker ’n admin?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Admins het spesiale voorregte wat ander gebruikers nie het nie. ’n Admin kan alle gebruikers bestuur, hierdie toestel opdateer of terugstel, instellings wysig, alle geïnstalleerde apps sien, en adminvoorregte vir ander mense gee of herroep."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Maak admin"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Voorspellingteruggebaaranimasies"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Aktiveer stelselanimasies vir voorspellingteruggebaar."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Hierdie instelling aktiveer stelselanimasies vir voorspellinggebaaranimasie. Dit vereis dat enableOnBackInvokedCallback per program op waar gestel word in die manifeslêer."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Skuif links"</item>
-    <item msgid="5425394847942513942">"Skuif af"</item>
-    <item msgid="7728484337962740316">"Skuif regs"</item>
-    <item msgid="324200556467459329">"Skuif op"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"Nie gespesifiseer nie"</string>
     <string name="neuter" msgid="2075249330106127310">"Neutrum"</string>

@@ -134,8 +134,6 @@ public class LockIconView extends FrameLayout implements Dumpable {
         mLockIcon.setPadding(mLockIconPadding, mLockIconPadding, mLockIconPadding,
                 mLockIconPadding);
 
-        // mSensorProps coordinates assume portrait mode which is OK b/c the keyguard is always in
-        // portrait.
         mSensorRect.set(mLockIconCenter.x - mRadius,
                 mLockIconCenter.y - mRadius,
                 mLockIconCenter.x + mRadius,

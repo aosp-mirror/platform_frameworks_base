@@ -56,7 +56,7 @@ import com.android.systemui.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
@@ -117,7 +117,7 @@ class SideFpsControllerTest : SysuiTestCase() {
     @Captor lateinit var overlayViewParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
     private lateinit var displayRepository: FakeDisplayRepository
-    private lateinit var rearDisplayStateRepository: FakeRearDisplayStateRepository
+    private lateinit var displayStateRepository: FakeDisplayStateRepository
     private lateinit var keyguardBouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     private lateinit var displayStateInteractor: DisplayStateInteractor
@@ -145,7 +145,7 @@ class SideFpsControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         displayRepository = FakeDisplayRepository()
-        rearDisplayStateRepository = FakeRearDisplayStateRepository()
+        displayStateRepository = FakeDisplayStateRepository()
         keyguardBouncerRepository = FakeKeyguardBouncerRepository()
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
@@ -161,7 +161,7 @@ class SideFpsControllerTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 context,
                 executor,
-                rearDisplayStateRepository,
+                displayStateRepository,
                 displayRepository,
             )
 
@@ -273,7 +273,7 @@ class SideFpsControllerTest : SysuiTestCase() {
                 TestCoroutineScope(),
                 dumpManager
             )
-        rearDisplayStateRepository.setIsInRearDisplayMode(inRearDisplayMode)
+        displayStateRepository.setIsInRearDisplayMode(inRearDisplayMode)
 
         overlayController =
             ArgumentCaptor.forClass(ISidefpsController::class.java)

@@ -1,6 +1,3 @@
-# Preserve line number information for debugging stack traces.
--keepattributes SourceFile,LineNumberTable
-
 -keep class com.android.systemui.VendorServices
 
 # the `#inject` methods are accessed via reflection to work on ContentProviders

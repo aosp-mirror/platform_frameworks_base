@@ -12,20 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.biometrics.data.repository
+package com.android.systemui.statusbar.policy.dagger
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Qualifier
 
-class FakeRearDisplayStateRepository : RearDisplayStateRepository {
-    private val _isInRearDisplayMode = MutableStateFlow<Boolean>(false)
-    override val isInRearDisplayMode: StateFlow<Boolean> = _isInRearDisplayMode.asStateFlow()
-
-    fun setIsInRearDisplayMode(isInRearDisplayMode: Boolean) {
-        _isInRearDisplayMode.value = isInRearDisplayMode
-    }
-}
+/** Logs for Battery events. See [BatteryControllerImpl] */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class BatteryControllerLog

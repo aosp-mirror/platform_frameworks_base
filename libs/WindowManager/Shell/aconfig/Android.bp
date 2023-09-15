@@ -1,0 +1,12 @@
+aconfig_declarations {
+    name: "com_android_wm_shell_flags",
+    package: "com.android.wm.shell",
+    srcs: [
+        "multitasking.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "com_android_wm_shell_flags_lib",
+    aconfig_declarations: "com_android_wm_shell_flags",
+}

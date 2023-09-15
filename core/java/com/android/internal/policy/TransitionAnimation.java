@@ -1304,8 +1304,9 @@ public class TransitionAnimation {
         t.setBuffer(layer, buffer.getHardwareBuffer());
         t.setDataSpace(layer, buffer.getColorSpace().getDataSpace());
         // Avoid showing dimming effect for HDR content when running animations.
-        // TODO(b/298219334): Only do this if we know we already dimmed in the screenshot
-        t.setDimmingEnabled(layer, false);
+        if (buffer.containsHdrLayers()) {
+            t.setDimmingEnabled(layer, false);
+        }
     }
 
     /** Returns whether the hardware buffer passed in is marked as protected. */

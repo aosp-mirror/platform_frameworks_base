@@ -356,7 +356,7 @@
     <string name="show_touches" msgid="8437666942161289025">"បង្ហាញការចុច"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"បង្ហាញដានចុច នៅពេលចុច"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"បង្ហាញការចុចគ្រាប់ចុច"</string>
-    <string name="show_key_presses_summary" msgid="725387457373015024">"បង្ហាញព័ត៌មានឆ្លើយតបជារូបភាពសម្រាប់ការចុចគ្រាប់ចុចរូបវន្ត"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"បង្ហាញរូបភាពប្រតិកម្មសម្រាប់ការចុចគ្រាប់ចុចរូបវន្ត"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"បង្ហាញ​បច្ចុប្បន្នភាព​ផ្ទៃ"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"ផ្ទៃ​វីនដូទាំង​មូល​បញ្ចេញពន្លឺ​នៅពេល​ធ្វើ​បច្ចុប្បន្នភាព"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"បង្ហាញ​បច្ចុប្បន្នភាពទិដ្ឋភាព"</string>
@@ -585,7 +585,7 @@
     <string name="user_grant_admin_message" msgid="1673791931033486709">"អ្នកគ្រប់គ្រងមានសិទ្ធិពិសេសដែលអ្នកប្រើប្រាស់ផ្សេងទៀតមិនមាន។ អ្នកគ្រប់គ្រងអាចគ្រប់គ្រងអ្នកប្រើប្រាស់ទាំងអស់ ធ្វើបច្ចុប្បន្នភាពឬកំណត់ឧបករណ៍នេះឡើងវិញ កែសម្រួលការកំណត់ មើលកម្មវិធីដែលបានដំឡើងទាំងអស់ និងផ្ដល់ឬដកសិទ្ធិជាអ្នកគ្រប់គ្រងសម្រាប់អ្នកផ្សេងទៀត។"</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"ផ្ដល់សិទ្ធិជាអ្នកគ្រប់គ្រង"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"រៀបចំ​អ្នក​ប្រើ​ប្រាស់ឥឡូវនេះ?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"សូម​ប្រាកដ​ថា​​អ្នក​ប្រើ​ប្រាស់នេះ​អាច​យក​​ឧបករណ៍ ​និង​រៀបចំ​​ទំហំ​ផ្ទុករបស់​គេបាន"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"សូម​ប្រាកដ​ថា​​អ្នក​ប្រើ​ប្រាស់នេះ​អាច​យក​​ឧបករណ៍ ​និង​រៀបចំ​​ទំហំ​ផ្ទុករបស់​គាត់បាន"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"រៀបចំ​ប្រវត្តិរូប​ឥឡូវ?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"រៀបចំ​ឥឡូវ"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"កុំទាន់"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ចលនា​ថយក្រោយ​ដែល​ព្យាករ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"បើក​ចលនា​ប្រព័ន្ធ​សម្រាប់​ការ​ថយក្រោយ​ព្យាករ។"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ការ​កំណត់នេះ​បើក​ចលនា​ប្រព័ន្ធ​សម្រាប់​ចលនាព្យាករ។ ចលនា​នេះ​ទាមទារ​ការ​កំណត់ enableOnBackInvokedCallback នៅ​ក្នុងកម្មវិធី​ទៅពិត​នៅ​ក្នុង​ឯកសារ​មេនីហ្វេសថ៍។"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"ផ្លាស់ទី​ទៅ​ឆ្វេង"</item>
-    <item msgid="5425394847942513942">"ផ្លាស់ទី​ចុះ​ក្រោម"</item>
-    <item msgid="7728484337962740316">"ផ្លាស់ទីទៅ​ស្តាំ"</item>
-    <item msgid="324200556467459329">"ផ្លាស់ទី​ឡើង​លើ"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"មិនបានបញ្ជាក់"</string>
     <string name="neuter" msgid="2075249330106127310">"អភេទ"</string>

@@ -812,10 +812,10 @@ Asset* AssetManager::openNonAssetInPathLocked(const char* fileName, AccessMode m
         /* check the appropriate Zip file */
         ZipFileRO* pZip = getZipFileLocked(ap);
         if (pZip != NULL) {
-            ALOGV("GOT zip, checking NA '%s'", (const char*) path);
+            ALOGV("GOT zip, checking NA '%s'", path.c_str());
             ZipEntryRO entry = pZip->findEntryByName(path.c_str());
             if (entry != NULL) {
-                ALOGV("FOUND NA in Zip file for %s", (const char*) path);
+                ALOGV("FOUND NA in Zip file for %s", path.c_str());
                 pAsset = openAssetFromZipLocked(pZip, entry, mode, path);
                 pZip->releaseEntry(entry);
             }
@@ -1425,7 +1425,7 @@ AssetManager::SharedZip::SharedZip(const String8& path, time_t modWhen)
       mResourceTableAsset(NULL), mResourceTable(NULL)
 {
     if (kIsDebug) {
-        ALOGI("Creating SharedZip %p %s\n", this, (const char*)mPath);
+        ALOGI("Creating SharedZip %p %s\n", this, mPath.c_str());
     }
     ALOGV("+++ opening zip '%s'\n", mPath.c_str());
     mZipFile = ZipFileRO::open(mPath.c_str());
@@ -1439,7 +1439,7 @@ AssetManager::SharedZip::SharedZip(int fd, const String8& path)
       mResourceTableAsset(NULL), mResourceTable(NULL)
 {
     if (kIsDebug) {
-        ALOGI("Creating SharedZip %p fd=%d %s\n", this, fd, (const char*)mPath);
+        ALOGI("Creating SharedZip %p fd=%d %s\n", this, fd, mPath.c_str());
     }
     ALOGV("+++ opening zip fd=%d '%s'\n", fd, mPath.c_str());
     mZipFile = ZipFileRO::openFd(fd, mPath.c_str());
@@ -1453,7 +1453,7 @@ sp<AssetManager::SharedZip> AssetManager::SharedZip::get(const String8& path,
         bool createIfNotPresent)
 {
     AutoMutex _l(gLock);
-    time_t modWhen = getFileModDate(path);
+    time_t modWhen = getFileModDate(path.c_str());
     sp<SharedZip> zip = gOpen.valueFor(path).promote();
     if (zip != NULL && zip->mModWhen == modWhen) {
         return zip;
@@ -1541,7 +1541,7 @@ bool AssetManager::SharedZip::getOverlay(size_t idx, asset_path* out) const
 AssetManager::SharedZip::~SharedZip()
 {
     if (kIsDebug) {
-        ALOGI("Destroying SharedZip %p %s\n", this, (const char*)mPath);
+        ALOGI("Destroying SharedZip %p %s\n", this, mPath.c_str());
     }
     if (mResourceTable != NULL) {
         delete mResourceTable;

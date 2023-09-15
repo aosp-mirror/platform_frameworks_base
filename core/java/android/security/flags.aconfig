@@ -13,3 +13,10 @@ flag {
     description: "Fix bugs in behavior of UnlockedDeviceRequired keystore keys"
     bug: "296464083"
 }
+
+flag {
+    name: "deprecate_fsv_sig"
+    namespace: "hardware_backed_security"
+    description: "Feature flag for deprecating .fsv_sig"
+    bug: "277916185"
+}

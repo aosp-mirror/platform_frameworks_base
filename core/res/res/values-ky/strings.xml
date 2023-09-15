@@ -765,7 +765,7 @@
     <string name="permlab_readNetworkUsageHistory" msgid="8470402862501573795">"тармактын колдонулуш таржымалын окуу"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="1112962304941637102">"Колдонмого белгилүү бир тармактарга жана колдонмолорго байланыштуу тармактын колдонулушу жөнүндө таржымалды окуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"тармак саясатын башкаруу"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"Колдонмого тармак саясаттарын башкаруу жана колдонмого мүнөздүү эрежелерди белгилөө мүмкүнчүлүгүн берет."</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"Колдонмого тармак эрежелерин башкаруу жана колдонмого мүнөздүү эрежелерди белгилөө мүмкүнчүлүгүн берет."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"тармактын колдонулуш эсеп-кысабын өзгөртүү"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"Колдонмого желени башка колдонмолордун пайдалануусун башкарган тууралоолорду киргизүү уруксатын берет. Жөнөкөй колдонмолор үчүн эмес."</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"эскертүүлөр менен иштөө"</string>
@@ -810,7 +810,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн санын текшерип, эгер алардын саны өтө эле көп болсо, планшетти кулпулаңыз же планшеттеги бардык маалыматтарды тазалап салыңыз."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Экрандын кулпусун ачуу учурунда сырсөздөр канча жолу туура эмес терилгенин тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, Android TV түзмөгүңүздү кулпулап же Android TV түзмөгүңүздөгү бардык дайын-даректериңизди тазалап салуу."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн саны текшерилип, эгер алардын саны өтө эле көп болсо, инфозоок тутуму кулпуланып же инфозоок тутумундагы бардык маалыматтар өчүрүлөт."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн санын текшерип, эгер алардын саны өтө эле көп болсо, телефонду кулпулаңыз же телефондогу бардык маалыматтарды тазалап салыңыз."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Экрандын кулпусун ачуу аракеттерине көз салып, сырсөз өтө көп жолу туура эмес терилсе, телефонду кулпулайт же андагы бардык нерселерди өчүрүп салат."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, планшетти кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Экрандын кулпусун ачуу учурунда сырсөздөр канча жолу туура эмес терилгенин тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, Android TV түзмөгүңүздү кулпулап же колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, инфозоок тутуму кулпуланып же бул профилдин бардык дайындары өчүрүлөт."</string>
@@ -1718,7 +1718,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"Түстөрдү инверсиялоо"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Түстөрдү тууралоо"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Бир кол режими"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дагы караңгы"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Кошумча караңгылатуу"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Угуу түзмөктөрү"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> күйгүзүлдү."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өчүрүлдү."</string>
@@ -1867,8 +1867,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2-жумуш <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3-жумуш <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> клону"</string>
-    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
-    <skip />
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"Купуя <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Бошотуудан мурун PIN суралсын"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Бошотуудан мурун графикалык ачкыч суралсын"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Бошотуудан мурун сырсөз суралсын"</string>

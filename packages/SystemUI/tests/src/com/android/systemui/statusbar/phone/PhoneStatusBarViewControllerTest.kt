@@ -104,6 +104,21 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun onViewAttachedAndDrawn_startListeningConfigurationControllerCallback() {
+        val view = createViewMock()
+        val argumentCaptor = ArgumentCaptor.forClass(
+                ConfigurationController.ConfigurationListener::class.java)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            controller = createAndInitController(view)
+        }
+
+        verify(configurationController).addCallback(argumentCaptor.capture())
+        argumentCaptor.value.onDensityOrFontScaleChanged()
+
+        verify(view).onDensityOrFontScaleChanged()
+    }
+
+    @Test
     fun onViewAttachedAndDrawn_moveFromCenterAnimationEnabled_moveFromCenterAnimationInitialized() {
         whenever(featureFlags.isEnabled(Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS)).thenReturn(true)
         val view = createViewMock()

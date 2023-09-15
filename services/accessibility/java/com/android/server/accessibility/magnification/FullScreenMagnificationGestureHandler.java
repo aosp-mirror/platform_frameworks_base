@@ -217,7 +217,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                         }
 
                         if (!activated) {
-                            clearAndTransitionToStateDetecting();
+                            // cancel the magnification shortcut
+                            mDetectingState.setShortcutTriggered(false);
                         }
                     }
 

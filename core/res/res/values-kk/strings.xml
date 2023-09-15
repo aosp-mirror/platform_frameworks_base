@@ -806,7 +806,7 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Бұған дейін орнатылған қолданбаның автоматты түрде жаңартылуына мүмкіндік береді."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Құпия сөз ережелерін тағайындау"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Экран құлпын ашу әркеттерін бақылау"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Экран құлпын ашу әрекеттерін бақылау"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және планшетті бекіту немесе тым көп қате құпия сөздер терілген болса, планшеттің бүкіл деректерін өшіру."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Экранның құлпын ашу кезінде қате енгізілген құпия сөздердің санын бақылау, құпия сөз тым көп қате енгізілген жағдайда, Android TV құрылғысын құлыптау және Android TV құрылғыңыздың барлық деректерінен тазарту."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Экран құлпын ашқан кезде, терілген қате құпия сөздердің саны бақыланады, сондай-ақ құпия сөздер бірнеше рет қате терілсе, ақпараттық-сауықтық жүйе құлыпталады немесе оның барлық дерегі жойылады."</string>
@@ -819,7 +819,7 @@
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Экран құлпын өзгерте алады."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Экранды құлыптау"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Экранның қашан және қалай құлыпталатынын басқара алады."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Барлық деректерді өшіру"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Барлық деректі өшіру"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Планшет дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Зауыттық деректерді қалпына келтіру арқылы Android TV құрылғыңыздың деректерін ескертусіз тазартыңыз."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Зауыттық деректерді қалпына келтіру арқылы ақпараттық-сауықтық жүйе дерегі ескертусіз өшіріледі."</string>
@@ -1867,8 +1867,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2-ші жұмыс профилі (<xliff:g id="LABEL">%1$s</xliff:g>)"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3-ші жұмыс профилі (<xliff:g id="LABEL">%1$s</xliff:g>)"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> клондау"</string>
-    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
-    <skip />
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"Жеке <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Босату алдында PIN кодын сұрау"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Босату алдында бекітпесін ашу өрнегін сұрау"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Босату алдында құпия сөзді сұрау"</string>

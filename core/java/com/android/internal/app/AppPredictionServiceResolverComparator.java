@@ -61,6 +61,8 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
     private final ModelBuilder mModelBuilder;
     private ResolverComparatorModel mComparatorModel;
 
+    private ResolverAppPredictorCallback mSortingCallback;
+
     // If this is non-null (and this is not destroyed), it means APS is disabled and we should fall
     // back to using the ResolverRankerService.
     // TODO: responsibility for this fallback behavior can live outside of the AppPrediction client.
@@ -93,6 +95,9 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
 
             // TODO: may not be necessary to build a new model, since we're destroying anyways.
             mComparatorModel = mModelBuilder.buildFallbackModel(mResolverRankerService);
+        }
+        if (mSortingCallback != null) {
+            mSortingCallback.destroy();
         }
     }
 
@@ -140,22 +145,27 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
                     .setClassName(target.name.getClassName())
                     .build());
         }
+
+        if (mSortingCallback != null) {
+            mSortingCallback.destroy();
+        }
+        mSortingCallback = new ResolverAppPredictorCallback(sortedAppTargets -> {
+            if (sortedAppTargets.isEmpty()) {
+                Log.i(TAG, "AppPredictionService disabled. Using resolver.");
+                setupFallbackModel(targets);
+            } else {
+                Log.i(TAG, "AppPredictionService response received");
+                // Skip sending to Handler which takes extra time to dispatch messages.
+                // TODO: the Handler guards some concurrency conditions, so this could
+                // probably result in a race (we're not currently on the Handler thread?).
+                // We'll leave this as-is since we intend to remove the Handler design
+                // shortly, but this is still an unsound shortcut.
+                handleResult(sortedAppTargets);
+            }
+        });
+
         mAppPredictor.sortTargets(appTargets, Executors.newSingleThreadExecutor(),
-                sortedAppTargets -> {
-                    if (sortedAppTargets.isEmpty()) {
-                        Log.i(TAG, "AppPredictionService disabled. Using resolver.");
-                        setupFallbackModel(targets);
-                    } else {
-                        Log.i(TAG, "AppPredictionService response received");
-                        // Skip sending to Handler which takes extra time to dispatch messages.
-                        // TODO: the Handler guards some concurrency conditions, so this could
-                        // probably result in a race (we're not currently on the Handler thread?).
-                        // We'll leave this as-is since we intend to remove the Handler design
-                        // shortly, but this is still an unsound shortcut.
-                        handleResult(sortedAppTargets);
-                    }
-                }
-        );
+                mSortingCallback.asConsumer());
     }
 
     private void setupFallbackModel(List<ResolvedComponentInfo> targets) {

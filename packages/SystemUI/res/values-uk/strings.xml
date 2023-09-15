@@ -299,7 +299,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Робочі додатки"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Призупинено"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нічний екран"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Вмикається ввечері"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Запуск увечері"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До сходу сонця"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Вмикається о <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"До <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -754,7 +754,7 @@
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"вилучити опцію"</string>
     <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"додати опцію в кінець"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Перемістити опцію"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Додати опцію"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Додати панель"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Перемістити на позицію <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Додати на позицію <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Позиція <xliff:g id="POSITION">%1$d</xliff:g>"</string>
@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Перемістити вниз"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Перемістити ліворуч"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Перемістити праворуч"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Перемикач режиму збільшення"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Збільшення всього екрана"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Збільшити частину екрана"</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Асистента активовано"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Призначте стандартний додаток для нотаток у налаштуваннях"</string>
     <string name="install_app" msgid="5066668100199613936">"Установити додаток"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Дублювати на зовнішньому екрані?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"Увімкнути екран"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Мікрофон і камера"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Нещодавнє використання додатками"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Переглянути нещодавній доступ"</string>

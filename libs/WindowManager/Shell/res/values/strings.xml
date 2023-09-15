@@ -142,6 +142,10 @@
     <string name="bubble_accessibility_action_move_bottom_left">Move bottom left</string>
     <!-- Action in accessibility menu to move the stack of bubbles to the bottom right of the screen. [CHAR LIMIT=30]-->
     <string name="bubble_accessibility_action_move_bottom_right">Move bottom right</string>
+    <!-- Accessibility announcement when the stack of bubbles expands. [CHAR LIMIT=NONE]-->
+    <string name="bubble_accessibility_announce_expand">expand <xliff:g id="bubble_title" example="Messages">%1$s</xliff:g></string>
+    <!-- Accessibility announcement when the stack of bubbles collapses. [CHAR LIMIT=NONE]-->
+    <string name="bubble_accessibility_announce_collapse">collapse <xliff:g id="bubble_title" example="Messages">%1$s</xliff:g></string>
     <!-- Label for the button that takes the user to the notification settings for the given app. -->
     <string name="bubbles_app_settings"><xliff:g id="notification_title" example="Android Messages">%1$s</xliff:g> settings</string>
     <!-- Text used for the bubble dismiss area. Bubbles dragged to, or flung towards, this area will go away. [CHAR LIMIT=30] -->

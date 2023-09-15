@@ -1200,10 +1200,6 @@ public class NotificationStackScrollLayoutController {
         mView.setHeadsUpBoundaries(height, bottomBarHeight);
     }
 
-    public void setUnlockHintRunning(boolean running) {
-        mView.setUnlockHintRunning(running);
-    }
-
     public void setPanelFlinging(boolean flinging) {
         mView.setPanelFlinging(flinging);
     }

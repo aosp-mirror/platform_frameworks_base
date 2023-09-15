@@ -863,6 +863,14 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Төмөн жылдыруу"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Солго жылдыруу"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Оңго жылдыруу"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Чоңойтуу режимине которулуу"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Толук экранда ачуу"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Экрандын бир бөлүгүн чоңойтуу"</string>
@@ -906,7 +914,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# көзөмөл кошулду.}other{# көзөмөл кошулду.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Өчүрүлдү"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> кошулсунбу?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> бул жерде көрсөтүлө турган башкаруу элементтерин жана контентти тандай алат."</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> бул жерде көрүнө турган нерселерди тандайт."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> башкаруу элементтери өчүрүлсүнбү?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Сүйүктүүлөргө кошулду"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Сүйүктүүлөргө <xliff:g id="NUMBER">%d</xliff:g>-позицияга кошулду"</string>
@@ -1132,7 +1140,7 @@
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> колдонмосуна түзмөктөгү бардык таржымалдарды жеткиликтүү кыласызбы?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Бир жолу жеткиликтүү кылуу"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Тыюу салуу"</string>
-    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Түзмөктө аткарылган бардык аракеттер түзмөктүн таржымалдарында сакталып калат. Колдонмолор бул таржымалдарды колдонуп, маселелерди оңдошот.\n\nАйрым таржымалдарда купуя маалымат болушу мүмкүн, андыктан ишенимдүү колдонмолорго гана түзмөктөгү бардык таржымалдарды пайдаланууга уруксат бериңиз. \n\nЭгер бул колдонмого түзмөктөгү бардык таржымалдарга кирүүгө тыюу салсаңыз, ал өзүнүн таржымалдарын пайдалана берет. Түзмөктү өндүрүүчү түзмөгүңүздөгү айрым таржымалдарды же маалыматты көрө берет."</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Түзмөктө жасалган аракеттердин баары таржымалдарда сакталат. Колдонмолор алардын жардамы менен мүмкүн болгон мүчүлүштүктөрдү таап, оңдоп турат.\n\nАйрым таржымалдарда купуя маалымат камтылышы мүмкүн болгондуктан, түзмөктөгү бардык таржымалдарды ишенимдүү колдонмолорго гана жеткиликтүү кылыңыз. \n\nЭгер бул колдонмого түзмөктөгү айрым таржымалдарды гана жеткиликтүү кылсаңыз, ал мурункудай эле өзүнүн таржымалдарын көрө берет. Түзмөгүңүздөгү айрым таржымалдар же нерселер анын өндүрүүчүсүнө көрүнүшү мүмкүн."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Кеңири маалымат"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Кеңири маалымат: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ачуу"</string>
@@ -1170,10 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Жардамчы иштетилди"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Параметрлерден демейки кыска жазуулар колдонмосун тууралаңыз"</string>
     <string name="install_app" msgid="5066668100199613936">"Колдонмону орнотуу"</string>
-    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
-    <skip />
-    <!-- no translation found for enable_display (8308309634883321977) -->
-    <skip />
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Тышкы экранга чыгарасызбы?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"Экранды иштетүү"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Микрофон жана камера"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Жакында колдонмолордо иштетилген"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Акыркы пайдалануусун көрүү"</string>

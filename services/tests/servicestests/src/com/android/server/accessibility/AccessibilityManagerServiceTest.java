@@ -27,6 +27,7 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -428,6 +429,10 @@ public class AccessibilityManagerServiceTest {
     @SmallTest
     @Test
     public void testChangeMagnificationModeOnTestDisplay_capabilitiesIsAll_transitMode() {
+        // This test only makes sense for devices that support Window magnification
+        assumeTrue(mTestableContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_WINDOW_MAGNIFICATION));
+
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
         userState.setMagnificationCapabilitiesLocked(

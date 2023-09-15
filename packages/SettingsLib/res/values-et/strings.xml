@@ -585,7 +585,7 @@
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Administraatoritel on eriõigused, mida teistel kasutajatel pole. Administraator saab hallata kõiki kasutajaid, värskendada või lähtestada seda seadet, muuta seadeid, vaadata kõiki installitud rakendusi ja anda teistele kasutajatele administraatoriõigused või need eemaldada."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Määra administraatoriks"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Kas seadistada kasutaja kohe?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Veenduge, et isik saaks seadet kasutada ja oma ruumi seadistada"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Veenduge, et isik saaks seadet kasutada ja oma ruumi seadistada."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Kas soovite kohe profiili seadistada?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Seadista kohe"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Mitte praegu"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Tagasiliigutuse prognoosi animatsioon"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Lubage süsteemi animatsioonid, et näha prognoositud tagasiliigutusi."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"See seade võimaldab süsteemi animatsioonidel prognoosida tagasiliigutusi. See nõuab manifestifailis rakendusepõhise atribuudi enableOnBackInvokedCallback määramist tõeseks."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Liiguta vasakule"</item>
-    <item msgid="5425394847942513942">"Liiguta alla"</item>
-    <item msgid="7728484337962740316">"Liiguta paremale"</item>
-    <item msgid="324200556467459329">"Liiguta üles"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="not_specified" msgid="5423502443185110328">"Pole määratud"</string>
     <string name="neuter" msgid="2075249330106127310">"Kesksugu"</string>

@@ -75,6 +75,10 @@ private constructor(
             override fun onConfigChanged(newConfig: Configuration?) {
                 mView.updateResources()
             }
+
+            override fun onDensityOrFontScaleChanged() {
+                mView.onDensityOrFontScaleChanged()
+            }
         }
 
     override fun onViewAttached() {
@@ -82,6 +86,10 @@ private constructor(
         statusContainer.setOnHoverListener(
             statusOverlayHoverListenerFactory.createDarkAwareListener(statusContainer)
         )
+
+        progressProvider?.setReadyToHandleTransition(true)
+        configurationController.addCallback(configurationListener)
+
         if (moveFromCenterAnimationController == null) return
 
         val statusBarLeftSide: View =
@@ -106,9 +114,6 @@ private constructor(
                 moveFromCenterAnimationController.onStatusBarWidthChanged()
             }
         }
-
-        progressProvider?.setReadyToHandleTransition(true)
-        configurationController.addCallback(configurationListener)
     }
 
     override fun onViewDetached() {

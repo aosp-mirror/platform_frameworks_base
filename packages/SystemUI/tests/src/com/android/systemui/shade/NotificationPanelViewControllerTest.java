@@ -866,37 +866,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
-    public void testUnlockAnimationDoesNotAffectScrim() {
-        mNotificationPanelViewController.onUnlockHintStarted();
-        verify(mScrimController).setExpansionAffectsAlpha(false);
-        mNotificationPanelViewController.onUnlockHintFinished();
-        verify(mScrimController).setExpansionAffectsAlpha(true);
-    }
-
-    @Test
-    public void testUnlockHintAnimation_runs_whenNotInPowerSaveMode_andDozeAmountIsZero() {
-        when(mPowerManager.isPowerSaveMode()).thenReturn(false);
-        when(mAmbientState.getDozeAmount()).thenReturn(0f);
-        mNotificationPanelViewController.startUnlockHintAnimation();
-        assertThat(mNotificationPanelViewController.isHintAnimationRunning()).isTrue();
-    }
-
-    @Test
-    public void testUnlockHintAnimation_doesNotRun_inPowerSaveMode() {
-        when(mPowerManager.isPowerSaveMode()).thenReturn(true);
-        mNotificationPanelViewController.startUnlockHintAnimation();
-        assertThat(mNotificationPanelViewController.isHintAnimationRunning()).isFalse();
-    }
-
-    @Test
-    public void testUnlockHintAnimation_doesNotRun_whenDozeAmountNotZero() {
-        when(mPowerManager.isPowerSaveMode()).thenReturn(false);
-        when(mAmbientState.getDozeAmount()).thenReturn(0.5f);
-        mNotificationPanelViewController.startUnlockHintAnimation();
-        assertThat(mNotificationPanelViewController.isHintAnimationRunning()).isFalse();
-    }
-
-    @Test
     public void setKeyguardStatusBarAlpha_setsAlphaOnKeyguardStatusBarController() {
         float statusBarAlpha = 0.5f;
 
@@ -1053,36 +1022,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         verify(mKeyguardFaceAuthInteractor).onNotificationPanelClicked();
         verify(mUpdateMonitor).requestFaceAuth(
                 FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
-    }
-
-    @Test
-    public void onEmptySpaceClicked_notDozingAndFaceDetectionIsNotRunning_startsUnlockAnimation() {
-        StatusBarStateController.StateListener statusBarStateListener =
-                mNotificationPanelViewController.getStatusBarStateListener();
-        statusBarStateListener.onStateChanged(KEYGUARD);
-        mNotificationPanelViewController.setDozing(false, false);
-        when(mUpdateMonitor.requestFaceAuth(NOTIFICATION_PANEL_CLICKED)).thenReturn(false);
-
-        // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
-        mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
-        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
-
-        verify(mNotificationStackScrollLayoutController).setUnlockHintRunning(true);
-    }
-
-    @Test
-    public void onEmptySpaceClicked_notDozingAndFaceDetectionIsRunning_doesNotStartUnlockHint() {
-        StatusBarStateController.StateListener statusBarStateListener =
-                mNotificationPanelViewController.getStatusBarStateListener();
-        statusBarStateListener.onStateChanged(KEYGUARD);
-        mNotificationPanelViewController.setDozing(false, false);
-        when(mUpdateMonitor.requestFaceAuth(NOTIFICATION_PANEL_CLICKED)).thenReturn(true);
-
-        // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
-        mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
-        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
-
-        verify(mNotificationStackScrollLayoutController, never()).setUnlockHintRunning(true);
     }
 
     @Test

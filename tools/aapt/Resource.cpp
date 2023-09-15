@@ -924,7 +924,7 @@ status_t massageManifest(Bundle* bundle, ResourceTable* table, sp<XMLNode> root)
 
     if (bundle->getCompileSdkVersion() != 0) {
         if (!addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "compileSdkVersion",
-                    String8::format("%d", bundle->getCompileSdkVersion()),
+                    String8::format("%d", bundle->getCompileSdkVersion()).c_str(),
                     errorOnFailedInsert, true)) {
             return UNKNOWN_ERROR;
         }
@@ -932,21 +932,21 @@ status_t massageManifest(Bundle* bundle, ResourceTable* table, sp<XMLNode> root)
 
     if (bundle->getCompileSdkVersionCodename() != "") {
         if (!addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "compileSdkVersionCodename",
-                    bundle->getCompileSdkVersionCodename(), errorOnFailedInsert, true)) {
+                    bundle->getCompileSdkVersionCodename().c_str(), errorOnFailedInsert, true)) {
             return UNKNOWN_ERROR;
         }
     }
 
     if (bundle->getPlatformBuildVersionCode() != "") {
         if (!addTagAttribute(root, "", "platformBuildVersionCode",
-                    bundle->getPlatformBuildVersionCode(), errorOnFailedInsert, true)) {
+                    bundle->getPlatformBuildVersionCode().c_str(), errorOnFailedInsert, true)) {
             return UNKNOWN_ERROR;
         }
     }
 
     if (bundle->getPlatformBuildVersionName() != "") {
         if (!addTagAttribute(root, "", "platformBuildVersionName",
-                    bundle->getPlatformBuildVersionName(), errorOnFailedInsert, true)) {
+                    bundle->getPlatformBuildVersionName().c_str(), errorOnFailedInsert, true)) {
             return UNKNOWN_ERROR;
         }
     }
@@ -1210,7 +1210,7 @@ status_t generateAndroidManifestForSplit(Bundle* bundle, const sp<AaptAssets>& a
     sp<XMLNode> manifest = XMLNode::newElement(filename, String16(), String16("manifest"));
 
     // Add the 'package' attribute which is set to the package name.
-    const char* packageName = assets->getPackage();
+    const char* packageName = assets->getPackage().c_str();
     const char* manifestPackageNameOverride = bundle->getManifestPackageNameOverride();
     if (manifestPackageNameOverride != NULL) {
         packageName = manifestPackageNameOverride;

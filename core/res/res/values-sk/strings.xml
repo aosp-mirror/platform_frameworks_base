@@ -808,7 +808,7 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Povolí vlastníkovi aktualizovať aplikáciu, ktorá bola nainštalovaná bez akcie používateľa"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Nastavte dĺžku hesiel na odomknutie obrazovky aj kódov PIN a v nich používané znaky."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Sledovanie pokusov o odomknutie obrazovky"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Sledovať pokusy o odomknutie obrazovky"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Sledovať počet nesprávnych hesiel zadaných pri odomykaní obrazovky a zamknúť tablet alebo vymazať všetky údaje tabletu v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Sledovanie počtu nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknutie zariadenia Android TV alebo vymazanie všetkých jeho údajov."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a uzamknite palubný systém alebo vymažte všetky údaje v palubnom systéme v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
@@ -1869,8 +1869,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Klonovať <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
-    <skip />
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"Súkromná aplikácia <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Pred odopnutím požiadať o číslo PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pred uvoľnením požiadať o bezpečnostný vzor"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Pred odopnutím požiadať o heslo"</string>

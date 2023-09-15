@@ -41,8 +41,8 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
@@ -208,7 +208,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 applicationScope = testScope.backgroundScope,
                 context = context,
                 mainExecutor = FakeExecutor(FakeSystemClock()),
-                rearDisplayStateRepository = FakeRearDisplayStateRepository(),
+                displayStateRepository = FakeDisplayStateRepository(),
                 displayRepository = displayRepository,
             )
 

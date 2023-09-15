@@ -382,7 +382,7 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operações de clipe não retangulares"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Renderização HWUI do perfil"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Ativar cam. depuração GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permitir carregamento de camadas de depuração de GPU p/ apps de depuração"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite carregamento de camadas de depuração de GPU para apps de depuração"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ativ. registo do fornecedor"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclua registos adicionais de fornecedores específicos de dispositivos em relatórios de erros, que podem conter informações privadas, utilizar mais bateria e/ou utilizar mais armazenamento."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animação de transição"</string>
@@ -684,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animações de gestos para voltar preditivos"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ative as animações do sistema para gestos para voltar preditivos."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Esta definição ativa animações do sistema para a animação de gestos preditivos. Requer a definição do atributo enableOnBackInvokedCallback por app como verdadeiro no ficheiro de manifesto."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Mover para a esquerda"</item>
-    <item msgid="5425394847942513942">"Mover para baixo"</item>
-    <item msgid="7728484337962740316">"Mover para a direita"</item>
-    <item msgid="324200556467459329">"Mover para cima"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="not_specified" msgid="5423502443185110328">"Não especificado"</string>
     <string name="neuter" msgid="2075249330106127310">"Neutro"</string>

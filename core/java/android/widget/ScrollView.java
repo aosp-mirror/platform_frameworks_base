@@ -1014,12 +1014,14 @@ public class ScrollView extends FrameLayout {
                             if (Flags.platformWidgetHapticScrollFeedback()) {
                                 initHapticScrollFeedbackProviderIfNotExists();
                                 mHapticScrollFeedbackProvider.onScrollLimit(
-                                        event, axis, /* isStart= */ newScrollY == 0);
+                                        event.getDeviceId(), event.getSource(), axis,
+                                        /* isStart= */ newScrollY == 0);
                             }
                         } else {
                             if (Flags.platformWidgetHapticScrollFeedback()) {
                                 initHapticScrollFeedbackProviderIfNotExists();
-                                mHapticScrollFeedbackProvider.onScrollProgress(event, axis, delta);
+                                mHapticScrollFeedbackProvider.onScrollProgress(
+                                        event.getDeviceId(), event.getSource(), axis, delta);
                             }
                             initDifferentialFlingHelperIfNotExists();
                             mDifferentialMotionFlingHelper.onMotionEvent(event, axis);

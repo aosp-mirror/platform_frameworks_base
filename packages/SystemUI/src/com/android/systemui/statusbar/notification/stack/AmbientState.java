@@ -86,7 +86,6 @@ public class AmbientState implements Dumpable {
     private boolean mExpansionChanging;
     private boolean mIsSmallScreen;
     private boolean mPulsing;
-    private boolean mUnlockHintRunning;
     private float mHideAmount;
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
@@ -592,14 +591,6 @@ public class AmbientState implements Dumpable {
         mIsSmallScreen = smallScreen;
     }
 
-    public void setUnlockHintRunning(boolean unlockHintRunning) {
-        mUnlockHintRunning = unlockHintRunning;
-    }
-
-    public boolean isUnlockHintRunning() {
-        return mUnlockHintRunning;
-    }
-
     /**
      * @return Whether we need to do a fling down after swiping up on lockscreen.
      */
@@ -770,7 +761,6 @@ public class AmbientState implements Dumpable {
         pw.println("mPulseHeight=" + mPulseHeight);
         pw.println("mTrackedHeadsUpRow.key=" + logKey(mTrackedHeadsUpRow));
         pw.println("mMaxHeadsUpTranslation=" + mMaxHeadsUpTranslation);
-        pw.println("mUnlockHintRunning=" + mUnlockHintRunning);
         pw.println("mDozeAmount=" + mDozeAmount);
         pw.println("mDozing=" + mDozing);
         pw.println("mFractionToShade=" + mFractionToShade);

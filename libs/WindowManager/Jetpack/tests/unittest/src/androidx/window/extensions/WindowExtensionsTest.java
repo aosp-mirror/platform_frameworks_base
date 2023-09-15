@@ -17,7 +17,6 @@
 package androidx.window.extensions;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.ActivityTaskManager;
@@ -32,7 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Test class for {@link WindowExtensionsTest}.
+ * Test class for {@link WindowExtensions}.
  *
  * Build/Install/Run:
  *  atest WMJetpackUnitTests:WindowExtensionsTest

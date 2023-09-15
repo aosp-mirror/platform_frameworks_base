@@ -182,7 +182,8 @@ public class AuthSessionTest {
                     eq(TEST_PACKAGE),
                     eq(TEST_REQUEST_ID),
                     eq(sensor.getCookie()),
-                    anyBoolean() /* allowBackgroundAuthentication */);
+                    anyBoolean() /* allowBackgroundAuthentication */,
+                    anyBoolean() /* isForLegacyFingerprintManager */);
         }
 
         final int cookie1 = session.mPreAuthInfo.eligibleSensors.get(0).getCookie();

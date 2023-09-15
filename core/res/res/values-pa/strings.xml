@@ -1867,8 +1867,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"ਦੂਸਰੀ ਕਾਰਜ-ਸਥਾਨ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"ਤੀਸਰੀ ਕਾਰਜ-ਸਥਾਨ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> ਦਾ ਕਲੋਨ"</string>
-    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
-    <skip />
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"ਨਿੱਜੀ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ਅਨਪਿੰਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪਿੰਨ ਮੰਗੋ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ਅਨਪਿੰਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਅਣਲਾਕ ਪੈਟਰਨ ਵਾਸਤੇ ਪੁੱਛੋ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ਅਣਪਿੰਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪਾਸਵਰਡ ਮੰਗੋ"</string>
@@ -2131,7 +2130,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"ਹਵਾਈ-ਜਹਾਜ਼ ਮੋਡ ਵੇਲੇ ਬਲੂਟੁੱਥ ਹਾਲੇ ਵੀ ਚਾਲੂ ਹੋ ਜਾਵੇਗਾ"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"ਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ਫ਼ਾਈਲ}one{{file_name} + # ਫ਼ਾਈਲ}other{{file_name} + # ਫ਼ਾਈਲਾਂ}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ਸਾਂਝਾ ਕਰਨ ਲਈ ਕੋਈ ਸਿਫ਼ਾਰਸ਼ ਕੀਤੇ ਲੋਕ ਨਹੀਂ"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ਸਾਂਝਾ ਕਰਨ ਲਈ ਕੋਈ ਸਿਫ਼ਾਰਸ਼ ਕੀਤਾ ਵਿਅਕਤੀ ਨਹੀਂ ਹੈ"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"ਐਪ ਸੂਚੀ"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ਇਸ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਪਰ ਇਹ USB ਡੀਵਾਈਸ ਰਾਹੀਂ ਆਡੀਓ ਕੈਪਚਰ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ਹੋਮ"</string>

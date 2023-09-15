@@ -2130,7 +2130,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth akan kekal hidup semasa dalam mod pesawat"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Memuatkan"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # fail}other{{file_name} + # fail}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Tiada orang yang disyorkan untuk berkongsi"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Tiada orang yang disyorkan untuk membuat perkongsian"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Senarai apl"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Apl ini belum diberikan kebenaran merakam tetapi dapat merakam audio melalui peranti USB ini."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Skrin Utama"</string>
