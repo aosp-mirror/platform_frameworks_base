@@ -3494,15 +3494,24 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
+    /**
+     * Determines if the given component name is the default component. Note: a null name can be
+     * used to represent the default component.
+     * @param name The component name to check.
+     * @return True if the component name matches the default wallpaper component.
+     */
+    private boolean isDefaultComponent(ComponentName name) {
+        return name == null || name.equals(mDefaultWallpaperComponent);
+    }
+
     private boolean changingToSame(ComponentName componentName, WallpaperData wallpaper) {
         if (wallpaper.connection != null) {
-            if (wallpaper.wallpaperComponent == null) {
-                if (componentName == null) {
-                    if (DEBUG) Slog.v(TAG, "changingToSame: still using default");
-                    // Still using default wallpaper.
-                    return true;
-                }
-            } else if (wallpaper.wallpaperComponent.equals(componentName)) {
+            final ComponentName wallpaperName = wallpaper.wallpaperComponent;
+            if (isDefaultComponent(componentName) && isDefaultComponent(wallpaperName)) {
+                if (DEBUG) Slog.v(TAG, "changingToSame: still using default");
+                // Still using default wallpaper.
+                return true;
+            } else if (wallpaperName != null && wallpaperName.equals(componentName)) {
                 // Changing to same wallpaper.
                 if (DEBUG) Slog.v(TAG, "same wallpaper");
                 return true;
@@ -3519,6 +3528,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         // Has the component changed?
         if (!force && changingToSame(componentName, wallpaper)) {
             try {
+                if (DEBUG_LIVE) {
+                    Slog.v(TAG, "Changing to the same component, ignoring");
+                }
                 if (reply != null) reply.sendResult(null);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to send callback", e);
