@@ -32,8 +32,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,10 +49,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -73,7 +71,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import com.android.settingslib.spa.framework.compose.horizontalValues
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import kotlin.math.abs
@@ -129,16 +126,10 @@ internal fun CustomizedLargeTopAppBar(
 private fun Title(title: String, maxLines: Int = Int.MAX_VALUE) {
     Text(
         text = title,
-        modifier = Modifier
-            .padding(
-                WindowInsets.navigationBars
-                    .asPaddingValues()
-                    .horizontalValues()
-            )
-            .padding(
-                start = SettingsDimension.itemPaddingAround,
-                end = SettingsDimension.itemPaddingEnd,
-            ),
+        modifier = Modifier.padding(
+            start = SettingsDimension.itemPaddingAround,
+            end = SettingsDimension.itemPaddingEnd,
+        ),
         overflow = TextOverflow.Ellipsis,
         maxLines = maxLines,
     )
@@ -157,6 +148,15 @@ private fun topAppBarColors() = TopAppBarColors(
  * Represents the colors used by a top app bar in different states.
  * This implementation animates the container color according to the top app bar scroll state. It
  * does not animate the leading, headline, or trailing colors.
+ *
+ * @constructor create an instance with arbitrary colors, see [TopAppBarColors] for a
+ * factory method using the default material3 spec
+ * @param containerColor the color used for the background of this BottomAppBar. Use
+ * [Color.Transparent] to have no color.
+ * @param scrolledContainerColor the container color when content is scrolled behind it
+ * @param navigationIconContentColor the content color used for the navigation icon
+ * @param titleContentColor the content color used for the title
+ * @param actionIconContentColor the content color used for actions
  */
 @Stable
 private class TopAppBarColors(
@@ -248,7 +248,6 @@ private fun SingleRowTopAppBar(
             titleTextStyle = titleTextStyle,
             titleAlpha = 1f,
             titleVerticalArrangement = Arrangement.Center,
-            titleHorizontalArrangement = Arrangement.Start,
             titleBottomPadding = 0,
             hideTitleSemantics = false,
             navigationIcon = navigationIcon,
@@ -312,7 +311,7 @@ private fun TwoRowsTopAppBar(
     // This will potentially animate or interpolate a transition between the container color and the
     // container's scrolled color according to the app bar's scroll state.
     val colorTransitionFraction = scrollBehavior?.state?.collapsedFraction ?: 0f
-    val appBarContainerColor by rememberUpdatedState(colors.containerColor(colorTransitionFraction))
+    val appBarContainerColor = colors.containerColor(colorTransitionFraction)
 
     // Wrap the given actions in a Row.
     val actionsRow = @Composable {
@@ -364,14 +363,17 @@ private fun TwoRowsTopAppBar(
                 titleTextStyle = smallTitleTextStyle,
                 titleAlpha = topTitleAlpha,
                 titleVerticalArrangement = Arrangement.Center,
-                titleHorizontalArrangement = Arrangement.Start,
                 titleBottomPadding = 0,
                 hideTitleSemantics = hideTopRowSemantics,
                 navigationIcon = navigationIcon,
                 actions = actionsRow,
             )
             TopAppBarLayout(
-                modifier = Modifier.clipToBounds(),
+                modifier = Modifier
+                    // only apply the horizontal sides of the window insets padding, since the top
+                    // padding will always be applied by the layout above
+                    .windowInsetsPadding(windowInsets.only(WindowInsetsSides.Horizontal))
+                    .clipToBounds(),
                 heightPx = maxHeightPx.floatValue - pinnedHeightPx +
                     (scrollBehavior?.state?.heightOffset ?: 0f),
                 navigationIconContentColor = colors.navigationIconContentColor,
@@ -392,7 +394,6 @@ private fun TwoRowsTopAppBar(
                 titleTextStyle = titleTextStyle,
                 titleAlpha = bottomTitleAlpha,
                 titleVerticalArrangement = Arrangement.Bottom,
-                titleHorizontalArrangement = Arrangement.Start,
                 titleBottomPadding = titleBottomPaddingPx,
                 hideTitleSemantics = hideBottomRowSemantics,
                 navigationIcon = {},
@@ -419,7 +420,6 @@ private fun TwoRowsTopAppBar(
  * @param modifier a [Modifier]
  * @param titleAlpha the title's alpha
  * @param titleVerticalArrangement the title's vertical arrangement
- * @param titleHorizontalArrangement the title's horizontal arrangement
  * @param titleBottomPadding the title's bottom padding
  * @param hideTitleSemantics hides the title node from the semantic tree. Apply this
  * boolean when this layout is part of a [TwoRowsTopAppBar] to hide the title's semantics
@@ -440,7 +440,6 @@ private fun TopAppBarLayout(
     titleTextStyle: TextStyle,
     titleAlpha: Float,
     titleVerticalArrangement: Arrangement.Vertical,
-    titleHorizontalArrangement: Arrangement.Horizontal,
     titleBottomPadding: Int,
     hideTitleSemantics: Boolean,
     navigationIcon: @Composable () -> Unit,
@@ -470,10 +469,10 @@ private fun TopAppBarLayout(
                     CompositionLocalProvider(
                         LocalContentColor provides titleContentColor,
                         LocalDensity provides with(LocalDensity.current) {
-                          Density(
-                              density = density,
-                              fontScale = if (titleScaleDisabled) 1f else fontScale,
-                          )
+                            Density(
+                                density = density,
+                                fontScale = if (titleScaleDisabled) 1f else fontScale,
+                            )
                         },
                         content = title
                     )
@@ -528,15 +527,7 @@ private fun TopAppBarLayout(
 
             // Title
             titlePlaceable.placeRelative(
-                x = when (titleHorizontalArrangement) {
-                    Arrangement.Center -> (constraints.maxWidth - titlePlaceable.width) / 2
-                    Arrangement.End ->
-                        constraints.maxWidth - titlePlaceable.width - actionIconsPlaceable.width
-                    // Arrangement.Start.
-                    // A TopAppBarTitleInset will make sure the title is offset in case the
-                    // navigation icon is missing.
-                    else -> max(TopAppBarTitleInset.roundToPx(), navigationIconPlaceable.width)
-                },
+                x = max(TopAppBarTitleInset.roundToPx(), navigationIconPlaceable.width),
                 y = when (titleVerticalArrangement) {
                     Arrangement.Center -> (layoutHeight - titlePlaceable.height) / 2
                     // Apply bottom padding from the title's baseline only when the Arrangement is
