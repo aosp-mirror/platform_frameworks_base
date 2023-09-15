@@ -23,6 +23,7 @@
         >
 
         <!-- Standard permissions granted to the shell. -->
+    <uses-permission android:name="android.permission.CAMERA_HEADLESS_SYSTEM_USER" />
     <uses-permission android:name="android.permission.MANAGE_HEALTH_PERMISSIONS" />
     <uses-permission android:name="android.permission.MANAGE_HEALTH_DATA" />
     <uses-permission android:name="android.permission.health.READ_EXERCISE_ROUTE" />
