@@ -40,7 +40,8 @@ import android.hardware.display.VirtualDisplay;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.InputChannel;
@@ -67,18 +68,19 @@ import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /** Tests of {@link DesktopModeWindowDecorViewModel} */
 @SmallTest
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
 
     private static final String TAG = "DesktopModeWindowDecorViewModelTests";
@@ -163,18 +165,17 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
         final ActivityManager.RunningTaskInfo taskInfo =
                 createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM);
         SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        runOnMainThread(() -> {
-            final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
-            final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
 
-            mDesktopModeWindowDecorViewModel.onTaskOpening(
-                    taskInfo, surfaceControl, startT, finishT);
+        mDesktopModeWindowDecorViewModel.onTaskOpening(
+                taskInfo, surfaceControl, startT, finishT);
 
-            taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
-            taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
-            mDesktopModeWindowDecorViewModel.onTaskChanging(
-                    taskInfo, surfaceControl, startT, finishT);
-        });
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        mDesktopModeWindowDecorViewModel.onTaskChanging(
+                taskInfo, surfaceControl, startT, finishT);
+
         verify(mDesktopModeWindowDecorFactory)
                 .create(
                         mContext,
@@ -195,20 +196,19 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
         final ActivityManager.RunningTaskInfo taskInfo =
                 createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_UNDEFINED);
         SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        runOnMainThread(() -> {
-            final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
-            final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
-            taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
 
-            mDesktopModeWindowDecorViewModel.onTaskChanging(
-                    taskInfo, surfaceControl, startT, finishT);
+        mDesktopModeWindowDecorViewModel.onTaskChanging(
+                taskInfo, surfaceControl, startT, finishT);
 
-            taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
-            taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD);
 
-            mDesktopModeWindowDecorViewModel.onTaskChanging(
-                    taskInfo, surfaceControl, startT, finishT);
-        });
+        mDesktopModeWindowDecorViewModel.onTaskChanging(
+                taskInfo, surfaceControl, startT, finishT);
+
         verify(mDesktopModeWindowDecorFactory, times(1))
                 .create(
                         mContext,
@@ -228,56 +228,53 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
         final ActivityManager.RunningTaskInfo taskInfo =
                 createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM);
         taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD);
-        runOnMainThread(() -> {
-            SurfaceControl surfaceControl = mock(SurfaceControl.class);
-            final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
-            final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
 
-            mDesktopModeWindowDecorViewModel.onTaskOpening(
-                    taskInfo, surfaceControl, startT, finishT);
+        mDesktopModeWindowDecorViewModel.onTaskOpening(
+                taskInfo, surfaceControl, startT, finishT);
+        mDesktopModeWindowDecorViewModel.destroyWindowDecoration(taskInfo);
 
-            mDesktopModeWindowDecorViewModel.destroyWindowDecoration(taskInfo);
-        });
         verify(mMockInputMonitorFactory).create(any(), any());
         verify(mInputMonitor).dispose();
     }
 
     @Test
     public void testEventReceiversOnMultipleDisplays() throws Exception {
-        runOnMainThread(() -> {
-            SurfaceView surfaceView = new SurfaceView(mContext);
-            final DisplayManager mDm = mContext.getSystemService(DisplayManager.class);
-            final VirtualDisplay secondaryDisplay = mDm.createVirtualDisplay(
-                    "testEventReceiversOnMultipleDisplays", /*width=*/ 400, /*height=*/ 400,
-                    /*densityDpi=*/ 320, surfaceView.getHolder().getSurface(),
-                    DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
-            try {
-                int secondaryDisplayId = secondaryDisplay.getDisplay().getDisplayId();
+        SurfaceView surfaceView = new SurfaceView(mContext);
+        final DisplayManager mDm = mContext.getSystemService(DisplayManager.class);
+        final VirtualDisplay secondaryDisplay = mDm.createVirtualDisplay(
+                "testEventReceiversOnMultipleDisplays", /*width=*/ 400, /*height=*/ 400,
+                /*densityDpi=*/ 320, surfaceView.getHolder().getSurface(),
+                DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
+        try {
+            int secondaryDisplayId = secondaryDisplay.getDisplay().getDisplayId();
 
-                final int taskId = 1;
-                final ActivityManager.RunningTaskInfo taskInfo =
-                        createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM);
-                final ActivityManager.RunningTaskInfo secondTaskInfo =
-                        createTaskInfo(taskId + 1, secondaryDisplayId, WINDOWING_MODE_FREEFORM);
-                final ActivityManager.RunningTaskInfo thirdTaskInfo =
-                        createTaskInfo(taskId + 2, secondaryDisplayId, WINDOWING_MODE_FREEFORM);
+            final int taskId = 1;
+            final ActivityManager.RunningTaskInfo taskInfo =
+                    createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM);
+            final ActivityManager.RunningTaskInfo secondTaskInfo =
+                    createTaskInfo(taskId + 1, secondaryDisplayId, WINDOWING_MODE_FREEFORM);
+            final ActivityManager.RunningTaskInfo thirdTaskInfo =
+                    createTaskInfo(taskId + 2, secondaryDisplayId, WINDOWING_MODE_FREEFORM);
 
-                SurfaceControl surfaceControl = mock(SurfaceControl.class);
-                final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
-                final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+            SurfaceControl surfaceControl = mock(SurfaceControl.class);
+            final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+            final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
 
-                mDesktopModeWindowDecorViewModel.onTaskOpening(taskInfo, surfaceControl, startT,
-                        finishT);
-                mDesktopModeWindowDecorViewModel.onTaskOpening(secondTaskInfo, surfaceControl,
-                        startT, finishT);
-                mDesktopModeWindowDecorViewModel.onTaskOpening(thirdTaskInfo, surfaceControl,
-                        startT, finishT);
-                mDesktopModeWindowDecorViewModel.destroyWindowDecoration(thirdTaskInfo);
-                mDesktopModeWindowDecorViewModel.destroyWindowDecoration(taskInfo);
-            } finally {
-                secondaryDisplay.release();
-            }
-        });
+            mDesktopModeWindowDecorViewModel.onTaskOpening(taskInfo, surfaceControl, startT,
+                    finishT);
+            mDesktopModeWindowDecorViewModel.onTaskOpening(secondTaskInfo, surfaceControl,
+                    startT, finishT);
+            mDesktopModeWindowDecorViewModel.onTaskOpening(thirdTaskInfo, surfaceControl,
+                    startT, finishT);
+            mDesktopModeWindowDecorViewModel.destroyWindowDecoration(thirdTaskInfo);
+            mDesktopModeWindowDecorViewModel.destroyWindowDecoration(taskInfo);
+        } finally {
+            secondaryDisplay.release();
+        }
+
         verify(mMockInputMonitorFactory, times(2)).create(any(), any());
         verify(mInputMonitor, times(1)).dispose();
     }
@@ -292,18 +289,17 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
                 createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_FULLSCREEN);
         taskInfo.isFocused = true;
         SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        runOnMainThread(() -> {
-            final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
-            final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
 
-            mDesktopModeWindowDecorViewModel.onTaskOpening(
-                    taskInfo, surfaceControl, startT, finishT);
+        mDesktopModeWindowDecorViewModel.onTaskOpening(
+                taskInfo, surfaceControl, startT, finishT);
 
-            taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
-            taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
-            mDesktopModeWindowDecorViewModel.onTaskChanging(
-                    taskInfo, surfaceControl, startT, finishT);
-        });
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        mDesktopModeWindowDecorViewModel.onTaskChanging(
+                taskInfo, surfaceControl, startT, finishT);
+
         verify(mDesktopModeWindowDecorFactory, never())
                 .create(any(), any(), any(), any(), any(), any(), any(), any(), any());
     }
@@ -326,26 +322,13 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
                 .create(any(), any(), any(), eq(taskInfo), eq(taskSurface), any(), any(), any(),
                         any());
 
-        runOnMainThread(() -> {
-            // Make sure a window decorations exists first by launching a freeform task.
-            mDesktopModeWindowDecorViewModel.onTaskOpening(
-                    taskInfo, taskSurface, startT, finishT);
-            // Now call back when as a Recents transition starts.
-            recentsCaptor.getValue().onTransitionStarted(transition);
-        });
+        // Make sure a window decorations exists first by launching a freeform task.
+        mDesktopModeWindowDecorViewModel.onTaskOpening(taskInfo, taskSurface, startT, finishT);
+        // Now call back when as a Recents transition starts.
+        recentsCaptor.getValue().onTransitionStarted(transition);
 
         verify(decoration).incrementRelayoutBlock();
         verify(decoration).addTransitionPausingRelayout(transition);
-    }
-
-    private void runOnMainThread(Runnable r) throws Exception {
-        final Handler mainHandler = new Handler(Looper.getMainLooper());
-        final CountDownLatch latch = new CountDownLatch(1);
-        mainHandler.post(() -> {
-            r.run();
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
     }
 
     private static ActivityManager.RunningTaskInfo createTaskInfo(int taskId,
