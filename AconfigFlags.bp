@@ -20,6 +20,7 @@ aconfig_srcjars = [
     ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
     ":android.security.flags-aconfig-java{.generated_srcjars}",
     ":android.view.flags-aconfig-java{.generated_srcjars}",
+    ":android.view.accessibility.flags-aconfig-java{.generated_srcjars}",
     ":camera_platform_flags_core_java_lib{.generated_srcjars}",
     ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
     ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
@@ -234,6 +235,24 @@ java_aconfig_library {
     name: "android.view.flags-aconfig-java",
     aconfig_declarations: "android.view.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// View.accessibility
+aconfig_declarations {
+    name: "android.view.accessibility.flags-aconfig",
+    package: "android.view.accessibility",
+    srcs: ["core/java/android/view/accessibility/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.view.accessibility.flags-aconfig-java",
+    aconfig_declarations: "android.view.accessibility.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+cc_aconfig_library {
+    name: "aconfig_view_accessibility_flags_c_lib",
+    aconfig_declarations: "android.view.accessibility.flags-aconfig",
 }
 
 // Widget
