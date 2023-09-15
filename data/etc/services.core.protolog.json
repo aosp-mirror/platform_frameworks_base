@@ -253,12 +253,6 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-1883484959": {
-      "message": "Content Recording: Display %d state is now (%d), so update recording?",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_CONTENT_RECORDING",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "-1872288685": {
       "message": "applyAnimation: anim=%s nextAppTransition=%s transit=%s isEntrance=%b Callers=%s",
       "level": "VERBOSE",
@@ -2364,6 +2358,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
+    },
+    "34106798": {
+      "message": "Content Recording: Display %d state was (%d), is now (%d), so update recording?",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "34682671": {
       "message": "Not moving display (displayId=%d) to top. Top focused displayId=%d. Reason: FLAG_STEAL_TOP_FOCUS_DISABLED",
