@@ -33,14 +33,14 @@ abstract class AppsEnterPipTransition(flicker: LegacyFlickerTest) : EnterPipTran
     @Postsubmit
     @Test
     override fun pipAppWindowAlwaysVisible() {
-        flicker.assertWm { this.isAppWindowVisible(standardAppHelper) }
+        flicker.assertWm { this.isAppWindowVisible(standardAppHelper.packageNameMatcher) }
     }
 
     /** Checks [standardAppHelper] layer remains visible throughout the animation */
     @Postsubmit
     @Test
     override fun pipAppLayerAlwaysVisible() {
-        flicker.assertLayers { this.isVisible(standardAppHelper) }
+        flicker.assertLayers { this.isVisible(standardAppHelper.packageNameMatcher) }
     }
 
     /** Checks the content overlay appears then disappears during the animation */
@@ -57,7 +57,9 @@ abstract class AppsEnterPipTransition(flicker: LegacyFlickerTest) : EnterPipTran
     @Postsubmit
     @Test
     override fun pipWindowRemainInsideVisibleBounds() {
-        flicker.assertWmVisibleRegion(standardAppHelper) { coversAtMost(displayBounds) }
+        flicker.assertWmVisibleRegion(standardAppHelper.packageNameMatcher) {
+            coversAtMost(displayBounds)
+        }
     }
 
     /**
@@ -68,7 +70,7 @@ abstract class AppsEnterPipTransition(flicker: LegacyFlickerTest) : EnterPipTran
     @Test
     override fun pipLayerOrOverlayRemainInsideVisibleBounds() {
         flicker.assertLayersVisibleRegion(
-            standardAppHelper.or(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
+            standardAppHelper.packageNameMatcher.or(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
         ) {
             coversAtMost(displayBounds)
         }
@@ -93,9 +95,9 @@ abstract class AppsEnterPipTransition(flicker: LegacyFlickerTest) : EnterPipTran
     @Test
     override fun pipWindowBecomesPinned() {
         flicker.assertWm {
-            invoke("pipWindowIsNotPinned") { it.isNotPinned(standardAppHelper) }
+            invoke("pipWindowIsNotPinned") { it.isNotPinned(standardAppHelper.packageNameMatcher) }
                 .then()
-                .invoke("pipWindowIsPinned") { it.isPinned(standardAppHelper) }
+                .invoke("pipWindowIsPinned") { it.isPinned(standardAppHelper.packageNameMatcher) }
         }
     }
 
