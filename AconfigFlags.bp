@@ -12,11 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Aconfig declarations and libraries for the core framework
-java_defaults {
-    name: "framework-minus-apex-aconfig-libraries",
-
-    // Add java_aconfig_libraries to here to add them to the core framework
+filegroup {
+    name: "framework-minus-apex-aconfig-srcjars",
     srcs: [
         ":android.app.usage.flags-aconfig-java{.generated_srcjars}",
         ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
@@ -35,6 +32,16 @@ java_defaults {
         ":android.widget.flags-aconfig-java{.generated_srcjars}",
         ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
         ":sdk_sandbox_flags_lib{.generated_srcjars}",
+    ],
+}
+
+// Aconfig declarations and libraries for the core framework
+java_defaults {
+    name: "framework-minus-apex-aconfig-libraries",
+
+    // Add java_aconfig_libraries to here to add them to the core framework
+    srcs: [
+        ":framework-minus-apex-aconfig-srcjars",
     ],
     // Add aconfig-annotations-lib as a dependency for the optimization
     libs: ["aconfig-annotations-lib"],
