@@ -256,6 +256,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     || event != CLOSE_WRITE // includes the MOVED_TO case
                     || wallpaper.imageWallpaperPending;
 
+            if (isMigration) {
+                // When separate lock screen engine is supported, migration will be handled by
+                // WallpaperDestinationChangeHandler.
+                return;
+            }
+            if (!(sysWallpaperChanged || lockWallpaperChanged)) {
+                return;
+            }
+
             if (DEBUG) {
                 Slog.v(TAG, "Wallpaper file change: evt=" + event
                         + " path=" + path
@@ -268,15 +277,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         + " isRestore=" + isRestore
                         + " isAppliedToLock=" + isAppliedToLock
                         + " needsUpdate=" + needsUpdate);
-            }
-
-            if (isMigration) {
-                // When separate lock screen engine is supported, migration will be handled by
-                // WallpaperDestinationChangeHandler.
-                return;
-            }
-            if (!(sysWallpaperChanged || lockWallpaperChanged)) {
-                return;
             }
 
             int notifyColorsWhich = 0;
