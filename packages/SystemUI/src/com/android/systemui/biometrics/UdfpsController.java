@@ -23,6 +23,7 @@ import static android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_
 import static android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
 import static android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING;
 import static android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
 import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
@@ -104,6 +105,8 @@ import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.SystemClock;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -113,8 +116,6 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import kotlin.Unit;
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
@@ -255,11 +256,12 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        final int touchConfigId = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_selected_udfps_touch_detection);
         pw.println("mSensorProps=(" + mSensorProps + ")");
         pw.println("Using new touch detection framework: " + mFeatureFlags.isEnabled(
                 Flags.UDFPS_NEW_TOUCH_DETECTION));
-        pw.println("Using ellipse touch detection: " + mFeatureFlags.isEnabled(
-                Flags.UDFPS_ELLIPSE_DETECTION));
+        pw.println("touchConfigId: " + touchConfigId);
     }
 
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
