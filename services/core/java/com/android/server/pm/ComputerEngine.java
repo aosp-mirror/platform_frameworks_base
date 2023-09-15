@@ -1700,7 +1700,9 @@ public class ComputerEngine implements Computer {
                 if (!listApex && ps.getPkg() != null && ps.getPkg().isApex()) {
                     continue;
                 }
-                if (listArchivedOnly && !isArchived(ps.getUserStateOrDefault(userId))) {
+                PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
+                if (listArchivedOnly && !userState.isInstalled()
+                        && userState.getArchiveState() == null) {
                     continue;
                 }
                 if (filterSharedLibPackage(ps, callingUid, userId, flags)) {
@@ -1744,13 +1746,6 @@ public class ComputerEngine implements Computer {
             }
         }
         return new ParceledListSlice<>(list);
-    }
-
-    // TODO(b/288142708) Check for userState.isInstalled() here once this bug is fixed.
-    // If an app has isInstalled() == true - it should not be filtered above in any case, currently
-    // it is.
-    private static boolean isArchived(PackageUserStateInternal userState) {
-        return userState.getArchiveState() != null;
     }
 
     public final ResolveInfo createForwardingResolveInfoUnchecked(WatchedIntentFilter filter,

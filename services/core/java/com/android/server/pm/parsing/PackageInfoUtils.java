@@ -54,6 +54,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
+import com.android.server.pm.PackageArchiver;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -401,14 +402,7 @@ public class PackageInfoUtils {
             ai.resourceDirs = overlayPaths.getResourceDirs().toArray(new String[0]);
             ai.overlayPaths = overlayPaths.getOverlayPaths().toArray(new String[0]);
         }
-        ai.isArchived = isArchived(state);
-    }
-
-    // TODO(b/288142708) Check for userState.isInstalled() here once this bug is fixed.
-    // If an app has isInstalled() == true - it should not be filtered above in any case, currently
-    // it is.
-    private static boolean isArchived(PackageUserState userState) {
-        return userState.getArchiveState() != null;
+        ai.isArchived = PackageArchiver.isArchived(state);
     }
 
     @Nullable
