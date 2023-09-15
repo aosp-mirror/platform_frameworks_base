@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
+import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_UNARCHIVE;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
@@ -142,7 +143,10 @@ public class PackageArchiver {
                             mPm.mInstallerService.uninstall(
                                     new VersionedPackage(packageName,
                                             PackageManager.VERSION_CODE_HIGHEST),
-                                    callerPackageName, DELETE_KEEP_DATA, intentSender, userId,
+                                    callerPackageName,
+                                    DELETE_ARCHIVE | DELETE_KEEP_DATA,
+                                    intentSender,
+                                    userId,
                                     binderUid);
                         })
                 .exceptionally(

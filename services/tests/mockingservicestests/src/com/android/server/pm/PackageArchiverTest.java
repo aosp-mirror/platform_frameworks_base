@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
+import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -275,7 +276,7 @@ public class PackageArchiverTest {
 
         verify(mInstallerService).uninstall(
                 eq(new VersionedPackage(PACKAGE, PackageManager.VERSION_CODE_HIGHEST)),
-                eq(CALLER_PACKAGE), eq(DELETE_KEEP_DATA), eq(mIntentSender),
+                eq(CALLER_PACKAGE), eq(DELETE_ARCHIVE | DELETE_KEEP_DATA), eq(mIntentSender),
                 eq(UserHandle.CURRENT.getIdentifier()), anyInt());
         assertThat(mPackageSetting.readUserState(
                 UserHandle.CURRENT.getIdentifier()).getArchiveState()).isEqualTo(

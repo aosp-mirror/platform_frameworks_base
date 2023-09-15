@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 import static android.content.pm.PackageManager.DELETE_SUCCEEDED;
 import static android.content.pm.PackageManager.MATCH_KNOWN_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
@@ -119,8 +120,6 @@ final class DeletePackageHelper {
      */
     public int deletePackageX(String packageName, long versionCode, int userId, int deleteFlags,
             boolean removedBySystem) {
-        final boolean isArchived = false; // TODO(b/278553670) Pass true during archival.
-
         final PackageRemovedInfo info = new PackageRemovedInfo(mPm);
         final boolean res;
 
@@ -250,6 +249,7 @@ final class DeletePackageHelper {
 
         if (res) {
             final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
+            final boolean isArchived = (deleteFlags & PackageManager.DELETE_ARCHIVE) != 0;
             info.sendPackageRemovedBroadcasts(killApp, removedBySystem, isArchived);
             info.sendSystemPackageUpdatedBroadcasts();
             PackageMetrics.onUninstallSucceeded(info, deleteFlags, removeUser);
