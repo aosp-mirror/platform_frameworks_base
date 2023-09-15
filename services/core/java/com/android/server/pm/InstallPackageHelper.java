@@ -56,7 +56,6 @@ import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
 import static com.android.server.pm.PackageManagerService.DEBUG_UPGRADE;
 import static com.android.server.pm.PackageManagerService.DEBUG_VERIFY;
-import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.MIN_INSTALLABLE_TARGET_SDK;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.POST_INSTALL;
@@ -180,7 +179,6 @@ import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.Permission;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedLibraryWrapper;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
@@ -1245,6 +1243,7 @@ final class InstallPackageHelper {
         boolean systemApp = false;
         boolean replace = false;
         synchronized (mPm.mLock) {
+            final PackageSetting ps = mPm.mSettings.getPackageLPr(pkgName);
             // Check if installing already existing package
             if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
                 String oldName = mPm.mSettings.getRenamedPackageLPr(pkgName);
@@ -1261,16 +1260,15 @@ final class InstallPackageHelper {
                         Slog.d(TAG, "Replacing existing renamed package: oldName="
                                 + oldName + " pkgName=" + pkgName);
                     }
-                } else if (mPm.mPackages.containsKey(pkgName)) {
+                } else if (ps != null) {
                     // This package, under its official name, already exists
                     // on the device; we should replace it.
                     replace = true;
                     if (DEBUG_INSTALL) Slog.d(TAG, "Replace existing package: " + pkgName);
                 }
-
-                if (replace) {
+                final AndroidPackage oldPackage = mPm.mPackages.get(pkgName);
+                if (replace && oldPackage != null) {
                     // Prevent apps opting out from runtime permissions
-                    AndroidPackage oldPackage = mPm.mPackages.get(pkgName);
                     final int oldTargetSdk = oldPackage.getTargetSdkVersion();
                     final int newTargetSdk = parsedPackage.getTargetSdkVersion();
                     if (oldTargetSdk > Build.VERSION_CODES.LOLLIPOP_MR1
@@ -1292,7 +1290,6 @@ final class InstallPackageHelper {
                 }
             }
 
-            PackageSetting ps = mPm.mSettings.getPackageLPr(pkgName);
             PackageSetting signatureCheckPs = ps;
 
             // SDK libs can have other major versions with different package names.
@@ -1368,8 +1365,8 @@ final class InstallPackageHelper {
                 if (DEBUG_INSTALL) Slog.d(TAG, "Existing package: " + ps);
 
                 systemApp = ps.isSystem();
-                request.setOriginUsers(
-                        ps.queryInstalledUsers(mPm.mUserManager.getUserIds(), true));
+                request.setOriginUsers(ps.queryUsersInstalledOrHasData(
+                        mPm.mUserManager.getUserIds()));
             }
 
             final int numGroups = ArrayUtils.size(parsedPackage.getPermissionGroups());
@@ -1595,7 +1592,7 @@ final class InstallPackageHelper {
 
         boolean shouldCloseFreezerBeforeReturn = true;
         try {
-            final PackageState oldPackageState;
+            final PackageSetting oldPackageState;
             final AndroidPackage oldPackage;
             String renamedPackage;
             boolean sysPkg = false;
@@ -1648,7 +1645,7 @@ final class InstallPackageHelper {
                         }
                     } else {
                         SigningDetails parsedPkgSigningDetails = parsedPackage.getSigningDetails();
-                        SigningDetails oldPkgSigningDetails = oldPackage.getSigningDetails();
+                        SigningDetails oldPkgSigningDetails = oldPackageState.getSigningDetails();
                         // default to original signature matching
                         if (!parsedPkgSigningDetails.checkCapability(oldPkgSigningDetails,
                                 SigningDetails.CertCapabilities.INSTALLED_DATA)
@@ -1668,7 +1665,8 @@ final class InstallPackageHelper {
                     }
 
                     // don't allow a system upgrade unless the upgrade hash matches
-                    if (oldPackage.getRestrictUpdateHash() != null && oldPackageState.isSystem()) {
+                    if (oldPackage != null && oldPackage.getRestrictUpdateHash() != null
+                            && oldPackageState.isSystem()) {
                         final byte[] digestBytes;
                         try {
                             final MessageDigest digest = MessageDigest.getInstance("SHA-512");
@@ -1691,23 +1689,26 @@ final class InstallPackageHelper {
                         parsedPackage.setRestrictUpdateHash(oldPackage.getRestrictUpdateHash());
                     }
 
-                    // APK should not change its sharedUserId declarations
-                    final var oldSharedUid = oldPackage.getSharedUserId() != null
-                            ? oldPackage.getSharedUserId() : "<nothing>";
-                    final var newSharedUid = parsedPackage.getSharedUserId() != null
-                            ? parsedPackage.getSharedUserId() : "<nothing>";
-                    if (!oldSharedUid.equals(newSharedUid)) {
-                        throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
-                                "Package " + parsedPackage.getPackageName()
-                                        + " shared user changed from "
-                                        + oldSharedUid + " to " + newSharedUid);
-                    }
+                    if (oldPackage != null) {
+                        // APK should not change its sharedUserId declarations
+                        final var oldSharedUid = oldPackage.getSharedUserId() != null
+                                ? oldPackage.getSharedUserId() : "<nothing>";
+                        final var newSharedUid = parsedPackage.getSharedUserId() != null
+                                ? parsedPackage.getSharedUserId() : "<nothing>";
+                        if (!oldSharedUid.equals(newSharedUid)) {
+                            throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
+                                    "Package " + parsedPackage.getPackageName()
+                                            + " shared user changed from "
+                                            + oldSharedUid + " to " + newSharedUid);
+                        }
 
-                    // APK should not re-join shared UID
-                    if (oldPackage.isLeavingSharedUser() && !parsedPackage.isLeavingSharedUser()) {
-                        throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
-                                "Package " + parsedPackage.getPackageName()
-                                        + " attempting to rejoin " + newSharedUid);
+                        // APK should not re-join shared UID
+                        if (oldPackage.isLeavingSharedUser()
+                                && !parsedPackage.isLeavingSharedUser()) {
+                            throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
+                                    "Package " + parsedPackage.getPackageName()
+                                            + " attempting to rejoin " + newSharedUid);
+                        }
                     }
 
                     // In case of rollback, remember per-user/profile install state
@@ -1740,8 +1741,8 @@ final class InstallPackageHelper {
 
                 // Update what is removed
                 PackageRemovedInfo removedInfo = new PackageRemovedInfo(mPm);
-                removedInfo.mUid = oldPackage.getUid();
-                removedInfo.mRemovedPackage = oldPackage.getPackageName();
+                removedInfo.mUid = ps.getAppId();
+                removedInfo.mRemovedPackage = ps.getPackageName();
                 removedInfo.mInstallerPackageName =
                         ps.getInstallSource().mInstallerPackageName;
                 removedInfo.mIsStaticSharedLib =
@@ -1760,8 +1761,8 @@ final class InstallPackageHelper {
                     removedInfo.mUninstallReasons.put(userId,
                             ps.getUninstallReason(userId));
                 }
-                removedInfo.mIsExternal = oldPackage.isExternalStorage();
-                removedInfo.mRemovedPackageVersionCode = oldPackage.getLongVersionCode();
+                removedInfo.mIsExternal = oldPackageState.isExternalStorage();
+                removedInfo.mRemovedPackageVersionCode = oldPackageState.getVersionCode();
                 request.setRemovedInfo(removedInfo);
 
                 sysPkg = oldPackageState.isSystem();
@@ -1801,7 +1802,7 @@ final class InstallPackageHelper {
             } else { // new package install
                 ps = null;
                 disabledPs = null;
-                oldPackage = null;
+                oldPackageState = null;
                 // Remember this for later, in case we need to rollback this install
                 String pkgName1 = parsedPackage.getPackageName();
 
@@ -1832,8 +1833,8 @@ final class InstallPackageHelper {
             shouldCloseFreezerBeforeReturn = false;
 
             request.setPrepareResult(replace, targetScanFlags, targetParseFlags,
-                    oldPackage, parsedPackage, replace /* clearCodeCache */, sysPkg,
-                    ps, disabledPs);
+                    oldPackageState, parsedPackage,
+                    replace /* clearCodeCache */, sysPkg, ps, disabledPs);
         } finally {
             request.setFreezer(freezer);
             if (shouldCloseFreezerBeforeReturn) {
@@ -2077,7 +2078,7 @@ final class InstallPackageHelper {
 
                 // Set the update and install times
                 PackageStateInternal deletedPkgSetting = mPm.snapshotComputer()
-                        .getPackageStateInternal(oldPackage.getPackageName());
+                        .getPackageStateInternal(packageName);
                 // TODO(b/225756739): For rebootless APEX, consider using lastUpdateMillis provided
                 //  by apexd to be more accurate.
                 installRequest.setScannedPackageSettingFirstInstallTimeFromReplaced(
@@ -2126,8 +2127,10 @@ final class InstallPackageHelper {
                         if (oldCodePaths == null) {
                             oldCodePaths = new ArraySet<>();
                         }
-                        Collections.addAll(oldCodePaths, oldPackage.getBaseApkPath());
-                        Collections.addAll(oldCodePaths, oldPackage.getSplitCodePaths());
+                        if (oldPackage != null) {
+                            Collections.addAll(oldCodePaths, oldPackage.getBaseApkPath());
+                            Collections.addAll(oldCodePaths, oldPackage.getSplitCodePaths());
+                        }
                         ps1.setOldCodePaths(oldCodePaths);
                     } else {
                         ps1.setOldCodePaths(null);
@@ -2852,46 +2855,11 @@ final class InstallPackageHelper {
             mPm.notifyInstantAppPackageInstalled(request.getPkg().getPackageName(),
                     request.getNewUsers());
 
-            // Determine the set of users who are adding this package for
-            // the first time vs. those who are seeing an update.
-            int[] firstUserIds = EMPTY_INT_ARRAY;
-            int[] firstInstantUserIds = EMPTY_INT_ARRAY;
-            int[] updateUserIds = EMPTY_INT_ARRAY;
-            int[] instantUserIds = EMPTY_INT_ARRAY;
-            final boolean allNewUsers = request.getOriginUsers() == null
-                    || request.getOriginUsers().length == 0;
-            for (int newUser : request.getNewUsers()) {
-                final boolean isInstantApp = pkgSetting.getUserStateOrDefault(newUser)
-                        .isInstantApp();
-                if (allNewUsers) {
-                    if (isInstantApp) {
-                        firstInstantUserIds = ArrayUtils.appendInt(firstInstantUserIds, newUser);
-                    } else {
-                        firstUserIds = ArrayUtils.appendInt(firstUserIds, newUser);
-                    }
-                    continue;
-                }
-                boolean isNew = true;
-                for (int origUser : request.getOriginUsers()) {
-                    if (origUser == newUser) {
-                        isNew = false;
-                        break;
-                    }
-                }
-                if (isNew) {
-                    if (isInstantApp) {
-                        firstInstantUserIds = ArrayUtils.appendInt(firstInstantUserIds, newUser);
-                    } else {
-                        firstUserIds = ArrayUtils.appendInt(firstUserIds, newUser);
-                    }
-                } else {
-                    if (isInstantApp) {
-                        instantUserIds = ArrayUtils.appendInt(instantUserIds, newUser);
-                    } else {
-                        updateUserIds = ArrayUtils.appendInt(updateUserIds, newUser);
-                    }
-                }
-            }
+            request.populateBroadcastUsers();
+            final int[] firstUserIds = request.getFirstTimeBroadcastUserIds();
+            final int[] firstInstantUserIds = request.getFirstTimeBroadcastInstantUserIds();
+            final int[] updateUserIds = request.getUpdateBroadcastUserIds();
+            final int[] instantUserIds = request.getUpdateBroadcastInstantUserIds();
 
             Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, request.getAppId());
@@ -2969,12 +2937,10 @@ final class InstallPackageHelper {
                 }
                 // If package installer is defined, notify package installer about new
                 // app installed
-                if (mPm.mRequiredInstallerPackage != null) {
-                    mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
-                            extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND /*flags*/,
-                            mPm.mRequiredInstallerPackage, null /*finishedReceiver*/,
-                            firstUserIds, instantUserIds, null /* broadcastAllowList */, null);
-                }
+                mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
+                        extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND /*flags*/,
+                        mPm.mRequiredInstallerPackage, null /*finishedReceiver*/,
+                        firstUserIds, instantUserIds, null /* broadcastAllowList */, null);
 
                 // Send replaced for users that don't see the package for the first time
                 if (update) {
@@ -3070,7 +3036,7 @@ final class InstallPackageHelper {
                 }
             }
 
-            if (allNewUsers && !update) {
+            if (request.isAllNewUsers() && !update) {
                 mPm.notifyPackageAdded(packageName, request.getAppId());
             } else {
                 mPm.notifyPackageChanged(packageName, request.getAppId());
