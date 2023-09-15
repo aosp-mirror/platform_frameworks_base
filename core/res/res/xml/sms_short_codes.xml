@@ -216,6 +216,9 @@
     <!-- Pakistan -->
     <shortcode country="pk" pattern="\\d{1,5}" free="2057" />
 
+    <!-- Palestine: 5 digits, known premium codes listed -->
+    <shortcode country="ps" pattern="\\d{1,5}" free="37477" />
+
     <!-- Poland: 4-5 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="pl" pattern="\\d{4,5}" premium="74240|79(?:10|866)|92525" free="116\\d{3}|8012|80921" />
 
