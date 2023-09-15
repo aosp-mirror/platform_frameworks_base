@@ -76,6 +76,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
     private final RecentTasksController mRecentTasksController;
     private IApplicationThread mAnimApp = null;
     private final ArrayList<RecentsController> mControllers = new ArrayList<>();
+    private final ArrayList<RecentsTransitionStateListener> mStateListeners = new ArrayList<>();
 
     /**
      * List of other handlers which might need to mix recents with other things. These are checked
@@ -104,6 +105,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
     /** Unregister a Mixed Handler */
     public void removeMixer(RecentsMixedHandler mixer) {
         mMixers.remove(mixer);
+    }
+
+    /** Adds the callback for receiving the state change of transition. */
+    public void addTransitionStateListener(RecentsTransitionStateListener listener) {
+        mStateListeners.add(listener);
     }
 
     @VisibleForTesting
@@ -381,6 +387,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             mTransition = null;
             mPendingPauseSnapshotsForCancel = null;
             mControllers.remove(this);
+            for (int i = 0; i < mStateListeners.size(); i++) {
+                mStateListeners.get(i).onAnimationStateChanged(false);
+            }
         }
 
         boolean start(TransitionInfo info, SurfaceControl.Transaction t,
@@ -519,6 +528,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         apps.toArray(new RemoteAnimationTarget[apps.size()]),
                         wallpapers.toArray(new RemoteAnimationTarget[wallpapers.size()]),
                         new Rect(0, 0, 0, 0), new Rect(), b);
+                for (int i = 0; i < mStateListeners.size(); i++) {
+                    mStateListeners.get(i).onAnimationStateChanged(true);
+                }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error starting recents animation", e);
                 cancel("onAnimationStart() failed");
