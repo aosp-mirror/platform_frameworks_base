@@ -345,7 +345,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         // as they are still relevant. Else, if the activity is visible and focused (the one the
         // user can see and is using), the user aspect ratio button can potentially be displayed so
         // start tracking the buttons visibility for this task.
-        if (mTopActivityTaskId != taskInfo.taskId && taskInfo.isVisible && taskInfo.isFocused) {
+        if (mTopActivityTaskId != taskInfo.taskId && !taskInfo.isTopActivityTransparent
+                && taskInfo.isVisible && taskInfo.isFocused) {
             mTopActivityTaskId = taskInfo.taskId;
             setHasShownUserAspectRatioSettingsButton(false);
         }
