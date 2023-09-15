@@ -33,9 +33,6 @@ droidstubs {
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
     ],
-    srcs: [
-        ":framework-minus-apex-aconfig-srcjars",
-    ],
     args: metalava_framework_docs_args + "--error UnflaggedApi ",
     check_api: {
         current: {
