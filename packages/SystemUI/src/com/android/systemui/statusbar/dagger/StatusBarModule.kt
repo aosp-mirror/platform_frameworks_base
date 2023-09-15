@@ -17,13 +17,16 @@
 package com.android.systemui.statusbar.dagger
 
 import com.android.systemui.CoreStartable
+import com.android.systemui.statusbar.core.StatusBarInitializer
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepository
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryImpl
+import com.android.systemui.statusbar.phone.LightBarController
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import dagger.multibindings.IntoSet
 
 /**
  * A module for **only** classes related to the status bar **UI element**. This module specifically
@@ -49,4 +52,15 @@ abstract class StatusBarModule {
     @IntoMap
     @ClassKey(OngoingCallController::class)
     abstract fun bindOngoingCallController(impl: OngoingCallController): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(LightBarController::class)
+    abstract fun bindLightBarController(impl: LightBarController): CoreStartable
+
+    @Binds
+    @IntoSet
+    abstract fun statusBarInitializedListener(
+        statusBarModeRepository: StatusBarModeRepository,
+    ): StatusBarInitializer.OnStatusBarViewInitializedListener
 }

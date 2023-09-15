@@ -21,9 +21,6 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
-import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS;
 
 import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_AUTO;
 import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS;
@@ -33,12 +30,6 @@ import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -92,7 +83,6 @@ import android.view.IWindowManager;
 import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.WindowInsets;
-import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
@@ -208,6 +198,7 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
+import com.android.systemui.statusbar.data.model.StatusBarMode;
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepository;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -222,7 +213,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
-import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -326,21 +316,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void acquireGestureWakeLock(long time) {
         mGestureWakeLock.acquire(time);
-    }
-
-    @Override
-    public boolean setAppearance(int appearance) {
-        if (mAppearance != appearance) {
-            mAppearance = appearance;
-            return updateBarMode(barMode(isTransientShown(), appearance));
-        }
-
-        return false;
-    }
-
-    @Override
-    public int getBarMode() {
-        return mStatusBarMode;
     }
 
     @Override
@@ -464,7 +439,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final UserInfoControllerImpl mUserInfoControllerImpl;
     private final DemoModeController mDemoModeController;
     private final NotificationsController mNotificationsController;
-    private final OngoingCallController mOngoingCallController;
     private final StatusBarSignalPolicy mStatusBarSignalPolicy;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final Lazy<LightRevealScrimViewModel> mLightRevealScrimViewModelLazy;
@@ -496,9 +470,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final UserTracker mUserTracker;
     private final Provider<FingerprintManager> mFingerprintManager;
     private final ActivityStarter mActivityStarter;
-
-    /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int, int) */
-    private @Appearance int mAppearance;
 
     private final DisplayMetrics mDisplayMetrics;
 
@@ -554,7 +525,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final DelayableExecutor mMainExecutor;
 
     private int mInteractingWindows;
-    private @TransitionMode int mStatusBarMode;
 
     private final ViewMediatorCallback mKeyguardViewMediatorCallback;
     private final ScrimController mScrimController;
@@ -714,7 +684,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             BrightnessSliderController.Factory brightnessSliderFactory,
             ScreenOffAnimationController screenOffAnimationController,
             WallpaperController wallpaperController,
-            OngoingCallController ongoingCallController,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             FeatureFlags featureFlags,
@@ -820,7 +789,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNotificationIconAreaController = notificationIconAreaController;
         mBrightnessSliderFactory = brightnessSliderFactory;
         mWallpaperController = wallpaperController;
-        mOngoingCallController = ongoingCallController;
         mStatusBarSignalPolicy = statusBarSignalPolicy;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mFeatureFlags = featureFlags;
@@ -853,9 +821,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mActivityLaunchAnimator = activityLaunchAnimator;
-
-        // The status bar background may need updating when the ongoing call status changes.
-        mOngoingCallController.addCallback((animate) -> maybeUpdateBarMode());
 
         // TODO(b/190746471): Find a better home for this.
         DateTimeView.setReceiverHandler(timeTickHandler);
@@ -1192,8 +1157,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mJavaAdapter.alwaysCollectFlow(
                 mStatusBarModeRepository.isTransientShown(), this::onTransientShownChanged);
         mJavaAdapter.alwaysCollectFlow(
-                mStatusBarModeRepository.isInFullscreenMode(),
-                this::onStatusBarFullscreenChanged);
+                mStatusBarModeRepository.getStatusBarMode(),
+                this::updateBarMode);
 
         mCommandQueueCallbacks = mCommandQueueCallbacksLazy.get();
         mCommandQueue.addCallback(mCommandQueueCallbacks);
@@ -1712,50 +1677,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (transientShown) {
             mNoAnimationOnNextBarModeChange = true;
         }
-        maybeUpdateBarMode();
     }
 
-    private void onStatusBarFullscreenChanged(boolean isWindowShown) {
-        maybeUpdateBarMode();
-    }
-
-    private void maybeUpdateBarMode() {
-        final int barMode = barMode(isTransientShown(), mAppearance);
-        if (updateBarMode(barMode)) {
-            mLightBarController.onStatusBarModeChanged(barMode);
-            updateBubblesVisibility();
-        }
-    }
-
-    private boolean updateBarMode(int barMode) {
-        if (mStatusBarMode != barMode) {
-            mStatusBarMode = barMode;
-            checkBarModes();
-            mAutoHideController.touchAutoHide();
-            return true;
-        }
-        return false;
-    }
-
-    private @TransitionMode int barMode(boolean isTransient, int appearance) {
-        boolean isFullscreen = mStatusBarModeRepository.isInFullscreenMode().getValue();
-        final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_STATUS_BARS;
-        if (mOngoingCallController.hasOngoingCall() && isFullscreen) {
-            // Force show the status bar if there's an ongoing call.
-            return MODE_SEMI_TRANSPARENT;
-        } else if (isTransient) {
-            return MODE_SEMI_TRANSPARENT;
-        } else if ((appearance & lightsOutOpaque) == lightsOutOpaque) {
-            return MODE_LIGHTS_OUT;
-        } else if ((appearance & APPEARANCE_LOW_PROFILE_BARS) != 0) {
-            return MODE_LIGHTS_OUT_TRANSPARENT;
-        } else if ((appearance & APPEARANCE_OPAQUE_STATUS_BARS) != 0) {
-            return MODE_OPAQUE;
-        } else if ((appearance & APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS) != 0) {
-            return MODE_SEMI_TRANSPARENT;
-        } else {
-            return MODE_TRANSPARENT;
-        }
+    private void updateBarMode(StatusBarMode barMode) {
+        checkBarModes();
+        mAutoHideController.touchAutoHide();
+        updateBubblesVisibility();
     }
 
     @Override
@@ -1785,7 +1712,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     public void checkBarModes() {
         if (mDemoModeController.isInDemoMode()) return;
         if (mStatusBarTransitions != null) {
-            checkBarMode(mStatusBarMode, mStatusBarWindowState, mStatusBarTransitions);
+            checkBarMode(
+                    mStatusBarModeRepository.getStatusBarMode().getValue(),
+                    mStatusBarWindowState,
+                    mStatusBarTransitions);
         }
         mNavigationBarController.checkNavBarModes(mDisplayId);
         mNoAnimationOnNextBarModeChange = false;
@@ -1794,16 +1724,19 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     /** Temporarily hides Bubbles if the status bar is hidden. */
     @Override
     public void updateBubblesVisibility() {
+        StatusBarMode mode = mStatusBarModeRepository.getStatusBarMode().getValue();
         mBubblesOptional.ifPresent(bubbles -> bubbles.onStatusBarVisibilityChanged(
-                mStatusBarMode != MODE_LIGHTS_OUT
-                        && mStatusBarMode != MODE_LIGHTS_OUT_TRANSPARENT));
+                mode != StatusBarMode.LIGHTS_OUT
+                        && mode != StatusBarMode.LIGHTS_OUT_TRANSPARENT));
     }
 
-    void checkBarMode(@TransitionMode int mode, @WindowVisibleState int windowState,
+    void checkBarMode(
+            StatusBarMode mode,
+            @WindowVisibleState int windowState,
             BarTransitions transitions) {
         final boolean anim = !mNoAnimationOnNextBarModeChange && mDeviceInteractive
                 && windowState != WINDOW_STATE_HIDDEN;
-        transitions.transitionTo(mode, anim);
+        transitions.transitionTo(mode.toTransitionModeInt(), anim);
     }
 
     private void finishBarAnimations() {
@@ -1850,8 +1783,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         pw.print("  mInteractingWindows="); pw.println(mInteractingWindows);
         pw.print("  mStatusBarWindowState=");
         pw.println(windowStateToString(mStatusBarWindowState));
-        pw.print("  mStatusBarMode=");
-        pw.println(BarTransitions.modeToString(mStatusBarMode));
         pw.print("  mDozing="); pw.println(mDozing);
         pw.print("  mWallpaperSupported= "); pw.println(mWallpaperSupported);
 

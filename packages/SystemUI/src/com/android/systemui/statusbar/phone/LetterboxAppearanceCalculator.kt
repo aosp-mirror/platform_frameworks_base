@@ -30,8 +30,6 @@ import com.android.internal.view.AppearanceRegion
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -57,7 +55,7 @@ constructor(
     context: Context,
     dumpManager: DumpManager,
     private val letterboxBackgroundProvider: LetterboxBackgroundProvider,
-) : OnStatusBarViewInitializedListener, Dumpable {
+) : Dumpable {
 
     private val darkAppearanceIconColor = context.getColor(
         // For a dark background status bar, use a *light* icon color.
@@ -72,8 +70,6 @@ constructor(
         dumpManager.registerCriticalDumpable(this)
     }
 
-    private var statusBarBoundsProvider: StatusBarBoundsProvider? = null
-
     private var lastAppearance: Int? = null
     private var lastAppearanceRegions: List<AppearanceRegion>? = null
     private var lastLetterboxes: List<LetterboxDetails>? = null
@@ -82,22 +78,24 @@ constructor(
     fun getLetterboxAppearance(
         @Appearance originalAppearance: Int,
         originalAppearanceRegions: List<AppearanceRegion>,
-        letterboxes: List<LetterboxDetails>
+        letterboxes: List<LetterboxDetails>,
+        statusBarBounds: BoundsPair,
     ): LetterboxAppearance {
         lastAppearance = originalAppearance
         lastAppearanceRegions = originalAppearanceRegions
         lastLetterboxes = letterboxes
         return getLetterboxAppearanceInternal(
-                letterboxes, originalAppearance, originalAppearanceRegions)
+                letterboxes, originalAppearance, originalAppearanceRegions, statusBarBounds)
             .also { lastLetterboxAppearance = it }
     }
 
     private fun getLetterboxAppearanceInternal(
         letterboxes: List<LetterboxDetails>,
         originalAppearance: Int,
-        originalAppearanceRegions: List<AppearanceRegion>
+        originalAppearanceRegions: List<AppearanceRegion>,
+        statusBarBounds: BoundsPair,
     ): LetterboxAppearance {
-        if (isScrimNeeded(letterboxes)) {
+        if (isScrimNeeded(letterboxes, statusBarBounds)) {
             return originalAppearanceWithScrim(originalAppearance, originalAppearanceRegions)
         }
         val appearance = appearanceWithoutScrim(originalAppearance)
@@ -105,13 +103,16 @@ constructor(
         return LetterboxAppearance(appearance, appearanceRegions)
     }
 
-    private fun isScrimNeeded(letterboxes: List<LetterboxDetails>): Boolean {
+    private fun isScrimNeeded(
+        letterboxes: List<LetterboxDetails>,
+        statusBarBounds: BoundsPair,
+    ): Boolean {
         if (isOuterLetterboxMultiColored()) {
             return true
         }
         return letterboxes.any { letterbox ->
-            letterbox.letterboxInnerBounds.overlapsWith(getStartSideIconBounds()) ||
-                letterbox.letterboxInnerBounds.overlapsWith(getEndSideIconsBounds())
+            letterbox.letterboxInnerBounds.overlapsWith(statusBarBounds.start) ||
+                letterbox.letterboxInnerBounds.overlapsWith(statusBarBounds.end)
         }
     }
 
@@ -198,18 +199,6 @@ constructor(
 
     private fun isOuterLetterboxMultiColored(): Boolean {
         return letterboxBackgroundProvider.isLetterboxBackgroundMultiColored
-    }
-
-    private fun getEndSideIconsBounds(): Rect {
-        return statusBarBoundsProvider?.visibleEndSideBounds ?: Rect()
-    }
-
-    private fun getStartSideIconBounds(): Rect {
-        return statusBarBoundsProvider?.visibleStartSideBounds ?: Rect()
-    }
-
-    override fun onStatusBarViewInitialized(component: StatusBarFragmentComponent) {
-        statusBarBoundsProvider = component.boundsProvider
     }
 
     private fun Rect.overlapsWith(other: Rect): Boolean {
