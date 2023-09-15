@@ -62,12 +62,14 @@ public class CpuPowerStatsCollectorTest {
         when(mPowerProfile.getCpuPowerBracketCount()).thenReturn(2);
         when(mPowerProfile.getCpuPowerBracketForScalingStep(0, 0)).thenReturn(0);
         when(mPowerProfile.getCpuPowerBracketForScalingStep(0, 1)).thenReturn(1);
+        when(mPowerProfile.getCpuPowerBracketForScalingStep(0, 2)).thenReturn(1);
+        when(mMockKernelCpuStatsReader.nativeIsSupportedFeature()).thenReturn(true);
         mCollector = new CpuPowerStatsCollector(new CpuScalingPolicies(
                 new SparseArray<>() {{
-                    put(0, new int[]{0});
+                        put(0, new int[]{0});
                 }},
                 new SparseArray<>() {{
-                    put(0, new int[]{1, 12});
+                        put(0, new int[]{1, 12, 24});
                 }}),
                 mPowerProfile, mHandler, mMockKernelCpuStatsReader, 60_000, mMockClock);
         mCollector.addConsumer(stats -> mCollectedStats = stats);
@@ -76,48 +78,56 @@ public class CpuPowerStatsCollectorTest {
 
     @Test
     public void collectStats() {
-        mockKernelCpuStats(new SparseArray<>() {{
-                put(42, new long[]{100, 200});
-                put(99, new long[]{300, 600});
-            }}, 0, 1234);
+        mockKernelCpuStats(new long[]{1111, 2222, 3333},
+                new SparseArray<>() {{
+                    put(42, new long[]{100, 200});
+                    put(99, new long[]{300, 600});
+                }}, 0, 1234);
 
         mMockClock.uptime = 1000;
         mCollector.forceSchedule();
         waitForIdle();
 
         assertThat(mCollectedStats.durationMs).isEqualTo(1234);
-        assertThat(mCollectedStats.uidStats.get(42)).isEqualTo(new long[]{100, 200});
-        assertThat(mCollectedStats.uidStats.get(99)).isEqualTo(new long[]{300, 600});
+        assertThat(mCollectedStats.stats).isEqualTo(new long[]{1111, 2222, 3333, 1000, 0});
+        assertThat(mCollectedStats.uidStats.get(42)).isEqualTo(new long[]{100, 200, 0});
+        assertThat(mCollectedStats.uidStats.get(99)).isEqualTo(new long[]{300, 600, 0});
 
-        mockKernelCpuStats(new SparseArray<>() {{
-                put(42, new long[]{123, 234});
-                put(99, new long[]{345, 678});
-            }}, 1234, 3421);
+        mockKernelCpuStats(new long[]{5555, 4444, 3333},
+                new SparseArray<>() {{
+                    put(42, new long[]{123, 234});
+                    put(99, new long[]{345, 678});
+                }}, 1234, 3421);
 
         mMockClock.uptime = 2000;
         mCollector.forceSchedule();
         waitForIdle();
 
         assertThat(mCollectedStats.durationMs).isEqualTo(3421 - 1234);
-        assertThat(mCollectedStats.uidStats.get(42)).isEqualTo(new long[]{23, 34});
-        assertThat(mCollectedStats.uidStats.get(99)).isEqualTo(new long[]{45, 78});
+        assertThat(mCollectedStats.stats).isEqualTo(new long[]{4444, 2222, 0, 1000, 0});
+        assertThat(mCollectedStats.uidStats.get(42)).isEqualTo(new long[]{23, 34, 0});
+        assertThat(mCollectedStats.uidStats.get(99)).isEqualTo(new long[]{45, 78, 0});
     }
 
-    private void mockKernelCpuStats(SparseArray<long[]> uidToCpuStats,
+    private void mockKernelCpuStats(long[] deviceStats, SparseArray<long[]> uidToCpuStats,
             long expectedLastUpdateTimestampMs, long newLastUpdateTimestampMs) {
         when(mMockKernelCpuStatsReader.nativeReadCpuStats(
                 any(CpuPowerStatsCollector.KernelCpuStatsCallback.class),
-                any(int[].class), anyLong(), any(long[].class)))
+                any(int[].class), anyLong(), any(long[].class), any(long[].class)))
                 .thenAnswer(invocation -> {
                     CpuPowerStatsCollector.KernelCpuStatsCallback callback =
                             invocation.getArgument(0);
                     int[] powerBucketIndexes = invocation.getArgument(1);
                     long lastTimestamp = invocation.getArgument(2);
-                    long[] tempStats = invocation.getArgument(3);
+                    long[] cpuTimeByScalingStep = invocation.getArgument(3);
+                    long[] tempStats = invocation.getArgument(4);
 
-                    assertThat(powerBucketIndexes).isEqualTo(new int[]{0, 1});
+                    assertThat(powerBucketIndexes).isEqualTo(new int[]{0, 1, 1});
                     assertThat(lastTimestamp / 1000000L).isEqualTo(expectedLastUpdateTimestampMs);
                     assertThat(tempStats).hasLength(2);
+
+                    System.arraycopy(deviceStats, 0, cpuTimeByScalingStep, 0,
+                            cpuTimeByScalingStep.length);
 
                     for (int i = 0; i < uidToCpuStats.size(); i++) {
                         int uid = uidToCpuStats.keyAt(i);

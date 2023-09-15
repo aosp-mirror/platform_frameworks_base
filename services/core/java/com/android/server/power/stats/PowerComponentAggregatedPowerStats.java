@@ -16,6 +16,8 @@
 
 package com.android.server.power.stats;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.IndentingPrintWriter;
 import android.util.SparseArray;
 
@@ -46,6 +48,8 @@ class PowerComponentAggregatedPowerStats {
     public final int powerComponentId;
     private final MultiStateStats.States[] mDeviceStateConfig;
     private final MultiStateStats.States[] mUidStateConfig;
+    @NonNull
+    private final AggregatedPowerStatsConfig.PowerComponent mConfig;
     private final int[] mDeviceStates;
     private final long[] mDeviceStateTimestamps;
 
@@ -62,13 +66,20 @@ class PowerComponentAggregatedPowerStats {
     }
 
     PowerComponentAggregatedPowerStats(AggregatedPowerStatsConfig.PowerComponent config) {
-        this.powerComponentId = config.getPowerComponentId();
+        mConfig = config;
+        powerComponentId = config.getPowerComponentId();
         mDeviceStateConfig = config.getDeviceStateConfig();
         mUidStateConfig = config.getUidStateConfig();
         mDeviceStates = new int[mDeviceStateConfig.length];
         mDeviceStateTimestamps = new long[mDeviceStateConfig.length];
     }
 
+    @NonNull
+    public AggregatedPowerStatsConfig.PowerComponent getConfig() {
+        return mConfig;
+    }
+
+    @Nullable
     public PowerStats.Descriptor getPowerStatsDescriptor() {
         return mPowerStatsDescriptor;
     }
@@ -106,6 +117,16 @@ class PowerComponentAggregatedPowerStats {
         if (uidStats.stats != null) {
             uidStats.stats.setState(stateId, state, time);
         }
+    }
+
+    void setDeviceStats(@AggregatedPowerStatsConfig.TrackedState int[] states, long[] values) {
+        mDeviceStats.setStats(states, values);
+    }
+
+    void setUidStats(int uid, @AggregatedPowerStatsConfig.TrackedState int[] states,
+            long[] values) {
+        UidStats uidStats = getUidStats(uid);
+        uidStats.stats.setStats(states, values);
     }
 
     boolean isCompatible(PowerStats powerStats) {
@@ -298,7 +319,8 @@ class PowerComponentAggregatedPowerStats {
         if (mDeviceStats != null) {
             ipw.println(mPowerStatsDescriptor.name);
             ipw.increaseIndent();
-            mDeviceStats.dump(ipw);
+            mDeviceStats.dump(ipw, stats ->
+                    mConfig.getProcessor().deviceStatsToString(mPowerStatsDescriptor, stats));
             ipw.decreaseIndent();
         }
     }
@@ -308,7 +330,8 @@ class PowerComponentAggregatedPowerStats {
         if (uidStats != null && uidStats.stats != null) {
             ipw.println(mPowerStatsDescriptor.name);
             ipw.increaseIndent();
-            uidStats.stats.dump(ipw);
+            uidStats.stats.dump(ipw, stats ->
+                    mConfig.getProcessor().uidStatsToString(mPowerStatsDescriptor, stats));
             ipw.decreaseIndent();
         }
     }

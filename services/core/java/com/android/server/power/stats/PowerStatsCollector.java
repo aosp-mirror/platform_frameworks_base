@@ -39,7 +39,7 @@ import java.util.stream.Stream;
  */
 public abstract class PowerStatsCollector {
     private final Handler mHandler;
-    private final Clock mClock;
+    protected final Clock mClock;
     private final long mThrottlePeriodMs;
     private final Runnable mCollectAndDeliverStats = this::collectAndDeliverStats;
     private boolean mEnabled;
@@ -100,6 +100,9 @@ public abstract class PowerStatsCollector {
     @SuppressWarnings("GuardedBy")  // Field is volatile
     private void collectAndDeliverStats() {
         PowerStats stats = collectStats();
+        if (stats == null) {
+            return;
+        }
         for (Consumer<PowerStats> consumer : mConsumerList) {
             consumer.accept(stats);
         }

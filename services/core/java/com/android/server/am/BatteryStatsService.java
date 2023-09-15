@@ -121,6 +121,7 @@ import com.android.server.power.stats.AggregatedPowerStatsConfig;
 import com.android.server.power.stats.BatteryExternalStatsWorker;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.power.stats.BatteryUsageStatsProvider;
+import com.android.server.power.stats.CpuAggregatedPowerStatsProcessor;
 import com.android.server.power.stats.PowerStatsAggregator;
 import com.android.server.power.stats.PowerStatsScheduler;
 import com.android.server.power.stats.PowerStatsStore;
@@ -440,7 +441,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 .trackUidStates(
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
-                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE);
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(
+                        new CpuAggregatedPowerStatsProcessor(mPowerProfile, mCpuScalingPolicies));
         return config;
     }
 
