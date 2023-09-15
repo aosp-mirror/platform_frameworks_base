@@ -71,12 +71,20 @@ class PhoneStatusBarViewController private constructor(
         override fun onConfigChanged(newConfig: Configuration?) {
             mView.updateResources()
         }
+
+        override fun onDensityOrFontScaleChanged() {
+            mView.onDensityOrFontScaleChanged()
+        }
     }
 
     override fun onViewAttached() {
         statusContainer = mView.requireViewById(R.id.system_icons)
         statusContainer.setOnHoverListener(
             statusOverlayHoverListenerFactory.createDarkAwareListener(statusContainer))
+
+        progressProvider?.setReadyToHandleTransition(true)
+        configurationController.addCallback(configurationListener)
+
         if (moveFromCenterAnimationController == null) return
 
         val statusBarLeftSide: View =
@@ -103,9 +111,6 @@ class PhoneStatusBarViewController private constructor(
                 moveFromCenterAnimationController.onStatusBarWidthChanged()
             }
         }
-
-        progressProvider?.setReadyToHandleTransition(true)
-        configurationController.addCallback(configurationListener)
     }
 
     override fun onViewDetached() {
