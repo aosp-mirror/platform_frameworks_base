@@ -16,13 +16,16 @@
 
 package com.android.wm.shell.flicker.pip.apps
 
+import android.platform.test.annotations.Postsubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.YouTubeAppHelper
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import androidx.test.filters.RequiresDevice
+import org.junit.Assume
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -74,5 +77,19 @@ open class YouTubeEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
 
     override val thisTransition: FlickerBuilder.() -> Unit = {
         transitions { tapl.goHome() }
+    }
+
+    @Postsubmit
+    @Test
+    override fun pipOverlayLayerAppearThenDisappear() {
+        // YouTube uses source rect hint, so PiP overlay is never present
+    }
+
+    @Postsubmit
+    @Test
+    override fun focusChanges() {
+        // in gestural nav the focus goes to different activity on swipe up with auto enter PiP
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
+        super.focusChanges()
     }
 }
