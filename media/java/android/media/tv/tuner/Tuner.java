@@ -903,6 +903,9 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
+    /**
+     * Releases Lnb resource if held. TRMS lock must be acquired prior to calling this function.
+     */
     private void closeLnb() {
         mLnbLock.lock();
         try {
@@ -2804,6 +2807,10 @@ public class Tuner implements AutoCloseable  {
     /** @hide */
     public int getClientId() {
         return mClientId;
+    }
+
+    /* package */ TunerResourceManager getTunerResourceManager() {
+        return mTunerResourceManager;
     }
 
     private void acquireTRMSLock(String functionNameForLog) {
