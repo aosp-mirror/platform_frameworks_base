@@ -1847,6 +1847,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     /** Returns extra space available to show the shelf on lockscreen */
     @VisibleForTesting
     float getVerticalSpaceForLockscreenShelf() {
+        if (mSplitShadeEnabled) {
+            return 0f;
+        }
         final float lockIconPadding = getLockIconPadding();
 
         final float noShelfOverlapBottomPadding =

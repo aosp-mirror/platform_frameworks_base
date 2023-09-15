@@ -197,6 +197,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void getVerticalSpaceForLockscreenShelf_useLockIconBottomPadding_returnsShelfHeight() {
+        enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
                 /* lockIconPadding= */ 20,
                 /* indicationPadding= */ 0,
@@ -209,6 +210,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void getVerticalSpaceForLockscreenShelf_useIndicationBottomPadding_returnsZero() {
+        enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
                 /* lockIconPadding= */ 0,
                 /* indicationPadding= */ 30,
@@ -221,6 +223,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void getVerticalSpaceForLockscreenShelf_useAmbientBottomPadding_returnsZero() {
+        enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
                 /* lockIconPadding= */ 0,
                 /* indicationPadding= */ 0,
@@ -233,6 +236,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void getVerticalSpaceForLockscreenShelf_useLockIconPadding_returnsLessThanShelfHeight() {
+        enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
                 /* lockIconPadding= */ 10,
                 /* indicationPadding= */ 8,
@@ -241,6 +245,19 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(2);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenShelf_splitShade() {
+        enableSplitShade(/* enabled= */ true);
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 10,
+                /* indicationPadding= */ 8,
+                /* ambientPadding= */ 0);
+
+        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
     }
 
     @Test
