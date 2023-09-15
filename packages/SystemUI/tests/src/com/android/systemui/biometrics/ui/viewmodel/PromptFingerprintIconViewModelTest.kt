@@ -4,9 +4,9 @@ import android.content.res.Configuration
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
@@ -41,7 +41,7 @@ class PromptFingerprintIconViewModelTest : SysuiTestCase() {
 
     private val fingerprintRepository = FakeFingerprintPropertyRepository()
     private val promptRepository = FakePromptRepository()
-    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
+    private val displayStateRepository = FakeDisplayStateRepository()
 
     private val testScope = TestScope(StandardTestDispatcher())
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
@@ -59,7 +59,7 @@ class PromptFingerprintIconViewModelTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 mContext,
                 fakeExecutor,
-                rearDisplayStateRepository
+                displayStateRepository
             )
         viewModel = PromptFingerprintIconViewModel(displayStateInteractor, promptSelectorInteractor)
     }
