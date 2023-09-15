@@ -71,6 +71,7 @@ public class DeviceConfigTest {
         deleteViaContentProvider(NAMESPACE, KEY2);
         deleteViaContentProvider(NAMESPACE, KEY3);
         DeviceConfig.clearAllLocalOverrides();
+        DeviceConfig.setSyncDisabledMode(DeviceConfig.SYNC_DISABLED_MODE_NONE);
     }
 
     /**
