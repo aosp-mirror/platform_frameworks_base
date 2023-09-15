@@ -53,6 +53,7 @@ import com.android.server.display.config.DisplayBrightnessPoint;
 import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.HbmTiming;
+import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.display.config.HighBrightnessMode;
 import com.android.server.display.config.IntegerArray;
 import com.android.server.display.config.LuxThrottling;
@@ -232,7 +233,22 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *          </point>
  *        </sdrHdrRatioMap>
  *      </highBrightnessMode>
- *
+ *      <hdrBrightnessConfig>
+ *         <brightnessMap>
+ *             <point>
+ *                <first>500</first>
+ *                <second>0.3</second>
+ *             </point>
+ *             <point>
+ *                 <first>1200</first>
+ *                 <second>0.6</second>
+ *             </point>
+ *         </brightnessMap>
+ *         <brightnessIncreaseDebounceMillis>1000</brightnessIncreaseDebounceMillis>
+ *         <brightnessIncreaseDurationMillis>10000</brightnessIncreaseDurationMillis>
+ *         <brightnessDecreaseDebounceMillis>13000</brightnessDecreaseDebounceMillis>
+ *         <brightnessDecreaseDurationMillis>10000</brightnessDecreaseDurationMillis>
+ *      </hdrBrightnessConfig>
  *      <luxThrottling>
  *        <brightnessLimitMap>
  *          <type>default</type>
@@ -768,6 +784,9 @@ public class DisplayDeviceConfig {
 
     @Nullable
     private HostUsiVersion mHostUsiVersion;
+
+    @Nullable
+    private HdrBrightnessData mHdrBrightnessData;
 
     @VisibleForTesting
     DisplayDeviceConfig(Context context) {
@@ -1544,6 +1563,14 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * @return HDR brightness related configuration
+     */
+    @Nullable
+    public HdrBrightnessData getHdrBrightnessData() {
+        return mHdrBrightnessData;
+    }
+
+    /**
      * @return Refresh rate range for specific profile id or null
      */
     @Nullable
@@ -1759,7 +1786,8 @@ public class DisplayDeviceConfig {
                 + "mScreenOffBrightnessSensorValueToLux=" + Arrays.toString(
                 mScreenOffBrightnessSensorValueToLux)
                 + "\n"
-                + "mUsiVersion= " + mHostUsiVersion
+                + "mUsiVersion= " + mHostUsiVersion + "\n"
+                + "mHdrBrightnessData" + mHdrBrightnessData
                 + "}";
     }
 
@@ -1823,6 +1851,7 @@ public class DisplayDeviceConfig {
                 loadRefreshRateSetting(config);
                 loadScreenOffBrightnessSensorValueToLuxFromDdc(config);
                 loadUsiVersion(config);
+                mHdrBrightnessData = HdrBrightnessData.loadConfig(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
