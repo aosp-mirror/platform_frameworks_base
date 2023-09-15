@@ -20,6 +20,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.media.AudioManager
+import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.BluetoothCallback
 import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
@@ -49,6 +50,7 @@ constructor(
     private val audioManager: AudioManager,
     private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter(),
     private val localBluetoothManager: LocalBluetoothManager?,
+    private val uiEventLogger: UiEventLogger,
     @Application private val coroutineScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
@@ -147,12 +149,14 @@ constructor(
             DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
                 if (!BluetoothUtils.isActiveMediaDevice(deviceItem.cachedBluetoothDevice)) {
                     deviceItem.cachedBluetoothDevice.setActive()
+                    uiEventLogger.log(BluetoothTileDialogUiEvent.CONNECTED_DEVICE_SET_ACTIVE)
                     isClicked = true
                 }
             }
             DeviceItemType.CONNECTED_BLUETOOTH_DEVICE -> {}
             DeviceItemType.SAVED_BLUETOOTH_DEVICE -> {
                 deviceItem.cachedBluetoothDevice.connect()
+                uiEventLogger.log(BluetoothTileDialogUiEvent.SAVED_DEVICE_CONNECT)
                 isClicked = true
             }
         }

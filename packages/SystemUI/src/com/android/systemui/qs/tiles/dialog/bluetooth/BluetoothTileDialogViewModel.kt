@@ -17,12 +17,19 @@
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.ACTION_BLUETOOTH_DEVICE_DETAILS
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.ACTION_PAIR_NEW_DEVICE
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.ACTION_PREVIOUSLY_CONNECTED_DEVICE
 import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.MAX_DEVICE_ITEM_ENTRY
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import javax.inject.Inject
@@ -42,6 +49,8 @@ constructor(
     private val deviceItemInteractor: DeviceItemInteractor,
     private val bluetoothStateInteractor: BluetoothStateInteractor,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val activityStarter: ActivityStarter,
+    private val uiEventLogger: UiEventLogger,
     @Application private val coroutineScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
 ) : BluetoothTileDialogCallback {
@@ -93,14 +102,14 @@ constructor(
                     .onEach {
                         dialog!!.onDeviceItemUpdated(
                             it.take(MAX_DEVICE_ITEM_ENTRY),
-                            showSeeAll = it.size > MAX_DEVICE_ITEM_ENTRY
+                            showSeeAll = it.size > MAX_DEVICE_ITEM_ENTRY,
+                            showPairNewDevice = bluetoothStateInteractor.isBluetoothEnabled
                         )
                     }
                     .launchIn(this)
 
                 dialog!!
                     .bluetoothStateSwitchedFlow
-                    .filterNotNull()
                     .onEach { bluetoothStateInteractor.isBluetoothEnabled = it }
                     .launchIn(this)
 
@@ -119,9 +128,34 @@ constructor(
         return BluetoothTileDialog(
                 bluetoothStateInteractor.isBluetoothEnabled,
                 this@BluetoothTileDialogViewModel,
+                uiEventLogger,
                 context
             )
             .apply { SystemUIDialog.registerDismissListener(this) { dismissDialog() } }
+    }
+
+    override fun onDeviceItemGearClicked(deviceItem: DeviceItem, view: View) {
+        uiEventLogger.log(BluetoothTileDialogUiEvent.DEVICE_GEAR_CLICKED)
+        val intent =
+            Intent(ACTION_BLUETOOTH_DEVICE_DETAILS).apply {
+                putExtra(
+                    ":settings:show_fragment_args",
+                    Bundle().apply {
+                        putString("device_address", deviceItem.cachedBluetoothDevice.address)
+                    }
+                )
+            }
+        startSettingsActivity(intent, view)
+    }
+
+    override fun onSeeAllClicked(view: View) {
+        uiEventLogger.log(BluetoothTileDialogUiEvent.SEE_ALL_CLICKED)
+        startSettingsActivity(Intent(ACTION_PREVIOUSLY_CONNECTED_DEVICE), view)
+    }
+
+    override fun onPairNewDeviceClicked(view: View) {
+        uiEventLogger.log(BluetoothTileDialogUiEvent.PAIR_NEW_DEVICE_CLICKED)
+        startSettingsActivity(Intent(ACTION_PAIR_NEW_DEVICE), view)
     }
 
     private fun dismissDialog() {
@@ -130,8 +164,21 @@ constructor(
         dialog?.dismiss()
         dialog = null
     }
+
+    private fun startSettingsActivity(intent: Intent, view: View) {
+        dialog?.run {
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            activityStarter.postStartActivityDismissingKeyguard(
+                intent,
+                0,
+                dialogLaunchAnimator.createActivityLaunchController(view)
+            )
+        }
+    }
 }
 
 internal interface BluetoothTileDialogCallback {
-    // TODO(b/298124674): Add click events for gear, see all and pair new device.
+    fun onDeviceItemGearClicked(deviceItem: DeviceItem, view: View)
+    fun onSeeAllClicked(view: View)
+    fun onPairNewDeviceClicked(view: View)
 }

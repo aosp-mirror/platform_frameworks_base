@@ -462,7 +462,9 @@
 
     <!-- Content description of the bluetooth device icon. [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_device_icon">Bluetooth device icon</string>
-    <!-- Content description of the bluetooth icon when connecting for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+
+    <!-- Content description of the bluetooth device settings gear icon. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_bluetooth_device_settings_gear">Bluetooth device settings gear</string>
 
     <!-- Content description of the battery when battery state is unknown for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_unknown">Battery percentage unknown.</string>
@@ -625,7 +627,9 @@
     <!-- QuickSettings: Bluetooth detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_detail_empty_text">No paired devices available</string>
     <!-- QuickSettings: Bluetooth dialog subtitle [CHAR LIMIT=NONE]-->
-    <string name="quick_settings_bluetooth_tile_subtitle">Tap to connect or disconnect</string>
+    <string name="quick_settings_bluetooth_tile_subtitle">Tap a device to connect</string>
+    <!-- QuickSettings: Bluetooth dialog pair new devices [CHAR LIMIT=NONE]-->
+    <string name="pair_new_bluetooth_devices">Pair new device</string>
     <!-- QuickSettings: Bluetooth dialog see all devices [CHAR LIMIT=NONE]-->
     <string name="see_all_bluetooth_devices">See all</string>
     <!-- QuickSettings: Bluetooth dialog turn on Bluetooth [CHAR LIMIT=NONE]-->
