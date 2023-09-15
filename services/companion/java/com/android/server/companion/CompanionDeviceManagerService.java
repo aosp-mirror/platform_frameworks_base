@@ -887,6 +887,11 @@ public class CompanionDeviceManagerService extends SystemService {
 
         @Override
         public PermissionSyncRequest getPermissionSyncRequest(int associationId) {
+            // TODO: temporary fix, will remove soon
+            AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+            if (association == null) {
+                return null;
+            }
             getAssociationWithCallerChecks(associationId);
             return mSystemDataTransferProcessor.getPermissionSyncRequest(associationId);
         }

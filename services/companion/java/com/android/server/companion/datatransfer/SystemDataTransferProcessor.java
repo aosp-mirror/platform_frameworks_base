@@ -139,7 +139,7 @@ public class SystemDataTransferProcessor {
             @UserIdInt int userId, int associationId) {
         if (PackageUtils.isPackageAllowlisted(mContext, mPackageManager, packageName)) {
             Slog.i(LOG_TAG, "User consent Intent should be skipped. Returning null.");
-            // Auto enable perm sync for the whitelisted packages, but don't override user decision
+            // Auto enable perm sync for the allowlisted packages, but don't override user decision
             PermissionSyncRequest request = getPermissionSyncRequest(associationId);
             if (request == null) {
                 PermissionSyncRequest newRequest = new PermissionSyncRequest(associationId);
@@ -224,20 +224,30 @@ public class SystemDataTransferProcessor {
      * Enable perm sync for the association
      */
     public void enablePermissionsSync(int associationId) {
-        int userId = mAssociationStore.getAssociationById(associationId).getUserId();
-        PermissionSyncRequest request = new PermissionSyncRequest(associationId);
-        request.setUserConsented(true);
-        mSystemDataTransferRequestStore.writeRequest(userId, request);
+        final long callingIdentityToken = Binder.clearCallingIdentity();
+        try {
+            int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+            PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+            request.setUserConsented(true);
+            mSystemDataTransferRequestStore.writeRequest(userId, request);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentityToken);
+        }
     }
 
     /**
      * Disable perm sync for the association
      */
     public void disablePermissionsSync(int associationId) {
-        int userId = mAssociationStore.getAssociationById(associationId).getUserId();
-        PermissionSyncRequest request = new PermissionSyncRequest(associationId);
-        request.setUserConsented(false);
-        mSystemDataTransferRequestStore.writeRequest(userId, request);
+        final long callingIdentityToken = Binder.clearCallingIdentity();
+        try {
+            int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+            PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+            request.setUserConsented(false);
+            mSystemDataTransferRequestStore.writeRequest(userId, request);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentityToken);
+        }
     }
 
     /**
@@ -245,23 +255,34 @@ public class SystemDataTransferProcessor {
      */
     @Nullable
     public PermissionSyncRequest getPermissionSyncRequest(int associationId) {
-        int userId = mAssociationStore.getAssociationById(associationId).getUserId();
-        List<SystemDataTransferRequest> requests =
-                mSystemDataTransferRequestStore.readRequestsByAssociationId(userId, associationId);
-        for (SystemDataTransferRequest request : requests) {
-            if (request instanceof PermissionSyncRequest) {
-                return (PermissionSyncRequest) request;
+        final long callingIdentityToken = Binder.clearCallingIdentity();
+        try {
+            int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+            List<SystemDataTransferRequest> requests =
+                    mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
+                            associationId);
+            for (SystemDataTransferRequest request : requests) {
+                if (request instanceof PermissionSyncRequest) {
+                    return (PermissionSyncRequest) request;
+                }
             }
+            return null;
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentityToken);
         }
-        return null;
     }
 
     /**
      * Remove perm sync request for the association.
      */
     public void removePermissionSyncRequest(int associationId) {
-        int userId = mAssociationStore.getAssociationById(associationId).getUserId();
-        mSystemDataTransferRequestStore.removeRequestsByAssociationId(userId, associationId);
+        final long callingIdentityToken = Binder.clearCallingIdentity();
+        try {
+            int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+            mSystemDataTransferRequestStore.removeRequestsByAssociationId(userId, associationId);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentityToken);
+        }
     }
 
     private void onReceivePermissionRestore(byte[] message) {
