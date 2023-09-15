@@ -75,6 +75,7 @@ import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.user.domain.interactor.UserInteractor;
 import com.android.systemui.util.kotlin.JavaAdapter;
@@ -182,7 +183,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                         mUserInteractor,
                         new SharedNotificationContainerInteractor(
                                 new FakeConfigurationRepository(),
-                                mContext),
+                                mContext,
+                                new ResourcesSplitShadeStateController()),
                         mShadeRepository
                 );
 
@@ -260,7 +262,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 mShadeRepository,
                 mShadeInteractor,
                 new JavaAdapter(mTestScope.getBackgroundScope()),
-                mCastController
+                mCastController,
+                new ResourcesSplitShadeStateController()
         );
         mQsController.init();
 

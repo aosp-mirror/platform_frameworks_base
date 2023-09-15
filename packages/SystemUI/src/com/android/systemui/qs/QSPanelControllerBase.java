@@ -40,7 +40,7 @@ import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
-import com.android.systemui.util.LargeScreenUtils;
+import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
 
@@ -86,6 +86,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     private final QSHost.Callback mQSHostCallback = this::setTiles;
 
+    private SplitShadeStateController mSplitShadeStateController;
+
     @VisibleForTesting
     protected final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             new QSPanel.OnConfigurationChangedListener() {
@@ -93,8 +95,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 public void onConfigurationChange(Configuration newConfig) {
                     final boolean previousSplitShadeState = mShouldUseSplitNotificationShade;
                     final int previousOrientation = mLastOrientation;
-                    mShouldUseSplitNotificationShade =
-                            LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                    mShouldUseSplitNotificationShade = mSplitShadeStateController
+                            .shouldUseSplitNotificationShade(getResources());
                     mLastOrientation = newConfig.orientation;
 
                     mQSLogger.logOnConfigurationChanged(
@@ -138,7 +140,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             MetricsLogger metricsLogger,
             UiEventLogger uiEventLogger,
             QSLogger qsLogger,
-            DumpManager dumpManager
+            DumpManager dumpManager,
+            SplitShadeStateController splitShadeStateController
     ) {
         super(view);
         mHost = host;
@@ -149,8 +152,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mUiEventLogger = uiEventLogger;
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
+        mSplitShadeStateController = splitShadeStateController;
         mShouldUseSplitNotificationShade =
-                LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                mSplitShadeStateController.shouldUseSplitNotificationShade(getResources());
     }
 
     @Override

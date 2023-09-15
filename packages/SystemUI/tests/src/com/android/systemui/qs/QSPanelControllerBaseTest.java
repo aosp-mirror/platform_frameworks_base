@@ -50,6 +50,7 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.util.animation.DisappearParameters;
 
 import org.junit.Before;
@@ -110,7 +111,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
                 MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
                 DumpManager dumpManager) {
             super(view, host, qsCustomizerController, true, mediaHost, metricsLogger, uiEventLogger,
-                    qsLogger, dumpManager);
+                    qsLogger, dumpManager, new ResourcesSplitShadeStateController());
         }
 
         @Override

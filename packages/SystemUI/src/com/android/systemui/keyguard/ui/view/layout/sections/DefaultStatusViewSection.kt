@@ -39,7 +39,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.media.controls.ui.KeyguardMediaController
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.shade.NotificationPanelViewController
-import com.android.systemui.util.LargeScreenUtils
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.Utils
 import dagger.Lazy
 import javax.inject.Inject
@@ -55,6 +55,7 @@ constructor(
     private val keyguardViewConfigurator: Lazy<KeyguardViewConfigurator>,
     private val notificationPanelViewController: Lazy<NotificationPanelViewController>,
     private val keyguardMediaController: KeyguardMediaController,
+    private val splitShadeStateController: SplitShadeStateController
 ) : KeyguardSection() {
     private val statusViewId = R.id.keyguard_status_view
 
@@ -104,7 +105,7 @@ constructor(
             connect(statusViewId, END, PARENT_ID, END)
 
             val margin =
-                if (LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)) {
+                if (splitShadeStateController.shouldUseSplitNotificationShade(context.resources)) {
                     context.resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin)
                 } else {
                     context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +

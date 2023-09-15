@@ -29,6 +29,7 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.leak.RotationUtils
 import org.junit.After
 import org.junit.Before
@@ -167,7 +168,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
             metricsLogger,
             uiEventLogger,
             qsLogger,
-            dumpManager) {
+            dumpManager,
+            ResourcesSplitShadeStateController()) {
 
         private var rotation = RotationUtils.ROTATION_NONE
 

@@ -89,9 +89,6 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     private static final ProgramSelector.Identifier TEST_DAB_FREQUENCY_ID =
             new ProgramSelector.Identifier(
                     ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, TEST_DAB_FREQUENCY_VALUE);
-    private static final ProgramSelector.Identifier TEST_FM_FREQUENCY_ID =
-            new ProgramSelector.Identifier(
-                    ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, TEST_FM_FREQUENCY_VALUE);
     private static final ProgramSelector.Identifier TEST_VENDOR_ID =
             new ProgramSelector.Identifier(
                     ProgramSelector.IDENTIFIER_TYPE_VENDOR_START, TEST_VENDOR_ID_VALUE);
@@ -248,6 +245,20 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
 
         expect.withMessage("Converted HAL DAB identifier").that(halDabId)
                 .isEqualTo(TEST_HAL_DAB_SID_EXT_ID);
+    }
+
+    @Test
+    public void identifierToHalProgramIdentifier_withDeprecateDabId() {
+        long value = 0x98765ABCDL;
+        ProgramSelector.Identifier dabId = new ProgramSelector.Identifier(
+                        ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT, value);
+        ProgramIdentifier halDabIdExpected = AidlTestUtils.makeHalIdentifier(
+                IdentifierType.DAB_SID_EXT, 0x987650000ABCDL);
+
+        ProgramIdentifier halDabId = ConversionUtils.identifierToHalProgramIdentifier(dabId);
+
+        expect.withMessage("Converted 28-bit DAB identifier for HAL").that(halDabId)
+                .isEqualTo(halDabIdExpected);
     }
 
     @Test

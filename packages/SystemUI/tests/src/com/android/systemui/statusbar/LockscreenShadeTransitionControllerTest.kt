@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -110,6 +111,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     private val sharedNotificationContainerInteractor = SharedNotificationContainerInteractor(
         configurationRepository,
         mContext,
+            ResourcesSplitShadeStateController()
     )
     private val shadeInteractor =
         ShadeInteractor(
@@ -172,7 +174,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                         scrimController,
                         context,
                         configurationController,
-                        dumpManager
+                        dumpManager,
+                            ResourcesSplitShadeStateController()
                     ),
                 keyguardTransitionControllerFactory = { notificationPanelController ->
                     LockscreenShadeKeyguardTransitionController(
@@ -180,7 +183,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                         notificationPanelController,
                         context,
                         configurationController,
-                        dumpManager
+                        dumpManager,
+                            ResourcesSplitShadeStateController()
                     )
                 },
                 qsTransitionControllerFactory = { qsTransitionController },
@@ -188,6 +192,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 shadeRepository = FakeShadeRepository(),
                 shadeInteractor = shadeInteractor,
                 powerInteractor = powerInteractor,
+                splitShadeStateController = ResourcesSplitShadeStateController()
             )
         transitionController.addCallback(transitionControllerCallback)
         whenever(nsslController.view).thenReturn(stackscroller)

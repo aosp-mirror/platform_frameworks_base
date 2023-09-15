@@ -8,6 +8,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -16,12 +17,14 @@ import dagger.assisted.AssistedInject
 class LockscreenShadeKeyguardTransitionController
 @AssistedInject
 constructor(
-    private val mediaHierarchyManager: MediaHierarchyManager,
-    @Assisted private val notificationPanelController: ShadeViewController,
-    context: Context,
-    configurationController: ConfigurationController,
-    dumpManager: DumpManager
-) : AbstractLockscreenShadeTransitionController(context, configurationController, dumpManager) {
+        private val mediaHierarchyManager: MediaHierarchyManager,
+        @Assisted private val notificationPanelController: ShadeViewController,
+        context: Context,
+        configurationController: ConfigurationController,
+        dumpManager: DumpManager,
+        splitShadeStateController: SplitShadeStateController
+) : AbstractLockscreenShadeTransitionController(context, configurationController, dumpManager,
+        splitShadeStateController) {
 
     /**
      * Distance that the full shade transition takes in order for the keyguard content on

@@ -49,7 +49,9 @@ class RemoteInputQuickSettingsDisablerTest : SysuiTestCase() {
 
         remoteInputQuickSettingsDisabler = RemoteInputQuickSettingsDisabler(
             mContext,
-            commandQueue, Mockito.mock(ConfigurationController::class.java)
+            commandQueue,
+                ResourcesSplitShadeStateController(),
+            Mockito.mock(ConfigurationController::class.java),
         )
         configuration = Configuration(mContext.resources.configuration)
 

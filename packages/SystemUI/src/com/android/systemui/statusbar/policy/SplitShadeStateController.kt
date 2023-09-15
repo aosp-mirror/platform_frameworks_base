@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.statusbar.policy
 
-package com.android.settingslib.net;
+import android.content.res.Resources
 
-import android.graphics.drawable.Drawable;
-
-public class UidDetail {
-    public CharSequence label;
-    public CharSequence contentDescription;
-    public CharSequence[] detailLabels;
-    public CharSequence[] detailContentDescriptions;
-    public Drawable icon;
-    public String packageName;
+/** Source of truth for split shade state: should or should not use split shade. */
+interface SplitShadeStateController {
+    /** Returns true if the device should use the split notification shade. */
+    fun shouldUseSplitNotificationShade(resources: Resources): Boolean
 }

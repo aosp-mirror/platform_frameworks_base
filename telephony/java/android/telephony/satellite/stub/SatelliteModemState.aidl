@@ -46,6 +46,14 @@ enum SatelliteModemState {
      */
     SATELLITE_MODEM_STATE_UNAVAILABLE = 5,
     /**
+     * The satellite modem is powered on but the device is not registered to a satellite cell.
+     */
+    SATELLITE_MODEM_STATE_NOT_CONNECTED = 6,
+    /**
+     * The satellite modem is powered on and the device is registered to a satellite cell.
+     */
+    SATELLITE_MODEM_STATE_CONNECTED = 7,
+    /**
      * Satellite modem state is unknown. This generic modem state should be used only when the
      * modem state cannot be mapped to other specific modem states.
      */

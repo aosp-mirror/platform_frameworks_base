@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCa
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -106,6 +107,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             SharedNotificationContainerInteractor(
                 configurationRepository,
                 mContext,
+                ResourcesSplitShadeStateController()
             )
         shadeInteractor =
             ShadeInteractor(

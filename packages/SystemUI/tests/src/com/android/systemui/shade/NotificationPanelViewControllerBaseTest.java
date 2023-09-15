@@ -172,6 +172,7 @@ import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.kotlin.JavaAdapter;
@@ -658,7 +659,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mActivityStarter,
                 mSharedNotificationContainerInteractor,
                 mKeyguardViewConfigurator,
-                mKeyguardFaceAuthInteractor);
+                mKeyguardFaceAuthInteractor,
+                new ResourcesSplitShadeStateController());
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 null,
@@ -730,7 +732,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mShadeRepository,
                 mShadeInteractor,
                 mJavaAdapter,
-                mCastController
+                mCastController,
+                new ResourcesSplitShadeStateController()
         );
     }
 

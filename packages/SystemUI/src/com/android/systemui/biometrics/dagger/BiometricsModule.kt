@@ -17,6 +17,9 @@
 package com.android.systemui.biometrics.dagger
 
 import com.android.systemui.biometrics.UdfpsUtils
+import android.content.res.Resources
+import com.android.internal.R
+import com.android.systemui.biometrics.EllipseOverlapDetectorParams
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.data.repository.FacePropertyRepositoryImpl
 import com.android.systemui.biometrics.data.repository.FaceSettingsRepository
@@ -37,6 +40,9 @@ import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteracto
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractorImpl
+import com.android.systemui.biometrics.udfps.BoundingBoxOverlapDetector
+import com.android.systemui.biometrics.udfps.EllipseOverlapDetector
+import com.android.systemui.biometrics.udfps.OverlapDetector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds
@@ -63,8 +69,9 @@ interface BiometricsModule {
 
     @Binds
     @SysUISingleton
-    fun fingerprintRepository(impl: FingerprintPropertyRepositoryImpl):
-            FingerprintPropertyRepository
+    fun fingerprintRepository(
+        impl: FingerprintPropertyRepositoryImpl
+    ): FingerprintPropertyRepository
 
     @Binds
     @SysUISingleton
@@ -72,8 +79,9 @@ interface BiometricsModule {
 
     @Binds
     @SysUISingleton
-    fun providesPromptSelectorInteractor(impl: PromptSelectorInteractorImpl):
-            PromptSelectorInteractor
+    fun providesPromptSelectorInteractor(
+        impl: PromptSelectorInteractorImpl
+    ): PromptSelectorInteractor
 
     @Binds
     @SysUISingleton
@@ -89,8 +97,9 @@ interface BiometricsModule {
 
     @Binds
     @SysUISingleton
-    fun providesSideFpsOverlayInteractor(impl: SideFpsOverlayInteractorImpl):
-            SideFpsOverlayInteractor
+    fun providesSideFpsOverlayInteractor(
+        impl: SideFpsOverlayInteractorImpl
+    ): SideFpsOverlayInteractor
 
     companion object {
         /** Background [Executor] for HAL related operations. */
@@ -103,6 +112,30 @@ interface BiometricsModule {
 
         @Provides
         fun providesUdfpsUtils(): UdfpsUtils = UdfpsUtils()
+
+        @Provides
+        @SysUISingleton
+        fun providesOverlapDetector(): OverlapDetector {
+            val selectedOption =
+                Resources.getSystem().getInteger(R.integer.config_selected_udfps_touch_detection)
+            val values =
+                Resources.getSystem()
+                    .getStringArray(R.array.config_udfps_touch_detection_options)[selectedOption]
+                    .split(",")
+                    .map { it.toFloat() }
+
+            return if (values[0] == 1f) {
+                EllipseOverlapDetector(
+                    EllipseOverlapDetectorParams(
+                        minOverlap = values[3],
+                        targetSize = values[2],
+                        stepSize = values[4].toInt()
+                    )
+                )
+            } else {
+                BoundingBoxOverlapDetector(values[2])
+            }
+        }
     }
 }
 
