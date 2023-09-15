@@ -250,6 +250,11 @@ public class TileUtils {
     public static final String META_DATA_NEW_TASK = "com.android.settings.new_task";
 
     /**
+     * If the entry should be shown in settings search results. Defaults to true.
+     */
+    public static final String META_DATA_PREFERENCE_SEARCHABLE = "com.android.settings.searchable";
+
+    /**
      * Build a list of DashboardCategory.
      */
     public static List<DashboardCategory> getCategories(Context context,
