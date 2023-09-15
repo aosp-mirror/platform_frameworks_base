@@ -40,6 +40,8 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.flags.Flags;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Contains methods to standard constants used in the UI for timeouts, sizes, and distances.
  */
@@ -600,6 +602,18 @@ public class ViewConfiguration {
         }
 
         return configuration;
+    }
+
+    /**
+     * Removes cached ViewConfiguration instances, so that we can ensure `get` constructs a new
+     * ViewConfiguration instance. This is useful for testing the behavior and performance of
+     * creating ViewConfiguration the first time.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static void resetCacheForTesting() {
+        sConfigurations.clear();
     }
 
     /**
