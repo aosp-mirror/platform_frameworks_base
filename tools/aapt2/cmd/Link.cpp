@@ -66,6 +66,7 @@
 #include "optimize/ResourceDeduper.h"
 #include "optimize/VersionCollapser.h"
 #include "process/IResourceTableConsumer.h"
+#include "process/ProductFilter.h"
 #include "process/SymbolTable.h"
 #include "split/TableSplitter.h"
 #include "trace/TraceBuffer.h"
@@ -2127,7 +2128,7 @@ class Linker {
                                          << "can't select products when building static library");
       }
     } else {
-      ProductFilter product_filter(options_.products);
+      ProductFilter product_filter(options_.products, /* remove_default_config_values = */ false);
       if (!product_filter.Consume(context_, &final_table_)) {
         context_->GetDiagnostics()->Error(android::DiagMessage() << "failed stripping products");
         return 1;

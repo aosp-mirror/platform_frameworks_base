@@ -42,6 +42,7 @@ struct CompileOptions {
   // See comments on aapt::ResourceParserOptions.
   bool preserve_visibility_of_styleables = false;
   bool verbose = false;
+  std::optional<std::string> product_;
 };
 
 /** Parses flags and compiles resources to be used in linking.  */
@@ -76,6 +77,10 @@ class CompileCommand : public Command {
     AddOptionalFlag("--source-path",
                       "Sets the compiled resource file source file path to the given string.",
                       &options_.source_path);
+    AddOptionalFlag("--filter-product",
+                    "Leave only resources specific to the given product. All "
+                    "other resources (including defaults) are removed.",
+                    &options_.product_);
   }
 
   int Action(const std::vector<std::string>& args) override;
