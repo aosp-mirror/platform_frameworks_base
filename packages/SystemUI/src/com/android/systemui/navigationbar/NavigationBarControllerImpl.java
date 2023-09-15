@@ -72,12 +72,12 @@ import javax.inject.Inject;
 
 /** A controller to handle navigation bars. */
 @SysUISingleton
-public class NavigationBarController implements
+public class NavigationBarControllerImpl implements
         ConfigurationController.ConfigurationListener,
         NavigationModeController.ModeChangedListener,
         Dumpable {
 
-    private static final String TAG = NavigationBarController.class.getSimpleName();
+    private static final String TAG = NavigationBarControllerImpl.class.getSimpleName();
 
     private final Context mContext;
     private final Handler mHandler;
@@ -101,7 +101,7 @@ public class NavigationBarController implements
                     | ActivityInfo.CONFIG_UI_MODE);
 
     @Inject
-    public NavigationBarController(Context context,
+    public NavigationBarControllerImpl(Context context,
             OverviewProxyService overviewProxyService,
             NavigationModeController navigationModeController,
             SysUiState sysUiFlagsContainer,

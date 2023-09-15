@@ -154,7 +154,7 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationBarControllerImpl;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter;
@@ -235,7 +235,6 @@ import kotlin.Unit;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -500,7 +499,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private int mCurrentPanelState = STATE_CLOSED;
     private final SysUiState mSysUiState;
     private final NotificationShadeDepthController mDepthController;
-    private final NavigationBarController mNavigationBarController;
+    private final NavigationBarControllerImpl mNavigationBarController;
     private final int mDisplayId;
 
     private final KeyguardIndicationController mKeyguardIndicationController;
@@ -737,7 +736,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             KeyguardMediaController keyguardMediaController,
             TapAgainViewController tapAgainViewController,
             NavigationModeController navigationModeController,
-            NavigationBarController navigationBarController,
+            NavigationBarControllerImpl navigationBarController,
             QuickSettingsController quickSettingsController,
             FragmentService fragmentService,
             IStatusBarService statusBarService,
