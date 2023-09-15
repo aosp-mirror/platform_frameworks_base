@@ -3,11 +3,6 @@
 # the `#inject` methods are accessed via reflection to work on ContentProviders
 -keepclassmembers class * extends com.android.systemui.dagger.SysUIComponent { void inject(***); }
 
-# Needed for builds to properly initialize KeyFrames from xml scene
--keepclassmembers class * extends androidx.constraintlayout.motion.widget.Key {
-  public <init>();
-}
-
 # Needed to ensure callback field references are kept in their respective
 # owning classes when the downstream callback registrars only store weak refs.
 # TODO(b/264686688): Handle these cases with more targeted annotations.
@@ -56,7 +51,6 @@
     public <init>(android.content.Context, android.util.AttributeSet);
 }
 
--keep class ** extends androidx.preference.PreferenceFragment
 -keep class com.android.systemui.tuner.*
 
 # The plugins and core log subpackages act as shared libraries that might be referenced in
