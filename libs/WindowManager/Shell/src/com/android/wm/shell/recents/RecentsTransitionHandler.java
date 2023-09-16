@@ -226,6 +226,13 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         private ArrayList<TaskState> mPausingTasks = null;
 
         /**
+         * List of tasks were pausing but closed in a subsequent merged transition. If a
+         * closing task is reopened, the leash is not initially hidden since it is already
+         * visible.
+         */
+        private ArrayList<TaskState> mClosingTasks = null;
+
+        /**
          * List of tasks that we are switching to. Upon finish, these will remain visible and
          * on top.
          */
@@ -376,6 +383,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             }
             mFinishTransaction = null;
             mPausingTasks = null;
+            mClosingTasks = null;
             mOpeningTasks = null;
             mInfo = null;
             mTransition = null;
@@ -420,6 +428,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             mFinishCB = finishCB;
             mFinishTransaction = finishT;
             mPausingTasks = new ArrayList<>();
+            mClosingTasks = new ArrayList<>();
             mOpeningTasks = new ArrayList<>();
             mLeashMap = new ArrayMap<>();
             mKeyguardLocked = (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0;
@@ -671,7 +680,10 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     final TransitionInfo.Change change = closingTasks.get(i);
                     final int pausingIdx = TaskState.indexOf(mPausingTasks, change);
                     if (pausingIdx >= 0) {
-                        mPausingTasks.remove(pausingIdx);
+                        // We are closing the pausing task, but it is still visible and can be
+                        // restart by another transition prior to this transition finishing
+                        final TaskState closingTask = mPausingTasks.remove(pausingIdx);
+                        mClosingTasks.add(closingTask);
                         didMergeThings = true;
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                                 "  closing pausing taskId=%d", change.getTaskInfo().taskId);
@@ -707,7 +719,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 for (int i = 0; i < openingTasks.size(); ++i) {
                     final TransitionInfo.Change change = openingTasks.get(i);
                     final boolean isLeaf = openingTaskIsLeafs.get(i) == 1;
-                    int pausingIdx = TaskState.indexOf(mPausingTasks, change);
+                    final int closingIdx = TaskState.indexOf(mClosingTasks, change);
+                    if (closingIdx >= 0) {
+                        // Remove opening tasks from closing set
+                        mClosingTasks.remove(closingIdx);
+                    }
+                    final int pausingIdx = TaskState.indexOf(mPausingTasks, change);
                     if (pausingIdx >= 0) {
                         // Something is showing/opening a previously-pausing app.
                         if (isLeaf) {
@@ -730,12 +747,14 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         appearedTargets[nextTargetIdx++] = target;
                         // reparent into the original `mInfo` since that's where we are animating.
                         final int rootIdx = TransitionUtil.rootIndexFor(change, mInfo);
+                        final boolean wasClosing = closingIdx >= 0;
                         t.reparent(target.leash, mInfo.getRoot(rootIdx).getLeash());
                         t.setLayer(target.leash, layer);
-                        // Hide the animation leash, let listener show it.
-                        t.hide(target.leash);
+                        // Hide the animation leash if not already visible, let listener show it
+                        t.setVisibility(target.leash, !wasClosing);
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                                "  opening new leaf taskId=%d", target.taskId);
+                                "  opening new leaf taskId=%d wasClosing=%b",
+                                target.taskId, wasClosing);
                         mOpeningTasks.add(new TaskState(change, target.leash));
                     } else {
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
