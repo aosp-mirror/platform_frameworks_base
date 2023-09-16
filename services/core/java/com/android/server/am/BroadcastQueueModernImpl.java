@@ -1172,7 +1172,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     private class BroadcastAnrTimer extends AnrTimer<BroadcastProcessQueue> {
-        BroadcastAnrTimer(Handler handler) {
+        BroadcastAnrTimer(@NonNull Handler handler) {
             super(Objects.requireNonNull(handler),
                     MSG_DELIVERY_TIMEOUT, "BROADCAST_TIMEOUT", true);
         }
