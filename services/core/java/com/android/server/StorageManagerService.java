@@ -2842,7 +2842,7 @@ class StorageManagerService extends IStorageManager.Stub
         return true;
     }
 
-    void runSmartIdleMaint(Runnable callback) {
+    synchronized void runSmartIdleMaint(Runnable callback) {
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         try {

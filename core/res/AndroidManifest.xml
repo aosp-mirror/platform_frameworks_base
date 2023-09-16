@@ -7663,6 +7663,10 @@
     <permission android:name="android.permission.DELETE_STAGED_HEALTH_CONNECT_REMOTE_DATA"
                 android:protectionLevel="signature" />
 
+    <!-- @hide @TestApi Allows tests running in CTS-in-sandbox mode to launch activities -->
+    <permission android:name="android.permission.START_ACTIVITIES_FROM_SDK_SANDBOX"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows the holder to call health connect migration APIs.
         @hide -->
     <permission android:name="android.permission.MIGRATE_HEALTH_CONNECT_DATA"

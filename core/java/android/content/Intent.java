@@ -12516,6 +12516,7 @@ public class Intent implements Parcelable, Cloneable {
         return (mFlags & FLAG_ACTIVITY_NEW_DOCUMENT) == FLAG_ACTIVITY_NEW_DOCUMENT;
     }
 
+    // TODO(b/299109198): Refactor into the {@link SdkSandboxManagerLocal}
     /** @hide */
     public boolean isSandboxActivity(@NonNull Context context) {
         if (mAction != null && mAction.equals(ACTION_START_SANDBOXED_ACTIVITY)) {

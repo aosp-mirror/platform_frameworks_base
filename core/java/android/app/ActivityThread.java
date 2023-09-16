@@ -3720,7 +3720,19 @@ public final class ActivityThread extends ClientTransactionHandler
     /**  Core implementation of activity launch. */
     private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
         ActivityInfo aInfo = r.activityInfo;
-        if (r.packageInfo == null) {
+
+        if (getInstrumentation() != null
+                && getInstrumentation().getContext() != null
+                && getInstrumentation().getContext().getApplicationInfo() != null
+                && getInstrumentation().isSdkSandboxAllowedToStartActivities()) {
+            // Activities launched from CTS-in-sandbox tests use a customized ApplicationInfo. See
+            // also {@link SdkSandboxManagerLocal#getSdkSandboxApplicationInfoForInstrumentation}.
+            r.packageInfo =
+                    getPackageInfo(
+                            getInstrumentation().getContext().getApplicationInfo(),
+                            mCompatibilityInfo,
+                            Context.CONTEXT_INCLUDE_CODE);
+        } else if (r.packageInfo == null) {
             r.packageInfo = getPackageInfo(aInfo.applicationInfo, mCompatibilityInfo,
                     Context.CONTEXT_INCLUDE_CODE);
         }

@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_ACTIVITY;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
@@ -26,7 +25,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
-import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_SDK_SANDBOX_ORDER_ID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -36,7 +34,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -44,13 +41,11 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
@@ -76,7 +71,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
@@ -508,89 +502,5 @@ public class ActivityStartInterceptorTest {
         mInterceptor.onActivityLaunched(null, mock(ActivityRecord.class));
 
         verify(callback, times(1)).onActivityLaunched(any(), any(), any());
-    }
-
-    @Test
-    public void testSandboxServiceInterceptionHappensToIntentWithSandboxActivityAction() {
-        ActivityInterceptorCallback spyCallback = Mockito.spy(info -> null);
-        mActivityInterceptorCallbacks.put(MAINLINE_SDK_SANDBOX_ORDER_ID, spyCallback);
-
-        PackageManager packageManagerMock = mock(PackageManager.class);
-        String sandboxPackageNameMock = "com.sandbox.mock";
-        when(mContext.getPackageManager()).thenReturn(packageManagerMock);
-        when(packageManagerMock.getSdkSandboxPackageName()).thenReturn(sandboxPackageNameMock);
-
-        Intent intent = new Intent().setAction(ACTION_START_SANDBOXED_ACTIVITY);
-        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null, null);
-
-        verify(spyCallback, times(1)).onInterceptActivityLaunch(
-                any(ActivityInterceptorCallback.ActivityInterceptorInfo.class));
-    }
-
-    @Test
-    public void testSandboxServiceInterceptionHappensToIntentWithSandboxPackage() {
-        ActivityInterceptorCallback spyCallback = Mockito.spy(info -> null);
-        mActivityInterceptorCallbacks.put(MAINLINE_SDK_SANDBOX_ORDER_ID, spyCallback);
-
-        PackageManager packageManagerMock = mock(PackageManager.class);
-        String sandboxPackageNameMock = "com.sandbox.mock";
-        when(mContext.getPackageManager()).thenReturn(packageManagerMock);
-        when(packageManagerMock.getSdkSandboxPackageName()).thenReturn(sandboxPackageNameMock);
-
-        Intent intent = new Intent().setPackage(sandboxPackageNameMock);
-        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null, null);
-
-        verify(spyCallback, times(1)).onInterceptActivityLaunch(
-                any(ActivityInterceptorCallback.ActivityInterceptorInfo.class));
-    }
-
-    @Test
-    public void testSandboxServiceInterceptionHappensToIntentWithComponentNameWithSandboxPackage() {
-        ActivityInterceptorCallback spyCallback = Mockito.spy(info -> null);
-        mActivityInterceptorCallbacks.put(MAINLINE_SDK_SANDBOX_ORDER_ID, spyCallback);
-
-        PackageManager packageManagerMock = mock(PackageManager.class);
-        String sandboxPackageNameMock = "com.sandbox.mock";
-        when(mContext.getPackageManager()).thenReturn(packageManagerMock);
-        when(packageManagerMock.getSdkSandboxPackageName()).thenReturn(sandboxPackageNameMock);
-
-        Intent intent = new Intent().setComponent(new ComponentName(sandboxPackageNameMock, ""));
-        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null, null);
-
-        verify(spyCallback, times(1)).onInterceptActivityLaunch(
-                any(ActivityInterceptorCallback.ActivityInterceptorInfo.class));
-    }
-
-    @Test
-    public void testSandboxServiceInterceptionNotCalledWhenIntentNotRelatedToSandbox() {
-        ActivityInterceptorCallback spyCallback = Mockito.spy(info -> null);
-        mActivityInterceptorCallbacks.put(MAINLINE_SDK_SANDBOX_ORDER_ID, spyCallback);
-
-        PackageManager packageManagerMock = mock(PackageManager.class);
-        String sandboxPackageNameMock = "com.sandbox.mock";
-        when(mContext.getPackageManager()).thenReturn(packageManagerMock);
-        when(packageManagerMock.getSdkSandboxPackageName()).thenReturn(sandboxPackageNameMock);
-
-        // Intent: null
-        mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null, null);
-
-        // Action: null, Package: null, ComponentName: null
-        Intent intent = new Intent();
-        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null, null);
-
-        // Wrong Action
-        intent = new Intent().setAction(Intent.ACTION_VIEW);
-        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null, null);
-
-        // Wrong Package
-        intent = new Intent().setPackage("Random");
-        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null, null);
-
-        // Wrong ComponentName's package
-        intent = new Intent().setComponent(new ComponentName("Random", ""));
-        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null, null);
-
-        verify(spyCallback, never()).onInterceptActivityLaunch(
-                any(ActivityInterceptorCallback.ActivityInterceptorInfo.class));
     }
 }

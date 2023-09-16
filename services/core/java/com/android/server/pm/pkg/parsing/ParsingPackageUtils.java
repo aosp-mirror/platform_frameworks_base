@@ -28,6 +28,7 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_
 import static android.os.Build.VERSION_CODES.DONUT;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+
 import static com.android.server.pm.pkg.parsing.ParsingUtils.parseKnownActivityEmbeddingCerts;
 
 import android.annotation.AnyRes;
@@ -509,24 +510,33 @@ public class ParsingPackageUtils {
                 /* Set the global "on SD card" flag */
                 .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0);
 
+        var archivedPackage = lite.getArchivedPackage();
+        if (archivedPackage == null) {
+            return input.error(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
+                    "archivePackage is missing");
+        }
+
         // parseBaseAppBasicFlags
         pkg
                 // Default true
-                .setBackupAllowed(lite.isBackupAllowed())
+                .setBackupAllowed(true)
                 .setClearUserDataAllowed(true)
-                .setClearUserDataOnFailedRestoreAllowed(
-                        lite.isClearUserDataOnFailedRestoreAllowed())
+                .setClearUserDataOnFailedRestoreAllowed(true)
                 .setAllowNativeHeapPointerTagging(true)
                 .setEnabled(true)
                 .setExtractNativeLibrariesRequested(true)
                 // targetSdkVersion gated
                 .setAllowAudioPlaybackCapture(targetSdk >= Build.VERSION_CODES.Q)
                 .setHardwareAccelerated(targetSdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-                .setRequestLegacyExternalStorage(lite.isRequestLegacyExternalStorage())
+                .setRequestLegacyExternalStorage(
+                        XmlUtils.convertValueToBoolean(archivedPackage.requestLegacyExternalStorage,
+                                targetSdk < Build.VERSION_CODES.Q))
                 .setCleartextTrafficAllowed(targetSdk < Build.VERSION_CODES.P)
                 // Default false
-                .setDefaultToDeviceProtectedStorage(lite.isDefaultToDeviceProtectedStorage())
-                .setUserDataFragile(lite.isUserDataFragile())
+                .setDefaultToDeviceProtectedStorage(XmlUtils.convertValueToBoolean(
+                        archivedPackage.defaultToDeviceProtectedStorage, false))
+                .setUserDataFragile(
+                        XmlUtils.convertValueToBoolean(archivedPackage.userDataFragile, false))
                 // Ints
                 .setCategory(ApplicationInfo.CATEGORY_UNDEFINED)
                 // Floats Default 0f

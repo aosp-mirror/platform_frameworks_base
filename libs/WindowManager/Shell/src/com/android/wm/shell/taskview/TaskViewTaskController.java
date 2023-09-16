@@ -54,12 +54,13 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = TaskViewTaskController.class.getSimpleName();
 
     private final CloseGuard mGuard = new CloseGuard();
-
+    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
+    /** Used to inset the activity content to allow space for a caption bar. */
+    private final Binder mCaptionInsetsOwner = new Binder();
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Executor mShellExecutor;
     private final SyncTransactionQueue mSyncQueue;
     private final TaskViewTransitions mTaskViewTransitions;
-    private TaskViewBase mTaskViewBase;
     private final Context mContext;
 
     /**
@@ -70,21 +71,19 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
      * in this situation to allow us to notify listeners correctly if the task failed to open.
      */
     private ActivityManager.RunningTaskInfo mPendingInfo;
-    /* Indicates that the task we attempted to launch in the task view failed to launch. */
-    private boolean mTaskNotFound;
+    private TaskViewBase mTaskViewBase;
     protected ActivityManager.RunningTaskInfo mTaskInfo;
     private WindowContainerToken mTaskToken;
     private SurfaceControl mTaskLeash;
-    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
+    /* Indicates that the task we attempted to launch in the task view failed to launch. */
+    private boolean mTaskNotFound;
     private boolean mSurfaceCreated;
     private SurfaceControl mSurfaceControl;
     private boolean mIsInitialized;
     private boolean mNotifiedForInitialized;
+    private boolean mHideTaskWithSurface = true;
     private TaskView.Listener mListener;
     private Executor mListenerExecutor;
-
-    /** Used to inset the activity content to allow space for a caption bar. */
-    private final Binder mCaptionInsetsOwner = new Binder();
     private Rect mCaptionInsets;
 
     public TaskViewTaskController(Context context, ShellTaskOrganizer organizer,
@@ -100,6 +99,19 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             }
         });
         mGuard.open("release");
+    }
+
+    /**
+     * Specifies if the task should be hidden when the surface is destroyed.
+     * <p>This is {@code true} by default.
+     *
+     * @param hideTaskWithSurface {@code false} if task needs to remain visible even when the
+     *                            surface is destroyed, {@code true} otherwise.
+     */
+    public void setHideTaskWithSurface(boolean hideTaskWithSurface) {
+        // TODO(b/299535374): Remove mHideTaskWithSurface once the taskviews with launch root tasks
+        // are moved to a window in SystemUI in auto.
+        mHideTaskWithSurface = hideTaskWithSurface;
     }
 
     SurfaceControl getSurfaceControl() {
@@ -257,9 +269,17 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         mTaskNotFound = false;
     }
 
+    /** This method shouldn't be called when shell transitions are enabled. */
     private void updateTaskVisibility() {
+        boolean visible = mSurfaceCreated;
+        if (!visible && !mHideTaskWithSurface) {
+            return;
+        }
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.setHidden(mTaskToken, !mSurfaceCreated /* hidden */);
+        wct.setHidden(mTaskToken, !visible /* hidden */);
+        if (!visible) {
+            wct.reorder(mTaskToken, false /* onTop */);
+        }
         mSyncQueue.queue(wct);
         if (mListener == null) {
             return;
