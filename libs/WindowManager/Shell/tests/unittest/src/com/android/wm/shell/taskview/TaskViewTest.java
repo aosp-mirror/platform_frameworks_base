@@ -221,6 +221,20 @@ public class TaskViewTest extends ShellTestCase {
     }
 
     @Test
+    public void testSurfaceDestroyed_withTask_shouldNotHideTask_legacyTransitions() {
+        assumeFalse(Transitions.ENABLE_SHELL_TRANSITIONS);
+        mTaskViewTaskController.setHideTaskWithSurface(false);
+
+        SurfaceHolder sh = mock(SurfaceHolder.class);
+        mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
+        mTaskView.surfaceCreated(sh);
+        reset(mViewListener);
+        mTaskView.surfaceDestroyed(sh);
+
+        verify(mViewListener, never()).onTaskVisibilityChanged(anyInt(), anyBoolean());
+    }
+
+    @Test
     public void testSurfaceDestroyed_withTask_legacyTransitions() {
         assumeFalse(Transitions.ENABLE_SHELL_TRANSITIONS);
         SurfaceHolder sh = mock(SurfaceHolder.class);

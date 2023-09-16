@@ -27,9 +27,9 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPH
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__SERVICE_CRASH;
 
-import android.app.AppOpsManager;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.content.ComponentName;
@@ -50,6 +50,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
+import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetectionServiceFailure;
@@ -113,6 +114,9 @@ final class HotwordDetectionConnection {
     private static final String KEY_RESTART_PERIOD_IN_SECONDS = "restart_period_in_seconds";
     private static final long RESET_DEBUG_HOTWORD_LOGGING_TIMEOUT_MILLIS = 60 * 60 * 1000; // 1 hour
     private static final int MAX_ISOLATED_PROCESS_NUMBER = 10;
+
+    private static final boolean SYSPROP_VISUAL_QUERY_SERVICE_ENABLED =
+            SystemProperties.getBoolean("ro.hotword.visual_query_service_enabled", false);
 
     /**
      * Indicates the {@link HotwordDetectionService} is created.
@@ -680,7 +684,8 @@ final class HotwordDetectionConnection {
             mIntent = intent;
             mDetectionServiceType = detectionServiceType;
             int flags = bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0;
-            if (mVisualQueryDetectionComponentName != null
+            if (SYSPROP_VISUAL_QUERY_SERVICE_ENABLED
+                    && mVisualQueryDetectionComponentName != null
                     && mHotwordDetectionComponentName != null) {
                 flags |= Context.BIND_SHARED_ISOLATED_PROCESS;
             }

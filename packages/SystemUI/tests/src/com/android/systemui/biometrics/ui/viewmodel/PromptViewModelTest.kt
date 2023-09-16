@@ -25,9 +25,9 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthBiometricView
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
@@ -79,14 +79,14 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private val testScope = TestScope()
     private val fingerprintRepository = FakeFingerprintPropertyRepository()
     private val promptRepository = FakePromptRepository()
-    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
+    private val displayStateRepository = FakeDisplayStateRepository()
 
     private val displayStateInteractor =
         DisplayStateInteractorImpl(
             testScope.backgroundScope,
             mContext,
             fakeExecutor,
-            rearDisplayStateRepository
+            displayStateRepository
         )
 
     private lateinit var selector: PromptSelectorInteractor
@@ -99,7 +99,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
 
-        viewModel = PromptViewModel(displayStateInteractor, selector, vibrator, featureFlags)
+        viewModel =
+            PromptViewModel(displayStateInteractor, selector, vibrator, mContext, featureFlags)
         featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
     }
 

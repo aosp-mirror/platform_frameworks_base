@@ -975,6 +975,9 @@ public final class MediaProjectionManagerService extends SystemService
                     throw new SecurityException("Media projections require a foreground service"
                             + " of type ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION");
                 }
+
+                mCallback = callback;
+                registerCallback(mCallback);
                 try {
                     mToken = callback.asBinder();
                     mDeathEater = () -> {
@@ -1019,11 +1022,6 @@ public final class MediaProjectionManagerService extends SystemService
                     }
                 }
                 startProjectionLocked(this);
-
-                // Register new callbacks after stop has been dispatched to previous session.
-                mCallback = callback;
-                registerCallback(mCallback);
-
                 // Mark this token as used when the app gets the MediaProjection instance.
                 mCountStarts++;
             }

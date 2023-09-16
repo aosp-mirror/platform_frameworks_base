@@ -17,6 +17,7 @@
 package com.android.systemui.mediaprojection.appselector.view
 
 import android.app.ActivityOptions
+import android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import android.app.IActivityTaskManager
 import android.graphics.Rect
 import android.os.Binder
@@ -129,6 +130,9 @@ constructor(
                 view.width,
                 view.height
             )
+        activityOptions.setPendingIntentBackgroundActivityStartMode(
+            MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+        )
         activityOptions.launchCookie = launchCookie
 
         activityTaskManager.startActivityFromRecents(task.taskId, activityOptions.toBundle())

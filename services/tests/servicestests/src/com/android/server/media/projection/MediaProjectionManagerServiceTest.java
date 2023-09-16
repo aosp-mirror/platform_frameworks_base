@@ -202,24 +202,6 @@ public class MediaProjectionManagerServiceTest {
     }
 
     @Test
-    public void testCreateProjection_priorProjectionGrant() throws NameNotFoundException {
-        // Create a first projection.
-        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
-        FakeIMediaProjectionCallback callback1 = new FakeIMediaProjectionCallback();
-        projection.start(callback1);
-
-        // Create a second projection.
-        MediaProjectionManagerService.MediaProjection secondProjection =
-                startProjectionPreconditions();
-        FakeIMediaProjectionCallback callback2 = new FakeIMediaProjectionCallback();
-        secondProjection.start(callback2);
-
-        // Check that the second projection's callback hasn't been stopped.
-        assertThat(callback1.mStopped).isTrue();
-        assertThat(callback2.mStopped).isFalse();
-    }
-
-    @Test
     public void testCreateProjection_attemptReuse_noPriorProjectionGrant()
             throws NameNotFoundException {
         // Create a first projection.
@@ -803,11 +785,8 @@ public class MediaProjectionManagerServiceTest {
     }
 
     private static class FakeIMediaProjectionCallback extends IMediaProjectionCallback.Stub {
-        boolean mStopped = false;
-
         @Override
         public void onStop() throws RemoteException {
-            mStopped = true;
         }
 
         @Override
