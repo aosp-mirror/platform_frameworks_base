@@ -584,7 +584,7 @@
     <string name="user_grant_admin_message" msgid="1673791931033486709">"អ្នកគ្រប់គ្រងមានសិទ្ធិពិសេសដែលអ្នកប្រើប្រាស់ផ្សេងទៀតមិនមាន។ អ្នកគ្រប់គ្រងអាចគ្រប់គ្រងអ្នកប្រើប្រាស់ទាំងអស់ ធ្វើបច្ចុប្បន្នភាពឬកំណត់ឧបករណ៍នេះឡើងវិញ កែសម្រួលការកំណត់ មើលកម្មវិធីដែលបានដំឡើងទាំងអស់ និងផ្ដល់ឬដកសិទ្ធិជាអ្នកគ្រប់គ្រងសម្រាប់អ្នកផ្សេងទៀត។"</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"ផ្ដល់សិទ្ធិជាអ្នកគ្រប់គ្រង"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"រៀបចំ​អ្នក​ប្រើ​ប្រាស់ឥឡូវនេះ?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"សូម​ប្រាកដ​ថា​​អ្នក​ប្រើ​ប្រាស់នេះ​អាច​យក​​ឧបករណ៍ ​និង​រៀបចំ​​ទំហំ​ផ្ទុករបស់​គេបាន"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"សូម​ប្រាកដ​ថា​​អ្នក​ប្រើ​ប្រាស់នេះ​អាច​យក​​ឧបករណ៍ ​និង​រៀបចំ​​ទំហំ​ផ្ទុករបស់​គាត់បាន"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"រៀបចំ​ប្រវត្តិរូប​ឥឡូវ?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"រៀបចំ​ឥឡូវ"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"កុំទាន់"</string>

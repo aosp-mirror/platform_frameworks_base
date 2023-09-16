@@ -584,7 +584,7 @@
     <string name="user_grant_admin_message" msgid="1673791931033486709">"एड्मिनहरूसँग अन्य प्रयोगकर्तासँग नभएका विशेषाधिकारहरू हुन्छन्। एड्मिन सबै प्रयोगकर्ताहरूलाई व्यवस्थापन गर्न, यो डिभाइस अपडेट वा रिसेट गर्न, सेटिङ परिमार्जन गर्न, इन्स्टल गरिएका सबै एपहरू हेर्न र अरूलाई एड्मिनका विशेषाधिकारहरू दिन वा अरूलाई दिइएका एड्मिनका विशेषाधिकारहरू खारेज गर्न सक्नुहुन्छ।"</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"एड्मिन बनाउनुहोस्"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"अहिले प्रयोगकर्ता सेटअप गर्ने हो?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"यी व्यक्ति यन्त्र यो डिभाइस चलाउन र आफ्नो ठाउँ सेट गर्न उपलब्ध छन् भन्ने कुरा सुनिश्चित गर्नुहोस्"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"यी व्यक्ति यो डिभाइस चलाउन र आफ्नो ठाउँ सेट गर्न उपलब्ध छन् भन्ने कुरा सुनिश्चित गर्नुहोस्"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"अहिले प्रोफाइल सेटअप गर्ने हो?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"अब सेटअप गर्नुहोस्"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"अहिले होइन"</string>
@@ -601,8 +601,8 @@
     <string name="add_user_failed" msgid="4809887794313944872">"नयाँ प्रयोगकर्ता सिर्जना गर्न सकिएन"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"नयाँ अतिथि बनाउन सकिएन"</string>
     <string name="user_nickname" msgid="262624187455825083">"उपनाम"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"प्रयोगकर्ता थप्नुहोस्"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि थप्नुहोस्"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"प्रयोगकर्ता कनेक्ट गर्नुहोस्"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि कनेक्ट गर्नुहोस्"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"गेस्ट मोडबाट बाहिर निस्कियोस्"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"अतिथि सत्र रिसेट गर्नुहोस्"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"अतिथिका रूपमा ब्राउज गर्ने सेसन रिसेट गर्ने हो?"</string>
