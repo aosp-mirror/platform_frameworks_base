@@ -18,7 +18,9 @@ package com.android.server.pm;
 
 import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -161,7 +163,7 @@ public class PackageArchiverTest {
 
         mArchiveManager = spy(new PackageArchiver(mContext, pm));
         doReturn(ICON_PATH).when(mArchiveManager).storeIcon(eq(PACKAGE),
-                any(LauncherActivityInfo.class), eq(mUserId));
+                any(LauncherActivityInfo.class), eq(mUserId), anyInt());
     }
 
     @Test
@@ -249,7 +251,7 @@ public class PackageArchiverTest {
     public void archiveApp_storeIconFails() throws IntentSender.SendIntentException, IOException {
         IOException e = new IOException("IO");
         doThrow(e).when(mArchiveManager).storeIcon(eq(PACKAGE),
-                any(LauncherActivityInfo.class), eq(mUserId));
+                any(LauncherActivityInfo.class), eq(mUserId), anyInt());
 
         mArchiveManager.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
         rule.mocks().getHandler().flush();

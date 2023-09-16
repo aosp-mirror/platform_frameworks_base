@@ -44,6 +44,7 @@ import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
+
 import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
@@ -111,6 +112,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.DataLoaderType;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
@@ -1142,15 +1144,18 @@ final class InstallPackageHelper {
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
         final ParsedPackage parsedPackage;
+        final ArchivedPackageParcel archivedPackage;
         try (PackageParser2 pp = mPm.mInjector.getPreparingPackageParser()) {
             if (request.getPackageLite() == null || !request.isArchived()) {
                 // TODO: pass packageLite from install request instead of reparsing the package
                 parsedPackage = pp.parsePackage(tmpPackageFile, parseFlags, false);
                 AndroidPackageUtils.validatePackageDexMetadata(parsedPackage);
+                archivedPackage = null;
             } else {
                 // Archived install mode, no APK.
                 parsedPackage = pp.parsePackageFromPackageLite(request.getPackageLite(),
                         parseFlags);
+                archivedPackage = request.getPackageLite().getArchivedPackage();
             }
         } catch (PackageManagerException e) {
             throw new PrepareFailure("Failed parse during installPackageLI", e);
@@ -1833,7 +1838,7 @@ final class InstallPackageHelper {
             shouldCloseFreezerBeforeReturn = false;
 
             request.setPrepareResult(replace, targetScanFlags, targetParseFlags,
-                    oldPackageState, parsedPackage,
+                    oldPackageState, parsedPackage, archivedPackage,
                     replace /* clearCodeCache */, sysPkg, ps, disabledPs);
         } finally {
             request.setFreezer(freezer);
@@ -2164,6 +2169,9 @@ final class InstallPackageHelper {
                 }
             }
             if (installRequest.getReturnCode() == PackageManager.INSTALL_SUCCEEDED) {
+                mPm.createArchiveStateIfNeeded(ps,
+                        installRequest.getArchivedPackage(),
+                        installRequest.getNewUsers());
                 mPm.updateSequenceNumberLP(ps, installRequest.getNewUsers());
                 mPm.updateInstantAppInstallerLocked(packageName);
             }

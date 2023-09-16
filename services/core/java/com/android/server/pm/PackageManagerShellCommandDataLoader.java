@@ -166,16 +166,7 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
         /** @hide */
         @VisibleForTesting
         public static Metadata forArchived(ArchivedPackageParcel archivedPackage) {
-            Parcel parcel = Parcel.obtain();
-            byte[] bytes;
-            try {
-                parcel.writeParcelable(archivedPackage, 0);
-                bytes = parcel.marshall();
-            } finally {
-                parcel.recycle();
-            }
-
-            return new Metadata(ARCHIVED, bytes, null);
+            return new Metadata(ARCHIVED, writeArchivedPackageParcel(archivedPackage), null);
         }
 
         static Metadata forDataOnlyStreaming(String fileId) {
@@ -270,17 +261,30 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
             if (getMode() != ARCHIVED) {
                 throw new IllegalStateException("Not an archived package metadata.");
             }
+            return readArchivedPackageParcel(this.mData);
+        }
 
+        static ArchivedPackageParcel readArchivedPackageParcel(byte[] bytes) {
             Parcel parcel = Parcel.obtain();
             ArchivedPackageParcel result;
             try {
-                parcel.unmarshall(this.mData, 0, this.mData.length);
+                parcel.unmarshall(bytes, 0, bytes.length);
                 parcel.setDataPosition(0);
                 result = parcel.readParcelable(ArchivedPackageParcel.class.getClassLoader());
             } finally {
                 parcel.recycle();
             }
             return result;
+        }
+
+        static byte[] writeArchivedPackageParcel(ArchivedPackageParcel archivedPackage) {
+            Parcel parcel = Parcel.obtain();
+            try {
+                parcel.writeParcelable(archivedPackage, 0);
+                return parcel.marshall();
+            } finally {
+                parcel.recycle();
+            }
         }
     }
 

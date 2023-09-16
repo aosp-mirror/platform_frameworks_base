@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.INSTALL_SCENARIO_DEFAULT;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.os.Process.INVALID_UID;
+
 import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.TAG;
@@ -29,6 +30,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.app.AppOpsManager;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.DataLoaderType;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInstaller;
@@ -77,6 +79,8 @@ final class InstallRequest {
     /** parsed package to be scanned */
     @Nullable
     private ParsedPackage mParsedPackage;
+    @Nullable
+    private ArchivedPackageParcel mArchivedPackage;
     private boolean mClearCodeCache;
     private boolean mSystem;
     @Nullable
@@ -189,6 +193,7 @@ final class InstallRequest {
         }
         mInstallArgs = null;
         mParsedPackage = parsedPackage;
+        mArchivedPackage = null;
         mParseFlags = parseFlags;
         mScanFlags = scanFlags;
         mScanResult = scanResult;
@@ -447,6 +452,9 @@ final class InstallRequest {
     public ParsedPackage getParsedPackage() {
         return mParsedPackage;
     }
+
+    @Nullable
+    public ArchivedPackageParcel getArchivedPackage() { return mArchivedPackage; }
 
     @ParsingPackageUtils.ParseFlags
     public int getParseFlags() {
@@ -753,7 +761,8 @@ final class InstallRequest {
 
     public void setPrepareResult(boolean replace, int scanFlags,
             int parseFlags, PackageState existingPackageState,
-            ParsedPackage packageToScan, boolean clearCodeCache, boolean system,
+            ParsedPackage packageToScan, ArchivedPackageParcel archivedPackage,
+            boolean clearCodeCache, boolean system,
             PackageSetting originalPs, PackageSetting disabledPs) {
         mReplace = replace;
         mScanFlags = scanFlags;
@@ -761,6 +770,7 @@ final class InstallRequest {
         mExistingPackageName =
                 existingPackageState != null ? existingPackageState.getPackageName() : null;
         mParsedPackage = packageToScan;
+        mArchivedPackage = archivedPackage;
         mClearCodeCache = clearCodeCache;
         mSystem = system;
         mOriginalPs = originalPs;
