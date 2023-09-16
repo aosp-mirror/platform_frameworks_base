@@ -85,9 +85,11 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         assertEquals(2, cache.getAllServicesSize(U0));
         assertEquals(2, cache.getPersistentServicesSize(U0));
         assertNotEmptyFileCreated(cache, U0);
+        cache.unregisterReceivers();
         // Make sure all services can be loaded from xml
         cache = new TestServicesCache();
         assertEquals(2, cache.getPersistentServicesSize(U0));
+        cache.unregisterReceivers();
     }
 
     public void testGetAllServicesReplaceUid() {
@@ -110,6 +112,7 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         assertTrue("UID must be updated to the new value",
                 uids.contains(SYSTEM_IMAGE_UID));
         assertFalse("UID must be updated to the new value", uids.contains(UID2));
+        cache.unregisterReceivers();
     }
 
     public void testGetAllServicesServiceRemoved() {
@@ -118,6 +121,7 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         cache.addServiceForQuerying(U0, r2, newServiceInfo(t2, UID2));
         assertEquals(2, cache.getAllServicesSize(U0));
         assertEquals(2, cache.getPersistentServicesSize(U0));
+        cache.unregisterReceivers();
         // Re-read data from disk and verify services were saved
         cache = new TestServicesCache();
         assertEquals(2, cache.getPersistentServicesSize(U0));
@@ -125,6 +129,7 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         cache.addServiceForQuerying(U0, r1, newServiceInfo(t1, UID1));
         assertEquals(1, cache.getAllServicesSize(U0));
         assertEquals(1, cache.getPersistentServicesSize(U0));
+        cache.unregisterReceivers();
     }
 
     public void testGetAllServicesMultiUser() {
@@ -137,12 +142,14 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         assertEquals(1, cache.getAllServicesSize(U1));
         assertEquals(1, cache.getPersistentServicesSize(U1));
         assertEquals("No services should be available for user 3", 0, cache.getAllServicesSize(3));
+        cache.unregisterReceivers();
         // Re-read data from disk and verify services were saved
         cache = new TestServicesCache();
         assertEquals(1, cache.getPersistentServicesSize(U0));
         assertEquals(1, cache.getPersistentServicesSize(U1));
         assertNotEmptyFileCreated(cache, U0);
         assertNotEmptyFileCreated(cache, U1);
+        cache.unregisterReceivers();
     }
 
     public void testOnRemove() {
@@ -158,6 +165,7 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         cache.clearServicesForQuerying();
         assertEquals(1, cache.getAllServicesSize(U0));
         assertEquals(0, cache.getAllServicesSize(U1));
+        cache.unregisterReceivers();
     }
 
     public void testMigration() {
@@ -186,10 +194,12 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         cache.addServiceForQuerying(0, r2, newServiceInfo(t2, 2));
         assertEquals(2, cache.getAllServicesSize(u0));
         assertEquals(0, cache.getAllServicesSize(u1));
+        cache.unregisterReceivers();
         // Re-read data from disk. Verify that services were saved and old file was ignored
         cache = new TestServicesCache();
         assertEquals(2, cache.getPersistentServicesSize(u0));
         assertEquals(0, cache.getPersistentServicesSize(u1));
+        cache.unregisterReceivers();
     }
 
     private static RegisteredServicesCache.ServiceInfo<TestServiceType> newServiceInfo(
