@@ -2826,9 +2826,6 @@ public class NotificationManagerService extends SystemService {
             mAssistants.onBootPhaseAppsCanStart();
             mConditionProviders.onBootPhaseAppsCanStart();
             mHistoryManager.onBootPhaseAppsCanStart();
-            if (expireBitmaps()) {
-                NotificationBitmapJobService.scheduleJob(getContext());
-            }
             registerDeviceConfigChange();
             migrateDefaultNAS();
             maybeShowInitialReviewPermissionsNotification();
@@ -2837,6 +2834,10 @@ public class NotificationManagerService extends SystemService {
         } else if (phase == SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY) {
             mPreferencesHelper.updateFixedImportance(mUm.getUsers());
             mPreferencesHelper.migrateNotificationPermissions(mUm.getUsers());
+        } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+            if (expireBitmaps()) {
+                NotificationBitmapJobService.scheduleJob(getContext());
+            }
         }
     }
 

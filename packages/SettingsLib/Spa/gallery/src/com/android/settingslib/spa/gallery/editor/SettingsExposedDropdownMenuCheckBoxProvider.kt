@@ -46,21 +46,23 @@ object SettingsExposedDropdownMenuCheckBoxProvider : SettingsPageProvider {
     @Composable
     override fun Page(arguments: Bundle?) {
         RegularScaffold(title = TITLE) {
-            SettingsExposedDropdownMenuCheckBox(label = exposedDropdownMenuCheckBoxLabel,
+            SettingsExposedDropdownMenuCheckBox(
+                label = exposedDropdownMenuCheckBoxLabel,
                 options = options,
                 selectedOptionsState = remember { selectedOptionsState1 },
                 enabled = true,
-                onselectedOptionStateChange = {})
+                onSelectedOptionStateChange = {},
+            )
         }
     }
 
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner = createSettingsPage()).setUiLayoutFn {
-                Preference(object : PreferenceModel {
-                    override val title = TITLE
-                    override val onClick = navigator(name)
-                })
-            }
+            Preference(object : PreferenceModel {
+                override val title = TITLE
+                override val onClick = navigator(name)
+            })
+        }
     }
 }
 

@@ -171,13 +171,14 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             return false;
         }
         final RecentsController controller = mControllers.get(controllerIdx);
-        Transitions.setRunningRemoteTransitionDelegate(mAnimApp);
+        final IApplicationThread animApp = mAnimApp;
         mAnimApp = null;
         if (!controller.start(info, startTransaction, finishTransaction, finishCallback)) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "RecentsTransitionHandler.startAnimation: failed to start animation");
             return false;
         }
+        Transitions.setRunningRemoteTransitionDelegate(animApp);
         return true;
     }
 

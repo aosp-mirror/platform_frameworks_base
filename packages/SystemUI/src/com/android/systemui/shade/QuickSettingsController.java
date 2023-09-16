@@ -201,8 +201,6 @@ public class QuickSettingsController implements Dumpable {
     private float mInitialTouchY;
     /** whether current touch Y delta is above falsing threshold */
     private boolean mTouchAboveFalsingThreshold;
-    /** whether we are tracking a touch on QS container */
-    private boolean mTracking;
     /** pointerId of the pointer we're currently tracking */
     private int mTrackingPointer;
 
@@ -600,7 +598,7 @@ public class QuickSettingsController implements Dumpable {
 
     @VisibleForTesting
     boolean isTracking() {
-        return mTracking;
+        return mShadeRepository.getLegacyQsTracking().getValue();
     }
 
     public boolean getFullyExpanded() {
@@ -613,8 +611,12 @@ public class QuickSettingsController implements Dumpable {
         // split shade as there QS are always expanded so every collapsing motion is motion from
         // expanded QS to closed panel
         return mExpandImmediate || (mExpanded
-                && !mTracking && !isExpansionAnimating()
+                && !isTracking() && !isExpansionAnimating()
                 && !mExpansionFromOverscroll);
+    }
+
+    private void setTracking(boolean tracking) {
+        mShadeRepository.setLegacyQsTracking(tracking);
     }
 
     private boolean isQsFragmentCreated() {
@@ -1601,7 +1603,7 @@ public class QuickSettingsController implements Dumpable {
         if (action == MotionEvent.ACTION_DOWN && expandedShadeCollapsedQs) {
             // Down in the empty area while fully expanded - go to QS.
             mShadeLog.logMotionEvent(event, "handleQsTouch: down action, QS tracking enabled");
-            mTracking = true;
+            setTracking(true);
             traceQsJank(true, false);
             mConflictingExpansionGesture = true;
             onExpansionStarted();
@@ -1616,9 +1618,9 @@ public class QuickSettingsController implements Dumpable {
         // as sometimes the qsExpansionFraction can be a tiny value instead of 0 when in QQS.
         if (!mSplitShadeEnabled && !mLastShadeFlingWasExpanding
                 && computeExpansionFraction() <= 0.01 && mShadeExpandedFraction < 1.0) {
-            mTracking = false;
+            setTracking(false);
         }
-        if (!isExpandImmediate() && mTracking) {
+        if (!isExpandImmediate() && isTracking()) {
             onTouch(event);
             if (!mConflictingExpansionGesture && !mSplitShadeEnabled) {
                 return true;
@@ -1662,7 +1664,7 @@ public class QuickSettingsController implements Dumpable {
             if (shouldQuickSettingsIntercept(event.getX(), event.getY(), -1)) {
                 mShadeLog.logMotionEvent(event,
                         "handleQsDown: down action, QS tracking enabled");
-                mTracking = true;
+                setTracking(true);
                 onExpansionStarted();
                 mInitialHeightOnTouch = mExpansionHeight;
                 mInitialTouchY = event.getY();
@@ -1688,7 +1690,7 @@ public class QuickSettingsController implements Dumpable {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mShadeLog.logMotionEvent(event, "onQsTouch: down action, QS tracking enabled");
-                mTracking = true;
+                setTracking(true);
                 traceQsJank(true, false);
                 mInitialTouchY = y;
                 mInitialTouchX = x;
@@ -1725,7 +1727,7 @@ public class QuickSettingsController implements Dumpable {
             case MotionEvent.ACTION_CANCEL:
                 mShadeLog.logMotionEvent(event,
                         "onQsTouch: up/cancel action, QS tracking disabled");
-                mTracking = false;
+                setTracking(false);
                 mTrackingPointer = -1;
                 trackMovement(event);
                 float fraction = computeExpansionFraction();
@@ -1780,7 +1782,7 @@ public class QuickSettingsController implements Dumpable {
                     mInitialHeightOnTouch = mExpansionHeight;
                     mShadeLog.logMotionEvent(event,
                             "onQsIntercept: down action, QS tracking enabled");
-                    mTracking = true;
+                    setTracking(true);
                     traceQsJank(true, false);
                     mNotificationStackScrollLayoutController.cancelLongPress();
                 }
@@ -1799,7 +1801,7 @@ public class QuickSettingsController implements Dumpable {
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
                 trackMovement(event);
-                if (mTracking) {
+                if (isTracking()) {
                     // Already tracking because onOverscrolled was called. We need to update here
                     // so we don't stop for a frame until the next touch event gets handled in
                     // onTouchEvent.
@@ -1819,7 +1821,7 @@ public class QuickSettingsController implements Dumpable {
                         mInitialTouchX, mInitialTouchY, h)) {
                     mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
                     mShadeLog.onQsInterceptMoveQsTrackingEnabled(h);
-                    mTracking = true;
+                    setTracking(true);
                     traceQsJank(true, false);
                     onExpansionStarted();
                     mPanelViewControllerLazy.get().notifyExpandingFinished();
@@ -1839,7 +1841,7 @@ public class QuickSettingsController implements Dumpable {
             case MotionEvent.ACTION_UP:
                 trackMovement(event);
                 mShadeLog.logMotionEvent(event, "onQsIntercept: up action, QS tracking disabled");
-                mTracking = false;
+                setTracking(false);
                 break;
         }
         return false;
@@ -2065,7 +2067,7 @@ public class QuickSettingsController implements Dumpable {
         ipw.print("mTouchAboveFalsingThreshold=");
         ipw.println(mTouchAboveFalsingThreshold);
         ipw.print("mTracking=");
-        ipw.println(mTracking);
+        ipw.println(isTracking());
         ipw.print("mTrackingPointer=");
         ipw.println(mTrackingPointer);
         ipw.print("mExpanded=");

@@ -52,7 +52,7 @@ fun SettingsExposedDropdownMenuCheckBox(
     options: List<String>,
     selectedOptionsState: SnapshotStateList<String>,
     enabled: Boolean,
-    onselectedOptionStateChange: (String) -> Unit,
+    onSelectedOptionStateChange: () -> Unit,
 ) {
     var dropDownWidth by remember { mutableStateOf(0) }
     var expanded by remember { mutableStateOf(false) }
@@ -70,7 +70,7 @@ fun SettingsExposedDropdownMenuCheckBox(
                 .menuAnchor()
                 .fillMaxWidth(),
             value = selectedOptionsState.joinToString(", "),
-            onValueChange = onselectedOptionStateChange,
+            onValueChange = {},
             label = { Text(text = label) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
@@ -89,18 +89,21 @@ fun SettingsExposedDropdownMenuCheckBox(
                 onDismissRequest = { expanded = false },
             ) {
                 options.forEach { option ->
-                    TextButton(modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(), onClick = {
-                        if (selectedOptionsState.contains(option)) {
-                            selectedOptionsState.remove(
-                                option
-                            )
-                        } else {
-                            selectedOptionsState.add(
-                                option
-                            )
-                        }
+                    TextButton(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(),
+                        onClick = {
+                            if (selectedOptionsState.contains(option)) {
+                                selectedOptionsState.remove(
+                                    option
+                                )
+                            } else {
+                                selectedOptionsState.add(
+                                    option
+                                )
+                            }
+                            onSelectedOptionStateChange()
                     }) {
                         Row(
                             modifier = Modifier
@@ -109,9 +112,10 @@ fun SettingsExposedDropdownMenuCheckBox(
                             horizontalArrangement = Arrangement.Start,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Checkbox(checked = selectedOptionsState.contains(
-                                option
-                            ), onCheckedChange = {})
+                            Checkbox(
+                                checked = selectedOptionsState.contains(option),
+                                onCheckedChange = null,
+                            )
                             Text(text = option)
                         }
                     }
@@ -131,6 +135,6 @@ private fun ActionButtonsPreview() {
             options = options,
             selectedOptionsState = selectedOptionsState,
             enabled = true,
-            onselectedOptionStateChange = {})
+            onSelectedOptionStateChange = {})
     }
 }

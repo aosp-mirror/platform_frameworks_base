@@ -16,19 +16,22 @@
 
 package com.android.wm.shell.flicker.pip.apps
 
-import android.os.Handler
-import android.os.Looper
-import android.os.SystemClock
 import android.content.Context
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationManager
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import android.platform.test.annotations.Postsubmit
 import android.tools.device.apphelpers.MapsAppHelper
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import androidx.test.filters.RequiresDevice
+import org.junit.Assume
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -128,5 +131,13 @@ open class MapsEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition
 
     override val thisTransition: FlickerBuilder.() -> Unit = {
         transitions { tapl.goHome() }
+    }
+
+    @Postsubmit
+    @Test
+    override fun focusChanges() {
+        // in gestural nav the focus goes to different activity on swipe up with auto enter PiP
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
+        super.focusChanges()
     }
 }

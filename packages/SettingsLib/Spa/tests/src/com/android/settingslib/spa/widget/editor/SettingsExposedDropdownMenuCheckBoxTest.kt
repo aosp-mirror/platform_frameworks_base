@@ -45,11 +45,12 @@ class SettingsExposedDropdownMenuCheckBoxTest {
     @Test
     fun exposedDropdownMenuCheckBox_displayed() {
         composeTestRule.setContent {
-            SettingsExposedDropdownMenuCheckBox(label = exposedDropdownMenuCheckBoxLabel,
+            SettingsExposedDropdownMenuCheckBox(
+                label = exposedDropdownMenuCheckBoxLabel,
                 options = options,
                 selectedOptionsState = remember { selectedOptionsState1 },
                 enabled = true,
-                onselectedOptionStateChange = {})
+            ) {}
         }
         composeTestRule.onNodeWithText(
             exposedDropdownMenuCheckBoxLabel, substring = true
@@ -59,11 +60,12 @@ class SettingsExposedDropdownMenuCheckBoxTest {
     @Test
     fun exposedDropdownMenuCheckBox_expanded() {
         composeTestRule.setContent {
-            SettingsExposedDropdownMenuCheckBox(label = exposedDropdownMenuCheckBoxLabel,
+            SettingsExposedDropdownMenuCheckBox(
+                label = exposedDropdownMenuCheckBoxLabel,
                 options = options,
                 selectedOptionsState = remember { selectedOptionsState1 },
                 enabled = true,
-                onselectedOptionStateChange = {})
+            ) {}
         }
         composeTestRule.onNodeWithText(item3, substring = true).assertDoesNotExist()
         composeTestRule.onNodeWithText(exposedDropdownMenuCheckBoxLabel, substring = true)
@@ -74,11 +76,12 @@ class SettingsExposedDropdownMenuCheckBoxTest {
     @Test
     fun exposedDropdownMenuCheckBox_valueAdded() {
         composeTestRule.setContent {
-            SettingsExposedDropdownMenuCheckBox(label = exposedDropdownMenuCheckBoxLabel,
+            SettingsExposedDropdownMenuCheckBox(
+                label = exposedDropdownMenuCheckBoxLabel,
                 options = options,
                 selectedOptionsState = remember { selectedOptionsState1 },
                 enabled = true,
-                onselectedOptionStateChange = {})
+            ) {}
         }
         composeTestRule.onNodeWithText(item3, substring = true).assertDoesNotExist()
         composeTestRule.onNodeWithText(exposedDropdownMenuCheckBoxLabel, substring = true)
@@ -90,11 +93,12 @@ class SettingsExposedDropdownMenuCheckBoxTest {
     @Test
     fun exposedDropdownMenuCheckBox_valueDeleted() {
         composeTestRule.setContent {
-            SettingsExposedDropdownMenuCheckBox(label = exposedDropdownMenuCheckBoxLabel,
+            SettingsExposedDropdownMenuCheckBox(
+                label = exposedDropdownMenuCheckBoxLabel,
                 options = options,
                 selectedOptionsState = remember { selectedOptionsState1 },
                 enabled = true,
-                onselectedOptionStateChange = {})
+            ) {}
         }
         composeTestRule.onNodeWithText(item2, substring = true).assertIsDisplayed()
         composeTestRule.onNodeWithText(exposedDropdownMenuCheckBoxLabel, substring = true)

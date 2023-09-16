@@ -17,15 +17,14 @@
 package com.android.server.wm;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
-import static junit.framework.Assert.assertEquals;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -37,8 +36,6 @@ import android.content.Context;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
-
-import com.android.window.flags.FakeFeatureFlagsImpl;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,16 +57,12 @@ public class LetterboxConfigurationTest {
     private LetterboxConfiguration mLetterboxConfiguration;
     private LetterboxConfigurationPersister mLetterboxConfigurationPersister;
 
-    private MutableFakeFeatureFlagsImpl mMutableFakeFeatureFlags;
-
-
     @Before
     public void setUp() throws Exception {
         mContext = getInstrumentation().getTargetContext();
-        mMutableFakeFeatureFlags = new MutableFakeFeatureFlagsImpl();
         mLetterboxConfigurationPersister = mock(LetterboxConfigurationPersister.class);
         mLetterboxConfiguration = new LetterboxConfiguration(mContext,
-                mLetterboxConfigurationPersister, mMutableFakeFeatureFlags);
+                mLetterboxConfigurationPersister);
     }
 
     @Test
@@ -96,22 +89,6 @@ public class LetterboxConfigurationTest {
             verify(mLetterboxConfigurationPersister).setLetterboxPositionForVerticalReachability(
                     eq(halfFoldPose), anyInt());
         }
-    }
-
-    @Test
-    public void test_whenFlagEnabled_wallpaperIsDefaultBackground() {
-        mMutableFakeFeatureFlags.setLetterboxBackgroundWallpaperFlag(true);
-        assertEquals(LETTERBOX_BACKGROUND_WALLPAPER,
-                mLetterboxConfiguration.getLetterboxBackgroundType());
-        assertEquals(1, mMutableFakeFeatureFlags.getInvocationCount());
-    }
-
-    @Test
-    public void test_whenFlagDisabled_solidColorIsDefaultBackground() {
-        mMutableFakeFeatureFlags.setLetterboxBackgroundWallpaperFlag(false);
-        assertEquals(LETTERBOX_BACKGROUND_SOLID_COLOR,
-                mLetterboxConfiguration.getLetterboxBackgroundType());
-        assertEquals(1, mMutableFakeFeatureFlags.getInvocationCount());
     }
 
     @Test
@@ -310,24 +287,5 @@ public class LetterboxConfigurationTest {
         verify(mLetterboxConfigurationPersister).setLetterboxPositionForVerticalReachability(
                 false /* forTabletopMode */,
                 LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP);
-    }
-
-    private static class MutableFakeFeatureFlagsImpl extends FakeFeatureFlagsImpl {
-        private boolean mLetterboxBackgroundWallpaperFlag;
-        private int mInvocationCount;
-
-        public void setLetterboxBackgroundWallpaperFlag(boolean letterboxBackgroundWallpaperFlag) {
-            mLetterboxBackgroundWallpaperFlag = letterboxBackgroundWallpaperFlag;
-        }
-
-        @Override
-        public boolean letterboxBackgroundWallpaperFlag() {
-            mInvocationCount++;
-            return mLetterboxBackgroundWallpaperFlag;
-        }
-
-        int getInvocationCount() {
-            return mInvocationCount;
-        }
     }
 }
