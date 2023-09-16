@@ -195,7 +195,7 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
     protected final void initKey(AndroidKeyStoreKey key) throws InvalidKeyException {
         if (!ACCEPTED_SIGNING_SCHEMES.contains(key.getAlgorithm().toLowerCase())) {
             throw new InvalidKeyException("Unsupported key algorithm: " + key.getAlgorithm()
-                    + ". Only" + Arrays.toString(ACCEPTED_SIGNING_SCHEMES.stream().toArray())
+                    + ". Only " + Arrays.toString(ACCEPTED_SIGNING_SCHEMES.stream().toArray())
                     + " supported");
         }
 
