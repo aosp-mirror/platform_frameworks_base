@@ -15877,7 +15877,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         activeInstr.mWatcher = watcher;
         activeInstr.mUiAutomationConnection = uiAutomationConnection;
         activeInstr.mResultClass = className;
-        activeInstr.mHasBackgroundActivityStartsPermission = false;
+        activeInstr.mHasBackgroundActivityStartsPermission =
+                isSdkInSandbox
+                        // TODO(b/261864298): consider using START_ACTIVITIES_FROM_BACKGROUND.
+                        && checkPermission(
+                                        android.Manifest.permission
+                                                .START_ACTIVITIES_FROM_SDK_SANDBOX,
+                                        Binder.getCallingPid(),
+                                        Binder.getCallingUid())
+                                == PackageManager.PERMISSION_GRANTED;
         activeInstr.mHasBackgroundForegroundServiceStartsPermission = false;
         // Instrumenting sdk sandbox without a restart is not supported
         activeInstr.mNoRestart = false;
