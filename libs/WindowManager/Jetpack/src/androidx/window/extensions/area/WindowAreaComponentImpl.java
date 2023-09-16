@@ -213,9 +213,6 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             if (mRearDisplayStateRequest != null || isRearDisplayActive()) {
                 mRearDisplayStateRequest = null;
                 mDeviceStateManager.cancelStateRequest();
-            } else {
-                throw new IllegalStateException(
-                        "Unable to cancel a rear display session as there is no active session");
             }
         }
     }
@@ -432,10 +429,6 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
         synchronized (mLock) {
             if (mRearDisplayPresentationController != null) {
                 mDeviceStateManager.cancelStateRequest();
-            } else {
-                throw new IllegalStateException(
-                        "Unable to cancel a rear display presentation session as there is no "
-                                + "active session");
             }
         }
     }
