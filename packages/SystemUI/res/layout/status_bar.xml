@@ -79,6 +79,7 @@
                     android:id="@+id/status_bar_start_side_except_heads_up"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
+                    android:layout_gravity="center_vertical|start"
                     android:clipChildren="false">
                     <ViewStub
                         android:id="@+id/operator_name"

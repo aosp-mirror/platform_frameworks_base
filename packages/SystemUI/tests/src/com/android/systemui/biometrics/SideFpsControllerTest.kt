@@ -56,7 +56,7 @@ import com.android.systemui.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
@@ -120,7 +120,7 @@ class SideFpsControllerTest : SysuiTestCase() {
     private lateinit var displayStateInteractor: DisplayStateInteractor
 
     private val executor = FakeExecutor(FakeSystemClock())
-    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
+    private val displayStateRepository = FakeDisplayStateRepository()
     private val testScope = TestScope(StandardTestDispatcher())
 
     private lateinit var overlayController: ISidefpsController
@@ -157,7 +157,7 @@ class SideFpsControllerTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 context,
                 executor,
-                rearDisplayStateRepository
+                displayStateRepository
             )
 
         context.addMockSystemService(DisplayManager::class.java, displayManager)
@@ -268,7 +268,7 @@ class SideFpsControllerTest : SysuiTestCase() {
                 TestCoroutineScope(),
                 dumpManager
             )
-        rearDisplayStateRepository.setIsInRearDisplayMode(inRearDisplayMode)
+        displayStateRepository.setIsInRearDisplayMode(inRearDisplayMode)
 
         overlayController =
             ArgumentCaptor.forClass(ISidefpsController::class.java)
