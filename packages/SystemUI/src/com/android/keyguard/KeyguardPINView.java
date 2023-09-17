@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_APPEAR;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_DISAPPEAR;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_CLOSED;
@@ -105,21 +106,21 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     }
 
     void onDevicePostureChanged(@DevicePostureInt int posture) {
-        if (mLastDevicePosture != posture) {
-            mLastDevicePosture = posture;
+        if (mLastDevicePosture == posture) return;
+        mLastDevicePosture = posture;
 
-            if (mIsLockScreenLandscapeEnabled) {
-                boolean useSplitBouncerAfterFold =
-                        mLastDevicePosture == DEVICE_POSTURE_CLOSED
-                        &&  getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE;
+        if (mIsLockScreenLandscapeEnabled) {
+            boolean useSplitBouncerAfterFold =
+                    mLastDevicePosture == DEVICE_POSTURE_CLOSED
+                    && getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE
+                    && getResources().getBoolean(R.bool.update_bouncer_constraints);
 
-                if (mAlreadyUsingSplitBouncer != useSplitBouncerAfterFold) {
-                    updateConstraints(useSplitBouncerAfterFold);
-                }
+            if (mAlreadyUsingSplitBouncer != useSplitBouncerAfterFold) {
+                updateConstraints(useSplitBouncerAfterFold);
             }
-
-            updateMargins();
         }
+
+        updateMargins();
     }
 
     @Override
