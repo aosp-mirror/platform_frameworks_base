@@ -18,6 +18,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.util.mockito.any
 import com.android.systemui.utils.GlobalWindowManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -227,6 +228,9 @@ class ResourceTrimmerTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
             )
-            verifyNoMoreInteractions(globalWindowManager)
+            // Memory hidden should still be called.
+            verify(globalWindowManager, times(1))
+                .trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+            verify(globalWindowManager, times(0)).trimCaches(any())
         }
 }

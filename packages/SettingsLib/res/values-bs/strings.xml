@@ -674,8 +674,8 @@
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Odaberite raspored tastature"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Zadano"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Uključivanje ekrana"</string>
-    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dozvolite uključivanje ekrana"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dozvolite aplikaciji da uključi ekran. Ako se odobri, aplikacija može uključiti ekran bilo kada bez vaše izričite namjere."</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dozvoli uključivanje ekrana"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dozvolite aplikaciji da uključuje ekran. Ako se odobri, aplikacija može uključiti ekran bilo kada bez vaše izričite namjere."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zaustaviti emitiranje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ako emitirate aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promijenite izlaz, trenutno emitiranje će se zaustaviti"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitiraj aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
