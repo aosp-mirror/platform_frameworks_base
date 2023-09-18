@@ -3587,8 +3587,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Otherwise check persisted shortcuts
             getShortcutInfoAsync(launcherUserId, packageName, shortcutId, userId, si -> {
-                cb.complete(getShortcutIconUriInternal(launcherUserId, launcherPackage,
-                        packageName, si, userId));
+                cb.complete(si == null ? null : getShortcutIconUriInternal(launcherUserId,
+                        launcherPackage, packageName, si, userId));
             });
         }
 

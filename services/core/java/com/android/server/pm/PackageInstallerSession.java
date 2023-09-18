@@ -67,6 +67,7 @@ import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
@@ -309,6 +310,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     private static final long SILENT_INSTALL_ALLOWED = 265131695L;
+
+    /**
+     * The system supports pre-approval and update ownership features from
+     * {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE API 34}. The change id is used to make sure
+     * the system includes the fix of pre-approval with update ownership case. When checking the
+     * change id, if it is disabled, it means the build includes the fix. The more detail is on
+     * b/293644536.
+     * See {@link PackageInstaller.SessionParams#setRequestUpdateOwnership(boolean)} and
+     * {@link #requestUserPreapproval(PreapprovalDetails, IntentSender)} for more details.
+     */
+    @Disabled
+    @ChangeId
+    private static final long PRE_APPROVAL_WITH_UPDATE_OWNERSHIP_FIX = 293644536L;
 
     /**
      * The default value of {@link #mValidatedTargetSdk} is {@link Integer#MAX_VALUE}. If {@link
@@ -893,16 +907,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (mPermissionsManuallyAccepted) {
                 return USER_ACTION_NOT_NEEDED;
             }
-            packageName = mPackageName;
+            // For pre-pappvoal case, the mPackageName would be null.
+            if (mPackageName != null) {
+                packageName = mPackageName;
+            } else if (mPreapprovalRequested.get() && mPreapprovalDetails != null) {
+                packageName = mPreapprovalDetails.getPackageName();
+            } else {
+                packageName = null;
+            }
             hasDeviceAdminReceiver = mHasDeviceAdminReceiver;
         }
 
-        final boolean forcePermissionPrompt =
+        // For the below cases, force user action prompt
+        // 1. installFlags includes INSTALL_FORCE_PERMISSION_PROMPT
+        // 2. params.requireUserAction is USER_ACTION_REQUIRED
+        final boolean forceUserActionPrompt =
                 (params.installFlags & PackageManager.INSTALL_FORCE_PERMISSION_PROMPT) != 0
                         || params.requireUserAction == SessionParams.USER_ACTION_REQUIRED;
-        if (forcePermissionPrompt) {
-            return USER_ACTION_REQUIRED;
-        }
+        final int userActionNotTypicallyNeededResponse = forceUserActionPrompt
+                ? USER_ACTION_REQUIRED
+                : USER_ACTION_NOT_NEEDED;
+
         // It is safe to access mInstallerUid and mInstallSource without lock
         // because they are immutable after sealing.
         final Computer snapshot = mPm.snapshotComputer();
@@ -956,7 +981,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 || isInstallerDeviceOwnerOrAffiliatedProfileOwner();
 
         if (noUserActionNecessary) {
-            return USER_ACTION_NOT_NEEDED;
+            return userActionNotTypicallyNeededResponse;
         }
 
         if (isUpdateOwnershipEnforcementEnabled
@@ -969,7 +994,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (isPermissionGranted) {
-            return USER_ACTION_NOT_NEEDED;
+            return userActionNotTypicallyNeededResponse;
         }
 
         if (snapshot.isInstallDisabledForPackage(getInstallerPackageName(), mInstallerUid,
