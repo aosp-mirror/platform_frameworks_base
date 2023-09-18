@@ -74,7 +74,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mWindowHandle.ownerPid = WindowManagerService.MY_PID;
         mWindowHandle.ownerUid = WindowManagerService.MY_UID;
         mWindowHandle.scaleFactor = 1.0f;
-        mWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE;
+        mWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE | InputConfig.TRUSTED_OVERLAY;
 
         mInputSurface = mService.makeSurfaceBuilder(
                         mService.mRoot.getDisplayContent(displayId).getSession())
@@ -129,14 +129,12 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
 
     void show(SurfaceControl.Transaction t, WindowContainer w) {
         t.show(mInputSurface);
-        mWindowHandle.setTrustedOverlay(t, mInputSurface, true);
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
         t.setRelativeLayer(mInputSurface, w.getSurfaceControl(), 1);
     }
 
     void show(SurfaceControl.Transaction t, int layer) {
         t.show(mInputSurface);
-        mWindowHandle.setTrustedOverlay(t, mInputSurface, true);
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
         t.setLayer(mInputSurface, layer);
     }
