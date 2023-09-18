@@ -9190,7 +9190,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     getRequestedOverrideWindowingMode() == WINDOWING_MODE_UNDEFINED
                             ? newParentConfig.windowConfiguration.getWindowingMode()
                             : getRequestedOverrideWindowingMode();
-            if (getWindowingMode() != projectedWindowingMode) {
+            if (getWindowingMode() != projectedWindowingMode
+                    // Do not collect a pip activity about to enter pinned mode
+                    // as a part of WindowOrganizerController#finishTransition().
+                    // If not checked the activity might be collected for the wrong transition,
+                    // such as a TRANSIT_OPEN transition requested right after TRANSIT_PIP.
+                    && !(mWaitForEnteringPinnedMode
+                    && mTransitionController.inFinishingTransition(this))) {
                 mTransitionController.collect(this);
             }
         }
