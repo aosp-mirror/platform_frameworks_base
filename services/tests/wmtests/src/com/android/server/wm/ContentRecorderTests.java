@@ -303,6 +303,30 @@ public class ContentRecorderTests extends WindowTestsBase {
                 anyFloat(), anyFloat());
     }
 
+    /**
+     * Test that resizing the output surface results in resizing the mirrored content to fit.
+     */
+    @Test
+    public void testOnConfigurationChanged_resizeSurface() {
+        mContentRecorder.setContentRecordingSession(mDisplaySession);
+        mContentRecorder.updateRecording();
+
+        // Resize the output surface.
+        final Point newSurfaceSize = new Point(Math.round(sSurfaceSize.x / 2f),
+                Math.round(sSurfaceSize.y * 2));
+        doReturn(newSurfaceSize).when(mWm.mDisplayManagerInternal).getDisplaySurfaceDefaultSize(
+                anyInt());
+        mContentRecorder.onConfigurationChanged(
+                mVirtualDisplayContent.getConfiguration().orientation);
+
+        // No resize is issued, only the initial transformations when we started recording.
+        verify(mTransaction, atLeast(2)).setPosition(eq(mRecordedSurface), anyFloat(),
+                anyFloat());
+        verify(mTransaction, atLeast(2)).setMatrix(eq(mRecordedSurface), anyFloat(), anyFloat(),
+                anyFloat(), anyFloat());
+
+    }
+
     @Test
     public void testOnTaskOrientationConfigurationChanged_resizesSurface() {
         mContentRecorder.setContentRecordingSession(mTaskSession);
