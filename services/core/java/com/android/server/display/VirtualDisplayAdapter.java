@@ -167,6 +167,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             int width, int height, int densityDpi) {
         VirtualDisplayDevice device = mVirtualDisplayDevices.get(appToken);
         if (device != null) {
+            Slog.v(TAG, "Resize VirtualDisplay " + device.mName + " to " + width
+                    + " " + height);
             device.resizeLocked(width, height, densityDpi);
         }
     }
@@ -183,6 +185,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     public void setVirtualDisplaySurfaceLocked(IBinder appToken, Surface surface) {
         VirtualDisplayDevice device = mVirtualDisplayDevices.get(appToken);
         if (device != null) {
+            Slog.v(TAG, "Update surface for VirtualDisplay " + device.mName);
             device.setSurfaceLocked(surface);
         }
     }
@@ -197,6 +200,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     public DisplayDevice releaseVirtualDisplayLocked(IBinder appToken) {
         VirtualDisplayDevice device = mVirtualDisplayDevices.remove(appToken);
         if (device != null) {
+            Slog.v(TAG, "Release VirtualDisplay " + device.mName);
             device.destroyLocked(true);
             appToken.unlinkToDeath(device, 0);
         }
