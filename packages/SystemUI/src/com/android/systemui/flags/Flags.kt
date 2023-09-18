@@ -294,6 +294,11 @@ object Flags {
     // TODO(b/291767565): Tracking bug.
     @JvmField val MIGRATE_KEYGUARD_STATUS_VIEW = unreleasedFlag("migrate_keyguard_status_view")
 
+    /** Migrate the status bar view on keyguard from notification panel to keyguard root view. */
+    // TODO(b/299115332): Tracking Bug.
+    @JvmField val MIGRATE_KEYGUARD_STATUS_BAR_VIEW =
+        unreleasedFlag("migrate_keyguard_status_bar_view")
+
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug
     @JvmField

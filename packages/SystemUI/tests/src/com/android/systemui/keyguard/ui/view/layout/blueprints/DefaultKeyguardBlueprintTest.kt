@@ -35,6 +35,7 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSect
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import com.android.systemui.util.mockito.whenever
@@ -60,6 +61,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     private lateinit var defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection
     @Mock private lateinit var defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection
     @Mock private lateinit var defaultStatusViewSection: DefaultStatusViewSection
+    @Mock private lateinit var defaultStatusBarViewSection: DefaultStatusBarSection
     @Mock private lateinit var defaultNSSLSection: DefaultNotificationStackScrollLayoutSection
     @Mock private lateinit var splitShadeGuidelines: SplitShadeGuidelines
     @Mock private lateinit var aodNotificationIconsSection: AodNotificationIconsSection
@@ -78,6 +80,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultAmbientIndicationAreaSection,
                 defaultSettingsPopupMenuSection,
                 defaultStatusViewSection,
+                defaultStatusBarViewSection,
                 defaultNSSLSection,
                 splitShadeGuidelines,
                 aodNotificationIconsSection,
