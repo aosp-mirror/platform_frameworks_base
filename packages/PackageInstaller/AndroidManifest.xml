@@ -43,6 +43,11 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name=".v2.ui.InstallLaunch"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/Theme.AlertDialogActivity"
+            android:exported="true"/>
+
         <activity android:name=".InstallStart"
                 android:theme="@style/Theme.AlertDialogActivity"
                 android:exported="true"
