@@ -976,4 +976,23 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         verify(mKeyguardMessageAreaController).setIsVisible(eq(false));
         verify(mKeyguardMessageAreaController).setMessage(eq(""));
     }
+
+    @Test
+    public void testShowBouncerOrKeyguard_needsFullScreen() {
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
+                KeyguardSecurityModel.SecurityMode.SimPin);
+        mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false);
+        verify(mCentralSurfaces).hideKeyguard();
+        verify(mPrimaryBouncerInteractor).show(true);
+    }
+
+    @Test
+    public void testShowBouncerOrKeyguard_needsFullScreen_bouncerAlreadyShowing() {
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
+                KeyguardSecurityModel.SecurityMode.SimPin);
+        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(true);
+        mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false);
+        verify(mCentralSurfaces, never()).hideKeyguard();
+        verify(mPrimaryBouncerInteractor, never()).show(true);
+    }
 }

@@ -635,8 +635,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     protected void showBouncerOrKeyguard(boolean hideBouncerWhenShowing) {
         if (needsFullscreenBouncer() && !mDozing) {
             // The keyguard might be showing (already). So we need to hide it.
-            mCentralSurfaces.hideKeyguard();
-            mPrimaryBouncerInteractor.show(true);
+            if (!primaryBouncerIsShowing()) {
+                mCentralSurfaces.hideKeyguard();
+                mPrimaryBouncerInteractor.show(true);
+            } else {
+                Log.e(TAG, "Attempted to show the sim bouncer when it is already showing.");
+            }
         } else {
             mCentralSurfaces.showKeyguard();
             if (hideBouncerWhenShowing) {
