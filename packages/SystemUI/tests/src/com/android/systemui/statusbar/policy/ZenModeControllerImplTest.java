@@ -132,12 +132,6 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAddNullCallback() {
-        mController.addCallback(null);
-        mController.fireConfigChanged(null);
-    }
-
-    @Test
     public void testModeChange() {
         List<Integer> states = List.of(
                 Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,

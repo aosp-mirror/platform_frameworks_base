@@ -169,6 +169,7 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     @Override
     public void addCallback(@NonNull Callback callback) {
         synchronized (mCallbacksLock) {
+            Log.d(TAG, "Added callback " + callback.getClass());
             mCallbacks.add(callback);
         }
     }
@@ -176,6 +177,7 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     @Override
     public void removeCallback(@NonNull Callback callback) {
         synchronized (mCallbacksLock) {
+            Log.d(TAG, "Removed callback " + callback.getClass());
             mCallbacks.remove(callback);
         }
     }
