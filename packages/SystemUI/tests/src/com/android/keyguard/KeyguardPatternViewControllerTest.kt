@@ -94,9 +94,10 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
             .thenReturn(mKeyguardMessageAreaController)
         fakeFeatureFlags = FakeFeatureFlags()
         fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, false)
+        fakeFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
         mKeyguardPatternView =
             View.inflate(mContext, R.layout.keyguard_pattern_view, null) as KeyguardPatternView
-
+        mKeyguardPatternView.setIsLockScreenLandscapeEnabled(false)
         mKeyguardPatternViewController =
             KeyguardPatternViewController(
                 mKeyguardPatternView,
