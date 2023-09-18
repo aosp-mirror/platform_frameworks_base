@@ -18,16 +18,16 @@ package com.android.server.wm;
 
 import static android.server.wm.ActivityManagerTestBase.createFullscreenActivityScenarioRule;
 import static android.server.wm.BuildUtils.HW_TIMEOUT_MULTIPLIER;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
 import android.platform.test.annotations.Presubmit;
-import android.util.Log;
+import android.server.wm.CtsWindowInfoUtils;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.TrustedPresentationThresholds;
 
+import androidx.annotation.GuardedBy;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import com.android.server.wm.utils.CommonUtils;
@@ -36,9 +36,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -52,6 +51,15 @@ public class TrustedPresentationCallbackTest {
     private static final long WAIT_TIME_MS = HW_TIMEOUT_MULTIPLIER * 2000L;
 
     private static final float FRACTION_VISIBLE = 0.1f;
+
+    private final Object mResultsLock = new Object();
+    @GuardedBy("mResultsLock")
+    private boolean mResult;
+    @GuardedBy("mResultsLock")
+    private boolean mReceivedResults;
+
+    @Rule
+    public TestName mName = new TestName();
 
     @Rule
     public ActivityScenarioRule<TestActivity> mActivityRule = createFullscreenActivityScenarioRule(
@@ -71,36 +79,32 @@ public class TrustedPresentationCallbackTest {
 
     @Test
     public void testAddTrustedPresentationListenerOnWindow() throws InterruptedException {
-        boolean[] results = new boolean[1];
-        CountDownLatch receivedResults = new CountDownLatch(1);
         TrustedPresentationThresholds thresholds = new TrustedPresentationThresholds(
                 1 /* minAlpha */, FRACTION_VISIBLE, STABILITY_REQUIREMENT_MS);
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         mActivity.getWindow().getRootSurfaceControl().addTrustedPresentationCallback(t, thresholds,
                 Runnable::run, inTrustedPresentationState -> {
-                    Log.d(TAG, "onTrustedPresentationChanged " + inTrustedPresentationState);
-                    results[0] = inTrustedPresentationState;
-                    receivedResults.countDown();
+                    synchronized (mResultsLock) {
+                        mResult = inTrustedPresentationState;
+                        mReceivedResults = true;
+                        mResultsLock.notify();
+                    }
                 });
         t.apply();
-
-        assertTrue("Timed out waiting for results",
-                receivedResults.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
-        assertTrue(results[0]);
+        synchronized (mResultsLock) {
+            assertResults();
+        }
     }
 
     @Test
     public void testRemoveTrustedPresentationListenerOnWindow() throws InterruptedException {
-        final Object resultsLock = new Object();
-        boolean[] results = new boolean[1];
-        boolean[] receivedResults = new boolean[1];
         TrustedPresentationThresholds thresholds = new TrustedPresentationThresholds(
                 1 /* minAlpha */, FRACTION_VISIBLE, STABILITY_REQUIREMENT_MS);
         Consumer<Boolean> trustedPresentationCallback = inTrustedPresentationState -> {
-            synchronized (resultsLock) {
-                results[0] = inTrustedPresentationState;
-                receivedResults[0] = true;
-                resultsLock.notify();
+            synchronized (mResultsLock) {
+                mResult = inTrustedPresentationState;
+                mReceivedResults = true;
+                mResultsLock.notify();
             }
         };
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
@@ -108,32 +112,41 @@ public class TrustedPresentationCallbackTest {
                 Runnable::run, trustedPresentationCallback);
         t.apply();
 
-        synchronized (resultsLock) {
-            if (!receivedResults[0]) {
-                resultsLock.wait(WAIT_TIME_MS);
+        synchronized (mResultsLock) {
+            if (!mReceivedResults) {
+                mResultsLock.wait(WAIT_TIME_MS);
             }
-            // Make sure we received the results and not just timed out
-            assertTrue("Timed out waiting for results", receivedResults[0]);
-            assertTrue(results[0]);
-
+            assertResults();
             // reset the state
-            receivedResults[0] = false;
+            mReceivedResults = false;
         }
 
         mActivity.getWindow().getRootSurfaceControl().removeTrustedPresentationCallback(t,
                 trustedPresentationCallback);
         t.apply();
 
-        synchronized (resultsLock) {
-            if (!receivedResults[0]) {
-                resultsLock.wait(WAIT_TIME_MS);
+        synchronized (mResultsLock) {
+            if (!mReceivedResults) {
+                mResultsLock.wait(WAIT_TIME_MS);
             }
             // Ensure we waited the full time and never received a notify on the result from the
             // callback.
-            assertFalse("Should never have received a callback", receivedResults[0]);
+            assertFalse("Should never have received a callback", mReceivedResults);
             // results shouldn't have changed.
-            assertTrue(results[0]);
+            assertTrue(mResult);
         }
+    }
+
+    @GuardedBy("mResultsLock")
+    private void assertResults() throws InterruptedException {
+        mResultsLock.wait(WAIT_TIME_MS);
+
+        if (!mReceivedResults) {
+            CtsWindowInfoUtils.dumpWindowsOnScreen(TAG, "test " + mName.getMethodName());
+        }
+        // Make sure we received the results and not just timed out
+        assertTrue("Timed out waiting for results", mReceivedResults);
+        assertTrue(mResult);
     }
 
     public static class TestActivity extends Activity {
