@@ -25,7 +25,7 @@ import android.os.Binder;
 import android.os.ShellCommand;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
+import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 import com.android.server.companion.datatransfer.contextsync.BitmapUtils;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
@@ -43,20 +43,20 @@ class CompanionDeviceShellCommand extends ShellCommand {
     private final CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private final CompanionTransportManager mTransportManager;
 
-    private final SystemDataTransferProcessor mSystemDataTransferProcessor;
+    private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     private final AssociationRequestsProcessor mAssociationRequestsProcessor;
 
     CompanionDeviceShellCommand(CompanionDeviceManagerService service,
             AssociationStoreImpl associationStore,
             CompanionDevicePresenceMonitor devicePresenceMonitor,
             CompanionTransportManager transportManager,
-            SystemDataTransferProcessor systemDataTransferProcessor,
+            SystemDataTransferRequestStore systemDataTransferRequestStore,
             AssociationRequestsProcessor associationRequestsProcessor) {
         mService = service;
         mAssociationStore = associationStore;
         mDevicePresenceMonitor = devicePresenceMonitor;
         mTransportManager = transportManager;
-        mSystemDataTransferProcessor = systemDataTransferProcessor;
+        mSystemDataTransferRequestStore = systemDataTransferRequestStore;
         mAssociationRequestsProcessor = associationRequestsProcessor;
     }
 
@@ -265,47 +265,16 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     break;
                 }
 
-                case "get-perm-sync-state": {
+                case "allow-permission-sync": {
+                    int userId = getNextIntArgRequired();
                     associationId = getNextIntArgRequired();
-                    PermissionSyncRequest request =
-                            mSystemDataTransferProcessor.getPermissionSyncRequest(associationId);
-                    out.println((request == null ? "null" : request.isUserConsented()));
-                    break;
+                    boolean enabled = getNextBooleanArgRequired();
+                    PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+                    request.setUserId(userId);
+                    request.setUserConsented(enabled);
+                    mSystemDataTransferRequestStore.writeRequest(userId, request);
                 }
-
-                case "remove-perm-sync-state": {
-                    associationId = getNextIntArgRequired();
-                    PermissionSyncRequest request =
-                            mSystemDataTransferProcessor.getPermissionSyncRequest(associationId);
-                    out.print((request == null ? "null" : request.isUserConsented()));
-                    mSystemDataTransferProcessor.removePermissionSyncRequest(associationId);
-                    request = mSystemDataTransferProcessor.getPermissionSyncRequest(associationId);
-                    // should print " -> null"
-                    out.println(" -> " + (request == null ? "null" : request.isUserConsented()));
-                    break;
-                }
-
-                case "enable-perm-sync": {
-                    associationId = getNextIntArgRequired();
-                    PermissionSyncRequest request =
-                            mSystemDataTransferProcessor.getPermissionSyncRequest(associationId);
-                    out.print((request == null ? "null" : request.isUserConsented()));
-                    mSystemDataTransferProcessor.enablePermissionsSync(associationId);
-                    request = mSystemDataTransferProcessor.getPermissionSyncRequest(associationId);
-                    out.println(" -> " + request.isUserConsented()); // should print " -> true"
-                    break;
-                }
-
-                case "disable-perm-sync": {
-                    associationId = getNextIntArgRequired();
-                    PermissionSyncRequest request =
-                            mSystemDataTransferProcessor.getPermissionSyncRequest(associationId);
-                    out.print((request == null ? "null" : request.isUserConsented()));
-                    mSystemDataTransferProcessor.disablePermissionsSync(associationId);
-                    request = mSystemDataTransferProcessor.getPermissionSyncRequest(associationId);
-                    out.println(" -> " + request.isUserConsented()); // should print " -> false"
-                    break;
-                }
+                break;
 
                 default:
                     return handleDefaultCommands(cmd);
@@ -377,14 +346,5 @@ class CompanionDeviceShellCommand extends ShellCommand {
 
         pw.println("  create-emulated-transport <ASSOCIATION_ID>");
         pw.println("      Create an EmulatedTransport for testing purposes only");
-
-        pw.println("  enable-perm-sync <ASSOCIATION_ID>");
-        pw.println("      Enable perm sync for the association.");
-        pw.println("  disable-perm-sync <ASSOCIATION_ID>");
-        pw.println("      Disable perm sync for the association.");
-        pw.println("  get-perm-sync-state <ASSOCIATION_ID>");
-        pw.println("      Get perm sync state for the association.");
-        pw.println("  remove-perm-sync-state <ASSOCIATION_ID>");
-        pw.println("      Remove perm sync state for the association.");
     }
 }
