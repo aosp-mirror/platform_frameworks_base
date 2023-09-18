@@ -2871,14 +2871,14 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setTask(sourceRecord.getTask()).build();
         secondRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
                 true /* startActivity */, sourceRecord);
-        assertFalse(secondRecord.mSplashScreenStyleSolidColor);
+        assertTrue(secondRecord.mAllowIconSplashScreen);
         secondRecord.onStartingWindowDrawn();
 
         final ActivityRecord finalRecord = new ActivityBuilder(mAtm)
                 .setTask(sourceRecord.getTask()).build();
         finalRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
                 true /* startActivity */, secondRecord);
-        assertTrue(finalRecord.mSplashScreenStyleSolidColor);
+        assertFalse(finalRecord.mAllowIconSplashScreen);
     }
 
     @Test

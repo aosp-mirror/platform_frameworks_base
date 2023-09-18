@@ -19,12 +19,12 @@ package com.android.server.wm;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_DRAWN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_ICON;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN;
 
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_TYPE_SNAPSHOT;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
@@ -102,7 +102,7 @@ public class StartingSurfaceController {
 
     static int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
             boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated,
-            boolean isSolidColor, boolean useLegacy, boolean activityDrawn, int startingWindowType,
+            boolean allowIcon, boolean useLegacy, boolean activityDrawn, int startingWindowType,
             String packageName, int userId) {
         int parameter = 0;
         if (newTask) {
@@ -120,8 +120,8 @@ public class StartingSurfaceController {
         if (activityCreated || startingWindowType == STARTING_WINDOW_TYPE_SNAPSHOT) {
             parameter |= TYPE_PARAMETER_ACTIVITY_CREATED;
         }
-        if (isSolidColor) {
-            parameter |= TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN;
+        if (allowIcon) {
+            parameter |= TYPE_PARAMETER_ALLOW_ICON;
         }
         if (useLegacy) {
             parameter |= TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
