@@ -18,6 +18,7 @@ package android.security.keystore2;
 
 import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.SecurityLevel;
+import android.os.StrictMode;
 import android.security.KeyStore2;
 import android.security.KeyStoreSecurityLevel;
 import android.security.keymaster.KeymasterDefs;
@@ -281,6 +282,7 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
 
     @Override
     protected SecretKey engineGenerateKey() {
+        StrictMode.noteSlowCall("engineGenerateKey");
         KeyGenParameterSpec spec = mSpec;
         if (spec == null) {
             throw new IllegalStateException("Not initialized");
