@@ -30,6 +30,7 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
 
 @Ignore("Base Test Class")
 abstract class QuickSwitchBetweenTwoAppsForward(val rotation: Rotation = Rotation.ROTATION_0) {
@@ -46,7 +47,9 @@ abstract class QuickSwitchBetweenTwoAppsForward(val rotation: Rotation = Rotatio
         tapl.setExpectedRotation(rotation.value)
 
         testApp1.launchViaIntent(wmHelper)
+        ChangeDisplayOrientationRule.setRotation(rotation)
         testApp2.launchViaIntent(wmHelper)
+        ChangeDisplayOrientationRule.setRotation(rotation)
         tapl.launchedAppState.quickSwitchToPreviousApp()
         wmHelper
             .StateSyncBuilder()
