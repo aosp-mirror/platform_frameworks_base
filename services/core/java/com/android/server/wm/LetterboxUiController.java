@@ -661,12 +661,24 @@ final class LetterboxUiController {
     @ScreenOrientation
     int overrideOrientationIfNeeded(@ScreenOrientation int candidate) {
         if (shouldApplyUserFullscreenOverride()) {
+            Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
+                    + mActivityRecord + " is overridden to "
+                    + screenOrientationToString(SCREEN_ORIENTATION_USER)
+                    + " by user aspect ratio settings.");
             return SCREEN_ORIENTATION_USER;
         }
 
         // In some cases (e.g. Kids app) we need to map the candidate orientation to some other
         // orientation.
         candidate = mActivityRecord.mWmService.mapOrientationRequest(candidate);
+
+        if (shouldApplyUserMinAspectRatioOverride() && !isFixedOrientation(candidate)) {
+            Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
+                    + mActivityRecord + " is overridden to "
+                    + screenOrientationToString(SCREEN_ORIENTATION_PORTRAIT)
+                    + " by user aspect ratio settings.");
+            return SCREEN_ORIENTATION_PORTRAIT;
+        }
 
         if (FALSE.equals(mBooleanPropertyAllowOrientationOverride)) {
             return candidate;
