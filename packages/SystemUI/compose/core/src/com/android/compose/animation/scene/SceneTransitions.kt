@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.snap
 import androidx.compose.ui.geometry.Offset
@@ -35,11 +36,12 @@ import com.android.compose.ui.util.fastMap
 
 /** The transitions configuration of a [SceneTransitionLayout]. */
 class SceneTransitions(
-    private val transitionSpecs: List<TransitionSpec>,
+    @get:VisibleForTesting val transitionSpecs: List<TransitionSpec>,
 ) {
     private val cache = mutableMapOf<SceneKey, MutableMap<SceneKey, TransitionSpec>>()
 
-    internal fun transitionSpec(from: SceneKey, to: SceneKey): TransitionSpec {
+    @VisibleForTesting
+    fun transitionSpec(from: SceneKey, to: SceneKey): TransitionSpec {
         return cache.getOrPut(from) { mutableMapOf() }.getOrPut(to) { findSpec(from, to) }
     }
 

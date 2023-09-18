@@ -127,6 +127,13 @@ interface TransitionBuilder : PropertyTransformationBuilder {
      * the result.
      */
     fun punchHole(matcher: ElementMatcher, bounds: ElementKey, shape: Shape = RectangleShape)
+
+    /**
+     * Adds the transformations in [builder] but in reversed order. This allows you to partially
+     * reuse the definition of the transition from scene `Foo` to scene `Bar` inside the definition
+     * of the transition from scene `Bar` to scene `Foo`.
+     */
+    fun reversed(builder: TransitionBuilder.() -> Unit)
 }
 
 @TransitionDsl

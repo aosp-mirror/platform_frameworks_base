@@ -80,6 +80,7 @@ internal class TransitionBuilderImpl : TransitionBuilder {
     override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
 
     private var range: TransformationRange? = null
+    private var reversed = false
     private val durationMillis: Int by lazy {
         val spec = spec
         if (spec !is DurationBasedAnimationSpec) {
@@ -91,6 +92,12 @@ internal class TransitionBuilderImpl : TransitionBuilder {
 
     override fun punchHole(matcher: ElementMatcher, bounds: ElementKey, shape: Shape) {
         transformations.add(PunchHole(matcher, bounds, shape))
+    }
+
+    override fun reversed(builder: TransitionBuilder.() -> Unit) {
+        reversed = true
+        builder()
+        reversed = false
     }
 
     override fun fractionRange(
@@ -122,11 +129,20 @@ internal class TransitionBuilderImpl : TransitionBuilder {
     }
 
     private fun transformation(transformation: PropertyTransformation<*>) {
-        if (range != null) {
-            transformations.add(RangedPropertyTransformation(transformation, range!!))
-        } else {
-            transformations.add(transformation)
-        }
+        val transformation =
+            if (range != null) {
+                RangedPropertyTransformation(transformation, range!!)
+            } else {
+                transformation
+            }
+
+        transformations.add(
+            if (reversed) {
+                transformation.reverse()
+            } else {
+                transformation
+            }
+        )
     }
 
     override fun fade(matcher: ElementMatcher) {
