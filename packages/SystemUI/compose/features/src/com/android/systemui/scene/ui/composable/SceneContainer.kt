@@ -158,6 +158,7 @@ private fun SceneTransitionObservableTransitionState.toModel(): ObservableTransi
                 fromScene = fromScene.toModel().key,
                 toScene = toScene.toModel().key,
                 progress = progress,
+                isUserInputDriven = isUserInputDriven,
             )
     }
 }

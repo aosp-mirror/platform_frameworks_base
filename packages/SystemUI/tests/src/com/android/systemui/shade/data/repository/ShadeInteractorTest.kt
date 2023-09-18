@@ -623,6 +623,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Lockscreen,
                         toScene = key,
                         progress = progress,
+                        isUserInputDriven = false,
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)
@@ -659,6 +660,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                         fromScene = key,
                         toScene = SceneKey.Lockscreen,
                         progress = progress,
+                        isUserInputDriven = false,
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)
@@ -694,6 +696,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Lockscreen,
                         toScene = SceneKey.Shade,
                         progress = progress,
+                        isUserInputDriven = false,
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)
