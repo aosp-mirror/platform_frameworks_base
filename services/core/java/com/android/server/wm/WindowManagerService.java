@@ -8413,6 +8413,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public boolean hasNavigationBar(int displayId) {
+            return WindowManagerService.this.hasNavigationBar(displayId);
+        }
+
+        @Override
         public void setInputMethodTargetChangeListener(@NonNull ImeTargetChangeListener listener) {
             synchronized (mGlobalLock) {
                 mImeTargetChangeListener = listener;
