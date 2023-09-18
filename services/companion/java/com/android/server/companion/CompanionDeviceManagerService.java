@@ -172,6 +172,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     private static final int ASSOCIATE_WITHOUT_PROMPT_MAX_PER_TIME_WINDOW = 5;
     private static final long ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS = 60 * 60 * 1000; // 60 min;
+    private static final int MAX_CN_LENGTH = 500;
 
     private static final String XML_TAG_ASSOCIATIONS = "associations";
     private static final String XML_TAG_ASSOCIATION = "association";
@@ -555,6 +556,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             String callingPackage = component.getPackageName();
             checkCanCallNotificationApi(callingPackage);
             int userId = getCallingUserId();
+            if (component.flattenToString().length() > MAX_CN_LENGTH) {
+                throw new IllegalArgumentException("Component name is too long.");
+            }
             final long identity = Binder.clearCallingIdentity();
             try {
                 return PendingIntent.getActivityAsUser(getContext(),
