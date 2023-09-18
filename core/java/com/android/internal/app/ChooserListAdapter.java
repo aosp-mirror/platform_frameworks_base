@@ -19,7 +19,6 @@ package com.android.internal.app;
 import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE;
 import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER;
 
-import android.app.ActivityManager;
 import android.app.prediction.AppPredictor;
 import android.content.ComponentName;
 import android.content.Context;
@@ -425,11 +424,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     public int getServiceTargetCount() {
-        if (mChooserListCommunicator.isSendAction(mChooserListCommunicator.getTargetIntent())
-                && !ActivityManager.isLowRamDeviceStatic()) {
+        if (mChooserListCommunicator.shouldShowServiceTargets()) {
             return Math.min(mServiceTargets.size(), mChooserListCommunicator.getMaxRankedTargets());
         }
-
         return 0;
     }
 
@@ -771,6 +768,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
         void sendListViewUpdateMessage(UserHandle userHandle);
 
         boolean isSendAction(Intent targetIntent);
+
+        boolean shouldShowContentPreview();
+
+        boolean shouldShowServiceTargets();
     }
 
     /**
