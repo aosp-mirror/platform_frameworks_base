@@ -125,7 +125,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private MoveToDesktopAnimator mMoveToDesktopAnimator;
     private final Rect mDragToDesktopAnimationStartBounds = new Rect();
-    private final DesktopModeKeyguardChangeListener mDesktopModeKeyguardChangeListener;
+    private final DesktopModeKeyguardChangeListener mDesktopModeKeyguardChangeListener =
+            new DesktopModeKeyguardChangeListener();
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
 
     public DesktopModeWindowDecorViewModel(
@@ -157,7 +158,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
                 SurfaceControl.Transaction::new,
-                new DesktopModeKeyguardChangeListener(),
                 rootTaskDisplayAreaOrganizer);
     }
 
@@ -177,7 +177,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
-            DesktopModeKeyguardChangeListener desktopModeKeyguardChangeListener,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         mContext = context;
         mMainHandler = mainHandler;
@@ -194,7 +193,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mDesktopModeWindowDecorFactory = desktopModeWindowDecorFactory;
         mInputMonitorFactory = inputMonitorFactory;
         mTransactionFactory = transactionFactory;
-        mDesktopModeKeyguardChangeListener = desktopModeKeyguardChangeListener;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
 
         shellInit.addInitCallback(this::onInit, this);
