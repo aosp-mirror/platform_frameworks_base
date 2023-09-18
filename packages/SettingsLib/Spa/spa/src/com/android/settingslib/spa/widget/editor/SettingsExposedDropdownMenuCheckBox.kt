@@ -131,7 +131,8 @@ private fun ActionButtonsPreview() {
     val options = listOf("item1", "item2", "item3")
     val selectedOptionsState = remember { mutableStateListOf("item1", "item2") }
     SettingsTheme {
-        SettingsExposedDropdownMenuCheckBox(label = "label",
+        SettingsExposedDropdownMenuCheckBox(
+            label = "label",
             options = options,
             selectedOptionsState = selectedOptionsState,
             enabled = true,

@@ -17,35 +17,44 @@
 package com.android.settingslib.spa.gallery.editor
 
 import android.os.Bundle
-import com.android.settingslib.spa.framework.common.SettingsEntry
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
+import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.widget.editor.SettingsTextFieldPassword
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
-private const val TITLE = "Category: Editor"
+private const val TITLE = "Sample SettingsTextFieldPassword"
 
-object EditorMainPageProvider : SettingsPageProvider {
-    override val name = "EditorMain"
-    private val owner = createSettingsPage()
+object SettingsTextFieldPasswordPageProvider : SettingsPageProvider {
+    override val name = "SettingsTextFieldPassword"
 
-    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
-        return listOf(
-            SettingsOutlinedTextFieldPageProvider.buildInjectEntry().setLink(fromPage = owner)
-                .build(),
-            SettingsExposedDropdownMenuBoxPageProvider.buildInjectEntry().setLink(fromPage = owner)
-                .build(),
-            SettingsExposedDropdownMenuCheckBoxProvider.buildInjectEntry().setLink(fromPage = owner)
-                .build(),
-            SettingsTextFieldPasswordPageProvider.buildInjectEntry().setLink(fromPage = owner)
-                .build(),
-        )
+    override fun getTitle(arguments: Bundle?): String {
+        return TITLE
+    }
+
+    @Composable
+    override fun Page(arguments: Bundle?) {
+        var value by remember { mutableStateOf("value") }
+        RegularScaffold(title = TITLE) {
+            SettingsTextFieldPassword(
+                value = value,
+                label = "label",
+                onTextChange = { value = it })
+        }
     }
 
     fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = owner)
+        return SettingsEntryBuilder.createInject(owner = createSettingsPage())
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE
@@ -53,8 +62,12 @@ object EditorMainPageProvider : SettingsPageProvider {
                 })
             }
     }
+}
 
-    override fun getTitle(arguments: Bundle?): String {
-        return TITLE
+@Preview(showBackground = true)
+@Composable
+private fun SettingsTextFieldPasswordPagePreview() {
+    SettingsTheme {
+        SettingsTextFieldPasswordPageProvider.Page(null)
     }
 }
