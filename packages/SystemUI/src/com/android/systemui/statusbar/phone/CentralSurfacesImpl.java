@@ -388,7 +388,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      */
     protected int mState; // TODO: remove this. Just use StatusBarStateController
     protected boolean mBouncerShowing;
-    private boolean mBouncerShowingOverDream;
 
     private final PhoneStatusBarPolicy mIconPolicy;
 
@@ -2460,10 +2459,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      */
     @Override
     public boolean shouldKeyguardHideImmediately() {
-        final boolean isScrimmedBouncer =
-                mScrimController.getState() == ScrimState.BOUNCER_SCRIMMED;
-        final boolean isBouncerOverDream = isBouncerShowingOverDream();
-        return (isScrimmedBouncer || isBouncerOverDream);
+        return mScrimController.getState() == ScrimState.BOUNCER_SCRIMMED;
     }
 
     private void showBouncerOrLockScreenIfKeyguard() {
@@ -3158,11 +3154,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean isBouncerShowingScrimmed() {
         return isBouncerShowing() && mStatusBarKeyguardViewManager.primaryBouncerNeedsScrimming();
-    }
-
-    @Override
-    public boolean isBouncerShowingOverDream() {
-        return mBouncerShowingOverDream;
     }
 
     // End Extra BaseStatusBarMethods.

@@ -3730,8 +3730,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     expand = true;
                     mShadeLog.logEndMotionEvent("endMotionEvent: cancel while on keyguard",
                             forceCancel, expand);
-                } else if (mCentralSurfaces.isBouncerShowingOverDream()) {
-                    expand = false;
                 } else {
                     // If we get a cancel, put the shade back to the state it was in when the
                     // gesture started
@@ -4891,10 +4889,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 return false;
             }
 
-            // Do not allow panel expansion if bouncer is scrimmed or showing over a dream,
+            // Do not allow panel expansion if bouncer is scrimmed,
             // otherwise user would be able to pull down QS or expand the shade.
-            if (mCentralSurfaces.isBouncerShowingScrimmed()
-                    || mCentralSurfaces.isBouncerShowingOverDream()) {
+            if (mCentralSurfaces.isBouncerShowingScrimmed()) {
                 mShadeLog.logMotionEvent(event,
                         "onTouch: ignore touch, bouncer scrimmed or showing over dream");
                 return false;
