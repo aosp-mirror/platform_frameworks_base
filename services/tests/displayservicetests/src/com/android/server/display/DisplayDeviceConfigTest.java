@@ -44,6 +44,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.display.config.ThermalStatus;
 
 import org.junit.Before;
@@ -477,6 +478,23 @@ public final class DisplayDeviceConfigTest {
                 mDisplayDeviceConfig.getHighAmbientBrightnessThresholds(), ZERO_DELTA);
     }
 
+    @Test
+    public void testHdrBrightnessDataFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        HdrBrightnessData data = mDisplayDeviceConfig.getHdrBrightnessData();
+
+        assertNotNull(data);
+        assertEquals(2, data.mMaxBrightnessLimits.size());
+        assertEquals(13000, data.mBrightnessDecreaseDebounceMillis);
+        assertEquals(10000, data.mBrightnessDecreaseDurationMillis);
+        assertEquals(1000, data.mBrightnessIncreaseDebounceMillis);
+        assertEquals(11000, data.mBrightnessIncreaseDurationMillis);
+
+        assertEquals(0.3f, data.mMaxBrightnessLimits.get(500f), SMALL_DELTA);
+        assertEquals(0.6f, data.mMaxBrightnessLimits.get(1200f), SMALL_DELTA);
+    }
+
     private void verifyConfigValuesFromConfigResource() {
         assertNull(mDisplayDeviceConfig.getName());
         assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsNits(), new
@@ -694,6 +712,25 @@ public final class DisplayDeviceConfigTest {
                 + "</proxSensor>\n";
     }
 
+    private String getHdrBrightnessConfig() {
+        return "<hdrBrightnessConfig>\n"
+              + "    <brightnessMap>\n"
+              + "        <point>\n"
+              + "            <first>500</first>\n"
+              + "            <second>0.3</second>\n"
+              + "        </point>\n"
+              + "        <point>\n"
+              + "           <first>1200</first>\n"
+              + "           <second>0.6</second>\n"
+              + "        </point>\n"
+              + "    </brightnessMap>\n"
+              + "    <brightnessIncreaseDebounceMillis>1000</brightnessIncreaseDebounceMillis>\n"
+              + "    <brightnessIncreaseDurationMillis>11000</brightnessIncreaseDurationMillis>\n"
+              + "    <brightnessDecreaseDebounceMillis>13000</brightnessDecreaseDebounceMillis>\n"
+              + "    <brightnessDecreaseDurationMillis>10000</brightnessDecreaseDurationMillis>\n"
+              + "</hdrBrightnessConfig>";
+    }
+
     private String getContent() {
         return getContent(getValidLuxThrottling(), getValidProxSensor());
     }
@@ -784,6 +821,7 @@ public final class DisplayDeviceConfigTest {
                 +            "</point>\n"
                 +       "</sdrHdrRatioMap>\n"
                 +   "</highBrightnessMode>\n"
+                + getHdrBrightnessConfig()
                 + brightnessCapConfig
                 +   "<lightSensor>\n"
                 +       "<type>test_light_sensor</type>\n"
