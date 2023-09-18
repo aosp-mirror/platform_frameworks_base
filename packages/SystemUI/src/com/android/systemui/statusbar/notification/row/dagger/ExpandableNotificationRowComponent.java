@@ -23,6 +23,7 @@ import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
+import com.android.systemui.statusbar.notification.row.BigPictureIconManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -66,6 +67,12 @@ public interface ExpandableNotificationRowComponent {
      */
     @NotificationRowScope
     ExpandableNotificationRowController getExpandableNotificationRowController();
+
+    /**
+     * Creates a BigPictureIconManager.
+     */
+    @NotificationRowScope
+    BigPictureIconManager getBigPictureIconManager();
 
     /**
      * Dagger Module that extracts interesting properties from an ExpandableNotificationRow.

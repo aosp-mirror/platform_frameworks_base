@@ -376,6 +376,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private float mTranslationWhenRemoved;
     private boolean mWasChildInGroupWhenRemoved;
     private NotificationInlineImageResolver mImageResolver;
+    private BigPictureIconManager mBigPictureIconManager;
     @Nullable
     private OnExpansionChangedListener mExpansionChangedListener;
     @Nullable
@@ -1355,6 +1356,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mImageResolver != null) {
             mImageResolver.updateMaxImageSizes();
         }
+        if (mBigPictureIconManager != null) {
+            mBigPictureIconManager.updateMaxImageSizes();
+        }
     }
 
     public void onUiModeChanged() {
@@ -1793,6 +1797,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     NotificationInlineImageResolver getImageResolver() {
         return mImageResolver;
     }
+
+    public BigPictureIconManager getBigPictureIconManager() {
+        return mBigPictureIconManager;
+    }
+
+    public void setBigPictureIconManager(
+            BigPictureIconManager bigPictureIconManager) {
+        mBigPictureIconManager = bigPictureIconManager;
+    }
+
 
     /**
      * Resets this view so it can be re-used for an updated notification.
@@ -3687,6 +3701,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 pw.println("no viewState!!!");
             }
             pw.println(getRoundableState().debugString());
+            if (mBigPictureIconManager != null) {
+                mBigPictureIconManager.dump(pw, args);
+            }
             dumpBackgroundView(pw, args);
 
             int transientViewCount = mChildrenContainer == null
