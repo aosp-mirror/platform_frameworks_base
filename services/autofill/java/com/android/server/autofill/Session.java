@@ -2437,7 +2437,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + id + " destroyed");
                 return;
             }
-            fillInIntent = createAuthFillInIntentLocked(requestId, extras);
+            fillInIntent = createAuthFillInIntentLocked(requestId, extras, /* authExtras= */ null);
             if (fillInIntent == null) {
                 forceRemoveFromServiceLocked();
                 return;
@@ -5557,7 +5557,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mPresentationStatsEventLogger.maybeSetAuthenticationType(
                 AUTHENTICATION_TYPE_DATASET_AUTHENTICATION);
             setViewStatesLocked(null, dataset, ViewState.STATE_WAITING_DATASET_AUTH, false);
-            final Intent fillInIntent = createAuthFillInIntentLocked(requestId, mClientState);
+            final Intent fillInIntent = createAuthFillInIntentLocked(requestId, mClientState,
+                    dataset.getAuthenticationExtras());
             if (fillInIntent == null) {
                 forceRemoveFromServiceLocked();
                 return;
@@ -5573,7 +5574,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // TODO: this should never be null, but we got at least one occurrence, probably due to a race.
     @GuardedBy("mLock")
     @Nullable
-    private Intent createAuthFillInIntentLocked(int requestId, Bundle extras) {
+    private Intent createAuthFillInIntentLocked(int requestId, Bundle extras,
+            @Nullable Bundle authExtras) {
         final Intent fillInIntent = new Intent();
 
         final FillContext context = getFillContextByRequestIdLocked(requestId);
@@ -5590,6 +5592,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         fillInIntent.putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, context.getStructure());
         fillInIntent.putExtra(AutofillManager.EXTRA_CLIENT_STATE, extras);
+        if (authExtras != null) {
+            fillInIntent.putExtra(AutofillManager.EXTRA_AUTH_STATE, authExtras);
+        }
         return fillInIntent;
     }
 

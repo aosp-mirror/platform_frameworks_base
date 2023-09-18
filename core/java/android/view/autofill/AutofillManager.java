@@ -277,6 +277,12 @@ public final class AutofillManager {
             "android.view.autofill.extra.CLIENT_STATE";
 
     /**
+     * @hide
+     */
+    public static final String EXTRA_AUTH_STATE =
+            "android.view.autofill.extra.AUTH_STATE";
+
+    /**
      * Intent extra: the {@link android.view.inputmethod.InlineSuggestionsRequest} in the
      * autofill request.
      *
