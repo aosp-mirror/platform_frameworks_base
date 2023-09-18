@@ -17,8 +17,13 @@
 package com.android.packageinstaller.v2.ui;
 
 import android.os.Bundle;
+import android.view.Window;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.ViewModelProvider;
+import com.android.packageinstaller.v2.model.InstallRepository;
+import com.android.packageinstaller.v2.viewmodel.InstallViewModel;
+import com.android.packageinstaller.v2.viewmodel.InstallViewModelFactory;
 
 public class InstallLaunch extends FragmentActivity {
 
@@ -27,9 +32,18 @@ public class InstallLaunch extends FragmentActivity {
     public static final String EXTRA_CALLING_PKG_NAME =
             InstallLaunch.class.getPackageName() + ".callingPkgName";
     private static final String TAG = InstallLaunch.class.getSimpleName();
+    private InstallViewModel mInstallViewModel;
+    private InstallRepository mInstallRepository;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        mInstallRepository = new InstallRepository(getApplicationContext());
+        mInstallViewModel = new ViewModelProvider(this,
+                new InstallViewModelFactory(this.getApplication(), mInstallRepository)).get(
+                InstallViewModel.class);
     }
 }
