@@ -56,9 +56,6 @@ class NoopDeviceEntryFaceAuthRepository @Inject constructor() : DeviceEntryFaceA
         get() = emptyFlow()
 
     override fun setLockedOut(isLockedOut: Boolean) = Unit
-    override fun pauseFaceAuth() = Unit
-
-    override fun resumeFaceAuth() = Unit
 
     /**
      * Trigger face authentication.
@@ -69,7 +66,7 @@ class NoopDeviceEntryFaceAuthRepository @Inject constructor() : DeviceEntryFaceA
      *
      * Run only face detection when [fallbackToDetection] is true and [canRunFaceAuth] is false.
      */
-    override suspend fun authenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) {}
+    override fun requestAuthenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) = Unit
 
     /** Stop currently running face authentication or detection. */
     override fun cancel() {}

@@ -52,8 +52,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 
 /**
@@ -144,14 +142,11 @@ constructor(
             .onEach { (previous, curr) ->
                 val wasSwitching = previous.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
                 val isSwitching = curr.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
-                if (!wasSwitching && isSwitching) {
-                    repository.pauseFaceAuth()
-                } else if (wasSwitching && !isSwitching) {
+                if (wasSwitching && !isSwitching) {
                     val lockoutMode = facePropertyRepository.getLockoutMode(curr.userInfo.id)
                     repository.setLockedOut(
                         lockoutMode == LockoutMode.PERMANENT || lockoutMode == LockoutMode.TIMED
                     )
-                    repository.resumeFaceAuth()
                     yield()
                     runFaceAuth(
                         FaceAuthUiEvent.FACE_AUTH_UPDATED_USER_SWITCHING,
@@ -232,12 +227,8 @@ constructor(
                     )
             } else {
                 faceAuthenticationStatusOverride.value = null
-                applicationScope.launch {
-                    withContext(mainDispatcher) {
-                        faceAuthenticationLogger.authRequested(uiEvent)
-                        repository.authenticate(uiEvent, fallbackToDetection = fallbackToDetect)
-                    }
-                }
+                faceAuthenticationLogger.authRequested(uiEvent)
+                repository.requestAuthenticate(uiEvent, fallbackToDetection = fallbackToDetect)
             }
         } else {
             faceAuthenticationLogger.ignoredFaceAuthTrigger(
