@@ -4439,12 +4439,12 @@ public class CarrierConfigManager {
      *
      * <p>Example:
      *
-     * <pre><code>
+     * <pre>{@code
      * <string-array name="carrier_service_name_array" num="2">
      *   <item value="Police"/>
      *   <item value="Ambulance"/>
      * </string-array>
-     * </code></pre>
+     * }</pre>
      */
     public static final String KEY_CARRIER_SERVICE_NAME_STRING_ARRAY = "carrier_service_name_array";
 
@@ -4458,18 +4458,18 @@ public class CarrierConfigManager {
      *
      * <ul>
      *   <li>The number of items in both the arrays are equal
-     *   <li>The item added in this key follows a specific format. Either it should be all numbers,
-     *       or "+" followed by all numbers.
+     *   <li>The item should contain dialable characters only which includes 0-9, -, *, #, (, ),
+     *       SPACE.
      * </ul>
      *
      * <p>Example:
      *
-     * <pre><code>
+     * <pre>{@code
      * <string-array name="carrier_service_number_array" num="2">
-     *   <item value="123"/>
-     *   <item value="+343"/>
+     *   <item value="*123"/>
+     *   <item value="+ (111) 111-111"/>
      * </string-array>
-     * </code></pre>
+     * }</pre>
      */
     public static final String KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY =
         "carrier_service_number_array";
