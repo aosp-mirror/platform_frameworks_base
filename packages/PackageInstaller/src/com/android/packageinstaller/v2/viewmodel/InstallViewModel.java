@@ -17,18 +17,34 @@
 package com.android.packageinstaller.v2.viewmodel;
 
 import android.app.Application;
+import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.MutableLiveData;
 import com.android.packageinstaller.v2.model.InstallRepository;
+import com.android.packageinstaller.v2.model.InstallRepository.CallerInfo;
+import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
+import com.android.packageinstaller.v2.model.installstagedata.InstallStaging;
+
 
 public class InstallViewModel extends AndroidViewModel {
 
     private static final String TAG = InstallViewModel.class.getSimpleName();
     private final InstallRepository mRepository;
+    private final MutableLiveData<InstallStage> mCurrentInstallStage = new MutableLiveData<>(
+            new InstallStaging());
 
     public InstallViewModel(@NonNull Application application, InstallRepository repository) {
         super(application);
         mRepository = repository;
     }
-}
 
+    public MutableLiveData<InstallStage> getCurrentInstallStage() {
+        return mCurrentInstallStage;
+    }
+
+    public void preprocessIntent(Intent intent, CallerInfo callerInfo) {
+        InstallStage stage = mRepository.performPreInstallChecks(intent, callerInfo);
+        mCurrentInstallStage.setValue(stage);
+    }
+}

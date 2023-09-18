@@ -16,12 +16,17 @@
 
 package com.android.packageinstaller.v2.ui;
 
+import static android.os.Process.INVALID_UID;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.android.packageinstaller.v2.model.InstallRepository;
+import com.android.packageinstaller.v2.model.InstallRepository.CallerInfo;
+import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
 import com.android.packageinstaller.v2.viewmodel.InstallViewModel;
 import com.android.packageinstaller.v2.viewmodel.InstallViewModelFactory;
 
@@ -45,5 +50,19 @@ public class InstallLaunch extends FragmentActivity {
         mInstallViewModel = new ViewModelProvider(this,
                 new InstallViewModelFactory(this.getApplication(), mInstallRepository)).get(
                 InstallViewModel.class);
+
+        Intent intent = getIntent();
+        CallerInfo info = new CallerInfo(
+                intent.getStringExtra(EXTRA_CALLING_PKG_NAME),
+                intent.getIntExtra(EXTRA_CALLING_PKG_UID, INVALID_UID));
+        mInstallViewModel.preprocessIntent(intent, info);
+
+        mInstallViewModel.getCurrentInstallStage().observe(this, this::onInstallStageChange);
+    }
+
+    /**
+     * Main controller of the UI. This method shows relevant dialogs based on the install stage
+     */
+    private void onInstallStageChange(InstallStage installStage) {
     }
 }
