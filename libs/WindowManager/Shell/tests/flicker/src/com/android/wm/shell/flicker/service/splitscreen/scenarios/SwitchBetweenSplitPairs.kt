@@ -51,8 +51,8 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
 
-        SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
-        SplitScreenUtils.enterSplit(wmHelper, tapl, device, thirdApp, fourthApp)
+        SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp, rotation)
+        SplitScreenUtils.enterSplit(wmHelper, tapl, device, thirdApp, fourthApp, rotation)
         SplitScreenUtils.waitForSplitComplete(wmHelper, thirdApp, fourthApp)
     }
 

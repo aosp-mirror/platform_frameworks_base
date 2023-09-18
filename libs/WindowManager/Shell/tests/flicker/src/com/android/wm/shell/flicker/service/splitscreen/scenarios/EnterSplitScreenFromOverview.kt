@@ -61,7 +61,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
     @Test
     open fun enterSplitScreenFromOverview() {
-        SplitScreenUtils.splitFromOverview(tapl, device)
+        SplitScreenUtils.splitFromOverview(tapl, device, rotation)
         SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
     }
 

@@ -39,7 +39,8 @@ abstract class CopyContentInSplitBenchmark(override val flicker: LegacyFlickerTe
     protected val popupWindowLayer = ComponentNameMatcher("", "PopupWindow:")
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
-            setup { SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, textEditApp) }
+            setup { SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp,
+                textEditApp, flicker.scenario.startRotation) }
             transitions {
                 SplitScreenUtils.copyContentInSplit(
                     instrumentation,

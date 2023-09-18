@@ -19,6 +19,7 @@ package com.android.wm.shell.flicker.utils
 import android.app.Instrumentation
 import android.graphics.Point
 import android.os.SystemClock
+import android.tools.common.Rotation
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.IComponentMatcher
 import android.tools.common.traces.component.IComponentNameMatcher
@@ -41,6 +42,7 @@ import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.flicker.testapp.ActivityOptions.SplitScreen.Primary
 import org.junit.Assert.assertNotNull
+import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
 
 object SplitScreenUtils {
     private const val TIMEOUT_MS = 3_000L
@@ -101,13 +103,14 @@ object SplitScreenUtils {
         tapl: LauncherInstrumentation,
         device: UiDevice,
         primaryApp: StandardAppHelper,
-        secondaryApp: StandardAppHelper
+        secondaryApp: StandardAppHelper,
+        rotation: Rotation
     ) {
         primaryApp.launchViaIntent(wmHelper)
         secondaryApp.launchViaIntent(wmHelper)
         tapl.goHome()
         wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
-        splitFromOverview(tapl, device)
+        splitFromOverview(tapl, device, rotation)
         waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
     }
 
@@ -121,7 +124,7 @@ object SplitScreenUtils {
         waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
     }
 
-    fun splitFromOverview(tapl: LauncherInstrumentation, device: UiDevice) {
+    fun splitFromOverview(tapl: LauncherInstrumentation, device: UiDevice, rotation: Rotation) {
         // Note: The initial split position in landscape is different between tablet and phone.
         // In landscape, tablet will let the first app split to right side, and phone will
         // split to left side.
@@ -129,7 +132,9 @@ object SplitScreenUtils {
             // TAPL's currentTask on tablet is sometimes not what we expected if the overview
             // contains more than 3 task views. We need to use uiautomator directly to find the
             // second task to split.
-            tapl.workspace.switchToOverview().overviewActions.clickSplit()
+            val home = tapl.workspace.switchToOverview()
+            ChangeDisplayOrientationRule.setRotation(rotation)
+            home.overviewActions.clickSplit()
             val snapshots = device.wait(Until.findObjects(overviewSnapshotSelector), TIMEOUT_MS)
             if (snapshots == null || snapshots.size < 1) {
                 error("Fail to find a overview snapshot to split.")
@@ -145,9 +150,10 @@ object SplitScreenUtils {
             }
             snapshots[0].click()
         } else {
-            tapl.workspace
+            val home = tapl.workspace
                 .switchToOverview()
-                .currentTask
+            ChangeDisplayOrientationRule.setRotation(rotation)
+            home.currentTask
                 .tapMenu()
                 .tapSplitMenuItem()
                 .currentTask

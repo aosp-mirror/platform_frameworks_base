@@ -27,7 +27,11 @@ import android.tools.device.traces.parsers.toFlickerComponent
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.wm.shell.flicker.utils.*
+import com.android.wm.shell.flicker.utils.SPLIT_SCREEN_DIVIDER_COMPONENT
+import com.android.wm.shell.flicker.utils.SplitScreenUtils
+import com.android.wm.shell.flicker.utils.appWindowIsVisibleAtEnd
+import com.android.wm.shell.flicker.utils.splitAppLayerBoundsIsVisibleAtEnd
+import com.android.wm.shell.flicker.utils.splitScreenDividerBecomesVisible
 import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.Test
@@ -63,11 +67,12 @@ class EnterSystemSplitTest(flicker: LegacyFlickerTest) :
                     .withHomeActivityVisible()
                     .waitForAndVerify()
             startDisplayBounds =
-                    wmHelper.currentState.layerState.physicalDisplayBounds ?:
-                    error("Display not found")
+                    wmHelper.currentState.layerState.physicalDisplayBounds
+                        ?: error("Display not found")
         }
         transitions {
-            SplitScreenUtils.enterSplit(wmHelper, tapl, device, testApp, secondaryApp)
+            SplitScreenUtils.enterSplit(wmHelper, tapl, device, testApp, secondaryApp,
+                flicker.scenario.startRotation)
             SplitScreenUtils.waitForSplitComplete(wmHelper, testApp, secondaryApp)
         }
     }
