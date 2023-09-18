@@ -104,7 +104,7 @@ public class SystemDataTransferRequestStore {
     }
 
     @NonNull
-    List<SystemDataTransferRequest> readRequestsByAssociationId(@UserIdInt int userId,
+    public List<SystemDataTransferRequest> readRequestsByAssociationId(@UserIdInt int userId,
             int associationId) {
         List<SystemDataTransferRequest> cachedRequests;
         synchronized (mLock) {

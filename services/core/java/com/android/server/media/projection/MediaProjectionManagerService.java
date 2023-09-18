@@ -956,6 +956,7 @@ public final class MediaProjectionManagerService extends SystemService
             if (callback == null) {
                 throw new IllegalArgumentException("callback must not be null");
             }
+            Slog.v(TAG, "Start the token instance " + this);
             // Cache result of calling into ActivityManagerService outside of the lock, to prevent
             // deadlock with WindowManagerService.
             final boolean hasFGS = mActivityManagerInternal.hasRunningForegroundService(
