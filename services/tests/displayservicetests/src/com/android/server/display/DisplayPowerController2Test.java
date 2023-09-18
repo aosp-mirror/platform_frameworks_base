@@ -43,6 +43,7 @@ import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
@@ -67,7 +68,9 @@ import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
 import com.android.server.display.brightness.BrightnessEvent;
+import com.android.server.display.brightness.clamper.HdrClamper;
 import com.android.server.display.color.ColorDisplayService;
+import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 import com.android.server.policy.WindowManagerPolicy;
@@ -1175,6 +1178,26 @@ public final class DisplayPowerController2Test {
         verify(mHolder.displayPowerState, times(1)).stop();
     }
 
+    @Test
+    public void testRampRateForHdrContent() {
+        float clampedBrightness = 0.6f;
+        float transitionRate = 35.5f;
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.hbmController.getHighBrightnessMode()).thenReturn(
+                BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR);
+        when(mHolder.hbmController.getHdrBrightnessValue()).thenReturn(PowerManager.BRIGHTNESS_MAX);
+        when(mHolder.hdrClamper.getMaxBrightness()).thenReturn(clampedBrightness);
+        when(mHolder.hdrClamper.getTransitionRate()).thenReturn(transitionRate);
+
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.animator, atLeastOnce()).animateTo(eq(clampedBrightness), anyFloat(),
+                eq(transitionRate));
+    }
+
     /**
      * Creates a mock and registers it to {@link LocalServices}.
      */
@@ -1270,12 +1293,16 @@ public final class DisplayPowerController2Test {
         final ScreenOffBrightnessSensorController screenOffBrightnessSensorController =
                 mock(ScreenOffBrightnessSensorController.class);
         final HighBrightnessModeController hbmController = mock(HighBrightnessModeController.class);
+        final HdrClamper hdrClamper = mock(HdrClamper.class);
+        final DeviceConfigParameterProvider deviceConfigParameterProvider =
+                mock(DeviceConfigParameterProvider.class);
 
         when(hbmController.getCurrentBrightnessMax()).thenReturn(PowerManager.BRIGHTNESS_MAX);
 
         TestInjector injector = spy(new TestInjector(displayPowerState, animator,
                 automaticBrightnessController, wakelockController, brightnessMappingStrategy,
-                hysteresisLevels, screenOffBrightnessSensorController, hbmController));
+                hysteresisLevels, screenOffBrightnessSensorController, hbmController, hdrClamper,
+                deviceConfigParameterProvider));
 
         final LogicalDisplay display = mock(LogicalDisplay.class);
         final DisplayDevice device = mock(DisplayDevice.class);
@@ -1293,7 +1320,7 @@ public final class DisplayPowerController2Test {
 
         return new DisplayPowerControllerHolder(dpc, display, displayPowerState, brightnessSetting,
                 animator, automaticBrightnessController, wakelockController,
-                screenOffBrightnessSensorController, hbmController, hbmMetadata,
+                screenOffBrightnessSensorController, hbmController, hdrClamper, hbmMetadata,
                 brightnessMappingStrategy, injector);
     }
 
@@ -1311,6 +1338,8 @@ public final class DisplayPowerController2Test {
         public final WakelockController wakelockController;
         public final ScreenOffBrightnessSensorController screenOffBrightnessSensorController;
         public final HighBrightnessModeController hbmController;
+
+        public final HdrClamper hdrClamper;
         public final HighBrightnessModeMetadata hbmMetadata;
         public final BrightnessMappingStrategy brightnessMappingStrategy;
         public final DisplayPowerController2.Injector injector;
@@ -1322,6 +1351,7 @@ public final class DisplayPowerController2Test {
                 WakelockController wakelockController,
                 ScreenOffBrightnessSensorController screenOffBrightnessSensorController,
                 HighBrightnessModeController hbmController,
+                HdrClamper hdrClamper,
                 HighBrightnessModeMetadata hbmMetadata,
                 BrightnessMappingStrategy brightnessMappingStrategy,
                 DisplayPowerController2.Injector injector) {
@@ -1334,6 +1364,7 @@ public final class DisplayPowerController2Test {
             this.wakelockController = wakelockController;
             this.screenOffBrightnessSensorController = screenOffBrightnessSensorController;
             this.hbmController = hbmController;
+            this.hdrClamper = hdrClamper;
             this.hbmMetadata = hbmMetadata;
             this.brightnessMappingStrategy = brightnessMappingStrategy;
             this.injector = injector;
@@ -1350,13 +1381,19 @@ public final class DisplayPowerController2Test {
         private final ScreenOffBrightnessSensorController mScreenOffBrightnessSensorController;
         private final HighBrightnessModeController mHighBrightnessModeController;
 
+        private final HdrClamper mHdrClamper;
+
+        private final DeviceConfigParameterProvider mDeviceConfigParameterProvider;
+
         TestInjector(DisplayPowerState dps, DualRampAnimator<DisplayPowerState> animator,
                 AutomaticBrightnessController automaticBrightnessController,
                 WakelockController wakelockController,
                 BrightnessMappingStrategy brightnessMappingStrategy,
                 HysteresisLevels hysteresisLevels,
                 ScreenOffBrightnessSensorController screenOffBrightnessSensorController,
-                HighBrightnessModeController highBrightnessModeController) {
+                HighBrightnessModeController highBrightnessModeController,
+                HdrClamper hdrClamper,
+                DeviceConfigParameterProvider deviceConfigParameterProvider) {
             mDisplayPowerState = dps;
             mAnimator = animator;
             mAutomaticBrightnessController = automaticBrightnessController;
@@ -1365,6 +1402,8 @@ public final class DisplayPowerController2Test {
             mHysteresisLevels = hysteresisLevels;
             mScreenOffBrightnessSensorController = screenOffBrightnessSensorController;
             mHighBrightnessModeController = highBrightnessModeController;
+            mHdrClamper = hdrClamper;
+            mDeviceConfigParameterProvider = deviceConfigParameterProvider;
         }
 
         @Override
@@ -1468,6 +1507,14 @@ public final class DisplayPowerController2Test {
                 Runnable hbmChangeCallback, HighBrightnessModeMetadata hbmMetadata,
                 Context context) {
             return mHighBrightnessModeController;
+        }
+
+        @Override
+        BrightnessRangeController getBrightnessRangeController(
+                HighBrightnessModeController hbmController, Runnable modeChangeCallback,
+                DisplayDeviceConfig displayDeviceConfig, Handler handler) {
+            return new BrightnessRangeController(hbmController, modeChangeCallback,
+                    displayDeviceConfig, mHdrClamper, mDeviceConfigParameterProvider);
         }
 
         @Override

@@ -539,8 +539,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 modeChangeCallback);
         mBrightnessThrottler = createBrightnessThrottlerLocked();
 
-        mBrightnessRangeController = new BrightnessRangeController(hbmController,
-                modeChangeCallback, mDisplayDeviceConfig);
+        mBrightnessRangeController = mInjector.getBrightnessRangeController(hbmController,
+                modeChangeCallback, mDisplayDeviceConfig, mHandler);
 
         mDisplayBrightnessController =
                 new DisplayBrightnessController(context, null,
@@ -1497,6 +1497,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             // allowed range.
             float animateValue = clampScreenBrightness(brightnessState);
 
+            // custom transition duration
+            float customTransitionRate = -1f;
+
             // If there are any HDR layers on the screen, we have a special brightness value that we
             // use instead. We still preserve the calculated brightness for Standard Dynamic Range
             // (SDR) layers, but the main brightness value will be the one for HDR.
@@ -1511,6 +1514,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 // We want to scale HDR brightness level with the SDR level, we also need to restore
                 // SDR brightness immediately when entering dim or low power mode.
                 animateValue = mBrightnessRangeController.getHdrBrightnessValue();
+                customTransitionRate = mBrightnessRangeController.getHdrTransitionRate();
             }
 
             final float currentBrightness = mPowerState.getScreenBrightness();
@@ -1523,6 +1527,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                         || !isDisplayContentVisible || brightnessIsTemporary) {
                     animateScreenBrightness(animateValue, sdrAnimateValue,
                             SCREEN_ANIMATION_RATE_MINIMUM);
+                } else if (customTransitionRate > 0) {
+                    animateScreenBrightness(animateValue, sdrAnimateValue,
+                            customTransitionRate);
                 } else {
                     boolean isIncreasing = animateValue > currentBrightness;
                     final float rampSpeed;
@@ -2966,6 +2973,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             return new HighBrightnessModeController(handler, width, height, displayToken,
                     displayUniqueId, brightnessMin, brightnessMax, hbmData, hdrBrightnessCfg,
                     hbmChangeCallback, hbmMetadata, context);
+        }
+
+        BrightnessRangeController getBrightnessRangeController(
+                HighBrightnessModeController hbmController, Runnable modeChangeCallback,
+                DisplayDeviceConfig displayDeviceConfig, Handler handler) {
+            return new BrightnessRangeController(hbmController,
+                    modeChangeCallback, displayDeviceConfig, handler);
         }
 
         DisplayWhiteBalanceController getDisplayWhiteBalanceController(Handler handler,
