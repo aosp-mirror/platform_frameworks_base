@@ -257,7 +257,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mInputMethodManager, emergencyButtonController, mMainExecutor, mResources,
                         mFalsingCollector, mKeyguardViewController,
-                        mFeatureFlags);
+                        mDevicePostureController, mFeatureFlags);
             } else if (keyguardInputView instanceof KeyguardPINView) {
                 ((KeyguardPINView) keyguardInputView).setIsLockScreenLandscapeEnabled(
                         mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE));

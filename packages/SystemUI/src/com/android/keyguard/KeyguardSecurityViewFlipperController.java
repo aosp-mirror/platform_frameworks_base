@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+
 import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 
 import android.util.Log;
@@ -156,7 +157,7 @@ public class KeyguardSecurityViewFlipperController
         switch (securityMode) {
             case Pattern: return R.layout.keyguard_pattern_view;
             case PIN: return R.layout.keyguard_pin_motion_layout;
-            case Password: return R.layout.keyguard_password_view;
+            case Password: return R.layout.keyguard_password_motion_layout;
             case SimPin: return R.layout.keyguard_sim_pin_view;
             case SimPuk: return R.layout.keyguard_sim_puk_view;
             default:
