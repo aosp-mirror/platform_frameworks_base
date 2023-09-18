@@ -52,6 +52,8 @@ import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createSplitScreenTask
+import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
@@ -94,6 +96,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             ToggleResizeDesktopTaskTransitionHandler
     @Mock lateinit var launchAdjacentController: LaunchAdjacentController
     @Mock lateinit var desktopModeWindowDecoration: DesktopModeWindowDecoration
+    @Mock lateinit var splitScreenController: SplitScreenController
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var controller: DesktopTasksController
@@ -116,6 +119,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
 
         controller = createController()
+        controller.splitScreenController = splitScreenController
 
         shellInit.init()
     }
@@ -338,6 +342,30 @@ class DesktopTasksControllerTest : ShellTestCase() {
             assertThat(hierarchyOps.map { it.container })
                 .doesNotContain(freeformTaskSecond.token.asBinder())
         }
+    }
+
+    @Test
+    fun moveToDesktop_splitTaskExitsSplit() {
+        var task = setUpSplitScreenTask()
+        controller.moveToDesktop(desktopModeWindowDecoration, task)
+        val wct = getLatestMoveToDesktopWct()
+        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
+        verify(splitScreenController).prepareExitSplitScreen(any(), anyInt(),
+            eq(SplitScreenController.EXIT_REASON_ENTER_DESKTOP)
+        )
+    }
+
+    @Test
+    fun moveToDesktop_fullscreenTaskDoesNotExitSplit() {
+        var task = setUpFullscreenTask()
+        controller.moveToDesktop(desktopModeWindowDecoration, task)
+        val wct = getLatestMoveToDesktopWct()
+        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
+        verify(splitScreenController, never()).prepareExitSplitScreen(any(), anyInt(),
+            eq(SplitScreenController.EXIT_REASON_ENTER_DESKTOP)
+        )
     }
 
     @Test
@@ -690,6 +718,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     private fun setUpFullscreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createFullscreenTask(displayId)
+        whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
+        runningTasks.add(task)
+        return task
+    }
+
+    private fun setUpSplitScreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
+        val task = createSplitScreenTask(displayId)
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         runningTasks.add(task)
         return task
