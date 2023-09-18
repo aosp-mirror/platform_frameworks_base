@@ -83,6 +83,11 @@ final class ContentRecorder implements WindowContainerListener {
     @Nullable private Rect mLastRecordedBounds = null;
 
     /**
+     * The last size of the surface mirrored out to.
+     */
+    @Nullable private Point mLastConsumingSurfaceSize = new Point(0, 0);
+
+    /**
      * The last configuration orientation.
      */
     @Configuration.Orientation
@@ -177,15 +182,17 @@ final class ContentRecorder implements WindowContainerListener {
         final Rect recordedContentBounds = mRecordedWindowContainer.getBounds();
         @Configuration.Orientation int recordedContentOrientation =
                 mRecordedWindowContainer.getConfiguration().orientation;
+        final Point surfaceSize = fetchSurfaceSizeIfPresent();
         if (!mLastRecordedBounds.equals(recordedContentBounds)
-                || lastOrientation != recordedContentOrientation) {
-            Point surfaceSize = fetchSurfaceSizeIfPresent();
+                || lastOrientation != recordedContentOrientation
+                || !mLastConsumingSurfaceSize.equals(surfaceSize)) {
             if (surfaceSize != null) {
                 ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                         "Content Recording: Going ahead with updating recording for display "
-                                + "%d to new bounds %s and/or orientation %d.",
+                                + "%d to new bounds %s and/or orientation %d and/or surface "
+                                + "size %s",
                         mDisplayContent.getDisplayId(), recordedContentBounds,
-                        recordedContentOrientation);
+                        recordedContentOrientation, surfaceSize);
                 updateMirroredSurface(mRecordedWindowContainer.getSyncTransaction(),
                         recordedContentBounds, surfaceSize);
             } else {
@@ -193,10 +200,10 @@ final class ContentRecorder implements WindowContainerListener {
                 // (the display will be off if the surface is removed).
                 ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                         "Content Recording: Unable to update recording for display %d to new "
-                                + "bounds %s and/or orientation %d, since the surface is not "
-                                + "available.",
+                                + "bounds %s and/or orientation %d and/or surface size %s, "
+                                + "since the surface is not available.",
                         mDisplayContent.getDisplayId(), recordedContentBounds,
-                        recordedContentOrientation);
+                        recordedContentOrientation, surfaceSize);
             }
         }
     }
@@ -500,10 +507,13 @@ final class ContentRecorder implements WindowContainerListener {
         }
 
         ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                "Content Recording: Apply transformations of shift %d x %d, scale %f, crop %d x "
-                        + "%d for display %d",
+                "Content Recording: Apply transformations of shift %d x %d, scale %f, crop (aka "
+                        + "recorded content size) %d x %d for display %d; display has size %d x "
+                        + "%d; surface has size %d x %d",
                 shiftedX, shiftedY, scale, recordedContentBounds.width(),
-                recordedContentBounds.height(), mDisplayContent.getDisplayId());
+                recordedContentBounds.height(), mDisplayContent.getDisplayId(),
+                mDisplayContent.getConfiguration().screenWidthDp,
+                mDisplayContent.getConfiguration().screenHeightDp, surfaceSize.x, surfaceSize.y);
 
         transaction
                 // Crop the area to capture to exclude the 'extra' wallpaper that is used
@@ -517,6 +527,8 @@ final class ContentRecorder implements WindowContainerListener {
                 // the content will no longer be centered in the output surface.
                 .setPosition(mRecordedSurface, shiftedX /* x */, shiftedY /* y */);
         mLastRecordedBounds = new Rect(recordedContentBounds);
+        mLastConsumingSurfaceSize.x = surfaceSize.x;
+        mLastConsumingSurfaceSize.y = surfaceSize.y;
         // Request to notify the client about the resize.
         mMediaProjectionManager.notifyActiveProjectionCapturedContentResized(
                 mLastRecordedBounds.width(), mLastRecordedBounds.height());
@@ -525,6 +537,7 @@ final class ContentRecorder implements WindowContainerListener {
     /**
      * Returns a non-null {@link Point} if the surface is present, or null otherwise
      */
+    @Nullable
     private Point fetchSurfaceSizeIfPresent() {
         // Retrieve the default size of the surface the app provided to
         // MediaProjection#createVirtualDisplay. Note the app is the consumer of the surface,
