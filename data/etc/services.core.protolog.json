@@ -2407,6 +2407,12 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "61363198": {
+      "message": "Auto-PIP allowed, requesting PIP mode via requestStartTransition(): %s, willAutoPip: %b",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
     "74885950": {
       "message": "Waiting for top state to be released by %s",
       "level": "VERBOSE",
@@ -2418,12 +2424,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
-    },
-    "90764070": {
-      "message": "Could not report token removal to the window token client.",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowContextListenerController.java"
     },
     "95216706": {
       "message": "hideIme target: %s ",
@@ -4350,12 +4350,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
-    },
-    "1948483534": {
-      "message": "Could not report config changes to the window token client.",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowContextListenerController.java"
     },
     "1964565370": {
       "message": "Starting remote animation",

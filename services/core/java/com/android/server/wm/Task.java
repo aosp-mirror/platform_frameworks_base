@@ -5102,7 +5102,6 @@ class Task extends TaskFragment {
 
     void startActivityLocked(ActivityRecord r, @Nullable Task topTask, boolean newTask,
             boolean isTaskSwitch, ActivityOptions options, @Nullable ActivityRecord sourceRecord) {
-        final ActivityRecord pipCandidate = findEnterPipOnTaskSwitchCandidate(topTask);
         Task rTask = r.getTask();
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
         final boolean isOrhasTask = rTask == this || hasChild(rTask);
@@ -5166,8 +5165,10 @@ class Task extends TaskFragment {
             // supporting picture-in-picture while pausing only if the starting activity
             // would not be considered an overlay on top of the current activity
             // (eg. not fullscreen, or the assistant)
-            enableEnterPipOnTaskSwitch(pipCandidate,
-                    null /* toFrontTask */, r, options);
+            if (!ActivityTaskManagerService.isPip2ExperimentEnabled()) {
+                final ActivityRecord pipCandidate = findEnterPipOnTaskSwitchCandidate(topTask);
+                enableEnterPipOnTaskSwitch(pipCandidate, null /* toFrontTask */, r, options);
+            }
         }
         boolean doShow = true;
         if (newTask) {
@@ -5240,7 +5241,7 @@ class Task extends TaskFragment {
      * enter PiP while it is pausing (if supported). Only one of {@param toFrontTask} or
      * {@param toFrontActivity} should be set.
      */
-    private static void enableEnterPipOnTaskSwitch(@Nullable ActivityRecord pipCandidate,
+    static void enableEnterPipOnTaskSwitch(@Nullable ActivityRecord pipCandidate,
             @Nullable Task toFrontTask, @Nullable ActivityRecord toFrontActivity,
             @Nullable ActivityOptions opts) {
         if (pipCandidate == null) {
