@@ -307,6 +307,46 @@ public class PackageArchiver {
         mPm.mHandler.post(() -> unarchiveInternal(packageName, userHandle, installerPackage));
     }
 
+    /**
+     * Returns the icon of an archived app. This is the icon of the main activity of the app.
+     *
+     * <p> The icon is returned without any treatment/overlay. In the rare case the app had multiple
+     * launcher activities, only one of the icons is returned arbitrarily.
+     */
+    public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(user);
+
+        Computer snapshot = mPm.snapshotComputer();
+        int callingUid = Binder.getCallingUid();
+        int userId = user.getIdentifier();
+        PackageStateInternal ps;
+        try {
+            ps = getPackageState(packageName, snapshot, callingUid, userId);
+            snapshot.enforceCrossUserPermission(callingUid, userId, true, false,
+                    "getArchivedAppIcon");
+            verifyArchived(ps, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new ParcelableException(e);
+        }
+
+        List<ArchiveActivityInfo> activityInfos = ps.getUserStateOrDefault(
+                userId).getArchiveState().getActivityInfos();
+        if (activityInfos.size() == 0) {
+            return null;
+        }
+
+        // TODO(b/298452477) Handle monochrome icons.
+        // In the rare case the archived app defined more than two launcher activities, we choose
+        // the first one arbitrarily.
+        return decodeIcon(activityInfos.get(0));
+    }
+
+    @VisibleForTesting
+    Bitmap decodeIcon(ArchiveActivityInfo archiveActivityInfo) {
+        return BitmapFactory.decodeFile(archiveActivityInfo.getIconBitmap().toString());
+    }
+
     private void verifyArchived(PackageStateInternal ps, int userId)
             throws PackageManager.NameNotFoundException {
         PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
