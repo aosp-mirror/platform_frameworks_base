@@ -25,7 +25,7 @@ constructor(
             shadeExpansionCollectorJob =
                 scope.launch {
                     // wait for it to emit true once
-                    shadeInteractorLazy.get().anyExpanding.first { it }
+                    shadeInteractorLazy.get().isAnyExpanding.first { it }
                     onShadeInteraction.run()
                 }
             shadeExpansionCollectorJob?.invokeOnCompletion { shadeExpansionCollectorJob = null }
