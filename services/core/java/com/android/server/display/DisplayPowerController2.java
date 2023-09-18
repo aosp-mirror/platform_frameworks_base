@@ -77,6 +77,7 @@ import com.android.server.display.brightness.clamper.BrightnessClamperController
 import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.state.DisplayStateController;
 import com.android.server.display.utils.SensorUtils;
@@ -472,7 +473,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             SensorManager sensorManager, DisplayBlanker blanker, LogicalDisplay logicalDisplay,
             BrightnessTracker brightnessTracker, BrightnessSetting brightnessSetting,
             Runnable onBrightnessChangeRunnable, HighBrightnessModeMetadata hbmMetadata,
-            boolean bootCompleted) {
+            boolean bootCompleted, DisplayManagerFlags flags) {
 
         mInjector = injector != null ? injector : new Injector();
         mClock = mInjector.getClock();
@@ -540,7 +541,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mBrightnessThrottler = createBrightnessThrottlerLocked();
 
         mBrightnessRangeController = mInjector.getBrightnessRangeController(hbmController,
-                modeChangeCallback, mDisplayDeviceConfig, mHandler);
+                modeChangeCallback, mDisplayDeviceConfig, mHandler, flags);
 
         mDisplayBrightnessController =
                 new DisplayBrightnessController(context, null,
@@ -2977,9 +2978,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         BrightnessRangeController getBrightnessRangeController(
                 HighBrightnessModeController hbmController, Runnable modeChangeCallback,
-                DisplayDeviceConfig displayDeviceConfig, Handler handler) {
+                DisplayDeviceConfig displayDeviceConfig, Handler handler,
+                DisplayManagerFlags flags) {
             return new BrightnessRangeController(hbmController,
-                    modeChangeCallback, displayDeviceConfig, handler);
+                    modeChangeCallback, displayDeviceConfig, handler, flags);
         }
 
         DisplayWhiteBalanceController getDisplayWhiteBalanceController(Handler handler,
