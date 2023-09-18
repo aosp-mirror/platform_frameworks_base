@@ -4444,7 +4444,7 @@ public class NotificationManagerService extends SystemService {
                     // Remove background token before returning notification to untrusted app, this
                     // ensures the app isn't able to perform background operations that are
                     // associated with notification interactions.
-                    notification.setAllowlistToken(null);
+                    notification.clearAllowlistToken();
                     return new StatusBarNotification(
                             sbn.getPackageName(),
                             sbn.getOpPkg(),
