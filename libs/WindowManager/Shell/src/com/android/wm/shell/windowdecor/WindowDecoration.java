@@ -194,13 +194,16 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         rootView = null; // Clear it just in case we use it accidentally
 
         final int oldDensityDpi = mWindowDecorConfig.densityDpi;
+        final int oldNightMode = mWindowDecorConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
         mWindowDecorConfig = params.mWindowDecorConfig != null ? params.mWindowDecorConfig
                 : mTaskInfo.getConfiguration();
         final int newDensityDpi = mWindowDecorConfig.densityDpi;
+        final int newNightMode =  mWindowDecorConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
         if (oldDensityDpi != newDensityDpi
                 || mDisplay == null
                 || mDisplay.getDisplayId() != mTaskInfo.displayId
-                || oldLayoutResId != mLayoutResId) {
+                || oldLayoutResId != mLayoutResId
+                || oldNightMode != newNightMode) {
             releaseViews();
 
             if (!obtainDisplayOrRegisterListener()) {
@@ -208,6 +211,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 return;
             }
             mDecorWindowContext = mContext.createConfigurationContext(mWindowDecorConfig);
+            mDecorWindowContext.setTheme(mContext.getThemeResId());
             if (params.mLayoutResId != 0) {
                 outResult.mRootView = (T) LayoutInflater.from(mDecorWindowContext)
                         .inflate(params.mLayoutResId, null);
