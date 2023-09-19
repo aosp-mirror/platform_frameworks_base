@@ -34,6 +34,7 @@
         android:id="@+id/pin_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:maxWidth="@dimen/keyguard_security_width"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:layoutDirection="ltr"

@@ -158,7 +158,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
         if (mIsLockScreenLandscapeEnabled) {
             boolean useSplitBouncerAfterFold =
                     mLastDevicePosture == DEVICE_POSTURE_CLOSED
-                    && getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE;
+                    && getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE
+                    && getResources().getBoolean(R.bool.update_bouncer_constraints);
 
             if (mAlreadyUsingSplitBouncer != useSplitBouncerAfterFold) {
                 updateConstraints(useSplitBouncerAfterFold);
@@ -170,20 +171,14 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
     @Override
     protected void updateConstraints(boolean useSplitBouncer) {
         mAlreadyUsingSplitBouncer = useSplitBouncer;
-        KeyguardSecurityViewFlipper.LayoutParams params =
-                (KeyguardSecurityViewFlipper.LayoutParams) getLayoutParams();
-
         if (useSplitBouncer) {
-            if (mContainerMotionLayout == null) return;
             mContainerMotionLayout.jumpToState(R.id.split_constraints);
-            params.maxWidth = Integer.MAX_VALUE;
+            mContainerMotionLayout.setMaxWidth(Integer.MAX_VALUE);
         } else {
             mContainerMotionLayout.jumpToState(R.id.single_constraints);
-            params.maxWidth = getResources()
-                    .getDimensionPixelSize(R.dimen.keyguard_security_width);
+            mContainerMotionLayout.setMaxWidth(getResources()
+                    .getDimensionPixelSize(R.dimen.keyguard_security_width));
         }
-
-        setLayoutParams(params);
     }
 
     @Override

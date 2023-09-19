@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
+
 import android.view.View;
 
 import com.android.internal.util.LatencyTracker;
@@ -61,6 +63,7 @@ public class KeyguardPinViewController
         mPostureController = postureController;
         mLockPatternUtils = lockPatternUtils;
         mFeatureFlags = featureFlags;
+        view.setIsLockScreenLandscapeEnabled(mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE));
         mBackspaceKey = view.findViewById(R.id.delete_button);
         mPinLength = mLockPatternUtils.getPinLength(KeyguardUpdateMonitor.getCurrentUser());
     }

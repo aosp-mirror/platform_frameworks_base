@@ -123,7 +123,6 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     private fun constructPinViewController(
         mKeyguardPinView: KeyguardPINView
     ): KeyguardPinViewController {
-        mKeyguardPinView.setIsLockScreenLandscapeEnabled(false)
         return KeyguardPinViewController(
             mKeyguardPinView,
             keyguardUpdateMonitor,
