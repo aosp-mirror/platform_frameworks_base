@@ -9841,7 +9841,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.initialCapsMode = ic.getCursorCapsMode(getInputType());
                 outAttrs.setInitialSurroundingText(mText);
                 outAttrs.contentMimeTypes = getReceiveContentMimeTypes();
-
+                if (android.view.inputmethod.Flags.editorinfoHandwritingEnabled()
+                        && isAutoHandwritingEnabled()) {
+                    outAttrs.setStylusHandwritingEnabled(true);
+                }
                 ArrayList<Class<? extends HandwritingGesture>> gestures = new ArrayList<>();
                 gestures.add(SelectGesture.class);
                 gestures.add(SelectRangeGesture.class);
