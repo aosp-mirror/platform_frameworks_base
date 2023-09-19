@@ -269,8 +269,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     boolean isScreenFullyOff();
 
-    void showScreenPinningRequest(int taskId, boolean allowCancel);
-
     @Nullable
     Intent getEmergencyActionIntent();
 

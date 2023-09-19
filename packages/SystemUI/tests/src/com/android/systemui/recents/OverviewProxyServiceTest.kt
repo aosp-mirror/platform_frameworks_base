@@ -96,6 +96,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     @Mock private lateinit var navBarController: NavigationBarController
     @Mock private lateinit var centralSurfaces: CentralSurfaces
     @Mock private lateinit var shadeViewController: ShadeViewController
+    @Mock private lateinit var screenPinningRequest: ScreenPinningRequest
     @Mock private lateinit var navModeController: NavigationModeController
     @Mock private lateinit var statusBarWinController: NotificationShadeWindowController
     @Mock private lateinit var userTracker: UserTracker
@@ -136,6 +137,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
                 { navBarController },
                 { Optional.of(centralSurfaces) },
                 { shadeViewController },
+                screenPinningRequest,
                 navModeController,
                 statusBarWinController,
                 sysUiState,
