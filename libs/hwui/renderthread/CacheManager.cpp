@@ -169,7 +169,8 @@ void CacheManager::trimStaleResources() {
         return;
     }
     mGrContext->flushAndSubmit();
-    mGrContext->purgeResourcesNotUsedInMs(std::chrono::seconds(30));
+    mGrContext->performDeferredCleanup(std::chrono::seconds(30),
+                                       GrPurgeResourceOptions::kAllResources);
 }
 
 void CacheManager::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {
