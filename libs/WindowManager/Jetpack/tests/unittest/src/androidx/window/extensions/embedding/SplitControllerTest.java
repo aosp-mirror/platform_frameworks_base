@@ -551,13 +551,12 @@ public class SplitControllerTest {
     }
 
     @Test
-    public void testResolveStartActivityIntent_skipIfPinned() {
+    public void testResolveStartActivityIntent_skipIfIsolatedNavEnabled() {
         final TaskFragmentContainer container = createMockTaskFragmentContainer(mActivity);
-        final TaskContainer taskContainer = container.getTaskContainer();
-        spyOn(taskContainer);
+        container.setIsolatedNavigationEnabled(true);
+
         final Intent intent = new Intent();
         setupSplitRule(mActivity, intent);
-        doReturn(true).when(taskContainer).isTaskFragmentContainerPinned(container);
         assertNull(mSplitController.resolveStartActivityIntent(mTransaction, TASK_ID, intent,
                 mActivity));
     }

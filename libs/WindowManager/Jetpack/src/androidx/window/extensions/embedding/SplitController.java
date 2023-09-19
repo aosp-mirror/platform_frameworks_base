@@ -292,8 +292,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // Resets the isolated navigation and updates the container.
             final TransactionRecord transactionRecord = mTransactionManager.startNewTransaction();
             final WindowContainerTransaction wct = transactionRecord.getTransaction();
-            mPresenter.setTaskFragmentIsolatedNavigation(wct,
-                    containerToUnpin.getTaskFragmentToken(), false /* isolated */);
+            mPresenter.setTaskFragmentIsolatedNavigation(wct, containerToUnpin,
+                    false /* isolated */);
             updateContainer(wct, containerToUnpin);
             transactionRecord.apply(false /* shouldApplyIndependently */);
             updateCallbackIfNecessary();
@@ -880,14 +880,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return true;
         }
 
-        // Skip resolving if the activity is on a pinned TaskFragmentContainer.
-        // TODO(b/243518738): skip resolving for overlay container.
-        final TaskContainer taskContainer = container != null ? container.getTaskContainer() : null;
-        if (container != null && taskContainer != null
-                && taskContainer.isTaskFragmentContainerPinned(container)) {
+        // Skip resolving if the activity is on an isolated navigated TaskFragmentContainer.
+        if (container != null && container.isIsolatedNavigationEnabled()) {
             return true;
         }
 
+        final TaskContainer taskContainer = container != null ? container.getTaskContainer() : null;
         if (!isOnReparent && taskContainer != null
                 && taskContainer.getTopNonFinishingTaskFragmentContainer(false /* includePin */)
                         != container) {
@@ -1312,15 +1310,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     TaskFragmentContainer resolveStartActivityIntent(@NonNull WindowContainerTransaction wct,
             int taskId, @NonNull Intent intent, @Nullable Activity launchingActivity) {
-        // Skip resolving if started from pinned TaskFragmentContainer.
-        // TODO(b/243518738): skip resolving for overlay container.
+        // Skip resolving if started from an isolated navigated TaskFragmentContainer.
         if (launchingActivity != null) {
             final TaskFragmentContainer taskFragmentContainer = getContainerWithActivity(
                     launchingActivity);
-            final TaskContainer taskContainer =
-                    taskFragmentContainer != null ? taskFragmentContainer.getTaskContainer() : null;
-            if (taskContainer != null && taskContainer.isTaskFragmentContainerPinned(
-                    taskFragmentContainer)) {
+            if (taskFragmentContainer != null
+                    && taskFragmentContainer.isIsolatedNavigationEnabled()) {
                 return null;
             }
         }

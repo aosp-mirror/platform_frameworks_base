@@ -160,6 +160,9 @@ class TaskFragmentContainer {
      */
     private boolean mHasCrossProcessActivities;
 
+    /** Whether this TaskFragment enable isolated navigation. */
+    private boolean mIsIsolatedNavigationEnabled;
+
     /**
      * @see #TaskFragmentContainer(Activity, Intent, TaskContainer, SplitController,
      * TaskFragmentContainer, String)
@@ -803,6 +806,16 @@ class TaskFragmentContainer {
      */
     void setLastCompanionTaskFragment(@Nullable IBinder fragmentToken) {
         mLastCompanionTaskFragment = fragmentToken;
+    }
+
+    /** Returns whether to enable isolated navigation or not. */
+    boolean isIsolatedNavigationEnabled() {
+        return mIsIsolatedNavigationEnabled;
+    }
+
+    /** Sets whether to enable isolated navigation or not. */
+    void setIsolatedNavigationEnabled(boolean isolatedNavigationEnabled) {
+        mIsIsolatedNavigationEnabled = isolatedNavigationEnabled;
     }
 
     /**
