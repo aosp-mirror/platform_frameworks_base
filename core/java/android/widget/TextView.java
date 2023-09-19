@@ -103,6 +103,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.BoringLayout;
+import android.text.ClientFlags;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.GetChars;
@@ -1634,7 +1635,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (CompatChanges.isChangeEnabled(USE_BOUNDS_FOR_WIDTH)) {
-            mUseBoundsForWidth = false;  // TODO: Connect to the flag.
+            mUseBoundsForWidth = ClientFlags.useBoundsForWidth();
         } else {
             mUseBoundsForWidth = false;
         }
