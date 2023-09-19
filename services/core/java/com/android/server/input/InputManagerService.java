@@ -95,6 +95,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
@@ -680,6 +681,12 @@ public class InputManagerService extends IInputManager.Stub
             return KEYCODE_UNKNOWN;
         }
         return mNative.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
+    }
+
+    @Override // Binder call
+    public KeyCharacterMap getKeyCharacterMap(@NonNull String layoutDescriptor) {
+        Objects.requireNonNull(layoutDescriptor, "layoutDescriptor must not be null");
+        return mKeyboardLayoutManager.getKeyCharacterMap(layoutDescriptor);
     }
 
     /**

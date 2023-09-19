@@ -240,6 +240,36 @@ static jboolean nativeEquals(JNIEnv* env, jobject clazz, jlong ptr1, jlong ptr2)
     return static_cast<jboolean>(*map1 == *map2);
 }
 
+static void nativeApplyOverlay(JNIEnv* env, jobject clazz, jlong ptr, jstring nameObj,
+        jstring overlayObj) {
+    NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
+    if (!map || !map->getMap()) {
+        return;
+    }
+    ScopedUtfChars nameChars(env, nameObj);
+    ScopedUtfChars overlayChars(env, overlayObj);
+    base::Result<std::shared_ptr<KeyCharacterMap>> ret =
+            KeyCharacterMap::loadContents(nameChars.c_str(), overlayChars.c_str(),
+                                          KeyCharacterMap::Format::OVERLAY);
+    if (ret.ok()) {
+        std::shared_ptr<KeyCharacterMap> overlay = *ret;
+        map->getMap()->combine(*overlay);
+    }
+}
+
+static jint nativeGetMappedKey(JNIEnv* env, jobject clazz, jlong ptr, jint scanCode) {
+    NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
+    if (!map || !map->getMap()) {
+        return 0;
+    }
+    int32_t outKeyCode;
+    status_t mapKeyRes = map->getMap()->mapKey(scanCode, /*usageCode=*/0, &outKeyCode);
+    if (mapKeyRes != OK) {
+        return 0;
+    }
+    return static_cast<jint>(outKeyCode);
+}
+
 /*
  * JNI registration.
  */
@@ -260,7 +290,9 @@ static const JNINativeMethod g_methods[] = {
         {"nativeObtainEmptyKeyCharacterMap", "(I)Landroid/view/KeyCharacterMap;",
          (void*)nativeObtainEmptyKeyCharacterMap},
         {"nativeEquals", "(JJ)Z", (void*)nativeEquals},
-};
+        {"nativeApplyOverlay", "(JLjava/lang/String;Ljava/lang/String;)V",
+         (void*)nativeApplyOverlay},
+        {"nativeGetMappedKey", "(JI)I", (void*)nativeGetMappedKey}};
 
 int register_android_view_KeyCharacterMap(JNIEnv* env)
 {

@@ -16,6 +16,8 @@
 
 package android.hardware.input;
 
+import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
+
 import android.Manifest;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -31,6 +33,7 @@ import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.hardware.BatteryState;
 import android.os.Build;
 import android.os.Handler;
@@ -928,6 +931,31 @@ public final class InputManager {
      */
     public int getKeyCodeForKeyLocation(int deviceId, int locationKeyCode) {
         return mGlobal.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
+    }
+
+    /**
+     * Provides a Keyboard layout preview of a particular dimension.
+     *
+     * @param keyboardLayout Layout whose preview is requested. If null, will return preview of
+     *                       the default Keyboard layout defined by {@code Generic.kl}.
+     * @param width Expected width of the drawable
+     * @param height Expected height of the drawable
+     *
+     * NOTE: Width and height will auto-adjust to the width and height of the ImageView that
+     * shows the drawable but this allows the caller to provide an intrinsic width and height of
+     * the drawable allowing the ImageView to properly wrap the drawable content.
+     *
+     * @hide
+     */
+    @Nullable
+    public Drawable getKeyboardLayoutPreview(@Nullable KeyboardLayout keyboardLayout, int width,
+            int height) {
+        if (!keyboardLayoutPreviewFlag()) {
+            return null;
+        }
+        PhysicalKeyLayout keyLayout = new PhysicalKeyLayout(
+                mGlobal.getKeyCharacterMap(keyboardLayout), keyboardLayout);
+        return new KeyboardLayoutPreviewDrawable(mContext, keyLayout, width, height);
     }
 
     /**
