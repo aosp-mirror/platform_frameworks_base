@@ -581,7 +581,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             final TransitionUtil.LeafTaskFilter leafTaskFilter =
                     new TransitionUtil.LeafTaskFilter();
             boolean hasTaskChange = false;
-            for (int i = 0; i < info.getChanges().size(); ++i) {
+            // Walk backwards so that higher z-order changes are recorded *last* in the assorted
+            // task lists. This way, when the are added, the on-top tasks are drawn on top.
+            for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
                 if (taskInfo != null
