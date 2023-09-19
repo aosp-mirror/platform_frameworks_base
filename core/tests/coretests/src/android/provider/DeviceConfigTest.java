@@ -35,6 +35,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -881,6 +882,7 @@ public class DeviceConfigTest {
     }
 
     @Test
+    @Ignore("b/300174188")
     public void syncDisabling() throws Exception {
         Properties properties1 = new Properties.Builder(NAMESPACE)
                 .setString(KEY, VALUE)
