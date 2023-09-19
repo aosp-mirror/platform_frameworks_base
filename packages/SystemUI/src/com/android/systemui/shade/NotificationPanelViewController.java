@@ -1404,13 +1404,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         updateViewControllers(userAvatarView, keyguardUserSwitcherView);
 
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW) && !mFeatureFlags.isEnabled(
-                Flags.LAZY_INFLATE_KEYGUARD)) {
-            attachSplitShadeMediaPlayerContainer(
-                    mKeyguardViewConfigurator.getKeyguardRootView()
-                        .findViewById(R.id.status_view_media_container));
-        }
-
         if (!mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
             // Update keyguard bottom area
             int index = mView.indexOfChild(mKeyguardBottomArea);
