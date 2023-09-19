@@ -14,7 +14,6 @@
 
 package com.android.systemui.qs.tileimpl;
 
-import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
@@ -22,19 +21,17 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.qs.QSFactory;
-import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.util.leak.GarbageMonitor;
+
+import dagger.Lazy;
 
 import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import dagger.Lazy;
 
 /**
  * A factory that creates Quick Settings tiles based on a tileSpec
@@ -95,11 +92,5 @@ public class QSFactoryImpl implements QSFactory {
         // Broken tiles.
         Log.w(TAG, "No stock tile spec: " + tileSpec);
         return null;
-    }
-
-    @Override
-    public QSTileView createTileView(Context context, QSTile tile, boolean collapsedView) {
-        QSIconView icon = tile.createTileView(context);
-        return new QSTileViewImpl(context, icon, collapsedView);
     }
 }

@@ -58,7 +58,6 @@ import java.util.Objects
 private const val TAG = "QSTileViewImpl"
 open class QSTileViewImpl @JvmOverloads constructor(
     context: Context,
-    private val _icon: QSIconView,
     private val collapsed: Boolean = false
 ) : QSTileView(context), HeightOverrideable, LaunchableView {
 
@@ -73,10 +72,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
         internal const val TILE_STATE_RES_PREFIX = "tile_states_"
     }
 
-    private var _position: Int = INVALID
+    private val icon: QSIconViewImpl = QSIconViewImpl(context)
+    private var position: Int = INVALID
 
     override fun setPosition(position: Int) {
-        _position = position
+        this.position = position
     }
 
     override var heightOverride: Int = HeightOverrideable.NO_OVERRIDE
@@ -173,7 +173,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
         setPaddingRelative(startPadding, padding, padding, padding)
 
         val iconSize = resources.getDimensionPixelSize(R.dimen.qs_icon_size)
-        addView(_icon, LayoutParams(iconSize, iconSize))
+        addView(icon, LayoutParams(iconSize, iconSize))
 
         createAndAddLabels()
         createAndAddSideView()
@@ -204,7 +204,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
         FontSizeUtils.updateFontSize(secondaryLabel, R.dimen.qs_tile_text_size)
 
         val iconSize = context.resources.getDimensionPixelSize(R.dimen.qs_icon_size)
-        _icon.layoutParams.apply {
+        icon.layoutParams.apply {
             height = iconSize
             width = iconSize
         }
@@ -291,7 +291,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     override fun getIcon(): QSIconView {
-        return _icon
+        return icon
     }
 
     override fun getIconWithBackground(): View {
@@ -425,16 +425,16 @@ open class QSTileViewImpl @JvmOverloads constructor(
                 }
             }
         }
-        if (_position != INVALID) {
+        if (position != INVALID) {
             info.collectionItemInfo =
-                AccessibilityNodeInfo.CollectionItemInfo(_position, 1, 0, 1, false)
+                AccessibilityNodeInfo.CollectionItemInfo(position, 1, 0, 1, false)
         }
     }
 
     override fun toString(): String {
         val sb = StringBuilder(javaClass.simpleName).append('[')
         sb.append("locInScreen=(${locInScreen[0]}, ${locInScreen[1]})")
-        sb.append(", iconView=$_icon")
+        sb.append(", iconView=$icon")
         sb.append(", tileState=$tileState")
         sb.append("]")
         return sb.toString()

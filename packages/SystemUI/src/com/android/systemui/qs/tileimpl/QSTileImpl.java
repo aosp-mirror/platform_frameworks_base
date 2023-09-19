@@ -60,7 +60,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -259,16 +258,6 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     public QSHost getHost() {
         return mHost;
-    }
-
-    /**
-     * Return the {@link QSIconView} to be used by this tile's view.
-     *
-     * @param context view context for the view
-     * @return icon view for this tile
-     */
-    public QSIconView createTileView(Context context) {
-        return new QSIconViewImpl(context);
     }
 
     /**

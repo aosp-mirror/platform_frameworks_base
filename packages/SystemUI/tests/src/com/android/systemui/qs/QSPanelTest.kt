@@ -32,7 +32,6 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord
 import com.android.systemui.qs.logging.QSLogger
-import com.android.systemui.qs.tileimpl.QSIconViewImpl
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -112,7 +111,7 @@ class QSPanelTest : SysuiTestCase() {
         qsPanel.tileLayout?.addTile(
                 QSPanelControllerBase.TileRecord(
                     mock(QSTile::class.java),
-                    QSTileViewImpl(themedContext, QSIconViewImpl(themedContext))
+                    QSTileViewImpl(themedContext)
                 )
             )
 
@@ -142,7 +141,7 @@ class QSPanelTest : SysuiTestCase() {
         qsPanel.tileLayout?.addTile(
             QSPanelControllerBase.TileRecord(
                 mock(QSTile::class.java),
-                QSTileViewImpl(themedContext, QSIconViewImpl(themedContext))
+                QSTileViewImpl(themedContext)
             )
         )
 

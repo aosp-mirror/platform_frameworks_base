@@ -873,12 +873,6 @@
          is displayed in the upper left corner. -->
     <dimen name="roaming_icon_start_padding">2sp</dimen>
 
-    <!-- Extra padding between the mobile data type icon and the strength indicator when the data
-         type icon is wide for the tile in quick settings. -->
-    <dimen name="wide_type_icon_start_padding_qs">3dp</dimen>
-
-    <dimen name="signal_indicator_to_icon_frame_spacing">3dp</dimen>
-
     <!-- Starting margin before the signal cluster -->
 
     <!-- Padding between signal cluster and battery icon -->

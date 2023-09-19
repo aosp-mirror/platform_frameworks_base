@@ -16,10 +16,8 @@
 
 package com.android.systemui.qs.pipeline.domain.interactor
 
-import android.content.Context
 import android.view.View
 import com.android.internal.logging.InstanceId
-import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
 
 class FakeQSTile(
@@ -56,10 +54,6 @@ class FakeQSTile(
 
     override fun removeCallbacks() {
         callbacks.clear()
-    }
-
-    override fun createTileView(context: Context?): QSIconView? {
-        return null
     }
 
     override fun click(view: View?) {}

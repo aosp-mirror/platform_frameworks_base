@@ -34,6 +34,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.ContextThemeWrapper;
 
 import androidx.test.filters.SmallTest;
 
@@ -46,7 +47,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -92,8 +92,6 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     @Mock
     QSTile mOtherTile;
     @Mock
-    QSTileView mQSTileView;
-    @Mock
     PagedTileLayout mPagedTileLayout;
     @Mock
     Resources mResources;
@@ -132,11 +130,12 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSPanel.getTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSTile.getTileSpec()).thenReturn("dnd");
         when(mQSHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
-        when(mQSHost.createTileView(any(), eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
         when(mQSTileRevealControllerFactory.create(any(), any()))
                 .thenReturn(mQSTileRevealController);
         when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
         when(mQSPanel.getResources()).thenReturn(mResources);
+        when(mQSPanel.getContext()).thenReturn(
+                new ContextThemeWrapper(getContext(), R.style.Theme_SystemUI_QuickSettings));
         when(mResources.getConfiguration()).thenReturn(mConfiguration);
         doAnswer(invocation -> {
             when(mQSPanel.isListening()).thenReturn(invocation.getArgument(0));
@@ -209,14 +208,15 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
     @Test
     public void testDump() {
-        String mockTileViewString = "Mock Tile View";
+        String mockTileViewString = "QSTileViewImpl[locInScreen=(0, 0), "
+                + "iconView=QSIconViewImpl[state=-1, tint=0], "
+                + "tileState=false]";
         String mockTileString = "Mock Tile";
         doAnswer(invocation -> {
             PrintWriter pw = invocation.getArgument(0);
             pw.println(mockTileString);
             return null;
         }).when(mQSTile).dump(any(PrintWriter.class), any(String[].class));
-        when(mQSTileView.toString()).thenReturn(mockTileViewString);
 
         StringWriter w = new StringWriter();
         PrintWriter pw = new PrintWriter(w);

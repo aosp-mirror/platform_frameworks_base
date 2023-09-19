@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles
 
-import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
@@ -28,10 +27,8 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.qs.AlphaControlledSignalTileView
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
@@ -59,7 +56,7 @@ constructor(
     private val internetDialogFactory: InternetDialogFactory,
     private val accessPointController: AccessPointController,
 ) :
-    QSTileImpl<QSTile.SignalState>(
+    QSTileImpl<QSTile.BooleanState>(
         host,
         uiEventLogger,
         backgroundLooper,
@@ -79,14 +76,11 @@ constructor(
         }
     }
 
-    override fun createTileView(context: Context): QSIconView =
-        AlphaControlledSignalTileView(context)
-
     override fun getTileLabel(): CharSequence =
         mContext.getString(R.string.quick_settings_internet_label)
 
-    override fun newTileState(): QSTile.SignalState {
-        return QSTile.SignalState().also { it.forceExpandIcon = true }
+    override fun newTileState(): QSTile.BooleanState {
+        return QSTile.BooleanState().also { it.forceExpandIcon = true }
     }
 
     override fun handleClick(view: View?) {
@@ -100,7 +94,7 @@ constructor(
         }
     }
 
-    override fun handleUpdateState(state: QSTile.SignalState, arg: Any?) {
+    override fun handleUpdateState(state: QSTile.BooleanState, arg: Any?) {
         state.label = mContext.resources.getString(R.string.quick_settings_internet_label)
 
         model.applyTo(state, mContext)

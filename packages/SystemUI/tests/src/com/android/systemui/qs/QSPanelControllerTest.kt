@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableResources
+import android.view.ContextThemeWrapper
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
@@ -71,6 +72,8 @@ class QSPanelControllerTest : SysuiTestCase() {
         whenever(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
         setShouldUseSplitShade(false)
         whenever(qsPanel.resources).thenReturn(testableResources.resources)
+        whenever(qsPanel.context)
+                .thenReturn( ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings))
         whenever(qsPanel.getOrCreateTileLayout()).thenReturn(pagedTileLayout)
         whenever(statusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false)
         whenever(qsPanel.setListening(anyBoolean())).then {

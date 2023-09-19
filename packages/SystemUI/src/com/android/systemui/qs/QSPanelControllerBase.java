@@ -44,6 +44,9 @@ import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,9 +55,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Named;
-
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 
 /**
  * Controller for QSPanel views.
@@ -250,8 +250,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     private void addTile(final QSTile tile, boolean collapsedView) {
-        final TileRecord r =
-                new TileRecord(tile, mHost.createTileView(getContext(), tile, collapsedView));
+        final QSTileViewImpl tileView = new QSTileViewImpl(getContext(), collapsedView);
+        final TileRecord r = new TileRecord(tile, tileView);
         // TODO(b/250618218): Remove the QSLogger in QSTileViewImpl once we know the root cause of
         // b/250618218.
         try {
@@ -490,7 +490,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
         public QSTile tile;
         public com.android.systemui.plugins.qs.QSTileView tileView;
-        public boolean scanState;
         @Nullable
         public QSTile.Callback callback;
     }
