@@ -182,7 +182,7 @@ object Flags {
 
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
-    @JvmField val FACE_AUTH_REFACTOR = unreleasedFlag("face_auth_refactor", teamfood = true)
+    @JvmField val FACE_AUTH_REFACTOR = releasedFlag("face_auth_refactor")
 
     /** Flag to control the revamp of keyguard biometrics progress animation */
     // TODO(b/244313043): Tracking bug
