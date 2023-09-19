@@ -78,8 +78,8 @@ internal class SceneContainerFlagsTest(
         @JvmStatic
         fun testCases() = buildList {
             repeat(4) { combination ->
-                val isComposeAvailable = combination and 0b100 != 0
-                val areAllFlagsSet = combination and 0b001 != 0
+                val isComposeAvailable = combination and 0b10 != 0
+                val areAllFlagsSet = combination and 0b01 != 0
 
                 val expectedEnabled = isComposeAvailable && areAllFlagsSet
 
