@@ -80,7 +80,9 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
                 secondAppForSplitScreen.launchViaIntent(wmHelper)
                 pipApp.launchViaIntent(wmHelper)
                 tapl.goHome()
-                SplitScreenUtils.enterSplit(wmHelper, tapl, device, pipApp, secondAppForSplitScreen)
+                SplitScreenUtils.enterSplit(
+                    wmHelper, tapl, device, pipApp, secondAppForSplitScreen,
+                    flicker.scenario.startRotation)
                 pipApp.enableAutoEnterForPipActivity()
             }
             teardown {

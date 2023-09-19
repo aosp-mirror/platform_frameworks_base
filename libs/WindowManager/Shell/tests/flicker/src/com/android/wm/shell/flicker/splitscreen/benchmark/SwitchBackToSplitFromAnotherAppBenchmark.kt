@@ -39,7 +39,8 @@ abstract class SwitchBackToSplitFromAnotherAppBenchmark(override val flicker: Le
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
             setup {
-                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp,
+                    secondaryApp, flicker.scenario.startRotation)
 
                 thirdApp.launchViaIntent(wmHelper)
                 wmHelper.StateSyncBuilder().withWindowSurfaceAppeared(thirdApp).waitForAndVerify()

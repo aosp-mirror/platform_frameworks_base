@@ -62,8 +62,10 @@ class SwitchBetweenSplitPairsNoPip(override val flicker: LegacyFlickerTest) :
         get() = {
             setup {
                 tapl.goHome()
-                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
-                SplitScreenUtils.enterSplit(wmHelper, tapl, device, thirdApp, pipApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp,
+                    secondaryApp, flicker.scenario.startRotation)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, device, thirdApp, pipApp,
+                    flicker.scenario.startRotation)
                 pipApp.enableAutoEnterForPipActivity()
                 SplitScreenUtils.waitForSplitComplete(wmHelper, thirdApp, pipApp)
             }

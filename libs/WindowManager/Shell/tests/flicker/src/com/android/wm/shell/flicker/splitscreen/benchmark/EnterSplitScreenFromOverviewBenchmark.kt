@@ -46,7 +46,7 @@ abstract class EnterSplitScreenFromOverviewBenchmark(override val flicker: Legac
                     .waitForAndVerify()
             }
             transitions {
-                SplitScreenUtils.splitFromOverview(tapl, device)
+                SplitScreenUtils.splitFromOverview(tapl, device, flicker.scenario.startRotation)
                 SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
             }
         }
