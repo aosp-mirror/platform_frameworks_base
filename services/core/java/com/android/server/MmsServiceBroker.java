@@ -342,7 +342,10 @@ public class MmsServiceBroker extends SystemService {
 
             // Check if user is associated with the subscription
             if (!TelephonyPermissions.checkSubscriptionAssociatedWithUser(mContext, subId,
-                    Binder.getCallingUserHandle())) {
+                    Binder.getCallingUserHandle())
+                    // For inactive sub, fall through to MMS service to have it recorded in metrics.
+                    && isActiveSubId(subId)) {
+                // Try remind user to use another profile to send.
                 TelephonyUtils.showSwitchToManagedProfileDialogIfAppropriate(mContext,
                         subId, Binder.getCallingUid(), callingPkg);
                 return;
@@ -547,6 +550,17 @@ public class MmsServiceBroker extends SystemService {
                 Binder.restoreCallingIdentity(token);
             }
             return contentUri;
+        }
+    }
+
+    /** @return true if the subId is active. */
+    private boolean isActiveSubId(int subId) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
+            return subManager != null && subManager.isActiveSubscriptionId(subId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
