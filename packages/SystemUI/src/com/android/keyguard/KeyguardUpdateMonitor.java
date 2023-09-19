@@ -4214,7 +4214,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                             WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
                     final boolean previousState = mAllowFingerprintOnCurrentOccludingActivity;
                     mAllowFingerprintOnCurrentOccludingActivity =
-                            standardTask.topActivity != null
+                            standardTask != null && standardTask.topActivity != null
                                     && !TextUtils.isEmpty(standardTask.topActivity.getPackageName())
                                     && mAllowFingerprintOnOccludingActivitiesFromPackage.contains(
                                             standardTask.topActivity.getPackageName())
