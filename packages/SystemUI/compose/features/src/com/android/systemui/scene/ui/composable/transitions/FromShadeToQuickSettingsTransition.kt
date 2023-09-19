@@ -10,7 +10,7 @@ import com.android.systemui.shade.ui.composable.ShadeHeader
 fun TransitionBuilder.shadeToQuickSettingsTransition() {
     spec = tween(durationMillis = 500)
 
-    translate(Notifications.Elements.Notifications, Edge.Bottom)
+    translate(Notifications.Elements.NotificationScrim, Edge.Bottom)
     timestampRange(endMillis = 83) { fade(QuickSettings.Elements.FooterActions) }
 
     translate(ShadeHeader.Elements.CollapsedContent, y = ShadeHeader.Dimensions.CollapsedHeight)

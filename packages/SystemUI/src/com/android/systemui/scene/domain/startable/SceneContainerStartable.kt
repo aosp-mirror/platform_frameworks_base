@@ -97,6 +97,7 @@ constructor(
     /** Updates the visibility of the scene container. */
     private fun hydrateVisibility() {
         applicationScope.launch {
+            // TODO(b/296114544): Combine with some global hun state to make it visible!
             sceneInteractor.transitionState
                 .mapNotNull { state ->
                     when (state) {

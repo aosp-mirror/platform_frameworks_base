@@ -49,6 +49,7 @@ import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -98,6 +99,10 @@ constructor(
             .map { VISIBLE }
 
     val goneToAodTransition = keyguardTransitionInteractor.goneToAodTransition
+
+    /** the shared notification container position *on the lockscreen* */
+    val notificationPositionOnLockscreen: StateFlow<SharedNotificationContainerPosition>
+        get() = keyguardInteractor.sharedNotificationContainerPosition
 
     /** An observable for the alpha level for the entire keyguard root view. */
     val alpha: Flow<Float> =
@@ -249,8 +254,9 @@ constructor(
         if (previewMode.value.isInPreviewMode) {
             return
         }
-        keyguardInteractor.sharedNotificationContainerPosition.value =
+        keyguardInteractor.setSharedNotificationContainerPosition(
             SharedNotificationContainerPosition(top, bottom)
+        )
     }
 
     /** Is there an expanded pulse, are we animating in response? */

@@ -68,6 +68,7 @@ abstract class ShadeViewProviderModule {
             sceneContainerFlags: SceneContainerFlags,
             viewModelProvider: Provider<SceneContainerViewModel>,
             containerConfigProvider: Provider<SceneContainerConfig>,
+            flagsProvider: Provider<SceneContainerFlags>,
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
             layoutInsetController: NotificationInsetsController,
         ): WindowRootView {
@@ -77,6 +78,9 @@ abstract class ShadeViewProviderModule {
                 sceneWindowRootView.init(
                     viewModel = viewModelProvider.get(),
                     containerConfig = containerConfigProvider.get(),
+                    sharedNotificationContainer =
+                        sceneWindowRootView.requireViewById(R.id.shared_notification_container),
+                    flags = flagsProvider.get(),
                     scenes = scenesProvider.get(),
                     layoutInsetController = layoutInsetController,
                 )

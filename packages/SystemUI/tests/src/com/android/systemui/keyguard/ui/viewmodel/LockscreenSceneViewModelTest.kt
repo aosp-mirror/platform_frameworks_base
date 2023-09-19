@@ -94,6 +94,8 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                 KeyguardLongPressViewModel(
                     interactor = mock(),
                 ),
+            keyguardRoot = utils.keyguardRootViewModel(),
+            notifications = utils.notificationsPlaceholderViewModel(),
         )
     }
 }

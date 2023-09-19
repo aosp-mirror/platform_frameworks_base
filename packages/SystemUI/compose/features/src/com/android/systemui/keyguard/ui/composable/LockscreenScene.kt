@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.toComposeRect
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.isVisible
 import com.android.compose.animation.scene.SceneScope
@@ -41,6 +42,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.qualifiers.KeyguardRootView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
+import com.android.systemui.notifications.ui.composable.NotificationStack
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
@@ -88,7 +90,7 @@ constructor(
     ) {
         LockscreenScene(
             viewProvider = viewProvider,
-            longPressViewModel = viewModel.longPress,
+            viewModel = viewModel,
             modifier = modifier,
         )
     }
@@ -108,9 +110,9 @@ constructor(
 }
 
 @Composable
-private fun LockscreenScene(
+private fun SceneScope.LockscreenScene(
     viewProvider: () -> View,
-    longPressViewModel: KeyguardLongPressViewModel,
+    viewModel: LockscreenSceneViewModel,
     modifier: Modifier = Modifier,
 ) {
     fun findSettingsMenu(): View {
@@ -121,7 +123,7 @@ private fun LockscreenScene(
         modifier = modifier,
     ) {
         LongPressSurface(
-            viewModel = longPressViewModel,
+            viewModel = viewModel.longPress,
             isSettingsMenuVisible = { findSettingsMenu().isVisible },
             settingsMenuBounds = {
                 val bounds = android.graphics.Rect()
@@ -141,6 +143,28 @@ private fun LockscreenScene(
             },
             modifier = Modifier.fillMaxSize(),
         )
+
+        val notificationStackPosition by
+            viewModel.keyguardRoot.notificationPositionOnLockscreen.collectAsState()
+
+        Layout(
+            modifier = Modifier.fillMaxSize(),
+            content = {
+                NotificationStack(
+                    viewModel = viewModel.notifications,
+                    isScrimVisible = false,
+                )
+            }
+        ) { measurables, constraints ->
+            check(measurables.size == 1)
+            val height = notificationStackPosition.height.toInt()
+            val childConstraints = constraints.copy(minHeight = height, maxHeight = height)
+            val placeable = measurables[0].measure(childConstraints)
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                val start = (constraints.maxWidth - placeable.measuredWidth) / 2
+                placeable.placeRelative(x = start, y = notificationStackPosition.top.toInt())
+            }
+        }
     }
 }
 
