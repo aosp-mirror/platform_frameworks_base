@@ -3749,7 +3749,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             mContext.getMainThreadHandler().removeCallbacks(
                     wallpaper.connection.mTryToRebindRunnable);
 
-            mContext.unbindService(wallpaper.connection);
+            try {
+                mContext.unbindService(wallpaper.connection);
+            } catch (IllegalArgumentException e) {
+                Slog.w(TAG, "Error unbinding wallpaper when detaching", e);
+            }
             wallpaper.connection = null;
             if (wallpaper == mLastWallpaper) {
                 mLastWallpaper = null;
