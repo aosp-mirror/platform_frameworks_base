@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -336,7 +337,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
     }
 
-    int getCaptionHeightId() {
+    int getCaptionHeightId(@WindowingMode int windowingMode) {
         return Resources.ID_NULL;
     }
 
@@ -458,7 +459,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * Adds caption inset source to a WCT
      */
     public void addCaptionInset(WindowContainerTransaction wct) {
-        final int captionHeightId = getCaptionHeightId();
+        final int captionHeightId = getCaptionHeightId(mTaskInfo.getWindowingMode());
         if (!ViewRootImpl.CAPTION_ON_SHELL || captionHeightId == Resources.ID_NULL) {
             return;
         }

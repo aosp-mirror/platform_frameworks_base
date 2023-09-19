@@ -17,8 +17,10 @@
 package com.android.wm.shell.windowdecor;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.app.ActivityManager;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -180,7 +182,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mRelayoutParams.reset();
         mRelayoutParams.mRunningTaskInfo = taskInfo;
         mRelayoutParams.mLayoutResId = windowDecorLayoutId;
-        mRelayoutParams.mCaptionHeightId = getCaptionHeightId();
+        mRelayoutParams.mCaptionHeightId = getCaptionHeightId(taskInfo.getWindowingMode());
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
         mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
 
@@ -286,7 +288,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         final int displayWidth = displayLayout.width();
         final int displayHeight = displayLayout.height();
-        final int captionHeight = getCaptionHeight();
+        final int captionHeight = getCaptionHeight(mTaskInfo.getWindowingMode());
 
         final ImageButton maximizeWindowButton =
                 mResult.mRootView.findViewById(R.id.maximize_window);
@@ -545,7 +547,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         super.close();
     }
 
-    private int getDesktopModeWindowDecorLayoutId(int windowingMode) {
+    private int getDesktopModeWindowDecorLayoutId(@WindowingMode int windowingMode) {
         return windowingMode == WINDOWING_MODE_FREEFORM
                 ? R.layout.desktop_mode_app_controls_window_decor
                 : R.layout.desktop_mode_focused_window_decor;
@@ -574,7 +576,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             exclusionRegion = new Region();
         }
         exclusionRegion.union(new Rect(0, 0, mResult.mWidth,
-                getCaptionHeight()));
+                getCaptionHeight(mTaskInfo.getWindowingMode())));
         exclusionRegion.translate(mPositionInParent.x, mPositionInParent.y);
         return exclusionRegion;
     }
@@ -590,12 +592,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     @Override
-    int getCaptionHeightId() {
-        return R.dimen.freeform_decor_caption_height;
+    int getCaptionHeightId(@WindowingMode int windowingMode) {
+        return windowingMode == WINDOWING_MODE_FULLSCREEN
+                ? R.dimen.desktop_mode_fullscreen_decor_caption_height
+                : R.dimen.desktop_mode_freeform_decor_caption_height;
     }
 
-    private int getCaptionHeight() {
-        return loadDimensionPixelSize(mContext.getResources(), getCaptionHeightId());
+    private int getCaptionHeight(@WindowingMode int windowingMode) {
+        return loadDimensionPixelSize(mContext.getResources(), getCaptionHeightId(windowingMode));
     }
 
     /**
