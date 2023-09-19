@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.dagger
 import com.android.systemui.CoreStartable
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepository
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryImpl
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -43,4 +44,9 @@ abstract class StatusBarModule {
     @IntoMap
     @ClassKey(StatusBarModeRepositoryImpl::class)
     abstract fun bindStatusBarModeRepositoryStart(impl: StatusBarModeRepositoryImpl): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(OngoingCallController::class)
+    abstract fun bindOngoingCallController(impl: OngoingCallController): CoreStartable
 }
