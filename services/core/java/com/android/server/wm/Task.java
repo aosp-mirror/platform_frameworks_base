@@ -3478,9 +3478,9 @@ class Task extends TaskFragment {
             }
         }
         // User Aspect Ratio Settings is enabled if the app is not in SCM
-        info.topActivityEligibleForUserAspectRatioButton =
-                mWmService.mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
-                        && top != null && !info.topActivityInSizeCompat;
+        info.topActivityEligibleForUserAspectRatioButton = top != null
+                && !info.topActivityInSizeCompat
+                && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings();
         info.topActivityBoundsLetterboxed = top != null && top.areBoundsLetterboxed();
     }
 
