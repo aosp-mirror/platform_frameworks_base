@@ -540,7 +540,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void forceStopPackage(String);
     method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public static int getCurrentUser();
-    method @NonNull @RequiresPermission(android.Manifest.permission.DUMP) public java.util.List<android.app.ApplicationStartInfo> getExternalHistoricalProcessStartReasons(@NonNull String, @IntRange(from=0) int);
+    method @FlaggedApi(Flags.FLAG_APP_START_INFO) @NonNull @RequiresPermission(android.Manifest.permission.DUMP) public java.util.List<android.app.ApplicationStartInfo> getExternalHistoricalProcessStartReasons(@NonNull String, @IntRange(from=0) int);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getPackageImportance(String);
     method @NonNull public java.util.Collection<java.util.Locale> getSupportedLocales();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidImportance(int);

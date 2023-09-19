@@ -1,0 +1,8 @@
+package: "android.app"
+
+flag {
+     namespace: "system_performance"
+     name: "app_start_info"
+     description: "Control collecting of ApplicationStartInfo records and APIs."
+     bug: "247814855"
+}
