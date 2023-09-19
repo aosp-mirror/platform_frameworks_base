@@ -194,8 +194,12 @@ public class RecoverableKeyStoreManager {
         mApplicationKeyStorage = applicationKeyStorage;
         mTestCertHelper = testOnlyInsecureCertificateHelper;
         mCleanupManager = cleanupManager;
-        // Clears data for removed users.
-        mCleanupManager.verifyKnownUsers();
+        try {
+            // Clears data for removed users.
+            mCleanupManager.verifyKnownUsers();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to verify known users", e);
+        }
         try {
             mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(mDatabase);
         } catch (NoSuchAlgorithmException e) {
