@@ -1126,11 +1126,25 @@ final class LetterboxUiController {
         return computeAspectRatio(bounds);
     }
 
+    /**
+     * Whether we should enable users to resize the current app.
+     */
+    boolean shouldEnableUserAspectRatioSettings() {
+        // We use mBooleanPropertyAllowUserAspectRatioOverride to allow apps to opt-out which has
+        // effect only if explicitly false. If mBooleanPropertyAllowUserAspectRatioOverride is null,
+        // the current app doesn't opt-out so the first part of the predicate is true.
+        return !FALSE.equals(mBooleanPropertyAllowUserAspectRatioOverride)
+                && mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
+                && mActivityRecord.mDisplayContent != null
+                && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest();
+    }
+
+    /**
+     * Whether we should apply the user aspect ratio override to the min aspect ratio for the
+     * current app.
+     */
     boolean shouldApplyUserMinAspectRatioOverride() {
-        if (FALSE.equals(mBooleanPropertyAllowUserAspectRatioOverride)
-                || !mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
-                || mActivityRecord.mDisplayContent == null
-                || !mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()) {
+        if (!shouldEnableUserAspectRatioSettings()) {
             return false;
         }
 
