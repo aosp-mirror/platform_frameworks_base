@@ -1279,6 +1279,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetLetterboxBackgroundWallpaperBlurRadiusPx();
             mLetterboxConfiguration.resetLetterboxBackgroundWallpaperDarkScrimAlpha();
             mLetterboxConfiguration.resetLetterboxHorizontalPositionMultiplier();
+            mLetterboxConfiguration.resetLetterboxVerticalPositionMultiplier();
             mLetterboxConfiguration.resetIsHorizontalReachabilityEnabled();
             mLetterboxConfiguration.resetIsVerticalReachabilityEnabled();
             mLetterboxConfiguration.resetEnabledAutomaticReachabilityInBookMode();
