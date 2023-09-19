@@ -172,7 +172,6 @@ class CustomizationProviderTest : SysuiTestCase() {
         val featureFlags =
             FakeFeatureFlags().apply {
                 set(Flags.LOCKSCREEN_CUSTOM_CLOCKS, true)
-                set(Flags.REVAMPED_WALLPAPER_UI, true)
                 set(Flags.WALLPAPER_FULLSCREEN_PREVIEW, true)
                 set(Flags.FACE_AUTH_REFACTOR, true)
             }

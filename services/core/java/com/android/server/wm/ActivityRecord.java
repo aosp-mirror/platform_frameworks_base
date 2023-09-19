@@ -565,8 +565,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean forceNewConfig; // force re-create with new config next time
     boolean supportsEnterPipOnTaskSwitch;  // This flag is set by the system to indicate that the
         // activity can enter picture in picture while pausing (only when switching to another task)
+    // The PiP params used when deferring the entering of picture-in-picture.
     PictureInPictureParams pictureInPictureArgs = new PictureInPictureParams.Builder().build();
-        // The PiP params used when deferring the entering of picture-in-picture.
     boolean shouldDockBigOverlays;
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last launch of this activity
@@ -1730,6 +1730,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         mAnimatingActivityRegistry = registry;
+    }
+
+    boolean canAutoEnterPip() {
+        // beforeStopping=false since the actual pip-ing will take place after startPausing()
+        final boolean activityCanPip = checkEnterPictureInPictureState(
+                "startActivityUnchecked", false /* beforeStopping */);
+
+        // check if this activity is about to auto-enter pip
+        return activityCanPip && pictureInPictureArgs != null
+                && pictureInPictureArgs.isAutoEnterEnabled();
     }
 
     /**
@@ -9180,7 +9190,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     getRequestedOverrideWindowingMode() == WINDOWING_MODE_UNDEFINED
                             ? newParentConfig.windowConfiguration.getWindowingMode()
                             : getRequestedOverrideWindowingMode();
-            if (getWindowingMode() != projectedWindowingMode) {
+            if (getWindowingMode() != projectedWindowingMode
+                    // Do not collect a pip activity about to enter pinned mode
+                    // as a part of WindowOrganizerController#finishTransition().
+                    // If not checked the activity might be collected for the wrong transition,
+                    // such as a TRANSIT_OPEN transition requested right after TRANSIT_PIP.
+                    && !(mWaitForEnteringPinnedMode
+                    && mTransitionController.inFinishingTransition(this))) {
                 mTransitionController.collect(this);
             }
         }

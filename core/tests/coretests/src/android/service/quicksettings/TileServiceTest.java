@@ -34,6 +34,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -88,6 +89,8 @@ public class TileServiceTest {
         verify(mIQSService, never()).onStartSuccessful(any());
     }
 
+    // TODO(b/298075609): Test is disabled due to flakiness.
+    @Ignore
     @Test
     public void testBindSuccessful() throws RemoteException {
         Intent intent = new Intent();

@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAr
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import javax.inject.Inject
@@ -41,6 +42,7 @@ constructor(
     defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
     alignShortcutsToUdfpsSection: AlignShortcutsToUdfpsSection,
     defaultStatusViewSection: DefaultStatusViewSection,
+    defaultStatusBarSection: DefaultStatusBarSection,
     splitShadeGuidelines: SplitShadeGuidelines,
     defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
     aodNotificationIconsSection: AodNotificationIconsSection,
@@ -55,6 +57,7 @@ constructor(
             defaultSettingsPopupMenuSection,
             alignShortcutsToUdfpsSection,
             defaultStatusViewSection,
+            defaultStatusBarSection,
             defaultNotificationStackScrollLayoutSection,
             splitShadeGuidelines,
             aodNotificationIconsSection,

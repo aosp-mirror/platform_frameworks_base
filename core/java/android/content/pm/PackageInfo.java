@@ -18,9 +18,7 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.IntentSender;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -490,18 +488,6 @@ public class PackageInfo implements Parcelable {
      */
     public boolean isActiveApex;
 
-    /**
-     * Whether the package is currently in an archived state.
-     *
-     * <p>Packages can be archived through
-     * {@link PackageInstaller#requestArchive(String, IntentSender)} and do not have any APKs stored
-     * on the device, but do keep the data directory.
-     * @hide
-     */
-    // TODO(b/278553670) Unhide and update @links before launch.
-    @SystemApi
-    public boolean isArchived;
-
     public PackageInfo() {
     }
 
@@ -589,7 +575,6 @@ public class PackageInfo implements Parcelable {
         }
         dest.writeBoolean(isApex);
         dest.writeBoolean(isActiveApex);
-        dest.writeBoolean(isArchived);
         dest.restoreAllowSquashing(prevAllowSquashing);
     }
 
@@ -655,6 +640,5 @@ public class PackageInfo implements Parcelable {
         }
         isApex = source.readBoolean();
         isActiveApex = source.readBoolean();
-        isArchived = source.readBoolean();
     }
 }

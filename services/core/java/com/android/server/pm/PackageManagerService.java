@@ -6389,6 +6389,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return getArchivedPackageInternal(packageName, userId);
         }
 
+        @Override
+        public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user) {
+            return mInstallerService.mPackageArchiver.getArchivedAppIcon(packageName, user);
+        }
+
         /**
          * Wait for the handler to finish handling all pending messages.
          * @param timeoutMillis Maximum time in milliseconds to wait.

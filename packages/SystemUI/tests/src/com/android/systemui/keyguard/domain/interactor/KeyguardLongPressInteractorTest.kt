@@ -302,7 +302,6 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
                 featureFlags =
                     FakeFeatureFlags().apply {
                         set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, isLongPressFeatureEnabled)
-                        set(Flags.REVAMPED_WALLPAPER_UI, isRevampedWppFeatureEnabled)
                         set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, isOpenWppDirectlyEnabled)
                     },
                 broadcastDispatcher = fakeBroadcastDispatcher,

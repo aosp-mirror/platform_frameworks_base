@@ -60,11 +60,15 @@ public abstract class NotificationRowModule {
     @Named(NOTIF_REMOTEVIEWS_FACTORIES)
     static Set<NotifRemoteViewsFactory> provideNotifRemoteViewsFactories(
             FeatureFlags featureFlags,
-            PrecomputedTextViewFactory precomputedTextViewFactory
+            PrecomputedTextViewFactory precomputedTextViewFactory,
+            BigPictureLayoutInflaterFactory bigPictureLayoutInflaterFactory
     ) {
         final Set<NotifRemoteViewsFactory> replacementFactories = new HashSet<>();
         if (featureFlags.isEnabled(Flags.PRECOMPUTED_TEXT)) {
             replacementFactories.add(precomputedTextViewFactory);
+        }
+        if (featureFlags.isEnabled(Flags.BIGPICTURE_NOTIFICATION_LAZY_LOADING)) {
+            replacementFactories.add(bigPictureLayoutInflaterFactory);
         }
         return replacementFactories;
     }

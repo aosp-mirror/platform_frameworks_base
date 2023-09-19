@@ -159,11 +159,12 @@ public class PackageArchiverTest {
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getResourcesForApplication(eq(PACKAGE))).thenReturn(
                 mock(Resources.class));
-        when(mIcon.compress(eq(Bitmap.CompressFormat.PNG), eq(100), any())).thenReturn(true);
 
         mArchiveManager = spy(new PackageArchiver(mContext, pm));
         doReturn(ICON_PATH).when(mArchiveManager).storeIcon(eq(PACKAGE),
                 any(LauncherActivityInfo.class), eq(mUserId), anyInt());
+        doReturn(mIcon).when(mArchiveManager).decodeIcon(
+                any(ArchiveState.ArchiveActivityInfo.class));
     }
 
     @Test
@@ -373,6 +374,38 @@ public class PackageArchiverTest {
                 intent.getBooleanExtra(PackageInstaller.EXTRA_UNARCHIVE_ALL_USERS, true)).isFalse();
         assertThat(intent.getPackage()).isEqualTo(INSTALLER_PACKAGE);
     }
+
+    @Test
+    public void getArchivedAppIcon_packageNotInstalled() {
+        when(mComputer.getPackageStateFiltered(eq(PACKAGE), anyInt(), anyInt())).thenReturn(
+                null);
+
+        Exception e = assertThrows(
+                ParcelableException.class,
+                () -> mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT));
+        assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
+        assertThat(e.getCause()).hasMessageThat().isEqualTo(
+                String.format("Package %s not found.", PACKAGE));
+    }
+
+    @Test
+    public void getArchivedAppIcon_notArchived() {
+        Exception e = assertThrows(
+                ParcelableException.class,
+                () -> mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT));
+        assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
+        assertThat(e.getCause()).hasMessageThat().isEqualTo(
+                String.format("Package %s is not currently archived.", PACKAGE));
+    }
+
+    @Test
+    public void getArchivedAppIcon_success() {
+        mUserState.setArchiveState(createArchiveState()).setInstalled(false);
+
+        assertThat(mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT)).isEqualTo(
+                mIcon);
+    }
+
 
     private static ArchiveState createArchiveState() {
         List<ArchiveState.ArchiveActivityInfo> activityInfos = new ArrayList<>();

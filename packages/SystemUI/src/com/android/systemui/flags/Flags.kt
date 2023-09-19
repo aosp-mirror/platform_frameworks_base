@@ -107,7 +107,7 @@ object Flags {
 
     // TODO(b/268005230): Tracking Bug
     @JvmField
-    val SENSITIVE_REVEAL_ANIM = unreleasedFlag("sensitive_reveal_anim", teamfood = true)
+    val SENSITIVE_REVEAL_ANIM = releasedFlag("sensitive_reveal_anim")
 
     // TODO(b/280783617): Tracking Bug
     @Keep
@@ -187,9 +187,6 @@ object Flags {
     /** Flag to control the revamp of keyguard biometrics progress animation */
     // TODO(b/244313043): Tracking bug
     @JvmField val BIOMETRICS_ANIMATION_REVAMP = unreleasedFlag("biometrics_animation_revamp")
-
-    // TODO(b/262780002): Tracking Bug
-    @JvmField val REVAMPED_WALLPAPER_UI = releasedFlag("revamped_wallpaper_ui")
 
     // flag for controlling auto pin confirmation and material u shapes in bouncer
     @JvmField
@@ -293,6 +290,11 @@ object Flags {
     /** Migrate the status view from the notification panel to keyguard root view. */
     // TODO(b/291767565): Tracking bug.
     @JvmField val MIGRATE_KEYGUARD_STATUS_VIEW = unreleasedFlag("migrate_keyguard_status_view")
+
+    /** Migrate the status bar view on keyguard from notification panel to keyguard root view. */
+    // TODO(b/299115332): Tracking Bug.
+    @JvmField val MIGRATE_KEYGUARD_STATUS_BAR_VIEW =
+        unreleasedFlag("migrate_keyguard_status_bar_view")
 
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug

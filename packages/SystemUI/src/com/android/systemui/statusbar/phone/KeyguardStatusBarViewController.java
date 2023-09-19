@@ -45,6 +45,8 @@ import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeViewStateProvider;
@@ -69,14 +71,14 @@ import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.settings.SecureSettings;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import kotlin.Unit;
 
 /** View Controller for {@link com.android.systemui.statusbar.phone.KeyguardStatusBarView}. */
 public class KeyguardStatusBarViewController extends ViewController<KeyguardStatusBarView> {
@@ -111,6 +113,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final BiometricUnlockController mBiometricUnlockController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final StatusBarContentInsetsProvider mInsetsProvider;
+    private final FeatureFlags mFeatureFlags;
     private final UserManager mUserManager;
     private final StatusBarUserChipViewModel mStatusBarUserChipViewModel;
     private final SecureSettings mSecureSettings;
@@ -283,6 +286,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             BiometricUnlockController biometricUnlockController,
             SysuiStatusBarStateController statusBarStateController,
             StatusBarContentInsetsProvider statusBarContentInsetsProvider,
+            FeatureFlags featureFlags,
             UserManager userManager,
             StatusBarUserChipViewModel userChipViewModel,
             SecureSettings secureSettings,
@@ -308,6 +312,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mBiometricUnlockController = biometricUnlockController;
         mStatusBarStateController = statusBarStateController;
         mInsetsProvider = statusBarContentInsetsProvider;
+        mFeatureFlags = featureFlags;
         mUserManager = userManager;
         mStatusBarUserChipViewModel = userChipViewModel;
         mSecureSettings = secureSettings;
@@ -367,7 +372,19 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                     mView.findViewById(R.id.statusIcons), StatusBarLocation.KEYGUARD);
             mTintedIconManager.setBlockList(getBlockedIcons());
             mStatusBarIconController.addIconGroup(mTintedIconManager);
+        } else {
+            // In the old implementation, the keyguard status bar view is never detached and
+            // re-attached, so only calling #addIconGroup when the IconManager is first created was
+            // safe and correct.
+            // In the new scene framework implementation, the keyguard status bar view *is* detached
+            // whenever the shade is opened on top of lockscreen, and then re-attached when the
+            // shade is closed. So, we need to re-add the IconManager each time we're re-attached to
+            // get icon updates.
+            if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW)) {
+                mStatusBarIconController.addIconGroup(mTintedIconManager);
+            }
         }
+
         mSystemIconsContainer = mView.findViewById(R.id.system_icons);
         StatusOverlayHoverListener hoverListener = mStatusOverlayHoverListenerFactory
                 .createDarkAwareListener(mSystemIconsContainer, mView.darkChangeFlow());

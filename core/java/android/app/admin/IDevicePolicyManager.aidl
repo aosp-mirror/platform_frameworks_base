@@ -54,6 +54,7 @@ import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.telephony.data.ApnSetting;
 import com.android.internal.infra.AndroidFuture;
 import android.app.admin.DevicePolicyState;
+import android.app.admin.EnforcingAdmin;
 
 import java.util.List;
 
@@ -274,6 +275,7 @@ interface IDevicePolicyManager {
 
     Intent createAdminSupportIntent(in String restriction);
     Bundle getEnforcingAdminAndUserDetails(int userId,String restriction);
+    List<EnforcingAdmin> getEnforcingAdminsForRestriction(int userId,String restriction);
     boolean setApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean hidden, boolean parent);
     boolean isApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean parent);
 

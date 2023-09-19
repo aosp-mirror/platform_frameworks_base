@@ -50,6 +50,13 @@
                             maxOccurs="1"/>
                 <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0"
                             maxOccurs="1"/>
+
+                <xs:element name="hdrBrightnessConfig" type="hdrBrightnessConfig"
+                            minOccurs="0" maxOccurs="1">
+                    <xs:annotation name="nullable"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
+
                 <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1"/>
                 <xs:element type="autoBrightness" name="autoBrightness" minOccurs="0"
                             maxOccurs="1"/>
@@ -236,6 +243,31 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:all>
+    </xs:complexType>
+
+    <!-- brightness config for HDR content -->
+    <xs:complexType name="hdrBrightnessConfig">
+        <!-- lux level from light sensor to screen brightness recommended max value map. -->
+        <xs:element name="brightnessMap" type="nonNegativeFloatToFloatMap">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Debounce for brightness increase in millis -->
+        <xs:element name="brightnessIncreaseDebounceMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Debounce for brightness decrease in millis -->
+        <xs:element name="brightnessDecreaseDebounceMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Animation time for brightness increase in millis -->
+        <xs:element  name="brightnessIncreaseDurationMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Animation time for brightness decrease in millis -->
+        <xs:element name="brightnessDecreaseDurationMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
     </xs:complexType>
 
     <!-- Maps to PowerManager.THERMAL_STATUS_* values. -->

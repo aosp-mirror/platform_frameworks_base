@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -307,8 +306,8 @@ class CustomizedAppBarTest {
     }
 
     /**
-     * Checks the app bar's components positioning when it's a [CustomizedTopAppBar], a
-     * [CenterAlignedTopAppBar], or a larger app bar that is scrolled up and collapsed into a small
+     * Checks the app bar's components positioning when it's a [CustomizedTopAppBar]
+     * or a larger app bar that is scrolled up and collapsed into a small
      * configuration and there is no navigation icon.
      */
     private fun assertSmallPositioningWithoutNavigation(isCenteredTitle: Boolean = false) {
@@ -335,8 +334,7 @@ class CustomizedAppBarTest {
     }
 
     /**
-     * Checks the app bar's components positioning when it's a [CustomizedTopAppBar] or a
-     * [CenterAlignedTopAppBar].
+     * Checks the app bar's components positioning when it's a [CustomizedTopAppBar].
      */
     private fun assertSmallDefaultPositioning(isCenteredTitle: Boolean = false) {
         val appBarBounds = rule.onNodeWithTag(TopAppBarTestTag).getUnclippedBoundsInRoot()

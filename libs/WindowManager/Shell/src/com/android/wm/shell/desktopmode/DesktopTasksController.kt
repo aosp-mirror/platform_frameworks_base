@@ -17,7 +17,6 @@
 package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
-import android.app.WindowConfiguration
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
@@ -61,6 +60,7 @@ import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksLi
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.TO_DESKTOP_INDICATOR
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.splitscreen.SplitScreenController
+import com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_ENTER_DESKTOP
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
@@ -213,6 +213,7 @@ class DesktopTasksController(
             "DesktopTasksController: moveToDesktop taskId=%d",
             task.taskId
         )
+        exitSplitIfApplicable(wct, task)
         // Bring other apps to front first
         bringDesktopAppsToFront(task.displayId, wct)
         addMoveToDesktopChanges(wct, task)
@@ -240,6 +241,7 @@ class DesktopTasksController(
             taskInfo.taskId
         )
         val wct = WindowContainerTransaction()
+        exitSplitIfApplicable(wct, taskInfo)
         moveHomeTaskToFront(wct)
         addMoveToDesktopChanges(wct, taskInfo)
         wct.setBounds(taskInfo.token, startBounds)
@@ -319,13 +321,20 @@ class DesktopTasksController(
             task.taskId
         )
         val wct = WindowContainerTransaction()
-        wct.setWindowingMode(task.token, WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW)
+        wct.setWindowingMode(task.token, WINDOWING_MODE_MULTI_WINDOW)
         wct.setBounds(task.token, Rect())
         wct.setDensityDpi(task.token, getDefaultDensityDpi())
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    private fun exitSplitIfApplicable(wct: WindowContainerTransaction, taskInfo: RunningTaskInfo) {
+        if (taskInfo.windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
+            splitScreenController.prepareExitSplitScreen(wct,
+                splitScreenController.getStageOfTask(taskInfo.taskId), EXIT_REASON_ENTER_DESKTOP)
         }
     }
 

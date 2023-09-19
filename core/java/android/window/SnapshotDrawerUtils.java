@@ -237,13 +237,14 @@ public class SnapshotDrawerUtils {
                         PixelFormat.RGBA_8888,
                         GraphicBuffer.USAGE_HW_TEXTURE | GraphicBuffer.USAGE_HW_COMPOSER
                                 | GraphicBuffer.USAGE_SW_WRITE_RARELY);
-                if (background == null) {
+                final Canvas c = background != null ? background.lockCanvas() : null;
+                if (c == null) {
                     Log.e(TAG, "Unable to draw snapshot: failed to allocate graphic buffer for "
                             + mTitle);
+                    mTransaction.clear();
+                    childSurfaceControl.release();
                     return;
                 }
-                // TODO: Support this on HardwareBuffer
-                final Canvas c = background.lockCanvas();
                 drawBackgroundAndBars(c, frame);
                 background.unlockCanvasAndPost(c);
                 mTransaction.setBuffer(mRootSurface,

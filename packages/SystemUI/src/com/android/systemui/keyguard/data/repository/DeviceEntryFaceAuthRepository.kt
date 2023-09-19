@@ -54,13 +54,13 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
+import com.google.errorprone.annotations.CompileTimeConstant
 import java.io.PrintWriter
 import java.util.Arrays
 import java.util.stream.Collectors
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -112,33 +112,27 @@ interface DeviceEntryFaceAuthRepository {
     fun setLockedOut(isLockedOut: Boolean)
 
     /**
-     * Cancel current face authentication and prevent it from running until [resumeFaceAuth] is
-     * invoked.
-     */
-    fun pauseFaceAuth()
-
-    /**
-     * Allow face auth paused using [pauseFaceAuth] to run again. The next invocation to
-     * [authenticate] will run as long as other gating conditions don't stop it from running.
-     */
-    fun resumeFaceAuth()
-
-    /**
-     * Trigger face authentication.
+     * Request face authentication or detection to be run.
      *
      * [uiEvent] provided should be logged whenever face authentication runs. Invocation should be
      * ignored if face authentication is already running. Results should be propagated through
      * [authenticationStatus]
      *
      * Run only face detection when [fallbackToDetection] is true and [canRunFaceAuth] is false.
+     *
+     * Method returns immediately and the face auth request is processed as soon as possible.
      */
-    suspend fun authenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean = false)
+    fun requestAuthenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean = false)
 
     /** Stop currently running face authentication or detection. */
     fun cancel()
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
+private data class AuthenticationRequest(
+    val uiEvent: FaceAuthUiEvent,
+    val fallbackToDetection: Boolean
+)
+
 @SysUISingleton
 class DeviceEntryFaceAuthRepositoryImpl
 @Inject
@@ -171,6 +165,8 @@ constructor(
     private var faceAcquiredInfoIgnoreList: Set<Int>
     private var retryCount = 0
 
+    private var pendingAuthenticateRequest = MutableStateFlow<AuthenticationRequest?>(null)
+
     private var cancelNotReceivedHandlerJob: Job? = null
     private var halErrorRetryJob: Job? = null
 
@@ -193,15 +189,6 @@ constructor(
     override val isAuthRunning: StateFlow<Boolean>
         get() = _isAuthRunning
 
-    private val faceAuthPaused = MutableStateFlow(false)
-    override fun pauseFaceAuth() {
-        faceAuthPaused.value = true
-    }
-
-    override fun resumeFaceAuth() {
-        faceAuthPaused.value = false
-    }
-
     private val keyguardSessionId: InstanceId?
         get() = sessionTracker.getSessionId(StatusBarManager.SESSION_KEYGUARD)
 
@@ -212,6 +199,8 @@ constructor(
     private val _isAuthenticated = MutableStateFlow(false)
     override val isAuthenticated: Flow<Boolean>
         get() = _isAuthenticated
+
+    private var cancellationInProgress = MutableStateFlow(false)
 
     override val isBypassEnabled: Flow<Boolean> =
         keyguardBypassController?.let {
@@ -302,6 +291,7 @@ constructor(
             observeFaceDetectGatingChecks()
             observeFaceAuthResettingConditions()
             listenForSchedulingWatchdog()
+            processPendingAuthRequests()
         } else {
             canRunFaceAuth = MutableStateFlow(false).asStateFlow()
             canRunDetection = MutableStateFlow(false).asStateFlow()
@@ -338,12 +328,22 @@ constructor(
             )
             .onEach { anyOfThemIsTrue ->
                 if (anyOfThemIsTrue) {
+                    clearPendingAuthRequest("Resetting auth status")
                     _isAuthenticated.value = false
                     retryCount = 0
                     halErrorRetryJob?.cancel()
                 }
             }
             .launchIn(applicationScope)
+    }
+
+    private fun clearPendingAuthRequest(@CompileTimeConstant loggingContext: String) {
+        faceAuthLogger.clearingPendingAuthRequest(
+            loggingContext,
+            pendingAuthenticateRequest.value?.uiEvent,
+            pendingAuthenticateRequest.value?.fallbackToDetection
+        )
+        pendingAuthenticateRequest.value = null
     }
 
     private fun observeFaceDetectGatingChecks() {
@@ -378,7 +378,6 @@ constructor(
                 biometricSettingsRepository.isFaceAuthEnrolledAndEnabled,
                 "isFaceAuthEnrolledAndEnabled"
             ),
-            Pair(faceAuthPaused.isFalse(), "faceAuthIsNotPaused"),
             Pair(keyguardRepository.isKeyguardGoingAway.isFalse(), "keyguardNotGoingAway"),
             Pair(
                 keyguardRepository.wakefulness.map { it.isStartingToSleep() }.isFalse(),
@@ -402,7 +401,13 @@ constructor(
                 biometricSettingsRepository.isCurrentUserInLockdown.isFalse(),
                 "userHasNotLockedDownDevice"
             ),
-            Pair(keyguardRepository.isKeyguardShowing, "isKeyguardShowing")
+            Pair(keyguardRepository.isKeyguardShowing, "isKeyguardShowing"),
+            Pair(
+                userRepository.selectedUser
+                    .map { it.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS }
+                    .isFalse(),
+                "userSwitchingInProgress"
+            )
         )
     }
 
@@ -440,9 +445,6 @@ constructor(
                 }
                 _authenticationStatus.value = errorStatus
                 _isAuthenticated.value = false
-                if (errorStatus.isCancellationError()) {
-                    handleFaceCancellationError()
-                }
                 if (errorStatus.isHardwareError()) {
                     faceAuthLogger.hardwareError(errorStatus)
                     handleFaceHardwareError()
@@ -471,16 +473,6 @@ constructor(
             }
         }
 
-    private fun handleFaceCancellationError() {
-        applicationScope.launch {
-            faceAuthRequestedWhileCancellation?.let {
-                faceAuthLogger.launchingQueuedFaceAuthRequest(it)
-                authenticate(it)
-            }
-            faceAuthRequestedWhileCancellation = null
-        }
-    }
-
     private fun handleFaceHardwareError() {
         if (retryCount < HAL_ERROR_RETRY_MAX) {
             retryCount++
@@ -490,7 +482,7 @@ constructor(
                     delay(HAL_ERROR_RETRY_TIMEOUT)
                     if (retryCount < HAL_ERROR_RETRY_MAX) {
                         faceAuthLogger.attemptingRetryAfterHardwareError(retryCount)
-                        authenticate(
+                        requestAuthenticate(
                             FaceAuthUiEvent.FACE_AUTH_TRIGGERED_RETRY_AFTER_HW_UNAVAILABLE,
                             fallbackToDetection = false
                         )
@@ -501,7 +493,7 @@ constructor(
 
     private fun onFaceAuthRequestCompleted() {
         cancelNotReceivedHandlerJob?.cancel()
-        cancellationInProgress = false
+        cancellationInProgress.value = false
         _isAuthRunning.value = false
         authCancellationSignal = null
     }
@@ -512,24 +504,60 @@ constructor(
             _detectionStatus.value = FaceDetectionStatus(sensorId, userId, isStrong)
         }
 
-    private var cancellationInProgress = false
-    private var faceAuthRequestedWhileCancellation: FaceAuthUiEvent? = null
+    override fun requestAuthenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) {
+        if (pendingAuthenticateRequest.value != null) {
+            faceAuthLogger.ignoredFaceAuthTrigger(
+                pendingAuthenticateRequest.value?.uiEvent,
+                "Previously queued trigger skipped due to new request"
+            )
+        }
+        faceAuthLogger.queueingRequest(uiEvent, fallbackToDetection)
+        pendingAuthenticateRequest.value = AuthenticationRequest(uiEvent, fallbackToDetection)
+    }
 
-    override suspend fun authenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) {
+    private fun processPendingAuthRequests() {
+        combine(
+                pendingAuthenticateRequest,
+                canRunFaceAuth,
+                canRunDetection,
+                cancellationInProgress,
+            ) { pending, canRunAuth, canRunDetect, cancelInProgress ->
+                if (
+                    pending != null &&
+                        !(canRunAuth || (canRunDetect && pending.fallbackToDetection)) ||
+                        cancelInProgress
+                ) {
+                    faceAuthLogger.notProcessingRequestYet(
+                        pending?.uiEvent,
+                        canRunAuth,
+                        canRunDetect,
+                        cancelInProgress
+                    )
+                    return@combine null
+                } else {
+                    return@combine pending
+                }
+            }
+            .onEach {
+                it?.let {
+                    faceAuthLogger.processingRequest(it.uiEvent, it.fallbackToDetection)
+                    clearPendingAuthRequest("Authenticate was invoked")
+                    authenticate(it.uiEvent, it.fallbackToDetection)
+                }
+            }
+            .flowOn(mainDispatcher)
+            .launchIn(applicationScope)
+    }
+
+    private suspend fun authenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) {
         if (_isAuthRunning.value) {
             faceAuthLogger.ignoredFaceAuthTrigger(uiEvent, "face auth is currently running")
             return
         }
 
-        if (cancellationInProgress) {
-            faceAuthLogger.queuingRequestWhileCancelling(
-                faceAuthRequestedWhileCancellation,
-                uiEvent
-            )
-            faceAuthRequestedWhileCancellation = uiEvent
+        if (cancellationInProgress.value) {
+            faceAuthLogger.ignoredFaceAuthTrigger(uiEvent, "cancellation in progress")
             return
-        } else {
-            faceAuthRequestedWhileCancellation = null
         }
 
         if (canRunFaceAuth.value) {
@@ -553,12 +581,19 @@ constructor(
                     FaceAuthenticateOptions.Builder().setUserId(currentUserId).build()
                 )
             }
-        } else if (fallbackToDetection && canRunDetection.value) {
-            faceAuthLogger.ignoredFaceAuthTrigger(
-                uiEvent,
-                "face auth gating check is false, falling back to detection."
-            )
-            detect()
+        } else if (canRunDetection.value) {
+            if (fallbackToDetection) {
+                faceAuthLogger.ignoredFaceAuthTrigger(
+                    uiEvent,
+                    "face auth gating check is false, falling back to detection."
+                )
+                detect()
+            } else {
+                faceAuthLogger.ignoredFaceAuthTrigger(
+                    uiEvent = uiEvent,
+                    "face auth gating check is false and fallback to detection is not requested"
+                )
+            }
         } else {
             faceAuthLogger.ignoredFaceAuthTrigger(
                 uiEvent,
@@ -608,13 +643,13 @@ constructor(
                 faceAuthLogger.cancelSignalNotReceived(
                     _isAuthRunning.value,
                     _isLockedOut.value,
-                    cancellationInProgress,
-                    faceAuthRequestedWhileCancellation
+                    cancellationInProgress.value,
+                    pendingAuthenticateRequest.value?.uiEvent
                 )
                 _authenticationStatus.value = ErrorFaceAuthenticationStatus.cancelNotReceivedError()
                 onFaceAuthRequestCompleted()
             }
-        cancellationInProgress = true
+        cancellationInProgress.value = true
         _isAuthRunning.value = false
     }
 
@@ -647,9 +682,7 @@ constructor(
             "    supportsFaceDetection: " +
                 "${faceManager?.sensorPropertiesInternal?.firstOrNull()?.supportsFaceDetection}"
         )
-        pw.println(
-            "  faceAuthRequestedWhileCancellation: ${faceAuthRequestedWhileCancellation?.reason}"
-        )
+        pw.println("  _pendingAuthenticateRequest: ${pendingAuthenticateRequest.value}")
         pw.println("  authCancellationSignal: $authCancellationSignal")
         pw.println("  detectCancellationSignal: $detectCancellationSignal")
         pw.println("  faceAcquiredInfoIgnoreList: $faceAcquiredInfoIgnoreList")

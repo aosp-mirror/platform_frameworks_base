@@ -3355,7 +3355,11 @@ public class ApplicationPackageManager extends PackageManager {
         }
         Drawable dr = null;
         if (itemInfo.packageName != null) {
-            dr = getDrawable(itemInfo.packageName, itemInfo.icon, appInfo);
+            if (itemInfo.isArchived) {
+                dr = getArchivedAppIcon(itemInfo.packageName);
+            } else {
+                dr = getDrawable(itemInfo.packageName, itemInfo.icon, appInfo);
+            }
         }
         if (dr == null && itemInfo != appInfo && appInfo != null) {
             dr = loadUnbadgedItemIcon(appInfo, appInfo);
@@ -3960,6 +3964,16 @@ public class ApplicationPackageManager extends PackageManager {
             synchronized (mPackageMonitorCallbacks) {
                 mPackageMonitorCallbacks.remove(callback);
             }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Nullable
+    private Drawable getArchivedAppIcon(String packageName) {
+        try {
+            return new BitmapDrawable(null,
+                    mPM.getArchivedAppIcon(packageName, new UserHandle(getUserId())));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -69,6 +69,7 @@ import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.color.ColorDisplayService;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 import com.android.server.policy.WindowManagerPolicy;
@@ -1282,6 +1283,7 @@ public final class DisplayPowerControllerTest {
         final HighBrightnessModeMetadata hbmMetadata = mock(HighBrightnessModeMetadata.class);
         final BrightnessSetting brightnessSetting = mock(BrightnessSetting.class);
         final DisplayDeviceConfig config = mock(DisplayDeviceConfig.class);
+        final DisplayManagerFlags flags = mock(DisplayManagerFlags.class);
 
         setUpDisplay(displayId, uniqueId, display, device, config, isEnabled);
 
@@ -1289,7 +1291,7 @@ public final class DisplayPowerControllerTest {
                 mContext, injector, mDisplayPowerCallbacksMock, mHandler,
                 mSensorManagerMock, mDisplayBlankerMock, display,
                 mBrightnessTrackerMock, brightnessSetting, () -> {},
-                hbmMetadata, /* bootCompleted= */ false);
+                hbmMetadata, /* bootCompleted= */ false, flags);
 
         return new DisplayPowerControllerHolder(dpc, display, displayPowerState, brightnessSetting,
                 animator, automaticBrightnessController, screenOffBrightnessSensorController,

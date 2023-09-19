@@ -1643,7 +1643,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             // next activity.
             final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
                     "shouldAutoPipWhilePausing", userLeaving);
-            if (userLeaving && resumingOccludesParent && lastResumedCanPip
+
+            if (ActivityTaskManagerService.isPip2ExperimentEnabled()) {
+                // If a new task is being launched, then mark the existing top activity as
+                // supporting picture-in-picture while pausing only if the starting activity
+                // would not be considered an overlay on top of the current activity
+                // (eg. not fullscreen, or the assistant)
+                Task.enableEnterPipOnTaskSwitch(prev, resuming.getTask(),
+                        resuming, resuming.getOptions());
+            }
+            if (prev.supportsEnterPipOnTaskSwitch && userLeaving
+                    && resumingOccludesParent && lastResumedCanPip
                     && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
                 shouldAutoPip = true;
             } else if (!lastResumedCanPip) {
@@ -1656,7 +1666,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
 
         if (prev.attachedToProcess()) {
-            if (shouldAutoPip) {
+            if (shouldAutoPip && ActivityTaskManagerService.isPip2ExperimentEnabled()) {
+                prev.mPauseSchedulePendingForPip = true;
+                boolean willAutoPip = mAtmService.prepareAutoEnterPictureAndPictureMode(prev);
+                ProtoLog.d(WM_DEBUG_STATES, "Auto-PIP allowed, requesting PIP mode "
+                        + "via requestStartTransition(): %s, willAutoPip: %b", prev, willAutoPip);
+            } else if (shouldAutoPip) {
                 prev.mPauseSchedulePendingForPip = true;
                 boolean didAutoPip = mAtmService.enterPictureInPictureMode(
                         prev, prev.pictureInPictureArgs, false /* fromClient */);
