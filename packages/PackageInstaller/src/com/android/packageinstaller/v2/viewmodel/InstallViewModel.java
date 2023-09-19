@@ -72,4 +72,13 @@ public class InstallViewModel extends AndroidViewModel {
         InstallStage stage = mRepository.requestUserConfirmation();
         mCurrentInstallStage.setValue(stage);
     }
+
+    public void forcedSkipSourceCheck() {
+        InstallStage stage = mRepository.forcedSkipSourceCheck();
+        mCurrentInstallStage.setValue(stage);
+    }
+
+    public void cleanupInstall() {
+        mRepository.cleanupInstall();
+    }
 }

@@ -16,13 +16,18 @@
 
 package com.android.packageinstaller.v2.ui;
 
+import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
 import static android.os.Process.INVALID_UID;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_INTERNAL_ERROR;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_POLICY;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Window;
 import androidx.annotation.Nullable;
@@ -36,6 +41,8 @@ import com.android.packageinstaller.v2.model.InstallRepository.CallerInfo;
 import com.android.packageinstaller.v2.model.installstagedata.InstallAborted;
 import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
 import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired;
+import com.android.packageinstaller.v2.ui.fragments.AnonymousSourceFragment;
+import com.android.packageinstaller.v2.ui.fragments.ExternalSourcesBlockedFragment;
 import com.android.packageinstaller.v2.ui.fragments.InstallConfirmationFragment;
 import com.android.packageinstaller.v2.ui.fragments.InstallStagingFragment;
 import com.android.packageinstaller.v2.ui.fragments.SimpleErrorFragment;
@@ -50,6 +57,7 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
             InstallLaunch.class.getPackageName() + ".callingPkgName";
     private static final String TAG = InstallLaunch.class.getSimpleName();
     private static final String TAG_DIALOG = "dialog";
+    private final int REQUEST_TRUST_EXTERNAL_SOURCE = 1;
     private final boolean mLocalLOGV = false;
     private InstallViewModel mInstallViewModel;
     private InstallRepository mInstallRepository;
@@ -95,8 +103,20 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
             }
         } else if (installStage.getStageCode() == InstallStage.STAGE_USER_ACTION_REQUIRED) {
             InstallUserActionRequired uar = (InstallUserActionRequired) installStage;
-            InstallConfirmationFragment actionDialog = new InstallConfirmationFragment(uar);
-            showDialogInner(actionDialog);
+            switch (uar.getActionReason()) {
+                case InstallUserActionRequired.USER_ACTION_REASON_INSTALL_CONFIRMATION:
+                    InstallConfirmationFragment actionDialog = new InstallConfirmationFragment(uar);
+                    showDialogInner(actionDialog);
+                    break;
+                case InstallUserActionRequired.USER_ACTION_REASON_UNKNOWN_SOURCE:
+                    ExternalSourcesBlockedFragment externalSourceDialog =
+                        new ExternalSourcesBlockedFragment(uar);
+                    showDialogInner(externalSourceDialog);
+                    break;
+                case InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE:
+                    AnonymousSourceFragment anonymousSourceDialog = new AnonymousSourceFragment();
+                    showDialogInner(anonymousSourceDialog);
+            }
         } else {
             Log.d(TAG, "Unimplemented stage: " + installStage.getStageCode());
             showDialogInner(null);
@@ -178,11 +198,32 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
 
     @Override
     public void onPositiveResponse(int reasonCode) {
-        // TODO: Implement this
+        if (reasonCode == InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE) {
+            mInstallViewModel.forcedSkipSourceCheck();
+        }
     }
 
     @Override
     public void onNegativeResponse(int stageCode) {
-        // TODO: Implement this
+        if (stageCode == InstallStage.STAGE_USER_ACTION_REQUIRED) {
+            mInstallViewModel.cleanupInstall();
+        }
+        setResult(Activity.RESULT_CANCELED, true);
+    }
+
+    @Override
+    public void sendUnknownAppsIntent(String sourcePackageName) {
+        Intent settingsIntent = new Intent();
+        settingsIntent.setAction(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+        final Uri packageUri = Uri.parse("package:" + sourcePackageName);
+        settingsIntent.setData(packageUri);
+        settingsIntent.setFlags(FLAG_ACTIVITY_NO_HISTORY);
+
+        try {
+            startActivityForResult(settingsIntent, REQUEST_TRUST_EXTERNAL_SOURCE);
+        } catch (ActivityNotFoundException exc) {
+            Log.e(TAG, "Settings activity not found for action: "
+                + Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+        }
     }
 }

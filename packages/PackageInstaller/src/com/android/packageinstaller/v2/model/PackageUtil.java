@@ -352,6 +352,40 @@ public class PackageUtil {
         return null;
     }
 
+    /**
+     * @return the packageName corresponding to a UID.
+     */
+    public static String getPackageNameForUid(Context context, int sourceUid,
+        String callingPackage) {
+        if (sourceUid == Process.INVALID_UID) {
+            return null;
+        }
+        // If the sourceUid belongs to the system downloads provider, we explicitly return the
+        // name of the Download Manager package. This is because its UID is shared with multiple
+        // packages, resulting in uncertainty about which package will end up first in the list
+        // of packages associated with this UID
+        PackageManager pm = context.getPackageManager();
+        ApplicationInfo systemDownloadProviderInfo = getSystemDownloadsProviderInfo(
+            pm, sourceUid);
+        if (systemDownloadProviderInfo != null) {
+            return systemDownloadProviderInfo.packageName;
+        }
+        String[] packagesForUid = pm.getPackagesForUid(sourceUid);
+        if (packagesForUid == null) {
+            return null;
+        }
+        if (packagesForUid.length > 1) {
+            if (callingPackage != null) {
+                for (String packageName : packagesForUid) {
+                    if (packageName.equals(callingPackage)) {
+                        return packageName;
+                    }
+                }
+            }
+            Log.i(TAG, "Multiple packages found for source uid " + sourceUid);
+        }
+        return packagesForUid[0];
+    }
 
     /**
      * Utility method to get package information for a given {@link File}

@@ -17,7 +17,6 @@
 package com.android.packageinstaller.v2.model.installstagedata;
 
 import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.android.packageinstaller.v2.model.PackageUtil.AppSnippet;
 
@@ -28,13 +27,13 @@ public class InstallUserActionRequired extends InstallStage {
     public static final int USER_ACTION_REASON_INSTALL_CONFIRMATION = 2;
     private final int mStage = InstallStage.STAGE_USER_ACTION_REQUIRED;
     private final int mActionReason;
-    @NonNull
+    @Nullable
     private final AppSnippet mAppSnippet;
     private final boolean mIsAppUpdating;
     @Nullable
     private final String mDialogMessage;
 
-    public InstallUserActionRequired(int actionReason, @NonNull AppSnippet appSnippet,
+    public InstallUserActionRequired(int actionReason, @Nullable AppSnippet appSnippet,
         boolean isUpdating, @Nullable String dialogMessage) {
         mActionReason = actionReason;
         mAppSnippet = appSnippet;
@@ -47,14 +46,14 @@ public class InstallUserActionRequired extends InstallStage {
         return mStage;
     }
 
-    @NonNull
+    @Nullable
     public Drawable getAppIcon() {
-        return mAppSnippet.getIcon();
+        return mAppSnippet != null ? mAppSnippet.getIcon() : null;
     }
 
-    @NonNull
+    @Nullable
     public String getAppLabel() {
-        return (String) mAppSnippet.getLabel();
+        return mAppSnippet != null ? (String) mAppSnippet.getLabel() : null;
     }
 
     public boolean isAppUpdating() {
@@ -66,6 +65,10 @@ public class InstallUserActionRequired extends InstallStage {
         return mDialogMessage;
     }
 
+    public int getActionReason() {
+        return mActionReason;
+    }
+
     public static class Builder {
 
         private final int mActionReason;
@@ -73,7 +76,7 @@ public class InstallUserActionRequired extends InstallStage {
         private boolean mIsAppUpdating;
         private String mDialogMessage;
 
-        public Builder(int actionReason, @NonNull AppSnippet appSnippet) {
+        public Builder(int actionReason, @Nullable AppSnippet appSnippet) {
             mActionReason = actionReason;
             mAppSnippet = appSnippet;
         }

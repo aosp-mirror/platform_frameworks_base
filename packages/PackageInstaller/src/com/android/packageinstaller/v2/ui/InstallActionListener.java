@@ -24,6 +24,11 @@ public interface InstallActionListener {
     void onPositiveResponse(int stageCode);
 
     /**
+     * Method to dispatch intent for toggling "install from unknown sources" setting for a package
+     */
+    void sendUnknownAppsIntent(String packageName);
+
+    /**
      * Method to handle a negative response from the user
      */
     void onNegativeResponse(int stageCode);

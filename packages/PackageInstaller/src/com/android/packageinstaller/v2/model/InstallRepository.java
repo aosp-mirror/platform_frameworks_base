@@ -19,17 +19,21 @@ package com.android.packageinstaller.v2.model;
 import static com.android.packageinstaller.v2.model.PackageUtil.canPackageQuery;
 import static com.android.packageinstaller.v2.model.PackageUtil.generateStubPackageInfo;
 import static com.android.packageinstaller.v2.model.PackageUtil.getAppSnippet;
-import static com.android.packageinstaller.v2.model.PackageUtil.isCallerSessionOwner;
 import static com.android.packageinstaller.v2.model.PackageUtil.getPackageInfo;
+import static com.android.packageinstaller.v2.model.PackageUtil.getPackageNameForUid;
+import static com.android.packageinstaller.v2.model.PackageUtil.isCallerSessionOwner;
 import static com.android.packageinstaller.v2.model.PackageUtil.isInstallPermissionGrantedOrRequested;
 import static com.android.packageinstaller.v2.model.PackageUtil.isPermissionGranted;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_INTERNAL_ERROR;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_POLICY;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.DLG_PACKAGE_ERROR;
+import static com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired.USER_ACTION_REASON_INSTALL_CONFIRMATION;
+import static com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired.USER_ACTION_REASON_UNKNOWN_SOURCE;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -73,6 +77,7 @@ public class InstallRepository {
     private final PackageInstaller mPackageInstaller;
     private final UserManager mUserManager;
     private final DevicePolicyManager mDevicePolicyManager;
+    private final AppOpsManager mAppOpsManager;
     private final MutableLiveData<InstallStage> mStagingResult = new MutableLiveData<>();
     private final boolean mLocalLOGV = false;
     private Intent mIntent;
@@ -89,6 +94,7 @@ public class InstallRepository {
     private int mCallingUid;
     private String mCallingPackage;
     private SessionStager mSessionStager;
+    private AppOpRequestInfo mAppOpRequestInfo;
     private AppSnippet mAppSnippet;
     /**
      * PackageInfo of the app being installed on device.
@@ -101,6 +107,7 @@ public class InstallRepository {
         mPackageInstaller = mPackageManager.getPackageInstaller();
         mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
         mUserManager = context.getSystemService(UserManager.class);
+        mAppOpsManager = context.getSystemService(AppOpsManager.class);
     }
 
     /**
@@ -143,6 +150,9 @@ public class InstallRepository {
         final ApplicationInfo sourceInfo = getSourceInfo(mCallingPackage);
         // Uid of the source package, with a preference to uid from ApplicationInfo
         final int originatingUid = sourceInfo != null ? sourceInfo.uid : mCallingUid;
+        mAppOpRequestInfo = new AppOpRequestInfo(
+            getPackageNameForUid(mContext, originatingUid, mCallingPackage),
+            originatingUid, callingAttributionTag);
 
         if (mCallingUid == Process.INVALID_UID && sourceInfo == null) {
             // Caller's identity could not be determined. Abort the install
@@ -389,10 +399,8 @@ public class InstallRepository {
             // computed, else it returns InstallAborted.
             return generateConfirmationSnippet();
         } else {
-            // This will be uncommented in subsequent changes.
-            // InstallStage unknownSourceStage = handleUnknownSources(mAppOpRequestInfo);
-            InstallStage unknownSourceStage = null;
-            if (unknownSourceStage == null) {
+            InstallStage unknownSourceStage = handleUnknownSources(mAppOpRequestInfo);
+            if (unknownSourceStage.getStageCode() == InstallStage.STAGE_READY) {
                 // Source app already has appOp granted.
                 return generateConfirmationSnippet();
             } else {
@@ -633,6 +641,72 @@ public class InstallRepository {
         return true;
     }
 
+    private InstallStage handleUnknownSources(AppOpRequestInfo requestInfo) {
+        if (requestInfo.getCallingPackage() == null) {
+            Log.i(TAG, "No source found for package " + mNewPackageInfo.packageName);
+            return new InstallUserActionRequired.Builder(
+                USER_ACTION_REASON_ANONYMOUS_SOURCE, null)
+                .build();
+        }
+        // Shouldn't use static constant directly, see b/65534401.
+        final String appOpStr =
+            AppOpsManager.permissionToOp(Manifest.permission.REQUEST_INSTALL_PACKAGES);
+        final int appOpMode = mAppOpsManager.noteOpNoThrow(appOpStr,
+            requestInfo.getOriginatingUid(),
+            requestInfo.getCallingPackage(), requestInfo.getAttributionTag(),
+            "Started package installation activity");
+
+        if (mLocalLOGV) {
+            Log.i(TAG, "handleUnknownSources(): appMode=" + appOpMode);
+        }
+        switch (appOpMode) {
+            case AppOpsManager.MODE_DEFAULT:
+                mAppOpsManager.setMode(appOpStr, requestInfo.getOriginatingUid(),
+                    requestInfo.getCallingPackage(), AppOpsManager.MODE_ERRORED);
+                // fall through
+            case AppOpsManager.MODE_ERRORED:
+                try {
+                    ApplicationInfo sourceInfo =
+                        mPackageManager.getApplicationInfo(requestInfo.getCallingPackage(), 0);
+                    AppSnippet sourceAppSnippet = getAppSnippet(mContext, sourceInfo);
+                    return new InstallUserActionRequired.Builder(
+                        USER_ACTION_REASON_UNKNOWN_SOURCE, sourceAppSnippet)
+                        .setDialogMessage(requestInfo.getCallingPackage())
+                        .build();
+                } catch (NameNotFoundException e) {
+                    Log.e(TAG, "Did not find appInfo for " + requestInfo.getCallingPackage());
+                    return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
+                }
+            case AppOpsManager.MODE_ALLOWED:
+                return new InstallReady();
+            default:
+                Log.e(TAG, "Invalid app op mode " + appOpMode
+                    + " for OP_REQUEST_INSTALL_PACKAGES found for uid "
+                    + requestInfo.getOriginatingUid());
+                return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
+        }
+    }
+
+    /**
+     * Cleanup the staged session. Also signal the packageinstaller that an install session is to
+     * be aborted
+     */
+    public void cleanupInstall() {
+        if (mSessionId > 0) {
+            mPackageInstaller.setPermissionsResult(mSessionId, false);
+        } else if (mStagedSessionId > 0) {
+            cleanupStagingSession();
+        }
+    }
+
+    /**
+     * When the identity of the install source could not be determined, user can skip checking the
+     * source and directly proceed with the install.
+     */
+    public InstallStage forcedSkipSourceCheck() {
+        return generateConfirmationSnippet();
+    }
+
     public MutableLiveData<Integer> getStagingProgress() {
         if (mSessionStager != null) {
             return mSessionStager.getProgress();
@@ -667,6 +741,31 @@ public class InstallRepository {
 
         public int getUid() {
             return mUid;
+        }
+    }
+
+    public static class AppOpRequestInfo {
+
+        private String mCallingPackage;
+        private String mAttributionTag;
+        private int mOrginatingUid;
+
+        public AppOpRequestInfo(String callingPackage, int orginatingUid, String attributionTag) {
+            mCallingPackage = callingPackage;
+            mOrginatingUid = orginatingUid;
+            mAttributionTag = attributionTag;
+        }
+
+        public String getCallingPackage() {
+            return mCallingPackage;
+        }
+
+        public String getAttributionTag() {
+            return mAttributionTag;
+        }
+
+        public int getOriginatingUid() {
+            return mOrginatingUid;
         }
     }
 }
