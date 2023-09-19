@@ -738,8 +738,17 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         final boolean wasClosing = closingIdx >= 0;
                         t.reparent(target.leash, mInfo.getRoot(rootIdx).getLeash());
                         t.setLayer(target.leash, layer);
-                        // Hide the animation leash if not already visible, let listener show it
-                        t.setVisibility(target.leash, !wasClosing);
+                        if (wasClosing) {
+                            // App was previously visible and is closing
+                            t.show(target.leash);
+                            t.setAlpha(target.leash, 1f);
+                            // Also override the task alpha as it was set earlier when dispatching
+                            // the transition and setting up the leash to hide the
+                            t.setAlpha(change.getLeash(), 1f);
+                        } else {
+                            // Hide the animation leash, let the listener show it
+                            t.hide(target.leash);
+                        }
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                                 "  opening new leaf taskId=%d wasClosing=%b",
                                 target.taskId, wasClosing);
