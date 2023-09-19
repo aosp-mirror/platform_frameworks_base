@@ -17,21 +17,30 @@
 package com.android.systemui.statusbar.data.repository
 
 import android.view.WindowInsets
+import android.view.WindowInsetsController
+import android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS
 import androidx.test.filters.SmallTest
+import com.android.internal.statusbar.LetterboxDetails
+import com.android.internal.view.AppearanceRegion
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.Mockito.verify
 
 @SmallTest
 class StatusBarModeRepositoryImplTest : SysuiTestCase() {
+    private val testScope = TestScope()
     private val commandQueue = mock<CommandQueue>()
 
     private val underTest =
         StatusBarModeRepositoryImpl(
+                testScope.backgroundScope,
                 DISPLAY_ID,
                 commandQueue,
             )
@@ -175,6 +184,71 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         underTest.clearTransient()
 
         assertThat(underTest.isTransientShown.value).isFalse()
+    }
+
+    @Test
+    fun isInFullscreenMode_visibleTypesHasStatusBar_false() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isInFullscreenMode)
+
+            onSystemBarAttributesChanged(
+                requestedVisibleTypes = WindowInsets.Type.statusBars(),
+            )
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isInFullscreenMode_visibleTypesDoesNotHaveStatusBar_true() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isInFullscreenMode)
+
+            onSystemBarAttributesChanged(
+                requestedVisibleTypes = WindowInsets.Type.navigationBars(),
+            )
+
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun isInFullscreenMode_wrongDisplayId_notUpdated() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isInFullscreenMode)
+
+            onSystemBarAttributesChanged(
+                requestedVisibleTypes = WindowInsets.Type.navigationBars(),
+            )
+            assertThat(latest).isTrue()
+
+            onSystemBarAttributesChanged(
+                displayId = DISPLAY_ID + 1,
+                requestedVisibleTypes = WindowInsets.Type.statusBars(),
+            )
+
+            assertThat(latest).isTrue()
+        }
+
+    private fun onSystemBarAttributesChanged(
+        displayId: Int = DISPLAY_ID,
+        @WindowInsetsController.Appearance appearance: Int = APPEARANCE_OPAQUE_STATUS_BARS,
+        appearanceRegions: Array<AppearanceRegion> = emptyArray(),
+        navbarColorManagedByIme: Boolean = false,
+        @WindowInsetsController.Behavior behavior: Int = WindowInsetsController.BEHAVIOR_DEFAULT,
+        @WindowInsets.Type.InsetsType
+        requestedVisibleTypes: Int = WindowInsets.Type.defaultVisible(),
+        packageName: String = "package name",
+        letterboxDetails: Array<LetterboxDetails> = emptyArray(),
+    ) {
+        commandQueueCallback.onSystemBarAttributesChanged(
+            displayId,
+            appearance,
+            appearanceRegions,
+            navbarColorManagedByIme,
+            behavior,
+            requestedVisibleTypes,
+            packageName,
+            letterboxDetails,
+        )
     }
 
     private companion object {
