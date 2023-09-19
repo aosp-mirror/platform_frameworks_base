@@ -31,7 +31,7 @@ import org.junit.runner.RunWith
 class DismissSplitScreenByGoHomeGesturalNavLandscape :
     DismissSplitScreenByGoHome(Rotation.ROTATION_90) {
 
-    @ExpectedScenarios(["SPLIT_SCREEN_EXIT"])
+    @ExpectedScenarios(["APP_CLOSE_TO_HOME"]) // SPLIT_SCREEN_EXIT not yet tagged here (b/301222449)
     @Test
     override fun dismissSplitScreenByGoHome() = super.dismissSplitScreenByGoHome()
 
