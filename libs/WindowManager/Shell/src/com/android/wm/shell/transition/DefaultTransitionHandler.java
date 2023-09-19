@@ -99,7 +99,6 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.policy.AttributeCache;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
@@ -182,7 +181,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 /* broadcastPermission = */ null,
                 mMainHandler);
 
-        AttributeCache.init(mContext);
+        TransitionAnimation.initAttributeCache(mContext, mMainHandler);
     }
 
     private void updateEnterpriseThumbnailDrawable() {
