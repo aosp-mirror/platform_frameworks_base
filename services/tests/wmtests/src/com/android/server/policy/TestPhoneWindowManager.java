@@ -464,6 +464,10 @@ class TestPhoneWindowManager {
         doReturn(device).when(mInputManager).getInputDevice(anyInt());
     }
 
+    void overrideInjectKeyEvent() {
+        doReturn(true).when(mInputManager).injectInputEvent(any(KeyEvent.class), anyInt());
+    }
+
     void overrideSearchKeyBehavior(int behavior) {
         mPhoneWindowManager.mSearchKeyBehavior = behavior;
     }
