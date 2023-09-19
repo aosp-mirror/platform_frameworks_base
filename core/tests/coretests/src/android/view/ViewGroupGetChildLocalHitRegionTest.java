@@ -90,22 +90,73 @@ public class ViewGroupGetChildLocalHitRegionTest {
         assertGetChildLocalHitRegionEmpty(R.id.view_cover_top, R.id.view_cover_bottom);
     }
 
+    @Test
+    public void testGetChildLocalHitRegion_topViewIsNotBlockedByBottomView() {
+        // In this case, two views overlap with each other and the MotionEvent is injected to the
+        // bottom view. It verifies that the hit region of the top view won't be blocked by the
+        // bottom view.
+        testGetChildLocalHitRegion_topViewIsNotBlockedByBottomView(/* isHover= */ true);
+        testGetChildLocalHitRegion_topViewIsNotBlockedByBottomView(/* isHover= */ false);
+    }
+
+    private void testGetChildLocalHitRegion_topViewIsNotBlockedByBottomView(boolean isHover) {
+        // In this case, two views overlap with each other and the MotionEvent is injected to the
+        // bottom view. It verifies that the hit region of the top view won't be blocked by the
+        // bottom view.
+        mScenarioRule.getScenario().onActivity(activity -> {
+            View viewTop = activity.findViewById(R.id.view_overlap_top);
+            View viewBottom = activity.findViewById(R.id.view_overlap_bottom);
+
+            // The viewTop covers the left side of the viewBottom. To avoid the MotionEvent gets
+            // blocked by viewTop, we inject MotionEvents into viewBottom's right bottom corner.
+            float x = viewBottom.getWidth() - 1;
+            float y = viewBottom.getHeight() - 1;
+            injectMotionEvent(viewBottom, x, y, isHover);
+
+            Matrix actualMatrix = new Matrix();
+            Region actualRegion = new Region(0, 0, viewTop.getWidth(), viewTop.getHeight());
+            boolean actualNotEmpty = viewTop.getParent()
+                    .getChildLocalHitRegion(viewTop, actualRegion, actualMatrix, isHover);
+
+            int[] windowLocation = new int[2];
+            viewTop.getLocationInWindow(windowLocation);
+            Matrix expectMatrix = new Matrix();
+            expectMatrix.preTranslate(-windowLocation[0], -windowLocation[1]);
+            // Though viewTop and viewBottom overlaps, viewTop's hit region won't be blocked by
+            // viewBottom.
+            Region expectRegion = new Region(0, 0, viewTop.getWidth(), viewTop.getHeight());
+
+            assertThat(actualNotEmpty).isTrue();
+            assertThat(actualMatrix).isEqualTo(expectMatrix);
+            assertThat(actualRegion).isEqualTo(expectRegion);
+        });
+    }
+
     private void injectMotionEvent(View view, boolean isHover) {
+        float x = view.getWidth() / 2f;
+        float y = view.getHeight() / 2f;
+        injectMotionEvent(view, x, y, isHover);
+    }
+
+    /**
+     * Inject MotionEvent into the given view, at the given location specified in the view's
+     * coordinates.
+     */
+    private void injectMotionEvent(View view, float x, float y, boolean isHover) {
         int[] location = new int[2];
         view.getLocationInWindow(location);
 
-        float x = location[0] + view.getWidth() / 2f;
-        float y = location[1] + view.getHeight() / 2f;
+        float globalX = location[0] + x;
+        float globalY = location[1] + y;
 
         int action = isHover ? MotionEvent.ACTION_HOVER_ENTER : MotionEvent.ACTION_DOWN;
         MotionEvent motionEvent = MotionEvent.obtain(/* downtime= */ 0, /* eventTime= */ 0, action,
-                x, y, /* pressure= */ 0, /* size= */ 0, /* metaState= */ 0,
+                globalX, globalY, /* pressure= */ 0, /* size= */ 0, /* metaState= */ 0,
                 /* xPrecision= */ 1, /* yPrecision= */ 1, /* deviceId= */0, /* edgeFlags= */0);
 
         View rootView = view.getRootView();
         rootView.dispatchPointerEvent(motionEvent);
     }
-
     private void assertGetChildLocalHitRegion(int viewId) {
         assertGetChildLocalHitRegion(viewId, /* isHover= */ true);
         assertGetChildLocalHitRegion(viewId, /* isHover= */ false);
