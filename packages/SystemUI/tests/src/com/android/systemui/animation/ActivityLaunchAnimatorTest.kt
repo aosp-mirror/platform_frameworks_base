@@ -57,7 +57,8 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        activityLaunchAnimator = ActivityLaunchAnimator(testLaunchAnimator, testLaunchAnimator)
+        activityLaunchAnimator =
+            ActivityLaunchAnimator(testLaunchAnimator, testLaunchAnimator, disableWmTimeout = true)
         activityLaunchAnimator.callback = callback
         activityLaunchAnimator.addListener(listener)
     }
