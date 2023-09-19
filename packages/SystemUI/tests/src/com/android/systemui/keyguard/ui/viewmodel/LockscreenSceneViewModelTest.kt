@@ -44,6 +44,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
 
     private val underTest =
         LockscreenSceneViewModel(
+            applicationScope = testScope.backgroundScope,
             authenticationInteractor = authenticationInteractor,
             longPress =
                 KeyguardLongPressViewModel(
