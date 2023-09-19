@@ -959,8 +959,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 mKeyphraseMetadata = new KeyphraseMetadata(1, mText, fakeSupportedLocales,
                         AlwaysOnHotwordDetector.RECOGNITION_MODE_VOICE_TRIGGER);
             }
-            notifyStateChangedLocked();
         }
+        notifyStateChanged(availability);
     }
 
     /**
@@ -1370,8 +1370,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
 
             mAvailability = STATE_INVALID;
             mIsAvailabilityOverriddenByTestApi = false;
-            notifyStateChangedLocked();
         }
+        notifyStateChanged(STATE_INVALID);
         super.destroy();
     }
 
@@ -1401,6 +1401,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
      */
     // TODO(b/281608561): remove the enrollment flow from AlwaysOnHotwordDetector
     void onSoundModelsChanged() {
+        boolean notifyError = false;
+
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID
                     || mAvailability == STATE_HARDWARE_UNAVAILABLE
@@ -1441,6 +1443,9 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                     // calling stopRecognition where there is no started session.
                     Log.w(TAG, "Failed to stop recognition after enrollment update: code="
                             + result);
+
+                    // Execute a refresh availability task - which should then notify of a change.
+                    new RefreshAvailabilityTask().execute();
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to stop recognition after enrollment update", e);
                     if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
@@ -1449,14 +1454,14 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                                         + Log.getStackTraceString(e),
                                 FailureSuggestedAction.RECREATE_DETECTOR));
                     } else {
-                        updateAndNotifyStateChangedLocked(STATE_ERROR);
+                        notifyError = true;
                     }
-                    return;
                 }
             }
+        }
 
-            // Execute a refresh availability task - which should then notify of a change.
-            new RefreshAvailabilityTask().execute();
+        if (notifyError) {
+            updateAndNotifyStateChanged(STATE_ERROR);
         }
     }
 
@@ -1572,10 +1577,11 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
     }
 
-    @GuardedBy("mLock")
-    private void updateAndNotifyStateChangedLocked(int availability) {
-        updateAvailabilityLocked(availability);
-        notifyStateChangedLocked();
+    private void updateAndNotifyStateChanged(int availability) {
+        synchronized (mLock) {
+            updateAvailabilityLocked(availability);
+        }
+        notifyStateChanged(availability);
     }
 
     @GuardedBy("mLock")
@@ -1589,17 +1595,17 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
     }
 
-    @GuardedBy("mLock")
-    private void notifyStateChangedLocked() {
+    private void notifyStateChanged(int newAvailability) {
         Message message = Message.obtain(mHandler, MSG_AVAILABILITY_CHANGED);
-        message.arg1 = mAvailability;
+        message.arg1 = newAvailability;
         message.sendToTarget();
     }
 
-    @GuardedBy("mLock")
     private void sendUnknownFailure(String failureMessage) {
-        // update but do not call onAvailabilityChanged callback for STATE_ERROR
-        updateAvailabilityLocked(STATE_ERROR);
+        synchronized (mLock) {
+            // update but do not call onAvailabilityChanged callback for STATE_ERROR
+            updateAvailabilityLocked(STATE_ERROR);
+        }
         Message.obtain(mHandler, MSG_DETECTION_UNKNOWN_FAILURE, failureMessage).sendToTarget();
     }
 
@@ -1802,19 +1808,17 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                             availability = STATE_KEYPHRASE_UNENROLLED;
                         }
                     }
-                    updateAndNotifyStateChangedLocked(availability);
                 }
+                updateAndNotifyStateChanged(availability);
             } catch (Exception e) {
                 // Any exception here not caught will crash the process because AsyncTask does not
                 // bubble up the exceptions to the client app, so we must propagate it to the app.
                 Slog.w(TAG, "Failed to refresh availability", e);
-                synchronized (mLock) {
-                    if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
-                        sendUnknownFailure(
-                                "Failed to refresh availability: " + Log.getStackTraceString(e));
-                    } else {
-                        updateAndNotifyStateChangedLocked(STATE_ERROR);
-                    }
+                if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
+                    sendUnknownFailure(
+                            "Failed to refresh availability: " + Log.getStackTraceString(e));
+                } else {
+                    updateAndNotifyStateChanged(STATE_ERROR);
                 }
             }
 
