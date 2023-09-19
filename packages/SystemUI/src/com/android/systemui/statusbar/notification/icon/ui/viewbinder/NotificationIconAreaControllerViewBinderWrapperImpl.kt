@@ -36,6 +36,7 @@ import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.Flags.NEW_AOD_TRANSITION
 import com.android.systemui.flags.ViewRefactorFlag
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -88,7 +89,7 @@ constructor(
     private val bubblesOptional: Optional<Bubbles>,
     demoModeController: DemoModeController,
     darkIconDispatcher: DarkIconDispatcher,
-    featureFlags: FeatureFlags,
+    private val featureFlags: FeatureFlags,
     private val statusBarWindowController: StatusBarWindowController,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val shelfIconsViewModel: NotificationIconContainerShelfViewModel,
@@ -294,9 +295,12 @@ constructor(
         var animate = true
         if (!bypassController.bypassEnabled) {
             animate = dozeParameters.alwaysOn && !dozeParameters.displayNeedsBlanking
-            // We only want the appear animations to happen when the notifications get fully hidden,
-            // since otherwise the unhide animation overlaps
-            animate = animate and isFullyHidden
+            if (!featureFlags.isEnabled(NEW_AOD_TRANSITION)) {
+                // We only want the appear animations to happen when the notifications get fully
+                // hidden,
+                // since otherwise the unhide animation overlaps
+                animate = animate and isFullyHidden
+            }
         }
         updateAodIconsVisibility(animate, false /* force */)
         updateAodNotificationIcons()
@@ -650,23 +654,34 @@ constructor(
             aodIconsVisible = visible
             aodIcons!!.animate().cancel()
             if (animate) {
-                val wasFullyInvisible = aodIcons!!.visibility != View.VISIBLE
-                if (aodIconsVisible) {
-                    if (wasFullyInvisible) {
-                        // No fading here, let's just appear the icons instead!
-                        aodIcons!!.visibility = View.VISIBLE
-                        aodIcons!!.alpha = 1.0f
-                        appearAodIcons()
+                if (featureFlags.isEnabled(NEW_AOD_TRANSITION)) {
+                    // Let's make sure the icon are translated to 0, since we cancelled it above
+                    animateInAodIconTranslation()
+                    if (aodIconsVisible) {
+                        CrossFadeHelper.fadeIn(aodIcons)
+                    } else {
+                        CrossFadeHelper.fadeOut(aodIcons)
+                    }
+                } else {
+                    val wasFullyInvisible = aodIcons!!.visibility != View.VISIBLE
+                    if (aodIconsVisible) {
+                        if (wasFullyInvisible) {
+                            // No fading here, let's just appear the icons instead!
+                            aodIcons!!.visibility = View.VISIBLE
+                            aodIcons!!.alpha = 1.0f
+                            appearAodIcons()
+                        } else {
+                            // Let's make sure the icon are translated to 0, since we cancelled it
+                            // above
+                            animateInAodIconTranslation()
+                            // We were fading out, let's fade in instead
+                            CrossFadeHelper.fadeIn(aodIcons)
+                        }
                     } else {
                         // Let's make sure the icon are translated to 0, since we cancelled it above
                         animateInAodIconTranslation()
-                        // We were fading out, let's fade in instead
-                        CrossFadeHelper.fadeIn(aodIcons)
+                        CrossFadeHelper.fadeOut(aodIcons)
                     }
-                } else {
-                    // Let's make sure the icon are translated to 0, since we cancelled it above
-                    animateInAodIconTranslation()
-                    CrossFadeHelper.fadeOut(aodIcons)
                 }
             } else {
                 aodIcons!!.alpha = 1.0f

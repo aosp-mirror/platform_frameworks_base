@@ -180,6 +180,10 @@ object Flags {
     @JvmField
     val LIGHT_REVEAL_MIGRATION = unreleasedFlag("light_reveal_migration", teamfood = false)
 
+    // TODO(b/301915812): Tracking Bug
+    @JvmField
+    val NEW_AOD_TRANSITION = unreleasedFlag("new_aod_transition", teamfood = false)
+
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
     @JvmField val FACE_AUTH_REFACTOR = unreleasedFlag("face_auth_refactor", teamfood = true)

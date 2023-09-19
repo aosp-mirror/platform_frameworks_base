@@ -772,6 +772,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * @return if the view is in heads up state, i.e either still heads upped or it's disappearing.
      */
+    @Override
     public boolean isHeadsUpState() {
         return mIsHeadsUp || mHeadsupDisappearRunning;
     }

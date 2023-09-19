@@ -621,6 +621,10 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         return false;
     }
 
+    public boolean isHeadsUpState() {
+        return false;
+    }
+
     public boolean isChildInGroup() {
         return false;
     }

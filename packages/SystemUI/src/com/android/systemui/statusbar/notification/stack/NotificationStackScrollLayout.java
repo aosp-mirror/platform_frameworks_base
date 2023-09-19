@@ -203,6 +203,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final ViewRefactorFlag mAnimatedInsets;
     private final ViewRefactorFlag mShelfRefactor;
 
+    private final boolean mNewAodTransition;
+
     private int mContentHeight;
     private float mIntrinsicContentHeight;
     private int mPaddingBetweenElements;
@@ -622,6 +624,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         Resources res = getResources();
         FeatureFlags featureFlags = Dependency.get(FeatureFlags.class);
         mDebugLines = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
+        mNewAodTransition = featureFlags.isEnabled(Flags.NEW_AOD_TRANSITION);
         mDebugRemoveAnimation = featureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
         mSensitiveRevealAnimEndabled = featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         mAnimatedInsets =
@@ -1414,12 +1417,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @VisibleForTesting
     public void updateStackHeight(float endHeight, float fraction) {
-        // During the (AOD<=>LS) transition where dozeAmount is changing,
-        // apply dozeAmount to stack height instead of expansionFraction
-        // to unfurl notifications on AOD=>LS wakeup (and furl up on LS=>AOD sleep)
-        final float dozeAmount = mAmbientState.getDozeAmount();
-        if (0f < dozeAmount && dozeAmount < 1f) {
-            fraction = 1f - dozeAmount;
+        if (!mNewAodTransition) {
+            // During the (AOD<=>LS) transition where dozeAmount is changing,
+            // apply dozeAmount to stack height instead of expansionFraction
+            // to unfurl notifications on AOD=>LS wakeup (and furl up on LS=>AOD sleep)
+            final float dozeAmount = mAmbientState.getDozeAmount();
+            if (0f < dozeAmount && dozeAmount < 1f) {
+                fraction = 1f - dozeAmount;
+            }
         }
         mAmbientState.setStackHeight(
                 MathUtils.lerp(endHeight * StackScrollAlgorithm.START_FRACTION,

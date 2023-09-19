@@ -132,7 +132,14 @@ object KeyguardQuickAffordanceViewBinder {
         vibratorHelper: VibratorHelper?,
     ) {
         if (!viewModel.isVisible) {
-            view.isInvisible = true
+            view.alpha = 1f
+            view
+                    .animate()
+                    .alpha(0f)
+                    .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
+                    .setDuration(EXIT_DOZE_BUTTON_REVEAL_ANIMATION_DURATION_MS)
+                    .withEndAction { view.isInvisible = true }
+                    .start()
             return
         }
 
@@ -140,11 +147,9 @@ object KeyguardQuickAffordanceViewBinder {
             view.isVisible = true
             if (viewModel.animateReveal) {
                 view.alpha = 0f
-                view.translationY = view.height / 2f
                 view
                     .animate()
                     .alpha(1f)
-                    .translationY(0f)
                     .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                     .setDuration(EXIT_DOZE_BUTTON_REVEAL_ANIMATION_DURATION_MS)
                     .start()
