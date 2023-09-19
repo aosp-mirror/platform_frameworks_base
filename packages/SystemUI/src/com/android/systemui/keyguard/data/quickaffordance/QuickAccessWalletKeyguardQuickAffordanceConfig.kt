@@ -34,6 +34,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.wallet.controller.QuickAccessWalletController
+import com.android.systemui.wallet.util.getPaymentCards
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -60,7 +61,7 @@ constructor(
             val callback =
                 object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
                     override fun onWalletCardsRetrieved(response: GetWalletCardsResponse) {
-                        val hasCards = response?.walletCards?.isNotEmpty() == true
+                        val hasCards = getPaymentCards(response.walletCards)?.isNotEmpty() == true
                         trySendWithFailureLogging(
                             state(
                                 isFeatureEnabled = isWalletAvailable(),
@@ -135,7 +136,7 @@ constructor(
                 object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
                     override fun onWalletCardsRetrieved(response: GetWalletCardsResponse) {
                         continuation.resumeWith(
-                            Result.success(response?.walletCards ?: emptyList())
+                            Result.success(getPaymentCards(response.walletCards) ?: emptyList())
                         )
                     }
 

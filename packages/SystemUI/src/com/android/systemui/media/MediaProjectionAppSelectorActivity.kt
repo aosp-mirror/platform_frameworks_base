@@ -274,7 +274,9 @@ class MediaProjectionAppSelectorActivity(
             recentsViewController.hasRecentTasks
         }
 
-    override fun shouldShowContentPreviewWhenEmpty() = shouldShowContentPreview()
+    override fun shouldShowStickyContentPreviewWhenEmpty() = shouldShowContentPreview()
+
+    override fun shouldShowServiceTargets() = false
 
     private fun hasWorkProfile() = mMultiProfilePagerAdapter.count > 1
 

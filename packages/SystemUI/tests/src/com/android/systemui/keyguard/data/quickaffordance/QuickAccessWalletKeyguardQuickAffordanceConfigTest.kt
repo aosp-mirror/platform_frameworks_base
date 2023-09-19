@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 import android.graphics.drawable.Drawable
 import android.service.quickaccesswallet.GetWalletCardsResponse
 import android.service.quickaccesswallet.QuickAccessWalletClient
+import android.service.quickaccesswallet.WalletCard
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -38,6 +39,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -90,6 +92,40 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
             )
         job.cancel()
     }
+
+    @Test
+    fun affordance_keyguardShowing_hasNonPaymentCard_modelIsNone() =
+        runTest(UnconfinedTestDispatcher()) {
+            setUpState(cardType = WalletCard.CARD_TYPE_NON_PAYMENT)
+            var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
+
+            val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
+            job.cancel()
+        }
+
+    @Test
+    fun affordance_keyguardShowing_hasPaymentCard_visibleModel() =
+        runTest(UnconfinedTestDispatcher()) {
+            setUpState(cardType = WalletCard.CARD_TYPE_PAYMENT)
+            var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
+
+            val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+
+            val visibleModel = latest as KeyguardQuickAffordanceConfig.LockScreenState.Visible
+            assertThat(visibleModel.icon)
+                .isEqualTo(
+                    Icon.Loaded(
+                        drawable = ICON,
+                        contentDescription =
+                            ContentDescription.Resource(
+                                res = R.string.accessibility_wallet_button,
+                            ),
+                    )
+                )
+            job.cancel()
+        }
 
     @Test
     fun affordance_walletFeatureNotEnabled_modelIsNone() = runBlockingTest {
@@ -187,6 +223,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         isWalletServiceAvailable: Boolean = true,
         isWalletQuerySuccessful: Boolean = true,
         hasSelectedCard: Boolean = true,
+        cardType: Int = WalletCard.CARD_TYPE_UNKNOWN
     ) {
         val walletClient: QuickAccessWalletClient = mock()
         whenever(walletClient.tileIcon).thenReturn(ICON)
@@ -202,7 +239,19 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
                 if (isWalletQuerySuccessful) {
                     onWalletCardsRetrieved(
                         if (hasSelectedCard) {
-                            GetWalletCardsResponse(listOf(mock()), 0)
+                            GetWalletCardsResponse(
+                                listOf(
+                                    WalletCard.Builder(
+                                            /*cardId= */ CARD_ID,
+                                            /*cardType= */ cardType,
+                                            /*cardImage= */ mock(),
+                                            /*contentDescription=  */ CARD_DESCRIPTION,
+                                            /*pendingIntent= */ mock()
+                                        )
+                                        .build()
+                                ),
+                                0
+                            )
                         } else {
                             GetWalletCardsResponse(emptyList(), 0)
                         }
@@ -216,5 +265,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
 
     companion object {
         private val ICON: Drawable = mock()
+        private const val CARD_ID: String = "Id"
+        private const val CARD_DESCRIPTION: String = "Description"
     }
 }
