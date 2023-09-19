@@ -197,6 +197,13 @@ public class InstallRepository {
         }
     }
 
+    public interface SessionStageListener {
+
+        void onStagingSuccess(SessionInfo info);
+
+        void onStagingFailure();
+    }
+
     public static class CallerInfo {
 
         private final String mPackageName;
