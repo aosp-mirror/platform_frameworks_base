@@ -17,6 +17,7 @@
 package com.android.systemui.display.data.repository
 
 import android.hardware.display.DisplayManager
+import android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED
 import android.hardware.display.DisplayManager.DisplayListener
 import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_ADDED
 import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
@@ -95,28 +96,36 @@ constructor(
     @Background backgroundCoroutineDispatcher: CoroutineDispatcher
 ) : DisplayRepository {
     // Displays are enabled only after receiving them in [onDisplayAdded]
-    private val allDisplayEvents: Flow<DisplayEvent> = conflatedCallbackFlow {
-        val callback =
-            object : DisplayListener {
-                override fun onDisplayAdded(displayId: Int) {
-                    trySend(DisplayEvent.Added(displayId))
-                }
+    private val allDisplayEvents: Flow<DisplayEvent> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : DisplayListener {
+                        override fun onDisplayAdded(displayId: Int) {
+                            trySend(DisplayEvent.Added(displayId))
+                        }
 
-                override fun onDisplayRemoved(displayId: Int) {
-                    trySend(DisplayEvent.Removed(displayId))
-                }
+                        override fun onDisplayRemoved(displayId: Int) {
+                            trySend(DisplayEvent.Removed(displayId))
+                        }
 
-                override fun onDisplayChanged(displayId: Int) {
-                    trySend(DisplayEvent.Changed(displayId))
-                }
+                        override fun onDisplayChanged(displayId: Int) {
+                            trySend(DisplayEvent.Changed(displayId))
+                        }
+                    }
+                // Triggers an initial event when subscribed. This is needed to avoid getDisplays to
+                // be called when this class is constructed, but only when someone subscribes to
+                // this flow.
+                trySend(DisplayEvent.Changed(Display.DEFAULT_DISPLAY))
+                displayManager.registerDisplayListener(
+                    callback,
+                    backgroundHandler,
+                    EVENT_FLAG_DISPLAY_ADDED or
+                        EVENT_FLAG_DISPLAY_CHANGED or
+                        EVENT_FLAG_DISPLAY_REMOVED,
+                )
+                awaitClose { displayManager.unregisterDisplayListener(callback) }
             }
-        displayManager.registerDisplayListener(
-            callback,
-            backgroundHandler,
-            EVENT_FLAG_DISPLAY_ADDED or EVENT_FLAG_DISPLAY_CHANGED or EVENT_FLAG_DISPLAY_REMOVED,
-        )
-        awaitClose { displayManager.unregisterDisplayListener(callback) }
-    }
+            .flowOn(backgroundCoroutineDispatcher)
 
     override val displayChangeEvent: Flow<Int> =
         allDisplayEvents.filter { it is DisplayEvent.Changed }.map { it.displayId }
@@ -128,7 +137,9 @@ constructor(
             .stateIn(
                 applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = getDisplays()
+                // To avoid getting displays on this object construction, they are get after the
+                // first event. allDisplayEvents emits a changed event when we subscribe to it.
+                initialValue = emptySet()
             )
 
     private fun getDisplays(): Set<Display> =
@@ -146,12 +157,23 @@ constructor(
 
     private val ignoredDisplayIds = MutableStateFlow<Set<Int>>(emptySet())
 
+    private fun getInitialConnectedDisplays(): Set<Int> =
+        displayManager
+            .getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
+            .map { it.displayId }
+            .toSet()
+            .also {
+                if (DEBUG) {
+                    Log.d(TAG, "getInitialConnectedDisplays: $it")
+                }
+            }
+
     /* keeps connected displays until they are disconnected. */
     private val connectedDisplayIds: StateFlow<Set<Int>> =
         conflatedCallbackFlow {
+                val connectedIds = getInitialConnectedDisplays().toMutableSet()
                 val callback =
                     object : DisplayConnectionListener {
-                        private val connectedIds = mutableSetOf<Int>()
                         override fun onDisplayConnected(id: Int) {
                             if (DEBUG) {
                                 Log.d(TAG, "display with id=$id connected.")
@@ -170,6 +192,7 @@ constructor(
                             trySend(connectedIds.toSet())
                         }
                     }
+                trySend(connectedIds.toSet())
                 displayManager.registerDisplayListener(
                     callback,
                     backgroundHandler,
@@ -183,6 +206,10 @@ constructor(
             .stateIn(
                 applicationScope,
                 started = SharingStarted.WhileSubscribed(),
+                // The initial value is set to empty, but connected displays are gathered as soon as
+                // the flow starts being collected. This is to ensure the call to get displays (an
+                // IPC) happens in the background instead of when this object
+                // is instantiated.
                 initialValue = emptySet()
             )
 
