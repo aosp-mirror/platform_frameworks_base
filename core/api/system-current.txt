@@ -16706,6 +16706,7 @@ package android.telephony.satellite {
     field public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_FAILED = 3; // 0x3
     field public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_SUCCESS = 2; // 0x2
     field public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_UNKNOWN = -1; // 0xffffffff
+    field @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG) public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_WAITING_TO_CONNECT = 8; // 0x8
     field @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG) public static final int SATELLITE_MODEM_STATE_CONNECTED = 7; // 0x7
     field public static final int SATELLITE_MODEM_STATE_DATAGRAM_RETRYING = 3; // 0x3
     field public static final int SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING = 2; // 0x2
