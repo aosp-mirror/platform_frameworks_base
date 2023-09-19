@@ -4062,21 +4062,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         profile.addPss(mi.getTotalPss(),
                                 mi.getTotalUss(), mi.getTotalRss(), false,
                                 ProcessStats.ADD_PSS_EXTERNAL_SLOW, duration);
-                        proc.getPkgList().forEachPackageProcessStats(holder -> {
-                            final ProcessState state = holder.state;
-                            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
-                                    proc.info.uid,
-                                    state != null ? state.getName() : proc.processName,
-                                    state != null ? state.getPackage() : proc.info.packageName,
-                                    mi.getTotalPss(),
-                                    mi.getTotalUss(),
-                                    mi.getTotalRss(),
-                                    ProcessStats.ADD_PSS_EXTERNAL_SLOW,
-                                    duration,
-                                    holder.appVersion,
-                                    profile.getCurrentHostingComponentTypes(),
-                                    profile.getHistoricalHostingComponentTypes());
-                        });
                     }
                 }
             }
@@ -4123,20 +4108,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         // Record this for posterity if the process has been stable.
                         profile.addPss(pi, tmpUss[0], tmpUss[2], false,
                                 ProcessStats.ADD_PSS_EXTERNAL, duration);
-                        proc.getPkgList().forEachPackageProcessStats(holder -> {
-                            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
-                                    proc.info.uid,
-                                    holder.state.getName(),
-                                    holder.state.getPackage(),
-                                    pi,
-                                    tmpUss[0],
-                                    tmpUss[2],
-                                    ProcessStats.ADD_PSS_EXTERNAL,
-                                    duration,
-                                    holder.appVersion,
-                                    profile.getCurrentHostingComponentTypes(),
-                                    profile.getHistoricalHostingComponentTypes());
-                        });
                     }
                 }
             }
@@ -11995,17 +11966,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         // Record this for posterity if the process has been stable.
                         r.mProfile.addPss(myTotalPss, myTotalUss, myTotalRss, true,
                                 reportType, endTime - startTime);
-                        r.getPkgList().forEachPackageProcessStats(holder -> {
-                            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
-                                    r.info.uid,
-                                    holder.state.getName(),
-                                    holder.state.getPackage(),
-                                    myTotalPss, myTotalUss, myTotalRss, reportType,
-                                    endTime-startTime,
-                                    holder.appVersion,
-                                    r.mProfile.getCurrentHostingComponentTypes(),
-                                    r.mProfile.getHistoricalHostingComponentTypes());
-                        });
                     }
                 }
 
@@ -12641,16 +12601,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Record this for posterity if the process has been stable.
                     r.mProfile.addPss(myTotalPss, myTotalUss, myTotalRss, true,
                                 reportType, endTime - startTime);
-                    r.getPkgList().forEachPackageProcessStats(holder -> {
-                        FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
-                                r.info.uid,
-                                holder.state.getName(),
-                                holder.state.getPackage(),
-                                myTotalPss, myTotalUss, myTotalRss, reportType, endTime-startTime,
-                                holder.appVersion,
-                                r.mProfile.getCurrentHostingComponentTypes(),
-                                r.mProfile.getHistoricalHostingComponentTypes());
-                    });
                 }
             }
 
