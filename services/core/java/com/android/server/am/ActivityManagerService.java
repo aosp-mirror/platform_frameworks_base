@@ -314,7 +314,6 @@ import android.net.ConnectivityManager;
 import android.net.Proxy;
 import android.net.Uri;
 import android.os.AppZygote;
-import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.BinderProxy;
@@ -15027,16 +15026,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (i >= stickiesCount) {
                 list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive, callingUid,
                         callerAppProcessState));
-            }
-        }
-
-        // STOPSHIP(b/298884211):  Remove this logging
-        if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
-            final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-            if (level < 0) {
-                Slog.wtf(BroadcastQueue.TAG, "Unexpected broadcast: " + intent
-                        + "; callingUid: " + callingUid + ", callingPid: " + callingPid,
-                        new Throwable());
             }
         }
 
