@@ -82,7 +82,7 @@ constructor(
 ) : ComposableScene {
     override val key = SceneKey.Bouncer
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
+    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow(
                 mapOf(
                     UserAction.Back to SceneModel(SceneKey.Lockscreen),

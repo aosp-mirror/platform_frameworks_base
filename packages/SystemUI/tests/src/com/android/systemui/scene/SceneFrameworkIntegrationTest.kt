@@ -123,6 +123,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private val lockscreenSceneViewModel =
         LockscreenSceneViewModel(
+            applicationScope = testScope.backgroundScope,
             authenticationInteractor = authenticationInteractor,
             longPress =
                 KeyguardLongPressViewModel(

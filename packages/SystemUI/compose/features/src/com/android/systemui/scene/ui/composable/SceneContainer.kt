@@ -79,7 +79,7 @@ fun SceneContainer(
     val currentSceneKey = currentSceneModel.key
     val currentScene = checkNotNull(sceneByKey[currentSceneKey])
     val currentDestinations: Map<UserAction, SceneModel> by
-        currentScene.destinationScenes().collectAsState()
+        currentScene.destinationScenes.collectAsState()
     val state = remember { SceneTransitionLayoutState(currentSceneKey.toTransitionSceneKey()) }
     val isRibbonEnabled = remember { SystemProperties.getBoolean("flexi.ribbon", false) }
 
@@ -116,7 +116,7 @@ fun SceneContainer(
                         if (sceneKey == currentSceneKey) {
                                 currentDestinations
                             } else {
-                                composableScene.destinationScenes().value
+                                composableScene.destinationScenes.value
                             }
                             .map { (userAction, destinationSceneModel) ->
                                 toTransitionModels(userAction, destinationSceneModel)
