@@ -61,11 +61,11 @@ android_test {
         "testng",
         "servicestests-utils",
         "device-time-shell-utils",
+        "testables",
     ],
 
     libs: [
         "android.test.runner",
-        "testables",
         "org.apache.http.legacy",
         "android.test.base",
         "android.test.mock",
