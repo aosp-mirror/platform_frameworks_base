@@ -395,7 +395,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
                 PendingIntent.getActivity(mContext, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
         WalletCard walletCard =
                 new WalletCard.Builder(
-                    CARD_ID, mCardImage, CARD_DESCRIPTION, pendingIntent).build();
+                        CARD_ID, mCardImage, CARD_DESCRIPTION, pendingIntent).build();
         GetWalletCardsResponse response =
                 new GetWalletCardsResponse(Collections.singletonList(walletCard), 0);
 
@@ -405,6 +405,22 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
 
         mCallbackCaptor.getValue().onWalletCardsRetrieved(response);
         mTestableLooper.processAllMessages();
+
+        assertNull(mTile.getState().sideViewCustomDrawable);
+    }
+
+    @Test
+    public void testQueryCards_cardDataPayment_updateSideViewDrawable() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
+        setUpWalletCardWithType(/* hasCard =*/ true, WalletCard.CARD_TYPE_PAYMENT);
+
+        assertNotNull(mTile.getState().sideViewCustomDrawable);
+    }
+
+    @Test
+    public void testQueryCards_cardDataNonPayment_updateSideViewDrawable() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
+        setUpWalletCardWithType(/* hasCard =*/ true, WalletCard.CARD_TYPE_NON_PAYMENT);
 
         assertNull(mTile.getState().sideViewCustomDrawable);
     }
@@ -436,6 +452,29 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         mTile.handleSetListening(false);
 
         verifyZeroInteractions(mQuickAccessWalletClient);
+    }
+
+    private WalletCard createWalletCardWithType(Context context, int cardType) {
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
+        return new WalletCard.Builder(CARD_ID, cardType, CARD_IMAGE, CARD_DESCRIPTION,
+                pendingIntent).build();
+    }
+
+    private void setUpWalletCardWithType(boolean hasCard, int cardType) {
+        GetWalletCardsResponse response =
+                new GetWalletCardsResponse(
+                        hasCard
+                                ? Collections.singletonList(
+                                createWalletCardWithType(mContext, cardType))
+                                : Collections.EMPTY_LIST, 0);
+
+        mTile.handleSetListening(true);
+
+        verify(mController).queryWalletCards(mCallbackCaptor.capture());
+
+        mCallbackCaptor.getValue().onWalletCardsRetrieved(response);
+        mTestableLooper.processAllMessages();
     }
 
     private void setUpWalletCard(boolean hasCard) {
