@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade
 
+import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.KeyEvent
@@ -24,29 +25,42 @@ import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardMessageAreaController
 import com.android.keyguard.KeyguardSecurityContainerController
+import com.android.keyguard.KeyguardSecurityModel
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.back.domain.interactor.BackActionInteractor
-import com.android.systemui.bouncer.data.factory.BouncerMessageFactory
-import com.android.systemui.bouncer.data.repository.FakeBouncerMessageRepository
+import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
+import com.android.systemui.bouncer.data.repository.BouncerMessageRepositoryImpl
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor
 import com.android.systemui.bouncer.domain.interactor.CountDownTimerUtil
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
+import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor
+import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.log.BouncerLogger
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.DragDownHelper
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -62,6 +76,7 @@ import com.android.systemui.statusbar.phone.DozeScrimController
 import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.user.data.repository.FakeUserRepository
@@ -201,11 +216,35 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 featureFlags,
                 fakeClock,
                 BouncerMessageInteractor(
-                    FakeBouncerMessageRepository(),
-                    mock(BouncerMessageFactory::class.java),
-                    FakeUserRepository(),
-                    CountDownTimerUtil(),
-                    featureFlags
+                    repository = BouncerMessageRepositoryImpl(),
+                    userRepository = FakeUserRepository(),
+                    countDownTimerUtil = mock(CountDownTimerUtil::class.java),
+                    featureFlags = featureFlags,
+                    updateMonitor = mock(KeyguardUpdateMonitor::class.java),
+                    biometricSettingsRepository = FakeBiometricSettingsRepository(),
+                    applicationScope = testScope.backgroundScope,
+                    trustRepository = FakeTrustRepository(),
+                    systemPropertiesHelper = mock(SystemPropertiesHelper::class.java),
+                    primaryBouncerInteractor =
+                        PrimaryBouncerInteractor(
+                            FakeKeyguardBouncerRepository(),
+                            mock(BouncerView::class.java),
+                            mock(Handler::class.java),
+                            mock(KeyguardStateController::class.java),
+                            mock(KeyguardSecurityModel::class.java),
+                            mock(PrimaryBouncerCallbackInteractor::class.java),
+                            mock(FalsingCollector::class.java),
+                            mock(DismissCallbackRegistry::class.java),
+                            context,
+                            mock(KeyguardUpdateMonitor::class.java),
+                            FakeTrustRepository(),
+                            testScope.backgroundScope,
+                        ),
+                    facePropertyRepository = FakeFacePropertyRepository(),
+                    deviceEntryFingerprintAuthRepository =
+                        FakeDeviceEntryFingerprintAuthRepository(),
+                    faceAuthRepository = FakeDeviceEntryFaceAuthRepository(),
+                    securityModel = mock(KeyguardSecurityModel::class.java),
                 ),
                 BouncerLogger(logcatLogBuffer("BouncerLog")),
                 keyEventInteractor,
