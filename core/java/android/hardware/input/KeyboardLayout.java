@@ -82,8 +82,8 @@ public final class KeyboardLayout implements Parcelable, Comparable<KeyboardLayo
         DVORAK(4, LAYOUT_TYPE_DVORAK),
         COLEMAK(5, LAYOUT_TYPE_COLEMAK),
         WORKMAN(6, LAYOUT_TYPE_WORKMAN),
-        TURKISH_F(7, LAYOUT_TYPE_TURKISH_F),
-        TURKISH_Q(8, LAYOUT_TYPE_TURKISH_Q),
+        TURKISH_Q(7, LAYOUT_TYPE_TURKISH_Q),
+        TURKISH_F(8, LAYOUT_TYPE_TURKISH_F),
         EXTENDED(9, LAYOUT_TYPE_EXTENDED);
 
         private final int mValue;
