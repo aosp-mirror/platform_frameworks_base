@@ -61,6 +61,7 @@ import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.sysui.ShellInterface;
 
@@ -109,6 +110,7 @@ public final class WMShell implements
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<DesktopMode> mDesktopModeOptional;
+    private final Optional<RecentTasks> mRecentTasksOptional;
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
@@ -172,6 +174,7 @@ public final class WMShell implements
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<DesktopMode> desktopMode,
+            Optional<RecentTasks> recentTasks,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
             KeyguardStateController keyguardStateController,
@@ -195,6 +198,7 @@ public final class WMShell implements
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
         mDesktopModeOptional = desktopMode;
+        mRecentTasksOptional = recentTasks;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
@@ -220,6 +224,7 @@ public final class WMShell implements
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
         mDesktopModeOptional.ifPresent(this::initDesktopMode);
+        mRecentTasksOptional.ifPresent(this::initRecentTasks);
 
         mNoteTaskInitializer.initialize();
     }
@@ -349,6 +354,12 @@ public final class WMShell implements
                         // TODO(b/278084491): update sysui state for changes on other displays
                     }
                 }, mSysUiMainExecutor);
+    }
+
+    @VisibleForTesting
+    void initRecentTasks(RecentTasks recentTasks) {
+        recentTasks.addAnimationStateListener(mSysUiMainExecutor,
+                mCommandQueue::onRecentsAnimationStateChanged);
     }
 
     @Override
