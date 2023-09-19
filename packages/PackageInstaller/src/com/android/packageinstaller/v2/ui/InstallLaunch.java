@@ -22,10 +22,13 @@ import static com.android.packageinstaller.v2.model.installstagedata.InstallAbor
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_POLICY;
 
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
@@ -48,6 +51,8 @@ import com.android.packageinstaller.v2.ui.fragments.InstallStagingFragment;
 import com.android.packageinstaller.v2.ui.fragments.SimpleErrorFragment;
 import com.android.packageinstaller.v2.viewmodel.InstallViewModel;
 import com.android.packageinstaller.v2.viewmodel.InstallViewModelFactory;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InstallLaunch extends FragmentActivity implements InstallActionListener {
 
@@ -59,10 +64,15 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
     private static final String TAG_DIALOG = "dialog";
     private final int REQUEST_TRUST_EXTERNAL_SOURCE = 1;
     private final boolean mLocalLOGV = false;
+    /**
+     * A collection of unknown sources listeners that are actively listening for app ops mode
+     * changes
+     */
+    private final List<UnknownSourcesListener> mActiveUnknownSourcesListeners = new ArrayList<>(1);
     private InstallViewModel mInstallViewModel;
     private InstallRepository mInstallRepository;
-
     private FragmentManager mFragmentManager;
+    private AppOpsManager mAppOpsManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,6 +81,8 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         mFragmentManager = getSupportFragmentManager();
+        mAppOpsManager = getSystemService(AppOpsManager.class);
+
         mInstallRepository = new InstallRepository(getApplicationContext());
         mInstallViewModel = new ViewModelProvider(this,
                 new InstallViewModelFactory(this.getApplication(), mInstallRepository)).get(
@@ -220,10 +232,63 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
         settingsIntent.setFlags(FLAG_ACTIVITY_NO_HISTORY);
 
         try {
+            registerAppOpChangeListener(new UnknownSourcesListener(sourcePackageName),
+                sourcePackageName);
             startActivityForResult(settingsIntent, REQUEST_TRUST_EXTERNAL_SOURCE);
         } catch (ActivityNotFoundException exc) {
             Log.e(TAG, "Settings activity not found for action: "
                 + Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+        }
+    }
+
+    private void registerAppOpChangeListener(UnknownSourcesListener listener, String packageName) {
+        mAppOpsManager.startWatchingMode(
+            AppOpsManager.OPSTR_REQUEST_INSTALL_PACKAGES, packageName,
+            listener);
+        mActiveUnknownSourcesListeners.add(listener);
+    }
+
+    private void unregisterAppOpChangeListener(UnknownSourcesListener listener) {
+        mActiveUnknownSourcesListeners.remove(listener);
+        mAppOpsManager.stopWatchingMode(listener);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        while (!mActiveUnknownSourcesListeners.isEmpty()) {
+            unregisterAppOpChangeListener(mActiveUnknownSourcesListeners.get(0));
+        }
+    }
+
+    private class UnknownSourcesListener implements AppOpsManager.OnOpChangedListener {
+
+        private final String mOriginatingPackage;
+
+        public UnknownSourcesListener(String originatingPackage) {
+            mOriginatingPackage = originatingPackage;
+        }
+
+        @Override
+        public void onOpChanged(String op, String packageName) {
+            if (!mOriginatingPackage.equals(packageName)) {
+                return;
+            }
+            unregisterAppOpChangeListener(this);
+            mActiveUnknownSourcesListeners.remove(this);
+            if (isDestroyed()) {
+                return;
+            }
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (!isDestroyed()) {
+                    startActivity(getIntent());
+                    // The start flag (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP) doesn't
+                    // work for the multiple user case, i.e. the caller task user and started
+                    // Activity user are not the same. To avoid having multiple PIAs in the task,
+                    // finish the current PackageInstallerActivity
+                    finish();
+                }
+            }, 500);
         }
     }
 }
