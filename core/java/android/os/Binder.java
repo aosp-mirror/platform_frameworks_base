@@ -186,6 +186,8 @@ public class Binder implements IBinder {
     /**
      * Get the binder transaction observer for this process.
      *
+     * TODO(b/299356196): only applies to Java code, not C++/Rust
+     *
      * @hide
      */
     public static void setObserver(@Nullable BinderInternal.Observer observer) {
@@ -202,6 +204,8 @@ public class Binder implements IBinder {
      * that require a result must be sent as {@link IBinder#FLAG_ONEWAY} calls
      * which deliver results through a callback interface.
      *
+     * TODO(b/299355525): only applies to Java code, not C++/Rust
+     *
      * @hide
      */
     public static void setWarnOnBlocking(boolean warnOnBlocking) {
@@ -217,6 +221,8 @@ public class Binder implements IBinder {
      * upgraded. In particular, this <em>must never</em> be called for
      * interfaces hosted by package that could be upgraded or replaced,
      * otherwise you risk system instability if that remote interface wedges.
+     *
+     * TODO(b/299355525): only applies to Java code, not C++/Rust
      *
      * @hide
      */
@@ -1307,6 +1313,8 @@ public class Binder implements IBinder {
             int callingUid) {
         // Make sure the observer won't change while processing a transaction.
         final BinderInternal.Observer observer = sObserver;
+
+        // TODO(b/299356196): observer should also observe transactions in native code
         final CallSession callSession =
                 observer != null ? observer.callStarted(this, code, UNSET_WORKSOURCE) : null;
         // Theoretically, we should call transact, which will call onTransact,
@@ -1329,7 +1337,7 @@ public class Binder implements IBinder {
 
         final boolean tracingEnabled = tagEnabled && transactionTraceName != null;
         try {
-            // TODO - this logic should not be in Java - it should be in native
+            // TODO(b/299356201) - this logic should not be in Java - it should be in native
             // code in libbinder so that it works for all binder users.
             final BinderCallHeavyHitterWatcher heavyHitterWatcher = sHeavyHitterWatcher;
             if (heavyHitterWatcher != null && callingUid != -1) {
@@ -1340,9 +1348,9 @@ public class Binder implements IBinder {
                 Trace.traceBegin(Trace.TRACE_TAG_AIDL, transactionTraceName);
             }
 
-            // TODO - this logic should not be in Java - it should be in native
-            // code in libbinder so that it works for all binder users. Further,
-            // this should not re-use flags.
+            // TODO(b/299353919) - this logic should not be in Java - it should be
+            // in native code in libbinder so that it works for all binder users.
+            // Further, this should not re-use flags.
             if ((flags & FLAG_COLLECT_NOTED_APP_OPS) != 0 && callingUid != -1) {
                 AppOpsManager.startNotedAppOpsCollection(callingUid);
                 try {
