@@ -1545,7 +1545,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return (v, event) -> {
             mAutoHideController.checkUserAutoHide(event);
             mRemoteInputManager.checkRemoteInputOutside(event);
-            mShadeController.onStatusBarTouch(event);
+            if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+                mShadeController.onStatusBarTouch(event);
+            }
             return getNotificationShadeWindowView().onTouchEvent(event);
         };
     }
