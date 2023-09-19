@@ -459,7 +459,7 @@ public class WalletScreenControllerTest extends SysuiTestCase {
                         WalletCard.CARD_TYPE_UNKNOWN),
                 createWalletCardWithType(mContext, WalletCard.CARD_TYPE_PAYMENT),
                 createWalletCardWithType(mContext, WalletCard.CARD_TYPE_NON_PAYMENT)
-                );
+        );
         GetWalletCardsResponse response = new GetWalletCardsResponse(walletCardList, 0);
         mController.onWalletCardsRetrieved(response);
         mTestableLooper.processAllMessages();
