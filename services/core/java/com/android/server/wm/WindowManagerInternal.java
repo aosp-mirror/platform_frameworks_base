@@ -963,4 +963,11 @@ public abstract class WindowManagerInternal {
     public abstract void captureDisplay(int displayId,
                                         @Nullable ScreenCapture.CaptureArgs captureArgs,
                                         ScreenCapture.ScreenCaptureListener listener);
+
+    /**
+     * Device has a software navigation bar (separate from the status bar) on specific display.
+     *
+     * @param displayId the id of display to check if there is a software navigation bar.
+     */
+    public abstract boolean hasNavigationBar(int displayId);
 }
