@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
 import android.content.Context
 import com.android.systemui.R
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -61,16 +62,21 @@ constructor(
     private val context: Context,
     @Application scope: CoroutineScope,
 ) {
+    private val internetLabel: String = context.getString(R.string.quick_settings_internet_label)
+
     // Three symmetrical Flows that can be switched upon based on the value of
     // [DefaultConnectionModel]
     private val wifiIconFlow: Flow<InternetTileModel> =
         wifiInteractor.wifiNetwork.flatMapLatest {
             val wifiIcon = WifiIcon.fromModel(it, context, showHotspotInfo = true)
             if (it is WifiNetworkModel.Active && wifiIcon is WifiIcon.Visible) {
+                val secondary = removeDoubleQuotes(it.ssid)
                 flowOf(
                     InternetTileModel.Active(
-                        secondaryTitle = removeDoubleQuotes(it.ssid),
-                        icon = ResourceIcon.get(wifiIcon.icon.res)
+                        secondaryTitle = secondary,
+                        icon = ResourceIcon.get(wifiIcon.icon.res),
+                        stateDescription = wifiIcon.contentDescription,
+                        contentDescription = ContentDescription.Loaded("$internetLabel,$secondary"),
                     )
                 )
             } else {
@@ -109,10 +115,13 @@ constructor(
                     it.signalLevelIcon,
                     mobileDataContentName,
                 ) { networkNameModel, signalIcon, dataContentDescription ->
+                    val secondary =
+                        mobileDataContentConcat(networkNameModel.name, dataContentDescription)
                     InternetTileModel.Active(
-                        secondaryTitle =
-                            mobileDataContentConcat(networkNameModel.name, dataContentDescription),
+                        secondaryTitle = secondary,
                         icon = SignalIcon(signalIcon.toSignalDrawableState()),
+                        stateDescription = ContentDescription.Loaded(secondary),
+                        contentDescription = ContentDescription.Loaded(internetLabel),
                     )
                 }
             }
@@ -148,10 +157,13 @@ constructor(
             if (it == null) {
                 notConnectedFlow
             } else {
+                val secondary = it.contentDescription.toString()
                 flowOf(
                     InternetTileModel.Active(
-                        secondaryTitle = it.contentDescription.toString(),
-                        iconId = it.res
+                        secondaryTitle = secondary,
+                        iconId = it.res,
+                        stateDescription = null,
+                        contentDescription = ContentDescription.Loaded(secondary),
                     )
                 )
             }
@@ -164,16 +176,23 @@ constructor(
             ) { networksAvailable, isAirplaneMode ->
                 when {
                     isAirplaneMode -> {
+                        val secondary = context.getString(R.string.status_bar_airplane)
                         InternetTileModel.Inactive(
-                            secondaryTitle = context.getString(R.string.status_bar_airplane),
-                            icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable)
+                            secondaryTitle = secondary,
+                            icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable),
+                            stateDescription = null,
+                            contentDescription = ContentDescription.Loaded(secondary),
                         )
                     }
                     networksAvailable -> {
+                        val secondary =
+                            context.getString(R.string.quick_settings_networks_available)
                         InternetTileModel.Inactive(
-                            secondaryTitle =
-                                context.getString(R.string.quick_settings_networks_available),
+                            secondaryTitle = secondary,
                             iconId = R.drawable.ic_qs_no_internet_available,
+                            stateDescription = null,
+                            contentDescription =
+                                ContentDescription.Loaded("$internetLabel,$secondary")
                         )
                     }
                     else -> {
@@ -206,6 +225,9 @@ constructor(
             InternetTileModel.Inactive(
                 secondaryLabel = Text.Resource(R.string.quick_settings_networks_unavailable),
                 iconId = R.drawable.ic_qs_no_internet_unavailable,
+                stateDescription = null,
+                contentDescription =
+                    ContentDescription.Resource(R.string.quick_settings_networks_unavailable),
             )
 
         private fun removeDoubleQuotes(string: String?): String? {
