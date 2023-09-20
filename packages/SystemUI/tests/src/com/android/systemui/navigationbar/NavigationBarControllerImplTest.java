@@ -74,11 +74,11 @@ import java.util.Optional;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
-public class NavigationBarControllerTest extends SysuiTestCase {
+public class NavigationBarControllerImplTest extends SysuiTestCase {
 
     private static final int SECONDARY_DISPLAY = 1;
 
-    private NavigationBarController mNavigationBarController;
+    private NavigationBarControllerImpl mNavigationBarController;
     private NavigationBar mDefaultNavBar;
     private NavigationBar mSecondaryNavBar;
     private StaticMockitoSession mMockitoSession;
@@ -95,7 +95,7 @@ public class NavigationBarControllerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mNavigationBarController = spy(
-                new NavigationBarController(mContext,
+                new NavigationBarControllerImpl(mContext,
                         mock(OverviewProxyService.class),
                         mock(NavigationModeController.class),
                         mock(SysUiState.class),
