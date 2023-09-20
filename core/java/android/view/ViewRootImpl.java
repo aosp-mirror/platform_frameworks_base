@@ -4017,8 +4017,6 @@ public final class ViewRootImpl implements ViewParent,
             mWindowFocusChanged = false;
             hasWindowFocus = mUpcomingWindowFocus;
         }
-        // TODO (b/131181940): Make sure this doesn't leak Activity with mActivityConfigCallback
-        // config changes.
         if (hasWindowFocus) {
             mInsetsController.onWindowFocusGained(
                     getFocusedViewOrNull() != null /* hasViewFocused */);
