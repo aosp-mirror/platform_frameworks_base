@@ -22,7 +22,6 @@ import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
-import android.annotation.ColorInt;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.Log;
@@ -70,8 +69,6 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private int mStatusBarMode;
     private int mNavigationBarMode;
     private int mNavigationMode;
-    private final int mDarkIconColor;
-    private final int mLightIconColor;
 
     /**
      * Whether the navigation bar should be light factoring in already how much alpha the scrim has.
@@ -121,10 +118,6 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             NavigationModeController navModeController,
             DumpManager dumpManager,
             DisplayTracker displayTracker) {
-        mDarkIconColor = ctx.getColor(
-                com.android.settingslib.R.color.dark_mode_icon_color_single_tone);
-        mLightIconColor = ctx.getColor(
-                com.android.settingslib.R.color.light_mode_icon_color_single_tone);
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
         mBatteryController = batteryController;
         mBatteryController.addCallback(this);
@@ -135,16 +128,6 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         if (ctx.getDisplayId() == displayTracker.getDefaultDisplayId()) {
             dumpManager.registerDumpable(getClass().getSimpleName(), this);
         }
-    }
-
-    @ColorInt
-    int getLightAppearanceIconColor() {
-        return mDarkIconColor;
-    }
-
-    @ColorInt
-    int getDarkAppearanceIconColor() {
-        return mLightIconColor;
     }
 
     public void setNavigationBar(LightBarTransitionsController navigationBar) {

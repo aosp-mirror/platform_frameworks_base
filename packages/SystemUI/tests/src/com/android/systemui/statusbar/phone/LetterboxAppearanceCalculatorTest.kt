@@ -47,13 +47,12 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
         private val TEST_APPEARANCE_REGION_BOUNDS = Rect(0, 0, 20, 100)
         private val TEST_APPEARANCE_REGION =
             AppearanceRegion(TEST_APPEARANCE, TEST_APPEARANCE_REGION_BOUNDS)
-        private val TEST_APPEARANCE_REGIONS = arrayOf(TEST_APPEARANCE_REGION)
+        private val TEST_APPEARANCE_REGIONS = listOf(TEST_APPEARANCE_REGION)
         private val TEST_WINDOW_BOUNDS = Rect(0, 0, 500, 500)
     }
 
     @get:Rule var expect = Expect.create()
 
-    @Mock private lateinit var lightBarController: LightBarController
     @Mock private lateinit var statusBarBoundsProvider: StatusBarBoundsProvider
     @Mock private lateinit var statusBarFragmentComponent: StatusBarFragmentComponent
     @Mock private lateinit var dumpManager: DumpManager
@@ -66,8 +65,7 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(statusBarFragmentComponent.boundsProvider).thenReturn(statusBarBoundsProvider)
         calculator =
-            LetterboxAppearanceCalculator(
-                lightBarController, dumpManager, letterboxBackgroundProvider)
+            LetterboxAppearanceCalculator(context, dumpManager, letterboxBackgroundProvider)
         calculator.onStatusBarViewInitialized(statusBarFragmentComponent)
         whenever(letterboxBackgroundProvider.letterboxBackgroundColor).thenReturn(Color.BLACK)
         whenever(letterboxBackgroundProvider.isLetterboxBackgroundMultiColored).thenReturn(false)
@@ -81,7 +79,7 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox))
 
         expect
             .that(letterboxAppearance.appearance)
@@ -97,7 +95,7 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox))
 
         expect
             .that(letterboxAppearance.appearance)
@@ -121,7 +119,7 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
         calculator.getLetterboxAppearance(
                 TEST_APPEARANCE,
                 TEST_APPEARANCE_REGIONS,
-                arrayOf(letterboxWithInnerBounds(letterBoxInnerBounds))
+            listOf(letterboxWithInnerBounds(letterBoxInnerBounds))
         )
 
         expect.that(statusBarStartSideBounds).isEqualTo(statusBarStartSideBoundsCopy)
@@ -138,7 +136,7 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox))
 
         expect
                 .that(letterboxAppearance.appearance)
@@ -154,7 +152,7 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox))
 
         assertThat(letterboxAppearance.appearance).isEqualTo(TEST_APPEARANCE)
     }
@@ -167,7 +165,7 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox))
 
         assertThat(letterboxAppearance.appearance).isEqualTo(TEST_APPEARANCE)
     }
@@ -180,7 +178,7 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox))
 
         assertThat(letterboxAppearance.appearance).isEqualTo(TEST_APPEARANCE)
     }
@@ -193,7 +191,7 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox))
 
         assertThat(letterboxAppearance.appearance).isEqualTo(TEST_APPEARANCE)
     }
@@ -207,7 +205,7 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, arrayOf(letterboxRegion), arrayOf(letterbox))
+                TEST_APPEARANCE, listOf(letterboxRegion), listOf(letterbox))
 
         val letterboxAdaptedRegion = letterboxRegion.copy(bounds = letterbox.letterboxInnerBounds)
         assertThat(letterboxAppearance.appearanceRegions.toList()).contains(letterboxAdaptedRegion)
@@ -226,16 +224,20 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, arrayOf(letterboxRegion), arrayOf(letterbox))
+                TEST_APPEARANCE, listOf(letterboxRegion), listOf(letterbox))
 
         val outerRegions =
             listOf(
                 AppearanceRegion(
-                    DEFAULT_APPEARANCE, Rect(left = 0, top = 0, right = 25, bottom = 100)),
+                    DEFAULT_APPEARANCE,
+                    Rect(left = 0, top = 0, right = 25, bottom = 100),
+                ),
                 AppearanceRegion(
-                    DEFAULT_APPEARANCE, Rect(left = 75, top = 0, right = 100, bottom = 100)),
+                    DEFAULT_APPEARANCE,
+                    Rect(left = 75, top = 0, right = 100, bottom = 100),
+                ),
             )
-        assertThat(letterboxAppearance.appearanceRegions.toList())
+        assertThat(letterboxAppearance.appearanceRegions)
             .containsAtLeastElementsIn(outerRegions)
     }
 

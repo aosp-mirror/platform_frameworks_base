@@ -109,9 +109,12 @@ internal constructor(
         if (shouldUseLetterboxAppearance(letterboxDetails)) {
             val letterboxAppearance =
                 letterboxAppearanceCalculator.getLetterboxAppearance(
-                    appearance, appearanceRegions, letterboxDetails)
+                    appearance, appearanceRegions.toList(), letterboxDetails.toList())
             lastLetterboxAppearance = letterboxAppearance
-            Pair(letterboxAppearance.appearance, letterboxAppearance.appearanceRegions)
+            Pair(
+                letterboxAppearance.appearance,
+                letterboxAppearance.appearanceRegions.toTypedArray()
+            )
         } else {
             lastLetterboxAppearance = null
             Pair(appearance, appearanceRegions)

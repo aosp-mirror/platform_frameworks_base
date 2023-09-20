@@ -91,7 +91,7 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
 
         verify(lightBarController)
             .onStatusBarAppearanceChanged(
-                eq(TEST_LETTERBOX_APPEARANCE.appearanceRegions),
+                eq(TEST_LETTERBOX_APPEARANCE.appearanceRegions.toTypedArray()),
                 anyBoolean(),
                 anyInt(),
                 anyBoolean())
@@ -106,7 +106,7 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
 
         verify(lightBarController)
             .onStatusBarAppearanceChanged(
-                eq(TEST_LETTERBOX_APPEARANCE.appearanceRegions),
+                eq(TEST_LETTERBOX_APPEARANCE.appearanceRegions.toTypedArray()),
                 anyBoolean(),
                 anyInt(),
                 anyBoolean())
@@ -178,7 +178,7 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
                     /* letterboxFullBounds= */ Rect(0, 0, 0, 0),
                     /* appAppearance= */ 0))
         private val TEST_LETTERBOX_APPEARANCE =
-            LetterboxAppearance(/* appearance= */ APPEARANCE_LOW_PROFILE_BARS, arrayOf())
+            LetterboxAppearance(/* appearance= */ APPEARANCE_LOW_PROFILE_BARS, listOf())
     }
 }
 
