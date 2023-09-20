@@ -38,11 +38,13 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.Keep;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.ProcessCpuTracker;
+import com.android.internal.util.RingBuffer;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -75,7 +77,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @hide
  */
-abstract class AnrTimer<V> {
+class AnrTimer<V> {
 
     /**
      * The log tag.
@@ -139,6 +141,8 @@ abstract class AnrTimer<V> {
         final String tag;
         /** A partial stack that localizes the caller of the operation. */
         final StackTraceElement[] stack;
+        /** The date, in local time, the error was created. */
+        final String date;
 
         Error(@NonNull String issue, @NonNull String operation, @NonNull String tag,
                 @NonNull StackTraceElement[] stack, @NonNull String arg) {
@@ -147,21 +151,17 @@ abstract class AnrTimer<V> {
             this.tag = tag;
             this.stack = stack;
             this.arg = arg;
+            this.date = new Date().toString();
         }
     }
 
     /**
      * A list of errors detected during processing.  Errors correspond to "timer not found"
      * conditions.  The stack trace identifies the source of the call.  The list is
-     * first-in/first-out, and the size is limited to MAX_SAVED_ERROR_COUNT.
+     * first-in/first-out, and the size is limited to 20.
      */
     @GuardedBy("sErrors")
-    private static final ArrayList<Error> sErrors = new ArrayList<>();
-
-    /**
-     * The maximum number of errors that are saved in the sErrors list.
-     */
-    private static final int MAX_SAVED_ERROR_COUNT = 20;
+    private static final RingBuffer<Error> sErrors = new RingBuffer<>(Error.class, 20);
 
     /**
      * A record of a single anr timer.  The pid and uid are retained for reference but they do not
@@ -420,7 +420,7 @@ abstract class AnrTimer<V> {
                 if (extension > 0) {
                     post(t, extension);
                 } else {
-                    onExpiredLocked(t, now());
+                    onExpiredLocked(t);
                 }
             }
             return true;
@@ -706,7 +706,7 @@ abstract class AnrTimer<V> {
      * The notifier that a timer has fired.  The timer is not modified.
      */
     @GuardedBy("mLock")
-    private void onExpiredLocked(@NonNull Timer timer, long when) {
+    private void onExpiredLocked(@NonNull Timer timer) {
         if (DEBUG) report(timer, "expire");
         traceBegin(timer, "expired");
         mHandler.sendMessage(Message.obtain(mHandler, mWhat, timer.arg));
@@ -757,12 +757,7 @@ abstract class AnrTimer<V> {
         // This should be enough to isolate the location of the call.
         StackTraceElement[] location = Arrays.copyOfRange(s, 6, 9);
         synchronized (sErrors) {
-            // Ensure the error list does not grow beyond the limit.
-            while (sErrors.size() >= MAX_SAVED_ERROR_COUNT) {
-                sErrors.remove(0);
-            }
-            // Add the new error to the list.
-            sErrors.add(new Error(errorMsg, operation, mLabel, location, what));
+            sErrors.append(new Error(errorMsg, operation, mLabel, location, what));
         }
         if (DEBUG) Log.w(TAG, operation + " " + errorMsg + " " + mLabel + " timer " + what);
         mTotalErrors++;
@@ -790,6 +785,7 @@ abstract class AnrTimer<V> {
     private static void dump(IndentingPrintWriter ipw, int seq, Error err) {
         ipw.format("%2d: op:%s tag:%s issue:%s arg:%s\n", seq, err.operation, err.tag,
                 err.issue, err.arg);
+        ipw.format("    date:%s\n", err.date);
         ipw.increaseIndent();
         for (int i = 0; i < err.stack.length; i++) {
             ipw.println("    " + err.stack[i].toString());
@@ -801,15 +797,15 @@ abstract class AnrTimer<V> {
      * Dump all errors to the output stream.
      */
     private static void dumpErrors(IndentingPrintWriter ipw) {
-        ArrayList<Error> errors;
+        Error errors[];
         synchronized (sErrors) {
             if (sErrors.size() == 0) return;
-            errors = (ArrayList<Error>) sErrors.clone();
+            errors = sErrors.toArray();
         }
         ipw.println("Errors");
         ipw.increaseIndent();
-        for (int i = 0; i < errors.size(); i++) {
-            dump(ipw, i, errors.get(i));
+        for (int i = 0; i < errors.length; i++) {
+            if (errors[i] != null) dump(ipw, i, errors[i]);
         }
         ipw.decreaseIndent();
     }
