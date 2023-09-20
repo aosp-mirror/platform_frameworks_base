@@ -3148,6 +3148,14 @@ public class CarrierConfigManager {
     public static final String KEY_ROAMING_OPERATOR_STRING_ARRAY = "roaming_operator_string_array";
 
     /**
+     * Config to show the roaming indicator (i.e. the "R" icon) from the status bar when roaming.
+     * The roaming indicator will be shown if this is {@code true} and will not be shown if this is
+     * {@code false}.
+     */
+    @FlaggedApi(Flags.FLAG_HIDE_ROAMING_ICON)
+    public static final String KEY_SHOW_ROAMING_INDICATOR_BOOL = "show_roaming_indicator_bool";
+
+    /**
      * URL from which the proto containing the public key of the Carrier used for
      * IMSI encryption will be downloaded.
      * @hide
@@ -3313,11 +3321,11 @@ public class CarrierConfigManager {
      * If {@code false} the SPN display checks if the current MCC/MNC is different from the
      * SIM card's MCC/MNC.
      *
-     * @see KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
-     * @see KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
-     * @see KEY_NON_ROAMING_OPERATOR_STRING_ARRAY
-     * @see KEY_ROAMING_OPERATOR_STRING_ARRAY
-     * @see KEY_FORCE_HOME_NETWORK_BOOL
+     * @see #KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_NON_ROAMING_OPERATOR_STRING_ARRAY
+     * @see #KEY_ROAMING_OPERATOR_STRING_ARRAY
+     * @see #KEY_FORCE_HOME_NETWORK_BOOL
      *
      * @hide
      */
@@ -10194,6 +10202,7 @@ public class CarrierConfigManager {
                 false);
         sDefaults.putStringArray(KEY_NON_ROAMING_OPERATOR_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_ROAMING_OPERATOR_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_SHOW_ROAMING_INDICATOR_BOOL, true);
         sDefaults.putBoolean(KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_TTY_SUPPORTED_BOOL, true);
