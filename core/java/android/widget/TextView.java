@@ -14151,7 +14151,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             selectionStart, OffsetMapping.MAP_STRATEGY_CURSOR);
                     final int line = layout.getLineForOffset(offsetTransformed);
                     final float insertionMarkerX =
-                            layout.getPrimaryHorizontal(offsetTransformed)
+                            layout.getPrimaryHorizontal(
+                                            offsetTransformed, layout.shouldClampCursor(line))
                                     + viewportToContentHorizontalOffset;
                     final float insertionMarkerTop = layout.getLineTop(line)
                             + viewportToContentVerticalOffset;
