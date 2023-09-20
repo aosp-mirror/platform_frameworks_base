@@ -16,11 +16,12 @@
 
 package com.android.server;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
 import android.app.StatsManager;
 import android.content.Context;
 import android.util.StatsEvent;
 
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.FrameworkStatsLog;
 
@@ -32,7 +33,7 @@ public class LogMteState {
                 .setPullAtomCallback(
                         FrameworkStatsLog.MTE_STATE,
                         null, // use default PullAtomMetadata values
-                        BackgroundThread.getExecutor(),
+                        DIRECT_EXECUTOR,
                         new StatsManager.StatsPullAtomCallback() {
                             @Override
                             public int onPullAtom(int atomTag, List<StatsEvent> data) {
