@@ -1464,7 +1464,7 @@ public final class AutofillManager {
         if (infos.size() == 0) {
             throw new IllegalArgumentException("No VirtualViewInfo found");
         }
-        if (view.isCredential() && mIsFillAndSaveDialogDisabledForCredentialManager) {
+        if (isCredmanRequested(view) && mIsFillAndSaveDialogDisabledForCredentialManager) {
             if (sDebug) {
                 Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
                         + view.getAutofillId().toString());
@@ -1488,7 +1488,7 @@ public final class AutofillManager {
      * @hide
      */
     public void notifyViewEnteredForFillDialog(View v) {
-        if (v.isCredential()
+        if (isCredmanRequested(v)
                 && mIsFillAndSaveDialogDisabledForCredentialManager) {
             if (sDebug) {
                 Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
@@ -3432,6 +3432,22 @@ public final class AutofillManager {
                 callback.onAutofillEvent(anchor, event);
             }
         }
+    }
+
+    private boolean isCredmanRequested(View view) {
+        if (view.isCredential()) {
+            return true;
+        }
+        String[] hints = view.getAutofillHints();
+        if (hints == null) {
+            return false;
+        }
+        for (String hint : hints) {
+            if (hint.equals(View.AUTOFILL_HINT_CREDENTIAL_MANAGER)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
