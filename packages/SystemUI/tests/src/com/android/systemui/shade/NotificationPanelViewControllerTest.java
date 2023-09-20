@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade;
 
-import static com.android.keyguard.FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
@@ -830,6 +829,42 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
 
         mNotificationPanelViewController.setDozing(true, false);
+
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ false);
+    }
+
+    @Test
+    public void switchesToBigClockInSplitShadeOn_landFlagOn_ForceSmallClock() {
+        when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(false);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ false);
+        mNotificationPanelViewController.setDozing(false, false);
+        when(mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)).thenReturn(true);
+        when(mResources.getBoolean(R.bool.force_small_clock_on_lockscreen)).thenReturn(true);
+        when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        clearInvocations(mKeyguardStatusViewController);
+
+        enableSplitShade(/* enabled= */ true);
+        mNotificationPanelViewController.updateResources();
+
+        verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate */ false);
+    }
+
+    @Test
+    public void switchesToBigClockInSplitShadeOn_landFlagOff_DontForceSmallClock() {
+        when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(false);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ false);
+        mNotificationPanelViewController.setDozing(false, false);
+        when(mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)).thenReturn(false);
+        when(mResources.getBoolean(R.bool.force_small_clock_on_lockscreen)).thenReturn(true);
+        when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        clearInvocations(mKeyguardStatusViewController);
+
+        enableSplitShade(/* enabled= */ true);
+        mNotificationPanelViewController.updateResources();
 
         verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ false);
     }

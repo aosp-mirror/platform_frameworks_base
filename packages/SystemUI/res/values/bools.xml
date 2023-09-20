@@ -59,4 +59,8 @@
 
       True here so bouncers constraints are updated when rotating on small screens -->
     <bool name="update_bouncer_constraints">true</bool>
+
+    <!-- Only use small clock on lockscreen.
+     False here because large clock used by default, unless otherwise specified -->
+    <bool name="force_small_clock_on_lockscreen">false</bool>
 </resources>
