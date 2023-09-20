@@ -415,7 +415,6 @@ public class BubblesTest extends SysuiTestCase {
                 keyguardRepository,
                 new FakeCommandQueue(),
                 powerInteractor,
-                featureFlags,
                 sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
                 configurationRepository,

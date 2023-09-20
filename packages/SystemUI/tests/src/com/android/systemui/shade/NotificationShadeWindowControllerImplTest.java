@@ -188,7 +188,6 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 keyguardRepository,
                 new FakeCommandQueue(),
                 powerInteractor,
-                featureFlags,
                 sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
                 configurationRepository,

@@ -39,6 +39,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.TrustRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.shared.system.SysUiStatsLog
@@ -75,6 +76,7 @@ constructor(
     private val trustRepository: TrustRepository,
     @Application private val applicationScope: CoroutineScope,
     private val selectedUserInteractor: SelectedUserInteractor,
+    private val keyguardFaceAuthInteractor: KeyguardFaceAuthInteractor,
 ) {
     private val passiveAuthBouncerDelay =
         context.resources.getInteger(R.integer.primary_bouncer_passive_auth_delay).toLong()
@@ -414,15 +416,12 @@ constructor(
 
     /** Whether we want to wait to show the bouncer in case passive auth succeeds. */
     private fun usePrimaryBouncerPassiveAuthDelay(): Boolean {
-        val canRunFaceAuth =
-            keyguardStateController.isFaceEnrolled &&
-                keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE) &&
-                keyguardUpdateMonitor.doesCurrentPostureAllowFaceAuth()
         val canRunActiveUnlock =
             currentUserActiveUnlockRunning &&
                 keyguardUpdateMonitor.canTriggerActiveUnlockBasedOnDeviceState()
 
-        return !needsFullscreenBouncer() && (canRunFaceAuth || canRunActiveUnlock)
+        return !needsFullscreenBouncer() &&
+            (keyguardFaceAuthInteractor.canFaceAuthRun() || canRunActiveUnlock)
     }
 
     companion object {

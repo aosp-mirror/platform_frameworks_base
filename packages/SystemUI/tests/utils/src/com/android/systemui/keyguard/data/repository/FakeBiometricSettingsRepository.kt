@@ -47,7 +47,7 @@ class FakeBiometricSettingsRepository @Inject constructor() : BiometricSettingsR
         get() = _isFaceAuthCurrentlyAllowed
 
     private val _isFaceAuthSupportedInCurrentPosture = MutableStateFlow(false)
-    override val isFaceAuthSupportedInCurrentPosture: Flow<Boolean>
+    override val isFaceAuthSupportedInCurrentPosture: StateFlow<Boolean>
         get() = _isFaceAuthSupportedInCurrentPosture
 
     override val isCurrentUserInLockdown: Flow<Boolean>

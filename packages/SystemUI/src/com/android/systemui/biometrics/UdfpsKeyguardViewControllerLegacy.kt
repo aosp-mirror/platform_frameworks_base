@@ -50,7 +50,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 /** Class that coordinates non-HBM animations during keyguard authentication. */
@@ -215,12 +214,12 @@ open class UdfpsKeyguardViewControllerLegacy(
     suspend fun listenForLockscreenAodTransitions(scope: CoroutineScope): Job {
         return scope.launch {
             transitionInteractor.dozeAmountTransition.collect { transitionStep ->
-                  view.onDozeAmountChanged(
-                      transitionStep.value,
-                      transitionStep.value,
-                      UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
-                  )
-              }
+                view.onDozeAmountChanged(
+                    transitionStep.value,
+                    transitionStep.value,
+                    UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
+                )
+            }
         }
     }
 
@@ -286,7 +285,6 @@ open class UdfpsKeyguardViewControllerLegacy(
         keyguardStateController.removeCallback(keyguardStateControllerCallback)
         statusBarStateController.removeCallback(stateListener)
         keyguardViewManager.removeOccludingAppBiometricUI(occludingAppBiometricUI)
-        keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false)
         configurationController.removeCallback(configurationListener)
         if (lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy === this) {
             lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = null
@@ -334,14 +332,9 @@ open class UdfpsKeyguardViewControllerLegacy(
             if (udfpsAffordanceWasNotShowing) {
                 view.animateInUdfpsBouncer(null)
             }
-            if (keyguardStateController.isOccluded) {
-                keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true)
-            }
             view.announceForAccessibility(
                 view.context.getString(R.string.accessibility_fingerprint_bouncer)
             )
-        } else {
-            keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false)
         }
         updateAlpha()
         updatePauseAuth()

@@ -25,8 +25,6 @@ import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -64,7 +62,6 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
     private lateinit var bouncerRepository: KeyguardBouncerRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var fakeCommandQueue: FakeCommandQueue
-    private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var burnInInteractor: BurnInInteractor
     private lateinit var shadeRepository: FakeShadeRepository
     private lateinit var keyguardInteractor: KeyguardInteractor
@@ -80,8 +77,7 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testScope = TestScope()
         configRepository = FakeConfigurationRepository()
-        featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
-        KeyguardInteractorFactory.create(featureFlags = featureFlags).let {
+        KeyguardInteractorFactory.create().let {
             keyguardInteractor = it.keyguardInteractor
             keyguardRepository = it.repository
         }

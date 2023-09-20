@@ -97,7 +97,7 @@ class FaceScanningProviderFactory @Inject constructor(
         }
 
     fun canShowFaceScanningAnim(): Boolean {
-        return hasProviders && keyguardUpdateMonitor.isFaceEnrolled
+        return hasProviders && keyguardUpdateMonitor.isFaceEnabledAndEnrolled
     }
 
     fun shouldShowFaceScanningAnim(): Boolean {

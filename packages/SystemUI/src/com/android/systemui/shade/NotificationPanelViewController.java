@@ -98,7 +98,6 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.ActiveUnlockConfig;
-import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
@@ -2966,10 +2965,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     // Try triggering face auth, this "might" run. Check
                     // KeyguardUpdateMonitor#shouldListenForFace to see when face auth won't run.
                     mKeyguardFaceAuthInteractor.onNotificationPanelClicked();
-                    boolean didFaceAuthRun = mUpdateMonitor.requestFaceAuth(
-                            FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
 
-                    if (didFaceAuthRun) {
+                    if (mKeyguardFaceAuthInteractor.canFaceAuthRun()) {
                         mUpdateMonitor.requestActiveUnlock(
                                 ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
                                 "lockScreenEmptySpaceTap");

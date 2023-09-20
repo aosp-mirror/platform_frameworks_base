@@ -69,7 +69,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -242,61 +241,52 @@ constructor(
                 .collect(Collectors.toSet())
         dumpManager.registerCriticalDumpable("DeviceEntryFaceAuthRepositoryImpl", this)
 
-        if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
-            canRunFaceAuth =
-                listOf(
-                        *gatingConditionsForAuthAndDetect(),
-                        Pair(isLockedOut.isFalse(), "isNotInLockOutState"),
-                        Pair(
-                            trustRepository.isCurrentUserTrusted.isFalse(),
-                            "currentUserIsNotTrusted"
-                        ),
-                        Pair(
-                            biometricSettingsRepository.isFaceAuthCurrentlyAllowed,
-                            "isFaceAuthCurrentlyAllowed"
-                        ),
-                        Pair(isAuthenticated.isFalse(), "faceNotAuthenticated"),
-                    )
-                    .andAllFlows("canFaceAuthRun", faceAuthLog)
-                    .flowOn(mainDispatcher)
-                    .stateIn(applicationScope, SharingStarted.Eagerly, false)
+        canRunFaceAuth =
+            listOf(
+                    *gatingConditionsForAuthAndDetect(),
+                    Pair(isLockedOut.isFalse(), "isNotInLockOutState"),
+                    Pair(trustRepository.isCurrentUserTrusted.isFalse(), "currentUserIsNotTrusted"),
+                    Pair(
+                        biometricSettingsRepository.isFaceAuthCurrentlyAllowed,
+                        "isFaceAuthCurrentlyAllowed"
+                    ),
+                    Pair(isAuthenticated.isFalse(), "faceNotAuthenticated"),
+                )
+                .andAllFlows("canFaceAuthRun", faceAuthLog)
+                .flowOn(mainDispatcher)
+                .stateIn(applicationScope, SharingStarted.Eagerly, false)
 
-            // Face detection can run only when lockscreen bypass is enabled
-            // & detection is supported
-            //   & biometric unlock is not allowed
-            //     or user is trusted by trust manager & we want to run face detect to dismiss
-            // keyguard
-            canRunDetection =
-                listOf(
-                        *gatingConditionsForAuthAndDetect(),
-                        Pair(isBypassEnabled, "isBypassEnabled"),
-                        Pair(
-                            biometricSettingsRepository.isFaceAuthCurrentlyAllowed
-                                .isFalse()
-                                .or(trustRepository.isCurrentUserTrusted),
-                            "faceAuthIsNotCurrentlyAllowedOrCurrentUserIsTrusted"
-                        ),
-                        // We don't want to run face detect if fingerprint can be used to unlock the
-                        // device
-                        // but it's not possible to authenticate with FP from the bouncer (UDFPS)
-                        Pair(
-                            and(isUdfps(), deviceEntryFingerprintAuthRepository.isRunning)
-                                .isFalse(),
-                            "udfpsAuthIsNotPossibleAnymore"
-                        )
+        // Face detection can run only when lockscreen bypass is enabled
+        // & detection is supported
+        //   & biometric unlock is not allowed
+        //     or user is trusted by trust manager & we want to run face detect to dismiss
+        // keyguard
+        canRunDetection =
+            listOf(
+                    *gatingConditionsForAuthAndDetect(),
+                    Pair(isBypassEnabled, "isBypassEnabled"),
+                    Pair(
+                        biometricSettingsRepository.isFaceAuthCurrentlyAllowed
+                            .isFalse()
+                            .or(trustRepository.isCurrentUserTrusted),
+                        "faceAuthIsNotCurrentlyAllowedOrCurrentUserIsTrusted"
+                    ),
+                    // We don't want to run face detect if fingerprint can be used to unlock the
+                    // device
+                    // but it's not possible to authenticate with FP from the bouncer (UDFPS)
+                    Pair(
+                        and(isUdfps(), deviceEntryFingerprintAuthRepository.isRunning).isFalse(),
+                        "udfpsAuthIsNotPossibleAnymore"
                     )
-                    .andAllFlows("canFaceDetectRun", faceDetectLog)
-                    .flowOn(mainDispatcher)
-                    .stateIn(applicationScope, SharingStarted.Eagerly, false)
-            observeFaceAuthGatingChecks()
-            observeFaceDetectGatingChecks()
-            observeFaceAuthResettingConditions()
-            listenForSchedulingWatchdog()
-            processPendingAuthRequests()
-        } else {
-            canRunFaceAuth = MutableStateFlow(false).asStateFlow()
-            canRunDetection = MutableStateFlow(false).asStateFlow()
-        }
+                )
+                .andAllFlows("canFaceDetectRun", faceDetectLog)
+                .flowOn(mainDispatcher)
+                .stateIn(applicationScope, SharingStarted.Eagerly, false)
+        observeFaceAuthGatingChecks()
+        observeFaceDetectGatingChecks()
+        observeFaceAuthResettingConditions()
+        listenForSchedulingWatchdog()
+        processPendingAuthRequests()
     }
 
     private fun listenForSchedulingWatchdog() {

@@ -214,7 +214,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         public void onUserInput() {
             mBouncerMessageInteractor.onPrimaryBouncerUserInput();
             mKeyguardFaceAuthInteractor.onPrimaryBouncerUserInput();
-            mUpdateMonitor.cancelFaceAuth();
         }
 
         @Override
@@ -340,16 +339,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final SwipeListener mSwipeListener = new SwipeListener() {
         @Override
         public void onSwipeUp() {
-            if (!mUpdateMonitor.isFaceDetectionRunning()) {
-                mKeyguardFaceAuthInteractor.onSwipeUpOnBouncer();
-                boolean didFaceAuthRun = mUpdateMonitor.requestFaceAuth(
-                        FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER);
+            if (mKeyguardFaceAuthInteractor.canFaceAuthRun()) {
                 mKeyguardSecurityCallback.userActivity();
-                if (didFaceAuthRun) {
-                    showMessage(/* message= */ null, /* colorState= */ null, /* animated= */ true);
-                }
             }
-            if (mUpdateMonitor.isFaceEnrolled()) {
+            mKeyguardFaceAuthInteractor.onSwipeUpOnBouncer();
+            if (mKeyguardFaceAuthInteractor.isFaceAuthEnabledAndEnrolled()) {
                 mUpdateMonitor.requestActiveUnlock(
                         ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
                         "swipeUpOnBouncer");
@@ -755,7 +749,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
         mView.onResume(
                 mSecurityModel.getSecurityMode(mSelectedUserInteractor.getSelectedUserId()),
-                mKeyguardStateController.isFaceEnrolled());
+                mKeyguardStateController.isFaceEnrolledAndEnabled());
     }
 
     /** Sets an initial message that would override the default message */
