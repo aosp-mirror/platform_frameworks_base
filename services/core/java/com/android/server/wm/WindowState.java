@@ -186,6 +186,7 @@ import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyCache;
+import android.app.servertransaction.WindowStateResizeItem;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
@@ -3732,28 +3733,42 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         markRedrawForSyncReported();
 
-        try {
-            mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
-                    getCompatInsetsState(), forceRelayout, alwaysConsumeSystemBars, displayId,
-                    syncWithBuffers ? mSyncSeqId : -1, isDragResizing);
-            if (drawPending && prevRotation >= 0 && prevRotation != mLastReportedConfiguration
-                    .getMergedConfiguration().windowConfiguration.getRotation()) {
-                mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Requested redraw for orientation change: %s", this);
+        if (mWmService.mFlags.mWindowStateResizeItemFlag) {
+            getProcess().scheduleClientTransactionItem(
+                    WindowStateResizeItem.obtain(mClient, mClientWindowFrames, reportDraw,
+                            mLastReportedConfiguration, getCompatInsetsState(), forceRelayout,
+                            alwaysConsumeSystemBars, displayId,
+                            syncWithBuffers ? mSyncSeqId : -1, isDragResizing));
+            onResizePostDispatched(drawPending, prevRotation, displayId);
+        } else {
+            // TODO(b/301870955): cleanup after launch
+            try {
+                mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
+                        getCompatInsetsState(), forceRelayout, alwaysConsumeSystemBars, displayId,
+                        syncWithBuffers ? mSyncSeqId : -1, isDragResizing);
+                onResizePostDispatched(drawPending, prevRotation, displayId);
+            } catch (RemoteException e) {
+                // Cancel orientation change of this window to avoid blocking unfreeze display.
+                setOrientationChanging(false);
+                mLastFreezeDuration = (int) (SystemClock.elapsedRealtime()
+                        - mWmService.mDisplayFreezeTime);
+                Slog.w(TAG, "Failed to report 'resized' to " + this + " due to " + e);
             }
-
-            if (mWmService.mAccessibilityController.hasCallbacks()) {
-                mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(displayId);
-            }
-        } catch (RemoteException e) {
-            // Cancel orientation change of this window to avoid blocking unfreeze display.
-            setOrientationChanging(false);
-            mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
-                    - mWmService.mDisplayFreezeTime);
-            Slog.w(TAG, "Failed to report 'resized' to " + this + " due to " + e);
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    private void onResizePostDispatched(boolean drawPending, int prevRotation, int displayId) {
+        if (drawPending && prevRotation >= 0 && prevRotation != mLastReportedConfiguration
+                .getMergedConfiguration().windowConfiguration.getRotation()) {
+            mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
+            ProtoLog.v(WM_DEBUG_ORIENTATION,
+                    "Requested redraw for orientation change: %s", this);
+        }
+
+        if (mWmService.mAccessibilityController.hasCallbacks()) {
+            mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(displayId);
+        }
     }
 
     boolean inRelaunchingActivity() {

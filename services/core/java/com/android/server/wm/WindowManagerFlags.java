@@ -45,5 +45,7 @@ class WindowManagerFlags {
 
     final boolean mSyncWindowConfigUpdateFlag = Flags.syncWindowConfigUpdateFlag();
 
+    final boolean mWindowStateResizeItemFlag = Flags.windowStateResizeItemFlag();
+
     /* End Available Flags */
 }
