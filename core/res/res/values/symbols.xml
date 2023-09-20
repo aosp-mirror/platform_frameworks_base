@@ -2584,6 +2584,7 @@
 
   <!-- Biometric FRR config -->
   <java-symbol type="fraction" name="config_biometricNotificationFrrThreshold" />
+  <java-symbol type="bool" name="config_biometricFrrNotificationEnabled" />
 
   <!-- Biometric FRR notification messages -->
   <java-symbol type="string" name="device_unlock_notification_name" />
