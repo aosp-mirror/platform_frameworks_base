@@ -54,7 +54,6 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.flags.Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels
@@ -134,10 +133,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
         // Avoid announcing window title.
         accessibilityTitle = " "
-
-        if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
-            inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
-        }
+        inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
     }
 
     /** If the overlay is currently showing. */
@@ -206,7 +202,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                         overlayTouchListener!!
                     )
                     overlayTouchListener?.onTouchExplorationStateChanged(true)
-                    useExpandedOverlay = featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
                 }
             } catch (e: RuntimeException) {
                 Log.e(TAG, "showUdfpsOverlay | failed to add window", e)
@@ -367,10 +362,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     ): WindowManager.LayoutParams {
         val paddingX = animation?.paddingX ?: 0
         val paddingY = animation?.paddingY ?: 0
-        if (!featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION) && animation != null &&
-                animation.listenForTouchesOutsideView()) {
-            flags = flags or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-        }
 
         val isEnrollment = when (requestReason) {
             REASON_ENROLL_FIND_SENSOR, REASON_ENROLL_ENROLLING -> true
@@ -379,19 +370,15 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
 
         // Use expanded overlay unless touchExploration enabled
         var rotatedBounds =
-            if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
-                if (accessibilityManager.isTouchExplorationEnabled && isEnrollment) {
-                    Rect(overlayParams.sensorBounds)
-                } else {
-                    Rect(
-                        0,
-                        0,
-                        overlayParams.naturalDisplayWidth,
-                        overlayParams.naturalDisplayHeight
-                    )
-                }
-            } else {
+            if (accessibilityManager.isTouchExplorationEnabled && isEnrollment) {
                 Rect(overlayParams.sensorBounds)
+            } else {
+                Rect(
+                    0,
+                    0,
+                    overlayParams.naturalDisplayWidth,
+                    overlayParams.naturalDisplayHeight
+                )
             }
 
         val rot = overlayParams.rotation
@@ -399,9 +386,9 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
             if (!shouldRotate(animation)) {
                 Log.v(
                     TAG, "Skip rotating UDFPS bounds " + Surface.rotationToString(rot) +
-                            " animation=$animation" +
-                            " isGoingToSleep=${keyguardUpdateMonitor.isGoingToSleep}" +
-                            " isOccluded=${keyguardStateController.isOccluded}"
+                        " animation=$animation" +
+                        " isGoingToSleep=${keyguardUpdateMonitor.isGoingToSleep}" +
+                        " isOccluded=${keyguardStateController.isOccluded}"
                 )
             } else {
                 Log.v(TAG, "Rotate UDFPS bounds " + Surface.rotationToString(rot))
@@ -412,14 +399,12 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                     rot
                 )
 
-                if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
-                    RotationUtils.rotateBounds(
-                            sensorBounds,
-                            overlayParams.naturalDisplayWidth,
-                            overlayParams.naturalDisplayHeight,
-                            rot
-                    )
-                }
+                RotationUtils.rotateBounds(
+                    sensorBounds,
+                    overlayParams.naturalDisplayWidth,
+                    overlayParams.naturalDisplayHeight,
+                    rot
+                )
             }
         }
 

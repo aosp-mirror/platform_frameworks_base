@@ -298,45 +298,34 @@ public class UdfpsKeyguardViewLegacy extends UdfpsAnimationView {
         pw.println("    mUdfpsRequested=" + mUdfpsRequested);
         pw.println("    mInterpolatedDarkAmount=" + mInterpolatedDarkAmount);
         pw.println("    mAnimationType=" + mAnimationType);
-        pw.println("    mUseExpandedOverlay=" + mUseExpandedOverlay);
     }
 
     private final AsyncLayoutInflater.OnInflateFinishedListener mLayoutInflaterFinishListener =
             new AsyncLayoutInflater.OnInflateFinishedListener() {
-        @Override
-        public void onInflateFinished(View view, int resid, ViewGroup parent) {
-            mFullyInflated = true;
-            mAodFp = view.findViewById(R.id.udfps_aod_fp);
-            mLockScreenFp = view.findViewById(R.id.udfps_lockscreen_fp);
-            mBgProtection = view.findViewById(R.id.udfps_keyguard_fp_bg);
+                @Override
+                public void onInflateFinished(View view, int resid, ViewGroup parent) {
+                    mFullyInflated = true;
+                    mAodFp = view.findViewById(R.id.udfps_aod_fp);
+                    mLockScreenFp = view.findViewById(R.id.udfps_lockscreen_fp);
+                    mBgProtection = view.findViewById(R.id.udfps_keyguard_fp_bg);
 
-            updatePadding();
-            updateColor();
-            updateAlpha();
+                    updatePadding();
+                    updateColor();
+                    updateAlpha();
 
-            if (mUseExpandedOverlay) {
-                final LayoutParams lp = (LayoutParams) view.getLayoutParams();
-                lp.width = mSensorBounds.width();
-                lp.height = mSensorBounds.height();
-                RectF relativeToView = getBoundsRelativeToView(new RectF(mSensorBounds));
-                lp.setMarginsRelative(
-                        (int) relativeToView.left,
-                        (int) relativeToView.top,
-                        (int) relativeToView.right,
-                        (int) relativeToView.bottom
-                );
-                parent.addView(view, lp);
-            } else {
-                parent.addView(view);
-            }
+                    final LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                    lp.width = mSensorBounds.width();
+                    lp.height = mSensorBounds.height();
+                    RectF relativeToView = getBoundsRelativeToView(new RectF(mSensorBounds));
+                    lp.setMarginsRelative((int) relativeToView.left, (int) relativeToView.top,
+                            (int) relativeToView.right, (int) relativeToView.bottom);
+                    parent.addView(view, lp);
 
-            // requires call to invalidate to update the color
-            mLockScreenFp.addValueCallback(
-                    new KeyPath("**"), LottieProperty.COLOR_FILTER,
-                    frameInfo -> new PorterDuffColorFilter(mTextColorPrimary,
-                            PorterDuff.Mode.SRC_ATOP)
-            );
-            mOnFinishInflateRunnable.run();
-        }
-    };
+                    // requires call to invalidate to update the color
+                    mLockScreenFp.addValueCallback(new KeyPath("**"), LottieProperty.COLOR_FILTER,
+                            frameInfo -> new PorterDuffColorFilter(mTextColorPrimary,
+                                    PorterDuff.Mode.SRC_ATOP));
+                    mOnFinishInflateRunnable.run();
+                }
+            };
 }

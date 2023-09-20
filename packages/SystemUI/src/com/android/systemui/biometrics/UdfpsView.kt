@@ -39,10 +39,6 @@ class UdfpsView(
     context: Context,
     attrs: AttributeSet?
 ) : FrameLayout(context, attrs), DozeReceiver {
-
-    // Use expanded overlay when feature flag is true, set by UdfpsViewController
-    var useExpandedOverlay: Boolean = false
-
     // sensorRect may be bigger than the sensor. True sensor dimensions are defined in
     // overlayParams.sensorBounds
     var sensorRect = Rect()
@@ -94,22 +90,8 @@ class UdfpsView(
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
 
-        val paddingX = animationViewController?.paddingX ?: 0
-        val paddingY = animationViewController?.paddingY ?: 0
-
         // Updates sensor rect in relation to the overlay view
-        if (useExpandedOverlay) {
-            animationViewController?.onSensorRectUpdated(RectF(sensorRect))
-        } else {
-            sensorRect.set(
-                    paddingX,
-                    paddingY,
-                    (overlayParams.sensorBounds.width() + paddingX),
-                    (overlayParams.sensorBounds.height() + paddingY)
-            )
-
-            animationViewController?.onSensorRectUpdated(RectF(sensorRect))
-        }
+        animationViewController?.onSensorRectUpdated(RectF(sensorRect))
     }
 
     override fun onAttachedToWindow() {

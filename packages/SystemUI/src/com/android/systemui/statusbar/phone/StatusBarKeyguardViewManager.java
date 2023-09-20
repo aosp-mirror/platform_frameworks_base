@@ -296,7 +296,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     final Set<KeyguardViewManagerCallback> mCallbacks = new HashSet<>();
     private boolean mIsBackAnimationEnabled;
-    private final boolean mUdfpsNewTouchDetectionEnabled;
     private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
     private final ActivityStarter mActivityStarter;
 
@@ -398,7 +397,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mIsBackAnimationEnabled =
                 featureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM);
-        mUdfpsNewTouchDetectionEnabled = featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION);
         mUdfpsOverlayInteractor = udfpsOverlayInteractor;
         mActivityStarter = activityStarter;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
@@ -1594,7 +1592,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             final boolean actionDownThenUp = mAlternateBouncerInteractor.getReceivedDownTouch()
                     && event.getActionMasked() == MotionEvent.ACTION_UP;
             final boolean udfpsOverlayWillForwardEventsOutsideNotificationShade =
-                    mUdfpsNewTouchDetectionEnabled && mKeyguardUpdateManager.isUdfpsEnrolled();
+                    mKeyguardUpdateManager.isUdfpsEnrolled();
             final boolean actionOutsideShouldDismissAlternateBouncer =
                     event.getActionMasked() == MotionEvent.ACTION_OUTSIDE
                     && !udfpsOverlayWillForwardEventsOutsideNotificationShade;
