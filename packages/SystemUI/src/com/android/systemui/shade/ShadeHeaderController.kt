@@ -479,11 +479,13 @@ constructor(
         if (largeScreenActive) {
             logInstantEvent("Large screen constraints set")
             header.setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
+            systemIcons.isClickable = true
             systemIcons.setOnClickListener { shadeCollapseAction?.run() }
         } else {
             logInstantEvent("Small screen constraints set")
             header.setTransition(HEADER_TRANSITION_ID)
             systemIcons.setOnClickListener(null)
+            systemIcons.isClickable = false
         }
         header.jumpToState(header.startState)
         updatePosition()
