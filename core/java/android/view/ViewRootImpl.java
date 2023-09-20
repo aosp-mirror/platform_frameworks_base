@@ -3862,9 +3862,7 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingTransitions.clear();
             }
 
-            if (mActiveSurfaceSyncGroup != null) {
-                mActiveSurfaceSyncGroup.markSyncReady();
-            }
+            handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction);
         } else if (cancelAndRedraw) {
             mLastPerformTraversalsSkipDrawReason = cancelDueToPreDrawListener
                 ? "predraw_" + mAttachInfo.mTreeObserver.getLastDispatchOnPreDrawCanceledReason()
@@ -3878,8 +3876,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mPendingTransitions.clear();
             }
-            if (!performDraw(mActiveSurfaceSyncGroup) && mActiveSurfaceSyncGroup != null) {
-                mActiveSurfaceSyncGroup.markSyncReady();
+            if (!performDraw(mActiveSurfaceSyncGroup)) {
+                handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction);
             }
         }
 
@@ -3894,6 +3892,7 @@ public final class ViewRootImpl implements ViewParent,
             mReportNextDraw = false;
             mLastReportNextDrawReason = null;
             mActiveSurfaceSyncGroup = null;
+            mHasPendingTransactions = false;
             mSyncBuffer = false;
             if (isInWMSRequestedSync()) {
                 mWmsRequestSyncGroup.markSyncReady();
@@ -4692,7 +4691,8 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
-        final boolean fullRedrawNeeded = mFullRedrawNeeded || surfaceSyncGroup != null;
+        final boolean fullRedrawNeeded =
+                mFullRedrawNeeded || surfaceSyncGroup != null || mHasPendingTransactions;
         mFullRedrawNeeded = false;
 
         mIsDrawing = true;
@@ -4722,8 +4722,15 @@ public final class ViewRootImpl implements ViewParent,
             mAttachInfo.mPendingAnimatingRenderNodes.clear();
         }
 
-        if (mReportNextDraw) {
+        final Transaction pendingTransaction;
+        if (!usingAsyncReport && mHasPendingTransactions) {
+            pendingTransaction = new Transaction();
+            pendingTransaction.merge(mPendingTransaction);
+        } else {
+            pendingTransaction = null;
+        }
 
+        if (mReportNextDraw) {
             // if we're using multi-thread renderer, wait for the window frame draws
             if (mWindowDrawCountDown != null) {
                 try {
@@ -4745,9 +4752,7 @@ public final class ViewRootImpl implements ViewParent,
             if (mSurfaceHolder != null && mSurface.isValid()) {
                 usingAsyncReport = true;
                 SurfaceCallbackHelper sch = new SurfaceCallbackHelper(() -> {
-                    if (surfaceSyncGroup != null) {
-                        surfaceSyncGroup.markSyncReady();
-                    }
+                    handleSyncRequestWhenNoAsyncDraw(surfaceSyncGroup, pendingTransaction);
                 });
 
                 SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
@@ -4760,15 +4765,27 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (surfaceSyncGroup != null && !usingAsyncReport) {
-            surfaceSyncGroup.markSyncReady();
+        if (!usingAsyncReport) {
+            handleSyncRequestWhenNoAsyncDraw(surfaceSyncGroup, pendingTransaction);
         }
+
         if (mPerformContentCapture) {
             performContentCaptureInitialReport();
         }
         return true;
     }
 
+    private void handleSyncRequestWhenNoAsyncDraw(SurfaceSyncGroup surfaceSyncGroup,
+            @Nullable Transaction pendingTransaction) {
+        if (surfaceSyncGroup != null) {
+            if (pendingTransaction != null) {
+                surfaceSyncGroup.addTransaction(pendingTransaction);
+            }
+            surfaceSyncGroup.markSyncReady();
+        } else if (pendingTransaction != null) {
+            pendingTransaction.apply();
+        }
+    }
     /**
      * Checks (and caches) if content capture is enabled for this context.
      */
@@ -4854,8 +4871,8 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private boolean draw(boolean fullRedrawNeeded,
-            @Nullable SurfaceSyncGroup activeSyncGroup, boolean syncBuffer) {
+    private boolean draw(boolean fullRedrawNeeded, @Nullable SurfaceSyncGroup activeSyncGroup,
+            boolean syncBuffer) {
         Surface surface = mSurface;
         if (!surface.isValid()) {
             return false;
@@ -4999,12 +5016,11 @@ public final class ViewRootImpl implements ViewParent,
                         mAttachInfo.mThreadedRenderer.forceDrawNextFrame();
                     }
                 } else if (mHasPendingTransactions) {
-                    // Register a calback if there's no sync involved but there were calls to
+                    // Register a callback if there's no sync involved but there were calls to
                     // applyTransactionOnDraw. If there is a sync involved, the sync callback will
                     // handle merging the pending transaction.
                     registerCallbackForPendingTransactions();
                 }
-                mHasPendingTransactions = false;
 
                 mAttachInfo.mThreadedRenderer.draw(mView, mAttachInfo, this);
             } else {
@@ -8981,13 +8997,7 @@ public final class ViewRootImpl implements ViewParent,
             mAdded = false;
             AnimationHandler.removeRequestor(this);
         }
-        if (mActiveSurfaceSyncGroup != null) {
-            mActiveSurfaceSyncGroup.markSyncReady();
-            mActiveSurfaceSyncGroup = null;
-        }
-        if (mHasPendingTransactions) {
-            mPendingTransaction.apply();
-        }
+        handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction);
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
 
@@ -11506,9 +11516,7 @@ public final class ViewRootImpl implements ViewParent,
             Log.d(mTag, "registerCallbacksForSync syncBuffer=" + syncBuffer);
         }
 
-        Transaction t = new Transaction();
-        t.merge(mPendingTransaction);
-
+        surfaceSyncGroup.addTransaction(mPendingTransaction);
         mAttachInfo.mThreadedRenderer.registerRtFrameCallback(new FrameDrawingCallback() {
             @Override
             public void onFrameDraw(long frame) {
@@ -11522,7 +11530,6 @@ public final class ViewRootImpl implements ViewParent,
                                     + frame + ".");
                 }
 
-                mergeWithNextTransaction(t, frame);
                 // If the syncResults are SYNC_LOST_SURFACE_REWARD_IF_FOUND or
                 // SYNC_CONTEXT_IS_STOPPED it means nothing will draw. There's no need to set up
                 // any blast sync or commit callback, and the code should directly call
