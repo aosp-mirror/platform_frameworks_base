@@ -63,6 +63,7 @@ droidstubs {
             tag: ".removed-api.txt",
         },
     ],
+    api_surface: "public",
 }
 
 priv_apps = " --show-annotation android.annotation.SystemApi\\(" +
@@ -116,6 +117,7 @@ droidstubs {
             tag: ".removed-api.txt",
         },
     ],
+    api_surface: "system",
 }
 
 droidstubs {
@@ -161,6 +163,7 @@ droidstubs {
             tag: ".removed-api.txt",
         },
     ],
+    api_surface: "test",
 }
 
 droidstubs {
@@ -200,6 +203,7 @@ droidstubs {
             tag: ".removed-api.txt",
         },
     ],
+    api_surface: "module-lib",
 }
 
 /////////////////////////////////////////////////////////////////////
