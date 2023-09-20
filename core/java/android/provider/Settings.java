@@ -3596,12 +3596,9 @@ public final class Settings {
                 }
 
                 Bundle b;
-                // b/252663068: if we're in system server and the caller did not call
+                // If we're in system server and the caller did not call
                 // clearCallingIdentity, the read would fail due to mismatched AttributionSources.
-                // TODO(b/256013480): remove this bypass after fixing the callers in system server.
-                if (namespace.equals(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER)
-                        && Settings.isInSystemServer()
-                        && Binder.getCallingUid() != Process.myUid()) {
+                if (Settings.isInSystemServer() && Binder.getCallingUid() != Process.myUid()) {
                     final long token = Binder.clearCallingIdentity();
                     try {
                         // Fetch all flags for the namespace at once for caching purposes
