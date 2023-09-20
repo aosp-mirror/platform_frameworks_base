@@ -47,11 +47,8 @@ import static org.mockito.Mockito.spy;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.window.IRemoteTransition;
-import android.window.IRemoteTransitionFinishedCallback;
 import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -65,6 +62,7 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.TestRemoteTransition;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.TransitionInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
@@ -205,7 +203,7 @@ public class SplitTransitionTests extends ShellTestCase {
 
         // Make sure split-screen is now visible
         assertTrue(mStageCoordinator.isSplitScreenVisible());
-        assertTrue(testRemote.mCalled);
+        assertTrue(testRemote.isCalled());
     }
 
     @Test
@@ -466,26 +464,6 @@ public class SplitTransitionTests extends ShellTestCase {
         out.setMode(mode);
         out.setTaskInfo(taskInfo);
         return out;
-    }
-
-    class TestRemoteTransition extends IRemoteTransition.Stub {
-        boolean mCalled = false;
-        final WindowContainerTransaction mRemoteFinishWCT = new WindowContainerTransaction();
-
-        @Override
-        public void startAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction startTransaction,
-                IRemoteTransitionFinishedCallback finishCallback)
-                throws RemoteException {
-            mCalled = true;
-            finishCallback.onTransitionFinished(mRemoteFinishWCT, null /* sct */);
-        }
-
-        @Override
-        public void mergeAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IBinder mergeTarget,
-                IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
-        }
     }
 
 }
