@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2017 Google Inc.
+ * Copyright (c) 2023 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.credentialmanager">
 
+    <uses-feature android:name="android.hardware.type.watch" />
+
     <uses-permission android:name="android.permission.LAUNCH_CREDENTIAL_SELECTOR"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
     <uses-permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS"/>
@@ -28,17 +30,15 @@
       android:dataExtractionRules="@xml/data_extraction_rules"
       android:fullBackupContent="@xml/backup_rules"
       android:label="@string/app_name"
-      android:supportsRtl="true"
-      android:theme="@style/Theme.CredentialSelector">
+      android:supportsRtl="true">
 
         <activity
-            android:name=".CredentialSelectorActivity"
+            android:name=".ui.CredentialSelectorActivity"
             android:exported="true"
             android:permission="android.permission.LAUNCH_CREDENTIAL_SELECTOR"
             android:launchMode="singleTop"
             android:label="@string/app_name"
-            android:excludeFromRecents="true"
-            android:theme="@style/Theme.CredentialSelector">
+            android:excludeFromRecents="true">
         </activity>
   </application>
 
