@@ -265,8 +265,6 @@ UnflaggedApi: android.database.sqlite.SQLiteRawStatement#reset():
     New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.reset()
 UnflaggedApi: android.database.sqlite.SQLiteRawStatement#step():
     New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.step()
-UnflaggedApi: android.database.sqlite.SQLiteRawStatement#toString():
-    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.toString()
 UnflaggedApi: android.graphics.Gainmap#Gainmap(android.graphics.Gainmap, android.graphics.Bitmap):
     New API must be flagged with @FlaggedApi: constructor android.graphics.Gainmap(android.graphics.Gainmap,android.graphics.Bitmap)
 UnflaggedApi: android.graphics.Path#computeBounds(android.graphics.RectF):
@@ -321,8 +319,6 @@ UnflaggedApi: android.media.midi.MidiUmpDeviceService#onBind(android.content.Int
     New API must be flagged with @FlaggedApi: method android.media.midi.MidiUmpDeviceService.onBind(android.content.Intent)
 UnflaggedApi: android.media.midi.MidiUmpDeviceService#onClose():
     New API must be flagged with @FlaggedApi: method android.media.midi.MidiUmpDeviceService.onClose()
-UnflaggedApi: android.media.midi.MidiUmpDeviceService#onCreate():
-    New API must be flagged with @FlaggedApi: method android.media.midi.MidiUmpDeviceService.onCreate()
 UnflaggedApi: android.media.midi.MidiUmpDeviceService#onDeviceStatusChanged(android.media.midi.MidiDeviceStatus):
     New API must be flagged with @FlaggedApi: method android.media.midi.MidiUmpDeviceService.onDeviceStatusChanged(android.media.midi.MidiDeviceStatus)
 UnflaggedApi: android.media.midi.MidiUmpDeviceService#onGetInputPortReceivers():
@@ -335,8 +331,6 @@ UnflaggedApi: android.os.UserManager#DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO:
     New API must be flagged with @FlaggedApi: field android.os.UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO
 UnflaggedApi: android.provider.Settings#ACTION_CREDENTIAL_PROVIDER:
     New API must be flagged with @FlaggedApi: field android.provider.Settings.ACTION_CREDENTIAL_PROVIDER
-UnflaggedApi: android.telecom.Call.Details#PROPERTY_IS_TRANSACTIONAL:
-    New API must be flagged with @FlaggedApi: field android.telecom.Call.Details.PROPERTY_IS_TRANSACTIONAL
 UnflaggedApi: android.telecom.Call.Details#getId():
     New API must be flagged with @FlaggedApi: method android.telecom.Call.Details.getId()
 UnflaggedApi: android.telephony.CarrierConfigManager#KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE:
@@ -355,46 +349,10 @@ UnflaggedApi: android.telephony.TelephonyManager#EVENT_DISPLAY_SOS_MESSAGE:
     New API must be flagged with @FlaggedApi: field android.telephony.TelephonyManager.EVENT_DISPLAY_SOS_MESSAGE
 UnflaggedApi: android.telephony.TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED:
     New API must be flagged with @FlaggedApi: field android.telephony.TelephonyManager.PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED
-UnflaggedApi: android.text.BoringLayout#computeDrawingBoundingBox():
-    New API must be flagged with @FlaggedApi: method android.text.BoringLayout.computeDrawingBoundingBox()
-UnflaggedApi: android.text.BoringLayout.Metrics#getDrawingBoundingBox():
-    New API must be flagged with @FlaggedApi: method android.text.BoringLayout.Metrics.getDrawingBoundingBox()
-UnflaggedApi: android.text.DynamicLayout#getLineBreakConfig():
-    New API must be flagged with @FlaggedApi: method android.text.DynamicLayout.getLineBreakConfig()
 UnflaggedApi: android.text.DynamicLayout.Builder#setLineBreakConfig(android.graphics.text.LineBreakConfig):
     New API must be flagged with @FlaggedApi: method android.text.DynamicLayout.Builder.setLineBreakConfig(android.graphics.text.LineBreakConfig)
 UnflaggedApi: android.text.DynamicLayout.Builder#setUseBoundsForWidth(boolean):
     New API must be flagged with @FlaggedApi: method android.text.DynamicLayout.Builder.setUseBoundsForWidth(boolean)
-UnflaggedApi: android.text.Layout#computeDrawingBoundingBox():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.computeDrawingBoundingBox()
-UnflaggedApi: android.text.Layout#getBreakStrategy():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getBreakStrategy()
-UnflaggedApi: android.text.Layout#getEllipsize():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getEllipsize()
-UnflaggedApi: android.text.Layout#getHyphenationFrequency():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getHyphenationFrequency()
-UnflaggedApi: android.text.Layout#getJustificationMode():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getJustificationMode()
-UnflaggedApi: android.text.Layout#getLeftIndents():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getLeftIndents()
-UnflaggedApi: android.text.Layout#getLineBreakConfig():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getLineBreakConfig()
-UnflaggedApi: android.text.Layout#getLineSpacingAmount():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getLineSpacingAmount()
-UnflaggedApi: android.text.Layout#getLineSpacingMultiplier():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getLineSpacingMultiplier()
-UnflaggedApi: android.text.Layout#getMaxLines():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getMaxLines()
-UnflaggedApi: android.text.Layout#getRightIndents():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getRightIndents()
-UnflaggedApi: android.text.Layout#getTextDirectionHeuristic():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getTextDirectionHeuristic()
-UnflaggedApi: android.text.Layout#getUseBoundsForWidth():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.getUseBoundsForWidth()
-UnflaggedApi: android.text.Layout#isFontPaddingIncluded():
-    New API must be flagged with @FlaggedApi: method android.text.Layout.isFontPaddingIncluded()
-UnflaggedApi: android.text.Layout.Builder:
-    New API must be flagged with @FlaggedApi: class android.text.Layout.Builder
 UnflaggedApi: android.text.Layout.Builder#Builder(CharSequence, int, int, android.text.TextPaint, int):
     New API must be flagged with @FlaggedApi: constructor android.text.Layout.Builder(CharSequence,int,int,android.text.TextPaint,int)
 UnflaggedApi: android.text.Layout.Builder#build():
@@ -429,24 +387,12 @@ UnflaggedApi: android.text.Layout.Builder#setRightIndents(int[]):
     New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setRightIndents(int[])
 UnflaggedApi: android.text.Layout.Builder#setTextDirectionHeuristic(android.text.TextDirectionHeuristic):
     New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setTextDirectionHeuristic(android.text.TextDirectionHeuristic)
-UnflaggedApi: android.text.Layout.Builder#setUseBoundsForWidth(boolean):
-    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setUseBoundsForWidth(boolean)
-UnflaggedApi: android.text.StaticLayout#computeDrawingBoundingBox():
-    New API must be flagged with @FlaggedApi: method android.text.StaticLayout.computeDrawingBoundingBox()
 UnflaggedApi: android.text.StaticLayout.Builder#setUseBoundsForWidth(boolean):
     New API must be flagged with @FlaggedApi: method android.text.StaticLayout.Builder.setUseBoundsForWidth(boolean)
-UnflaggedApi: android.text.style.LineBreakConfigSpan:
-    New API must be flagged with @FlaggedApi: class android.text.style.LineBreakConfigSpan
 UnflaggedApi: android.text.style.LineBreakConfigSpan#LineBreakConfigSpan(android.graphics.text.LineBreakConfig):
     New API must be flagged with @FlaggedApi: constructor android.text.style.LineBreakConfigSpan(android.graphics.text.LineBreakConfig)
-UnflaggedApi: android.text.style.LineBreakConfigSpan#equals(Object):
-    New API must be flagged with @FlaggedApi: method android.text.style.LineBreakConfigSpan.equals(Object)
 UnflaggedApi: android.text.style.LineBreakConfigSpan#getLineBreakConfig():
     New API must be flagged with @FlaggedApi: method android.text.style.LineBreakConfigSpan.getLineBreakConfig()
-UnflaggedApi: android.text.style.LineBreakConfigSpan#hashCode():
-    New API must be flagged with @FlaggedApi: method android.text.style.LineBreakConfigSpan.hashCode()
-UnflaggedApi: android.text.style.LineBreakConfigSpan#toString():
-    New API must be flagged with @FlaggedApi: method android.text.style.LineBreakConfigSpan.toString()
 UnflaggedApi: android.view.HapticScrollFeedbackProvider#HapticScrollFeedbackProvider(android.view.View):
     New API must be flagged with @FlaggedApi: constructor android.view.HapticScrollFeedbackProvider(android.view.View)
 UnflaggedApi: android.view.HapticScrollFeedbackProvider#onScrollLimit(int, int, int, boolean):
@@ -455,16 +401,10 @@ UnflaggedApi: android.view.HapticScrollFeedbackProvider#onScrollProgress(int, in
     New API must be flagged with @FlaggedApi: method android.view.HapticScrollFeedbackProvider.onScrollProgress(int,int,int,int)
 UnflaggedApi: android.view.HapticScrollFeedbackProvider#onSnapToItem(int, int, int):
     New API must be flagged with @FlaggedApi: method android.view.HapticScrollFeedbackProvider.onSnapToItem(int,int,int)
-UnflaggedApi: android.view.ScrollFeedbackProvider#onScrollLimit(android.view.MotionEvent, int, boolean):
-    New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onScrollLimit(android.view.MotionEvent,int,boolean)
 UnflaggedApi: android.view.ScrollFeedbackProvider#onScrollLimit(int, int, int, boolean):
     New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onScrollLimit(int,int,int,boolean)
-UnflaggedApi: android.view.ScrollFeedbackProvider#onScrollProgress(android.view.MotionEvent, int, int):
-    New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onScrollProgress(android.view.MotionEvent,int,int)
 UnflaggedApi: android.view.ScrollFeedbackProvider#onScrollProgress(int, int, int, int):
     New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onScrollProgress(int,int,int,int)
-UnflaggedApi: android.view.ScrollFeedbackProvider#onSnapToItem(android.view.MotionEvent, int):
-    New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onSnapToItem(android.view.MotionEvent,int)
 UnflaggedApi: android.view.ScrollFeedbackProvider#onSnapToItem(int, int, int):
     New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onSnapToItem(int,int,int)
 UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo#ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT:
@@ -515,7 +455,3 @@ UnflaggedApi: android.view.inputmethod.InlineSuggestionsRequest.Builder#setClien
     New API must be flagged with @FlaggedApi: method android.view.inputmethod.InlineSuggestionsRequest.Builder.setClientSupported(boolean)
 UnflaggedApi: android.view.inputmethod.InlineSuggestionsRequest.Builder#setServiceSupported(boolean):
     New API must be flagged with @FlaggedApi: method android.view.inputmethod.InlineSuggestionsRequest.Builder.setServiceSupported(boolean)
-UnflaggedApi: android.widget.TextView#getUseBoundsForWidth():
-    New API must be flagged with @FlaggedApi: method android.widget.TextView.getUseBoundsForWidth()
-UnflaggedApi: android.widget.TextView#setUseBoundsForWidth(boolean):
-    New API must be flagged with @FlaggedApi: method android.widget.TextView.setUseBoundsForWidth(boolean)
