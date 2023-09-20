@@ -2368,10 +2368,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             //  * When phone is unlocked: we still don't want to execute hiding of the keyguard
             //    as the animation could prepare 'fake AOD' interface (without actually
             //    transitioning to keyguard state) and this might reset the view states
+            // Log for b/290627350
+            Log.d(TAG, "!shouldBeKeyguard mStatusBarStateController.isKeyguardRequested() "
+                    + mStatusBarStateController.isKeyguardRequested() + " keyguardForDozing "
+                    + keyguardForDozing + " wakeAndUnlocking " + wakeAndUnlocking
+                    + " isWakingAndOccluded " + isWakingAndOccluded);
             if (!mScreenOffAnimationController.isKeyguardHideDelayed()
                     // If we're animating occluded, there's an activity launching over the keyguard
                     // UI. Wait to hide it until after the animation concludes.
                     && !mKeyguardViewMediator.isOccludeAnimationPlaying()) {
+                Log.d(TAG, "hideKeyguardImpl " + forceStateChange);
                 return hideKeyguardImpl(forceStateChange);
             }
         }
