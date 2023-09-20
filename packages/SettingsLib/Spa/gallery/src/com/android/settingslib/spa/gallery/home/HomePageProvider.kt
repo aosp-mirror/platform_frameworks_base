@@ -41,6 +41,7 @@ import com.android.settingslib.spa.gallery.page.ProgressBarPageProvider
 import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
+import com.android.settingslib.spa.gallery.scaffold.SearchScaffoldPageProvider
 import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 import com.android.settingslib.spa.widget.scaffold.HomeScaffold
@@ -55,6 +56,7 @@ object HomePageProvider : SettingsPageProvider {
             PreferenceMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             OperateListPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             ArgumentPageProvider.buildInjectEntry("foo")!!.setLink(fromPage = owner).build(),
+            SearchScaffoldPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             SliderPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             SpinnerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             SettingsPagerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
