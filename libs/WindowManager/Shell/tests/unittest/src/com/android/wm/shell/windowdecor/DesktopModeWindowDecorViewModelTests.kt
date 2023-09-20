@@ -33,8 +33,12 @@ import android.view.Choreographer
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.InputChannel
 import android.view.InputMonitor
+import android.view.InsetsSource
+import android.view.InsetsState
 import android.view.SurfaceControl
 import android.view.SurfaceView
+import android.view.WindowInsets.Type.navigationBars
+import android.view.WindowInsets.Type.statusBars
 import androidx.core.content.getSystemService
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
@@ -42,6 +46,7 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
@@ -53,10 +58,12 @@ import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
@@ -67,6 +74,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import java.util.Optional
 import java.util.function.Supplier
+
 
 /** Tests of [DesktopModeWindowDecorViewModel]  */
 @SmallTest
@@ -80,6 +88,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockTaskOrganizer: ShellTaskOrganizer
     @Mock private lateinit var mockDisplayController: DisplayController
     @Mock private lateinit var mockDisplayLayout: DisplayLayout
+    @Mock private lateinit var displayInsetsController: DisplayInsetsController
     @Mock private lateinit var mockSyncQueue: SyncTransactionQueue
     @Mock private lateinit var mockDesktopTasksController: DesktopTasksController
     @Mock private lateinit var mockInputMonitor: InputMonitor
@@ -97,6 +106,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     private lateinit var shellInit: ShellInit
+    private lateinit var desktopModeOnInsetsChangedListener: DesktopModeOnInsetsChangedListener
     private lateinit var desktopModeWindowDecorViewModel: DesktopModeWindowDecorViewModel
 
     @Before
@@ -111,6 +121,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockTaskOrganizer,
                 mockDisplayController,
                 mockShellController,
+                displayInsetsController,
                 mockSyncQueue,
                 mockTransitions,
                 Optional.of(mockDesktopTasksController),
@@ -131,6 +142,11 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         whenever(mockInputMonitor.inputChannel).thenReturn(inputChannels[1])
 
         shellInit.init()
+
+        val listenerCaptor =
+                argumentCaptor<DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener>()
+        verify(displayInsetsController).addInsetsChangedListener(anyInt(), listenerCaptor.capture())
+        desktopModeOnInsetsChangedListener = listenerCaptor.firstValue
     }
 
     @Test
@@ -274,6 +290,67 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         verify(decoration).addTransitionPausingRelayout(transition)
     }
 
+    @Test
+    fun testRelayoutRunsWhenStatusBarsInsetsSourceVisibilityChanges() {
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
+        val decoration = setUpMockDecorationForTask(task)
+
+        onTaskOpening(task)
+
+        // Add status bar insets source
+        val insetsState = InsetsState()
+        val statusBarInsetsSourceId = 0
+        val statusBarInsetsSource = InsetsSource(statusBarInsetsSourceId, statusBars())
+        statusBarInsetsSource.isVisible = false
+        insetsState.addSource(statusBarInsetsSource)
+
+        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
+
+        // Verify relayout occurs when status bar inset visibility changes
+        verify(decoration, times(1)).relayout(task)
+    }
+
+    @Test
+    fun testRelayoutDoesNotRunWhenNonStatusBarsInsetsSourceVisibilityChanges() {
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
+        val decoration = setUpMockDecorationForTask(task)
+
+        onTaskOpening(task)
+
+        // Add navigation bar insets source
+        val insetsState = InsetsState()
+        val navigationBarInsetsSourceId = 1
+        val navigationBarInsetsSource = InsetsSource(navigationBarInsetsSourceId, navigationBars())
+        navigationBarInsetsSource.isVisible = false
+        insetsState.addSource(navigationBarInsetsSource)
+
+        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
+
+        // Verify relayout does not occur when non-status bar inset changes visibility
+        verify(decoration, never()).relayout(task)
+    }
+
+    @Test
+    fun testRelayoutDoesNotRunWhenNonStatusBarsInsetSourceVisibilityDoesNotChange() {
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
+        val decoration = setUpMockDecorationForTask(task)
+
+        onTaskOpening(task)
+
+        // Add status bar insets source
+        val insetsState = InsetsState()
+        val statusBarInsetsSourceId = 0
+        val statusBarInsetsSource = InsetsSource(statusBarInsetsSourceId, statusBars())
+        statusBarInsetsSource.isVisible = false
+        insetsState.addSource(statusBarInsetsSource)
+
+        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
+        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
+
+        // Verify relayout runs only once when status bar inset visibility changes.
+        verify(decoration, times(1)).relayout(task)
+    }
+
     private fun onTaskOpening(task: RunningTaskInfo, leash: SurfaceControl = SurfaceControl()) {
         desktopModeWindowDecorViewModel.onTaskOpening(
                 task,
@@ -313,6 +390,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         whenever(mockDesktopModeWindowDecorFactory.create(
                 any(), any(), any(), eq(task), any(), any(), any(), any(), any())
         ).thenReturn(decoration)
+        decoration.mTaskInfo = task
+        whenever(decoration.isFocused).thenReturn(task.isFocused)
         return decoration
     }
 

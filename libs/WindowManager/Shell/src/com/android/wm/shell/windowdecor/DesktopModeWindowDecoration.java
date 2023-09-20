@@ -638,6 +638,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return loadDimensionPixelSize(mContext.getResources(), getCaptionHeightId(windowingMode));
     }
 
+    @Override
+    int getCaptionViewId() {
+        return R.id.desktop_mode_caption;
+    }
+
     /**
      * Add transition to mTransitionsPausingRelayout
      */
