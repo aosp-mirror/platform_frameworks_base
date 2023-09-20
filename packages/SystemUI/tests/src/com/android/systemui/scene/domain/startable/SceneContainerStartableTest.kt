@@ -109,6 +109,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                     fromScene = SceneKey.Gone,
                     toScene = SceneKey.Shade,
                     progress = flowOf(0.5f),
+                    isUserInputDriven = false,
                 )
             assertThat(isVisible).isTrue()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Shade), "reason")
@@ -121,6 +122,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                     fromScene = SceneKey.Shade,
                     toScene = SceneKey.Gone,
                     progress = flowOf(0.5f),
+                    isUserInputDriven = false,
                 )
             assertThat(isVisible).isTrue()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone), "reason")

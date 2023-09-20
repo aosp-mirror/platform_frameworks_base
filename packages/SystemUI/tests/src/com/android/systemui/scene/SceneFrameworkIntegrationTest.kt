@@ -433,6 +433,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 fromScene = getCurrentSceneInUi(),
                 toScene = to.key,
                 progress = progressFlow,
+                isUserInputDriven = false,
             )
         runCurrent()
 

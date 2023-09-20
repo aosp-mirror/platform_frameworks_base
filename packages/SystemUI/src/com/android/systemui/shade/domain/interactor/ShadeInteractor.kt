@@ -59,6 +59,7 @@ constructor(
     @Application scope: CoroutineScope,
     disableFlagsRepository: DisableFlagsRepository,
     sceneContainerFlags: SceneContainerFlags,
+    // TODO(b/300258424) convert to direct reference instead of provider
     sceneInteractorProvider: Provider<SceneInteractor>,
     keyguardRepository: KeyguardRepository,
     userSetupRepository: UserSetupRepository,
@@ -141,15 +142,22 @@ constructor(
      * if the user's input gesture has ended but a transition they initiated is animating.
      */
     val isUserInteractingWithShade: Flow<Boolean> =
-        userInteractingFlow(repository.legacyShadeTracking, repository.legacyShadeExpansion)
-
+        if (sceneContainerFlags.isEnabled()) {
+            sceneBasedInteracting(sceneInteractorProvider.get(), SceneKey.Shade)
+        } else {
+            userInteractingFlow(repository.legacyShadeTracking, repository.legacyShadeExpansion)
+        }
     /**
      * Whether the user is expanding or collapsing quick settings with user input. This will be true
      * even if the user's input gesture has ended but a transition they initiated is still
      * animating.
      */
     val isUserInteractingWithQs: Flow<Boolean> =
-        userInteractingFlow(repository.legacyQsTracking, repository.qsExpansion)
+        if (sceneContainerFlags.isEnabled()) {
+            sceneBasedInteracting(sceneInteractorProvider.get(), SceneKey.QuickSettings)
+        } else {
+            userInteractingFlow(repository.legacyQsTracking, repository.qsExpansion)
+        }
 
     /**
      * Whether the user is expanding or collapsing either the shade or quick settings with user
@@ -158,6 +166,7 @@ constructor(
      */
     val isUserInteracting: Flow<Boolean> =
         combine(isUserInteractingWithShade, isUserInteractingWithShade) { shade, qs -> shade || qs }
+            .distinctUntilChanged()
 
     /** Emits true if the shade can be expanded from QQS to QS and false otherwise. */
     val isExpandToQsEnabled: Flow<Boolean> =
@@ -194,6 +203,18 @@ constructor(
                         } else {
                             flowOf(0f)
                         }
+                }
+            }
+            .distinctUntilChanged()
+
+    fun sceneBasedInteracting(sceneInteractor: SceneInteractor, sceneKey: SceneKey) =
+        sceneInteractor.transitionState
+            .map { state ->
+                when (state) {
+                    is ObservableTransitionState.Idle -> false
+                    is ObservableTransitionState.Transition ->
+                        state.isUserInputDriven &&
+                            (state.toScene == sceneKey || state.fromScene == sceneKey)
                 }
             }
             .distinctUntilChanged()
