@@ -220,6 +220,24 @@ public class ForegroundServiceTypeLoggerModule {
         final ArrayList<Long> timestampsFound = new ArrayList<>();
         for (int i = 0, size = apiTypes.size(); i < size; i++) {
             final int apiType = apiTypes.get(i);
+
+            // remove the FGS record from the stack
+            final ArrayMap<ComponentName, ServiceRecord> runningFgsOfType =
+                    uidState.mRunningFgs.get(apiType);
+            if (runningFgsOfType == null) {
+                Slog.w(TAG, "Could not find appropriate running FGS for FGS stop for UID " + uid
+                        + " in package " + record.packageName);
+                continue;
+            }
+
+            runningFgsOfType.remove(record.getComponentName());
+            if (runningFgsOfType.size() == 0) {
+                // there's no more FGS running for this type, just get rid of it
+                uidState.mRunningFgs.remove(apiType);
+                // but we need to keep track of the timestamp in case an API stops
+                uidState.mLastFgsTimeStamp.put(apiType, System.currentTimeMillis());
+            }
+
             final int apiTypeIndex = uidState.mOpenWithFgsCount.indexOfKey(apiType);
             if (apiTypeIndex < 0) {
                 Slog.w(TAG, "Logger should be tracking FGS types correctly for UID " + uid
@@ -237,22 +255,6 @@ public class ForegroundServiceTypeLoggerModule {
                 timestampsFound.add(closedApi.mTimeStart);
                 // remove the last API close call
                 uidState.mApiClosedCalls.remove(apiType);
-            }
-            // remove the FGS record from the stack
-            final ArrayMap<ComponentName, ServiceRecord> runningFgsOfType =
-                    uidState.mRunningFgs.get(apiType);
-            if (runningFgsOfType == null) {
-                Slog.w(TAG, "Could not find appropriate running FGS for FGS stop for UID " + uid
-                        + " in package " + record.packageName);
-                continue;
-            }
-
-            runningFgsOfType.remove(record.getComponentName());
-            if (runningFgsOfType.size() == 0) {
-                // there's no more FGS running for this type, just get rid of it
-                uidState.mRunningFgs.remove(apiType);
-                // but we need to keep track of the timestamp in case an API stops
-                uidState.mLastFgsTimeStamp.put(apiType, System.currentTimeMillis());
             }
         }
         if (!apisFound.isEmpty()) {
@@ -383,9 +385,14 @@ public class ForegroundServiceTypeLoggerModule {
             // initialize if we don't contain
             uidState.mOpenedWithoutFgsCount.put(apiType, 0);
         }
-        if (uidState.mOpenedWithoutFgsCount.get(apiType) != 0) {
+        int apiOpenWithoutFgsCount = uidState.mOpenedWithoutFgsCount.get(apiType);
+        if (apiOpenWithoutFgsCount != 0) {
+            apiOpenWithoutFgsCount -= 1;
+            if (apiOpenWithoutFgsCount == 0) {
+                uidState.mApiOpenCalls.remove(apiType);
+            }
             uidState.mOpenedWithoutFgsCount
-                    .put(apiType, uidState.mOpenedWithoutFgsCount.get(apiType) - 1);
+                    .put(apiType, apiOpenWithoutFgsCount);
             return System.currentTimeMillis();
         }
         // This is a part of a valid active FGS
