@@ -433,7 +433,7 @@ type bazelCombinedApisAttributes struct {
 }
 
 // combined_apis bp2build converter
-func (a *CombinedApis) ConvertWithBp2build(ctx android.TopDownMutatorContext) {
+func (a *CombinedApis) ConvertWithBp2build(ctx android.Bp2buildMutatorContext) {
 	basePrefix := "non-updatable"
 	scopeToSuffix := map[string]string{
 		"public":        "-current.txt",
