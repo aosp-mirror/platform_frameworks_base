@@ -139,12 +139,12 @@ public class KeyguardSecurityViewFlipperController
                             onViewInflatedListener.onViewInflated(childController);
 
                             // Single bouncer constrains are default
-                            if (mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)
-                                    &&
-                                    getResources().getBoolean(R.bool.update_bouncer_constraints)) {
+                            if (mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)) {
                                 boolean useSplitBouncer =
-                                        getResources().getConfiguration().orientation
+                                        getResources().getBoolean(R.bool.update_bouncer_constraints)
+                                        && getResources().getConfiguration().orientation
                                                 == ORIENTATION_LANDSCAPE;
+
                                 updateConstraints(useSplitBouncer);
                             }
                         }

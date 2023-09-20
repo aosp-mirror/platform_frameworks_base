@@ -105,6 +105,13 @@
          screen. -->
     <item name="half_opened_bouncer_height_ratio" type="dimen" format="float">0.0</item>
 
+    <!-- Proportion of the screen height to use to set the maximum height of the bouncer to when
+     the device is in the DEVICE_POSTURE_HALF_OPENED posture.
+
+     This value is only used when motion layout bouncer is used - when flag
+     landscape.enable_lockscreen (b/293252410) is on -->
+    <item name="motion_layout_half_fold_bouncer_height_ratio" type="dimen" format="float">0.55</item>
+
     <!-- The actual amount of translation that is applied to the security when it animates from one
          side of the screen to the other in one-handed or user switcher mode. Note that it will
          always translate from the side of the screen to the other (it will "jump" closer to the
