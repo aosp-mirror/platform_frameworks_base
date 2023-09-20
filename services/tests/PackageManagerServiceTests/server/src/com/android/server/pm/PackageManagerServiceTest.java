@@ -17,24 +17,22 @@
 package com.android.server.pm;
 
 import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
+
 import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
+
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.AppGlobals;
-import android.content.IIntentReceiver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
-import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -87,18 +85,6 @@ public class PackageManagerServiceTest {
     @Test
     public void testPackageRemoval() {
         class PackageSenderImpl implements PackageSender {
-            public void sendPackageBroadcast(final String action, final String pkg,
-                    final Bundle extras, final int flags, final String targetPkg,
-                    final IIntentReceiver finishedReceiver, final int[] userIds,
-                    int[] instantUserIds, SparseArray<int[]> broadcastAllowList,
-                    @Nullable Bundle bOptions) {
-            }
-
-            public void sendPackageAddedForNewUsers(@NonNull Computer snapshot, String packageName,
-                    boolean sendBootComplete, boolean includeStopped, int appId,
-                    int[] userIds, int[] instantUserIds, boolean isArchived, int dataLoaderType) {
-            }
-
             @Override
             public void notifyPackageAdded(String packageName, int uid) {
             }
@@ -113,9 +99,8 @@ public class PackageManagerServiceTest {
             }
         }
 
-        PackageSenderImpl sender = new PackageSenderImpl();
         PackageSetting setting = null;
-        PackageRemovedInfo pri = new PackageRemovedInfo(sender);
+        PackageRemovedInfo pri = new PackageRemovedInfo();
 
         // Initial conditions: nothing there
         Assert.assertNull(pri.mRemovedUsers);

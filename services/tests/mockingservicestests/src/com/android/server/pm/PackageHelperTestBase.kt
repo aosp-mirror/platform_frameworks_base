@@ -17,7 +17,6 @@
 package com.android.server.pm
 
 import android.os.Build
-import android.os.Bundle
 import android.os.UserHandle
 import android.os.UserManager
 import com.android.server.pm.pkg.PackageStateInternal
@@ -68,7 +67,11 @@ open class PackageHelperTestBase {
     lateinit var protectedPackages: ProtectedPackages
 
     @Captor
-    lateinit var bundleCaptor: ArgumentCaptor<Bundle>
+    lateinit var pkgListCaptor: ArgumentCaptor<Array<String>>
+    @Captor
+    lateinit var flagsCaptor: ArgumentCaptor<Int>
+    @Captor
+    lateinit var uidsCaptor: ArgumentCaptor<IntArray>
 
     @Rule
     @JvmField

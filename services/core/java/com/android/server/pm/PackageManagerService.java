@@ -70,7 +70,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -98,6 +97,7 @@ import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ComponentEnabledSetting;
@@ -115,6 +115,7 @@ import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
 import android.content.pm.UserPackage;
 import android.content.pm.VerifierDeviceIdentity;
+import android.content.pm.VerifierInfo;
 import android.content.pm.VersionedPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.PackageLite;
@@ -985,7 +986,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final DeletePackageHelper mDeletePackageHelper;
     private final InitAppsHelper mInitAppsHelper;
     private final AppDataHelper mAppDataHelper;
-    private final InstallPackageHelper mInstallPackageHelper;
+    @NonNull private final InstallPackageHelper mInstallPackageHelper;
     private final PreferredActivityHelper mPreferredActivityHelper;
     private final ResolveIntentHelper mResolveIntentHelper;
     private final DexOptHelper mDexOptHelper;
@@ -1715,7 +1716,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new CrossProfileIntentFilterHelper(i.getSettings(),
                         i.getUserManagerService(), i.getLock(), i.getUserManagerInternal(),
                         context),
-                (i, pm) -> new UpdateOwnershipHelper());
+                (i, pm) -> new UpdateOwnershipHelper(),
+                (i, pm) -> new PackageMonitorCallbackHelper());
 
         if (Build.VERSION.SDK_INT <= 0) {
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
@@ -2067,17 +2069,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDomainVerificationManager.setConnection(mDomainVerificationConnection);
 
         mBroadcastHelper = new BroadcastHelper(mInjector);
-        mPackageMonitorCallbackHelper = new PackageMonitorCallbackHelper(mInjector);
+        mPackageMonitorCallbackHelper = injector.getPackageMonitorCallbackHelper();
         mAppDataHelper = new AppDataHelper(this);
-        mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper);
-        mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
-        mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper);
+        mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper, mBroadcastHelper);
+        mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
+                mBroadcastHelper);
+        mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper, mRemovePackageHelper,
+                mDeletePackageHelper, mBroadcastHelper);
 
         mInstantAppRegistry = new InstantAppRegistry(mContext, mPermissionManager,
                 mInjector.getUserManagerInternal(), mDeletePackageHelper);
 
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
-        mPreferredActivityHelper = new PreferredActivityHelper(this);
+        mPreferredActivityHelper = new PreferredActivityHelper(this, mBroadcastHelper);
         mResolveIntentHelper = new ResolveIntentHelper(mContext, mPreferredActivityHelper,
                 injector.getCompatibility(), mUserManager, mDomainVerificationManager,
                 mUserNeedsBadging, () -> mResolveInfo, () -> mInstantAppInstallerActivity,
@@ -2085,7 +2089,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDexOptHelper = new DexOptHelper(this);
         mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mUserManager,
                 mBroadcastHelper, mProtectedPackages);
-        mDistractingPackageHelper = new DistractingPackageHelper(this, mInjector, mBroadcastHelper,
+        mDistractingPackageHelper = new DistractingPackageHelper(this, mBroadcastHelper,
                 mSuspendPackageHelper);
         mStorageEventHelper = new StorageEventHelper(this, mDeletePackageHelper,
                 mRemovePackageHelper);
@@ -3078,38 +3082,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     @Override
-    public void sendPackageBroadcast(final String action, final String pkg, final Bundle extras,
-            final int flags, final String targetPkg, final IIntentReceiver finishedReceiver,
-            final int[] userIds, int[] instantUserIds,
-            @Nullable SparseArray<int[]> broadcastAllowList,
-            @Nullable Bundle bOptions) {
-        mHandler.post(() -> mBroadcastHelper.sendPackageBroadcast(action, pkg, extras, flags,
-                targetPkg, finishedReceiver, userIds, instantUserIds, broadcastAllowList,
-                null /* filterExtrasForReceiver */, bOptions));
-        if (targetPkg == null) {
-            // For some broadcast action, e.g. ACTION_PACKAGE_ADDED, this method will be called
-            // many times to different targets, e.g. installer app, permission controller, other
-            // registered apps. We should filter it to avoid calling back many times for the same
-            // action. When the targetPkg is set, it sends the broadcast to specific app, e.g.
-            // installer app or null for registered apps. The callback only need to send back to the
-            // registered apps so we check the null condition here.
-            notifyPackageMonitor(action, pkg, extras, userIds, instantUserIds, broadcastAllowList);
-        }
-    }
-
-    void notifyPackageMonitor(String action, String pkg, Bundle extras, int[] userIds,
-            int[] instantUserIds, SparseArray<int[]> broadcastAllowList) {
-        mPackageMonitorCallbackHelper.notifyPackageMonitor(action, pkg, extras, userIds,
-                instantUserIds, broadcastAllowList);
-    }
-
-    void notifyResourcesChanged(boolean mediaStatus, boolean replacing,
-            @NonNull String[] pkgNames, @NonNull int[] uids) {
-        mPackageMonitorCallbackHelper.notifyResourcesChanged(mediaStatus, replacing, pkgNames,
-                uids);
-    }
-
-    @Override
     public void notifyPackageAdded(String packageName, int uid) {
         mPackageObserverHelper.notifyAdded(packageName, uid);
     }
@@ -3123,64 +3095,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     public void notifyPackageRemoved(String packageName, int uid) {
         mPackageObserverHelper.notifyRemoved(packageName, uid);
         UserPackage.removeFromCache(UserHandle.getUserId(uid), packageName);
-    }
-
-    void sendPackageAddedForUser(@NonNull Computer snapshot, String packageName,
-            @NonNull PackageStateInternal packageState, int userId, boolean isArchived,
-            int dataLoaderType) {
-        final PackageUserStateInternal userState = packageState.getUserStateOrDefault(userId);
-        final boolean isSystem = packageState.isSystem();
-        final boolean isInstantApp = userState.isInstantApp();
-        final int[] userIds = isInstantApp ? EMPTY_INT_ARRAY : new int[] { userId };
-        final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
-        sendPackageAddedForNewUsers(snapshot, packageName, isSystem /*sendBootCompleted*/,
-                false /*startReceiver*/, packageState.getAppId(), userIds, instantUserIds,
-                isArchived, dataLoaderType);
-
-        // Send a session commit broadcast
-        final PackageInstaller.SessionInfo info = new PackageInstaller.SessionInfo();
-        info.installReason = userState.getInstallReason();
-        info.appPackageName = packageName;
-        sendSessionCommitBroadcast(info, userId);
-    }
-
-    @Override
-    public void sendPackageAddedForNewUsers(@NonNull Computer snapshot, String packageName,
-            boolean sendBootCompleted, boolean includeStopped, @AppIdInt int appId, int[] userIds,
-            int[] instantUserIds, boolean isArchived, int dataLoaderType) {
-        if (ArrayUtils.isEmpty(userIds) && ArrayUtils.isEmpty(instantUserIds)) {
-            return;
-        }
-        SparseArray<int[]> broadcastAllowList = mAppsFilter.getVisibilityAllowList(snapshot,
-                snapshot.getPackageStateInternal(packageName, Process.SYSTEM_UID),
-                userIds, snapshot.getPackageStates());
-        mHandler.post(
-                () -> mBroadcastHelper.sendPackageAddedForNewUsers(packageName, appId, userIds,
-                        instantUserIds, isArchived, dataLoaderType, broadcastAllowList));
-        mPackageMonitorCallbackHelper.notifyPackageAddedForNewUsers(packageName, appId, userIds,
-                instantUserIds, isArchived, dataLoaderType, broadcastAllowList);
-        if (sendBootCompleted && !ArrayUtils.isEmpty(userIds)) {
-            mHandler.post(() -> {
-                        for (int userId : userIds) {
-                            mBroadcastHelper.sendBootCompletedBroadcastToSystemApp(
-                                    packageName, includeStopped, userId);
-                        }
-                    }
-            );
-        }
-    }
-
-    private void sendApplicationHiddenForUser(String packageName, PackageStateInternal packageState,
-            int userId) {
-        final PackageRemovedInfo info = new PackageRemovedInfo(this);
-        info.mRemovedPackage = packageName;
-        info.mInstallerPackageName = packageState.getInstallSource().mInstallerPackageName;
-        info.mRemovedUsers = new int[] {userId};
-        info.mBroadcastUsers = new int[] {userId};
-        info.mUid = UserHandle.getUid(userId, packageState.getAppId());
-        info.mRemovedPackageVersionCode = packageState.getVersionCode();
-        info.sendPackageRemovedBroadcasts(true /*killApp*/, false /*removedBySystem*/,
-                false /*isArchived*/);
     }
 
     boolean isUserRestricted(int userId, String restrictionKey) {
@@ -3505,11 +3419,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    void postPreferredActivityChangedBroadcast(int userId) {
-        mHandler.post(() -> mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId));
-    }
-
-
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     @GuardedBy("mLock")
     void clearPackagePreferredActivitiesLPw(String packageName,
@@ -3609,17 +3518,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     public void sendSessionCommitBroadcast(PackageInstaller.SessionInfo sessionInfo, int userId) {
-        UserManagerService ums = UserManagerService.getInstance();
-        if (ums == null || sessionInfo.isStaged()) {
-            return;
-        }
-        final UserInfo parent = ums.getProfileParent(userId);
-        final int launcherUid = (parent != null) ? parent.id : userId;
-        // TODO: Should this snapshot be moved further up?
-        final ComponentName launcherComponent = snapshotComputer()
-                .getDefaultHomeActivity(launcherUid);
-        mBroadcastHelper.sendSessionCommitBroadcast(sessionInfo, userId, launcherUid,
-                launcherComponent, mAppPredictionServicePackage);
+        mBroadcastHelper.sendSessionCommitBroadcast(snapshotComputer(), sessionInfo, userId,
+                mAppPredictionServicePackage);
     }
 
     private @Nullable String getSetupWizardPackageNameImpl(@NonNull Computer computer) {
@@ -3988,7 +3888,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                     || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
-                if (!mInstallPackageHelper.enableCompressedPackage(deletedPkg, pkgSetting)) {
+                if (!enableCompressedPackage(deletedPkg, pkgSetting)) {
                     Slog.w(TAG, "Failed setApplicationEnabledSetting: failed to enable "
                             + "commpressed package " + setting.getPackageName());
                     updateAllowed[i] = false;
@@ -4070,8 +3970,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 final ArrayList<String> components = sendNowBroadcasts.valueAt(i);
                 final int packageUid = UserHandle.getUid(
                         userId, pkgSettings.get(packageName).getAppId());
-                sendPackageChangedBroadcast(newSnapshot, packageName, false /* dontKillApp */,
-                        components, packageUid, null /* reason */);
+                mBroadcastHelper.sendPackageChangedBroadcast(newSnapshot, packageName,
+                        false /* dontKillApp */, components, packageUid, null /* reason */);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -4145,27 +4045,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mBackgroundHandler.removeMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS);
             }
         }
-    }
-
-    void sendPackageChangedBroadcast(@NonNull Computer snapshot, String packageName,
-            boolean dontKillApp, ArrayList<String> componentNames, int packageUid, String reason) {
-        PackageStateInternal setting = snapshot.getPackageStateInternal(packageName,
-                Process.SYSTEM_UID);
-        if (setting == null) {
-            return;
-        }
-        final int userId = UserHandle.getUserId(packageUid);
-        final boolean isInstantApp =
-                snapshot.isInstantAppInternal(packageName, userId, Process.SYSTEM_UID);
-        final int[] userIds = isInstantApp ? EMPTY_INT_ARRAY : new int[] { userId };
-        final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
-        final SparseArray<int[]> broadcastAllowList =
-                isInstantApp ? null : snapshot.getVisibilityAllowLists(packageName, userIds);
-        mHandler.post(() -> mBroadcastHelper.sendPackageChangedBroadcast(
-                packageName, dontKillApp, componentNames, packageUid, reason, userIds,
-                instantUserIds, broadcastAllowList));
-        mPackageMonitorCallbackHelper.notifyPackageChanged(packageName, dontKillApp, componentNames,
-                packageUid, reason, userIds, instantUserIds, broadcastAllowList);
     }
 
     /**
@@ -4312,7 +4191,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 if (pkg == null) {
                     return;
                 }
-                sendPackageChangedBroadcast(snapshot, pkg.getPackageName(),
+                mBroadcastHelper.sendPackageChangedBroadcast(snapshot, pkg.getPackageName(),
                         true /* dontKillApp */,
                         new ArrayList<>(Collections.singletonList(pkg.getPackageName())),
                         pkg.getUid(),
@@ -5291,7 +5170,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 throw new SecurityException("Calling package " + packageName
                         + " does not belong to calling uid " + callingUid);
             }
-            return mSuspendPackageHelper
+            return SuspendPackageHelper
                     .getSuspendedPackageAppExtras(snapshot, packageName, userId, callingUid);
         }
 
@@ -5854,10 +5733,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 if (hidden) {
                     killApplication(packageName, newPackageState.getAppId(), userId, "hiding pkg",
                             ApplicationExitInfo.REASON_OTHER);
-                    sendApplicationHiddenForUser(packageName, newPackageState, userId);
+                    mBroadcastHelper.sendApplicationHiddenForUser(
+                            packageName, newPackageState, userId,
+                            /* packageSender= */ PackageManagerService.this);
                 } else {
-                    sendPackageAddedForUser(newSnapshot, packageName, newPackageState, userId,
-                            false /* isArchived */, DataLoaderType.NONE);
+                    mBroadcastHelper.sendPackageAddedForUser(
+                            newSnapshot, packageName, newPackageState, userId,
+                            false /* isArchived */, DataLoaderType.NONE,
+                            mAppPredictionServicePackage);
                 }
 
                 scheduleWritePackageRestrictions(userId);
@@ -7925,5 +7808,76 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 throw new IOException(e.getMessage());
             }
         }
+    }
+
+    void removeCodePath(@Nullable File codePath) {
+        mRemovePackageHelper.removeCodePath(codePath);
+    }
+
+    void cleanUpResources(@Nullable File codeFile, @Nullable String[] instructionSets) {
+        mRemovePackageHelper.cleanUpResources(codeFile, instructionSets);
+    }
+
+    void cleanUpForMoveInstall(String volumeUuid, String packageName, String fromCodePath) {
+        mRemovePackageHelper.cleanUpForMoveInstall(volumeUuid, packageName, fromCodePath);
+    }
+
+    void sendPendingBroadcasts() {
+        mInstallPackageHelper.sendPendingBroadcasts();
+    }
+
+    void handlePackagePostInstall(@NonNull InstallRequest request, boolean launchedForRestore) {
+        mInstallPackageHelper.handlePackagePostInstall(request, launchedForRestore);
+    }
+
+    Pair<Integer, IntentSender> installExistingPackageAsUser(
+            @Nullable String packageName,
+            @UserIdInt int userId, @PackageManager.InstallFlags int installFlags,
+            @PackageManager.InstallReason int installReason,
+            @Nullable List<String> allowlistedRestrictedPermissions,
+            @Nullable IntentSender intentSender) {
+        return mInstallPackageHelper.installExistingPackageAsUser(packageName, userId, installFlags,
+                installReason, allowlistedRestrictedPermissions, intentSender);
+    }
+    AndroidPackage initPackageTracedLI(File scanFile, final int parseFlags, int scanFlags)
+            throws PackageManagerException {
+        return mInstallPackageHelper.initPackageTracedLI(scanFile, parseFlags, scanFlags);
+    }
+
+    void restoreDisabledSystemPackageLIF(@NonNull DeletePackageAction action,
+                                         @NonNull int[] allUserHandles,
+                                         boolean writeSettings) throws SystemDeleteException {
+        mInstallPackageHelper.restoreDisabledSystemPackageLIF(
+                action, allUserHandles, writeSettings);
+    }
+    boolean enableCompressedPackage(@NonNull AndroidPackage stubPkg,
+                                    @NonNull PackageSetting stubPs) {
+        return mInstallPackageHelper.enableCompressedPackage(stubPkg, stubPs);
+    }
+
+    void installPackagesTraced(List<InstallRequest> requests) {
+        mInstallPackageHelper.installPackagesTraced(requests);
+    }
+
+    void restoreAndPostInstall(InstallRequest request) {
+        mInstallPackageHelper.restoreAndPostInstall(request);
+    }
+
+    Pair<Integer, String> verifyReplacingVersionCode(@NonNull PackageInfoLite pkgLite,
+                                    long requiredInstalledVersionCode,
+                                    int installFlags) {
+        return mInstallPackageHelper.verifyReplacingVersionCode(
+                pkgLite, requiredInstalledVersionCode, installFlags);
+    }
+
+    int getUidForVerifier(VerifierInfo verifierInfo) {
+        return mInstallPackageHelper.getUidForVerifier(verifierInfo);
+    }
+
+    int deletePackageX(String packageName, long versionCode, int userId, int deleteFlags,
+                        boolean removedBySystem) {
+        return mDeletePackageHelper.deletePackageX(packageName,
+                PackageManager.VERSION_CODE_HIGHEST, UserHandle.USER_SYSTEM,
+                PackageManager.DELETE_ALL_USERS, true /*removedBySystem*/);
     }
 }

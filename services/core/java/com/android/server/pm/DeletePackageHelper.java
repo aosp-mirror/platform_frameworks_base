@@ -62,7 +62,6 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -86,19 +85,16 @@ final class DeletePackageHelper {
 
     private final PackageManagerService mPm;
     private final UserManagerInternal mUserManagerInternal;
-    private final PermissionManagerServiceInternal mPermissionManager;
     private final RemovePackageHelper mRemovePackageHelper;
+    private final BroadcastHelper mBroadcastHelper;
 
     // TODO(b/198166813): remove PMS dependency
-    DeletePackageHelper(PackageManagerService pm, RemovePackageHelper removePackageHelper) {
+    DeletePackageHelper(PackageManagerService pm, RemovePackageHelper removePackageHelper,
+                        BroadcastHelper broadcastHelper) {
         mPm = pm;
         mUserManagerInternal = mPm.mInjector.getUserManagerInternal();
-        mPermissionManager = mPm.mInjector.getPermissionManagerServiceInternal();
         mRemovePackageHelper = removePackageHelper;
-    }
-
-    DeletePackageHelper(PackageManagerService pm) {
-        this(pm, new RemovePackageHelper(pm));
+        mBroadcastHelper = broadcastHelper;
     }
 
     /**
@@ -120,7 +116,7 @@ final class DeletePackageHelper {
      */
     public int deletePackageX(String packageName, long versionCode, int userId, int deleteFlags,
             boolean removedBySystem) {
-        final PackageRemovedInfo info = new PackageRemovedInfo(mPm);
+        final PackageRemovedInfo info = new PackageRemovedInfo();
         final boolean res;
 
         final int removeUser = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0
@@ -250,8 +246,9 @@ final class DeletePackageHelper {
         if (res) {
             final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
             final boolean isArchived = (deleteFlags & PackageManager.DELETE_ARCHIVE) != 0;
-            info.sendPackageRemovedBroadcasts(killApp, removedBySystem, isArchived);
-            info.sendSystemPackageUpdatedBroadcasts();
+            mBroadcastHelper.sendPackageRemovedBroadcasts(info, mPm, killApp,
+                    removedBySystem, isArchived);
+            mBroadcastHelper.sendSystemPackageUpdatedBroadcasts(info);
             PackageMetrics.onUninstallSucceeded(info, deleteFlags, removeUser);
         }
 
@@ -313,7 +310,7 @@ final class DeletePackageHelper {
                             Slog.i(TAG, "Enabling system stub after removal; pkg: "
                                     + stubPkg.getPackageName());
                         }
-                        new InstallPackageHelper(mPm).enableCompressedPackage(stubPkg, stubPs);
+                        mPm.enableCompressedPackage(stubPkg, stubPs);
                     } else if (DEBUG_COMPRESSION) {
                         Slog.i(TAG, "System stub disabled for all users, leaving uncompressed "
                                 + "after removal; pkg: " + stubPkg.getPackageName());
@@ -490,8 +487,7 @@ final class DeletePackageHelper {
             // When an updated system application is deleted we delete the existing resources
             // as well and fall back to existing code in system partition
             deleteInstalledSystemPackage(action, allUserHandles, writeSettings);
-            new InstallPackageHelper(mPm).restoreDisabledSystemPackageLIF(
-                    action, allUserHandles, writeSettings);
+            mPm.restoreDisabledSystemPackageLIF(action, allUserHandles, writeSettings);
         } else {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.getPackageName());
             if (ps.isIncremental()) {

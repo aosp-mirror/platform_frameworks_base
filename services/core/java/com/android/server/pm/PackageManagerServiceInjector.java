@@ -146,6 +146,7 @@ public class PackageManagerServiceInjector {
     private final Singleton<SharedLibrariesImpl> mSharedLibrariesProducer;
     private final Singleton<CrossProfileIntentFilterHelper> mCrossProfileIntentFilterHelperProducer;
     private final Singleton<UpdateOwnershipHelper> mUpdateOwnershipHelperProducer;
+    private final Singleton<PackageMonitorCallbackHelper> mPackageMonitorCallbackHelper;
 
     PackageManagerServiceInjector(Context context, PackageManagerTracedLock lock,
             Installer installer, Object installLock, PackageAbiHelper abiHelper,
@@ -186,7 +187,8 @@ public class PackageManagerServiceInjector {
             Producer<IBackupManager> iBackupManager,
             Producer<SharedLibrariesImpl> sharedLibrariesProducer,
             Producer<CrossProfileIntentFilterHelper> crossProfileIntentFilterHelperProducer,
-            Producer<UpdateOwnershipHelper> updateOwnershipHelperProducer) {
+            Producer<UpdateOwnershipHelper> updateOwnershipHelperProducer,
+            Producer<PackageMonitorCallbackHelper> packageMonitorCallbackHelper) {
         mContext = context;
         mLock = lock;
         mInstaller = installer;
@@ -242,6 +244,7 @@ public class PackageManagerServiceInjector {
         mCrossProfileIntentFilterHelperProducer = new Singleton<>(
                 crossProfileIntentFilterHelperProducer);
         mUpdateOwnershipHelperProducer = new Singleton<>(updateOwnershipHelperProducer);
+        mPackageMonitorCallbackHelper = new Singleton<>(packageMonitorCallbackHelper);
     }
 
     /**
@@ -429,6 +432,10 @@ public class PackageManagerServiceInjector {
 
     public UpdateOwnershipHelper getUpdateOwnershipHelper() {
         return mUpdateOwnershipHelperProducer.get(this, mPackageManager);
+    }
+
+    public PackageMonitorCallbackHelper getPackageMonitorCallbackHelper() {
+        return mPackageMonitorCallbackHelper.get(this, mPackageManager);
     }
 
 

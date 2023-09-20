@@ -16,24 +16,12 @@
 
 package com.android.server.pm;
 
-import static android.os.PowerExemptionManager.REASON_PACKAGE_REPLACED;
-import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
-import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
-
-import android.annotation.NonNull;
-import android.app.ActivityManagerInternal;
-import android.app.BroadcastOptions;
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.PowerExemptionManager;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.server.LocalServices;
 
 final class PackageRemovedInfo {
-    final PackageSender mPackageSender;
     String mRemovedPackage;
     String mInstallerPackageName;
     int mUid = -1;
@@ -57,116 +45,6 @@ final class PackageRemovedInfo {
     // Clean up resources deleted packages.
     InstallArgs mArgs = null;
     private static final int[] EMPTY_INT_ARRAY = new int[0];
-
-    PackageRemovedInfo(PackageSender packageSender) {
-        mPackageSender = packageSender;
-    }
-
-    void sendPackageRemovedBroadcasts(boolean killApp, boolean removedBySystem,
-            boolean isArchived) {
-        sendPackageRemovedBroadcastInternal(killApp, removedBySystem, isArchived);
-    }
-
-    void sendSystemPackageUpdatedBroadcasts() {
-        if (mIsRemovedPackageSystemUpdate) {
-            sendSystemPackageUpdatedBroadcastsInternal();
-        }
-    }
-
-    private void sendSystemPackageUpdatedBroadcastsInternal() {
-        Bundle extras = new Bundle(2);
-        extras.putInt(Intent.EXTRA_UID, mRemovedAppId >= 0 ? mRemovedAppId : mUid);
-        extras.putBoolean(Intent.EXTRA_REPLACING, true);
-        mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, mRemovedPackage, extras,
-                0, null /*targetPackage*/, null, null, null, mBroadcastAllowList, null);
-        if (mInstallerPackageName != null) {
-            mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                    mRemovedPackage, extras, 0 /*flags*/,
-                    mInstallerPackageName, null, null, null, null /* broadcastAllowList */,
-                    null);
-            mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
-                    mRemovedPackage, extras, 0 /*flags*/,
-                    mInstallerPackageName, null, null, null, null /* broadcastAllowList */,
-                    null);
-        }
-        mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, mRemovedPackage,
-                extras, 0, null /*targetPackage*/, null, null, null, mBroadcastAllowList, null);
-        mPackageSender.sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED, null, null, 0,
-                mRemovedPackage, null, null, null, null /* broadcastAllowList */,
-                getTemporaryAppAllowlistBroadcastOptions(REASON_PACKAGE_REPLACED).toBundle());
-    }
-
-    private static @NonNull BroadcastOptions getTemporaryAppAllowlistBroadcastOptions(
-            @PowerExemptionManager.ReasonCode int reasonCode) {
-        long duration = 10_000;
-        final ActivityManagerInternal amInternal =
-                LocalServices.getService(ActivityManagerInternal.class);
-        if (amInternal != null) {
-            duration = amInternal.getBootTimeTempAllowListDuration();
-        }
-        final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
-        bOptions.setTemporaryAppAllowlist(duration,
-                TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
-                reasonCode, "");
-        return bOptions;
-    }
-
-    private void sendPackageRemovedBroadcastInternal(boolean killApp, boolean removedBySystem,
-            boolean isArchived) {
-        Bundle extras = new Bundle();
-        final int removedUid = mRemovedAppId >= 0  ? mRemovedAppId : mUid;
-        extras.putInt(Intent.EXTRA_UID, removedUid);
-        extras.putBoolean(Intent.EXTRA_DATA_REMOVED, mDataRemoved);
-        extras.putBoolean(Intent.EXTRA_SYSTEM_UPDATE_UNINSTALL, mIsRemovedPackageSystemUpdate);
-        extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, !killApp);
-        extras.putBoolean(Intent.EXTRA_USER_INITIATED, !removedBySystem);
-        final boolean isReplace = mIsUpdate || mIsRemovedPackageSystemUpdate;
-        if (isReplace || isArchived) {
-            extras.putBoolean(Intent.EXTRA_REPLACING, true);
-        }
-        if (isArchived) {
-            extras.putBoolean(Intent.EXTRA_ARCHIVAL, true);
-        }
-        extras.putBoolean(Intent.EXTRA_REMOVED_FOR_ALL_USERS, mRemovedForAllUsers);
-
-        // Send PACKAGE_REMOVED broadcast to the respective installer.
-        if (mRemovedPackage != null && mInstallerPackageName != null) {
-            mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
-                    mRemovedPackage, extras, 0 /*flags*/,
-                    mInstallerPackageName, null, mBroadcastUsers, mInstantUserIds, null, null);
-        }
-        if (mIsStaticSharedLib) {
-            // When uninstalling static shared libraries, only the package's installer needs to be
-            // sent a PACKAGE_REMOVED broadcast. There are no other intended recipients.
-            return;
-        }
-        if (mRemovedPackage != null) {
-            mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
-                    mRemovedPackage, extras, 0, null /*targetPackage*/, null,
-                    mBroadcastUsers, mInstantUserIds, mBroadcastAllowList, null);
-            mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED_INTERNAL,
-                    mRemovedPackage, extras, 0 /*flags*/, PLATFORM_PACKAGE_NAME,
-                    null /*finishedReceiver*/, mBroadcastUsers, mInstantUserIds,
-                    mBroadcastAllowList, null /*bOptions*/);
-            if (mDataRemoved && !mIsRemovedPackageSystemUpdate) {
-                mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED,
-                        mRemovedPackage, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, null,
-                        null, mBroadcastUsers, mInstantUserIds, mBroadcastAllowList, null);
-                mPackageSender.notifyPackageRemoved(mRemovedPackage, removedUid);
-            }
-        }
-        if (mRemovedAppId >= 0) {
-            // If a system app's updates are uninstalled the UID is not actually removed. Some
-            // services need to know the package name affected.
-            if (isReplace) {
-                extras.putString(Intent.EXTRA_PACKAGE_NAME, mRemovedPackage);
-            }
-
-            mPackageSender.sendPackageBroadcast(Intent.ACTION_UID_REMOVED,
-                    null, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
-                    null, null, mBroadcastUsers, mInstantUserIds, mBroadcastAllowList, null);
-        }
-    }
 
     public void populateBroadcastUsers(PackageSetting deletedPackageSetting) {
         if (mRemovedUsers == null) {
