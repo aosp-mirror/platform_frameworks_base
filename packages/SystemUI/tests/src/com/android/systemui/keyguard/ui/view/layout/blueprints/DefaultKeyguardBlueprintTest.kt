@@ -23,8 +23,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
@@ -66,8 +64,6 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Mock private lateinit var splitShadeGuidelines: SplitShadeGuidelines
     @Mock private lateinit var aodNotificationIconsSection: AodNotificationIconsSection
 
-    private val featureFlags = FakeFeatureFlags()
-
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -84,21 +80,11 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultNSSLSection,
                 splitShadeGuidelines,
                 aodNotificationIconsSection,
-                featureFlags,
             )
-        featureFlags.set(Flags.LAZY_INFLATE_KEYGUARD, false)
     }
 
     @Test
     fun replaceViews() {
-        val constraintLayout = ConstraintLayout(context, null)
-        underTest.replaceViews(null, constraintLayout)
-        underTest.sections.forEach { verify(it, never()).addViews(constraintLayout) }
-    }
-
-    @Test
-    fun replaceViews_lazyInflateFlagOn() {
-        featureFlags.set(Flags.LAZY_INFLATE_KEYGUARD, true)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.replaceViews(null, constraintLayout)
         underTest.sections.forEach { verify(it).addViews(constraintLayout) }
@@ -110,7 +96,6 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
         val someSection = mock(KeyguardSection::class.java)
         whenever(prevBlueprint.sections)
             .thenReturn(underTest.sections.minus(defaultLockIconSection).plus(someSection))
-        featureFlags.set(Flags.LAZY_INFLATE_KEYGUARD, true)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.replaceViews(prevBlueprint, constraintLayout)
         underTest.sections.minus(defaultLockIconSection).forEach {

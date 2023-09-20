@@ -17,10 +17,7 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
@@ -54,7 +51,6 @@ constructor(
     defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
     splitShadeGuidelines: SplitShadeGuidelines,
     aodNotificationIconsSection: AodNotificationIconsSection,
-    private val featureFlags: FeatureFlags,
 ) : KeyguardBlueprint {
     override val id: String = DEFAULT
 
@@ -71,16 +67,6 @@ constructor(
             splitShadeGuidelines,
             aodNotificationIconsSection,
         )
-
-    override fun replaceViews(
-        previousBlueprint: KeyguardBlueprint?,
-        constraintLayout: ConstraintLayout,
-        bindData: Boolean
-    ) {
-        if (featureFlags.isEnabled(Flags.LAZY_INFLATE_KEYGUARD)) {
-            super.replaceViews(previousBlueprint, constraintLayout, bindData)
-        }
-    }
 
     companion object {
         const val DEFAULT = "default"
