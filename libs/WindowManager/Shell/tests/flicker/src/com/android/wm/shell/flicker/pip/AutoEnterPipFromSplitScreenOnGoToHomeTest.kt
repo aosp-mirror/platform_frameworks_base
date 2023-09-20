@@ -23,6 +23,7 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.common.flicker.subject.region.RegionTraceSubject
 import android.tools.device.helpers.WindowUtils
 import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.filters.RequiresDevice
@@ -128,9 +129,20 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
         if (tapl.isTablet) {
             flicker.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
         } else {
-            // on phones home does not rotate in landscape, PiP enters back to portrait
-            // orientation so use display bounds from that orientation for assertion
-            flicker.assertWmVisibleRegion(pipApp) { coversAtMost(portraitDisplayBounds) }
+            // on phones home screen does not rotate in landscape, PiP enters back to portrait
+            // orientation - if we go from landscape to portrait it should switch between the bounds
+            // otherwise it should be the same as tablet (i.e. portrait to portrait)
+            if (flicker.scenario.isLandscapeOrSeascapeAtStart) {
+                flicker.assertWmVisibleRegion(pipApp) {
+                    // first check against landscape bounds then against portrait bounds
+                    (coversAtMost(displayBounds).then() as RegionTraceSubject).coversAtMost(
+                        portraitDisplayBounds
+                    )
+                }
+            } else {
+                // always check against the display bounds which do not change during transition
+                flicker.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
+            }
         }
     }
 
@@ -139,7 +151,6 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
         @JvmStatic
         fun getParams() =
             LegacyFlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(Rotation.ROTATION_0),
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
