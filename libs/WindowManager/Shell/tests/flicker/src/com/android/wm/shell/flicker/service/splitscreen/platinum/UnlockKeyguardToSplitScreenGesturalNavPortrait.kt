@@ -18,13 +18,18 @@ package com.android.wm.shell.flicker.service.splitscreen.platinum
 
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
+import android.tools.device.flicker.rules.FlickerServiceRule
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.UnlockKeyguardToSplitScreen
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.BlockJUnit4ClassRunner
 
 @RunWith(BlockJUnit4ClassRunner::class)
 open class UnlockKeyguardToSplitScreenGesturalNavPortrait : UnlockKeyguardToSplitScreen() {
+    @get:Rule
+    val flickerServiceRule = FlickerServiceRule(enabled = true, failTestOnFaasFailure = false)
+
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
