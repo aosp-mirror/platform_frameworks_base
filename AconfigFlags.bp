@@ -12,31 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+aconfig_srcjars = [
+    ":android.app.usage.flags-aconfig-java{.generated_srcjars}",
+    ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
+    ":android.os.flags-aconfig-java{.generated_srcjars}",
+    ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
+    ":android.security.flags-aconfig-java{.generated_srcjars}",
+    ":android.view.flags-aconfig-java{.generated_srcjars}",
+    ":camera_platform_flags_core_java_lib{.generated_srcjars}",
+    ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
+    ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
+    ":com.android.text.flags-aconfig-java{.generated_srcjars}",
+    ":telecom_flags_core_java_lib{.generated_srcjars}",
+    ":telephony_flags_core_java_lib{.generated_srcjars}",
+    ":android.companion.virtual.flags-aconfig-java{.generated_srcjars}",
+    ":android.view.inputmethod.flags-aconfig-java{.generated_srcjars}",
+    ":android.widget.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
+    ":sdk_sandbox_flags_lib{.generated_srcjars}",
+    ":android.permission.flags-aconfig-java{.generated_srcjars}",
+]
+
+filegroup {
+    name: "framework-minus-apex-aconfig-srcjars",
+    srcs: aconfig_srcjars,
+}
+
 // Aconfig declarations and libraries for the core framework
 java_defaults {
     name: "framework-minus-apex-aconfig-libraries",
-
     // Add java_aconfig_libraries to here to add them to the core framework
-    srcs: [
-        ":android.app.usage.flags-aconfig-java{.generated_srcjars}",
-        ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
-        ":android.os.flags-aconfig-java{.generated_srcjars}",
-        ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
-        ":android.security.flags-aconfig-java{.generated_srcjars}",
-        ":android.view.flags-aconfig-java{.generated_srcjars}",
-        ":camera_platform_flags_core_java_lib{.generated_srcjars}",
-        ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
-        ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
-        ":com.android.text.flags-aconfig-java{.generated_srcjars}",
-        ":telecom_flags_core_java_lib{.generated_srcjars}",
-        ":telephony_flags_core_java_lib{.generated_srcjars}",
-        ":android.companion.virtual.flags-aconfig-java{.generated_srcjars}",
-        ":android.view.inputmethod.flags-aconfig-java{.generated_srcjars}",
-        ":android.widget.flags-aconfig-java{.generated_srcjars}",
-        ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
-        ":sdk_sandbox_flags_lib{.generated_srcjars}",
-        ":android.permission.flags-aconfig-java{.generated_srcjars}",
-    ],
+    srcs: aconfig_srcjars,
     // Add aconfig-annotations-lib as a dependency for the optimization
     libs: ["aconfig-annotations-lib"],
 }
