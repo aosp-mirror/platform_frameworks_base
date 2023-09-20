@@ -27,6 +27,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_C
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
 
 import android.R;
@@ -240,7 +241,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastMath;
 import com.android.internal.util.Preconditions;
-import com.android.text.flags.Flags;
 
 import libcore.util.EmptyArray;
 
@@ -1634,7 +1634,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (CompatChanges.isChangeEnabled(USE_BOUNDS_FOR_WIDTH)) {
-            mUseBoundsForWidth = Flags.useBoundsForWidth();
+            mUseBoundsForWidth = false;  // TODO: Connect to the flag.
         } else {
             mUseBoundsForWidth = false;
         }
