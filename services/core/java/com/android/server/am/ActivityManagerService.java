@@ -327,6 +327,7 @@ import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.FactoryTest;
 import android.os.FileUtils;
+import android.os.Flags;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IDeviceIdentifiersPolicyService;
@@ -8560,6 +8561,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // If the processes' memory has increased by more than 1% of the total memory,
             // or 10 MB, whichever is greater, then the processes' are eligible to be killed.
             final long totalMemoryInKb = getTotalMemory() / 1000;
+
+            // This threshold should be applicable to both PSS and RSS because the value is absolute
+            // and represents an increase in process memory relative to its own previous state.
+            //
+            // TODO(b/296454553): Tune this value during the flag rollout process if more processes
+            // seem to be getting killed than before.
             final long memoryGrowthThreshold =
                     Math.max(totalMemoryInKb / 100, MINIMUM_MEMORY_GROWTH_THRESHOLD);
             mProcessList.forEachLruProcessesLOSP(false, proc -> {
@@ -8572,24 +8579,34 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (state.isNotCachedSinceIdle()) {
                     if (setProcState >= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
                             && setProcState <= ActivityManager.PROCESS_STATE_SERVICE) {
-                        final long initialIdlePss, lastPss, lastSwapPss;
+                        final long initialIdlePssOrRss, lastPssOrRss, lastSwapPss;
                         synchronized (mAppProfiler.mProfilerLock) {
-                            initialIdlePss = pr.getInitialIdlePss();
-                            lastPss = pr.getLastPss();
+                            initialIdlePssOrRss = pr.getInitialIdlePssOrRss();
+                            lastPssOrRss = !Flags.removeAppProfilerPssCollection()
+                                    ? pr.getLastPss() : pr.getLastRss();
                             lastSwapPss = pr.getLastSwapPss();
                         }
-                        if (doKilling && initialIdlePss != 0
-                                && lastPss > (initialIdlePss * 3 / 2)
-                                && lastPss > (initialIdlePss + memoryGrowthThreshold)) {
+                        if (doKilling && initialIdlePssOrRss != 0
+                                && lastPssOrRss > (initialIdlePssOrRss * 3 / 2)
+                                && lastPssOrRss > (initialIdlePssOrRss + memoryGrowthThreshold)) {
                             final StringBuilder sb2 = new StringBuilder(128);
                             sb2.append("Kill");
                             sb2.append(proc.processName);
-                            sb2.append(" in idle maint: pss=");
-                            sb2.append(lastPss);
-                            sb2.append(", swapPss=");
-                            sb2.append(lastSwapPss);
-                            sb2.append(", initialPss=");
-                            sb2.append(initialIdlePss);
+                            if (!Flags.removeAppProfilerPssCollection()) {
+                                sb2.append(" in idle maint: pss=");
+                            } else {
+                                sb2.append(" in idle maint: rss=");
+                            }
+                            sb2.append(lastPssOrRss);
+
+                            if (!Flags.removeAppProfilerPssCollection()) {
+                                sb2.append(", swapPss=");
+                                sb2.append(lastSwapPss);
+                                sb2.append(", initialPss=");
+                            } else {
+                                sb2.append(", initialRss=");
+                            }
+                            sb2.append(initialIdlePssOrRss);
                             sb2.append(", period=");
                             TimeUtils.formatDuration(timeSinceLastIdle, sb2);
                             sb2.append(", lowRamPeriod=");
@@ -8597,8 +8614,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                             Slog.wtfQuiet(TAG, sb2.toString());
                             mHandler.post(() -> {
                                 synchronized (ActivityManagerService.this) {
-                                    proc.killLocked("idle maint (pss " + lastPss
-                                            + " from " + initialIdlePss + ")",
+                                    proc.killLocked(!Flags.removeAppProfilerPssCollection()
+                                            ? "idle maint (pss " : "idle maint (rss " + lastPssOrRss
+                                            + " from " + initialIdlePssOrRss + ")",
                                             ApplicationExitInfo.REASON_OTHER,
                                             ApplicationExitInfo.SUBREASON_MEMORY_PRESSURE,
                                             true);
@@ -8610,7 +8628,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         && setProcState >= ActivityManager.PROCESS_STATE_PERSISTENT) {
                     state.setNotCachedSinceIdle(true);
                     synchronized (mAppProfiler.mProfilerLock) {
-                        pr.setInitialIdlePss(0);
+                        pr.setInitialIdlePssOrRss(0);
                         mAppProfiler.updateNextPssTimeLPf(
                                 state.getSetProcState(), proc.mProfile, now, true);
                     }
