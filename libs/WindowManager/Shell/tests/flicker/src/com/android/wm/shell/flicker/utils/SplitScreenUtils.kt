@@ -108,6 +108,7 @@ object SplitScreenUtils {
     ) {
         primaryApp.launchViaIntent(wmHelper)
         secondaryApp.launchViaIntent(wmHelper)
+        ChangeDisplayOrientationRule.setRotation(rotation)
         tapl.goHome()
         wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
         splitFromOverview(tapl, device, rotation)
