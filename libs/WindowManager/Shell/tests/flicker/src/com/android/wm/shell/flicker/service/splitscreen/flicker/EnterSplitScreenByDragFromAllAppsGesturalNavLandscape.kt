@@ -31,7 +31,7 @@ import org.junit.runner.RunWith
 class EnterSplitScreenByDragFromAllAppsGesturalNavLandscape :
     EnterSplitScreenByDragFromAllApps(Rotation.ROTATION_90) {
 
-    @ExpectedScenarios(["SPLIT_SCREEN_ENTER"])
+    @ExpectedScenarios(["ENTIRE_TRACE"]) // missing SPLIT_SCREEN_ENTER tag (b/301093332)
     @Test
     override fun enterSplitScreenByDragFromAllApps() = super.enterSplitScreenByDragFromAllApps()
 
