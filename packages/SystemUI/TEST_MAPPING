@@ -43,7 +43,9 @@
         {
           "exclude-annotation": "android.platform.test.annotations.Postsubmit"
         }
-      ]
+      ],
+      // The test doesn't run on AOSP Cuttlefish
+      "keywords": ["internal"]
     },
     {
       // TODO(b/251476085): Consider merging with SystemUIGoogleScreenshotTests (in U+)
@@ -55,7 +57,9 @@
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
-      ]
+      ],
+      // The test doesn't run on AOSP Cuttlefish
+      "keywords": ["internal"]
     },
     {
       // Permission indicators
@@ -112,10 +116,8 @@
           "include-filter": "android.permissionui.cts.CameraMicIndicatorsPermissionTest"
         }
       ]
-    }
-  ],
-  "postsubmit": [
-   {
+    },
+    {
       "name": "SystemUIGoogleScreenshotTests",
       "options": [
         {
