@@ -5451,6 +5451,10 @@
          to enroll the other eligible biometric. -->
     <fraction name="config_biometricNotificationFrrThreshold">25%</fraction>
 
+    <!-- Whether to enable the biometric notification for dual-modality device that enrolled a
+         single biometric and experiences high FRR. -->
+    <bool name="config_biometricFrrNotificationEnabled">false</bool>
+
     <!-- The component name for the default profile supervisor, which can be set as a profile owner
     even after user setup is complete. The defined component should be used for supervision purposes
     only. The component must be part of a system app. -->
