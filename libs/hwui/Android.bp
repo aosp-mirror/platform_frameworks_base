@@ -36,11 +36,6 @@ aconfig_declarations {
     ],
 }
 
-java_aconfig_library {
-    name: "hwui_flags_java_lib",
-    aconfig_declarations: "hwui_flags",
-}
-
 cc_aconfig_library {
     name: "hwui_flags_cc_lib",
     aconfig_declarations: "hwui_flags",
