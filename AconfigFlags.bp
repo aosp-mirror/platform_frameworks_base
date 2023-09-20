@@ -12,20 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+aconfig_srcjars = [
+    ":android.os.flags-aconfig-java{.generated_srcjars}",
+    ":android.security.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.hardware.camera2-aconfig-java{.generated_srcjars}",
+    ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
+    ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
+    ":com.android.text.flags-aconfig-java{.generated_srcjars}",
+]
+
+filegroup {
+    name: "framework-minus-apex-aconfig-srcjars",
+    srcs: aconfig_srcjars,
+}
+
 // Aconfig declarations and libraries for the core framework
 java_defaults {
     name: "framework-minus-apex-aconfig-libraries",
 
     // Add java_aconfig_libraries to here to add them to the core framework
-    srcs: [
-        ":android.os.flags-aconfig-java{.generated_srcjars}",
-        ":android.security.flags-aconfig-java{.generated_srcjars}",
-        ":com.android.hardware.camera2-aconfig-java{.generated_srcjars}",
-        ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
-        ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
-        ":com.android.text.flags-aconfig-java{.generated_srcjars}",
-    ],
     // Add aconfig-annotations-lib as a dependency for the optimization
+    srcs: aconfig_srcjars,
     libs: ["aconfig-annotations-lib"],
 }
 
