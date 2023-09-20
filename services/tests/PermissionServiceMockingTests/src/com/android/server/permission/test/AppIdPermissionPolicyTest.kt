@@ -1445,6 +1445,192 @@ class AppIdPermissionPolicyTest {
             .isEqualTo(expectedNewFlags)
     }
 
+    @Test
+    fun testOnPackageAdded_runtimeExistingImplicitPermissions_sourceFlagsNotInherited() {
+        val oldImplicitPermissionFlags = PermissionFlags.USER_FIXED
+        testInheritImplicitPermissionStates(
+            implicitPermissionFlags = oldImplicitPermissionFlags,
+            isNewInstallAndNewPermission = false
+        )
+
+        val actualFlags = getPermissionFlags(APP_ID_1, USER_ID_0, PERMISSION_NAME_0)
+        val expectedNewFlags = oldImplicitPermissionFlags or PermissionFlags.IMPLICIT_GRANTED or
+            PermissionFlags.APP_OP_REVOKED
+        assertWithMessage(
+            "After onPackageAdded() is called for a package that requests a permission that is" +
+                " implicit, existing and runtime, it should not inherit the runtime flags from" +
+                " the source permission. Hence the actual permission flags $actualFlags should" +
+                " match the expected flags $expectedNewFlags"
+        )
+            .that(actualFlags)
+            .isEqualTo(expectedNewFlags)
+    }
+
+    @Test
+    fun testOnPackageAdded_nonRuntimeNewImplicitPermissions_sourceFlagsNotInherited() {
+        testInheritImplicitPermissionStates(
+            implicitPermissionProtectionLevel = PermissionInfo.PROTECTION_NORMAL
+        )
+
+        val actualFlags = getPermissionFlags(APP_ID_1, USER_ID_0, PERMISSION_NAME_0)
+        val expectedNewFlags = PermissionFlags.INSTALL_GRANTED
+        assertWithMessage(
+            "After onPackageAdded() is called for a package that requests a permission that is" +
+                " implicit, new and non-runtime, it should not inherit the runtime flags from" +
+                " the source permission. Hence the actual permission flags $actualFlags should" +
+                " match the expected flags $expectedNewFlags"
+        )
+            .that(actualFlags)
+            .isEqualTo(expectedNewFlags)
+    }
+
+    @Test
+    fun testOnPackageAdded_runtimeNewImplicitPermissions_sourceFlagsInherited() {
+        val sourceRuntimeFlags = PermissionFlags.RUNTIME_GRANTED or PermissionFlags.USER_SET
+        testInheritImplicitPermissionStates(sourceRuntimeFlags = sourceRuntimeFlags)
+
+        val actualFlags = getPermissionFlags(APP_ID_1, USER_ID_0, PERMISSION_NAME_0)
+        val expectedNewFlags = sourceRuntimeFlags or PermissionFlags.IMPLICIT_GRANTED or
+            PermissionFlags.IMPLICIT
+        assertWithMessage(
+            "After onPackageAdded() is called for a package that requests a permission that is" +
+                " implicit, new and runtime, it should inherit the runtime flags from" +
+                " the source permission. Hence the actual permission flags $actualFlags should" +
+                " match the expected flags $expectedNewFlags"
+        )
+            .that(actualFlags)
+            .isEqualTo(expectedNewFlags)
+    }
+
+    @Test
+    fun testOnPackageAdded_grantingNewFromRevokeImplicitPermissions_onlySourceFlagsInherited() {
+        val sourceRuntimeFlags = PermissionFlags.RUNTIME_GRANTED or PermissionFlags.USER_SET
+        testInheritImplicitPermissionStates(
+            implicitPermissionFlags = PermissionFlags.POLICY_FIXED,
+            sourceRuntimeFlags = sourceRuntimeFlags,
+            isAnySourcePermissionNonRuntime = false
+        )
+
+        val actualFlags = getPermissionFlags(APP_ID_1, USER_ID_0, PERMISSION_NAME_0)
+        val expectedNewFlags = sourceRuntimeFlags or PermissionFlags.IMPLICIT
+        assertWithMessage(
+            "After onPackageAdded() is called for a package that requests a permission that is" +
+                " implicit, existing, runtime and revoked, it should only inherit runtime flags" +
+                " from source permission. Hence the actual permission flags $actualFlags should" +
+                " match the expected flags $expectedNewFlags"
+        )
+            .that(actualFlags)
+            .isEqualTo(expectedNewFlags)
+    }
+
+    /**
+     * If it's a media implicit permission (one of RETAIN_IMPLICIT_FLAGS_PERMISSIONS), we want to
+     * remove the IMPLICIT flag so that they will be granted when they are no longer implicit.
+     * (instead of revoking it)
+     */
+    @Test
+    fun testOnPackageAdded_mediaImplicitPermissions_getsImplicitFlagRemoved() {
+        val sourceRuntimeFlags = PermissionFlags.RUNTIME_GRANTED or PermissionFlags.USER_SET
+        testInheritImplicitPermissionStates(
+            implicitPermissionName = PERMISSION_ACCESS_MEDIA_LOCATION,
+            sourceRuntimeFlags = sourceRuntimeFlags
+        )
+
+        val actualFlags = getPermissionFlags(APP_ID_1, USER_ID_0, PERMISSION_ACCESS_MEDIA_LOCATION)
+        val expectedNewFlags = sourceRuntimeFlags or PermissionFlags.IMPLICIT_GRANTED
+        assertWithMessage(
+            "After onPackageAdded() is called for a package that requests a media permission that" +
+                " is implicit, new and runtime, it should inherit the runtime flags from" +
+                " the source permission and have the IMPLICIT flag removed. Hence the actual" +
+                " permission flags $actualFlags should match the expected flags $expectedNewFlags"
+        )
+            .that(actualFlags)
+            .isEqualTo(expectedNewFlags)
+    }
+
+    private fun testInheritImplicitPermissionStates(
+        implicitPermissionName: String = PERMISSION_NAME_0,
+        implicitPermissionFlags: Int = 0,
+        implicitPermissionProtectionLevel: Int = PermissionInfo.PROTECTION_DANGEROUS,
+        sourceRuntimeFlags: Int = PermissionFlags.RUNTIME_GRANTED or PermissionFlags.USER_SET,
+        isAnySourcePermissionNonRuntime: Boolean = true,
+        isNewInstallAndNewPermission: Boolean = true
+    ) {
+        val implicitPermission = mockParsedPermission(
+            implicitPermissionName,
+            PACKAGE_NAME_0,
+            protectionLevel = implicitPermissionProtectionLevel,
+        )
+        // For source from non-runtime in order to grant by implicit
+        val sourcePermission1 = mockParsedPermission(
+            PERMISSION_NAME_1,
+            PACKAGE_NAME_0,
+            protectionLevel = if (isAnySourcePermissionNonRuntime) {
+                PermissionInfo.PROTECTION_NORMAL
+            } else {
+                PermissionInfo.PROTECTION_DANGEROUS
+            }
+        )
+        // For inheriting runtime flags
+        val sourcePermission2 = mockParsedPermission(
+            PERMISSION_NAME_2,
+            PACKAGE_NAME_0,
+            protectionLevel = PermissionInfo.PROTECTION_DANGEROUS,
+        )
+        val permissionOwnerPackageState = mockPackageState(
+            APP_ID_0,
+            mockAndroidPackage(
+                PACKAGE_NAME_0,
+                permissions = listOf(implicitPermission, sourcePermission1, sourcePermission2)
+            )
+        )
+        val installedPackageState = mockPackageState(
+            APP_ID_1,
+            mockAndroidPackage(
+                PACKAGE_NAME_1,
+                requestedPermissions = setOf(
+                    implicitPermissionName,
+                    PERMISSION_NAME_1,
+                    PERMISSION_NAME_2
+                ),
+                implicitPermissions = setOf(implicitPermissionName)
+            )
+        )
+        oldState.mutateExternalState().setImplicitToSourcePermissions(
+            MutableIndexedMap<String, IndexedListSet<String>>().apply {
+                put(implicitPermissionName, MutableIndexedListSet<String>().apply {
+                    add(PERMISSION_NAME_1)
+                    add(PERMISSION_NAME_2)
+                })
+            }
+        )
+        addPackageState(permissionOwnerPackageState)
+        addPermission(implicitPermission)
+        addPermission(sourcePermission1)
+        addPermission(sourcePermission2)
+        if (!isNewInstallAndNewPermission) {
+            addPackageState(installedPackageState)
+            setPermissionFlags(APP_ID_1, USER_ID_0, implicitPermissionName, implicitPermissionFlags)
+        }
+        setPermissionFlags(APP_ID_1, USER_ID_0, PERMISSION_NAME_2, sourceRuntimeFlags)
+
+        mutateState {
+            if (isNewInstallAndNewPermission) {
+                addPackageState(installedPackageState)
+                setPermissionFlags(
+                    APP_ID_1,
+                    USER_ID_0,
+                    implicitPermissionName,
+                    implicitPermissionFlags,
+                    newState
+                )
+            }
+            with(appIdPermissionPolicy) {
+                onPackageAdded(installedPackageState)
+            }
+        }
+    }
+
     /**
      * Setup simple package states for testing evaluatePermissionState().
      * permissionOwnerPackageState is definer of permissionName with APP_ID_0.
@@ -1734,6 +1920,7 @@ class AppIdPermissionPolicyTest {
 
         private const val PERMISSION_NAME_0 = "permissionName0"
         private const val PERMISSION_NAME_1 = "permissionName1"
+        private const val PERMISSION_NAME_2 = "permissionName2"
         private const val PERMISSION_READ_EXTERNAL_STORAGE =
             Manifest.permission.READ_EXTERNAL_STORAGE
         private const val PERMISSION_POST_NOTIFICATIONS =
@@ -1742,6 +1929,8 @@ class AppIdPermissionPolicyTest {
             Manifest.permission.BLUETOOTH_CONNECT
         private const val PERMISSION_ACCESS_BACKGROUND_LOCATION =
             Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        private const val PERMISSION_ACCESS_MEDIA_LOCATION =
+            Manifest.permission.ACCESS_MEDIA_LOCATION
 
         private const val USER_ID_0 = 0
     }
