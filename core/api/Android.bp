@@ -38,6 +38,11 @@ filegroup {
 }
 
 filegroup {
+    name: "non-updatable-lint-baseline.txt",
+    srcs: ["lint-baseline.txt"],
+}
+
+filegroup {
     name: "non-updatable-system-current.txt",
     srcs: ["system-current.txt"],
 }
