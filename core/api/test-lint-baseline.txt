@@ -101,6 +101,10 @@ IntentName: android.provider.Telephony.Sms.Intents#SMS_CARRIER_PROVISION_ACTION:
     Intent action constant name must be ACTION_FOO: SMS_CARRIER_PROVISION_ACTION
 
 
+KotlinKeyword: android.app.Notification#when:
+    Avoid field names that are Kotlin hard keywords ("when"); see https://android.github.io/kotlin-guides/interop.html#no-hard-keywords
+
+
 KotlinOperator: android.os.PackageTagsList#contains(android.os.PackageTagsList):
     Method can be invoked as a "in" operator from Kotlin: `contains` (this is usually desirable; just make sure it makes sense for this type of object)
 KotlinOperator: android.util.SparseArrayMap#get(int, K):
@@ -907,16 +911,88 @@ RethrowRemoteException: android.app.ActivityManager#resumeAppSwitches():
     Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
 
 
+SamShouldBeLast: android.animation.ValueAnimator#ofObject(android.animation.TypeEvaluator, java.lang.Object...):
+    SAM-compatible parameters (such as parameter 1, "evaluator", in android.animation.ValueAnimator.ofObject) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.Activity#convertToTranslucent(android.app.Activity.TranslucentConversionListener, android.app.ActivityOptions):
+    SAM-compatible parameters (such as parameter 1, "callback", in android.app.Activity.convertToTranslucent) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.ActivityManager#addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.app.ActivityManager.addOnUidImportanceListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.AlarmManager#set(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 4, "listener", in android.app.AlarmManager.set) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.AlarmManager#set(int, long, long, long, android.app.AlarmManager.OnAlarmListener, android.os.Handler, android.os.WorkSource):
+    SAM-compatible parameters (such as parameter 5, "listener", in android.app.AlarmManager.set) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.AlarmManager#setExact(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 4, "listener", in android.app.AlarmManager.setExact) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.AlarmManager#setWindow(int, long, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 5, "listener", in android.app.AlarmManager.setWindow) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.PendingIntent#send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler):
+    SAM-compatible parameters (such as parameter 4, "onFinished", in android.app.PendingIntent.send) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.PendingIntent#send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler, String):
+    SAM-compatible parameters (such as parameter 4, "onFinished", in android.app.PendingIntent.send) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.PendingIntent#send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler, String, android.os.Bundle):
+    SAM-compatible parameters (such as parameter 4, "onFinished", in android.app.PendingIntent.send) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.PendingIntent#send(int, android.app.PendingIntent.OnFinished, android.os.Handler):
+    SAM-compatible parameters (such as parameter 2, "onFinished", in android.app.PendingIntent.send) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.UiAutomation#executeAndWaitForEvent(Runnable, android.app.UiAutomation.AccessibilityEventFilter, long):
+    SAM-compatible parameters (such as parameter 2, "filter", in android.app.UiAutomation.executeAndWaitForEvent) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.WallpaperManager#addOnColorsChangedListener(android.app.WallpaperManager.OnColorsChangedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.app.WallpaperManager.addOnColorsChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.content.pm.ActivityInfo#dump(android.util.Printer, String):
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.ActivityInfo.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.content.pm.ApplicationInfo#dump(android.util.Printer, String):
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.ApplicationInfo.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.content.pm.ComponentInfo#dumpBack(android.util.Printer, String):
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.ComponentInfo.dumpBack) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.content.pm.ComponentInfo#dumpFront(android.util.Printer, String):
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.ComponentInfo.dumpFront) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.content.pm.PackageItemInfo#dumpBack(android.util.Printer, String):
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.PackageItemInfo.dumpBack) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.content.pm.PackageItemInfo#dumpFront(android.util.Printer, String):
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.PackageItemInfo.dumpFront) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.database.sqlite.SQLiteCursorDriver#query(android.database.sqlite.SQLiteDatabase.CursorFactory, String[]):
+    SAM-compatible parameters (such as parameter 1, "factory", in android.database.sqlite.SQLiteCursorDriver.query) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.database.sqlite.SQLiteDebug#dump(android.util.Printer, String[]):
     SAM-compatible parameters (such as parameter 1, "printer", in android.database.sqlite.SQLiteDebug.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.database.sqlite.SQLiteDirectCursorDriver#query(android.database.sqlite.SQLiteDatabase.CursorFactory, String[]):
     SAM-compatible parameters (such as parameter 1, "factory", in android.database.sqlite.SQLiteDirectCursorDriver.query) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.graphics.drawable.AdaptiveIconDrawable#scheduleDrawable(android.graphics.drawable.Drawable, Runnable, long):
+    SAM-compatible parameters (such as parameter 2, "what", in android.graphics.drawable.AdaptiveIconDrawable.scheduleDrawable) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.graphics.drawable.Drawable#scheduleSelf(Runnable, long):
+    SAM-compatible parameters (such as parameter 1, "what", in android.graphics.drawable.Drawable.scheduleSelf) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.graphics.drawable.Drawable.Callback#scheduleDrawable(android.graphics.drawable.Drawable, Runnable, long):
+    SAM-compatible parameters (such as parameter 2, "what", in android.graphics.drawable.Drawable.Callback.scheduleDrawable) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.graphics.drawable.LayerDrawable#scheduleDrawable(android.graphics.drawable.Drawable, Runnable, long):
+    SAM-compatible parameters (such as parameter 2, "what", in android.graphics.drawable.LayerDrawable.scheduleDrawable) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.AudioManager#abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes):
+    SAM-compatible parameters (such as parameter 1, "l", in android.media.AudioManager.abandonAudioFocus) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int):
+    SAM-compatible parameters (such as parameter 1, "l", in android.media.AudioManager.requestAudioFocus) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int, android.media.audiopolicy.AudioPolicy):
+    SAM-compatible parameters (such as parameter 1, "l", in android.media.AudioManager.requestAudioFocus) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int):
+    SAM-compatible parameters (such as parameter 1, "l", in android.media.AudioManager.requestAudioFocus) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.AudioRecord#addOnRoutingChangedListener(android.media.AudioRecord.OnRoutingChangedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioRecord.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.AudioRecord#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioRecord.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioTrack.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioTrack.OnRoutingChangedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioTrack.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.MediaCas#setEventListener(android.media.MediaCas.EventListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.MediaCas.setEventListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.os.Parcel#createFixedArray(Class<T>, java.util.function.Function<android.os.IBinder,S>, int...):
+    SAM-compatible parameters (such as parameter 2, "asInterface", in android.os.Parcel.createFixedArray) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.StrictMode.ViolationInfo#dump(android.util.Printer, String):
     SAM-compatible parameters (such as parameter 1, "pw", in android.os.StrictMode.ViolationInfo.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.permission.PermissionControllerManager#countPermissionApps(java.util.List<java.lang.String>, int, android.permission.PermissionControllerManager.OnCountPermissionAppsResultCallback, android.os.Handler):
     SAM-compatible parameters (such as parameter 3, "callback", in android.permission.PermissionControllerManager.countPermissionApps) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.permission.PermissionControllerManager#getAppPermissions(String, android.permission.PermissionControllerManager.OnGetAppPermissionResultCallback, android.os.Handler):
     SAM-compatible parameters (such as parameter 2, "callback", in android.permission.PermissionControllerManager.getAppPermissions) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.security.KeyChain#choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, String[], java.security.Principal[], String, int, String):
+    SAM-compatible parameters (such as parameter 2, "response", in android.security.KeyChain.choosePrivateKeyAlias) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.security.KeyChain#choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, String[], java.security.Principal[], android.net.Uri, String):
+    SAM-compatible parameters (such as parameter 2, "response", in android.security.KeyChain.choosePrivateKeyAlias) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.service.autofill.CharSequenceTransformation#apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int):
     SAM-compatible parameters (such as parameter 1, "finder", in android.service.autofill.CharSequenceTransformation.apply) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.service.autofill.DateTransformation#apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int):
@@ -929,8 +1005,24 @@ SamShouldBeLast: android.view.Choreographer#postCallback(int, Runnable, Object):
     SAM-compatible parameters (such as parameter 2, "action", in android.view.Choreographer.postCallback) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.view.Choreographer#postCallbackDelayed(int, Runnable, Object, long):
     SAM-compatible parameters (such as parameter 2, "action", in android.view.Choreographer.postCallbackDelayed) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.Choreographer#postFrameCallbackDelayed(android.view.Choreographer.FrameCallback, long):
+    SAM-compatible parameters (such as parameter 1, "callback", in android.view.Choreographer.postFrameCallbackDelayed) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.view.Choreographer#removeCallbacks(int, Runnable, Object):
     SAM-compatible parameters (such as parameter 2, "action", in android.view.Choreographer.removeCallbacks) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.View#postDelayed(Runnable, long):
+    SAM-compatible parameters (such as parameter 1, "action", in android.view.View.postDelayed) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.View#postOnAnimationDelayed(Runnable, long):
+    SAM-compatible parameters (such as parameter 1, "action", in android.view.View.postOnAnimationDelayed) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.View#scheduleDrawable(android.graphics.drawable.Drawable, Runnable, long):
+    SAM-compatible parameters (such as parameter 2, "what", in android.view.View.scheduleDrawable) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.Window#addOnFrameMetricsAvailableListener(android.view.Window.OnFrameMetricsAvailableListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.view.Window.addOnFrameMetricsAvailableListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.accessibility.AccessibilityManager#addAccessibilityStateChangeListener(android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addAccessibilityStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.accessibility.AccessibilityManager#addTouchExplorationStateChangeListener(android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addTouchExplorationStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.inputmethod.InputMethodInfo#dump(android.util.Printer, String):
+    SAM-compatible parameters (such as parameter 1, "pw", in android.view.inputmethod.InputMethodInfo.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 
 
 StaticUtils: android.os.health.HealthKeys:
@@ -945,6 +1037,238 @@ StreamFiles: android.os.Environment#buildPath(java.io.File, java.lang.String...)
     Methods accepting `File` should also accept `FileDescriptor` or streams: method android.os.Environment.buildPath(java.io.File,java.lang.String...)
 StreamFiles: android.os.FileUtils#contains(java.io.File, java.io.File):
     Methods accepting `File` should also accept `FileDescriptor` or streams: method android.os.FileUtils.contains(java.io.File,java.io.File)
+
+
+UnflaggedApi: android.Manifest.permission#MANAGE_REMOTE_AUTH:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.MANAGE_REMOTE_AUTH
+UnflaggedApi: android.Manifest.permission#START_ACTIVITIES_FROM_SDK_SANDBOX:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.START_ACTIVITIES_FROM_SDK_SANDBOX
+UnflaggedApi: android.Manifest.permission#USE_REMOTE_AUTH:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.USE_REMOTE_AUTH
+UnflaggedApi: android.app.admin.DevicePolicyIdentifiers#PERMITTED_INPUT_METHODS_POLICY:
+    New API must be flagged with @FlaggedApi: field android.app.admin.DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY
+UnflaggedApi: android.app.admin.DevicePolicyIdentifiers#PERSONAL_APPS_SUSPENDED_POLICY:
+    New API must be flagged with @FlaggedApi: field android.app.admin.DevicePolicyIdentifiers.PERSONAL_APPS_SUSPENDED_POLICY
+UnflaggedApi: android.app.admin.DevicePolicyIdentifiers#SCREEN_CAPTURE_DISABLED_POLICY:
+    New API must be flagged with @FlaggedApi: field android.app.admin.DevicePolicyIdentifiers.SCREEN_CAPTURE_DISABLED_POLICY
+UnflaggedApi: android.app.admin.DevicePolicyIdentifiers#USB_DATA_SIGNALING_POLICY:
+    New API must be flagged with @FlaggedApi: field android.app.admin.DevicePolicyIdentifiers.USB_DATA_SIGNALING_POLICY
+UnflaggedApi: android.companion.AssociationInfo.Builder:
+    New API must be flagged with @FlaggedApi: class android.companion.AssociationInfo.Builder
+UnflaggedApi: android.companion.AssociationInfo.Builder#Builder(android.companion.AssociationInfo):
+    New API must be flagged with @FlaggedApi: constructor android.companion.AssociationInfo.Builder(android.companion.AssociationInfo)
+UnflaggedApi: android.companion.AssociationInfo.Builder#Builder(int, int, String):
+    New API must be flagged with @FlaggedApi: constructor android.companion.AssociationInfo.Builder(int,int,String)
+UnflaggedApi: android.companion.AssociationInfo.Builder#build():
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.build()
+UnflaggedApi: android.companion.AssociationInfo.Builder#setAssociatedDevice(android.companion.AssociatedDevice):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setAssociatedDevice(android.companion.AssociatedDevice)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setDeviceMacAddress(android.net.MacAddress):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setDeviceMacAddress(android.net.MacAddress)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setDeviceProfile(String):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setDeviceProfile(String)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setDisplayName(CharSequence):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setDisplayName(CharSequence)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setLastTimeConnected(long):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setLastTimeConnected(long)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setNotifyOnDeviceNearby(boolean):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setNotifyOnDeviceNearby(boolean)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setRevoked(boolean):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setRevoked(boolean)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setSelfManaged(boolean):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setSelfManaged(boolean)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setSystemDataSyncFlags(int):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setSystemDataSyncFlags(int)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setTag(String):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setTag(String)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setTimeApproved(long):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setTimeApproved(long)
+UnflaggedApi: android.companion.CompanionDeviceManager#MESSAGE_REQUEST_PING:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PING
+UnflaggedApi: android.companion.CompanionDeviceManager#enableSecureTransport(boolean):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.enableSecureTransport(boolean)
+UnflaggedApi: android.content.AttributionSource#AttributionSource(int, int, String, String, android.os.IBinder, String[], android.content.AttributionSource):
+    New API must be flagged with @FlaggedApi: constructor android.content.AttributionSource(int,int,String,String,android.os.IBinder,String[],android.content.AttributionSource)
+UnflaggedApi: android.content.AttributionSource#AttributionSource(int, int, String, String, android.os.IBinder, String[], int, android.content.AttributionSource):
+    New API must be flagged with @FlaggedApi: constructor android.content.AttributionSource(int,int,String,String,android.os.IBinder,String[],int,android.content.AttributionSource)
+UnflaggedApi: android.content.pm.UserInfo#isCommunalProfile():
+    New API must be flagged with @FlaggedApi: method android.content.pm.UserInfo.isCommunalProfile()
+UnflaggedApi: android.content.pm.UserInfo#isPrivateProfile():
+    New API must be flagged with @FlaggedApi: method android.content.pm.UserInfo.isPrivateProfile()
+UnflaggedApi: android.credentials.CredentialProviderInfo#isPrimary():
+    New API must be flagged with @FlaggedApi: method android.credentials.CredentialProviderInfo.isPrimary()
+UnflaggedApi: android.media.AudioManager#enterAudioFocusFreezeForTest(java.util.List<java.lang.Integer>):
+    New API must be flagged with @FlaggedApi: method android.media.AudioManager.enterAudioFocusFreezeForTest(java.util.List<java.lang.Integer>)
+UnflaggedApi: android.media.AudioManager#exitAudioFocusFreezeForTest():
+    New API must be flagged with @FlaggedApi: method android.media.AudioManager.exitAudioFocusFreezeForTest()
+UnflaggedApi: android.media.AudioManager#getFocusDuckedUidsForTest():
+    New API must be flagged with @FlaggedApi: method android.media.AudioManager.getFocusDuckedUidsForTest()
+UnflaggedApi: android.media.AudioManager#getFocusFadeOutDurationForTest():
+    New API must be flagged with @FlaggedApi: method android.media.AudioManager.getFocusFadeOutDurationForTest()
+UnflaggedApi: android.media.AudioManager#getFocusUnmuteDelayAfterFadeOutForTest():
+    New API must be flagged with @FlaggedApi: method android.media.AudioManager.getFocusUnmuteDelayAfterFadeOutForTest()
+UnflaggedApi: android.media.RingtoneSelection:
+    New API must be flagged with @FlaggedApi: class android.media.RingtoneSelection
+UnflaggedApi: android.media.RingtoneSelection#DEFAULT_SELECTION_URI_STRING:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.DEFAULT_SELECTION_URI_STRING
+UnflaggedApi: android.media.RingtoneSelection#FROM_URI_RINGTONE_SELECTION_ONLY:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.FROM_URI_RINGTONE_SELECTION_ONLY
+UnflaggedApi: android.media.RingtoneSelection#FROM_URI_RINGTONE_SELECTION_OR_SOUND:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.FROM_URI_RINGTONE_SELECTION_OR_SOUND
+UnflaggedApi: android.media.RingtoneSelection#FROM_URI_RINGTONE_SELECTION_OR_VIBRATION:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.FROM_URI_RINGTONE_SELECTION_OR_VIBRATION
+UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_DEFAULT:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_DEFAULT
+UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_OFF:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_OFF
+UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_URI:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_URI
+UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_APPLICATION_PROVIDED:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_APPLICATION_PROVIDED
+UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_AUDIO_CHANNEL:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_AUDIO_CHANNEL
+UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_DEFAULT:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_DEFAULT
+UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_HAPTIC_GENERATOR:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_HAPTIC_GENERATOR
+UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_OFF:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_OFF
+UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_URI:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_URI
+UnflaggedApi: android.media.RingtoneSelection#fromUri(android.net.Uri, int):
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.fromUri(android.net.Uri,int)
+UnflaggedApi: android.media.RingtoneSelection#getSoundSource():
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.getSoundSource()
+UnflaggedApi: android.media.RingtoneSelection#getSoundUri():
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.getSoundUri()
+UnflaggedApi: android.media.RingtoneSelection#getVibrationSource():
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.getVibrationSource()
+UnflaggedApi: android.media.RingtoneSelection#getVibrationUri():
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.getVibrationUri()
+UnflaggedApi: android.media.RingtoneSelection#isRingtoneSelectionUri(android.net.Uri):
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.isRingtoneSelectionUri(android.net.Uri)
+UnflaggedApi: android.media.RingtoneSelection#toUri():
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.toUri()
+UnflaggedApi: android.media.RingtoneSelection.Builder:
+    New API must be flagged with @FlaggedApi: class android.media.RingtoneSelection.Builder
+UnflaggedApi: android.media.RingtoneSelection.Builder#Builder():
+    New API must be flagged with @FlaggedApi: constructor android.media.RingtoneSelection.Builder()
+UnflaggedApi: android.media.RingtoneSelection.Builder#Builder(android.media.RingtoneSelection):
+    New API must be flagged with @FlaggedApi: constructor android.media.RingtoneSelection.Builder(android.media.RingtoneSelection)
+UnflaggedApi: android.media.RingtoneSelection.Builder#build():
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.Builder.build()
+UnflaggedApi: android.media.RingtoneSelection.Builder#setSoundSource(android.net.Uri):
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.Builder.setSoundSource(android.net.Uri)
+UnflaggedApi: android.media.RingtoneSelection.Builder#setSoundSource(int):
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.Builder.setSoundSource(int)
+UnflaggedApi: android.media.RingtoneSelection.Builder#setVibrationSource(android.net.Uri):
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.Builder.setVibrationSource(android.net.Uri)
+UnflaggedApi: android.media.RingtoneSelection.Builder#setVibrationSource(int):
+    New API must be flagged with @FlaggedApi: method android.media.RingtoneSelection.Builder.setVibrationSource(int)
+UnflaggedApi: android.media.soundtrigger.SoundTriggerInstrumentation#setInPhoneCallState(boolean):
+    New API must be flagged with @FlaggedApi: method android.media.soundtrigger.SoundTriggerInstrumentation.setInPhoneCallState(boolean)
+UnflaggedApi: android.media.soundtrigger.SoundTriggerManager#createManagerForModule(android.hardware.soundtrigger.SoundTrigger.ModuleProperties):
+    New API must be flagged with @FlaggedApi: method android.media.soundtrigger.SoundTriggerManager.createManagerForModule(android.hardware.soundtrigger.SoundTrigger.ModuleProperties)
+UnflaggedApi: android.media.soundtrigger.SoundTriggerManager#createManagerForTestModule():
+    New API must be flagged with @FlaggedApi: method android.media.soundtrigger.SoundTriggerManager.createManagerForTestModule()
+UnflaggedApi: android.media.soundtrigger.SoundTriggerManager#listModuleProperties():
+    New API must be flagged with @FlaggedApi: method android.media.soundtrigger.SoundTriggerManager.listModuleProperties()
+UnflaggedApi: android.media.soundtrigger.SoundTriggerManager#loadSoundModel(android.hardware.soundtrigger.SoundTrigger.SoundModel):
+    New API must be flagged with @FlaggedApi: method android.media.soundtrigger.SoundTriggerManager.loadSoundModel(android.hardware.soundtrigger.SoundTrigger.SoundModel)
+UnflaggedApi: android.media.soundtrigger.SoundTriggerManager.Model#getSoundModel():
+    New API must be flagged with @FlaggedApi: method android.media.soundtrigger.SoundTriggerManager.Model.getSoundModel()
+UnflaggedApi: android.net.wifi.sharedconnectivity.app.SharedConnectivityManager#getBroadcastReceiver():
+    New API must be flagged with @FlaggedApi: method android.net.wifi.sharedconnectivity.app.SharedConnectivityManager.getBroadcastReceiver()
+UnflaggedApi: android.os.BatteryManager#BATTERY_PLUGGED_ANY:
+    New API must be flagged with @FlaggedApi: field android.os.BatteryManager.BATTERY_PLUGGED_ANY
+UnflaggedApi: android.os.BugreportParams#BUGREPORT_MODE_MAX_VALUE:
+    New API must be flagged with @FlaggedApi: field android.os.BugreportParams.BUGREPORT_MODE_MAX_VALUE
+UnflaggedApi: android.os.PowerManager#isBatterySaverSupported():
+    New API must be flagged with @FlaggedApi: method android.os.PowerManager.isBatterySaverSupported()
+UnflaggedApi: android.os.UserHandle#USER_CURRENT:
+    New API must be flagged with @FlaggedApi: field android.os.UserHandle.USER_CURRENT
+UnflaggedApi: android.os.UserManager#getAliveUsers():
+    New API must be flagged with @FlaggedApi: method android.os.UserManager.getAliveUsers()
+UnflaggedApi: android.os.UserManager#getUsers():
+    New API must be flagged with @FlaggedApi: method android.os.UserManager.getUsers()
+UnflaggedApi: android.os.vibrator.persistence.ParsedVibration:
+    New API must be flagged with @FlaggedApi: class android.os.vibrator.persistence.ParsedVibration
+UnflaggedApi: android.os.vibrator.persistence.ParsedVibration#getVibrationEffects():
+    New API must be flagged with @FlaggedApi: method android.os.vibrator.persistence.ParsedVibration.getVibrationEffects()
+UnflaggedApi: android.os.vibrator.persistence.ParsedVibration#resolve(android.os.Vibrator):
+    New API must be flagged with @FlaggedApi: method android.os.vibrator.persistence.ParsedVibration.resolve(android.os.Vibrator)
+UnflaggedApi: android.os.vibrator.persistence.VibrationXmlParser:
+    New API must be flagged with @FlaggedApi: class android.os.vibrator.persistence.VibrationXmlParser
+UnflaggedApi: android.os.vibrator.persistence.VibrationXmlParser#parseDocument(java.io.Reader):
+    New API must be flagged with @FlaggedApi: method android.os.vibrator.persistence.VibrationXmlParser.parseDocument(java.io.Reader)
+UnflaggedApi: android.os.vibrator.persistence.VibrationXmlParser#parseVibrationEffect(java.io.Reader):
+    New API must be flagged with @FlaggedApi: method android.os.vibrator.persistence.VibrationXmlParser.parseVibrationEffect(java.io.Reader)
+UnflaggedApi: android.os.vibrator.persistence.VibrationXmlSerializer:
+    New API must be flagged with @FlaggedApi: class android.os.vibrator.persistence.VibrationXmlSerializer
+UnflaggedApi: android.os.vibrator.persistence.VibrationXmlSerializer#serialize(android.os.VibrationEffect, java.io.Writer):
+    New API must be flagged with @FlaggedApi: method android.os.vibrator.persistence.VibrationXmlSerializer.serialize(android.os.VibrationEffect,java.io.Writer)
+UnflaggedApi: android.os.vibrator.persistence.VibrationXmlSerializer.SerializationFailedException:
+    New API must be flagged with @FlaggedApi: class android.os.vibrator.persistence.VibrationXmlSerializer.SerializationFailedException
+UnflaggedApi: android.service.notification.NotificationRankingUpdate:
+    New API must be flagged with @FlaggedApi: class android.service.notification.NotificationRankingUpdate
+UnflaggedApi: android.service.notification.NotificationRankingUpdate#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.service.notification.NotificationRankingUpdate.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.service.notification.NotificationRankingUpdate#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.service.notification.NotificationRankingUpdate.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.service.notification.NotificationRankingUpdate#isFdNotNullAndClosed():
+    New API must be flagged with @FlaggedApi: method android.service.notification.NotificationRankingUpdate.isFdNotNullAndClosed()
+UnflaggedApi: android.telephony.TelephonyManager#HAL_SERVICE_SATELLITE:
+    New API must be flagged with @FlaggedApi: field android.telephony.TelephonyManager.HAL_SERVICE_SATELLITE
+UnflaggedApi: android.telephony.ims.feature.MmTelFeature.MmTelCapabilities:
+    New API must be flagged with @FlaggedApi: class android.telephony.ims.feature.MmTelFeature.MmTelCapabilities
+UnflaggedApi: android.text.MeasuredParagraph:
+    New API must be flagged with @FlaggedApi: class android.text.MeasuredParagraph
+UnflaggedApi: android.text.MeasuredParagraph#buildForStaticLayoutTest(android.text.TextPaint, android.graphics.text.LineBreakConfig, CharSequence, int, int, android.text.TextDirectionHeuristic, int, boolean, android.text.MeasuredParagraph.StyleRunCallback):
+    New API must be flagged with @FlaggedApi: method android.text.MeasuredParagraph.buildForStaticLayoutTest(android.text.TextPaint,android.graphics.text.LineBreakConfig,CharSequence,int,int,android.text.TextDirectionHeuristic,int,boolean,android.text.MeasuredParagraph.StyleRunCallback)
+UnflaggedApi: android.text.MeasuredParagraph.StyleRunCallback:
+    New API must be flagged with @FlaggedApi: class android.text.MeasuredParagraph.StyleRunCallback
+UnflaggedApi: android.text.MeasuredParagraph.StyleRunCallback#onAppendReplacementRun(android.graphics.Paint, int, float):
+    New API must be flagged with @FlaggedApi: method android.text.MeasuredParagraph.StyleRunCallback.onAppendReplacementRun(android.graphics.Paint,int,float)
+UnflaggedApi: android.text.MeasuredParagraph.StyleRunCallback#onAppendStyleRun(android.graphics.Paint, android.graphics.text.LineBreakConfig, int, boolean):
+    New API must be flagged with @FlaggedApi: method android.text.MeasuredParagraph.StyleRunCallback.onAppendStyleRun(android.graphics.Paint,android.graphics.text.LineBreakConfig,int,boolean)
+UnflaggedApi: android.view.Choreographer#getFrameTimeNanos():
+    New API must be flagged with @FlaggedApi: method android.view.Choreographer.getFrameTimeNanos()
+UnflaggedApi: android.view.InputDevice#getAssociatedDisplayId():
+    New API must be flagged with @FlaggedApi: method android.view.InputDevice.getAssociatedDisplayId()
+UnflaggedApi: android.view.InputDevice#getKeyboardLanguageTag():
+    New API must be flagged with @FlaggedApi: method android.view.InputDevice.getKeyboardLanguageTag()
+UnflaggedApi: android.view.InputDevice#getKeyboardLayoutType():
+    New API must be flagged with @FlaggedApi: method android.view.InputDevice.getKeyboardLayoutType()
+UnflaggedApi: android.view.MotionEvent.PointerCoords#isResampled():
+    New API must be flagged with @FlaggedApi: method android.view.MotionEvent.PointerCoords.isResampled()
+UnflaggedApi: android.view.WindowManager#replaceContentOnDisplayWithMirror(int, android.view.Window):
+    New API must be flagged with @FlaggedApi: method android.view.WindowManager.replaceContentOnDisplayWithMirror(int,android.view.Window)
+UnflaggedApi: android.view.WindowManager#replaceContentOnDisplayWithSc(int, android.view.SurfaceControl):
+    New API must be flagged with @FlaggedApi: method android.view.WindowManager.replaceContentOnDisplayWithSc(int,android.view.SurfaceControl)
+UnflaggedApi: android.view.WindowManager.LayoutParams#preferredMaxDisplayRefreshRate:
+    New API must be flagged with @FlaggedApi: field android.view.WindowManager.LayoutParams.preferredMaxDisplayRefreshRate
+UnflaggedApi: android.view.WindowManager.LayoutParams#preferredMinDisplayRefreshRate:
+    New API must be flagged with @FlaggedApi: field android.view.WindowManager.LayoutParams.preferredMinDisplayRefreshRate
+UnflaggedApi: android.view.accessibility.AccessibilityWindowInfo#UNDEFINED_WINDOW_ID:
+    New API must be flagged with @FlaggedApi: field android.view.accessibility.AccessibilityWindowInfo.UNDEFINED_WINDOW_ID
+UnflaggedApi: android.view.animation.AnimationUtils#lockAnimationClock(long, long):
+    New API must be flagged with @FlaggedApi: method android.view.animation.AnimationUtils.lockAnimationClock(long,long)
+UnflaggedApi: android.view.inputmethod.InputMethodManager#getEnabledInputMethodListAsUser(android.os.UserHandle):
+    New API must be flagged with @FlaggedApi: method android.view.inputmethod.InputMethodManager.getEnabledInputMethodListAsUser(android.os.UserHandle)
+UnflaggedApi: android.view.inputmethod.InputMethodManager#getEnabledInputMethodSubtypeListAsUser(String, boolean, android.os.UserHandle):
+    New API must be flagged with @FlaggedApi: method android.view.inputmethod.InputMethodManager.getEnabledInputMethodSubtypeListAsUser(String,boolean,android.os.UserHandle)
+UnflaggedApi: android.view.inputmethod.InputMethodManager#isCurrentRootView(android.view.View):
+    New API must be flagged with @FlaggedApi: method android.view.inputmethod.InputMethodManager.isCurrentRootView(android.view.View)
+UnflaggedApi: android.view.inputmethod.InputMethodManager#isStylusHandwritingAvailableAsUser(android.os.UserHandle):
+    New API must be flagged with @FlaggedApi: method android.view.inputmethod.InputMethodManager.isStylusHandwritingAvailableAsUser(android.os.UserHandle)
+UnflaggedApi: android.view.inputmethod.InsertModeGesture:
+    New API must be flagged with @FlaggedApi: class android.view.inputmethod.InsertModeGesture
+UnflaggedApi: android.window.WindowInfosListenerForTest.WindowInfo#displayId:
+    New API must be flagged with @FlaggedApi: field android.window.WindowInfosListenerForTest.WindowInfo.displayId
+UnflaggedApi: android.window.WindowInfosListenerForTest.WindowInfo#isVisible:
+    New API must be flagged with @FlaggedApi: field android.window.WindowInfosListenerForTest.WindowInfo.isVisible
+UnflaggedApi: android.window.WindowInfosListenerForTest.WindowInfo#transform:
+    New API must be flagged with @FlaggedApi: field android.window.WindowInfosListenerForTest.WindowInfo.transform
 
 
 UseIcu: android.hardware.soundtrigger.KeyphraseEnrollmentInfo#getKeyphraseMetadata(String, java.util.Locale) parameter #1:
