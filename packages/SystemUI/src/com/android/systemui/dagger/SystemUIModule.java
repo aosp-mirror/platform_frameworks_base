@@ -89,6 +89,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.connectivity.ConnectivityModule;
+import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.disableflags.dagger.DisableFlagsModule;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
@@ -198,6 +199,7 @@ import javax.inject.Named;
             SettingsUtilModule.class,
             SmartRepliesInflationModule.class,
             SmartspaceModule.class,
+            StatusBarModule.class,
             StatusBarPipelineModule.class,
             StatusBarPolicyModule.class,
             StatusBarWindowModule.class,

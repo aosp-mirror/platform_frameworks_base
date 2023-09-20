@@ -207,6 +207,7 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepository;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
@@ -238,6 +239,7 @@ import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
@@ -410,6 +412,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarInitializer mStatusBarInitializer;
     private final StatusBarWindowController mStatusBarWindowController;
+    private final StatusBarModeRepository mStatusBarModeRepository;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @VisibleForTesting
     DozeServiceHost mDozeServiceHost;
@@ -496,8 +499,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int, int) */
     private @Appearance int mAppearance;
 
-    private boolean mTransientShown;
-
     private final DisplayMetrics mDisplayMetrics;
 
     // XXX: gesture research
@@ -558,6 +559,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final ScrimController mScrimController;
     protected DozeScrimController mDozeScrimController;
     private final BackActionInteractor mBackActionInteractor;
+    private final JavaAdapter mJavaAdapter;
     private final Executor mUiBgExecutor;
 
     protected boolean mDozing;
@@ -633,6 +635,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             StatusBarInitializer statusBarInitializer,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowStateController statusBarWindowStateController,
+            StatusBarModeRepository statusBarModeRepository,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarSignalPolicy statusBarSignalPolicy,
             PulseExpansionHandler pulseExpansionHandler,
@@ -651,6 +654,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
             ShadeLogger shadeLogger,
+            JavaAdapter javaAdapter,
             @UiBackground Executor uiBgExecutor,
             ShadeSurface shadeSurface,
             NotificationMediaManager notificationMediaManager,
@@ -740,6 +744,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mAutoHideController = autoHideController;
         mStatusBarInitializer = statusBarInitializer;
         mStatusBarWindowController = statusBarWindowController;
+        mStatusBarModeRepository = statusBarModeRepository;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mPulseExpansionHandler = pulseExpansionHandler;
         mWakeUpCoordinator = notificationWakeUpCoordinator;
@@ -759,6 +764,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mDisplayMetrics = displayMetrics;
         mMetricsLogger = metricsLogger;
         mShadeLogger = shadeLogger;
+        mJavaAdapter = javaAdapter;
         mUiBgExecutor = uiBgExecutor;
         mShadeSurface = shadeSurface;
         mMediaManager = notificationMediaManager;
@@ -934,7 +940,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         setUpPresenter();
 
         if ((result.mTransientBarTypes & WindowInsets.Type.statusBars()) != 0) {
-            showTransientUnchecked();
+            mStatusBarModeRepository.showTransient();
         }
         mCommandQueueCallbacks.onSystemBarAttributesChanged(mDisplayId, result.mAppearance,
                 result.mAppearanceRegions, result.mNavbarColorManagedByIme, result.mBehavior,
@@ -1184,6 +1190,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mWallpaperController.setRootView(getNotificationShadeWindowView());
 
         mDemoModeController.addCallback(mDemoModeCallback);
+        mJavaAdapter.alwaysCollectFlow(
+                mStatusBarModeRepository.isTransientShown(), this::onTransientShownChanged);
 
         mCommandQueueCallbacks = mCommandQueueCallbacksLazy.get();
         mCommandQueue.addCallback(mCommandQueueCallbacks);
@@ -1249,7 +1257,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
             @Override
             public void hide() {
-                clearTransient();
+                mStatusBarModeRepository.clearTransient();
             }
         });
 
@@ -1716,25 +1724,15 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mCommandQueue.panelsEnabled();
     }
 
-    @Override
-    public void showTransientUnchecked() {
-        if (!mTransientShown) {
-            mTransientShown = true;
+    private void onTransientShownChanged(boolean transientShown) {
+        if (transientShown) {
             mNoAnimationOnNextBarModeChange = true;
-            maybeUpdateBarMode();
         }
-    }
-
-    @Override
-    public void clearTransient() {
-        if (mTransientShown) {
-            mTransientShown = false;
-            maybeUpdateBarMode();
-        }
+        maybeUpdateBarMode();
     }
 
     private void maybeUpdateBarMode() {
-        final int barMode = barMode(mTransientShown, mAppearance);
+        final int barMode = barMode(isTransientShown(), mAppearance);
         if (updateBarMode(barMode)) {
             mLightBarController.onStatusBarModeChanged(barMode);
             updateBubblesVisibility();
@@ -3149,7 +3147,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     // End Extra BaseStatusBarMethods.
 
     boolean isTransientShown() {
-        return mTransientShown;
+        return mStatusBarModeRepository.isTransientShown().getValue();
     }
 
     private void updateLightRevealScrimVisibility() {
