@@ -392,7 +392,11 @@ oneway interface ISatellite {
      *
      * @param simSlot Indicates the SIM slot to which this API will be applied. The modem will use
      *                this information to determine the relevant carrier.
-     * @param plmnList The list of roaming PLMN used for connecting to satellite networks.
+     * @param carrierPlmnList The list of roaming PLMN used for connecting to satellite networks
+     *                        supported by user subscription.
+     * @param allSatellitePlmnList Modem should use the allSatellitePlmnList to identify satellite
+     *                             PLMNs that are not supported by the carrier and make sure not to
+     *                             attach to them.
      * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
@@ -404,8 +408,8 @@ oneway interface ISatellite {
      *   SatelliteError:RADIO_NOT_AVAILABLE
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      */
-    void setSatellitePlmn(int simSlot, in List<String> plmnList,
-            in IIntegerConsumer resultCallback);
+    void setSatellitePlmn(int simSlot, in List<String> carrierPlmnList,
+            in List<String> allSatellitePlmnList, in IIntegerConsumer resultCallback);
 
     /**
      * Enable or disable satellite in the cellular modem associated with a carrier.

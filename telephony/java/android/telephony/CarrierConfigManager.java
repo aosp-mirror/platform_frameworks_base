@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -52,6 +53,7 @@ import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.util.List;
@@ -9436,22 +9438,9 @@ public class CarrierConfigManager {
      * </carrier_config>
      * }</pre>
      * <p>
-     * If this carrier config is not present, the device overlay config
-     * {@code config_satellite_services_supported_by_providers} will be used. If the carrier config
-     * is present, the supported services associated with the PLMNs listed in the carrier config
-     * will override that of the device overlay config. The supported satellite services will be
-     * identified as follows:
-     * <ul>
-     * <li>For each PLMN that exists only in the carrier provided satellite services, use the
-     * carrier provided services as the supported services.</li>
-     * <li>For each PLMN that is present only in the device provided satellite services, use the
-     * device provided services as the supported services.</li>
-     * <li>For each PLMN that is present in both the carrier provided and device provided satellite
-     * services, use the carrier provided services as the supported services.</li>
-     * </ul>
-     * <p>
      * This config is empty by default.
      */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public static final String KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE =
             "carrier_supported_satellite_services_per_provider_bundle";
 
@@ -9462,9 +9451,8 @@ public class CarrierConfigManager {
      * satellite provider and the carrier before enabling this flag.
      *
      * The default value is false.
-     *
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public static final String KEY_SATELLITE_ATTACH_SUPPORTED_BOOL =
             "satellite_attach_supported_bool";
 
