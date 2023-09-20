@@ -327,12 +327,22 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         // the time of handleRequest, but we need more information than is available at that time.
         if (KeyguardTransitionHandler.handles(info)) {
             if (mixed != null && mixed.mType != MixedTransition.TYPE_KEYGUARD) {
-                ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                        "Converting mixed transition into a keyguard transition");
-                onTransitionConsumed(transition, false, null);
+                final MixedTransition keyguardMixed =
+                        new MixedTransition(MixedTransition.TYPE_KEYGUARD, transition);
+                mActiveTransitions.add(keyguardMixed);
+                final boolean hasAnimateKeyguard = animateKeyguard(keyguardMixed, info,
+                        startTransaction, finishTransaction, finishCallback);
+                if (hasAnimateKeyguard) {
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "Converting mixed transition into a keyguard transition");
+                    // Consume the original mixed transition
+                    onTransitionConsumed(transition, false, null);
+                    return true;
+                } else {
+                    // Keyguard handler cannot handle it, process through original mixed
+                    mActiveTransitions.remove(keyguardMixed);
+                }
             }
-            mixed = new MixedTransition(MixedTransition.TYPE_KEYGUARD, transition);
-            mActiveTransitions.add(mixed);
         }
 
         if (mixed == null) return false;
