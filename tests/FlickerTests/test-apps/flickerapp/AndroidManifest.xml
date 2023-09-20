@@ -102,6 +102,20 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".PortraitImmersiveActivity"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.PortraitImmersiveActivity"
+                  android:immersive="true"
+                  android:resizeableActivity="true"
+                  android:screenOrientation="portrait"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:configChanges="screenSize"
+                  android:label="PortraitImmersiveActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <activity android:name=".LaunchTransparentActivity"
                   android:resizeableActivity="false"
                   android:screenOrientation="portrait"

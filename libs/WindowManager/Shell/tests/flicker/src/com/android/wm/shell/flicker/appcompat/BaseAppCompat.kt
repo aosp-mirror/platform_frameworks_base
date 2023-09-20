@@ -50,7 +50,7 @@ abstract class BaseAppCompat(flicker: LegacyFlickerTest) : BaseTest(flicker) {
         }
 
     @Before
-    fun before() {
+    fun setUp() {
         Assume.assumeTrue(tapl.isTablet && letterboxRule.isIgnoreOrientationRequest)
     }
 
