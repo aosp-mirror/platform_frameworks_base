@@ -27,6 +27,8 @@ import static android.app.ActivityManager.FOREGROUND_SERVICE_API_TYPE_PHONE_CALL
 import static android.app.ActivityManager.FOREGROUND_SERVICE_API_TYPE_USB;
 import static android.os.Process.INVALID_UID;
 
+import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__FGS_START_API__FGSSTARTAPI_NA;
+
 import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ForegroundServiceApiType;
@@ -520,7 +522,10 @@ public class ForegroundServiceTypeLoggerModule {
                 r.mAllowWIUByBindings,
                 r.mAllowStartForegroundNoBinding,
                 r.mAllowStartInBindService,
-                r.mAllowStartByBindings);
+                r.mAllowStartByBindings,
+                FOREGROUND_SERVICE_STATE_CHANGED__FGS_START_API__FGSSTARTAPI_NA,
+                false
+        );
     }
 
     /**
@@ -578,7 +583,10 @@ public class ForegroundServiceTypeLoggerModule {
                 0,
                 0,
                 0,
-                0);
+                0,
+                FOREGROUND_SERVICE_STATE_CHANGED__FGS_START_API__FGSSTARTAPI_NA,
+                false
+        );
     }
 
     /**
