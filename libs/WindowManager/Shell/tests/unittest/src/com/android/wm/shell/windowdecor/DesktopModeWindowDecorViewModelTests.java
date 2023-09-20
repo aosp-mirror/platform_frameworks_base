@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -38,6 +39,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.input.InputManager;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.view.Choreographer;
 import android.view.Display;
@@ -54,14 +56,18 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.recents.RecentsTransitionHandler;
+import com.android.wm.shell.recents.RecentsTransitionStateListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
 import java.util.ArrayList;
@@ -96,18 +102,21 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
     @Mock private SurfaceControl.Transaction mTransaction;
     @Mock private Display mDisplay;
     @Mock private ShellController mShellController;
-    @Mock private ShellInit mShellInit;
+    @Mock private ShellExecutor mShellExecutor;
     @Mock private DesktopModeWindowDecorViewModel.DesktopModeKeyguardChangeListener
             mDesktopModeKeyguardChangeListener;
     @Mock private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
+    @Mock private RecentsTransitionHandler mRecentsTransitionHandler;
+
     private final List<InputManager> mMockInputManagers = new ArrayList<>();
 
+    private ShellInit mShellInit;
     private DesktopModeWindowDecorViewModel mDesktopModeWindowDecorViewModel;
 
     @Before
     public void setUp() {
         mMockInputManagers.add(mInputManager);
-
+        mShellInit = new ShellInit(mShellExecutor);
         mDesktopModeWindowDecorViewModel =
                 new DesktopModeWindowDecorViewModel(
                         mContext,
@@ -120,6 +129,7 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
                         mSyncQueue,
                         mTransitions,
                         Optional.of(mDesktopTasksController),
+                        mRecentsTransitionHandler,
                         mDesktopModeWindowDecorFactory,
                         mMockInputMonitorFactory,
                         mTransactionFactory,
@@ -143,6 +153,8 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
 
         mDesktopModeWindowDecoration.mDisplay = mDisplay;
         doReturn(Display.DEFAULT_DISPLAY).when(mDisplay).getDisplayId();
+
+        mShellInit.init();
     }
 
     @Test
@@ -294,6 +306,36 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
         });
         verify(mDesktopModeWindowDecorFactory, never())
                 .create(any(), any(), any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testRelayoutBlockedDuringRecentsTransition() throws Exception {
+        final ArgumentCaptor<RecentsTransitionStateListener> recentsCaptor =
+                ArgumentCaptor.forClass(RecentsTransitionStateListener.class);
+        verify(mRecentsTransitionHandler).addTransitionStateListener(recentsCaptor.capture());
+
+        final IBinder transition = mock(IBinder.class);
+        final DesktopModeWindowDecoration decoration = mock(DesktopModeWindowDecoration.class);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        final int taskId = 1;
+        final SurfaceControl taskSurface = new SurfaceControl();
+        final ActivityManager.RunningTaskInfo taskInfo =
+                createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM);
+        doReturn(decoration).when(mDesktopModeWindowDecorFactory)
+                .create(any(), any(), any(), eq(taskInfo), eq(taskSurface), any(), any(), any(),
+                        any());
+
+        runOnMainThread(() -> {
+            // Make sure a window decorations exists first by launching a freeform task.
+            mDesktopModeWindowDecorViewModel.onTaskOpening(
+                    taskInfo, taskSurface, startT, finishT);
+            // Now call back when as a Recents transition starts.
+            recentsCaptor.getValue().onTransitionStarted(transition);
+        });
+
+        verify(decoration).incrementRelayoutBlock();
+        verify(decoration).addTransitionPausingRelayout(transition);
     }
 
     private void runOnMainThread(Runnable r) throws Exception {
