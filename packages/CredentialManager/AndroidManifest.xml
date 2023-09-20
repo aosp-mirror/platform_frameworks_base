@@ -22,6 +22,7 @@
     <uses-permission android:name="android.permission.LAUNCH_CREDENTIAL_SELECTOR"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
     <uses-permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS"/>
+    <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS" />
 
     <application
         android:allowBackup="true"

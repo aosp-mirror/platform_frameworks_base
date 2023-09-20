@@ -19,6 +19,7 @@ package com.android.credentialmanager
 import android.app.slice.Slice
 import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import android.credentials.ui.AuthenticationEntry
@@ -67,7 +68,7 @@ fun getAppLabel(
     appPackageName: String
 ): String? {
     return try {
-        val pkgInfo = pm.getPackageInfo(appPackageName, PackageManager.PackageInfoFlags.of(0))
+        val pkgInfo = getPackageInfo(pm, appPackageName)
         val applicationInfo = checkNotNull(pkgInfo.applicationInfo)
         applicationInfo.loadSafeLabel(
             pm, 0f,
@@ -90,10 +91,7 @@ private fun getServiceLabelAndIcon(
         // Test data has only package name not component name.
         // For test data usage only.
         try {
-            val pkgInfo = pm.getPackageInfo(
-                providerFlattenedComponentName,
-                PackageManager.PackageInfoFlags.of(0)
-            )
+            val pkgInfo = getPackageInfo(pm, providerFlattenedComponentName)
             val applicationInfo = checkNotNull(pkgInfo.applicationInfo)
             providerLabel =
                 applicationInfo.loadSafeLabel(
@@ -117,10 +115,7 @@ private fun getServiceLabelAndIcon(
             // Added for mdoc use case where the provider may not need to register a service and
             // instead only relies on the registration api.
             try {
-                val pkgInfo = pm.getPackageInfo(
-                    component.packageName,
-                    PackageManager.PackageInfoFlags.of(0)
-                )
+                val pkgInfo = getPackageInfo(pm, providerFlattenedComponentName)
                 val applicationInfo = checkNotNull(pkgInfo.applicationInfo)
                 providerLabel =
                     applicationInfo.loadSafeLabel(
@@ -142,6 +137,19 @@ private fun getServiceLabelAndIcon(
     } else {
         Pair(providerLabel, providerIcon)
     }
+}
+
+private fun getPackageInfo(
+    pm: PackageManager,
+    packageName: String
+): PackageInfo {
+    val flags = PackageManager.MATCH_INSTANT
+
+    return pm.getPackageInfo(
+       packageName,
+       PackageManager.PackageInfoFlags.of(
+               (flags).toLong())
+    )
 }
 
 /** Utility functions for converting CredentialManager data structures to or from UI formats. */
