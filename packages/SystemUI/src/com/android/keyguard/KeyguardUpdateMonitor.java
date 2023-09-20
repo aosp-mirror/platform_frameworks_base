@@ -35,6 +35,7 @@ import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.os.BatteryManager.CHARGING_POLICY_DEFAULT;
 import static android.os.PowerManager.WAKE_REASON_UNKNOWN;
+
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -4201,7 +4202,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
                 final boolean previousState = mAllowFingerprintOnCurrentOccludingActivity;
                 mAllowFingerprintOnCurrentOccludingActivity =
-                        standardTask.topActivity != null
+                        standardTask != null && standardTask.topActivity != null
                                 && !TextUtils.isEmpty(standardTask.topActivity.getPackageName())
                                 && mAllowFingerprintOnOccludingActivitiesFromPackage.contains(
                                         standardTask.topActivity.getPackageName())

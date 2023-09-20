@@ -100,6 +100,7 @@ public final class DisplayPowerController2Test {
     private static final int SECOND_FOLLOWER_DISPLAY_ID = FOLLOWER_DISPLAY_ID + 1;
     private static final String SECOND_FOLLOWER_UNIQUE_DISPLAY_ID = "unique_id_789";
     private static final float PROX_SENSOR_MAX_RANGE = 5;
+    private static final float BRIGHTNESS_RAMP_RATE_MINIMUM = 0.0f;
     private static final float BRIGHTNESS_RAMP_RATE_FAST_DECREASE = 0.3f;
     private static final float BRIGHTNESS_RAMP_RATE_FAST_INCREASE = 0.4f;
     private static final float BRIGHTNESS_RAMP_RATE_SLOW_DECREASE = 0.1f;
@@ -698,6 +699,80 @@ public final class DisplayPowerController2Test {
     }
 
     @Test
+    public void testDisplayBrightnessHdr_SkipAnimationOnHdrAppearance() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        final float sdrBrightness = 0.1f;
+        final float hdrBrightness = 0.3f;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness(
+                any(BrightnessEvent.class))).thenReturn(sdrBrightness);
+        when(mHolder.hdrClamper.getMaxBrightness()).thenReturn(1.0f);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.animator).animateTo(eq(sdrBrightness), eq(sdrBrightness),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+
+        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(sdrBrightness);
+        when(mHolder.displayPowerState.getSdrScreenBrightness()).thenReturn(sdrBrightness);
+
+        when(mHolder.hbmController.getHighBrightnessMode()).thenReturn(
+                BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR);
+        when(mHolder.hbmController.getHdrBrightnessValue()).thenReturn(hdrBrightness);
+        clearInvocations(mHolder.animator);
+
+        mHolder.dpc.updateBrightness();
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.animator).animateTo(eq(hdrBrightness), eq(sdrBrightness),
+                eq(BRIGHTNESS_RAMP_RATE_MINIMUM));
+    }
+
+    @Test
+    public void testDisplayBrightnessHdr_SkipAnimationOnHdrRemoval() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        final float sdrBrightness = 0.1f;
+        final float hdrBrightness = 0.3f;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.automaticBrightnessController.isInIdleMode()).thenReturn(true);
+        when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness(
+                any(BrightnessEvent.class))).thenReturn(sdrBrightness);
+        when(mHolder.hdrClamper.getMaxBrightness()).thenReturn(1.0f);
+
+        when(mHolder.hbmController.getHighBrightnessMode()).thenReturn(
+                BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR);
+        when(mHolder.hbmController.getHdrBrightnessValue()).thenReturn(hdrBrightness);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.animator).animateTo(eq(hdrBrightness), eq(sdrBrightness),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+
+        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(hdrBrightness);
+        when(mHolder.displayPowerState.getSdrScreenBrightness()).thenReturn(sdrBrightness);
+        when(mHolder.hbmController.getHighBrightnessMode()).thenReturn(
+                BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF);
+
+        clearInvocations(mHolder.animator);
+
+        mHolder.dpc.updateBrightness();
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.animator).animateTo(eq(sdrBrightness), eq(sdrBrightness),
+                eq(BRIGHTNESS_RAMP_RATE_MINIMUM));
+    }
+
+    @Test
     public void testDoesNotSetScreenStateForNonDefaultDisplayUntilBootCompleted() {
         // We should still set screen state for the default display
         DisplayPowerRequest dpr = new DisplayPowerRequest();
@@ -1185,6 +1260,8 @@ public final class DisplayPowerController2Test {
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(.2f);
+        when(mHolder.displayPowerState.getSdrScreenBrightness()).thenReturn(.1f);
         when(mHolder.hbmController.getHighBrightnessMode()).thenReturn(
                 BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR);
         when(mHolder.hbmController.getHdrBrightnessValue()).thenReturn(PowerManager.BRIGHTNESS_MAX);

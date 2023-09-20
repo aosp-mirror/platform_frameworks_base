@@ -182,7 +182,7 @@ object Flags {
 
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
-    @JvmField val FACE_AUTH_REFACTOR = unreleasedFlag("face_auth_refactor", teamfood = true)
+    @JvmField val FACE_AUTH_REFACTOR = releasedFlag("face_auth_refactor")
 
     /** Flag to control the revamp of keyguard biometrics progress animation */
     // TODO(b/244313043): Tracking bug
@@ -320,6 +320,11 @@ object Flags {
             R.bool.flag_stop_pulsing_face_scanning_animation,
             "stop_pulsing_face_scanning_animation")
 
+    /** Flag to use a separate view for the alternate bouncer. */
+    // TODO(b/300440924): Tracking bug
+    @JvmField
+    val ALTERNATE_BOUNCER_REFACTOR: UnreleasedFlag = unreleasedFlag("alternate_bouncer_view")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag("power_menu_lite")
@@ -405,7 +410,7 @@ object Flags {
 
     // TODO(b/290676905): Tracking Bug
     val NEW_SHADE_CARRIER_GROUP_MOBILE_ICONS =
-        unreleasedFlag("new_shade_carrier_group_mobile_icons", teamfood = true)
+        releasedFlag("new_shade_carrier_group_mobile_icons")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
@@ -768,8 +773,7 @@ object Flags {
 
     // TODO(b/285174336): Tracking Bug
     @JvmField
-    val USE_REPOS_FOR_BOUNCER_SHOWING =
-        unreleasedFlag("use_repos_for_bouncer_showing", teamfood = true)
+    val USE_REPOS_FOR_BOUNCER_SHOWING = releasedFlag("use_repos_for_bouncer_showing")
 
     // 3100 - Haptic interactions
 
@@ -806,4 +810,9 @@ object Flags {
     /** Enable showing a dialog when clicking on Quick Settings bluetooth tile. */
     @JvmField
     val BLUETOOTH_QS_TILE_DIALOG = unreleasedFlag("bluetooth_qs_tile_dialog")
+
+    // TODO(b/300995746): Tracking Bug
+    /** Enable communal hub features. */
+    @JvmField
+    val COMMUNAL_HUB = resourceBooleanFlag(R.bool.config_communalServiceEnabled, "communal_hub")
 }

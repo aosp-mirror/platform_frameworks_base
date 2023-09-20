@@ -1022,6 +1022,8 @@ public class ZenModeHelper {
     @VisibleForTesting
     protected void setZenModeSetting(int zen) {
         Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zen);
+        ZenLog.traceSetZenMode(Global.getInt(mContext.getContentResolver(), Global.ZEN_MODE, -1),
+                "updated setting");
         showZenUpgradeNotification(zen);
     }
 

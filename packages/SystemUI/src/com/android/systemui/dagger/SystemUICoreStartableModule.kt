@@ -49,6 +49,7 @@ import com.android.systemui.mediaprojection.taskswitcher.MediaProjectionTaskSwit
 import com.android.systemui.power.PowerUI
 import com.android.systemui.reardisplay.RearDisplayDialogController
 import com.android.systemui.recents.Recents
+import com.android.systemui.recents.ScreenPinningRequest
 import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.ImmersiveModeConfirmation
@@ -366,4 +367,9 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(KeyguardDismissBinder::class)
     abstract fun bindKeyguardDismissBinder(impl: KeyguardDismissBinder): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(ScreenPinningRequest::class)
+    abstract fun bindScreenPinningRequest(impl: ScreenPinningRequest): CoreStartable
 }

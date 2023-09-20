@@ -1922,8 +1922,25 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (isValidBrightnessValue(animateValue)
                     && (animateValue != currentBrightness
                     || sdrAnimateValue != currentSdrBrightness)) {
-                if (initialRampSkip || hasBrightnessBuckets
-                        || !isDisplayContentVisible || brightnessIsTemporary) {
+                boolean skipAnimation = initialRampSkip || hasBrightnessBuckets
+                        || !isDisplayContentVisible || brightnessIsTemporary;
+                if (!skipAnimation && BrightnessSynchronizer.floatEquals(
+                        sdrAnimateValue, currentSdrBrightness)) {
+                    // Going from HDR to no HDR; visually this should be a "no-op" anyway
+                    // as the remaining SDR content's brightness should be holding steady
+                    // due to the sdr brightness not shifting
+                    if (BrightnessSynchronizer.floatEquals(sdrAnimateValue, animateValue)) {
+                        skipAnimation = true;
+                    }
+
+                    // Going from no HDR to HDR; visually this is a significant scene change
+                    // and the animation just prevents advanced clients from doing their own
+                    // handling of enter/exit animations if they would like to do such a thing
+                    if (BrightnessSynchronizer.floatEquals(sdrAnimateValue, currentBrightness)) {
+                        skipAnimation = true;
+                    }
+                }
+                if (skipAnimation) {
                     animateScreenBrightness(animateValue, sdrAnimateValue,
                             SCREEN_ANIMATION_RATE_MINIMUM);
                 } else {

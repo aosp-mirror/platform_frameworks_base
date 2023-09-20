@@ -26,6 +26,7 @@ android_test {
         "androidx.test.runner",
         "androidx.test.uiautomator_uiautomator",
         "servicestests-utils",
+        "flag-junit",
         "frameworks-base-testutils",
         "hamcrest-library",
         "kotlin-test",

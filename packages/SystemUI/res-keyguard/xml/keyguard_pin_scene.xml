@@ -26,12 +26,10 @@
         motion:constraintSetStart="@id/single_constraints"
         motion:constraintSetEnd="@+id/split_constraints"
         motion:duration="0"
-        motion:autoTransition="none">
-    </Transition>
+        motion:autoTransition="none"/>
 
-    <ConstraintSet android:id="@+id/single_constraints">
-        <!-- No changes to default layout -->
-    </ConstraintSet>
+    <!-- No changes to default layout -->
+    <ConstraintSet android:id="@+id/single_constraints"/>
 
     <ConstraintSet android:id="@+id/split_constraints">
 

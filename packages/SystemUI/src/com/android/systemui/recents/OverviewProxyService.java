@@ -151,6 +151,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
+    private final ScreenPinningRequest mScreenPinningRequest;
     private final NotificationShadeWindowController mStatusBarWinController;
     private final Provider<SceneInteractor> mSceneInteractor;
 
@@ -185,9 +186,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void startScreenPinning(int taskId) {
             verifyCallerAndClearCallingIdentityPostMain("startScreenPinning", () ->
-                    mCentralSurfacesOptionalLazy.get().ifPresent(
-                            statusBar -> statusBar.showScreenPinningRequest(taskId,
-                                    false /* allowCancel */)));
+                    mScreenPinningRequest.showPrompt(taskId, false /* allowCancel */));
         }
 
         @Override
@@ -572,6 +571,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             Lazy<NavigationBarController> navBarControllerLazy,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<ShadeViewController> shadeViewControllerLazy,
+            ScreenPinningRequest screenPinningRequest,
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController,
             SysUiState sysUiState,
@@ -601,6 +601,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mShadeViewControllerLazy = shadeViewControllerLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
+        mScreenPinningRequest = screenPinningRequest;
         mStatusBarWinController = statusBarWinController;
         mSceneInteractor = sceneInteractor;
         mUserTracker = userTracker;

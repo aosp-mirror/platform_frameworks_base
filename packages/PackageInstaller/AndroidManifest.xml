@@ -70,15 +70,18 @@
             </intent-filter>
         </activity>
 
+        <!-- NOTE: the workaround to fix the screen flash problem. Remember to check the problem
+            is resolved for new implementation -->
         <activity android:name=".InstallStaging"
-                android:exported="false" />
+                  android:theme="@style/Theme.AlertDialogActivity.NoDim"
+                  android:exported="false" />
 
         <activity android:name=".DeleteStagedFileOnResult"
             android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
             android:exported="false" />
 
         <activity android:name=".PackageInstallerActivity"
-                android:exported="false" />
+                  android:exported="false" />
 
         <activity android:name=".InstallInstalling"
                 android:theme="@style/Theme.AlertDialogActivity.NoAnimation"

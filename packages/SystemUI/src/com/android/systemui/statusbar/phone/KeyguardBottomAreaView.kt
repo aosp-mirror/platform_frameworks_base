@@ -62,6 +62,7 @@ constructor(
     private var keyguardIndicationArea: View? = null
     private var binding: KeyguardBottomAreaViewBinder.Binding? = null
     private var lockIconViewController: LockIconViewController? = null
+    private var isLockscreenLandscapeEnabled: Boolean = false
 
     /** Initializes the view. */
     @Deprecated("Deprecated as part of b/278057014")
@@ -115,15 +116,26 @@ constructor(
         }
     }
 
+    fun setIsLockscreenLandscapeEnabled(isLockscreenLandscapeEnabled: Boolean) {
+        this.isLockscreenLandscapeEnabled = isLockscreenLandscapeEnabled
+    }
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         ambientIndicationArea = findViewById(R.id.ambient_indication_container)
+        keyguardIndicationArea = findViewById(R.id.keyguard_indication_area)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         binding?.onConfigurationChanged()
 
+        if (isLockscreenLandscapeEnabled) {
+            updateIndicationAreaBottomMargin()
+        }
+    }
+
+    private fun updateIndicationAreaBottomMargin() {
         keyguardIndicationArea?.let {
             val params = it.layoutParams as FrameLayout.LayoutParams
             params.bottomMargin =

@@ -49,7 +49,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
 
-        SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
+        SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp, rotation)
 
         tapl.goHome()
         wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()

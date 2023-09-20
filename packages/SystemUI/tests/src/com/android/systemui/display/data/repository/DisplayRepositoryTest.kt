@@ -21,6 +21,7 @@ import android.os.Looper
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Display
+import android.view.Display.TYPE_EXTERNAL
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.FlowValue
@@ -62,6 +63,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
     @Before
     fun setup() {
         setDisplays(emptyList())
+        setAllDisplaysIncludingDisabled()
         displayRepository =
             DisplayRepositoryImpl(
                 displayManager,
@@ -70,6 +72,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
                 UnconfinedTestDispatcher()
             )
         verify(displayManager, never()).registerDisplayListener(any(), any())
+        verify(displayManager, never()).getDisplays(any())
     }
 
     @Test
@@ -351,6 +354,22 @@ class DisplayRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun initialState_onePendingDisplayOnBoot_notNull() =
+        testScope.runTest {
+            // 1 is not enabled, but just connected. It should be seen as pending
+            setAllDisplaysIncludingDisabled(0, 1)
+            setDisplays(0) // 0 is enabled.
+            verify(displayManager, never()).getDisplays(any())
+
+            val pendingDisplay by collectLastValue(displayRepository.pendingDisplay)
+
+            verify(displayManager).getDisplays(any())
+
+            assertThat(pendingDisplay).isNotNull()
+            assertThat(pendingDisplay!!.id).isEqualTo(1)
+        }
+
+    @Test
     fun onPendingDisplay_internalDisplay_ignored() =
         testScope.runTest {
             val pendingDisplay by lastPendingDisplay()
@@ -365,7 +384,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val pendingDisplay by lastPendingDisplay()
 
-            sendOnDisplayConnected(1, Display.TYPE_EXTERNAL)
+            sendOnDisplayConnected(1, TYPE_EXTERNAL)
             sendOnDisplayConnected(2, Display.TYPE_INTERNAL)
 
             assertThat(pendingDisplay!!.id).isEqualTo(1)
@@ -416,7 +435,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
         whenever(displayManager.getDisplay(eq(id))).thenReturn(null)
     }
 
-    private fun sendOnDisplayConnected(id: Int, displayType: Int = Display.TYPE_EXTERNAL) {
+    private fun sendOnDisplayConnected(id: Int, displayType: Int = TYPE_EXTERNAL) {
         val mockDisplay = display(id = id, type = displayType)
         whenever(displayManager.getDisplay(eq(id))).thenReturn(mockDisplay)
         connectedDisplayListener.value.onDisplayConnected(id)
@@ -424,15 +443,25 @@ class DisplayRepositoryTest : SysuiTestCase() {
 
     private fun setDisplays(displays: List<Display>) {
         whenever(displayManager.displays).thenReturn(displays.toTypedArray())
+        displays.forEach { display ->
+            whenever(displayManager.getDisplay(eq(display.displayId))).thenReturn(display)
+        }
+    }
+
+    private fun setAllDisplaysIncludingDisabled(vararg ids: Int) {
+        val displays = ids.map { display(type = TYPE_EXTERNAL, id = it) }.toTypedArray()
+        whenever(
+                displayManager.getDisplays(
+                    eq(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
+                )
+            )
+            .thenReturn(displays)
+        displays.forEach { display ->
+            whenever(displayManager.getDisplay(eq(display.displayId))).thenReturn(display)
+        }
     }
 
     private fun setDisplays(vararg ids: Int) {
-        setDisplays(ids.map { display(it) })
-    }
-
-    private fun display(id: Int): Display {
-        return mock<Display>().also { mockDisplay ->
-            whenever(mockDisplay.displayId).thenReturn(id)
-        }
+        setDisplays(ids.map { display(type = TYPE_EXTERNAL, id = it) })
     }
 }

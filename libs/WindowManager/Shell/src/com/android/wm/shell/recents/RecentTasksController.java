@@ -428,6 +428,21 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 executor.execute(() -> callback.accept(tasks));
             });
         }
+
+        @Override
+        public void addAnimationStateListener(Executor executor, Consumer<Boolean> listener) {
+            mMainExecutor.execute(() -> {
+                if (mTransitionHandler == null) {
+                    return;
+                }
+                mTransitionHandler.addTransitionStateListener(new RecentsTransitionStateListener() {
+                    @Override
+                    public void onAnimationStateChanged(boolean running) {
+                        executor.execute(() -> listener.accept(running));
+                    }
+                });
+            });
+        }
     }
 
 

@@ -123,13 +123,13 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
 
     @Override
     public boolean setEnabled(BluetoothDevice device, boolean enabled) {
-        boolean isEnabled = false;
+        boolean isSuccessful = false;
         // if set preferred to false, then disconnect to the current device
         if (!enabled) {
-            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
+            isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
 
-        return isEnabled;
+        return isSuccessful;
     }
 
     @Override

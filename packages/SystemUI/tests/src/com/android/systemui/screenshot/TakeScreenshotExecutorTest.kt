@@ -180,7 +180,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
-    fun executeScreenshots_doesNotReportFinishedIfOneFinishesOtherFails() =
+    fun executeScreenshots_oneFinishesOtherFails_reportFailsOnlyAtTheEnd() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
             val onSaved = { _: Uri -> }
@@ -207,7 +207,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
-    fun executeScreenshots_doesNotReportFinishedAfterOneFails() =
+    fun executeScreenshots_allDisplaysFail_reportsFail() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
             val onSaved = { _: Uri -> }
@@ -224,11 +224,12 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             capturer0.value.reportError()
 
             verify(callback, never()).onFinish()
-            verify(callback).reportError()
+            verify(callback, never()).reportError()
 
-            capturer1.value.onFinish()
+            capturer1.value.reportError()
 
             verify(callback, never()).onFinish()
+            verify(callback).reportError()
             screenshotExecutor.onDestroy()
         }
 

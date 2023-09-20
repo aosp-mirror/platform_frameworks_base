@@ -195,11 +195,6 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
-    void setTrustedOverlay(SurfaceControl.Transaction t, SurfaceControl sc,
-            boolean trustedOverlay) {
-        mHandle.setTrustedOverlay(t, sc, trustedOverlay);
-    }
-
     void setOwnerPid(int pid) {
         if (mHandle.ownerPid == pid) {
             return;

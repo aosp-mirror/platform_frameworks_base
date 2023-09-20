@@ -4607,12 +4607,12 @@ public class CarrierConfigManager {
      *
      * <p>Example:
      *
-     * <pre><code>
+     * <pre>{@code
      * <string-array name="carrier_service_name_array" num="2">
      *   <item value="Police"/>
      *   <item value="Ambulance"/>
      * </string-array>
-     * </code></pre>
+     * }</pre>
      */
     public static final String KEY_CARRIER_SERVICE_NAME_STRING_ARRAY = "carrier_service_name_array";
 
@@ -4626,18 +4626,18 @@ public class CarrierConfigManager {
      *
      * <ul>
      *   <li>The number of items in both the arrays are equal
-     *   <li>The item added in this key follows a specific format. Either it should be all numbers,
-     *       or "+" followed by all numbers.
+     *   <li>The item should contain dialable characters only which includes 0-9, -, *, #, (, ),
+     *       SPACE.
      * </ul>
      *
      * <p>Example:
      *
-     * <pre><code>
+     * <pre>{@code
      * <string-array name="carrier_service_number_array" num="2">
-     *   <item value="123"/>
-     *   <item value="+343"/>
+     *   <item value="*123"/>
+     *   <item value="+ (111) 111-111"/>
      * </string-array>
-     * </code></pre>
+     * }</pre>
      */
     public static final String KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY =
         "carrier_service_number_array";
@@ -10229,7 +10229,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putInt(KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT, 0);
         sDefaults.putBoolean(KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL, false);
-        sDefaults.putBoolean(KEY_RATCHET_NR_ADVANCED_BANDWIDTH_IF_RRC_IDLE_BOOL, true);
+        sDefaults.putBoolean(KEY_RATCHET_NR_ADVANCED_BANDWIDTH_IF_RRC_IDLE_BOOL, false);
         sDefaults.putIntArray(KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
                 new int[]{CARRIER_NR_AVAILABILITY_NSA, CARRIER_NR_AVAILABILITY_SA});
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);

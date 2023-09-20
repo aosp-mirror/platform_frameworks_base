@@ -16,8 +16,6 @@
 
 package com.android.keyguard;
 
-import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
-
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -259,8 +257,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                         mFalsingCollector, mKeyguardViewController,
                         mDevicePostureController, mFeatureFlags);
             } else if (keyguardInputView instanceof KeyguardPINView) {
-                ((KeyguardPINView) keyguardInputView).setIsLockScreenLandscapeEnabled(
-                        mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE));
                 return new KeyguardPinViewController((KeyguardPINView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,

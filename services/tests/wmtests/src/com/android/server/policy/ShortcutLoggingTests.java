@@ -297,6 +297,7 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.overrideUserSetupComplete();
         mPhoneWindowManager.setupAssistForLaunch();
         mPhoneWindowManager.overrideTogglePanel();
+        mPhoneWindowManager.overrideInjectKeyEvent();
     }
 
     @Test

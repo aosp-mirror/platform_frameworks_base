@@ -59,6 +59,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
@@ -84,6 +85,7 @@ import javax.inject.Inject;
 public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callbacks {
     private final CentralSurfaces mCentralSurfaces;
     private final Context mContext;
+    private final ScreenPinningRequest mScreenPinningRequest;
     private final com.android.systemui.shade.ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
     private final ShadeViewController mShadeViewController;
@@ -126,6 +128,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             QuickSettingsController quickSettingsController,
             Context context,
             @Main Resources resources,
+            ScreenPinningRequest screenPinningRequest,
             ShadeController shadeController,
             CommandQueue commandQueue,
             ShadeViewController shadeViewController,
@@ -155,6 +158,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mCentralSurfaces = centralSurfaces;
         mQsController = quickSettingsController;
         mContext = context;
+        mScreenPinningRequest = screenPinningRequest;
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
         mShadeViewController = shadeViewController;
@@ -516,7 +520,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             return;
         }
         // Show screen pinning request, since this comes from an app, show 'no thanks', button.
-        mCentralSurfaces.showScreenPinningRequest(taskId, true);
+        mScreenPinningRequest.showPrompt(taskId, true);
     }
 
     @Override
