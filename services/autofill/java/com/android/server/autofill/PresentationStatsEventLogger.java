@@ -508,6 +508,23 @@ public final class PresentationStatsEventLogger {
         return PICK_REASON_UNKNOWN;
     }
 
+    /**
+     * Set field_classification_request_id as long as mEventInternal presents.
+     */
+    public void maybeSetFieldClassificationRequestId(int requestId) {
+        mEventInternal.ifPresent(event -> {
+            event.mFieldClassificationRequestId = requestId;
+        });
+    }
+
+    /**
+     * Set app_package_uid as long as mEventInternal presents.
+     */
+    public void maybeSetAppPackageUid(int uid) {
+        mEventInternal.ifPresent(event -> {
+            event.mAppPackageUid = uid;
+        });
+    }
 
     public void logAndEndEvent() {
         if (!mEventInternal.isPresent()) {
@@ -584,7 +601,9 @@ public final class PresentationStatsEventLogger {
                 event.mAvailablePccCount,
                 event.mAvailablePccOnlyCount,
                 event.mSelectedDatasetPickedReason,
-                event.mDetectionPreference);
+                event.mDetectionPreference,
+                event.mFieldClassificationRequestId,
+                event.mAppPackageUid);
         mEventInternal = Optional.empty();
     }
 
@@ -617,6 +636,8 @@ public final class PresentationStatsEventLogger {
         int mAvailablePccOnlyCount = -1;
         @DatasetPickedReason int mSelectedDatasetPickedReason = PICK_REASON_UNKNOWN;
         @DetectionPreference int mDetectionPreference = DETECTION_PREFER_UNKNOWN;
+        int mFieldClassificationRequestId = -1;
+        int mAppPackageUid = -1;
 
         PresentationStatsEventInternal() {}
     }

@@ -56,11 +56,74 @@ public final class FieldClassificationEventLogger {
     }
 
     /**
-     * Set latency as long as mEventInternal presents.
+     * Set latency_millis as long as mEventInternal presents.
      */
     public void maybeSetLatencyMillis(long timestamp) {
         mEventInternal.ifPresent(event -> {
             event.mLatencyClassificationRequestMillis = timestamp;
+        });
+    }
+
+    /**
+     * Set count_classifications as long as mEventInternal presents.
+     */
+    public void maybeSetCountClassifications(int countClassifications) {
+        mEventInternal.ifPresent(event -> {
+            event.mCountClassifications = countClassifications;
+        });
+    }
+
+    /**
+     * Set session_id as long as mEventInternal presents.
+     */
+    public void maybeSetSessionId(int sessionId) {
+        mEventInternal.ifPresent(event -> {
+            event.mSessionId = sessionId;
+        });
+    }
+
+    /**
+     * Set request_id as long as mEventInternal presents.
+     */
+    public void maybeSetRequestId(int requestId) {
+        mEventInternal.ifPresent(event -> {
+            event.mRequestId = requestId;
+        });
+    }
+
+    /**
+     * Set next_fill_request_id as long as mEventInternal presents.
+     */
+    public void maybeSetNextFillRequestId(int nextFillRequestId) {
+        mEventInternal.ifPresent(event -> {
+            event.mNextFillRequestId = nextFillRequestId;
+        });
+    }
+
+    /**
+     * Set app_package_uid as long as mEventInternal presents.
+     */
+    public void maybeSetAppPackageUid(int uid) {
+        mEventInternal.ifPresent(event -> {
+            event.mAppPackageUid = uid;
+        });
+    }
+
+    /**
+     * Set status as long as mEventInternal presents.
+     */
+    public void maybeSetRequestStatus(int status) {
+        mEventInternal.ifPresent(event -> {
+            event.mStatus = status;
+        });
+    }
+
+    /**
+     * Set is_session_gc as long as mEventInternal presents.
+     */
+    public void maybeSetSessionGc(boolean isSessionGc) {
+        mEventInternal.ifPresent(event -> {
+            event.mIsSessionGc = isSessionGc;
         });
     }
 
@@ -81,12 +144,26 @@ public final class FieldClassificationEventLogger {
         }
         FrameworkStatsLog.write(
                 AUTOFILL_FIELD_CLASSIFICATION_EVENT_REPORTED,
-                event.mLatencyClassificationRequestMillis);
+                event.mLatencyClassificationRequestMillis,
+                event.mCountClassifications,
+                event.mSessionId,
+                event.mRequestId,
+                event.mNextFillRequestId,
+                event.mAppPackageUid,
+                event.mStatus,
+                event.mIsSessionGc);
         mEventInternal = Optional.empty();
     }
 
     private static final class FieldClassificationEventInternal {
         long mLatencyClassificationRequestMillis = -1;
+        int mCountClassifications = -1;
+        int mSessionId = -1;
+        int mRequestId = -1;
+        int mNextFillRequestId = -1;
+        int mAppPackageUid = -1;
+        int mStatus;
+        boolean mIsSessionGc;
 
         FieldClassificationEventInternal() {
         }
