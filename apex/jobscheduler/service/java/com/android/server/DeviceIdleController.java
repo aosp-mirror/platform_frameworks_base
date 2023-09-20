@@ -5318,7 +5318,7 @@ public class DeviceIdleController extends SystemService
             if (mConstants.USE_MODE_MANAGER) {
                 pw.print("  mModeManagerRequestedQuickDoze=");
                 pw.println(mModeManagerRequestedQuickDoze);
-                pw.print("  mIsOffBody");
+                pw.print("  mIsOffBody=");
                 pw.println(mIsOffBody);
             }
         }
