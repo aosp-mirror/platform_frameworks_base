@@ -17,8 +17,16 @@
 package android.credentials;
 
 import android.annotation.Hide;
+import android.annotation.NonNull;
+import android.credentials.ui.GetCredentialProviderData;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.util.AnnotationValidations;
+import com.android.internal.util.Preconditions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A list of candidate credentials.
@@ -28,11 +36,34 @@ import android.os.Parcelable;
 @Hide
 public final class GetCandidateCredentialsResponse implements Parcelable {
     // TODO(b/299321990): Add members
+
+    @NonNull
+    private final List<GetCredentialProviderData> mCandidateProviderDataList;
+
+    /**
+     * @hide
+     */
+    @Hide
+    public GetCandidateCredentialsResponse(
+            List<GetCredentialProviderData> candidateProviderDataList
+    ) {
+        Preconditions.checkCollectionNotEmpty(
+                candidateProviderDataList,
+                /*valueName=*/ "candidateProviderDataList");
+        mCandidateProviderDataList = new ArrayList<>(candidateProviderDataList);
+    }
+
     protected GetCandidateCredentialsResponse(Parcel in) {
+        List<GetCredentialProviderData> candidateProviderDataList = new ArrayList<>();
+        in.readTypedList(candidateProviderDataList, GetCredentialProviderData.CREATOR);
+        mCandidateProviderDataList = candidateProviderDataList;
+
+        AnnotationValidations.validate(NonNull.class, null, mCandidateProviderDataList);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(mCandidateProviderDataList);
     }
 
     @Override
@@ -41,7 +72,7 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
     }
 
     public static final Creator<GetCandidateCredentialsResponse> CREATOR =
-            new Creator<GetCandidateCredentialsResponse>() {
+            new Creator<>() {
                 @Override
                 public GetCandidateCredentialsResponse createFromParcel(Parcel in) {
                     return new GetCandidateCredentialsResponse(in);

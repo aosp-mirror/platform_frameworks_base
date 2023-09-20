@@ -131,15 +131,35 @@ public final class CredentialManager {
     @Hide
     public void getCandidateCredentials(
             @NonNull GetCredentialRequest request,
+            @NonNull String callingPackage,
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
-            @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
+            @NonNull OutcomeReceiver<GetCandidateCredentialsResponse,
+                    GetCandidateCredentialsException> callback
+    ) {
         requireNonNull(request, "request must not be null");
+        requireNonNull(callingPackage, "callingPackage must not be null");
         requireNonNull(executor, "executor must not be null");
         requireNonNull(callback, "callback must not be null");
 
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            Log.w(TAG, "getCredential already canceled");
+            Log.w(TAG, "getCandidateCredentials already canceled");
+            return;
+        }
+
+        ICancellationSignal cancelRemote = null;
+        try {
+            cancelRemote =
+                    mService.getCandidateCredentials(
+                            request,
+                            new GetCandidateCredentialsTransport(executor, callback),
+                            mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        if (cancellationSignal != null && cancelRemote != null) {
+            cancellationSignal.setRemote(cancelRemote);
         }
     }
 
