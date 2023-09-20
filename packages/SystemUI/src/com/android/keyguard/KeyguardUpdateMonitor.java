@@ -75,6 +75,7 @@ import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_STARTED_WAK
 import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_STRONG_AUTH_CHANGED;
 import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_USER_SWITCHING;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
 
@@ -161,6 +162,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.FaceAuthenticationListener;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.shared.constants.TrustAgentUiEvent;
@@ -343,15 +345,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 return;
             }
 
-            if (mDisplayTracker.getDisplay(mDisplayTracker.getDefaultDisplayId()).getState()
+            if (mWakefulness.getWakefulness() == WAKEFULNESS_AWAKE
+                    && mDisplayTracker.getDisplay(mDisplayTracker.getDefaultDisplayId()).getState()
                     == Display.STATE_OFF) {
-                mAllowedDisplayStateForFaceAuth = false;
+                mAllowedDisplayStateWhileAwakeForFaceAuth = false;
                 updateFaceListeningState(
                         BIOMETRIC_ACTION_STOP,
                         FACE_AUTH_DISPLAY_OFF
                 );
             } else {
-                mAllowedDisplayStateForFaceAuth = true;
+                mAllowedDisplayStateWhileAwakeForFaceAuth = true;
             }
         }
     };
@@ -375,7 +378,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mOccludingAppRequestingFp;
     private boolean mOccludingAppRequestingFace;
     private boolean mSecureCameraLaunched;
-    private boolean mAllowedDisplayStateForFaceAuth = true;
+    private boolean mAllowedDisplayStateWhileAwakeForFaceAuth = true;
     @VisibleForTesting
     protected boolean mTelephonyCapable;
     private boolean mAllowFingerprintOnCurrentOccludingActivity;
@@ -423,6 +426,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private KeyguardFaceAuthInteractor mFaceAuthInteractor;
     private final TaskStackChangeListeners mTaskStackChangeListeners;
     private final IActivityTaskManager mActivityTaskManager;
+    private final WakefulnessLifecycle mWakefulness;
     private final DisplayTracker mDisplayTracker;
     private final LockPatternUtils mLockPatternUtils;
     @VisibleForTesting
@@ -2208,7 +2212,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         Trace.beginSection("KeyguardUpdateMonitor#handleStartedWakingUp");
         Assert.isMainThread();
 
-        mAllowedDisplayStateForFaceAuth = true;
+        mAllowedDisplayStateWhileAwakeForFaceAuth = true;
         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
         if (mFaceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(pmWakeReason)) {
             FACE_AUTH_UPDATED_STARTED_WAKING_UP.setExtraInfo(pmWakeReason);
@@ -2364,7 +2368,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             Optional<FingerprintInteractiveToAuthProvider> interactiveToAuthProvider,
             TaskStackChangeListeners taskStackChangeListeners,
             IActivityTaskManager activityTaskManagerService,
-            DisplayTracker displayTracker) {
+            DisplayTracker displayTracker,
+            WakefulnessLifecycle wakefulness) {
         mContext = context;
         mSubscriptionManager = subscriptionManager;
         mUserTracker = userTracker;
@@ -2411,6 +2416,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 .collect(Collectors.toSet());
         mTaskStackChangeListeners = taskStackChangeListeners;
         mActivityTaskManager = activityTaskManagerService;
+        mWakefulness = wakefulness;
         mDisplayTracker = displayTracker;
         mDisplayTracker.addDisplayChangeCallback(mDisplayCallback, mainExecutor);
 
@@ -3213,7 +3219,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && faceAndFpNotAuthenticated
                 && !mGoingToSleep
                 && isPostureAllowedForFaceAuth
-                && mAllowedDisplayStateForFaceAuth;
+                && mAllowedDisplayStateWhileAwakeForFaceAuth;
 
         // Aggregate relevant fields for debug logging.
         logListenerModelData(
@@ -3221,7 +3227,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     System.currentTimeMillis(),
                     user,
                     shouldListen,
-                    mAllowedDisplayStateForFaceAuth,
+                    mAllowedDisplayStateWhileAwakeForFaceAuth,
                     mAlternateBouncerShowing,
                     mAuthInterruptActive,
                     biometricEnabledForUser,
