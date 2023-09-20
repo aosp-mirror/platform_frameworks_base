@@ -595,7 +595,6 @@ java_defaults {
     name: "android_test_stubs_current_contributions",
     api_surface: "test",
     api_contributions: [
-        "test-api-stubs-docs-non-updatable.api.contribution",
         "framework-virtualization.stubs.source.test.api.contribution",
     ],
 }
@@ -661,6 +660,7 @@ java_api_library {
     api_contributions: [
         "api-stubs-docs-non-updatable.api.contribution",
         "system-api-stubs-docs-non-updatable.api.contribution",
+        "test-api-stubs-docs-non-updatable.api.contribution",
     ],
     visibility: ["//visibility:public"],
 }
