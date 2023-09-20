@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.data.repository
 
 import android.app.StatusBarManager
 import android.content.Context
-import android.hardware.face.FaceAuthenticateOptions
 import android.hardware.face.FaceManager
 import android.os.CancellationSignal
 import com.android.internal.logging.InstanceId
@@ -47,6 +46,7 @@ import com.android.systemui.keyguard.shared.model.FailedFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.SysUiFaceAuthenticateOptions
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
@@ -578,7 +578,12 @@ constructor(
                     authCancellationSignal,
                     faceAuthCallback,
                     null,
-                    FaceAuthenticateOptions.Builder().setUserId(currentUserId).build()
+                    SysUiFaceAuthenticateOptions(
+                            currentUserId,
+                            uiEvent,
+                            wakeReason = uiEvent.extraInfo
+                        )
+                        .toFaceAuthenticateOptions()
                 )
             }
         } else if (canRunDetection.value) {
@@ -587,7 +592,7 @@ constructor(
                     uiEvent,
                     "face auth gating check is false, falling back to detection."
                 )
-                detect()
+                detect(uiEvent)
             } else {
                 faceAuthLogger.ignoredFaceAuthTrigger(
                     uiEvent = uiEvent,
@@ -602,7 +607,7 @@ constructor(
         }
     }
 
-    suspend fun detect() {
+    suspend fun detect(uiEvent: FaceAuthUiEvent) {
         if (!isDetectionSupported) {
             faceAuthLogger.detectionNotSupported(faceManager, faceManager?.sensorPropertiesInternal)
             return
@@ -619,7 +624,8 @@ constructor(
             faceManager?.detectFace(
                 checkNotNull(detectCancellationSignal),
                 detectionCallback,
-                FaceAuthenticateOptions.Builder().setUserId(currentUserId).build()
+                SysUiFaceAuthenticateOptions(currentUserId, uiEvent, uiEvent.extraInfo)
+                    .toFaceAuthenticateOptions()
             )
         }
     }

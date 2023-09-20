@@ -23,6 +23,7 @@ import android.os.Handler
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.FaceAuthUiEvent
+import com.android.keyguard.FaceWakeUpTriggersConfig
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
@@ -42,17 +43,22 @@ import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.shared.model.WakeSleepReason
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -83,8 +89,10 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
     private lateinit var facePropertyRepository: FakeFacePropertyRepository
     private lateinit var fakeDeviceEntryFingerprintAuthRepository:
         FakeDeviceEntryFingerprintAuthRepository
+    private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
 
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig
 
     @Before
     fun setup() {
@@ -108,6 +116,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         fakeUserRepository = FakeUserRepository()
         fakeUserRepository.setUserInfos(listOf(primaryUser, secondaryUser))
         facePropertyRepository = FakeFacePropertyRepository()
+        fakeKeyguardRepository = FakeKeyguardRepository()
         underTest =
             SystemUIKeyguardFaceAuthInteractor(
                 mContext,
@@ -144,6 +153,8 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 fakeDeviceEntryFingerprintAuthRepository,
                 fakeUserRepository,
                 facePropertyRepository,
+                fakeKeyguardRepository,
+                faceWakeUpTriggersConfig,
             )
     }
 
@@ -151,6 +162,18 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
     fun faceAuthIsRequestedWhenLockscreenBecomesVisibleFromOffState() =
         testScope.runTest {
             underTest.start()
+
+            fakeKeyguardRepository.setWakefulnessModel(
+                WakefulnessModel(
+                    WakefulnessState.STARTING_TO_WAKE,
+                    WakeSleepReason.LID,
+                    WakeSleepReason.LID
+                )
+            )
+            whenever(
+                    faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LID)
+                )
+                .thenReturn(true)
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -188,6 +211,18 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest.start()
 
+            fakeKeyguardRepository.setWakefulnessModel(
+                WakefulnessModel(
+                    WakefulnessState.STARTING_TO_WAKE,
+                    WakeSleepReason.LID,
+                    WakeSleepReason.LID
+                )
+            )
+            whenever(
+                    faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LID)
+                )
+                .thenReturn(true)
+
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.AOD,
@@ -204,9 +239,50 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun faceAuthIsNotRequestedWhenLockscreenBecomesVisibleDueToIgnoredWakeReasons() =
+        testScope.runTest {
+            underTest.start()
+
+            fakeKeyguardRepository.setWakefulnessModel(
+                WakefulnessModel(
+                    WakefulnessState.STARTING_TO_WAKE,
+                    WakeSleepReason.LIFT,
+                    WakeSleepReason.POWER_BUTTON
+                )
+            )
+            whenever(
+                    faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LIFT)
+                )
+                .thenReturn(false)
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    KeyguardState.DOZING,
+                    KeyguardState.LOCKSCREEN,
+                    transitionState = TransitionState.STARTED
+                )
+            )
+
+            runCurrent()
+            assertThat(faceAuthRepository.runningAuthRequest.value).isNull()
+        }
+
+    @Test
     fun faceAuthIsRequestedWhenLockscreenBecomesVisibleFromDozingState() =
         testScope.runTest {
             underTest.start()
+
+            fakeKeyguardRepository.setWakefulnessModel(
+                WakefulnessModel(
+                    WakefulnessState.STARTING_TO_WAKE,
+                    WakeSleepReason.LID,
+                    WakeSleepReason.LID
+                )
+            )
+            whenever(
+                    faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LID)
+                )
+                .thenReturn(true)
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(

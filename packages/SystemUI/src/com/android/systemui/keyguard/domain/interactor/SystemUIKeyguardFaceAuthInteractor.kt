@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.content.Context
 import android.hardware.biometrics.BiometricFaceConstants
 import com.android.keyguard.FaceAuthUiEvent
+import com.android.keyguard.FaceWakeUpTriggersConfig
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
@@ -31,8 +32,10 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -40,6 +43,7 @@ import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -75,6 +79,8 @@ constructor(
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
     private val userRepository: UserRepository,
     private val facePropertyRepository: FacePropertyRepository,
+    private val keyguardRepository: KeyguardRepository,
+    private val faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig,
 ) : CoreStartable, KeyguardFaceAuthInteractor {
 
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
@@ -117,8 +123,21 @@ constructor(
                 keyguardTransitionInteractor.dozingToLockscreenTransition
             )
             .filter { it.transitionState == TransitionState.STARTED }
+            .sample(keyguardRepository.wakefulness)
+            .filter { wakefulnessModel ->
+                val validWakeupReason =
+                    faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(
+                        wakefulnessModel.lastWakeReason
+                    )
+                if (!validWakeupReason) {
+                    faceAuthenticationLogger.ignoredWakeupReason(wakefulnessModel.lastWakeReason)
+                }
+                validWakeupReason
+            }
             .onEach {
                 faceAuthenticationLogger.lockscreenBecameVisible(it)
+                FaceAuthUiEvent.FACE_AUTH_UPDATED_KEYGUARD_VISIBILITY_CHANGED.extraInfo =
+                    it.lastWakeReason.powerManagerWakeReason
                 runFaceAuth(
                     FaceAuthUiEvent.FACE_AUTH_UPDATED_KEYGUARD_VISIBILITY_CHANGED,
                     fallbackToDetect = true

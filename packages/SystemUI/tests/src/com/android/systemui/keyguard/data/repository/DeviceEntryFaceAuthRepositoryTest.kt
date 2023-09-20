@@ -25,6 +25,9 @@ import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILA
 import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT
 import android.hardware.biometrics.ComponentInfoInternal
 import android.hardware.face.FaceAuthenticateOptions
+import android.hardware.face.FaceAuthenticateOptions.AUTHENTICATE_REASON_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN
+import android.hardware.face.FaceAuthenticateOptions.AUTHENTICATE_REASON_NOTIFICATION_PANEL_CLICKED
+import android.hardware.face.FaceAuthenticateOptions.AUTHENTICATE_REASON_SWIPE_UP_ON_BOUNCER
 import android.hardware.face.FaceManager
 import android.hardware.face.FaceSensorProperties
 import android.hardware.face.FaceSensorPropertiesInternal
@@ -102,7 +105,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
@@ -133,6 +135,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
     @Captor
     private lateinit var detectionCallback: ArgumentCaptor<FaceManager.FaceDetectionCallback>
+    @Captor private lateinit var faceAuthenticateOptions: ArgumentCaptor<FaceAuthenticateOptions>
     @Captor private lateinit var cancellationSignal: ArgumentCaptor<CancellationSignal>
 
     private lateinit var bypassStateChangedListener:
@@ -412,7 +415,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             underTest = createDeviceEntryFaceAuthRepositoryImpl()
             initCollectors()
 
-            underTest.detect()
+            underTest.detect(FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED)
             faceDetectIsCalled()
 
             detectionCallback.value.onFaceDetected(1, 1, true)
@@ -421,6 +424,8 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             assertThat(status.sensorId).isEqualTo(1)
             assertThat(status.userId).isEqualTo(1)
             assertThat(status.isStrongBiometric).isEqualTo(true)
+            assertThat(faceAuthenticateOptions.value.authenticateReason)
+                .isEqualTo(AUTHENTICATE_REASON_NOTIFICATION_PANEL_CLICKED)
         }
 
     @Test
@@ -432,7 +437,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             initCollectors()
             clearInvocations(faceManager)
 
-            underTest.detect()
+            underTest.detect(FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED)
 
             verify(faceManager, never())
                 .detectFace(any(), any(), any(FaceAuthenticateOptions::class.java))
@@ -467,6 +472,8 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             faceAuthenticateIsCalled()
             uiEventIsLogged(FACE_AUTH_TRIGGERED_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN)
+            assertThat(faceAuthenticateOptions.value.authenticateReason)
+                .isEqualTo(AUTHENTICATE_REASON_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN)
         }
 
     @Test
@@ -484,6 +491,8 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             underTest.requestAuthenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
             faceAuthenticateIsCalled()
+            assertThat(faceAuthenticateOptions.value.authenticateReason)
+                .isEqualTo(AUTHENTICATE_REASON_SWIPE_UP_ON_BOUNCER)
         }
 
     @Test
@@ -1238,7 +1247,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             .detectFace(
                 cancellationSignal.capture(),
                 detectionCallback.capture(),
-                eq(FaceAuthenticateOptions.Builder().setUserId(primaryUserId).build())
+                faceAuthenticateOptions.capture(),
             )
     }
 
@@ -1251,7 +1260,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 cancellationSignal.capture(),
                 authenticationCallback.capture(),
                 isNull(),
-                eq(FaceAuthenticateOptions.Builder().setUserId(primaryUserId).build())
+                faceAuthenticateOptions.capture(),
             )
     }
 
