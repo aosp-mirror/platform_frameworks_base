@@ -112,7 +112,14 @@ public abstract class PackageManagerInternal {
      */
     public static final int INTEGRITY_VERIFICATION_REJECT = 0;
 
-    /** Observer called whenever the list of packages changes */
+    /**
+     * Observer called whenever the list of packages changes.
+     *
+     * @deprecated please use {@link com.android.internal.content.PackageMonitor} instead.
+     * PackageMonitor covers more installation and uninstallation corner cases than
+     * PackageListObserver.
+     */
+    @Deprecated
     public interface PackageListObserver {
         /** A package was added to the system. */
         default void onPackageAdded(@NonNull String packageName, int uid) {}
@@ -723,7 +730,12 @@ public abstract class PackageManagerInternal {
      * notified if a package is updated.
      * <p>The package list will not be updated automatically as packages are
      * installed / uninstalled. Any changes must be handled within the observer.
+     *
+     * @deprecated please use {@link com.android.internal.content.PackageMonitor} instead.
+     * PackageMonitor covers more installation and uninstallation corner cases than
+     * PackageListObserver.
      */
+    @Deprecated
     public abstract @NonNull PackageList getPackageList(@Nullable PackageListObserver observer);
 
     /**
@@ -733,7 +745,12 @@ public abstract class PackageManagerInternal {
      * <p>Does nothing if the observer isn't currently registered.
      * <p>Observers are notified asynchronously and it's possible for an observer to be
      * invoked after its been removed.
+     *
+     * @deprecated please use {@link com.android.internal.content.PackageMonitor} instead.
+     * PackageMonitor covers more installation and uninstallation corner cases than
+     * PackageListObserver.
      */
+    @Deprecated
     public abstract void removePackageListObserver(@NonNull PackageListObserver observer);
 
     /**
