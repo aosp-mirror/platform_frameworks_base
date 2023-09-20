@@ -196,7 +196,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final int oldDensityDpi = mWindowDecorConfig.densityDpi;
         mWindowDecorConfig = params.mWindowDecorConfig != null ? params.mWindowDecorConfig
                 : mTaskInfo.getConfiguration();
-        if (oldDensityDpi != mWindowDecorConfig.densityDpi
+        final int newDensityDpi = mWindowDecorConfig.densityDpi;
+        if (oldDensityDpi != newDensityDpi
                 || mDisplay == null
                 || mDisplay.getDisplayId() != mTaskInfo.displayId
                 || oldLayoutResId != mLayoutResId) {
