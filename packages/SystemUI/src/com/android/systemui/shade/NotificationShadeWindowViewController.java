@@ -267,6 +267,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
         }
         mView.setLayoutInsetsController(mNotificationInsetsController);
         mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
+            boolean mUseDragDownHelperForTouch = false;
+            boolean mLastInterceptWasDragDownHelper = false;
+
             @Override
             public Boolean handleDispatchTouchEvent(MotionEvent ev) {
                 if (mStatusBarViewController == null) { // Fix for b/192490822
@@ -360,10 +363,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 );
 
                 // In case we start outside of the view bounds (below the status bar), we need to
-                // dispatch
-                // the touch manually as the view system can't accommodate for touches outside of
-                // the
-                // regular view bounds.
+                // dispatch the touch manually as the view system can't accommodate for touches
+                // outside of the regular view bounds.
                 if (isDown && ev.getY() >= mView.getBottom()) {
                     mExpandingBelowNotch = true;
                     expandingBelowNotch = true;
@@ -405,6 +406,15 @@ public class NotificationShadeWindowViewController implements Dumpable {
 
             @Override
             public boolean shouldInterceptTouchEvent(MotionEvent ev) {
+                boolean intercepted = shouldInterceptTouchEventInternal(ev);
+                if (intercepted) {
+                    mUseDragDownHelperForTouch = mLastInterceptWasDragDownHelper;
+                }
+                return intercepted;
+            }
+
+            private boolean shouldInterceptTouchEventInternal(MotionEvent ev) {
+                mLastInterceptWasDragDownHelper = false;
                 if (mStatusBarStateController.isDozing() && !mDozeServiceHost.isPulsing()
                         && !mDockManager.isDocked()) {
                     if (ev.getAction() == MotionEvent.ACTION_DOWN) {
@@ -431,19 +441,36 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 }
 
                 if (mNotificationPanelViewController.isFullyExpanded()
-                        && mDragDownHelper.isDragDownEnabled()
                         && !mService.isBouncerShowing()
                         && !mStatusBarStateController.isDozing()) {
-                    boolean result = mDragDownHelper.onInterceptTouchEvent(ev);
-                    if (result) {
-                        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-                            mShadeLogger.d("NSWVC: drag down helper intercepted");
+                    if (mDragDownHelper.isDragDownEnabled()) {
+                        // This handles drag down over lockscreen
+                        boolean result = mDragDownHelper.onInterceptTouchEvent(ev);
+                        if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+                            if (result) {
+                                mLastInterceptWasDragDownHelper = true;
+                                if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                                    mShadeLogger.d("NSWVC: drag down helper intercepted");
+                                }
+                            } else if (didNotificationPanelInterceptEvent(ev)) {
+                                return true;
+                            }
+                        } else {
+                            if (result) {
+                                if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                                    mShadeLogger.d("NSWVC: drag down helper intercepted");
+                                }
+                            }
+                        }
+                        return result;
+                    } else {
+                        // This else handles interactions on the full shade while unlocked
+                        if (didNotificationPanelInterceptEvent(ev)) {
+                            return true;
                         }
                     }
-                    return result;
-                } else {
-                    return false;
                 }
+                return false;
             }
 
             @Override
@@ -451,7 +478,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 MotionEvent cancellation = MotionEvent.obtain(ev);
                 cancellation.setAction(MotionEvent.ACTION_CANCEL);
                 mStackScrollLayout.onInterceptTouchEvent(cancellation);
-                mNotificationPanelViewController.handleExternalInterceptTouch(cancellation);
+                if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+                    mNotificationPanelViewController.handleExternalInterceptTouch(cancellation);
+                }
                 cancellation.recycle();
             }
 
@@ -461,18 +490,27 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 if (mStatusBarStateController.isDozing()) {
                     handled = !mDozeServiceHost.isPulsing();
                 }
-
                 if (mStatusBarKeyguardViewManager.onTouch(ev)) {
                     return true;
                 }
-
-                if (mDragDownHelper.isDragDownEnabled()
-                        || mDragDownHelper.isDraggingDown()) {
-                    // we still want to finish our drag down gesture when locking the screen
-                    return mDragDownHelper.onTouchEvent(ev) || handled;
+                if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+                    if (mLastInterceptWasDragDownHelper && (mDragDownHelper.isDraggingDown())) {
+                        // we still want to finish our drag down gesture when locking the screen
+                        handled |= mDragDownHelper.onTouchEvent(ev) || handled;
+                    }
+                    if (!handled && mNotificationPanelViewController.handleExternalTouch(ev)) {
+                        return true;
+                    }
                 } else {
-                    return handled;
+                    if (mDragDownHelper.isDragDownEnabled()
+                            || mDragDownHelper.isDraggingDown()) {
+                        // we still want to finish our drag down gesture when locking the screen
+                        return mDragDownHelper.onTouchEvent(ev) || handled;
+                    } else {
+                        return handled;
+                    }
                 }
+                return handled;
             }
 
             @Override
@@ -518,6 +556,20 @@ public class NotificationShadeWindowViewController implements Dumpable {
         ShadeExpansionChangeEvent currentState =
                 mShadeExpansionStateManager.addExpansionListener(mDepthController);
         mDepthController.onPanelExpansionChanged(currentState);
+    }
+
+    private boolean didNotificationPanelInterceptEvent(MotionEvent ev) {
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+            // Since NotificationStackScrollLayout is now a sibling of notification_panel, we need
+            // to also ask NotificationPanelViewController directly, in order to process swipe up
+            // events originating from notifications
+            if (mNotificationPanelViewController.handleExternalInterceptTouch(ev)) {
+                mShadeLogger.d("NSWVC: NPVC intercepted");
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public NotificationShadeWindowView getView() {

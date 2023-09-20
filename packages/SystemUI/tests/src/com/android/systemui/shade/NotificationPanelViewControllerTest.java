@@ -59,6 +59,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.shared.model.WakeSleepReason;
 import com.android.systemui.keyguard.shared.model.WakefulnessModel;
 import com.android.systemui.keyguard.shared.model.WakefulnessState;
@@ -1064,7 +1065,18 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
 
         verify(mUpdateMonitor, never()).requestFaceAuth(anyString());
+    }
 
+    @Test
+    public void nsslFlagEnabled_allowOnlyExternalTouches() {
+        when(mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)).thenReturn(true);
+
+        // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
+        mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
+        verify(mQsController, never()).disallowTouches();
+
+        mNotificationPanelViewController.handleExternalInterceptTouch(mDownMotionEvent);
+        verify(mQsController).disallowTouches();
     }
 
     @Test

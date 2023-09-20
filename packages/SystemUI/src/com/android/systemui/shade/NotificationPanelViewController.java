@@ -586,6 +586,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private boolean mGestureWaitForTouchSlop;
     private boolean mIgnoreXTouchSlop;
     private boolean mExpandLatencyTracking;
+    private boolean mUseExternalTouch = false;
+
     /**
      * Whether we're waking up and will play the delayed doze animation in
      * {@link NotificationWakeUpCoordinator}. If so, we'll want to keep the clock centered until the
@@ -4114,12 +4116,22 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     /** Sends an external (e.g. Status Bar) intercept touch event to the Shade touch handler. */
     boolean handleExternalInterceptTouch(MotionEvent event) {
-        return mTouchHandler.onInterceptTouchEvent(event);
+        try {
+            mUseExternalTouch = true;
+            return mTouchHandler.onInterceptTouchEvent(event);
+        } finally {
+            mUseExternalTouch = false;
+        }
     }
 
     @Override
     public boolean handleExternalTouch(MotionEvent event) {
-        return mTouchHandler.onTouchEvent(event);
+        try {
+            mUseExternalTouch = true;
+            return mTouchHandler.onTouchEvent(event);
+        } finally {
+            mUseExternalTouch = false;
+        }
     }
 
     @Override
@@ -4706,9 +4718,20 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     public final class TouchHandler implements View.OnTouchListener, Gefingerpoken {
         private long mLastTouchDownTime = -1L;
 
-        /** @see ViewGroup#onInterceptTouchEvent(MotionEvent) */
+        /**
+         * With the shade and lockscreen being separated in the view hierarchy, touch handling now
+         * originates with the parent window through {@link #handleExternalTouch}. This allows for
+         * parity with the legacy hierarchy while not undertaking a massive refactoring of touch
+         * handling.
+         *
+         * @see NotificationShadeWindowViewController#didNotificationPanelInterceptEvent
+         */
         @Override
         public boolean onInterceptTouchEvent(MotionEvent event) {
+            if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL) && !mUseExternalTouch) {
+                return false;
+            }
+
             mShadeLog.logMotionEvent(event, "NPVC onInterceptTouchEvent");
             if (mQsController.disallowTouches()) {
                 mShadeLog.logMotionEvent(event,
@@ -4861,8 +4884,20 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             return onTouchEvent(event);
         }
 
+        /**
+         * With the shade and lockscreen being separated in the view hierarchy, touch handling now
+         * originates with the parent window through {@link #handleExternalTouch}. This allows for
+         * parity with the legacy hierarchy while not undertaking a massive refactoring of touch
+         * handling.
+         *
+         * @see NotificationShadeWindowViewController#didNotificationPanelInterceptEvent
+         */
         @Override
         public boolean onTouchEvent(MotionEvent event) {
+            if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL) && !mUseExternalTouch) {
+                return false;
+            }
+
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (event.getDownTime() == mLastTouchDownTime) {
                     // An issue can occur when swiping down after unlock, where multiple down
