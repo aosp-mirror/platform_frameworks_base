@@ -1254,7 +1254,6 @@
     <!-- Summary to show how many devices are connected in wifi hotspot [CHAR LIMIT=NONE] -->
     <string name="wifi_tether_connected_summary">
         {count, plural,
-            =0    {0 device connected}
             =1    {1 device connected}
             other {# devices connected}
         }
