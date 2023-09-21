@@ -36,7 +36,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
-import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -189,17 +188,6 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 mVibratorOptional, resources);
         mSystemBarAttributesListener = systemBarAttributesListener;
         mActivityStarter = activityStarter;
-    }
-
-    @Override
-    public void abortTransient(int displayId, @InsetsType int types) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        if ((types & WindowInsets.Type.statusBars()) == 0) {
-            return;
-        }
-        mCentralSurfaces.clearTransient();
     }
 
     @Override
@@ -484,17 +472,6 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 packageName,
                 letterboxDetails
         );
-    }
-
-    @Override
-    public void showTransient(int displayId, @InsetsType int types, boolean isGestureOnSystemBar) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        if ((types & WindowInsets.Type.statusBars()) == 0) {
-            return;
-        }
-        mCentralSurfaces.showTransientUnchecked();
     }
 
     @Override

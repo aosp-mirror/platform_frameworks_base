@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.dagger;
 
-import android.app.IActivityManager;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
@@ -38,7 +37,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.DisplayTracker;
@@ -57,12 +55,10 @@ import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
-import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -73,22 +69,14 @@ import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconList;
 import com.android.systemui.statusbar.phone.StatusBarNotificationPresenterModule;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
-import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
-import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
-import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
-import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
-import com.android.systemui.util.time.SystemClock;
 
 import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
-
-import java.util.Optional;
-import java.util.concurrent.Executor;
 
 /**
  * This module provides instances needed to construct {@link CentralSurfacesImpl}. These are moved to
@@ -227,51 +215,6 @@ public interface CentralSurfacesDependenciesModule {
         return new StatusBarIconList(
                 context.getResources().getStringArray(
                         com.android.internal.R.array.config_statusBarIcons));
-    }
-
-    /**
-     */
-    @Provides
-    @SysUISingleton
-    static OngoingCallController provideOngoingCallController(
-            Context context,
-            CommonNotifCollection notifCollection,
-            SystemClock systemClock,
-            ActivityStarter activityStarter,
-            @Main Executor mainExecutor,
-            IActivityManager iActivityManager,
-            OngoingCallLogger logger,
-            DumpManager dumpManager,
-            StatusBarWindowController statusBarWindowController,
-            SwipeStatusBarAwayGestureHandler swipeStatusBarAwayGestureHandler,
-            StatusBarStateController statusBarStateController,
-            OngoingCallFlags ongoingCallFlags) {
-
-        boolean ongoingCallInImmersiveEnabled = ongoingCallFlags.isInImmersiveEnabled();
-        Optional<StatusBarWindowController> windowController =
-                ongoingCallInImmersiveEnabled
-                        ? Optional.of(statusBarWindowController)
-                        : Optional.empty();
-        Optional<SwipeStatusBarAwayGestureHandler> gestureHandler =
-                ongoingCallInImmersiveEnabled
-                        ? Optional.of(swipeStatusBarAwayGestureHandler)
-                        : Optional.empty();
-        OngoingCallController ongoingCallController =
-                new OngoingCallController(
-                        context,
-                        notifCollection,
-                        ongoingCallFlags,
-                        systemClock,
-                        activityStarter,
-                        mainExecutor,
-                        iActivityManager,
-                        logger,
-                        dumpManager,
-                        windowController,
-                        gestureHandler,
-                        statusBarStateController);
-        ongoingCallController.init();
-        return ongoingCallController;
     }
 
     /**

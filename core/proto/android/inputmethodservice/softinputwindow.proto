@@ -27,6 +27,6 @@ message SoftInputWindowProto {
     reserved 2;  // window_type
     reserved 3;  // gravity
     reserved 4;  // takes_focus
-    optional .android.graphics.RectProto bounds = 5;
+    reserved 5;  // bounds
     optional int32 window_state = 6;
 }

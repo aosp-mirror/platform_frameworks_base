@@ -811,6 +811,28 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
                 /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_PORTRAIT);
     }
 
+    @Test
+    public void testOverrideOrientationIfNeeded_userAspectRatioApplied_unspecifiedOverridden() {
+        spyOn(mController);
+        doReturn(true).when(mController).shouldApplyUserMinAspectRatioOverride();
+
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_PORTRAIT);
+
+        // unchanged if orientation is specified
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_LANDSCAPE), SCREEN_ORIENTATION_LANDSCAPE);
+    }
+
+    @Test
+    public void testOverrideOrientationIfNeeded_userAspectRatioNotApplied_returnsUnchanged() {
+        spyOn(mController);
+        doReturn(false).when(mController).shouldApplyUserMinAspectRatioOverride();
+
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_UNSPECIFIED);
+    }
+
     // shouldApplyUser...Override
     @Test
     public void testShouldApplyUserFullscreenOverride_trueProperty_returnsFalse() throws Exception {

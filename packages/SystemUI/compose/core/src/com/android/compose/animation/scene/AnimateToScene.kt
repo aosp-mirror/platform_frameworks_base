@@ -107,6 +107,9 @@ private fun CoroutineScope.animate(
     reversed: Boolean = false,
 ) {
     val fromScene = layoutImpl.state.transitionState.currentScene
+    val isUserInput =
+        (layoutImpl.state.transitionState as? TransitionState.Transition)?.isUserInputDriven
+            ?: false
 
     val animationSpec = layoutImpl.transitions.transitionSpec(fromScene, target).spec
     val visibilityThreshold =
@@ -116,9 +119,9 @@ private fun CoroutineScope.animate(
     val targetProgress = if (reversed) 0f else 1f
     val transition =
         if (reversed) {
-            OneOffTransition(target, fromScene, currentScene = target, animatable)
+            OneOffTransition(target, fromScene, currentScene = target, isUserInput, animatable)
         } else {
-            OneOffTransition(fromScene, target, currentScene = target, animatable)
+            OneOffTransition(fromScene, target, currentScene = target, isUserInput, animatable)
         }
 
     // Change the current layout state to use this new transition.
@@ -139,6 +142,7 @@ private class OneOffTransition(
     override val fromScene: SceneKey,
     override val toScene: SceneKey,
     override val currentScene: SceneKey,
+    override val isUserInputDriven: Boolean,
     private val animatable: Animatable<Float, AnimationVector1D>,
 ) : TransitionState.Transition {
     override val progress: Float

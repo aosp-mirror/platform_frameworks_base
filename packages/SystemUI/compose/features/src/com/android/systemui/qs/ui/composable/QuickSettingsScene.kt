@@ -58,13 +58,14 @@ constructor(
 ) : ComposableScene {
     override val key = SceneKey.QuickSettings
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
+    private val _destinationScenes =
         MutableStateFlow<Map<UserAction, SceneModel>>(
                 mapOf(
                     UserAction.Swipe(Direction.UP) to SceneModel(SceneKey.Shade),
                 )
             )
             .asStateFlow()
+    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> = _destinationScenes
 
     @Composable
     override fun SceneScope.Content(

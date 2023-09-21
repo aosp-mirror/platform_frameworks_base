@@ -1843,8 +1843,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             RemoteCallback navigationObserver, BackAnimationAdapter adapter) {
         mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
                 "startBackNavigation()");
-
-        return mBackNavigationController.startBackNavigation(navigationObserver, adapter);
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return mBackNavigationController.startBackNavigation(navigationObserver, adapter);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     /**

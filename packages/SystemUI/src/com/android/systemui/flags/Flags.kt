@@ -412,16 +412,6 @@ object Flags {
     val NEW_SHADE_CARRIER_GROUP_MOBILE_ICONS =
         releasedFlag("new_shade_carrier_group_mobile_icons")
 
-    // 700 - dialer/calls
-    // TODO(b/254512734): Tracking Bug
-    val ONGOING_CALL_STATUS_BAR_CHIP = releasedFlag("ongoing_call_status_bar_chip")
-
-    // TODO(b/254512681): Tracking Bug
-    val ONGOING_CALL_IN_IMMERSIVE = releasedFlag("ongoing_call_in_immersive")
-
-    // TODO(b/254512753): Tracking Bug
-    val ONGOING_CALL_IN_IMMERSIVE_CHIP_TAP = releasedFlag("ongoing_call_in_immersive_chip_tap")
-
     // 800 - general visual/theme
     @JvmField val MONET = resourceBooleanFlag(R.bool.flag_monet, "monet")
 

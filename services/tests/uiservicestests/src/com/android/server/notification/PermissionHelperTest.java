@@ -248,8 +248,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
         verify(mPermManager).grantRuntimePermission(
                 "pkg", Manifest.permission.POST_NOTIFICATIONS, Context.DEVICE_ID_DEFAULT, 10);
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                USER_FLAG_MASK | FLAG_PERMISSION_GRANTED_BY_DEFAULT,
-                FLAG_PERMISSION_USER_SET, true, Context.DEVICE_ID_DEFAULT, 10);
+                USER_FLAG_MASK, FLAG_PERMISSION_USER_SET, true, Context.DEVICE_ID_DEFAULT, 10);
     }
 
     @Test
@@ -267,8 +266,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
         verify(mPermManager).grantRuntimePermission(
                 "pkg", Manifest.permission.POST_NOTIFICATIONS, Context.DEVICE_ID_DEFAULT, 10);
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                USER_FLAG_MASK | FLAG_PERMISSION_GRANTED_BY_DEFAULT,
-                FLAG_PERMISSION_USER_SET, true, Context.DEVICE_ID_DEFAULT, 10);
+                USER_FLAG_MASK, FLAG_PERMISSION_USER_SET, true, Context.DEVICE_ID_DEFAULT, 10);
     }
 
     @Test
@@ -282,8 +280,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
                 eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS),
                 eq(Context.DEVICE_ID_DEFAULT), eq(10), anyString());
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                USER_FLAG_MASK | FLAG_PERMISSION_GRANTED_BY_DEFAULT,
-                FLAG_PERMISSION_USER_SET, true, Context.DEVICE_ID_DEFAULT, 10);
+                USER_FLAG_MASK, FLAG_PERMISSION_USER_SET, true, Context.DEVICE_ID_DEFAULT, 10);
     }
 
     @Test
@@ -310,8 +307,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
                 eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS),
                 eq(Context.DEVICE_ID_DEFAULT), eq(10), anyString());
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                USER_FLAG_MASK | FLAG_PERMISSION_GRANTED_BY_DEFAULT, 0,
-                true, Context.DEVICE_ID_DEFAULT, 10);
+                USER_FLAG_MASK, 0, true, Context.DEVICE_ID_DEFAULT, 10);
     }
 
     @Test

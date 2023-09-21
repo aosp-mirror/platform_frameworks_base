@@ -7319,6 +7319,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         return false;
     }
+
+    /**
+     * @return true if a solid color splash screen must be used
+     *         false when an icon splash screen can be used, but the final decision for whether to
+     *               use an icon or solid color splash screen will be made by WmShell.
+     */
     private boolean shouldUseSolidColorSplashScreen(ActivityRecord sourceRecord,
             boolean startActivity, ActivityOptions options, int resolvedTheme) {
         if (sourceRecord == null && !startActivity) {
@@ -7332,39 +7338,36 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // setSplashScreenStyle decide in priority of windowSplashScreenBehavior.
-        if (options != null) {
-            final int optionsStyle = options.getSplashScreenStyle();
-            if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR) {
-                return true;
-            } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON
+        final int optionsStyle = options != null ? options.getSplashScreenStyle() :
+                SplashScreen.SPLASH_SCREEN_STYLE_UNDEFINED;
+        if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR) {
+            return true;
+        } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON
                     || isIconStylePreferred(resolvedTheme)) {
-                return false;
-            }
-            // Choose the default behavior for Launcher and SystemUI when the SplashScreen style is
-            // not specified in the ActivityOptions.
-            if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME
-                    || launchedFromUid == Process.SHELL_UID) {
-                return false;
-            } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
-                return true;
-            }
-        } else if (isIconStylePreferred(resolvedTheme)) {
             return false;
         }
-        if (sourceRecord == null) {
-            sourceRecord = searchCandidateLaunchingActivity();
-        }
 
-        if (sourceRecord != null && !sourceRecord.isActivityTypeHome()) {
-            return sourceRecord.mSplashScreenStyleSolidColor;
-        }
+        // Choose the default behavior when neither the ActivityRecord nor the activity theme have
+        // specified a splash screen style.
 
-        // If this activity was launched from Launcher or System for first start, never use a
-        // solid color splash screen.
-        // Need to check sourceRecord before in case this activity is launched from service.
-        return !startActivity || !(mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEM
-                || mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME
-                || launchedFromUid == Process.SHELL_UID);
+        if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME || launchedFromUid == Process.SHELL_UID) {
+            return false;
+        } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
+            return true;
+        } else {
+            // Need to check sourceRecord in case this activity is launched from a service.
+            if (sourceRecord == null) {
+                sourceRecord = searchCandidateLaunchingActivity();
+            }
+
+            if (sourceRecord != null) {
+                return sourceRecord.mSplashScreenStyleSolidColor;
+            }
+
+            // Use an icon if the activity was launched from System for the first start.
+            // Otherwise, must use solid color splash screen.
+            return mLaunchSourceType != LAUNCH_SOURCE_TYPE_SYSTEM || !startActivity;
+        }
     }
 
     private int getSplashscreenTheme(ActivityOptions options) {

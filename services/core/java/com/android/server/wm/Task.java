@@ -1262,6 +1262,37 @@ class Task extends TaskFragment {
         return null;
     }
 
+    boolean pauseActivityIfNeeded(@Nullable ActivityRecord resuming, @NonNull String reason) {
+        if (!isLeafTask()) {
+            return false;
+        }
+
+        final int[] someActivityPaused = {0};
+        // Check if the direct child resumed activity in the leaf task needed to be paused if
+        // the leaf task is not a leaf task fragment.
+        if (!isLeafTaskFragment()) {
+            final ActivityRecord top = topRunningActivity();
+            final ActivityRecord resumedActivity = getResumedActivity();
+            if (resumedActivity != null && top.getTaskFragment() != this) {
+                // Pausing the resumed activity because it is occluded by other task fragment.
+                if (startPausing(false /* uiSleeping*/, resuming, reason)) {
+                    someActivityPaused[0]++;
+                }
+            }
+        }
+
+        forAllLeafTaskFragments((taskFrag) -> {
+            final ActivityRecord resumedActivity = taskFrag.getResumedActivity();
+            if (resumedActivity != null && !taskFrag.canBeResumed(resuming)) {
+                if (taskFrag.startPausing(false /* uiSleeping*/, resuming, reason)) {
+                    someActivityPaused[0]++;
+                }
+            }
+        }, true /* traverseTopToBottom */);
+
+        return someActivityPaused[0] > 0;
+    }
+
     void updateTaskMovement(boolean toTop, boolean toBottom, int position) {
         EventLogTags.writeWmTaskMoved(mTaskId, getRootTaskId(), getDisplayId(), toTop ? 1 : 0,
                 position);

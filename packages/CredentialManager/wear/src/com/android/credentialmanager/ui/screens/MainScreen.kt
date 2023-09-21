@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.activity.ComponentActivity
-import androidx.wear.compose.material.MaterialTheme
+package com.android.credentialmanager.ui.screens
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.wear.compose.material.Text
 
-class CredentialSelectorActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContent {
-            MaterialTheme {
-                Text("Credential Manager entry point")
-            }
-        }
+@Composable
+fun MainScreen(modifier: Modifier = Modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Text("This is a placeholder for the main screen.")
     }
 }

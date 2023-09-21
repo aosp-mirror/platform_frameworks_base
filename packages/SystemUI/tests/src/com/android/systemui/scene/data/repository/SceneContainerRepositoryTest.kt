@@ -119,6 +119,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
                     fromScene = SceneKey.Lockscreen,
                     toScene = SceneKey.Shade,
                     progress = progress,
+                    isUserInputDriven = false,
                 )
             assertThat(reflectedTransitionState).isEqualTo(transitionState.value)
 

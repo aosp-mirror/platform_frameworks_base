@@ -16,14 +16,12 @@
 
 package android.inputmethodservice;
 
-import static android.inputmethodservice.SoftInputWindowProto.BOUNDS;
 import static android.inputmethodservice.SoftInputWindowProto.WINDOW_STATE;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.app.Dialog;
-import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
@@ -45,7 +43,6 @@ final class SoftInputWindow extends Dialog {
     private static final String TAG = "SoftInputWindow";
 
     private final KeyEvent.DispatcherState mDispatcherState;
-    private final Rect mBounds = new Rect();
     private final InputMethodService mService;
 
     @Retention(SOURCE)
@@ -147,22 +144,6 @@ final class SoftInputWindow extends Dialog {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         mDispatcherState.reset();
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        getWindow().getDecorView().getHitRect(mBounds);
-
-        if (ev.isWithinBoundsNoHistory(mBounds.left, mBounds.top,
-                mBounds.right - 1, mBounds.bottom - 1)) {
-            return super.dispatchTouchEvent(ev);
-        } else {
-            MotionEvent temp = ev.clampNoHistory(mBounds.left, mBounds.top,
-                    mBounds.right - 1, mBounds.bottom - 1);
-            boolean handled = super.dispatchTouchEvent(temp);
-            temp.recycle();
-            return handled;
-        }
     }
 
     @Override
@@ -273,7 +254,6 @@ final class SoftInputWindow extends Dialog {
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        mBounds.dumpDebug(proto, BOUNDS);
         proto.write(WINDOW_STATE, mWindowState);
         proto.end(token);
     }

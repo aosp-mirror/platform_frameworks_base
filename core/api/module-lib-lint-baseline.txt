@@ -35,26 +35,8 @@ SamShouldBeLast: android.media.session.MediaSessionManager#setOnMediaKeyListener
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.session.MediaSessionManager.setOnMediaKeyListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.session.MediaSessionManager#setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.session.MediaSessionManager.setOnVolumeKeyLongPressListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.Binder#attachInterface(android.os.IInterface, String):
-    SAM-compatible parameters (such as parameter 1, "owner", in android.os.Binder.attachInterface) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.Binder#linkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.Binder.linkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.Binder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.Binder.unlinkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.IBinder#linkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.IBinder.linkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.IBinder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.IBinder.unlinkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 
 
-UnflaggedApi: android.Manifest.permission#BLUETOOTH_STACK:
-    New API must be flagged with @FlaggedApi: field android.Manifest.permission.BLUETOOTH_STACK
-UnflaggedApi: android.Manifest.permission#CONTROL_AUTOMOTIVE_GNSS:
-    New API must be flagged with @FlaggedApi: field android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS
-UnflaggedApi: android.Manifest.permission#GET_INTENT_SENDER_INTENT:
-    New API must be flagged with @FlaggedApi: field android.Manifest.permission.GET_INTENT_SENDER_INTENT
-UnflaggedApi: android.Manifest.permission#MAKE_UID_VISIBLE:
-    New API must be flagged with @FlaggedApi: field android.Manifest.permission.MAKE_UID_VISIBLE
 UnflaggedApi: android.Manifest.permission#MANAGE_REMOTE_AUTH:
     New API must be flagged with @FlaggedApi: field android.Manifest.permission.MANAGE_REMOTE_AUTH
 UnflaggedApi: android.Manifest.permission#USE_COMPANION_TRANSPORTS:
@@ -89,13 +71,7 @@ UnflaggedApi: android.companion.CompanionDeviceManager.OnTransportsChangedListen
     New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.OnTransportsChangedListener.onTransportsChanged(java.util.List<android.companion.AssociationInfo>)
 UnflaggedApi: android.content.Context#REMOTE_AUTH_SERVICE:
     New API must be flagged with @FlaggedApi: field android.content.Context.REMOTE_AUTH_SERVICE
-UnflaggedApi: android.content.ContextWrapper#createContextForSdkInSandbox(android.content.pm.ApplicationInfo, int):
-    New API must be flagged with @FlaggedApi: method android.content.ContextWrapper.createContextForSdkInSandbox(android.content.pm.ApplicationInfo,int)
-UnflaggedApi: android.media.session.MediaController.PlaybackInfo#PlaybackInfo(int, int, int, int, android.media.AudioAttributes, String):
-    New API must be flagged with @FlaggedApi: constructor android.media.session.MediaController.PlaybackInfo(int,int,int,int,android.media.AudioAttributes,String)
 UnflaggedApi: android.os.IpcDataCache#MODULE_TELEPHONY:
     New API must be flagged with @FlaggedApi: field android.os.IpcDataCache.MODULE_TELEPHONY
-UnflaggedApi: android.provider.ContactsContract.RawContactsEntity#queryRawContactEntity(android.content.ContentResolver, long):
-    New API must be flagged with @FlaggedApi: method android.provider.ContactsContract.RawContactsEntity.queryRawContactEntity(android.content.ContentResolver,long)
 UnflaggedApi: android.provider.Settings.Config#getAllStrings():
     New API must be flagged with @FlaggedApi: method android.provider.Settings.Config.getAllStrings()

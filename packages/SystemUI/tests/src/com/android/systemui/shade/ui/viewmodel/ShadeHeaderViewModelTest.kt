@@ -83,7 +83,8 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = SceneKey.Shade,
                         toScene = SceneKey.QuickSettings,
-                        progress = MutableStateFlow(0.5f)
+                        progress = MutableStateFlow(0.5f),
+                        isUserInputDriven = false,
                     )
                 )
             )
@@ -100,7 +101,8 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = SceneKey.QuickSettings,
                         toScene = SceneKey.Shade,
-                        progress = MutableStateFlow(0.5f)
+                        progress = MutableStateFlow(0.5f),
+                        isUserInputDriven = false,
                     )
                 )
             )
@@ -117,7 +119,8 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = SceneKey.Gone,
                         toScene = SceneKey.Shade,
-                        progress = MutableStateFlow(0.5f)
+                        progress = MutableStateFlow(0.5f),
+                        isUserInputDriven = false,
                     )
                 )
             )

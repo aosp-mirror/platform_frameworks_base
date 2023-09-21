@@ -119,6 +119,42 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         return null;
     }
 
+    /** Creates a new provider session to be used by the request session. */
+    @Nullable
+    public static ProviderGetSession createNewSession(
+            Context context,
+            @UserIdInt int userId,
+            CredentialProviderInfo providerInfo,
+            GetCandidateRequestSession getRequestSession,
+            RemoteCredentialService remoteCredentialService) {
+        android.credentials.GetCredentialRequest filteredRequest =
+                filterOptions(providerInfo.getCapabilities(),
+                        getRequestSession.mClientRequest,
+                        providerInfo);
+        if (filteredRequest != null) {
+            Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
+                    new HashMap<>();
+            return new ProviderGetSession(
+                    context,
+                    providerInfo,
+                    getRequestSession,
+                    userId,
+                    remoteCredentialService,
+                    constructQueryPhaseRequest(
+                            filteredRequest, getRequestSession.mClientAppInfo,
+                            getRequestSession.mClientRequest.alwaysSendAppInfoToProvider(),
+                            beginGetOptionToCredentialOptionMap),
+                    filteredRequest,
+                    getRequestSession.mClientAppInfo,
+                    beginGetOptionToCredentialOptionMap,
+                    getRequestSession.mHybridService
+            );
+        }
+        Slog.i(TAG, "Unable to create provider session for: "
+                + providerInfo.getComponentName());
+        return null;
+    }
+
     private static BeginGetCredentialRequest constructQueryPhaseRequest(
             android.credentials.GetCredentialRequest filteredRequest,
             CallingAppInfo callingAppInfo,
@@ -192,7 +228,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     public ProviderGetSession(Context context,
             CredentialProviderInfo info,
-            ProviderInternalCallback<GetCredentialResponse> callbacks,
+            ProviderInternalCallback callbacks,
             int userId, RemoteCredentialService remoteCredentialService,
             BeginGetCredentialRequest beginGetRequest,
             android.credentials.GetCredentialRequest completeGetRequest,

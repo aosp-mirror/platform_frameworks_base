@@ -137,6 +137,8 @@ private class SwipeTransition(initialScene: Scene) : TransitionState.Transition 
             return offset / distance
         }
 
+    override val isUserInputDriven = true
+
     /** The current offset caused by the drag gesture. */
     var dragOffset by mutableFloatStateOf(0f)
 

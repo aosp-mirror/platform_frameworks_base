@@ -66,13 +66,13 @@ constructor(
 ) : ComposableScene {
     override val key = SceneKey.Lockscreen
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
+    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
         viewModel.upDestinationSceneKey
             .map { pageKey -> destinationScenes(up = pageKey) }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = destinationScenes(up = null)
+                initialValue = destinationScenes(up = viewModel.upDestinationSceneKey.value)
             )
 
     @Composable

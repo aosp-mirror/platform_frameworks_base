@@ -1347,8 +1347,8 @@ class BroadcastProcessQueue {
      * Set the timeout flag to indicate that an ANR timer has been started.  A value of true means a
      * timer is running; a value of false means there is no timer running.
      */
-    void setTimeoutScheduled(boolean timeoutStarted) {
-        mTimeoutScheduled = timeoutStarted;
+    void setTimeoutScheduled(boolean timeoutScheduled) {
+        mTimeoutScheduled = timeoutScheduled;
     }
 
     /**

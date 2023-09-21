@@ -47,7 +47,7 @@ interface ICredentialManager {
 
     @nullable ICancellationSignal executeCreateCredential(in CreateCredentialRequest request, in ICreateCredentialCallback callback, String callingPackage);
 
-    @nullable ICancellationSignal getCandidateCredentials(in GetCandidateCredentialsRequest request, in IGetCandidateCredentialsCallback callback, String callingPackage);
+    @nullable ICancellationSignal getCandidateCredentials(in GetCredentialRequest request, in IGetCandidateCredentialsCallback callback, String callingPackage);
 
     @nullable ICancellationSignal clearCredentialState(in ClearCredentialStateRequest request, in IClearCredentialStateCallback callback, String callingPackage);
 

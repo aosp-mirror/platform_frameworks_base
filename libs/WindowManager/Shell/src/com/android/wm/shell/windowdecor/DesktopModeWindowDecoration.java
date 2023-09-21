@@ -56,6 +56,7 @@ import com.android.wm.shell.windowdecor.viewholder.DesktopModeWindowDecorationVi
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
@@ -109,7 +110,30 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
-        super(context, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorConfig);
+        this (context, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorConfig,
+                handler, choreographer, syncQueue, rootTaskDisplayAreaOrganizer,
+                SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
+                WindowContainerTransaction::new, new SurfaceControlViewHostFactory() {});
+    }
+
+    DesktopModeWindowDecoration(
+            Context context,
+            DisplayController displayController,
+            ShellTaskOrganizer taskOrganizer,
+            ActivityManager.RunningTaskInfo taskInfo,
+            SurfaceControl taskSurface,
+            Configuration windowDecorConfig,
+            Handler handler,
+            Choreographer choreographer,
+            SyncTransactionQueue syncQueue,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
+            Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
+            Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
+            SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
+        super(context, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorConfig,
+                surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
+                windowContainerTransactionSupplier, surfaceControlViewHostFactory);
 
         mHandler = handler;
         mChoreographer = choreographer;
@@ -150,7 +174,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return;
         }
 
-        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
         // Use |applyStartTransactionOnDraw| so that the transaction (that applies task crop) is
         // synced with the buffer transaction (that draws the View). Both will be shown on screen
         // at the same, whereas applying them independently causes flickering. See b/270202228.
@@ -183,10 +207,20 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mRelayoutParams.mCaptionHeightId = getCaptionHeightId();
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
         mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
-
-        mRelayoutParams.mWindowDecorConfig = DesktopTasksController.isDesktopDensityOverrideSet()
-                ? mContext.getResources().getConfiguration() // Use system context
-                : mTaskInfo.configuration; // Use task configuration
+        // The configuration used to lay out the window decoration. The system context's config is
+        // used when the task density has been overridden to a custom density so that the resources
+        // and views of the decoration aren't affected and match the rest of the System UI, if not
+        // then just use the task's configuration. A copy is made instead of using the original
+        // reference so that the configuration isn't mutated on config changes and diff checks can
+        // be made in WindowDecoration#relayout using the pre/post-relayout configuration.
+        // See b/301119301.
+        // TODO(b/301119301): consider moving the config data needed for diffs to relayout params
+        // instead of using a whole Configuration as a parameter.
+        final Configuration windowDecorConfig = new Configuration();
+        windowDecorConfig.setTo(DesktopTasksController.isDesktopDensityOverrideSet()
+                ? mContext.getResources().getConfiguration() // Use system context.
+                : mTaskInfo.configuration); // Use task configuration.
+        mRelayoutParams.mWindowDecorConfig = windowDecorConfig;
 
         mRelayoutParams.mCornerRadius =
                 (int) ScreenDecorationsUtils.getWindowCornerRadius(mContext);
@@ -442,6 +476,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     @Override
     void releaseViews() {
         closeHandleMenu();
+        closeMaximizeMenu();
         super.releaseViews();
     }
 

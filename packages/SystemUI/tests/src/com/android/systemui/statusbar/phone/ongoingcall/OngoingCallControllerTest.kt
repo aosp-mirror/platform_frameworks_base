@@ -84,7 +84,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
     private lateinit var controller: OngoingCallController
     private lateinit var notifCollectionListener: NotifCollectionListener
 
-    @Mock private lateinit var mockOngoingCallFlags: OngoingCallFlags
     @Mock private lateinit var mockSwipeStatusBarAwayGestureHandler:
         SwipeStatusBarAwayGestureHandler
     @Mock private lateinit var mockOngoingCallListener: OngoingCallListener
@@ -103,24 +102,22 @@ class OngoingCallControllerTest : SysuiTestCase() {
         }
 
         MockitoAnnotations.initMocks(this)
-        `when`(mockOngoingCallFlags.isStatusBarChipEnabled()).thenReturn(true)
         val notificationCollection = mock(CommonNotifCollection::class.java)
 
         controller = OngoingCallController(
                 context,
                 notificationCollection,
-                mockOngoingCallFlags,
                 clock,
                 mockActivityStarter,
                 mainExecutor,
                 mockIActivityManager,
                 OngoingCallLogger(uiEventLoggerFake),
                 DumpManager(),
-                Optional.of(mockStatusBarWindowController),
-                Optional.of(mockSwipeStatusBarAwayGestureHandler),
+                mockStatusBarWindowController,
+                mockSwipeStatusBarAwayGestureHandler,
                 mockStatusBarStateController,
             )
-        controller.init()
+        controller.start()
         controller.addCallback(mockOngoingCallListener)
         controller.setChipView(chipView)
 
@@ -494,42 +491,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun fullscreenIsTrue_thenCallNotificationAdded_chipNotClickable() {
-        `when`(mockOngoingCallFlags.isInImmersiveChipTapEnabled()).thenReturn(false)
-
-        getStateListener().onFullscreenStateChanged(/* isFullscreen= */ true)
-        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
-
-        assertThat(chipView.hasOnClickListeners()).isFalse()
-    }
-
-    @Test
-    fun callNotificationAdded_thenFullscreenIsTrue_chipNotClickable() {
-        `when`(mockOngoingCallFlags.isInImmersiveChipTapEnabled()).thenReturn(false)
-
-        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
-        getStateListener().onFullscreenStateChanged(/* isFullscreen= */ true)
-
-        assertThat(chipView.hasOnClickListeners()).isFalse()
-    }
-
-    @Test
-    fun fullscreenChangesToFalse_chipClickable() {
-        `when`(mockOngoingCallFlags.isInImmersiveChipTapEnabled()).thenReturn(false)
-
-        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
-        // First, update to true
-        getStateListener().onFullscreenStateChanged(/* isFullscreen= */ true)
-        // Then, update to false
-        getStateListener().onFullscreenStateChanged(/* isFullscreen= */ false)
-
-        assertThat(chipView.hasOnClickListeners()).isTrue()
-    }
-
-    @Test
-    fun fullscreenIsTrue_butChipClickInImmersiveEnabled_chipClickable() {
-        `when`(mockOngoingCallFlags.isInImmersiveChipTapEnabled()).thenReturn(true)
-
+    fun fullscreenIsTrue_chipStillClickable() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
         getStateListener().onFullscreenStateChanged(/* isFullscreen= */ true)
 

@@ -87,7 +87,7 @@ constructor(
 ) : ComposableScene {
     override val key = SceneKey.Shade
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
+    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
         viewModel.upDestinationSceneKey
             .map { sceneKey -> destinationScenes(up = sceneKey) }
             .stateIn(

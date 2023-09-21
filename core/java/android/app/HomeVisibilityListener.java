@@ -17,7 +17,6 @@
 package android.app;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.SuppressLint;
@@ -108,13 +107,12 @@ public abstract class HomeVisibilityListener {
             if (DBG) {
                 Log.d(TAG, "Task#" + i + ": activity=" + task.topActivity
                         + ", visible=" + task.isVisible()
-                        + ", flg=" + Integer.toHexString(task.baseIntent.getFlags()));
+                        + ", flg=" + Integer.toHexString(task.baseIntent.getFlags())
+                        + ", type=" + task.getActivityType());
             }
-            if (!task.isVisible()
-                    || (task.baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0) {
-                continue;
+            if (task.isVisible() && (task.getActivityType() == ACTIVITY_TYPE_HOME)) {
+                return true;
             }
-            return task.getActivityType() == ACTIVITY_TYPE_HOME;
         }
         return false;
     }

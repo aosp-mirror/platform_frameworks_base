@@ -70,6 +70,7 @@ import com.android.systemui.classifier.Classifier;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
@@ -1776,7 +1777,9 @@ public class QuickSettingsController implements Dumpable {
                     // Dragging down on the lockscreen statusbar should prohibit other interactions
                     // immediately, otherwise we'll wait on the touchslop. This is to allow
                     // dragging down to expanded quick settings directly on the lockscreen.
-                    mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
+                    if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+                        mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
+                    }
                 }
                 if (mExpansionAnimator != null) {
                     mInitialHeightOnTouch = mExpansionHeight;
@@ -1819,7 +1822,9 @@ public class QuickSettingsController implements Dumpable {
                         && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldQuickSettingsIntercept(
                         mInitialTouchX, mInitialTouchY, h)) {
-                    mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
+                    if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+                        mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
+                    }
                     mShadeLog.onQsInterceptMoveQsTrackingEnabled(h);
                     setTracking(true);
                     traceQsJank(true, false);

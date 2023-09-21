@@ -33,8 +33,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
-import com.android.systemui.navigationbar.NavigationBarInflaterView;
-import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.recents.OverviewProxyService;
 
 import org.junit.After;

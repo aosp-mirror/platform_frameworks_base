@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -84,6 +85,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     private final SystemClock mClock;
 
     private H mBGHandler;
+    private final Executor mBgExecutor;
     private final List<AppOpsController.Callback> mCallbacks = new ArrayList<>();
     private final SparseArray<Set<Callback>> mCallbacksByCode = new SparseArray<>();
     private boolean mListening;
@@ -153,6 +155,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     public AppOpsControllerImpl(
             Context context,
             @Background Looper bgLooper,
+            @Background Executor bgExecutor,
             DumpManager dumpManager,
             AudioManager audioManager,
             IndividualSensorPrivacyController sensorPrivacyController,
@@ -162,6 +165,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         mDispatcher = dispatcher;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mBGHandler = new H(bgLooper);
+        mBgExecutor = bgExecutor;
         final int numOps = OPS.length;
         for (int i = 0; i < numOps; i++) {
             mCallbacksByCode.put(OPS[i], new ArraySet<>());
@@ -184,41 +188,43 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     @VisibleForTesting
     protected void setListening(boolean listening) {
         mListening = listening;
-        if (listening) {
-            // System UI could be restarted while ops are active, so fetch the currently active ops
-            // once System UI starts listening again.
-            fetchCurrentActiveOps();
+        // Move IPCs to the background.
+        mBgExecutor.execute(() -> {
+            if (listening) {
+                // System UI could be restarted while ops are active, so fetch the currently active
+                // ops once System UI starts listening again -- see b/294104969.
+                fetchCurrentActiveOps();
 
-            mAppOps.startWatchingActive(OPS, this);
-            mAppOps.startWatchingNoted(OPS, this);
-            mAudioManager.registerAudioRecordingCallback(mAudioRecordingCallback, mBGHandler);
-            mSensorPrivacyController.addCallback(this);
+                mAppOps.startWatchingActive(OPS, this);
+                mAppOps.startWatchingNoted(OPS, this);
+                mAudioManager.registerAudioRecordingCallback(mAudioRecordingCallback, mBGHandler);
+                mSensorPrivacyController.addCallback(this);
 
-            mMicMuted = mAudioManager.isMicrophoneMute()
-                    || mSensorPrivacyController.isSensorBlocked(MICROPHONE);
-            mCameraDisabled = mSensorPrivacyController.isSensorBlocked(CAMERA);
+                mMicMuted = mAudioManager.isMicrophoneMute()
+                        || mSensorPrivacyController.isSensorBlocked(MICROPHONE);
+                mCameraDisabled = mSensorPrivacyController.isSensorBlocked(CAMERA);
 
-            mBGHandler.post(() -> mAudioRecordingCallback.onRecordingConfigChanged(
-                    mAudioManager.getActiveRecordingConfigurations()));
-            mDispatcher.registerReceiverWithHandler(this,
-                    new IntentFilter(ACTION_MICROPHONE_MUTE_CHANGED), mBGHandler);
+                mBGHandler.post(() -> mAudioRecordingCallback.onRecordingConfigChanged(
+                        mAudioManager.getActiveRecordingConfigurations()));
+                mDispatcher.registerReceiverWithHandler(this,
+                        new IntentFilter(ACTION_MICROPHONE_MUTE_CHANGED), mBGHandler);
+            } else {
+                mAppOps.stopWatchingActive(this);
+                mAppOps.stopWatchingNoted(this);
+                mAudioManager.unregisterAudioRecordingCallback(mAudioRecordingCallback);
+                mSensorPrivacyController.removeCallback(this);
 
-        } else {
-            mAppOps.stopWatchingActive(this);
-            mAppOps.stopWatchingNoted(this);
-            mAudioManager.unregisterAudioRecordingCallback(mAudioRecordingCallback);
-            mSensorPrivacyController.removeCallback(this);
-
-            mBGHandler.removeCallbacksAndMessages(null); // null removes all
-            mDispatcher.unregisterReceiver(this);
-            synchronized (mActiveItems) {
-                mActiveItems.clear();
-                mRecordingsByUid.clear();
+                mBGHandler.removeCallbacksAndMessages(null); // null removes all
+                mDispatcher.unregisterReceiver(this);
+                synchronized (mActiveItems) {
+                    mActiveItems.clear();
+                    mRecordingsByUid.clear();
+                }
+                synchronized (mNotedItems) {
+                    mNotedItems.clear();
+                }
             }
-            synchronized (mNotedItems) {
-                mNotedItems.clear();
-            }
-        }
+        });
     }
 
     private void fetchCurrentActiveOps() {

@@ -86,8 +86,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun updateNotificationPanelTouchState() {}
     override fun getRotation() = 0
     override fun setBarStateForTest(state: Int) {}
-    override fun showTransientUnchecked() {}
-    override fun clearTransient() {}
     override fun acquireGestureWakeLock(time: Long) {}
     override fun setAppearance(appearance: Int) = false
     override fun getBarMode() = 0
