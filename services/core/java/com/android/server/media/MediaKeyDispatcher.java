@@ -117,24 +117,11 @@ public abstract class MediaKeyDispatcher {
 
     /**
      * Gets the map of key code -> {@link KeyEventType} that have been overridden.
-     * <p>
-     * The list of valid key codes are the following:
-     * <ul>
-     * <li> {@link KeyEvent#KEYCODE_MEDIA_PLAY}
-     * <li> {@link KeyEvent#KEYCODE_MEDIA_PAUSE}
-     * <li> {@link KeyEvent#KEYCODE_MEDIA_PLAY_PAUSE}
-     * <li> {@link KeyEvent#KEYCODE_MUTE}
-     * <li> {@link KeyEvent#KEYCODE_HEADSETHOOK}
-     * <li> {@link KeyEvent#KEYCODE_MEDIA_STOP}
-     * <li> {@link KeyEvent#KEYCODE_MEDIA_NEXT}
-     * <li> {@link KeyEvent#KEYCODE_MEDIA_PREVIOUS}
-     * <li> {@link KeyEvent#KEYCODE_VOLUME_UP}
-     * <li> {@link KeyEvent#KEYCODE_VOLUME_DOWN}
-     * <li> {@link KeyEvent#KEYCODE_VOLUME_MUTE}
-     * </ul>
-     * @see {@link KeyEvent#isMediaSessionKey(int)}
+     *
+     * <p>For the list of relevant key codes, see {@link KeyEvent#isMediaSessionKey(int)}.
      */
-    @KeyEventType Map<Integer, Integer> getOverriddenKeyEvents() {
+    @KeyEventType
+    Map<Integer, Integer> getOverriddenKeyEvents() {
         return mOverriddenKeyEvents;
     }
 

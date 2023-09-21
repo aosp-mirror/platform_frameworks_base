@@ -1990,8 +1990,23 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns whether this key will be sent to the
-     * {@link android.media.session.MediaSession.Callback} if not handled.
+     * Returns whether this key will be sent to the {@link
+     * android.media.session.MediaSession.Callback} if not handled.
+     *
+     * <p>The following key codes are considered {@link android.media.session.MediaSession} keys:
+     *
+     * <ul>
+     *   <li>{@link #KEYCODE_MEDIA_PLAY}
+     *   <li>{@link #KEYCODE_MEDIA_PAUSE}
+     *   <li>{@link #KEYCODE_MEDIA_PLAY_PAUSE}
+     *   <li>{@link #KEYCODE_HEADSETHOOK}
+     *   <li>{@link #KEYCODE_MEDIA_STOP}
+     *   <li>{@link #KEYCODE_MEDIA_NEXT}
+     *   <li>{@link #KEYCODE_MEDIA_PREVIOUS}
+     *   <li>{@link #KEYCODE_MEDIA_REWIND}
+     *   <li>{@link #KEYCODE_MEDIA_RECORD}
+     *   <li>{@link #KEYCODE_MEDIA_FAST_FORWARD}
+     * </ul>
      */
     public static final boolean isMediaSessionKey(int keyCode) {
         switch (keyCode) {
