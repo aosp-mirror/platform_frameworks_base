@@ -16728,7 +16728,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int i = 0; i < N; i++) {
                 PendingTempAllowlist ptw = list[i];
                 mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(ptw.targetUid,
-                        ptw.duration, ptw.type, true, ptw.reasonCode, ptw.tag,
+                        ptw.duration, ptw.type, false, ptw.reasonCode, ptw.tag,
                         ptw.callingUid);
             }
         }
