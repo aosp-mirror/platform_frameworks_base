@@ -64,27 +64,27 @@ class SoongModule:
 
 class SoongLintFix:
     """
-    This class creates a command line tool that will
-    apply lint fixes to the platform via the necessary
-    combination of soong and shell commands.
+    This class creates a command line tool that will apply lint fixes to the
+    platform via the necessary combination of soong and shell commands.
 
-    It breaks up these operations into a few "private" methods
-    that are intentionally exposed so experimental code can tweak behavior.
+    It breaks up these operations into a few "private" methods that are
+    intentionally exposed so experimental code can tweak behavior.
 
-    The entry point, `run`, will apply lint fixes using the
-    intermediate `suggested-fixes` directory that soong creates during its
-    invocation of lint.
+    The entry point, `run`, will apply lint fixes using the intermediate
+    `suggested-fixes` directory that soong creates during its invocation of
+    lint.
 
     Basic usage:
     ```
     from soong_lint_fix import SoongLintFix
 
-    SoongLintFix().run()
+    opts = SoongLintFixOptions()
+    opts.parse_args(sys.argv)
+    SoongLintFix(opts).run()
     ```
     """
-    def __init__(self):
-        self._parser = _setup_parser()
-        self._args = None
+    def __init__(self, opts):
+        self._opts = opts
         self._kwargs = None
         self._modules = []
 
@@ -96,19 +96,18 @@ class SoongLintFix:
         self._find_modules()
         self._lint()
 
-        if not self._args.no_fix:
+        if not self._opts.no_fix:
             self._fix()
 
-        if self._args.print:
+        if self._opts.print:
             self._print()
 
     def _setup(self):
-        self._args = self._parser.parse_args()
         env = os.environ.copy()
-        if self._args.check:
-            env["ANDROID_LINT_CHECK"] = self._args.check
-        if self._args.lint_module:
-            env["ANDROID_LINT_CHECK_EXTRA_MODULES"] = self._args.lint_module
+        if self._opts.check:
+            env["ANDROID_LINT_CHECK"] = self._opts.check
+        if self._opts.lint_module:
+            env["ANDROID_LINT_CHECK_EXTRA_MODULES"] = self._opts.lint_module
 
         self._kwargs = {
             "env": env,
@@ -131,7 +130,7 @@ class SoongLintFix:
         with open(f"{ANDROID_PRODUCT_OUT}/module-info.json") as f:
             module_info = json.load(f)
 
-        for module_name in self._args.modules:
+        for module_name in self._opts.modules:
             module = SoongModule(module_name)
             module.find(module_info)
             self._modules.append(module)
@@ -169,6 +168,20 @@ class SoongLintFix:
                 print(f.read())
 
 
+class SoongLintFixOptions:
+    """Options for SoongLintFix"""
+
+    def __init__(self):
+        self.modules = []
+        self.check = None
+        self.lint_module = None
+        self.no_fix = False
+        self.print = False
+
+    def parse_args(self, args=None):
+        _setup_parser().parse_args(args, self)
+
+
 def _setup_parser():
     parser = argparse.ArgumentParser(description="""
         This is a python script that applies lint fixes to the platform:
@@ -199,4 +212,6 @@ def _setup_parser():
     return parser
 
 if __name__ == "__main__":
-    SoongLintFix().run()
+    opts = SoongLintFixOptions()
+    opts.parse_args(sys.argv)
+    SoongLintFix(opts).run()
