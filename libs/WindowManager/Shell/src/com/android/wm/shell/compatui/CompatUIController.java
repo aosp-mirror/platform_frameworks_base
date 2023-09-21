@@ -22,10 +22,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.app.TaskInfo.CameraCompatControlState;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
+import android.net.Uri;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
@@ -577,7 +580,13 @@ public class CompatUIController implements OnDisplaysChangedListener,
         final Intent intent = new Intent(Settings.ACTION_MANAGE_USER_ASPECT_RATIO_SETTINGS);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        mContext.startActivity(intent);
+        final ComponentName appComponent = taskInfo.topActivity;
+        if (appComponent != null) {
+            final Uri packageUri = Uri.parse("package:" + appComponent.getPackageName());
+            intent.setData(packageUri);
+        }
+        final UserHandle userHandle = UserHandle.of(taskInfo.userId);
+        mContext.startActivityAsUser(intent, userHandle);
     }
 
     private void removeLayouts(int taskId) {
