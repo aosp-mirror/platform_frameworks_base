@@ -89,6 +89,7 @@ constructor(
             this.lastLoadingJob?.cancel()
             this.lastLoadingJob =
                 when {
+                    skipLazyLoading(state.icon) -> null
                     state is Empty && shown -> state.icon?.let(::startLoadingJob)
                     state is PlaceHolder && shown -> startLoadingJob(state.icon)
                     state is FullImage && !shown ->
@@ -144,7 +145,7 @@ constructor(
     private fun loadImageOrPlaceHolderSync(icon: Icon?): Drawable? {
         icon ?: return null
 
-        if (viewShown) {
+        if (viewShown || skipLazyLoading(icon)) {
             return loadImageSync(icon)
         }
 
@@ -227,6 +228,19 @@ constructor(
                 R.dimen.notification_big_picture_max_height
             }
         )
+
+    /**
+     * We don't support lazy-loading or set placeholders for bitmap and data based icons, because
+     * they gonna stay in memory anyways.
+     */
+    private fun skipLazyLoading(icon: Icon?): Boolean =
+        when (icon?.type) {
+            Icon.TYPE_BITMAP,
+            Icon.TYPE_ADAPTIVE_BITMAP,
+            Icon.TYPE_DATA,
+            null -> true
+            else -> false
+        }
 
     private fun log(msg: String) {
         if (DEBUG) {
