@@ -496,9 +496,10 @@
     <dimen name="large_screen_shade_header_min_height">@dimen/qs_header_row_min_height</dimen>
     <dimen name="large_screen_shade_header_left_padding">@dimen/qs_horizontal_margin</dimen>
     <dimen name="shade_header_system_icons_height">@dimen/large_screen_shade_header_min_height</dimen>
-    <dimen name="shade_header_system_icons_height_large_screen">32dp</dimen>
-    <dimen name="shade_header_system_icons_padding_start">0dp</dimen>
-    <dimen name="shade_header_system_icons_padding_end">0dp</dimen>
+    <dimen name="hover_system_icons_container_padding_start">0dp</dimen>
+    <dimen name="hover_system_icons_container_padding_end">0dp</dimen>
+    <dimen name="hover_system_icons_container_padding_top">0dp</dimen>
+    <dimen name="hover_system_icons_container_padding_bottom">0dp</dimen>
 
     <!-- The top margin of the panel that holds the list of notifications.
          On phones it's always 0dp but it's overridden in Car UI
@@ -856,6 +857,8 @@
 
     <dimen name="keyguard_security_container_padding_top">20dp</dimen>
 
+    <dimen name="keyguard_translate_distance_on_swipe_up">-200dp</dimen>
+
     <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
     <dimen name="lock_icon_margin_bottom">74dp</dimen>
     <dimen name="ambient_indication_margin_bottom">71dp</dimen>
@@ -869,12 +872,6 @@
     <!-- Padding between the mobile signal indicator and the start icon when the roaming icon
          is displayed in the upper left corner. -->
     <dimen name="roaming_icon_start_padding">2sp</dimen>
-
-    <!-- Extra padding between the mobile data type icon and the strength indicator when the data
-         type icon is wide for the tile in quick settings. -->
-    <dimen name="wide_type_icon_start_padding_qs">3dp</dimen>
-
-    <dimen name="signal_indicator_to_icon_frame_spacing">3dp</dimen>
 
     <!-- Starting margin before the signal cluster -->
 
@@ -1229,6 +1226,7 @@
     <dimen name="magnification_setting_image_button_open_in_full_padding_horizontal">28dp</dimen>
     <dimen name="magnification_setting_drag_corner_radius">28dp</dimen>
     <dimen name="magnification_setting_drag_size">56dp</dimen>
+    <fraction name="magnification_resize_window_size_amount">10%</fraction>
 
     <!-- Seekbar with icon buttons -->
     <dimen name="seekbar_icon_size">24dp</dimen>

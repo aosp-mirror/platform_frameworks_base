@@ -184,7 +184,7 @@ public class LetterboxConfigurationPersisterTest {
                 LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT);
         firstPersister.setLetterboxPositionForVerticalReachability(false,
                 LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP);
-        waitForCompletion(mPersisterQueue);
+        waitForCompletion(firstPersisterQueue);
         final int newPositionForHorizontalReachability =
                 firstPersister.getLetterboxPositionForHorizontalReachability(false);
         final int newPositionForVerticalReachability =

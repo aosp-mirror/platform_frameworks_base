@@ -23,6 +23,7 @@ import android.os.UserHandle
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_N
 import android.view.KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL
+import android.view.ViewConfiguration
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.dagger.qualifiers.Background
@@ -65,12 +66,6 @@ constructor(
      * [NoteTaskController], ensure custom actions can be triggered (i.e., keyboard shortcut).
      */
     private fun initializeHandleSystemKey() {
-        val callbacks =
-            object : CommandQueue.Callbacks {
-                override fun handleSystemKey(key: KeyEvent) {
-                    key.toNoteTaskEntryPointOrNull()?.let(controller::showNoteTask)
-                }
-            }
         commandQueue.addCallback(callbacks)
     }
 
@@ -134,15 +129,39 @@ constructor(
                 controller.updateNoteTaskForCurrentUserAndManagedProfiles()
             }
         }
-}
 
-/**
- * Maps a [KeyEvent] to a [NoteTaskEntryPoint]. If the [KeyEvent] does not represent a
- * [NoteTaskEntryPoint], returns null.
- */
-private fun KeyEvent.toNoteTaskEntryPointOrNull(): NoteTaskEntryPoint? =
-    when {
-        keyCode == KEYCODE_STYLUS_BUTTON_TAIL -> TAIL_BUTTON
-        keyCode == KEYCODE_N && isMetaPressed && isCtrlPressed -> KEYBOARD_SHORTCUT
-        else -> null
+    /**
+     * Tracks a [KeyEvent], and determines if it should trigger an action to show the note task.
+     * Returns a [NoteTaskEntryPoint] if an action should be taken, and null otherwise.
+     */
+    private fun KeyEvent.toNoteTaskEntryPointOrNull(): NoteTaskEntryPoint? =
+        when {
+            keyCode == KEYCODE_STYLUS_BUTTON_TAIL && isTailButtonNotesGesture() -> TAIL_BUTTON
+            keyCode == KEYCODE_N && isMetaPressed && isCtrlPressed -> KEYBOARD_SHORTCUT
+            else -> null
+        }
+
+    private var lastStylusButtonTailUpEventTime: Long = -MULTI_PRESS_TIMEOUT
+
+    /**
+     * Perform gesture detection for the stylus tail button to make sure we only show the note task
+     * when there is a single press. Long presses and multi-presses are ignored for now.
+     */
+    private fun KeyEvent.isTailButtonNotesGesture(): Boolean {
+        if (keyCode != KEYCODE_STYLUS_BUTTON_TAIL || action != KeyEvent.ACTION_UP) {
+            return false
+        }
+
+        val isMultiPress = (downTime - lastStylusButtonTailUpEventTime) < MULTI_PRESS_TIMEOUT
+        val isLongPress = (eventTime - downTime) >= LONG_PRESS_TIMEOUT
+        lastStylusButtonTailUpEventTime = eventTime
+        // For now, trigger action immediately on UP of a single press, without waiting for
+        // the multi-press timeout to expire.
+        return !isMultiPress && !isLongPress
     }
+
+    companion object {
+        val MULTI_PRESS_TIMEOUT = ViewConfiguration.getMultiPressTimeout().toLong()
+        val LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout().toLong()
+    }
+}

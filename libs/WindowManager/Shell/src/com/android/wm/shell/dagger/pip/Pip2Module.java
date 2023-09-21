@@ -16,24 +16,34 @@
 
 package com.android.wm.shell.dagger.pip;
 
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 
+import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.pip2.PipTransition;
+import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.Transitions;
 
 import dagger.Module;
 import dagger.Provides;
 
 /**
  * Provides dependencies from {@link com.android.wm.shell.pip2}, this implementation is meant to be
- * the successor of its sibling {@link Pip1SharedModule}.
+ * the successor of its sibling {@link Pip1Module}.
  */
-@Module
+@Module(includes = WMShellBaseModule.class)
 public abstract class Pip2Module {
     @WMSingleton
     @Provides
-    @Nullable
-    static PipTransition providePipTransition() {
-        return null;
+    static PipTransition providePipTransition(@NonNull ShellInit shellInit,
+            @NonNull ShellTaskOrganizer shellTaskOrganizer,
+            @NonNull Transitions transitions,
+            PipBoundsState pipBoundsState,
+            PipBoundsAlgorithm pipBoundsAlgorithm) {
+        return new PipTransition(shellInit, shellTaskOrganizer, transitions, pipBoundsState, null,
+                pipBoundsAlgorithm);
     }
 }

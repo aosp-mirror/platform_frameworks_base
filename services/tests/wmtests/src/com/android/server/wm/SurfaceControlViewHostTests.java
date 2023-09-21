@@ -16,10 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.ACCESS_SURFACE_FLINGER;
-import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
-import static android.server.wm.CtsWindowInfoUtils.waitForWindowVisible;
+import static android.server.wm.CtsWindowInfoUtils.dumpWindowsOnScreen;
 import static android.server.wm.CtsWindowInfoUtils.waitForWindowFocus;
+import static android.server.wm.CtsWindowInfoUtils.waitForWindowVisible;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static org.junit.Assert.assertTrue;
@@ -65,6 +64,8 @@ import java.util.concurrent.CountDownLatch;
 @SmallTest
 @RunWith(WindowTestRunner.class)
 public class SurfaceControlViewHostTests {
+    private static final String TAG = "SurfaceControlViewHostTests";
+
     private final ActivityTestRule<TestActivity> mActivityRule = new ActivityTestRule<>(
             TestActivity.class);
     private Instrumentation mInstrumentation;
@@ -78,17 +79,11 @@ public class SurfaceControlViewHostTests {
     @Before
     public void setUp() throws Exception {
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
-
-        // ACCESS_SURFACE_FLINGER is necessary to call waitForWindow
-        // INTERNAL_SYSTEM_WINDOW is necessary to add SCVH with no host parent
-        mInstrumentation.getUiAutomation().adoptShellPermissionIdentity(ACCESS_SURFACE_FLINGER,
-                INTERNAL_SYSTEM_WINDOW);
         mActivity = mActivityRule.launchActivity(null);
     }
 
     @After
     public void tearDown() {
-        mInstrumentation.getUiAutomation().dropShellPermissionIdentity();
         CommonUtils.waitUntilActivityRemoved(mActivity);
     }
 
@@ -102,13 +97,14 @@ public class SurfaceControlViewHostTests {
         mView2 = new Button(mActivity);
 
         mInstrumentation.runOnMainSync(() -> {
-            TestWindowlessWindowManager wwm = new TestWindowlessWindowManager(
-                    mActivity.getResources().getConfiguration(), sc, null);
-
             try {
                 mActivity.attachToSurfaceView(sc);
             } catch (InterruptedException e) {
             }
+
+            TestWindowlessWindowManager wwm = new TestWindowlessWindowManager(
+                    mActivity.getResources().getConfiguration(), sc,
+                    mActivity.mSurfaceView.getHostToken());
 
             mScvh1 = new SurfaceControlViewHost(mActivity, mActivity.getDisplay(),
                     wwm, "requestFocusWithMultipleWindows");
@@ -127,14 +123,25 @@ public class SurfaceControlViewHostTests {
             mScvh2.setView(mView2, lp2);
         });
 
-        assertTrue("Failed to wait for view1", waitForWindowVisible(mView1));
-        assertTrue("Failed to wait for view2", waitForWindowVisible(mView2));
+        boolean wasVisible = waitForWindowVisible(mView1);
+        if (!wasVisible) {
+            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows");
+        }
+        assertTrue("Failed to wait for view1", wasVisible);
 
-        WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
+        wasVisible = waitForWindowVisible(mView2);
+        if (!wasVisible) {
+            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows");
+        }
+        assertTrue("Failed to wait for view2", wasVisible);
+
+        IWindow window = IWindow.Stub.asInterface(mActivity.mSurfaceView.getWindowToken());
+
+        WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
                 mScvh1.getFocusGrantToken(), true);
         assertTrue("Failed to gain focus for view1", waitForWindowFocus(mView1, true));
 
-        WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
+        WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
                 mScvh2.getFocusGrantToken(), true);
         assertTrue("Failed to gain focus for view2", waitForWindowFocus(mView2, true));
     }

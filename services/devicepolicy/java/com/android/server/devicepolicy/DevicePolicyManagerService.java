@@ -491,6 +491,7 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.devicepolicy.ActiveAdmin.TrustAgentInfo;
+import com.android.server.devicepolicy.flags.FlagUtils;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.DefaultCrossProfileIntentFilter;
@@ -680,7 +681,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // to decide whether an existing policy in the {@link #DEVICE_POLICIES_XML} needs to
     // be upgraded. See {@link PolicyVersionUpgrader} on instructions how to add an upgrade
     // step.
-    static final int DPMS_VERSION = 5;
+    static final int DPMS_VERSION = 6;
 
     static {
         SECURE_SETTINGS_ALLOWLIST = new ArraySet<>();
@@ -876,8 +877,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final boolean DEFAULT_ENABLE_DEVICE_POLICY_ENGINE_FOR_FINANCE_FLAG = true;
 
     // TODO(b/265683382) remove the flag after rollout.
-    private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";
-    public static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = true;
+    public static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = false;
 
     // TODO(b/261999445) remove the flag after rollout.
     private static final String HEADLESS_FLAG = "headless";
@@ -2594,6 +2594,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, true,
                         userHandle);
             }
+            // Enforcing the restriction of private profile creation in case device owner is set.
+            if (!mUserManager.hasUserRestriction(
+                    UserManager.DISALLOW_ADD_PRIVATE_PROFILE, userHandle)) {
+                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE, true,
+                        userHandle);
+            }
             // Creation of managed profile is restricted in case device owner is set, enforcing this
             // restriction by setting user level restriction at time of device owner setup.
             if (!mUserManager.hasUserRestriction(
@@ -3341,6 +3347,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mOwners.systemReady();
                 applyManagedSubscriptionsPolicyIfRequired();
                 break;
+            case SystemService.PHASE_SYSTEM_SERVICES_READY:
+                synchronized (getLockObject()) {
+                    mDevicePolicyEngine.reapplyAllPoliciesLocked();
+                }
+                break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 synchronized (getLockObject()) {
                     migrateToProfileOnOrganizationOwnedDeviceIfCompLocked();
@@ -3427,6 +3438,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
 
             revertTransferOwnershipIfNecessaryLocked();
+            if (!FlagUtils.isPolicyEngineMigrationV2Enabled()) {
+                updateUsbDataSignal(mContext, isUsbDataSignalingEnabledInternalLocked());
+            }
         }
 
         // In case flag value has changed, we apply it during boot to avoid doing it concurrently
@@ -4036,6 +4050,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
                             false, user);
                 }
+
+                // When a device owner is set, the system automatically restricts adding a
+                // private profile.
+                // Remove this restriction when the device owner is cleared.
+                if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                        user)) {
+                    mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                            false, user);
+                }
             }
         } else {
             // ManagedProvisioning/DPC sets DISALLOW_ADD_USER. Clear to recover to the original state
@@ -4060,6 +4083,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
                         false,
                         userHandle);
+            }
+
+            // When a device owner is set, the system automatically restricts adding a
+            // private profile.
+            // Remove this restriction when the device owner is cleared.
+            if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                    userHandle)) {
+                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                        false, userHandle);
             }
         }
     }
@@ -9098,9 +9130,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         UserManager.DISALLOW_CAMERA);
         if (who != null) {
             EnforcingAdmin admin = getEnforcingAdminForCaller(who, callerPackageName);
-            return Boolean.TRUE.equals(
-                    mDevicePolicyEngine.getLocalPolicySetByAdmin(
-                            policy, admin, affectedUserId));
+            Boolean value = null;
+            if (isDeviceOwner(caller)) {
+                value = mDevicePolicyEngine.getGlobalPolicySetByAdmin(policy, admin);
+            } else {
+                value = mDevicePolicyEngine.getLocalPolicySetByAdmin(
+                        policy, admin, affectedUserId);
+            }
+            return Boolean.TRUE.equals(value);
+
         } else {
             return Boolean.TRUE.equals(
                     mDevicePolicyEngine.getResolvedPolicy(policy, affectedUserId));
@@ -9423,6 +9461,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
                                 true,
                                 UserHandle.of(u));
+
+                        // Restrict adding a private profile when a device owner is set.
+                        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                                true,
+                                UserHandle.of(u));
                     }
                 } else {
                     mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE,
@@ -9433,6 +9476,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     // on the same device.
                     // CDD for reference : https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support
                     mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
+                            true,
+                            UserHandle.of(userId));
+                    mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
                             true,
                             UserHandle.of(userId));
                 }
@@ -13200,6 +13246,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ADD_CLONE_PROFILE, new String[]{MANAGE_DEVICE_POLICY_PROFILES});
         USER_RESTRICTION_PERMISSIONS.put(
+                UserManager.DISALLOW_ADD_PRIVATE_PROFILE, new String[]{MANAGE_DEVICE_POLICY_PROFILES});
+        USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ADD_USER, new String[]{MANAGE_DEVICE_POLICY_MODIFY_USERS});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ADD_WIFI_CONFIG, new String[]{MANAGE_DEVICE_POLICY_WIFI});
@@ -15793,6 +15841,83 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
+     * @param restriction The restriction enforced by admin. It could be any user restriction or
+     *                    policy like {@link DevicePolicyManager#POLICY_DISABLE_CAMERA},
+     *                    {@link DevicePolicyManager#POLICY_DISABLE_SCREEN_CAPTURE} and  {@link
+     *                    DevicePolicyManager#POLICY_SUSPEND_PACKAGES}.
+     */
+    private Set<android.app.admin.EnforcingAdmin> getEnforcingAdminsForRestrictionInternal(
+            int userId, @NonNull String restriction) {
+        Objects.requireNonNull(restriction);
+        Set<android.app.admin.EnforcingAdmin> admins = new HashSet<>();
+        // For POLICY_SUSPEND_PACKAGES return PO or DO to keep the behavior same as
+        // before the bug fix for b/192245204.
+        if (DevicePolicyManager.POLICY_SUSPEND_PACKAGES.equals(
+                restriction)) {
+            ComponentName profileOwner = mOwners.getProfileOwnerComponent(userId);
+            if (profileOwner != null) {
+                EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                        profileOwner, userId);
+                admins.add(admin.getParcelableAdmin());
+                return admins;
+            }
+            final Pair<Integer, ComponentName> deviceOwner =
+                    mOwners.getDeviceOwnerUserIdAndComponent();
+            if (deviceOwner != null && deviceOwner.first == userId) {
+                EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                        deviceOwner.second, deviceOwner.first);
+                admins.add(admin.getParcelableAdmin());
+                return admins;
+            }
+        } else {
+            long ident = mInjector.binderClearCallingIdentity();
+            try {
+                PolicyDefinition<Boolean> policyDefinition = getPolicyDefinitionForRestriction(
+                        restriction);
+                Boolean value = mDevicePolicyEngine.getResolvedPolicy(policyDefinition, userId);
+                if (value != null && value) {
+                    Map<EnforcingAdmin, PolicyValue<Boolean>> globalPolicies =
+                            mDevicePolicyEngine.getGlobalPoliciesSetByAdmins(policyDefinition);
+                    for (EnforcingAdmin admin : globalPolicies.keySet()) {
+                        if (globalPolicies.get(admin) != null
+                                && Boolean.TRUE.equals(globalPolicies.get(admin).getValue())) {
+                            admins.add(admin.getParcelableAdmin());
+                        }
+                    }
+
+                    Map<EnforcingAdmin, PolicyValue<Boolean>> localPolicies =
+                            mDevicePolicyEngine.getLocalPoliciesSetByAdmins(
+                                    policyDefinition, userId);
+                    for (EnforcingAdmin admin : localPolicies.keySet()) {
+                        if (localPolicies.get(admin) != null
+                                && Boolean.TRUE.equals(localPolicies.get(admin).getValue())) {
+                            admins.add(admin.getParcelableAdmin());
+                        }
+                    }
+                    return admins;
+                }
+            } finally {
+                mInjector.binderRestoreCallingIdentity(ident);
+            }
+        }
+        return admins;
+    }
+
+    private static PolicyDefinition<Boolean> getPolicyDefinitionForRestriction(
+            @NonNull String restriction) {
+        Objects.requireNonNull(restriction);
+        if (DevicePolicyManager.POLICY_DISABLE_CAMERA.equals(restriction)) {
+            return PolicyDefinition.getPolicyDefinitionForUserRestriction(
+                    UserManager.DISALLOW_CAMERA);
+        } else if (DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE.equals(restriction)) {
+            return PolicyDefinition.SCREEN_CAPTURE_DISABLED;
+        } else {
+            return PolicyDefinition.getPolicyDefinitionForUserRestriction(restriction);
+        }
+    }
+
+
+    /**
      *  Excludes restrictions imposed by UserManager.
      */
     private List<UserManager.EnforcingUser> getDevicePolicySources(
@@ -15828,6 +15953,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public Bundle getEnforcingAdminAndUserDetails(int userId, String restriction) {
         Preconditions.checkCallAuthorization(isSystemUid(getCallerIdentity()));
         return getEnforcingAdminAndUserDetailsInternal(userId, restriction);
+    }
+
+    @Override
+    public List<android.app.admin.EnforcingAdmin> getEnforcingAdminsForRestriction(
+            int userId, String restriction) {
+        Preconditions.checkCallAuthorization(isSystemUid(getCallerIdentity()));
+        return new ArrayList<>(getEnforcingAdminsForRestrictionInternal(userId, restriction));
     }
 
     /**
@@ -21542,17 +21674,35 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Objects.requireNonNull(packageName, "Admin package name must be provided");
         final CallerIdentity caller = getCallerIdentity(packageName);
 
-        synchronized (getLockObject()) {
-            EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
-                    /* admin= */ null, MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING,
-                    caller.getPackageName(),
-                    caller.getUserId());
+        if (!FlagUtils.isPolicyEngineMigrationV2Enabled()) {
+            Preconditions.checkCallAuthorization(
+                    isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller),
+                    "USB data signaling can only be controlled by a device owner or "
+                            + "a profile owner on an organization-owned device.");
             Preconditions.checkState(canUsbDataSignalingBeDisabled(),
                     "USB data signaling cannot be disabled.");
-            mDevicePolicyEngine.setGlobalPolicy(
-                    PolicyDefinition.USB_DATA_SIGNALING,
-                    enforcingAdmin,
-                    new BooleanPolicyValue(enabled));
+        }
+
+        synchronized (getLockObject()) {
+            if (FlagUtils.isPolicyEngineMigrationV2Enabled()) {
+                EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                        /* admin= */ null, MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING,
+                        caller.getPackageName(),
+                        caller.getUserId());
+                Preconditions.checkState(canUsbDataSignalingBeDisabled(),
+                        "USB data signaling cannot be disabled.");
+                mDevicePolicyEngine.setGlobalPolicy(
+                        PolicyDefinition.USB_DATA_SIGNALING,
+                        enforcingAdmin,
+                        new BooleanPolicyValue(enabled));
+            } else {
+                ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
+                if (admin.mUsbDataSignalingEnabled != enabled) {
+                    admin.mUsbDataSignalingEnabled = enabled;
+                    saveSettingsLocked(caller.getUserId());
+                    updateUsbDataSignal(mContext, isUsbDataSignalingEnabledInternalLocked());
+                }
+            }
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_USB_DATA_SIGNALING)
@@ -21574,10 +21724,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean isUsbDataSignalingEnabled(String packageName) {
         final CallerIdentity caller = getCallerIdentity(packageName);
-        Boolean enabled = mDevicePolicyEngine.getResolvedPolicy(
-                PolicyDefinition.USB_DATA_SIGNALING,
-                caller.getUserId());
-        return enabled == null || enabled;
+        if (FlagUtils.isPolicyEngineMigrationV2Enabled()) {
+            Boolean enabled = mDevicePolicyEngine.getResolvedPolicy(
+                    PolicyDefinition.USB_DATA_SIGNALING,
+                    caller.getUserId());
+            return enabled == null || enabled;
+        } else {
+            synchronized (getLockObject()) {
+                // If the caller is an admin, return the policy set by itself. Otherwise
+                // return the device-wide policy.
+                if (isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(
+                        caller)) {
+                    return getProfileOwnerOrDeviceOwnerLocked(
+                            caller.getUserId()).mUsbDataSignalingEnabled;
+                } else {
+                    return isUsbDataSignalingEnabledInternalLocked();
+                }
+            }
+        }
     }
 
     private boolean isUsbDataSignalingEnabledInternalLocked() {
@@ -22977,10 +23141,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private static boolean isKeepProfilesRunningFlagEnabled() {
-        return DeviceConfig.getBoolean(
-                NAMESPACE_DEVICE_POLICY_MANAGER,
-                KEEP_PROFILES_RUNNING_FLAG,
-                DEFAULT_KEEP_PROFILES_RUNNING_FLAG);
+        return DEFAULT_KEEP_PROFILES_RUNNING_FLAG;
     }
 
     private boolean isUnicornFlagEnabled() {

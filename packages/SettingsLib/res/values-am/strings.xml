@@ -107,8 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ፋይል ማስተላለፍ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ግቤት መሣሪያ"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"የበይነመረብ ድረስ"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"የእውቂያዎች እና የጥሪ ታሪክ ማጋራት"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"እውቂያዎችን እና የጥሪ ታሪክን ለማጋራት ይጠቀሙበት"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"ለዕውቂያዎች እና ለጥሪ ታሪክ መዳረሻ ይፍቀዱ"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"መረጃ ለጥሪ ማስታወቂያዎች እና ሌሎችም ጥቅም ላይ ይውላል"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"የበይነ መረብ ተያያዥ ማጋሪያ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"የጽሑፍ መልዕክቶች"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"የሲም መዳረሻ"</string>
@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"የዝርዝር ሰነድ እሴቶች ምንም ይሁኑ ምን ለበርካታ መስኮቶች ሁሉንም እንቅስቃሴዎች መጠናቸው የሚቀየሩ እንዲሆኑ ያደርጋቸዋል።"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"የነጻ ቅርጽ መስኮቶችን ያንቁ"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"የሙከራ ነፃ መልክ መስኮቶች ድጋፍን አንቃ"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"የዴስክቶፕ ሁነታ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"የዴስክቶፕ መጠባበቂያ ይለፍ ቃል"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ዴስክቶፕ ሙሉ ምትኬዎች በአሁኑ ሰዓት አልተጠበቁም"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"የዴስክቶፕ ሙሉ ምትኬዎች የይለፍ ቃሉን ለመለወጥ ወይም ለማስወገድ ነካ ያድርጉ"</string>
@@ -685,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"የግምት ጀርባ እነማዎች"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ለግምት ጀርባ የስርዓት እንማዎችን ያንቁ።"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ይህ ቅንብር የስርዓት እነማዎችን ለመገመት የምልክት እነማን ያነቃል። በዝርዝር ሰነድ ፋይሉ ውስጥ በእያንዳንዱ መተግበሪያ enableOnBackInvokedCallbackን ወደ እውነት ማቀናበር ያስፈልገዋል።"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"ወደ ግራ ውሰድ"</item>
-    <item msgid="5425394847942513942">"ወደ ታች ውሰድ"</item>
-    <item msgid="7728484337962740316">"ወደ ቀኝ ውሰድ"</item>
-    <item msgid="324200556467459329">"ወደ ላይ ውሰድ"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"አልተገለጸም"</string>
     <string name="neuter" msgid="2075249330106127310">"ገለልተኛ"</string>

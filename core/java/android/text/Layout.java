@@ -16,10 +16,15 @@
 
 package android.text;
 
+import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
+
+import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -227,7 +232,7 @@ public abstract class Layout {
      */
     public static float getDesiredWidth(CharSequence source, int start, int end, TextPaint paint,
             TextDirectionHeuristic textDir) {
-        return getDesiredWidthWithLimit(source, start, end, paint, textDir, Float.MAX_VALUE);
+        return getDesiredWidthWithLimit(source, start, end, paint, textDir, Float.MAX_VALUE, false);
     }
     /**
      * Return how wide a layout must be in order to display the
@@ -237,7 +242,8 @@ public abstract class Layout {
      * @hide
      */
     public static float getDesiredWidthWithLimit(CharSequence source, int start, int end,
-            TextPaint paint, TextDirectionHeuristic textDir, float upperLimit) {
+            TextPaint paint, TextDirectionHeuristic textDir, float upperLimit,
+            boolean useBoundsForWidth) {
         float need = 0;
 
         int next;
@@ -248,7 +254,7 @@ public abstract class Layout {
                 next = end;
 
             // note, omits trailing paragraph char
-            float w = measurePara(paint, source, i, next, textDir);
+            float w = measurePara(paint, source, i, next, textDir, useBoundsForWidth);
             if (w > upperLimit) {
                 return upperLimit;
             }
@@ -281,7 +287,7 @@ public abstract class Layout {
         this(text, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
                 spacingMult, spacingAdd, false, false, 0, null, Integer.MAX_VALUE,
                 BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null, null,
-                JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE);
+                JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE, false);
     }
 
     /**
@@ -329,7 +335,8 @@ public abstract class Layout {
             int[] leftIndents,
             int[] rightIndents,
             int justificationMode,
-            LineBreakConfig lineBreakConfig
+            LineBreakConfig lineBreakConfig,
+            boolean useBoundsForWidth
     ) {
 
         if (width < 0)
@@ -363,6 +370,7 @@ public abstract class Layout {
         mRightIndents = rightIndents;
         mJustificationMode = justificationMode;
         mLineBreakConfig = lineBreakConfig;
+        mUseBoundsForWidth = useBoundsForWidth;
     }
 
     /**
@@ -442,6 +450,13 @@ public abstract class Layout {
             @Nullable Path selectionPath,
             @Nullable Paint selectionPaint,
             int cursorOffsetVertical) {
+        if (mUseBoundsForWidth) {
+            canvas.save();
+            RectF drawingRect = computeDrawingBoundingBox();
+            if (drawingRect.left < 0) {
+                canvas.translate(-drawingRect.left, 0);
+            }
+        }
         final long lineRange = getLineRangeForDraw(canvas);
         int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
         int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
@@ -450,6 +465,9 @@ public abstract class Layout {
         drawWithoutText(canvas, highlightPaths, highlightPaints, selectionPath, selectionPaint,
                 cursorOffsetVertical, firstLine, lastLine);
         drawText(canvas, firstLine, lastLine);
+        if (mUseBoundsForWidth) {
+            canvas.restore();
+        }
     }
 
     /**
@@ -984,6 +1002,85 @@ public abstract class Layout {
     public abstract int getLineCount();
 
     /**
+     * Get an actual bounding box that draws text content.
+     *
+     * Note that the {@link RectF#top} and {@link RectF#bottom} may be different from the
+     * {@link Layout#getLineTop(int)} of the first line and {@link Layout#getLineBottom(int)} of
+     * the last line. The line top and line bottom are calculated based on yMin/yMax or
+     * ascent/descent value of font file. On the other hand, the drawing bounding boxes are
+     * calculated based on actual glyphs used there.
+     *
+     * @return bounding rectangle
+     */
+    @NonNull
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+    public RectF computeDrawingBoundingBox() {
+        float left = 0;
+        float right = 0;
+        float top = 0;
+        float bottom = 0;
+        TextLine tl = TextLine.obtain();
+        RectF rectF = new RectF();
+        for (int line = 0; line < getLineCount(); ++line) {
+            final int start = getLineStart(line);
+            final int end = getLineVisibleEnd(line);
+
+            final boolean hasTabs = getLineContainsTab(line);
+            TabStops tabStops = null;
+            if (hasTabs && mText instanceof Spanned) {
+                // Just checking this line should be good enough, tabs should be
+                // consistent across all lines in a paragraph.
+                TabStopSpan[] tabs = getParagraphSpans((Spanned) mText, start, end,
+                        TabStopSpan.class);
+                if (tabs.length > 0) {
+                    tabStops = new TabStops(TAB_INCREMENT, tabs); // XXX should reuse
+                }
+            }
+            final Directions directions = getLineDirections(line);
+            // Returned directions can actually be null
+            if (directions == null) {
+                continue;
+            }
+            final int dir = getParagraphDirection(line);
+
+            final TextPaint paint = mWorkPaint;
+            paint.set(mPaint);
+            paint.setStartHyphenEdit(getStartHyphenEdit(line));
+            paint.setEndHyphenEdit(getEndHyphenEdit(line));
+            tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops,
+                    getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
+                    isFallbackLineSpacingEnabled());
+            if (isJustificationRequired(line)) {
+                tl.justify(getJustifyWidth(line));
+            }
+            tl.metrics(null, rectF, false);
+
+            float lineLeft = rectF.left;
+            float lineRight = rectF.right;
+            float lineTop = rectF.top + getLineBaseline(line);
+            float lineBottom = rectF.bottom + getLineBaseline(line);
+            if (getParagraphDirection(line) == Layout.DIR_RIGHT_TO_LEFT) {
+                lineLeft += getWidth();
+                lineRight += getWidth();
+            }
+
+            if (line == 0) {
+                left = lineLeft;
+                right = lineRight;
+                top = lineTop;
+                bottom = lineBottom;
+            } else {
+                left = Math.min(left, lineLeft);
+                right = Math.max(right, lineRight);
+                top = Math.min(top, lineTop);
+                bottom = Math.max(bottom, lineBottom);
+            }
+        }
+        TextLine.recycle(tl);
+        return new RectF(left, top, right, bottom);
+    }
+
+    /**
      * Return the baseline for the specified line (0&hellip;getLineCount() - 1)
      * If bounds is not null, return the top, left, right, bottom extents
      * of the specified line in it.
@@ -1356,7 +1453,7 @@ public abstract class Layout {
         tl.set(mPaint, mText, start, end, dir, directions, hasTab, tabStops,
                 getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
                 isFallbackLineSpacingEnabled());
-        float wid = tl.measure(offset - start, trailing, null);
+        float wid = tl.measure(offset - start, trailing, null, null);
         TextLine.recycle(tl);
 
         if (clamped && wid > mWidth) {
@@ -1692,7 +1789,7 @@ public abstract class Layout {
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
-        final float width = tl.metrics(null);
+        final float width = tl.metrics(null, null, mUseBoundsForWidth);
         TextLine.recycle(tl);
         return width;
     }
@@ -1723,7 +1820,7 @@ public abstract class Layout {
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
-        final float width = tl.metrics(null);
+        final float width = tl.metrics(null, null, mUseBoundsForWidth);
         TextLine.recycle(tl);
         return width;
     }
@@ -2799,7 +2896,7 @@ public abstract class Layout {
     }
 
     private static float measurePara(TextPaint paint, CharSequence text, int start, int end,
-            TextDirectionHeuristic textDir) {
+            TextDirectionHeuristic textDir, boolean useBoundsForWidth) {
         MeasuredParagraph mt = null;
         TextLine tl = TextLine.obtain();
         try {
@@ -2839,7 +2936,7 @@ public abstract class Layout {
             tl.set(paint, text, start, end, dir, directions, hasTabs, tabStops,
                     0 /* ellipsisStart */, 0 /* ellipsisEnd */,
                     false /* use fallback line spacing. unused */);
-            return margin + Math.abs(tl.metrics(null));
+            return margin + Math.abs(tl.metrics(null, null, useBoundsForWidth));
         } finally {
             TextLine.recycle(tl);
             if (mt != null) {
@@ -3234,6 +3331,7 @@ public abstract class Layout {
     private int[] mRightIndents;
     private int mJustificationMode;
     private LineBreakConfig mLineBreakConfig;
+    private boolean mUseBoundsForWidth;
 
     /** @hide */
     @IntDef(prefix = { "DIR_" }, value = {
@@ -3342,6 +3440,7 @@ public abstract class Layout {
      *
      * @see StaticLayout.Builder
      */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public static final class Builder {
         /**
          * Construct a builder class.
@@ -3407,7 +3506,7 @@ public abstract class Layout {
          *
          * The specified amount of pixels will be added to each line.
          *
-         * The default value is {@code 0}.
+         * The default value is {@code 0}. The negative value is allowed for squeezing lines.
          *
          * @param amount an amount of pixels to be added to line height.
          * @return this builder instance.
@@ -3435,7 +3534,7 @@ public abstract class Layout {
          * @see StaticLayout.Builder#setLineSpacing(float, float)
          */
         @NonNull
-        public Builder setLineSpacingMultiplier(float multiplier) {
+        public Builder setLineSpacingMultiplier(@FloatRange(from = 0) float multiplier) {
             mSpacingMult = multiplier;
             return this;
         }
@@ -3450,11 +3549,11 @@ public abstract class Layout {
          *
          * @param includeFontPadding true for including extra space into first and last line.
          * @return this builder instance.
-         * @see Layout#isIncludeFontPadding()
+         * @see Layout#isFontPaddingIncluded()
          * @see StaticLayout.Builder#setIncludePad(boolean)
          */
         @NonNull
-        public Builder setIncludeFontPadding(boolean includeFontPadding) {
+        public Builder setFontPaddingIncluded(boolean includeFontPadding) {
             mIncludePad = includeFontPadding;
             return this;
         }
@@ -3662,6 +3761,32 @@ public abstract class Layout {
             return this;
         }
 
+        /**
+         * Set true for using width of bounding box as a source of automatic line breaking and
+         * drawing.
+         *
+         * If this value is false, the Layout determines the drawing offset and automatic line
+         * breaking based on total advances. By setting true, use all joined glyph's bounding boxes
+         * as a source of text width.
+         *
+         * If the font has glyphs that have negative bearing X or its xMax is greater than advance,
+         * the glyph clipping can happen because the drawing area may be bigger. By setting this to
+         * true, the Layout will reserve more spaces for drawing.
+         *
+         * @param useBoundsForWidth True for using bounding box, false for advances.
+         * @return this builder instance
+         * @see Layout#getUseBoundsForWidth()
+         * @see StaticLayout.Builder#setUseBoundsForWidth(boolean)
+         */
+        // The corresponding getter is getUseBoundsForWidth
+        @NonNull
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+        public Builder setUseBoundsForWidth(boolean useBoundsForWidth) {
+            mUseBoundsForWidth = useBoundsForWidth;
+            return this;
+        }
+
         private BoringLayout.Metrics isBoring() {
             if (mStart != 0 || mEnd != mText.length()) {  // BoringLayout only support entire text.
                 return null;
@@ -3701,13 +3826,14 @@ public abstract class Layout {
                         .setIndents(mLeftIndents, mRightIndents)
                         .setJustificationMode(mJustificationMode)
                         .setLineBreakConfig(mLineBreakConfig)
+                        .setUseBoundsForWidth(mUseBoundsForWidth)
                         .build();
             } else {
                 return new BoringLayout(
                         mText, mPaint, mWidth, mAlignment, mTextDir, mSpacingMult, mSpacingAdd,
                         mIncludePad, mFallbackLineSpacing, mEllipsizedWidth, mEllipsize, mMaxLines,
                         mBreakStrategy, mHyphenationFrequency, mLeftIndents, mRightIndents,
-                        mJustificationMode, mLineBreakConfig, metrics);
+                        mJustificationMode, mLineBreakConfig, metrics, mUseBoundsForWidth);
             }
         }
 
@@ -3731,6 +3857,7 @@ public abstract class Layout {
         private int[] mRightIndents = null;
         private int mJustificationMode = JUSTIFICATION_MODE_NONE;
         private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
+        private boolean mUseBoundsForWidth;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -3744,6 +3871,7 @@ public abstract class Layout {
      * @see Layout.Builder
      */
     @NonNull
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final CharSequence getText() {
         return mText;
     }
@@ -3793,6 +3921,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setTextDirection(TextDirectionHeuristic)
      */
     @NonNull
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final TextDirectionHeuristic getTextDirectionHeuristic() {
         return mTextDir;
     }
@@ -3819,6 +3948,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setLineSpacing(float, float)
      * @see Layout#getSpacingMultiplier()
      */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final float getLineSpacingMultiplier() {
         return mSpacingMult;
     }
@@ -3845,6 +3975,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setLineSpacing(float, float)
      * @see Layout#getSpacingAdd()
      */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final float getLineSpacingAmount() {
         return mSpacingAdd;
     }
@@ -3853,10 +3984,11 @@ public abstract class Layout {
      * Returns true if this layout is created with increased line height.
      *
      * @return true if the layout is created with increased line height.
-     * @see Layout.Builder#setIncludeFontPadding(boolean)
+     * @see Layout.Builder#setFontPaddingIncluded(boolean)
      * @see StaticLayout.Builder#setIncludePad(boolean)
      */
-    public final boolean isIncludeFontPadding() {
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+    public final boolean isFontPaddingIncluded() {
         return mIncludePad;
     }
 
@@ -3903,6 +4035,7 @@ public abstract class Layout {
      * @see Layout#getEllipsizedWidth()
      */
     @Nullable
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final TextUtils.TruncateAt getEllipsize() {
         return mEllipsize;
     }
@@ -3918,6 +4051,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setMaxLines(int)
      */
     @IntRange(from = 1)
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int getMaxLines() {
         return mMaxLines;
     }
@@ -3930,6 +4064,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setBreakStrategy(int)
      */
     @BreakStrategy
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int getBreakStrategy() {
         return mBreakStrategy;
     }
@@ -3942,6 +4077,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setHyphenationFrequency(int)
      */
     @HyphenationFrequency
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int getHyphenationFrequency() {
         return mHyphenationFrequency;
     }
@@ -3957,6 +4093,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setIndents(int[], int[])
      */
     @Nullable
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int[] getLeftIndents() {
         if (mLeftIndents == null) {
             return null;
@@ -3977,9 +4114,10 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setIndents(int[], int[])
      */
     @Nullable
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int[] getRightIndents() {
         if (mRightIndents == null) {
-            return mLeftIndents;
+            return null;
         }
         int[] newArray = new int[mRightIndents.length];
         System.arraycopy(mRightIndents, 0, newArray, 0, newArray.length);
@@ -3994,6 +4132,7 @@ public abstract class Layout {
      * @see StaticLayout.Builder#setJustificationMode(int)
      */
     @JustificationMode
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final int getJustificationMode() {
         return mJustificationMode;
     }
@@ -4007,7 +4146,22 @@ public abstract class Layout {
      */
     // not being final because of subclass has already published API.
     @NonNull
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public LineBreakConfig getLineBreakConfig() {
         return mLineBreakConfig;
+    }
+
+    /**
+     * Returns true if using bounding box as a width, false for using advance as a width.
+     *
+     * @return True if using bounding box for width, false if using advance for width.
+     * @see android.widget.TextView#setUseBoundsForWidth(boolean)
+     * @see android.widget.TextView#getUseBoundsForWidth()
+     * @see StaticLayout.Builder#setUseBoundsForWidth(boolean)
+     * @see DynamicLayout.Builder#setUseBoundsForWidth(boolean)
+     */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+    public boolean getUseBoundsForWidth() {
+        return mUseBoundsForWidth;
     }
 }

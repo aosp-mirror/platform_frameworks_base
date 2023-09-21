@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
@@ -180,6 +181,23 @@ public class PackageParser2 implements AutoCloseable {
         }
 
         return parsed;
+    }
+
+    /**
+     * Creates a ParsedPackage from PackageLite without any additional parsing or processing.
+     * Most fields will get reasonable default values, corresponding to "deleted-keep-data".
+     */
+    @AnyThread
+    public ParsedPackage parsePackageFromPackageLite(PackageLite packageLite, int flags)
+            throws PackageManagerException {
+        ParseInput input = mSharedResult.get().reset();
+        ParseResult<ParsingPackage> result = parsingUtils.parsePackageFromPackageLite(input,
+                packageLite, flags);
+        if (result.isError()) {
+            throw new PackageManagerException(result.getErrorCode(), result.getErrorMessage(),
+                    result.getException());
+        }
+        return result.getResult().hideAsParsed();
     }
 
     /**

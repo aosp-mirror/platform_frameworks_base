@@ -27,14 +27,16 @@ import android.util.Log
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepository
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -42,8 +44,9 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.time.SystemClock
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.io.PrintWriter
-import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -52,19 +55,19 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class OngoingCallController @Inject constructor(
+    @Application private val scope: CoroutineScope,
     private val context: Context,
     private val notifCollection: CommonNotifCollection,
-    private val ongoingCallFlags: OngoingCallFlags,
     private val systemClock: SystemClock,
     private val activityStarter: ActivityStarter,
     @Main private val mainExecutor: Executor,
     private val iActivityManager: IActivityManager,
     private val logger: OngoingCallLogger,
     private val dumpManager: DumpManager,
-    private val statusBarWindowController: Optional<StatusBarWindowController>,
-    private val swipeStatusBarAwayGestureHandler: Optional<SwipeStatusBarAwayGestureHandler>,
-    private val statusBarStateController: StatusBarStateController
-) : CallbackController<OngoingCallListener>, Dumpable {
+    private val statusBarWindowController: StatusBarWindowController,
+    private val swipeStatusBarAwayGestureHandler: SwipeStatusBarAwayGestureHandler,
+    private val statusBarModeRepository: StatusBarModeRepository,
+) : CallbackController<OngoingCallListener>, Dumpable, CoreStartable {
     private var isFullscreen: Boolean = false
     /** Non-null if there's an active call notification. */
     private var callNotificationInfo: CallNotificationInfo? = null
@@ -120,11 +123,15 @@ class OngoingCallController @Inject constructor(
         }
     }
 
-    fun init() {
+    override fun start() {
         dumpManager.registerDumpable(this)
-        if (ongoingCallFlags.isStatusBarChipEnabled()) {
-            notifCollection.addCollectionListener(notifListener)
-            statusBarStateController.addCallback(statusBarStateListener)
+        notifCollection.addCollectionListener(notifListener)
+        scope.launch {
+            statusBarModeRepository.isInFullscreenMode.collect {
+                isFullscreen = it
+                updateChipClickListener()
+                updateGestureListening()
+            }
         }
     }
 
@@ -138,7 +145,7 @@ class OngoingCallController @Inject constructor(
         this.chipView = chipView
         val backgroundView: OngoingCallBackgroundContainer? =
             chipView.findViewById(R.id.ongoing_call_chip_background)
-        backgroundView?.maxHeightFetcher = { statusBarWindowController.get().statusBarHeight }
+        backgroundView?.maxHeightFetcher = { statusBarWindowController.statusBarHeight }
         if (hasOngoingCall()) {
             updateChip()
         }
@@ -197,9 +204,7 @@ class OngoingCallController @Inject constructor(
 
             uidObserver.registerWithUid(currentCallNotificationInfo.uid)
             if (!currentCallNotificationInfo.statusBarSwipedAway) {
-                statusBarWindowController.ifPresent {
-                    it.setOngoingProcessRequiresStatusBarVisible(true)
-                }
+                statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(true)
             }
             updateGestureListening()
             mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
@@ -217,23 +222,19 @@ class OngoingCallController @Inject constructor(
 
     private fun updateChipClickListener() {
         if (callNotificationInfo == null) { return }
-        if (isFullscreen && !ongoingCallFlags.isInImmersiveChipTapEnabled()) {
-            chipView?.setOnClickListener(null)
-        } else {
-            val currentChipView = chipView
-            val backgroundView =
-                currentChipView?.findViewById<View>(R.id.ongoing_call_chip_background)
-            val intent = callNotificationInfo?.intent
-            if (currentChipView != null && backgroundView != null && intent != null) {
-                currentChipView.setOnClickListener {
-                    logger.logChipClicked()
-                    activityStarter.postStartActivityDismissingKeyguard(
-                        intent,
-                        ActivityLaunchAnimator.Controller.fromView(
-                            backgroundView,
-                            InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP)
-                    )
-                }
+        val currentChipView = chipView
+        val backgroundView =
+            currentChipView?.findViewById<View>(R.id.ongoing_call_chip_background)
+        val intent = callNotificationInfo?.intent
+        if (currentChipView != null && backgroundView != null && intent != null) {
+            currentChipView.setOnClickListener {
+                logger.logChipClicked()
+                activityStarter.postStartActivityDismissingKeyguard(
+                    intent,
+                    ActivityLaunchAnimator.Controller.fromView(
+                        backgroundView,
+                        InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP)
+                )
             }
         }
     }
@@ -247,10 +248,10 @@ class OngoingCallController @Inject constructor(
         if (callNotificationInfo == null ||
             callNotificationInfo?.statusBarSwipedAway == true ||
             !isFullscreen) {
-            swipeStatusBarAwayGestureHandler.ifPresent { it.removeOnGestureDetectedCallback(TAG) }
+            swipeStatusBarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
         } else {
-            swipeStatusBarAwayGestureHandler.ifPresent {
-                it.addOnGestureDetectedCallback(TAG) { _ -> onSwipeAwayGestureDetected() }
+            swipeStatusBarAwayGestureHandler.addOnGestureDetectedCallback(TAG) { _ ->
+                onSwipeAwayGestureDetected()
             }
         }
     }
@@ -258,8 +259,8 @@ class OngoingCallController @Inject constructor(
     private fun removeChip() {
         callNotificationInfo = null
         tearDownChipView()
-        statusBarWindowController.ifPresent { it.setOngoingProcessRequiresStatusBarVisible(false) }
-        swipeStatusBarAwayGestureHandler.ifPresent { it.removeOnGestureDetectedCallback(TAG) }
+        statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(false)
+        swipeStatusBarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
         mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
         uidObserver.unregister()
     }
@@ -283,20 +284,8 @@ class OngoingCallController @Inject constructor(
     private fun onSwipeAwayGestureDetected() {
         if (DEBUG) { Log.d(TAG, "Swipe away gesture detected") }
         callNotificationInfo = callNotificationInfo?.copy(statusBarSwipedAway = true)
-        statusBarWindowController.ifPresent {
-            it.setOngoingProcessRequiresStatusBarVisible(false)
-        }
-        swipeStatusBarAwayGestureHandler.ifPresent {
-            it.removeOnGestureDetectedCallback(TAG)
-        }
-    }
-
-    private val statusBarStateListener = object : StatusBarStateController.StateListener {
-        override fun onFullscreenStateChanged(isFullscreen: Boolean) {
-            this@OngoingCallController.isFullscreen = isFullscreen
-            updateChipClickListener()
-            updateGestureListening()
-        }
+        statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(false)
+        swipeStatusBarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
     }
 
     private data class CallNotificationInfo(

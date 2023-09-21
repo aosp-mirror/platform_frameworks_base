@@ -43,7 +43,7 @@ public interface SatelliteTransmissionUpdateCallback {
      */
     void onSendDatagramStateChanged(
             @SatelliteManager.SatelliteDatagramTransferState int state, int sendPendingCount,
-            @SatelliteManager.SatelliteError int errorCode);
+            @SatelliteManager.SatelliteResult int errorCode);
 
     /**
      * Called when satellite datagram receive state changed.
@@ -54,5 +54,5 @@ public interface SatelliteTransmissionUpdateCallback {
      */
     void onReceiveDatagramStateChanged(
             @SatelliteManager.SatelliteDatagramTransferState int state, int receivePendingCount,
-            @SatelliteManager.SatelliteError int errorCode);
+            @SatelliteManager.SatelliteResult int errorCode);
 }

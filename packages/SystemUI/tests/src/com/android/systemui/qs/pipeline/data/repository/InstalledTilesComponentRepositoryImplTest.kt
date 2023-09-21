@@ -29,8 +29,10 @@ import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
 import android.os.UserHandle
 import android.service.quicksettings.TileService
-import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.util.mockito.any
@@ -60,7 +62,9 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
+@TestableLooper.RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
 class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
     private val testDispatcher = StandardTestDispatcher()

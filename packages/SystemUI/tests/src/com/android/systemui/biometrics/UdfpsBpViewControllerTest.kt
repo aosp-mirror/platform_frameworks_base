@@ -21,6 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionStateManager
@@ -44,6 +45,7 @@ class UdfpsBpViewControllerTest : SysuiTestCase() {
     @Mock lateinit var udfpsBpView: UdfpsBpView
     @Mock lateinit var statusBarStateController: StatusBarStateController
     @Mock lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
+    @Mock lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     @Mock lateinit var systemUIDialogManager: SystemUIDialogManager
     @Mock lateinit var dumpManager: DumpManager
 
@@ -55,12 +57,13 @@ class UdfpsBpViewControllerTest : SysuiTestCase() {
             UdfpsBpViewController(
                 udfpsBpView,
                 statusBarStateController,
-                shadeExpansionStateManager,
+                primaryBouncerInteractor,
                 systemUIDialogManager,
                 dumpManager
             )
     }
 
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
     @Test
     fun testShouldNeverPauseAuth() {
         assertFalse(udfpsBpViewController.shouldPauseAuth())

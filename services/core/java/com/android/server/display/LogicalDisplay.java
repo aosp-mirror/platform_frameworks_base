@@ -193,7 +193,7 @@ final class LogicalDisplay {
     private SparseArray<SurfaceControl.RefreshRateRange> mThermalRefreshRateThrottling =
             new SparseArray<>();
 
-    public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
+    LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
         mDisplayId = displayId;
         mLayerStack = layerStack;
         mPrimaryDisplayDevice = primaryDisplayDevice;
@@ -872,7 +872,10 @@ final class LogicalDisplay {
      * @param enabled True if enabled, false otherwise.
      */
     public void setEnabledLocked(boolean enabled) {
-        mIsEnabled = enabled;
+        if (enabled != mIsEnabled) {
+            mDirty = true;
+            mIsEnabled = enabled;
+        }
     }
 
     /**

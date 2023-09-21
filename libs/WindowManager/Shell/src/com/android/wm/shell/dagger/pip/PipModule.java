@@ -16,11 +16,9 @@
 
 package com.android.wm.shell.dagger.pip;
 
-import android.annotation.Nullable;
-
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.pip.PipTransitionController;
-import com.android.wm.shell.pip.PipUtils;
 
 import dagger.Module;
 import dagger.Provides;
@@ -38,8 +36,8 @@ public abstract class PipModule {
     @Provides
     static PipTransitionController providePipTransitionController(
             com.android.wm.shell.pip.PipTransition legacyPipTransition,
-            @Nullable com.android.wm.shell.pip2.PipTransition newPipTransition) {
-        if (PipUtils.isPip2ExperimentEnabled() && newPipTransition != null) {
+            com.android.wm.shell.pip2.PipTransition newPipTransition) {
+        if (PipUtils.isPip2ExperimentEnabled()) {
             return newPipTransition;
         } else {
             return legacyPipTransition;

@@ -172,7 +172,6 @@ constructor(
 
     private fun isFeatureEnabled(): Boolean {
         return featureFlags.isEnabled(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED) &&
-            featureFlags.isEnabled(Flags.REVAMPED_WALLPAPER_UI) &&
             appContext.resources.getBoolean(R.bool.long_press_keyguard_customize_lockscreen_enabled)
     }
 

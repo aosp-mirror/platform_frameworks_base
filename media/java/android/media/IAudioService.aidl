@@ -54,6 +54,8 @@ import android.media.IVolumeController;
 import android.media.PlayerBase;
 import android.media.VolumeInfo;
 import android.media.VolumePolicy;
+import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
@@ -325,6 +327,15 @@ interface IAudioService {
     boolean isCsdEnabled();
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean isCsdAsAFeatureAvailable();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean isCsdAsAFeatureEnabled();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    oneway void setCsdAsAFeatureEnabled(boolean csdToggleValue);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     oneway void setBluetoothAudioDeviceCategory(in String address, boolean isBle, int deviceType);
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
@@ -346,6 +357,11 @@ interface IAudioService {
     int addMixForPolicy(in AudioPolicyConfig policyConfig, in IAudioPolicyCallback pcb);
 
     int removeMixForPolicy(in AudioPolicyConfig policyConfig, in IAudioPolicyCallback pcb);
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    int updateMixingRulesForPolicy(in AudioMix[] mixesToUpdate,
+                                   in AudioMixingRule[] updatedMixingRules,
+                                   in IAudioPolicyCallback pcb);
 
     int setFocusPropertiesForPolicy(int duckingBehavior, in IAudioPolicyCallback pcb);
 
@@ -519,6 +535,23 @@ interface IAudioService {
             in AudioAttributes aa, in String callingPackageName);
 
     long getFadeOutDurationOnFocusLossMillis(in AudioAttributes aa);
+
+    @EnforcePermission("QUERY_AUDIO_STATE")
+    /* Returns a List<Integer> */
+    @SuppressWarnings(value = {"untyped-collection"})
+    List getFocusDuckedUidsForTest();
+
+    @EnforcePermission("QUERY_AUDIO_STATE")
+    long getFocusFadeOutDurationForTest();
+
+    @EnforcePermission("QUERY_AUDIO_STATE")
+    long getFocusUnmuteDelayAfterFadeOutForTest();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean enterAudioFocusFreezeForTest(IBinder cb, in int[] uids);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean exitAudioFocusFreezeForTest(IBinder cb);
 
     void registerModeDispatcher(IAudioModeDispatcher dispatcher);
 

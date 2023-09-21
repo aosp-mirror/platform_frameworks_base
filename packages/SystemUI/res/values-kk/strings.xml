@@ -57,6 +57,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Басқа құрылғыдан жүйе тілін өзгерту туралы сұрау жіберілді."</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Тілді өзгерту"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Қазіргі тіл тұра берсін"</string>
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"Wi‑Fi желісін бөлісу"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Бұл желіде сымсыз түзетуге рұқсат етілсін бе?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Желі атауы (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi мекенжайы (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Осы желіде үнемі рұқсат ету"</string>
@@ -158,6 +159,7 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Өрнек қате."</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Құпия сөз қате."</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Тым көп қате енгізілді.\n<xliff:g id="NUMBER">%d</xliff:g> секундта әрекетті қайталаңыз."</string>
+    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"Төтенше жағдай"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Әрекетті қайталаңыз. <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> мүмкіндік, барлығы – <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Деректеріңіз жойылады"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Келесі әрекет кезінде қате өрнек енгізсеңіз, бұл құрылғылардың деректері жойылады."</string>
@@ -295,6 +297,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> шегі"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> туралы ескерту"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Жұмыс қолданбалары"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Кідіртілген"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Түнгі жарық"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Күн батқанда қосу"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Күн шыққанға дейін"</string>
@@ -410,6 +413,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Бөлісу, жазу не трансляциялау кезінде <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Қолданба экранын бөлісу, жазу не трансляциялау кезінде <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> онда көрінетін не ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Бастау"</string>
+    <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы осы опцияны өшірді."</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Трансляциялау басталсын ба?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Трансляциялау кезінде Android жүйесі экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Қолданба экранын трансляциялау кезінде Android жүйесі қолданбада көрінетін не ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
@@ -859,11 +863,20 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Төмен қарай жылжыту"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Солға жылжыту"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Оңға жылжыту"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Ұлғайту режиміне ауыстырғыш"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Толық экранды ұлғайту"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Экранның бөлігін ұлғайту"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Ұлғайту параметрлерін ашу"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Ұлғайту параметрлерін жабу"</string>
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"Өзгерту режимінен шығу"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Өлшемін өзгерту үшін бұрышынан сүйреңіз."</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Диагональ бойынша айналдыруға рұқсат беру"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Өлшемін өзгерту"</string>
@@ -922,7 +935,7 @@
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Үйлесімді басқару элементтері қолжетімді емес."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Басқа"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Құрылғы басқару элементтеріне қосу"</string>
-    <string name="controls_dialog_ok" msgid="2770230012857881822">"Енгізу"</string>
+    <string name="controls_dialog_ok" msgid="2770230012857881822">"Қосу"</string>
     <string name="controls_dialog_remove" msgid="3775288002711561936">"Жою"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ұсынған"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Құрылғы құлыпталды."</string>
@@ -1133,7 +1146,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ашу"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet қолданбасын таңбаша ретінде қосу үшін қолданбаның орнатылғанын тексеріңіз."</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet қолданбасын таңбаша ретінде қосу үшін кемінде бір картаның қосылғанын тексеріңіз."</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR кодының сканерін таңбаша ретінде қосу үшін камера қолданбасының орнатылғанын тексеріңіз."</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home қолданбасын таңбаша ретінде қосу үшін қолданбаның орнатылғанын тексеріңіз."</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Кемінде бір құрылғы қолжетімді."</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Жазба жазу таңбашасын пайдалану үшін әдепкі жазба қолданбаны таңдаңыз."</string>
@@ -1166,6 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant қосулы."</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Параметрлерден әдепкі жазба қолданбасын орнатыңыз."</string>
     <string name="install_app" msgid="5066668100199613936">"Қолданбаны орнату"</string>
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Сыртқы экран арқылы да көрсету керек пе?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"Дисплейді қосу"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Микрофон және камера"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Соңғы рет қолданбаның датчикті пайдалануы"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Соңғы рет пайдаланғандар"</string>

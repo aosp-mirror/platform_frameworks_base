@@ -19,4 +19,19 @@ java_library_static {
     defaults: ["platform_service_defaults"],
     srcs: [":services.autofill-sources"],
     libs: ["services.core"],
+    static_libs: ["autofill_flags_java_lib"],
+}
+
+aconfig_declarations {
+    name: "autofill_flags",
+    package: "android.service.autofill",
+    srcs: [
+        "bugfixes.aconfig",
+        "features.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "autofill_flags_java_lib",
+    aconfig_declarations: "autofill_flags",
 }

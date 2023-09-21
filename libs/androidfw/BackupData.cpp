@@ -106,8 +106,8 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
         k = key;
     }
     if (kIsDebug) {
-        ALOGD("Writing header: prefix='%s' key='%s' dataSize=%zu", m_keyPrefix.string(),
-                key.string(), dataSize);
+        ALOGD("Writing header: prefix='%s' key='%s' dataSize=%zu", m_keyPrefix.c_str(),
+                key.c_str(), dataSize);
     }
 
     entity_header_v1 header;
@@ -128,7 +128,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
     m_pos += amt;
 
     if (kIsDebug) ALOGI("writing entity header key, %zd bytes", keyLen+1);
-    amt = write(m_fd, k.string(), keyLen+1);
+    amt = write(m_fd, k.c_str(), keyLen+1);
     if (amt != keyLen+1) {
         m_status = errno;
         return m_status;

@@ -68,7 +68,7 @@ import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.utils.BackupEligibilityRules;
-import com.android.server.backup.utils.BackupManagerMonitorUtils;
+import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 
 import libcore.io.IoUtils;
 
@@ -225,7 +225,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             boolean nonIncremental,
             BackupEligibilityRules backupEligibilityRules) {
         KeyValueBackupReporter reporter =
-                new KeyValueBackupReporter(backupManagerService, observer, monitor);
+                new KeyValueBackupReporter(backupManagerService, observer,
+                        new BackupManagerMonitorEventSender(monitor));
         KeyValueBackupTask task =
                 new KeyValueBackupTask(
                         backupManagerService,
@@ -698,8 +699,9 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
         try {
             extractAgentData(mCurrentPackage);
-            BackupManagerMonitorUtils.monitorAgentLoggingResults(
-                    mReporter.getMonitor(), mCurrentPackage, mAgent);
+            BackupManagerMonitorEventSender mBackupManagerMonitorEventSender =
+                    new BackupManagerMonitorEventSender(mReporter.getMonitor());
+            mBackupManagerMonitorEventSender.monitorAgentLoggingResults(mCurrentPackage, mAgent);
             int status = sendDataToTransport(mCurrentPackage);
             cleanUpAgentForTransportStatus(status);
         } catch (AgentException | TaskException e) {

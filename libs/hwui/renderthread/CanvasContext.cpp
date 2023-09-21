@@ -195,6 +195,7 @@ void CanvasContext::setHardwareBuffer(AHardwareBuffer* buffer) {
 void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
     ATRACE_CALL();
 
+    startHintSession();
     if (window) {
         mNativeSurface = std::make_unique<ReliableSurface>(window);
         mNativeSurface->init();
@@ -1130,6 +1131,12 @@ bool CanvasContext::shouldDither() {
     CanvasContext* self = getActiveContext();
     if (!self) return false;
     return self->mColorMode != ColorMode::Default;
+}
+
+void CanvasContext::visitAllRenderNodes(std::function<void(const RenderNode&)> func) const {
+    for (auto node : mRenderNodes) {
+        node->visit(func);
+    }
 }
 
 } /* namespace renderthread */

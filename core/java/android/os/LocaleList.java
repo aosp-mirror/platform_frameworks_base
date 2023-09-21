@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -148,6 +149,25 @@ public final class LocaleList implements Parcelable {
     @NonNull
     public String toLanguageTags() {
         return mStringRepresentation;
+    }
+
+    /**
+     * Find the intersection between this LocaleList and another
+     * @return a String array of the Locales in both LocaleLists
+     * {@hide}
+     */
+    @NonNull
+    public String[] getIntersection(@NonNull LocaleList other) {
+        List<String> intersection = new ArrayList<>();
+        for (Locale l1 : mList) {
+            for (Locale l2 : other.mList) {
+                if (matchesLanguageAndScript(l2, l1)) {
+                    intersection.add(l1.toLanguageTag());
+                    break;
+                }
+            }
+        }
+        return intersection.toArray(new String[0]);
     }
 
     /**

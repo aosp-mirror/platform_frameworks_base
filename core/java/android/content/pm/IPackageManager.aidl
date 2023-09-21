@@ -20,8 +20,10 @@ package android.content.pm;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.ChangedPackages;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
@@ -58,7 +60,7 @@ import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
-import android.content.IntentSender;
+import android.os.UserHandle;
 
 import java.util.Map;
 
@@ -303,6 +305,8 @@ interface IPackageManager {
     String[] getUnsuspendablePackagesForUser(in String[] packageNames, int userId);
 
     boolean isPackageSuspendedForUser(String packageName, int userId);
+
+    boolean isPackageQuarantinedForUser(String packageName, int userId);
 
     Bundle getSuspendedPackageAppExtras(String packageName, int userId);
 
@@ -828,4 +832,8 @@ interface IPackageManager {
     void registerPackageMonitorCallback(IRemoteCallback callback, int userId);
 
     void unregisterPackageMonitorCallback(IRemoteCallback callback);
+
+    ArchivedPackageParcel getArchivedPackage(in String packageName, int userId);
+
+    Bitmap getArchivedAppIcon(String packageName, in UserHandle user);
 }

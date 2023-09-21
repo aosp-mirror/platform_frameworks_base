@@ -34,7 +34,6 @@ import android.os.UserHandle;
 import android.permission.PermissionManager;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import androidx.annotation.WorkerThread;
@@ -53,7 +52,9 @@ import com.android.systemui.util.time.SystemClock;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -84,6 +85,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     private final SystemClock mClock;
 
     private H mBGHandler;
+    private final Executor mBgExecutor;
     private final List<AppOpsController.Callback> mCallbacks = new ArrayList<>();
     private final SparseArray<Set<Callback>> mCallbacksByCode = new SparseArray<>();
     private boolean mListening;
@@ -122,8 +124,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             AppOpsManager.OP_SYSTEM_ALERT_WINDOW
     };
 
-
-   protected static final int[] OPS = concatOps(OPS_MIC, OPS_CAMERA, OPS_LOC, OPS_OTHERS);
+    protected static final int[] OPS = concatOps(OPS_MIC, OPS_CAMERA, OPS_LOC, OPS_OTHERS);
 
     /**
      * @param opArrays the given op arrays.
@@ -154,6 +155,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     public AppOpsControllerImpl(
             Context context,
             @Background Looper bgLooper,
+            @Background Executor bgExecutor,
             DumpManager dumpManager,
             AudioManager audioManager,
             IndividualSensorPrivacyController sensorPrivacyController,
@@ -163,6 +165,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         mDispatcher = dispatcher;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mBGHandler = new H(bgLooper);
+        mBgExecutor = bgExecutor;
         final int numOps = OPS.length;
         for (int i = 0; i < numOps; i++) {
             mCallbacksByCode.put(OPS[i], new ArraySet<>());
@@ -185,35 +188,64 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     @VisibleForTesting
     protected void setListening(boolean listening) {
         mListening = listening;
-        if (listening) {
-            mAppOps.startWatchingActive(OPS, this);
-            mAppOps.startWatchingNoted(OPS, this);
-            mAudioManager.registerAudioRecordingCallback(mAudioRecordingCallback, mBGHandler);
-            mSensorPrivacyController.addCallback(this);
+        // Move IPCs to the background.
+        mBgExecutor.execute(() -> {
+            if (listening) {
+                // System UI could be restarted while ops are active, so fetch the currently active
+                // ops once System UI starts listening again -- see b/294104969.
+                fetchCurrentActiveOps();
 
-            mMicMuted = mAudioManager.isMicrophoneMute()
-                    || mSensorPrivacyController.isSensorBlocked(MICROPHONE);
-            mCameraDisabled = mSensorPrivacyController.isSensorBlocked(CAMERA);
+                mAppOps.startWatchingActive(OPS, this);
+                mAppOps.startWatchingNoted(OPS, this);
+                mAudioManager.registerAudioRecordingCallback(mAudioRecordingCallback, mBGHandler);
+                mSensorPrivacyController.addCallback(this);
 
-            mBGHandler.post(() -> mAudioRecordingCallback.onRecordingConfigChanged(
-                    mAudioManager.getActiveRecordingConfigurations()));
-            mDispatcher.registerReceiverWithHandler(this,
-                    new IntentFilter(ACTION_MICROPHONE_MUTE_CHANGED), mBGHandler);
+                mMicMuted = mAudioManager.isMicrophoneMute()
+                        || mSensorPrivacyController.isSensorBlocked(MICROPHONE);
+                mCameraDisabled = mSensorPrivacyController.isSensorBlocked(CAMERA);
 
-        } else {
-            mAppOps.stopWatchingActive(this);
-            mAppOps.stopWatchingNoted(this);
-            mAudioManager.unregisterAudioRecordingCallback(mAudioRecordingCallback);
-            mSensorPrivacyController.removeCallback(this);
+                mBGHandler.post(() -> mAudioRecordingCallback.onRecordingConfigChanged(
+                        mAudioManager.getActiveRecordingConfigurations()));
+                mDispatcher.registerReceiverWithHandler(this,
+                        new IntentFilter(ACTION_MICROPHONE_MUTE_CHANGED), mBGHandler);
+            } else {
+                mAppOps.stopWatchingActive(this);
+                mAppOps.stopWatchingNoted(this);
+                mAudioManager.unregisterAudioRecordingCallback(mAudioRecordingCallback);
+                mSensorPrivacyController.removeCallback(this);
 
-            mBGHandler.removeCallbacksAndMessages(null); // null removes all
-            mDispatcher.unregisterReceiver(this);
-            synchronized (mActiveItems) {
-                mActiveItems.clear();
-                mRecordingsByUid.clear();
+                mBGHandler.removeCallbacksAndMessages(null); // null removes all
+                mDispatcher.unregisterReceiver(this);
+                synchronized (mActiveItems) {
+                    mActiveItems.clear();
+                    mRecordingsByUid.clear();
+                }
+                synchronized (mNotedItems) {
+                    mNotedItems.clear();
+                }
             }
-            synchronized (mNotedItems) {
-                mNotedItems.clear();
+        });
+    }
+
+    private void fetchCurrentActiveOps() {
+        List<AppOpsManager.PackageOps> packageOps = mAppOps.getPackagesForOps(OPS);
+        for (AppOpsManager.PackageOps op : packageOps) {
+            for (AppOpsManager.OpEntry entry : op.getOps()) {
+                for (Map.Entry<String, AppOpsManager.AttributedOpEntry> attributedOpEntry :
+                        entry.getAttributedOpEntries().entrySet()) {
+                    if (attributedOpEntry.getValue().isRunning()) {
+                        onOpActiveChanged(
+                                entry.getOpStr(),
+                                op.getUid(),
+                                op.getPackageName(),
+                                /* attributionTag= */ attributedOpEntry.getKey(),
+                                /* active= */ true,
+                                // AppOpsManager doesn't have a way to fetch attribution flags or
+                                // chain ID given an op entry, so default them to none.
+                                AppOpsManager.ATTRIBUTION_FLAGS_NONE,
+                                AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
+                    }
+                }
             }
         }
     }

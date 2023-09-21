@@ -76,7 +76,9 @@ import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
 import android.service.carrier.CarrierService;
 import android.sysprop.TelephonyProperties;
+import android.telecom.Call;
 import android.telecom.CallScreeningService;
+import android.telecom.Connection;
 import android.telecom.InCallService;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -1184,6 +1186,17 @@ public class TelephonyManager {
      */
     public static final String EVENT_SUPPLEMENTARY_SERVICE_NOTIFICATION =
             "android.telephony.event.EVENT_SUPPLEMENTARY_SERVICE_NOTIFICATION";
+
+    /**
+     * Event reported from the Telephony stack to indicate that the {@link Connection} is not
+     * able to find any network and likely will not get connected. Upon receiving this event,
+     * the dialer app should show satellite SOS button if satellite is provisioned.
+     * <p>
+     * The dialer app receives this event via
+     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     */
+    public static final String EVENT_DISPLAY_SOS_MESSAGE =
+            "android.telephony.event.DISPLAY_SOS_MESSAGE";
 
     /**
      * Integer extra key used with {@link #EVENT_SUPPLEMENTARY_SERVICE_NOTIFICATION} which indicates
@@ -2636,10 +2649,6 @@ public class TelephonyManager {
         return getCurrentPhoneType();
     }
 
-    private int getPhoneTypeFromProperty() {
-        return getPhoneTypeFromProperty(getPhoneId());
-    }
-
     /** {@hide} */
     @UnsupportedAppUsage
     private int getPhoneTypeFromProperty(int phoneId) {
@@ -2647,10 +2656,6 @@ public class TelephonyManager {
                 phoneId, TelephonyProperties.current_active_phone(), null);
         if (type != null) return type;
         return getPhoneTypeFromNetworkType(phoneId);
-    }
-
-    private int getPhoneTypeFromNetworkType() {
-        return getPhoneTypeFromNetworkType(getPhoneId());
     }
 
     /** {@hide} */
@@ -7844,7 +7849,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Rollback modem configurations to factory default except some config which are in whitelist.
+     * Rollback modem configurations to factory default except some config which are in allowlist.
      * Used for device configuration by some carriers.
      *
      * <p>Requires Permission:
@@ -11551,16 +11556,6 @@ public class TelephonyManager {
     }
 
    /**
-    * Set TelephonyProperties.icc_operator_numeric for the default phone.
-    *
-    * @hide
-    */
-    public void setSimOperatorNumeric(String numeric) {
-        int phoneId = getPhoneId();
-        setSimOperatorNumericForPhone(phoneId, numeric);
-    }
-
-   /**
     * Set TelephonyProperties.icc_operator_numeric for the given phone.
     *
     * @hide
@@ -11572,16 +11567,6 @@ public class TelephonyManager {
                     TelephonyProperties.icc_operator_numeric(), phoneId, numeric);
             TelephonyProperties.icc_operator_numeric(newList);
         }
-    }
-
-    /**
-     * Set TelephonyProperties.icc_operator_alpha for the default phone.
-     *
-     * @hide
-     */
-    public void setSimOperatorName(String name) {
-        int phoneId = getPhoneId();
-        setSimOperatorNameForPhone(phoneId, name);
     }
 
     /**
@@ -11837,17 +11822,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Set baseband version for the default phone.
-     *
-     * @param version baseband version
-     * @hide
-     */
-    public void setBasebandVersion(String version) {
-        int phoneId = getPhoneId();
-        setBasebandVersionForPhone(phoneId, version);
-    }
-
-    /**
      * Set baseband version by phone id.
      *
      * @param phoneId for which baseband version is set
@@ -11885,18 +11859,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Set phone type for the default phone.
-     *
-     * @param type phone type
-     *
-     * @hide
-     */
-    public void setPhoneType(int type) {
-        int phoneId = getPhoneId();
-        setPhoneType(phoneId, type);
-    }
-
-    /**
      * Set phone type by phone id.
      *
      * @param phoneId for which phone type is set
@@ -11911,19 +11873,6 @@ public class TelephonyManager {
                     TelephonyProperties.current_active_phone(), phoneId, type);
             TelephonyProperties.current_active_phone(newList);
         }
-    }
-
-    /**
-     * Get OTASP number schema for the default phone.
-     *
-     * @param defaultValue default value
-     * @return OTA SP number schema
-     *
-     * @hide
-     */
-    public String getOtaSpNumberSchema(String defaultValue) {
-        int phoneId = getPhoneId();
-        return getOtaSpNumberSchemaForPhone(phoneId, defaultValue);
     }
 
     /**
@@ -11946,19 +11895,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Get SMS receive capable from system property for the default phone.
-     *
-     * @param defaultValue default value
-     * @return SMS receive capable
-     *
-     * @hide
-     */
-    public boolean getSmsReceiveCapable(boolean defaultValue) {
-        int phoneId = getPhoneId();
-        return getSmsReceiveCapableForPhone(phoneId, defaultValue);
-    }
-
-    /**
      * Get SMS receive capable from system property by phone id.
      *
      * @param phoneId for which SMS receive capable is get
@@ -11973,19 +11909,6 @@ public class TelephonyManager {
         }
 
         return defaultValue;
-    }
-
-    /**
-     * Get SMS send capable from system property for the default phone.
-     *
-     * @param defaultValue default value
-     * @return SMS send capable
-     *
-     * @hide
-     */
-    public boolean getSmsSendCapable(boolean defaultValue) {
-        int phoneId = getPhoneId();
-        return getSmsSendCapableForPhone(phoneId, defaultValue);
     }
 
     /**
@@ -12052,16 +11975,6 @@ public class TelephonyManager {
 
     /**
      * Set the alphabetic name of current registered operator.
-     * @param name the alphabetic name of current registered operator.
-     * @hide
-     */
-    public void setNetworkOperatorName(String name) {
-        int phoneId = getPhoneId();
-        setNetworkOperatorNameForPhone(phoneId, name);
-    }
-
-    /**
-     * Set the alphabetic name of current registered operator.
      * @param phoneId which phone you want to set
      * @param name the alphabetic name of current registered operator.
      * @hide
@@ -12095,16 +12008,6 @@ public class TelephonyManager {
 
     /**
      * Set the numeric name (MCC+MNC) of current registered operator.
-     * @param operator the numeric name (MCC+MNC) of current registered operator
-     * @hide
-     */
-    public void setNetworkOperatorNumeric(String numeric) {
-        int phoneId = getPhoneId();
-        setNetworkOperatorNumericForPhone(phoneId, numeric);
-    }
-
-    /**
-     * Set the numeric name (MCC+MNC) of current registered operator.
      * @param phoneId for which phone type is set
      * @param operator the numeric name (MCC+MNC) of current registered operator
      * @hide
@@ -12116,16 +12019,6 @@ public class TelephonyManager {
                     TelephonyProperties.operator_numeric(), phoneId, numeric);
             TelephonyProperties.operator_numeric(newList);
         }
-    }
-
-    /**
-     * Set roaming state of the current network, for GSM purposes.
-     * @param isRoaming is network in romaing state or not
-     * @hide
-     */
-    public void setNetworkRoaming(boolean isRoaming) {
-        int phoneId = getPhoneId();
-        setNetworkRoamingForPhone(phoneId, isRoaming);
     }
 
     /**
@@ -12301,21 +12194,6 @@ public class TelephonyManager {
                 if (!TextUtils.isEmpty(languageTag)) {
                     return Locale.forLanguageTag(languageTag);
                 }
-            }
-        } catch (RemoteException ex) {
-        }
-        return null;
-    }
-
-    /**
-     * TODO delete after SuW migrates to new API.
-     * @hide
-     */
-    public String getLocaleFromDefaultSim() {
-        try {
-            final ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.getSimLocaleForSubscriber(getSubId());
             }
         } catch (RemoteException ex) {
         }
@@ -15338,7 +15216,7 @@ public class TelephonyManager {
      *
      *  1) User data is turned on, or
      *  2) APN is un-metered for this subscription, or
-     *  3) APN type is whitelisted. E.g. MMS is whitelisted if
+     *  3) APN type is allowlisted. E.g. MMS is allowlisted if
      *  {@link #MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED} is enabled.
      *
      * @param apnType Value indicating the apn type. Apn types are defined in {@link ApnSetting}.

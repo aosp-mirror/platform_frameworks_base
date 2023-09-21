@@ -517,7 +517,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // The configuration change is still sent to the activity, even if it doesn't relaunch.
         final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(newConfig);
+                ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
         verify(mAtm.getLifecycleManager()).scheduleTransaction(
                 eq(activity.app.getThread()), eq(activity.token), eq(expected));
     }
@@ -597,7 +597,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setRequestedOrientation(requestedOrientation);
 
         final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(newConfig);
+                ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
         verify(mAtm.getLifecycleManager()).scheduleTransaction(eq(activity.app.getThread()),
                 eq(activity.token), eq(expected));
 
@@ -815,7 +815,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                     false /* preserveWindow */, true /* ignoreStopState */);
 
             final ActivityConfigurationChangeItem expected =
-                    ActivityConfigurationChangeItem.obtain(newConfig);
+                    ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
             verify(mAtm.getLifecycleManager()).scheduleTransaction(
                     eq(activity.app.getThread()), eq(activity.token), eq(expected));
         } finally {
@@ -1541,7 +1541,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Make keyguard locked and set the top activity show-when-locked.
         KeyguardController keyguardController = activity.mTaskSupervisor.getKeyguardController();
         int displayId = activity.getDisplayId();
-        doReturn(true).when(keyguardController).isKeyguardLocked(eq(displayId));
+        keyguardController.setKeyguardShown(displayId, true /* keyguardShowing */,
+                false /* aodShowing */);
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
         topActivity.setVisibleRequested(true);
         topActivity.nowVisible = true;
@@ -1553,7 +1554,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Verify the stack-top activity is occluded keyguard.
         assertEquals(topActivity, task.topRunningActivity());
-        assertTrue(keyguardController.isDisplayOccluded(DEFAULT_DISPLAY));
+        assertTrue(keyguardController.isKeyguardOccluded(displayId));
 
         // Finish the top activity
         topActivity.setState(PAUSED, "true");
@@ -1562,7 +1563,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Verify new top activity does not occlude keyguard.
         assertEquals(activity, task.topRunningActivity());
-        assertFalse(keyguardController.isDisplayOccluded(DEFAULT_DISPLAY));
+        assertFalse(keyguardController.isKeyguardOccluded(displayId));
     }
 
     /**
@@ -2870,14 +2871,14 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setTask(sourceRecord.getTask()).build();
         secondRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
                 true /* startActivity */, sourceRecord);
-        assertFalse(secondRecord.mSplashScreenStyleSolidColor);
+        assertTrue(secondRecord.mAllowIconSplashScreen);
         secondRecord.onStartingWindowDrawn();
 
         final ActivityRecord finalRecord = new ActivityBuilder(mAtm)
                 .setTask(sourceRecord.getTask()).build();
         finalRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
                 true /* startActivity */, secondRecord);
-        assertTrue(finalRecord.mSplashScreenStyleSolidColor);
+        assertFalse(finalRecord.mAllowIconSplashScreen);
     }
 
     @Test

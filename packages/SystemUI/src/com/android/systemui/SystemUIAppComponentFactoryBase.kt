@@ -25,6 +25,9 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.AppComponentFactory
 import com.android.systemui.dagger.ContextComponentHelper
+import com.android.systemui.dagger.SysUIComponent
+import com.android.tools.r8.keepanno.annotations.KeepTarget
+import com.android.tools.r8.keepanno.annotations.UsesReflection
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.ExecutionException
 import javax.inject.Inject
@@ -88,6 +91,7 @@ abstract class SystemUIAppComponentFactoryBase : AppComponentFactory() {
         return app
     }
 
+    @UsesReflection(KeepTarget(extendsClassConstant = SysUIComponent::class, methodName = "inject"))
     override fun instantiateProviderCompat(cl: ClassLoader, className: String): ContentProvider {
         val contentProvider = super.instantiateProviderCompat(cl, className)
         if (contentProvider is ContextInitializer) {

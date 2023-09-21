@@ -17,30 +17,73 @@
 package com.android.systemui.display.data.repository
 
 import android.hardware.display.DisplayManager
+import android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED
 import android.hardware.display.DisplayManager.DisplayListener
 import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_ADDED
 import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
 import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_REMOVED
 import android.os.Handler
+import android.os.Trace
+import android.util.Log
 import android.view.Display
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.display.data.DisplayEvent
+import com.android.systemui.util.Compile
 import com.android.systemui.util.traceSection
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /** Provides a [Flow] of [Display] as returned by [DisplayManager]. */
 interface DisplayRepository {
-    /** Provides a nullable set of displays. */
+    /** Display change event indicating a change to the given displayId has occurred. */
+    val displayChangeEvent: Flow<Int>
+
+    /**
+     * Provides a nullable set of displays. Updates when new displays have been added or removed but
+     * not when a display's info has changed.
+     */
     val displays: Flow<Set<Display>>
+
+    /**
+     * Pending display id that can be enabled/disabled.
+     *
+     * When `null`, it means there is no pending display waiting to be enabled.
+     */
+    val pendingDisplay: Flow<PendingDisplay?>
+
+    /** Represents a connected display that has not been enabled yet. */
+    interface PendingDisplay {
+        /** Id of the pending display. */
+        val id: Int
+
+        /** Enables the display, making it available to the system. */
+        suspend fun enable()
+
+        /**
+         * Ignores the pending display. When called, this specific display id doesn't appear as
+         * pending anymore until the display is disconnected and reconnected again.
+         */
+        suspend fun ignore()
+
+        /** Disables the display, making it unavailable to the system. */
+        suspend fun disable()
+    }
 }
 
 @SysUISingleton
@@ -52,23 +95,27 @@ constructor(
     @Application applicationScope: CoroutineScope,
     @Background backgroundCoroutineDispatcher: CoroutineDispatcher
 ) : DisplayRepository {
-
-    override val displays: Flow<Set<Display>> =
+    // Displays are enabled only after receiving them in [onDisplayAdded]
+    private val allDisplayEvents: Flow<DisplayEvent> =
         conflatedCallbackFlow {
                 val callback =
                     object : DisplayListener {
                         override fun onDisplayAdded(displayId: Int) {
-                            trySend(getDisplays())
+                            trySend(DisplayEvent.Added(displayId))
                         }
 
                         override fun onDisplayRemoved(displayId: Int) {
-                            trySend(getDisplays())
+                            trySend(DisplayEvent.Removed(displayId))
                         }
 
                         override fun onDisplayChanged(displayId: Int) {
-                            trySend(getDisplays())
+                            trySend(DisplayEvent.Changed(displayId))
                         }
                     }
+                // Triggers an initial event when subscribed. This is needed to avoid getDisplays to
+                // be called when this class is constructed, but only when someone subscribes to
+                // this flow.
+                trySend(DisplayEvent.Changed(Display.DEFAULT_DISPLAY))
                 displayManager.registerDisplayListener(
                     callback,
                     backgroundHandler,
@@ -79,14 +126,185 @@ constructor(
                 awaitClose { displayManager.unregisterDisplayListener(callback) }
             }
             .flowOn(backgroundCoroutineDispatcher)
+
+    override val displayChangeEvent: Flow<Int> =
+        allDisplayEvents.filter { it is DisplayEvent.Changed }.map { it.displayId }
+
+    private val enabledDisplays =
+        allDisplayEvents
+            .map { getDisplays() }
+            .flowOn(backgroundCoroutineDispatcher)
             .stateIn(
                 applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = getDisplays()
+                // To avoid getting displays on this object construction, they are get after the
+                // first event. allDisplayEvents emits a changed event when we subscribe to it.
+                initialValue = emptySet()
             )
 
-    fun getDisplays(): Set<Display> =
+    private fun getDisplays(): Set<Display> =
         traceSection("DisplayRepository#getDisplays()") {
             displayManager.displays?.toSet() ?: emptySet()
         }
+
+    /** Propagate to the listeners only enabled displays */
+    override val displays: Flow<Set<Display>> = enabledDisplays
+
+    private val enabledDisplayIds: Flow<Set<Int>> =
+        enabledDisplays
+            .map { enabledDisplaysSet -> enabledDisplaysSet.map { it.displayId }.toSet() }
+            .debugLog("enabledDisplayIds")
+
+    private val ignoredDisplayIds = MutableStateFlow<Set<Int>>(emptySet())
+
+    private fun getInitialConnectedDisplays(): Set<Int> =
+        displayManager
+            .getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
+            .map { it.displayId }
+            .toSet()
+            .also {
+                if (DEBUG) {
+                    Log.d(TAG, "getInitialConnectedDisplays: $it")
+                }
+            }
+
+    /* keeps connected displays until they are disconnected. */
+    private val connectedDisplayIds: StateFlow<Set<Int>> =
+        conflatedCallbackFlow {
+                val connectedIds = getInitialConnectedDisplays().toMutableSet()
+                val callback =
+                    object : DisplayConnectionListener {
+                        override fun onDisplayConnected(id: Int) {
+                            if (DEBUG) {
+                                Log.d(TAG, "display with id=$id connected.")
+                            }
+                            connectedIds += id
+                            ignoredDisplayIds.value -= id
+                            trySend(connectedIds.toSet())
+                        }
+
+                        override fun onDisplayDisconnected(id: Int) {
+                            connectedIds -= id
+                            if (DEBUG) {
+                                Log.d(TAG, "display with id=$id disconnected.")
+                            }
+                            ignoredDisplayIds.value -= id
+                            trySend(connectedIds.toSet())
+                        }
+                    }
+                trySend(connectedIds.toSet())
+                displayManager.registerDisplayListener(
+                    callback,
+                    backgroundHandler,
+                    DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
+                )
+                awaitClose { displayManager.unregisterDisplayListener(callback) }
+            }
+            .distinctUntilChanged()
+            .debugLog("connectedDisplayIds")
+            .flowOn(backgroundCoroutineDispatcher)
+            .stateIn(
+                applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                // The initial value is set to empty, but connected displays are gathered as soon as
+                // the flow starts being collected. This is to ensure the call to get displays (an
+                // IPC) happens in the background instead of when this object
+                // is instantiated.
+                initialValue = emptySet()
+            )
+
+    private val connectedExternalDisplayIds: Flow<Set<Int>> =
+        connectedDisplayIds
+            .map { connectedDisplayIds ->
+                connectedDisplayIds
+                    .filter { id -> displayManager.getDisplay(id)?.type == Display.TYPE_EXTERNAL }
+                    .toSet()
+            }
+            .flowOn(backgroundCoroutineDispatcher)
+            .debugLog("connectedExternalDisplayIds")
+
+    /**
+     * Pending displays are the ones connected, but not enabled and not ignored. A connected display
+     * is ignored after the user makes the decision to use it or not. For now, the initial decision
+     * from the user is final and not reversible.
+     */
+    private val pendingDisplayIds: Flow<Set<Int>> =
+        combine(enabledDisplayIds, connectedExternalDisplayIds, ignoredDisplayIds) {
+                enabledDisplaysIds,
+                connectedExternalDisplayIds,
+                ignoredDisplayIds ->
+                if (DEBUG) {
+                    Log.d(
+                        TAG,
+                        "combining enabled=$enabledDisplaysIds, " +
+                            "connectedExternalDisplayIds=$connectedExternalDisplayIds, " +
+                            "ignored=$ignoredDisplayIds"
+                    )
+                }
+                connectedExternalDisplayIds - enabledDisplaysIds - ignoredDisplayIds
+            }
+            .debugLog("pendingDisplayIds")
+
+    override val pendingDisplay: Flow<DisplayRepository.PendingDisplay?> =
+        pendingDisplayIds
+            .map { pendingDisplayIds ->
+                val id = pendingDisplayIds.maxOrNull() ?: return@map null
+                object : DisplayRepository.PendingDisplay {
+                    override val id = id
+                    override suspend fun enable() {
+                        traceSection("DisplayRepository#enable($id)") {
+                            if (DEBUG) {
+                                Log.d(TAG, "Enabling display with id=$id")
+                            }
+                            displayManager.enableConnectedDisplay(id)
+                        }
+                        // After the display has been enabled, it is automatically ignored.
+                        ignore()
+                    }
+
+                    override suspend fun ignore() {
+                        traceSection("DisplayRepository#ignore($id)") {
+                            ignoredDisplayIds.value += id
+                        }
+                    }
+
+                    override suspend fun disable() {
+                        ignore()
+                        traceSection("DisplayRepository#disable($id)") {
+                            if (DEBUG) {
+                                Log.d(TAG, "Disabling display with id=$id")
+                            }
+                            displayManager.disableConnectedDisplay(id)
+                        }
+                    }
+                }
+            }
+            .debugLog("pendingDisplay")
+
+    private fun <T> Flow<T>.debugLog(flowName: String): Flow<T> {
+        return if (DEBUG) {
+            this.onEach {
+                Log.d(TAG, "$flowName: $it")
+                Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, "$TAG#$flowName", 0)
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, "$TAG#$flowName", "$it", 0)
+            }
+        } else {
+            this
+        }
+    }
+
+    private companion object {
+        const val TAG = "DisplayRepository"
+        val DEBUG = Log.isLoggable(TAG, Log.DEBUG) || Compile.IS_DEBUG
+    }
+}
+
+/** Used to provide default implementations for all methods. */
+private interface DisplayConnectionListener : DisplayListener {
+
+    override fun onDisplayConnected(id: Int) {}
+    override fun onDisplayDisconnected(id: Int) {}
+    override fun onDisplayAdded(id: Int) {}
+    override fun onDisplayRemoved(id: Int) {}
+    override fun onDisplayChanged(id: Int) {}
 }

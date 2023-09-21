@@ -20,26 +20,39 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 import android.content.Context
 import com.android.systemui.R
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 /** Encapsulates business-logic specifically related to the shared notification stack container. */
+@SysUISingleton
 class SharedNotificationContainerInteractor
 @Inject
 constructor(
     configurationRepository: ConfigurationRepository,
     private val context: Context,
+    private val splitShadeStateController: SplitShadeStateController
 ) {
+
+    private val _topPosition = MutableStateFlow(0f)
+    val topPosition = _topPosition.asStateFlow()
+
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
         configurationRepository.onAnyConfigurationChange
             .onStart { emit(Unit) }
             .map { _ ->
                 with(context.resources) {
                     ConfigurationBasedDimensions(
-                        useSplitShade = getBoolean(R.bool.config_use_split_notification_shade),
+                        useSplitShade =
+                            splitShadeStateController.shouldUseSplitNotificationShade(
+                                context.resources
+                            ),
                         useLargeScreenHeader =
                             getBoolean(R.bool.config_use_large_screen_shade_header),
                         marginHorizontal =
@@ -53,6 +66,11 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+
+    /** Top position (without translation) of the shared container. */
+    fun setTopPosition(top: Float) {
+        _topPosition.value = top
+    }
 
     data class ConfigurationBasedDimensions(
         val useSplitShade: Boolean,

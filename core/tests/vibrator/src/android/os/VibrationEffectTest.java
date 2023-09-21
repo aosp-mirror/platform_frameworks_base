@@ -41,8 +41,6 @@ import android.os.VibrationEffect.Composition.UnreachableAfterRepeatingIndefinit
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
 
-import androidx.test.InstrumentationRegistry;
-
 import com.android.internal.R;
 
 import org.jetbrains.annotations.NotNull;
@@ -838,31 +836,29 @@ public class VibrationEffectTest {
 
     @Test
     public void testAreVibrationFeaturesSupported_allSegmentsSupported() {
-        Vibrator vibrator =
-                createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
-                        .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
-                        .build());
+        VibratorInfo info = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+                .build();
 
         assertTrue(VibrationEffect.createWaveform(
                         /* timings= */ new long[] {1, 2, 3}, /* repeatIndex= */ -1)
-                .areVibrationFeaturesSupported(vibrator));
+                .areVibrationFeaturesSupported(info));
         assertTrue(VibrationEffect.createWaveform(
                         /* timings= */ new long[] {1, 2, 3},
                         /* amplitudes= */ new int[] {10, 20, 40},
                         /* repeatIndex= */ 2)
-                .areVibrationFeaturesSupported(vibrator));
+                .areVibrationFeaturesSupported(info));
         assertTrue(
                 VibrationEffect.startComposition()
                         .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
                         .repeatEffectIndefinitely(TEST_ONE_SHOT)
                         .compose()
-                .areVibrationFeaturesSupported(vibrator));
+                .areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testAreVibrationFeaturesSupported_withUnsupportedSegments() {
-        Vibrator vibrator =
-                createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1).build());
+        VibratorInfo info = new VibratorInfo.Builder(/* id= */ 1).build();
 
         assertFalse(
                 VibrationEffect.startComposition()
@@ -872,7 +868,7 @@ public class VibrationEffectTest {
                                 /* amplitudes= */ new int[] {10, 20, 40},
                                 /* repeatIndex= */ -1))
                         .compose()
-                .areVibrationFeaturesSupported(vibrator));
+                .areVibrationFeaturesSupported(info));
     }
 
     @Test
@@ -995,14 +991,5 @@ public class VibrationEffectTest {
         }
 
         return context;
-    }
-
-    private Vibrator createVibratorWithCustomInfo(VibratorInfo info) {
-        return new SystemVibrator(InstrumentationRegistry.getContext()) {
-            @Override
-            public VibratorInfo getInfo() {
-                return info;
-            }
-        };
     }
 }

@@ -25,7 +25,6 @@ import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView
-import com.android.systemui.qs.tileimpl.QSIconViewImpl
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
@@ -68,7 +67,7 @@ class TileRequestDialog(
 
     private fun createTileView(tileData: TileData): QSTileView {
         val themedContext = ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
-        val tile = QSTileViewImpl(themedContext, QSIconViewImpl(themedContext), true)
+        val tile = QSTileViewImpl(themedContext, true)
         val state = QSTile.BooleanState().apply {
             label = tileData.label
             handlesLongClick = false

@@ -118,9 +118,6 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String NAS_DEFAULT_SERVICE = "nas_default_service";
 
-    /** (boolean) Whether notify() calls to NMS should acquire and hold WakeLocks. */
-    public static final String NOTIFY_WAKELOCK = "nms_notify_wakelock";
-
     // Flags related to media notifications
 
     /**
@@ -129,11 +126,6 @@ public final class SystemUiDeviceConfigFlags {
     public static final String HASH_SALT_MAX_DAYS = "hash_salt_max_days";
 
     // Flag related to Privacy Indicators
-
-    /**
-     * Whether to show the complete ongoing app ops chip.
-     */
-    public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_2_enabled";
 
     /**
      * Whether to show app ops chip for just microphone + camera.

@@ -30,7 +30,6 @@ import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.SurfaceControl.getGlobalTransaction;
-import static android.view.ViewRootImpl.LOCAL_LAYOUT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -1446,9 +1445,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         final boolean dragResizingChanged = !mDragResizingChangeReported && isDragResizeChanged();
-
-        final boolean attachedFrameChanged = LOCAL_LAYOUT
-                && mLayoutAttached && getParentWindow().frameChanged();
+        final boolean attachedFrameChanged = mLayoutAttached && getParentWindow().frameChanged();
 
         if (DEBUG) {
             Slog.v(TAG_WM, "Resizing " + this + ": configChanged=" + configChanged
@@ -1720,29 +1717,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * This is a form of rectangle "difference". It cut off each dimension of rect by the amount
-     * that toRemove is "pushing into" it from the outside. Any dimension that fully contains
-     * toRemove won't change.
-     */
-    private void cutRect(Rect rect, Rect toRemove) {
-        if (toRemove.isEmpty()) return;
-        if (toRemove.top < rect.bottom && toRemove.bottom > rect.top) {
-            if (toRemove.right >= rect.right && toRemove.left >= rect.left) {
-                rect.right = toRemove.left;
-            } else if (toRemove.left <= rect.left && toRemove.right <= rect.right) {
-                rect.left = toRemove.right;
-            }
-        }
-        if (toRemove.left < rect.right && toRemove.right > rect.left) {
-            if (toRemove.bottom >= rect.bottom && toRemove.top >= rect.top) {
-                rect.bottom = toRemove.top;
-            } else if (toRemove.top <= rect.top && toRemove.bottom <= rect.bottom) {
-                rect.top = toRemove.bottom;
-            }
-        }
-    }
-
-    /**
      * Retrieves the visible bounds of the window.
      * @param bounds The rect which gets the bounds.
      */
@@ -1762,7 +1736,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         bounds.set(mWindowFrames.mFrame);
         bounds.inset(getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                bounds, mAttrs.type, getWindowingMode(), mAttrs.softInputMode, mAttrs.flags));
+                bounds, mAttrs.type, getActivityType(), mAttrs.softInputMode, mAttrs.flags));
         if (intersectWithRootTaskBounds) {
             bounds.intersect(mTmpRect);
         }
@@ -3968,14 +3942,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mDragResizing != computeDragResizing();
     }
 
-    @Override
-    void setWaitingForDrawnIfResizingChanged() {
-        if (isDragResizeChanged()) {
-            mWmService.mRoot.mWaitingForDrawn.add(this);
-        }
-        super.setWaitingForDrawnIfResizingChanged();
-    }
-
     /**
      * Resets the state whether we reported a drag resize change to the app.
      */
@@ -5525,10 +5491,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // The region is on the window coordinates, so it needs to  be translated into screen
         // coordinates. There's no need to scale since that will be done by native code.
         outRegion.translate(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top);
-    }
-
-    boolean hasTapExcludeRegion() {
-        return !mTapExcludeRegion.isEmpty();
     }
 
     boolean isImeLayeringTarget() {

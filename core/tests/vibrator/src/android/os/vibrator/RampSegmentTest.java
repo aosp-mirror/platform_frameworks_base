@@ -23,30 +23,20 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
+import android.hardware.vibrator.IVibrator;
 import android.os.Parcel;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
+import android.os.VibratorInfo;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.MockitoRule;
+import org.junit.runners.JUnit4;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(JUnit4.class)
 public class RampSegmentTest {
     private static final float TOLERANCE = 1e-2f;
-
-    @Rule
-    public MockitoRule mMockitoRule = MockitoJUnit.rule();
-
-    @Mock
-    private Vibrator mVibrator;
 
     @Test
     public void testCreation() {
@@ -147,71 +137,71 @@ public class RampSegmentTest {
 
     @Test
     public void testVibrationFeaturesSupport_amplitudeAndFrequencyControls_supported() {
-        when(mVibrator.hasAmplitudeControl()).thenReturn(true);
-        when(mVibrator.hasFrequencyControl()).thenReturn(true);
+        VibratorInfo info =
+                createVibInfo(/* hasAmplitudeControl= */ true, /* hasFrequencyControl= */ true);
 
         // Increasing amplitude
-        assertTrue(new RampSegment(0.5f, 1, 0, 0, 10).areVibrationFeaturesSupported(mVibrator));
+        assertTrue(new RampSegment(0.5f, 1, 0, 0, 10).areVibrationFeaturesSupported(info));
         // Increasing frequency
-        assertTrue(new RampSegment(0.5f, 0.5f, 0, 1, 10).areVibrationFeaturesSupported(mVibrator));
+        assertTrue(new RampSegment(0.5f, 0.5f, 0, 1, 10).areVibrationFeaturesSupported(info));
         // Decreasing amplitude
-        assertTrue(new RampSegment(1, 0.5f, 0, 0, 10).areVibrationFeaturesSupported(mVibrator));
+        assertTrue(new RampSegment(1, 0.5f, 0, 0, 10).areVibrationFeaturesSupported(info));
         // Decreasing frequency
-        assertTrue(new RampSegment(0.5f, 0.5f, 1, 0, 10).areVibrationFeaturesSupported(mVibrator));
+        assertTrue(new RampSegment(0.5f, 0.5f, 1, 0, 10).areVibrationFeaturesSupported(info));
         // Zero duration
-        assertTrue(new RampSegment(0.5f, 0.5f, 1, 0, 0).areVibrationFeaturesSupported(mVibrator));
+        assertTrue(new RampSegment(0.5f, 0.5f, 1, 0, 0).areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_noAmplitudeControl_unsupportedForChangingAmplitude() {
-        when(mVibrator.hasAmplitudeControl()).thenReturn(false);
-        when(mVibrator.hasFrequencyControl()).thenReturn(true);
+        VibratorInfo info =
+                createVibInfo(/* hasAmplitudeControl= */ false, /* hasFrequencyControl= */ true);
 
         // Test with increasing/decreasing amplitudes.
-        assertFalse(new RampSegment(0.5f, 1, 0, 0, 10).areVibrationFeaturesSupported(mVibrator));
-        assertFalse(new RampSegment(1, 0.5f, 0, 0, 10).areVibrationFeaturesSupported(mVibrator));
+        assertFalse(new RampSegment(0.5f, 1, 0, 0, 10).areVibrationFeaturesSupported(info));
+        assertFalse(new RampSegment(1, 0.5f, 0, 0, 10).areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_noAmplitudeControl_fractionalAmplitudeUnsupported() {
-        when(mVibrator.hasAmplitudeControl()).thenReturn(false);
-        when(mVibrator.hasFrequencyControl()).thenReturn(true);
+        VibratorInfo info =
+                createVibInfo(/* hasAmplitudeControl= */ false, /* hasFrequencyControl= */ true);
 
-        assertFalse(new RampSegment(0.2f, 0.2f, 0, 0, 10).areVibrationFeaturesSupported(mVibrator));
-        assertFalse(new RampSegment(0, 0.2f, 0, 0, 10).areVibrationFeaturesSupported(mVibrator));
-        assertFalse(new RampSegment(0.2f, 0, 0, 0, 10).areVibrationFeaturesSupported(mVibrator));
+        assertFalse(new RampSegment(0.2f, 0.2f, 0, 0, 10).areVibrationFeaturesSupported(info));
+        assertFalse(new RampSegment(0, 0.2f, 0, 0, 10).areVibrationFeaturesSupported(info));
+        assertFalse(new RampSegment(0.2f, 0, 0, 0, 10).areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_unchangingZeroAmplitude_supported() {
         RampSegment amplitudeZeroWithIncreasingFrequency = new RampSegment(1, 1, 0.5f, 0.8f, 10);
         RampSegment amplitudeZeroWithDecreasingFrequency = new RampSegment(1, 1, 0.8f, 0.5f, 10);
-        when(mVibrator.hasFrequencyControl()).thenReturn(true);
-        when(mVibrator.hasAmplitudeControl()).thenReturn(false);
+        VibratorInfo info =
+                createVibInfo(/* hasAmplitudeControl= */ false, /* hasFrequencyControl= */ true);
 
-        assertTrue(amplitudeZeroWithIncreasingFrequency.areVibrationFeaturesSupported(mVibrator));
-        assertTrue(amplitudeZeroWithDecreasingFrequency.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(amplitudeZeroWithIncreasingFrequency.areVibrationFeaturesSupported(info));
+        assertTrue(amplitudeZeroWithDecreasingFrequency.areVibrationFeaturesSupported(info));
 
-        when(mVibrator.hasAmplitudeControl()).thenReturn(true);
+        info = createVibInfo(/* hasAmplitudeControl= */ true, /* hasFrequencyControl= */ true);
 
-        assertTrue(amplitudeZeroWithIncreasingFrequency.areVibrationFeaturesSupported(mVibrator));
-        assertTrue(amplitudeZeroWithDecreasingFrequency.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(amplitudeZeroWithIncreasingFrequency.areVibrationFeaturesSupported(info));
+        assertTrue(amplitudeZeroWithDecreasingFrequency.areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_unchangingOneAmplitude_supported() {
         RampSegment amplitudeOneWithIncreasingFrequency = new RampSegment(1, 1, 0.5f, 0.8f, 10);
         RampSegment amplitudeOneWithDecreasingFrequency = new RampSegment(1, 1, 0.8f, 0.5f, 10);
-        when(mVibrator.hasFrequencyControl()).thenReturn(true);
-        when(mVibrator.hasAmplitudeControl()).thenReturn(false);
+        VibratorInfo info =
+                createVibInfo(/* hasAmplitudeControl= */ false, /* hasFrequencyControl= */ true);
 
-        assertTrue(amplitudeOneWithIncreasingFrequency.areVibrationFeaturesSupported(mVibrator));
-        assertTrue(amplitudeOneWithDecreasingFrequency.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(amplitudeOneWithIncreasingFrequency.areVibrationFeaturesSupported(info));
+        assertTrue(amplitudeOneWithDecreasingFrequency.areVibrationFeaturesSupported(info));
 
-        when(mVibrator.hasAmplitudeControl()).thenReturn(true);
+        info = createVibInfo(/* hasAmplitudeControl= */ true, /* hasFrequencyControl= */ true);
 
-        assertTrue(amplitudeOneWithIncreasingFrequency.areVibrationFeaturesSupported(mVibrator));
-        assertTrue(amplitudeOneWithDecreasingFrequency.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(amplitudeOneWithIncreasingFrequency.areVibrationFeaturesSupported(info));
+        assertTrue(amplitudeOneWithDecreasingFrequency.areVibrationFeaturesSupported(info));
     }
 
     @Test
@@ -220,52 +210,52 @@ public class RampSegmentTest {
                 new RampSegment(DEFAULT_AMPLITUDE, DEFAULT_AMPLITUDE, 0.5f, 0.8f, 10);
         RampSegment defaultAmplitudeDecreasingFrequency =
                 new RampSegment(DEFAULT_AMPLITUDE, DEFAULT_AMPLITUDE, 0.8f, 0.5f, 10);
-        when(mVibrator.hasFrequencyControl()).thenReturn(true);
-        when(mVibrator.hasAmplitudeControl()).thenReturn(false);
+        VibratorInfo info =
+                createVibInfo(/* hasAmplitudeControl= */ false, /* hasFrequencyControl= */ true);
 
-        assertTrue(defaultAmplitudeIncreasingFrequency.areVibrationFeaturesSupported(mVibrator));
-        assertTrue(defaultAmplitudeDecreasingFrequency.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(defaultAmplitudeIncreasingFrequency.areVibrationFeaturesSupported(info));
+        assertTrue(defaultAmplitudeDecreasingFrequency.areVibrationFeaturesSupported(info));
 
-        when(mVibrator.hasAmplitudeControl()).thenReturn(true);
+        info = createVibInfo(/* hasAmplitudeControl= */ true, /* hasFrequencyControl= */ true);
 
-        assertTrue(defaultAmplitudeIncreasingFrequency.areVibrationFeaturesSupported(mVibrator));
-        assertTrue(defaultAmplitudeDecreasingFrequency.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(defaultAmplitudeIncreasingFrequency.areVibrationFeaturesSupported(info));
+        assertTrue(defaultAmplitudeDecreasingFrequency.areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_noFrequencyControl_unsupportedForChangingFrequency() {
-        when(mVibrator.hasAmplitudeControl()).thenReturn(true);
-        when(mVibrator.hasFrequencyControl()).thenReturn(false);
+        VibratorInfo info =
+                createVibInfo(/* hasAmplitudeControl= */ true, /* hasFrequencyControl= */ false);
 
         // Test with increasing/decreasing frequencies.
-        assertFalse(new RampSegment(0, 0, 0.2f, 0.4f, 10).areVibrationFeaturesSupported(mVibrator));
-        assertFalse(new RampSegment(0, 0, 0.4f, 0.2f, 10).areVibrationFeaturesSupported(mVibrator));
+        assertFalse(new RampSegment(0, 0, 0.2f, 0.4f, 10).areVibrationFeaturesSupported(info));
+        assertFalse(new RampSegment(0, 0, 0.4f, 0.2f, 10).areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_noFrequencyControl_fractionalFrequencyUnsupported() {
-        when(mVibrator.hasAmplitudeControl()).thenReturn(true);
-        when(mVibrator.hasFrequencyControl()).thenReturn(false);
+        VibratorInfo info =
+                createVibInfo(/* hasAmplitudeControl= */ true, /* hasFrequencyControl= */ false);
 
-        assertFalse(new RampSegment(0, 0, 0.2f, 0.2f, 10).areVibrationFeaturesSupported(mVibrator));
-        assertFalse(new RampSegment(0, 0, 0.2f, 0, 10).areVibrationFeaturesSupported(mVibrator));
-        assertFalse(new RampSegment(0, 0, 0, 0.2f, 10).areVibrationFeaturesSupported(mVibrator));
+        assertFalse(new RampSegment(0, 0, 0.2f, 0.2f, 10).areVibrationFeaturesSupported(info));
+        assertFalse(new RampSegment(0, 0, 0.2f, 0, 10).areVibrationFeaturesSupported(info));
+        assertFalse(new RampSegment(0, 0, 0, 0.2f, 10).areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_unchangingZeroFrequency_supported() {
         RampSegment frequencyZeroWithIncreasingAmplitude = new RampSegment(0.1f, 1, 0, 0, 10);
         RampSegment frequencyZeroWithDecreasingAmplitude = new RampSegment(1, 0.1f, 0, 0, 10);
-        when(mVibrator.hasAmplitudeControl()).thenReturn(true);
-        when(mVibrator.hasFrequencyControl()).thenReturn(false);
+        VibratorInfo info =
+                createVibInfo(/* hasAmplitudeControl= */ true, /* hasFrequencyControl= */ false);
 
-        assertTrue(frequencyZeroWithIncreasingAmplitude.areVibrationFeaturesSupported(mVibrator));
-        assertTrue(frequencyZeroWithDecreasingAmplitude.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(frequencyZeroWithIncreasingAmplitude.areVibrationFeaturesSupported(info));
+        assertTrue(frequencyZeroWithDecreasingAmplitude.areVibrationFeaturesSupported(info));
 
-        when(mVibrator.hasFrequencyControl()).thenReturn(true);
+        info = createVibInfo(/* hasAmplitudeControl= */ true, /* hasFrequencyControl= */ true);
 
-        assertTrue(frequencyZeroWithIncreasingAmplitude.areVibrationFeaturesSupported(mVibrator));
-        assertTrue(frequencyZeroWithDecreasingAmplitude.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(frequencyZeroWithIncreasingAmplitude.areVibrationFeaturesSupported(info));
+        assertTrue(frequencyZeroWithDecreasingAmplitude.areVibrationFeaturesSupported(info));
     }
 
     @Test
@@ -273,5 +263,18 @@ public class RampSegmentTest {
         // A single ramp segment duration is not checked here, but contributes to the effect known
         // duration checked in VibrationEffect implementations.
         assertTrue(new RampSegment(0.5f, 1, 0, 0, 5_000).isHapticFeedbackCandidate());
+    }
+
+    private static VibratorInfo createVibInfo(
+            boolean hasAmplitudeControl, boolean hasFrequencyControl) {
+        VibratorInfo.Builder builder = new VibratorInfo.Builder(/* id= */ 1);
+        long capabilities = 0;
+        if (hasAmplitudeControl) {
+            capabilities |= IVibrator.CAP_AMPLITUDE_CONTROL;
+        }
+        if (hasFrequencyControl) {
+            capabilities |= (IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        }
+        return builder.setCapabilities(capabilities).build();
     }
 }

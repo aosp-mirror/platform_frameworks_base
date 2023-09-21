@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.pipeline.data.repository
 
-import android.util.Log
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository.Companion.POSITION_AT_END
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +27,7 @@ class FakeTileSpecRepository : TileSpecRepository {
     private val tilesPerUser = mutableMapOf<Int, MutableStateFlow<List<TileSpec>>>()
 
     override fun tilesSpecs(userId: Int): Flow<List<TileSpec>> {
-        return getFlow(userId).asStateFlow().also { Log.d("Fabian", "Retrieving flow for $userId") }
+        return getFlow(userId).asStateFlow()
     }
 
     override suspend fun addTile(userId: Int, tile: TileSpec, position: Int) {

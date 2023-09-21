@@ -811,6 +811,28 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
                 /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_PORTRAIT);
     }
 
+    @Test
+    public void testOverrideOrientationIfNeeded_userAspectRatioApplied_unspecifiedOverridden() {
+        spyOn(mController);
+        doReturn(true).when(mController).shouldApplyUserMinAspectRatioOverride();
+
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_PORTRAIT);
+
+        // unchanged if orientation is specified
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_LANDSCAPE), SCREEN_ORIENTATION_LANDSCAPE);
+    }
+
+    @Test
+    public void testOverrideOrientationIfNeeded_userAspectRatioNotApplied_returnsUnchanged() {
+        spyOn(mController);
+        doReturn(false).when(mController).shouldApplyUserMinAspectRatioOverride();
+
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_UNSPECIFIED);
+    }
+
     // shouldApplyUser...Override
     @Test
     public void testShouldApplyUserFullscreenOverride_trueProperty_returnsFalse() throws Exception {
@@ -862,6 +884,39 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testShouldEnableUserAspectRatioSettings_falseProperty_returnsFalse()
+            throws Exception {
+        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ false);
+
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldEnableUserAspectRatioSettings());
+    }
+
+    @Test
+    public void testShouldEnableUserAspectRatioSettings_trueProperty_returnsTrue()
+            throws Exception {
+        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ true);
+
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertTrue(mController.shouldEnableUserAspectRatioSettings());
+    }
+
+    @Test
+    public void testShouldEnableUserAspectRatioSettings_noIgnoreOrientaion_returnsFalse()
+            throws Exception {
+        prepareActivityForShouldApplyUserMinAspectRatioOverride(/* orientationRequest */ false);
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ true);
+
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldEnableUserAspectRatioSettings());
+    }
+
+    @Test
     public void testShouldApplyUserMinAspectRatioOverride_falseProperty_returnsFalse()
             throws Exception {
         prepareActivityThatShouldApplyUserMinAspectRatioOverride();
@@ -898,11 +953,24 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         assertTrue(mController.shouldApplyUserMinAspectRatioOverride());
     }
 
-    private void prepareActivityThatShouldApplyUserMinAspectRatioOverride() {
+    @Test
+    public void testShouldApplyUserMinAspectRatioOverride_noIgnoreOrientationreturnsFalse() {
+        prepareActivityForShouldApplyUserMinAspectRatioOverride(/* orientationRequest */ false);
+
+        assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
+    }
+
+    private void prepareActivityForShouldApplyUserMinAspectRatioOverride(
+            boolean orientationRequest) {
         spyOn(mController);
-        doReturn(true).when(mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
+        doReturn(orientationRequest).when(
+                mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
         mDisplayContent.setIgnoreOrientationRequest(true);
         doReturn(USER_MIN_ASPECT_RATIO_3_2).when(mController).getUserMinAspectRatioOverrideCode();
+    }
+
+    private void prepareActivityThatShouldApplyUserMinAspectRatioOverride() {
+        prepareActivityForShouldApplyUserMinAspectRatioOverride(/* orientationRequest */ true);
     }
 
     private void prepareActivityThatShouldApplyUserFullscreenOverride() {

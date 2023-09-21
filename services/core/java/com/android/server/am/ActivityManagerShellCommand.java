@@ -2514,30 +2514,36 @@ final class ActivityManagerShellCommand extends ShellCommand {
         StopUserCallback callback = wait ? new StopUserCallback(userId) : null;
 
         Slogf.d(TAG, "Calling stopUser(%d, %b, %s)", userId, force, callback);
-        int res = mInterface.stopUser(userId, force, callback);
-        if (res != ActivityManager.USER_OP_SUCCESS) {
-            String txt = "";
-            switch (res) {
-                case ActivityManager.USER_OP_IS_CURRENT:
-                    txt = " (Can't stop current user)";
-                    break;
-                case ActivityManager.USER_OP_UNKNOWN_USER:
-                    txt = " (Unknown user " + userId + ")";
-                    break;
-                case ActivityManager.USER_OP_ERROR_IS_SYSTEM:
-                    txt = " (System user cannot be stopped)";
-                    break;
-                case ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP:
-                    txt = " (Can't stop user " + userId
-                            + " - one of its related users can't be stopped)";
-                    break;
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "shell_runStopUser-" + userId + "-[stopUser]");
+        try {
+            int res = mInterface.stopUser(userId, force, callback);
+            if (res != ActivityManager.USER_OP_SUCCESS) {
+                String txt = "";
+                switch (res) {
+                    case ActivityManager.USER_OP_IS_CURRENT:
+                        txt = " (Can't stop current user)";
+                        break;
+                    case ActivityManager.USER_OP_UNKNOWN_USER:
+                        txt = " (Unknown user " + userId + ")";
+                        break;
+                    case ActivityManager.USER_OP_ERROR_IS_SYSTEM:
+                        txt = " (System user cannot be stopped)";
+                        break;
+                    case ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP:
+                        txt = " (Can't stop user " + userId
+                                + " - one of its related users can't be stopped)";
+                        break;
+                }
+                getErrPrintWriter().println("Switch failed: " + res + txt);
+                return -1;
+            } else if (callback != null) {
+                callback.waitForFinish();
             }
-            getErrPrintWriter().println("Switch failed: " + res + txt);
-            return -1;
-        } else if (callback != null) {
-            callback.waitForFinish();
+            return 0;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
-        return 0;
     }
 
     int runIsUserStopped(PrintWriter pw) {
@@ -4089,6 +4095,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    lru: raw LRU process list");
             pw.println("    binder-proxies: stats on binder objects and IPCs");
             pw.println("    settings: currently applied config settings");
+            pw.println("    timers: the current ANR timer state");
             pw.println("    service [COMP_SPEC]: service client-side state");
             pw.println("    package [PACKAGE_NAME]: all state related to given package");
             pw.println("    all: dump all activities");

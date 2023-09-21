@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"დაბლოკვის შემდეგ საჭიროა PIN-კოდი"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"დაბლოკვის შემდეგ საჭიროა პაროლი"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"დაბლოკვის შემდეგ საჭიროა ნიმუში"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"განახლება დაინსტალირდება, როცა მოწყობილობა არ გამოიყენება"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"საჭიროა დამ. უსაფრთ. PIN-კოდი ერთხანს არ გამოიყენ."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"საჭ. დამ. უსაფრთ. პაროლი ერთხანს არ გამოიყენება."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"საჭიროა დამ. უსაფრთ. ნიმუში ერთხანს არ გამოიყენება."</string>

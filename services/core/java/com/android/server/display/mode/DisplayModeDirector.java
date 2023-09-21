@@ -1540,6 +1540,21 @@ public class DisplayModeDirector {
         private final Injector mInjector;
         private final Handler mHandler;
 
+        private final IThermalEventListener.Stub mThermalListener =
+                new IThermalEventListener.Stub() {
+                    @Override
+                    public void notifyThrottling(Temperature temp) {
+                        @Temperature.ThrottlingStatus int currentStatus = temp.getStatus();
+                        synchronized (mLock) {
+                            if (mThermalStatus != currentStatus) {
+                                mThermalStatus = currentStatus;
+                            }
+                            onBrightnessChangedLocked();
+                        }
+                    }
+                };
+        private boolean mThermalRegistered;
+
         // Enable light sensor only when mShouldObserveAmbientLowChange is true or
         // mShouldObserveAmbientHighChange is true, screen is on, peak refresh rate
         // changeable and low power mode off. After initialization, these states will
@@ -1548,8 +1563,16 @@ public class DisplayModeDirector {
         private boolean mRefreshRateChangeable = false;
         private boolean mLowPowerModeEnabled = false;
 
+        @Nullable
+        private SparseArray<RefreshRateRange> mLowZoneRefreshRateForThermals;
         private int mRefreshRateInLowZone;
+
+        @Nullable
+        private SparseArray<RefreshRateRange> mHighZoneRefreshRateForThermals;
         private int mRefreshRateInHighZone;
+
+        @GuardedBy("mLock")
+        private @Temperature.ThrottlingStatus int mThermalStatus = Temperature.THROTTLING_NONE;
 
         BrightnessObserver(Context context, Handler handler, Injector injector) {
             mContext = context;
@@ -1649,6 +1672,8 @@ public class DisplayModeDirector {
                                 R.integer.config_defaultRefreshRateInZone)
                         : displayDeviceConfig.getDefaultLowBlockingZoneRefreshRate();
             }
+            mLowZoneRefreshRateForThermals = displayDeviceConfig == null ? null
+                    : displayDeviceConfig.getLowBlockingZoneThermalMap();
             mRefreshRateInLowZone = refreshRateInLowZone;
         }
 
@@ -1668,6 +1693,8 @@ public class DisplayModeDirector {
                                 R.integer.config_fixedRefreshRateInHighZone)
                         : displayDeviceConfig.getDefaultHighBlockingZoneRefreshRate();
             }
+            mHighZoneRefreshRateForThermals = displayDeviceConfig == null ? null
+                    : displayDeviceConfig.getHighBlockingZoneThermalMap();
             mRefreshRateInHighZone = refreshRateInHighZone;
         }
 
@@ -1785,18 +1812,26 @@ public class DisplayModeDirector {
                 mRefreshRateChangeable = changeable;
                 updateSensorStatus();
                 if (!changeable) {
-                    // Revoke previous vote from BrightnessObserver
-                    mVotesStorage.updateGlobalVote(Vote.PRIORITY_FLICKER_REFRESH_RATE, null);
-                    mVotesStorage.updateGlobalVote(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, null);
+                    removeFlickerRefreshRateVotes();
                 }
             }
         }
 
-        private void onLowPowerModeEnabledLocked(boolean b) {
-            if (mLowPowerModeEnabled != b) {
-                mLowPowerModeEnabled = b;
+        @VisibleForTesting
+        void onLowPowerModeEnabledLocked(boolean enabled) {
+            if (mLowPowerModeEnabled != enabled) {
+                mLowPowerModeEnabled = enabled;
                 updateSensorStatus();
+                if (enabled) {
+                    removeFlickerRefreshRateVotes();
+                }
             }
+        }
+
+        private void removeFlickerRefreshRateVotes() {
+            // Revoke previous vote from BrightnessObserver
+            mVotesStorage.updateGlobalVote(Vote.PRIORITY_FLICKER_REFRESH_RATE, null);
+            mVotesStorage.updateGlobalVote(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, null);
         }
 
         private void onDeviceConfigLowBrightnessThresholdsChanged(float[] displayThresholds,
@@ -2101,7 +2136,7 @@ public class DisplayModeDirector {
         }
 
         private void onBrightnessChangedLocked() {
-            if (!mRefreshRateChangeable) {
+            if (!mRefreshRateChangeable || mLowPowerModeEnabled) {
                 return;
             }
             Vote refreshRateVote = null;
@@ -2117,6 +2152,15 @@ public class DisplayModeDirector {
             if (insideLowZone) {
                 refreshRateVote =
                         Vote.forPhysicalRefreshRates(mRefreshRateInLowZone, mRefreshRateInLowZone);
+                if (mLowZoneRefreshRateForThermals != null) {
+                    RefreshRateRange range = SkinThermalStatusObserver
+                            .findBestMatchingRefreshRateRange(mThermalStatus,
+                                    mLowZoneRefreshRateForThermals);
+                    if (range != null) {
+                        refreshRateVote =
+                                Vote.forPhysicalRefreshRates(range.min, range.max);
+                    }
+                }
                 refreshRateSwitchingVote = Vote.forDisableRefreshRateSwitching();
             }
 
@@ -2126,6 +2170,15 @@ public class DisplayModeDirector {
                 refreshRateVote =
                         Vote.forPhysicalRefreshRates(mRefreshRateInHighZone,
                                 mRefreshRateInHighZone);
+                if (mHighZoneRefreshRateForThermals != null) {
+                    RefreshRateRange range = SkinThermalStatusObserver
+                            .findBestMatchingRefreshRateRange(mThermalStatus,
+                                    mHighZoneRefreshRateForThermals);
+                    if (range != null) {
+                        refreshRateVote =
+                                Vote.forPhysicalRefreshRates(range.min, range.max);
+                    }
+                }
                 refreshRateSwitchingVote = Vote.forDisableRefreshRateSwitching();
             }
 
@@ -2184,12 +2237,24 @@ public class DisplayModeDirector {
                         + mRefreshRateChangeable);
             }
 
+            boolean registerForThermals = false;
             if ((mShouldObserveAmbientLowChange || mShouldObserveAmbientHighChange)
                      && isDeviceActive() && !mLowPowerModeEnabled && mRefreshRateChangeable) {
                 registerLightSensor();
-
+                registerForThermals = mLowZoneRefreshRateForThermals != null
+                        || mHighZoneRefreshRateForThermals != null;
             } else {
                 unregisterSensorListener();
+            }
+
+            if (registerForThermals && !mThermalRegistered) {
+                mThermalRegistered = mInjector.registerThermalServiceListener(mThermalListener);
+            } else if (!registerForThermals && mThermalRegistered) {
+                mInjector.unregisterThermalServiceListener(mThermalListener);
+                mThermalRegistered = false;
+                synchronized (mLock) {
+                    mThermalStatus = Temperature.THROTTLING_NONE; // reset
+                }
             }
         }
 
@@ -2821,6 +2886,7 @@ public class DisplayModeDirector {
         boolean isDozeState(Display d);
 
         boolean registerThermalServiceListener(IThermalEventListener listener);
+        void unregisterThermalServiceListener(IThermalEventListener listener);
 
         boolean supportsFrameRateOverride();
 
@@ -2919,6 +2985,19 @@ public class DisplayModeDirector {
                 return false;
             }
             return true;
+        }
+
+        @Override
+        public void unregisterThermalServiceListener(IThermalEventListener listener) {
+            IThermalService thermalService = getThermalService();
+            if (thermalService == null) {
+                Slog.w(TAG, "Could not unregister thermal status. Service not available");
+            }
+            try {
+                thermalService.unregisterThermalEventListener(listener);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to unregister thermal status listener", e);
+            }
         }
 
         @Override

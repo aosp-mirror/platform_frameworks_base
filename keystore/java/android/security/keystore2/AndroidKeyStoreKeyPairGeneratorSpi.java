@@ -27,6 +27,7 @@ import android.hardware.security.keymint.KeyPurpose;
 import android.hardware.security.keymint.SecurityLevel;
 import android.hardware.security.keymint.Tag;
 import android.os.Build;
+import android.os.StrictMode;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore2;
 import android.security.KeyStoreException;
@@ -617,6 +618,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
     @Override
     public KeyPair generateKeyPair() {
+        StrictMode.noteSlowCall("generateKeyPair");
         if (mKeyStore == null || mSpec == null) {
             throw new IllegalStateException("Not initialized");
         }

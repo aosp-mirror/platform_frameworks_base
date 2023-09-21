@@ -21,31 +21,20 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
+import android.hardware.vibrator.IVibrator;
 import android.os.Parcel;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
+import android.os.VibratorInfo;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.MockitoRule;
+import org.junit.runners.JUnit4;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(JUnit4.class)
 public class StepSegmentTest {
     private static final float TOLERANCE = 1e-2f;
-
-    @Rule
-    public MockitoRule mMockitoRule = MockitoJUnit.rule();
-
-    @Mock
-    private Vibrator mVibrator;
-
     @Test
     public void testCreation() {
         StepSegment step = new StepSegment(/* amplitude= */ 1f, /* frequencyHz= */ 1f,
@@ -160,26 +149,26 @@ public class StepSegmentTest {
     public void testVibrationFeaturesSupport_zeroAmplitude_supported() {
         StepSegment segment =
                 new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 0);
-        when(mVibrator.hasAmplitudeControl()).thenReturn(true);
+        VibratorInfo info = createVibInfoForAmplitude(/* hasAmplitudeControl= */ true);
 
-        assertTrue(segment.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(segment.areVibrationFeaturesSupported(info));
 
-        when(mVibrator.hasAmplitudeControl()).thenReturn(false);
+        info = createVibInfoForAmplitude(/* hasAmplitudeControl= */ false);
 
-        assertTrue(segment.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(segment.areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_maxAmplitude_supported() {
         StepSegment segment =
                 new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 0);
-        when(mVibrator.hasAmplitudeControl()).thenReturn(true);
+        VibratorInfo info = createVibInfoForAmplitude(/* hasAmplitudeControl= */ true);
 
-        assertTrue(segment.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(segment.areVibrationFeaturesSupported(info));
 
-        when(mVibrator.hasAmplitudeControl()).thenReturn(false);
+        info = createVibInfoForAmplitude(/* hasAmplitudeControl= */ false);
 
-        assertTrue(segment.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(segment.areVibrationFeaturesSupported(info));
     }
 
     @Test
@@ -189,60 +178,60 @@ public class StepSegmentTest {
                         /* amplitude= */ VibrationEffect.DEFAULT_AMPLITUDE,
                         /* frequencyHz= */ 0,
                         /* duration= */ 0);
-        when(mVibrator.hasAmplitudeControl()).thenReturn(true);
+        VibratorInfo info = createVibInfoForAmplitude(/* hasAmplitudeControl= */ true);
 
-        assertTrue(segment.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(segment.areVibrationFeaturesSupported(info));
 
-        when(mVibrator.hasAmplitudeControl()).thenReturn(false);
+        info = createVibInfoForAmplitude(/* hasAmplitudeControl= */ false);
 
-        assertTrue(segment.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(segment.areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_fractionalAmplitude_hasAmplitudeCtrl_supported() {
-        when(mVibrator.hasAmplitudeControl()).thenReturn(true);
+        VibratorInfo info = createVibInfoForAmplitude(/* hasAmplitudeControl= */ true);
 
         assertTrue(new StepSegment(/* amplitude= */ 0.2f, /* frequencyHz= */ 0, /* duration= */ 0)
-                .areVibrationFeaturesSupported(mVibrator));
+                .areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_fractionalAmplitude_hasNoAmplitudeCtrl_notSupported() {
-        when(mVibrator.hasAmplitudeControl()).thenReturn(false);
+        VibratorInfo info = createVibInfoForAmplitude(/* hasAmplitudeControl= */ false);
 
         assertFalse(new StepSegment(/* amplitude= */ 0.2f, /* frequencyHz= */ 0, /* duration= */ 0)
-                .areVibrationFeaturesSupported(mVibrator));
+                .areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_zeroFrequency_supported() {
         StepSegment segment =
                 new StepSegment(/* amplitude= */ 0f, /* frequencyHz= */ 0, /* duration= */ 0);
-        when(mVibrator.hasFrequencyControl()).thenReturn(false);
+        VibratorInfo info = createVibInfoForFrequency(/* hasFrequencyControl= */ false);
 
-        assertTrue(segment.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(segment.areVibrationFeaturesSupported(info));
 
-        when(mVibrator.hasFrequencyControl()).thenReturn(true);
+        info = createVibInfoForFrequency(/* hasFrequencyControl= */ true);
 
-        assertTrue(segment.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(segment.areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_nonZeroFrequency_hasFrequencyCtrl_supported() {
         StepSegment segment =
                 new StepSegment(/* amplitude= */ 0f, /* frequencyHz= */ 0.2f, /* duration= */ 0);
-        when(mVibrator.hasFrequencyControl()).thenReturn(true);
+        VibratorInfo info = createVibInfoForFrequency(/* hasFrequencyControl= */ true);
 
-        assertTrue(segment.areVibrationFeaturesSupported(mVibrator));
+        assertTrue(segment.areVibrationFeaturesSupported(info));
     }
 
     @Test
     public void testVibrationFeaturesSupport_nonZeroFrequency_hasNoFrequencyCtrl_notSupported() {
         StepSegment segment =
                 new StepSegment(/* amplitude= */ 0f, /* frequencyHz= */ 0.2f, /* duration= */ 0);
-        when(mVibrator.hasFrequencyControl()).thenReturn(false);
+        VibratorInfo info = createVibInfoForFrequency(/* hasFrequencyControl= */ false);
 
-        assertFalse(segment.areVibrationFeaturesSupported(mVibrator));
+        assertFalse(segment.areVibrationFeaturesSupported(info));
     }
 
     @Test
@@ -250,5 +239,22 @@ public class StepSegmentTest {
         // A single step segment duration is not checked here, but contributes to the effect known
         // duration checked in VibrationEffect implementations.
         assertTrue(new StepSegment(0, 0, 5_000).isHapticFeedbackCandidate());
+    }
+
+    private static VibratorInfo createVibInfoForAmplitude(boolean hasAmplitudeControl) {
+        VibratorInfo.Builder builder = new VibratorInfo.Builder(/* id= */ 1);
+        if (hasAmplitudeControl) {
+            builder.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        }
+        return builder.build();
+    }
+
+    private static VibratorInfo createVibInfoForFrequency(boolean hasFrequencyControl) {
+        VibratorInfo.Builder builder = new VibratorInfo.Builder(/* id= */ 1);
+        if (hasFrequencyControl) {
+            builder.setCapabilities(
+                    IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        }
+        return builder.build();
     }
 }

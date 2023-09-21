@@ -107,8 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ഫയൽ കൈമാറൽ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ഇൻപുട്ട് ഉപകരണം"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ഇന്‍റർനെറ്റ് ആക്‌സസ്"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"കോ‌ൺടാക്‌റ്റുകളും കോൾ ചരിത്രം പങ്കിടലും"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"കോൺടാക്‌റ്റുകളുടെയും കോൾ ചരിത്രം പങ്കിടലിന്റെയും ഉപയോഗം"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"കോൺടാക്‌റ്റുകളിലേക്കും കോൾ ചരിത്രത്തിലേക്കും ആക്സസ് അനുവദിക്കൂ"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"വിവരങ്ങൾ, കോൾ അറിയിപ്പുകൾക്കും മറ്റും ഉപയോഗിക്കും"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ഇന്റർനെറ്റ് കണക്ഷൻ പങ്കിടൽ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"അക്ഷര സന്ദേശങ്ങൾ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"സിം ആക്സസ്"</string>
@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, എല്ലാ ആക്ടിവിറ്റികളെയും മൾട്ടി-വിൻഡോയ്ക്കായി വലുപ്പം മാറ്റുക."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ഫ്രീഫോം വിൻഡോകൾ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"പരീക്ഷണാത്മക ഫ്രീഫോം വിൻഡോകൾക്കുള്ള പിന്തുണ പ്രവർത്തനക്ഷമമാക്കുക."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"ഡെസ്‌ക്ടോപ്പ് മോഡ്"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ഡെ‌സ്‌ക്ടോപ്പ് ബാക്കപ്പ് പാസ്‌വേഡ്"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ഡെസ്‌ക്‌ടോപ്പ് പൂർണ്ണ ബാക്കപ്പുകൾ നിലവിൽ പരിരക്ഷിച്ചിട്ടില്ല"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ഡെസ്‌ക്‌ടോപ്പ് പൂർണ്ണ ബാക്കപ്പുകൾക്കായി പാസ്‌വേഡുകൾ മാറ്റാനോ നീക്കംചെയ്യാനോ ടാപ്പുചെയ്യുക"</string>
@@ -685,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"പ്രെഡിക്റ്റീവ് ബാക്ക് ആനിമേഷനുകൾ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"പ്രെഡിക്റ്റീവ് ബാക്കിനായി സിസ്റ്റം ആനിമേഷനുകൾ പ്രവർത്തനക്ഷമമാക്കുക."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ഈ ക്രമീകരണം പ്രെഡിക്റ്റീവ് ജെസ്ച്ചർ ആനിമേഷന് വേണ്ടി സിസ്റ്റം ആനിമേഷനുകളെ പ്രവർത്തനക്ഷമമാക്കുന്നു. ഇതിന് ഓരോ ആപ്പിലും enableOnBackInvokedCallback എന്നത് മാനിഫെസ്റ്റ് ഫയലിൽ ശരി എന്ന് സജ്ജീകരിക്കേണ്ടതുണ്ട്."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"ഇടത്തേക്ക് നീക്കുക"</item>
-    <item msgid="5425394847942513942">"താഴേക്ക് നീക്കുക"</item>
-    <item msgid="7728484337962740316">"വലത്തേക്ക് നീക്കുക"</item>
-    <item msgid="324200556467459329">"മുകളിലേക്ക് നീക്കുക"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"വ്യക്തമാക്കിയിട്ടില്ലാത്തവ"</string>
     <string name="neuter" msgid="2075249330106127310">"നപുംസകലിംഗം"</string>

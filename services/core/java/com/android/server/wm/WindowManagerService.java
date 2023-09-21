@@ -2493,6 +2493,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 outInsetsState.set(win.getCompatInsetsState(), true /* copySources */);
             }
 
+            // TODO (b/298562855): Remove this after identifying the reason why the frame is empty.
+            if (win.mAttrs.providedInsets != null && win.getFrame().isEmpty()) {
+                Slog.w(TAG, "Empty frame of " + win
+                        + " configChanged=" + configChanged
+                        + " frame=" + win.getFrame().toShortString()
+                        + " attrs=" + attrs);
+            }
+
             ProtoLog.v(WM_DEBUG_FOCUS, "Relayout of %s: focusMayChange=%b",
                     win, focusMayChange);
 
@@ -8338,12 +8346,18 @@ public class WindowManagerService extends IWindowManager.Stub
                             + displayId + " - DisplayContent not found.");
                     return null;
                 }
-                //TODO (b/210039666): Use a method like add/removeDisplayOverlay if available.
+                final SurfaceControl inputOverlay = dc.getInputOverlayLayer();
+                if (inputOverlay == null) {
+                    Slog.e(TAG, "Failed to create a gesture monitor on display: " + displayId
+                            + " - Input overlay layer is not initialized.");
+                    return null;
+                }
+                // TODO(b/210039666): Use a method like add/removeDisplayOverlay if available.
                 return makeSurfaceBuilder(dc.getSession())
                         .setContainerLayer()
                         .setName("IME Handwriting Surface")
                         .setCallsite("getHandwritingSurfaceForDisplay")
-                        .setParent(dc.getSurfaceControl())
+                        .setParent(inputOverlay)
                         .build();
             }
         }
@@ -8398,6 +8412,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             return null;
+        }
+
+        @Override
+        public void captureDisplay(int displayId, @Nullable ScreenCapture.CaptureArgs captureArgs,
+                                   ScreenCapture.ScreenCaptureListener listener) {
+            WindowManagerService.this.captureDisplay(displayId, captureArgs, listener);
+        }
+
+        @Override
+        public boolean hasNavigationBar(int displayId) {
+            return WindowManagerService.this.hasNavigationBar(displayId);
         }
 
         @Override

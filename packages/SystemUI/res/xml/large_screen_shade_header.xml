@@ -56,7 +56,7 @@
     <Constraint android:id="@+id/shade_header_system_icons">
         <Layout
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/shade_header_system_icons_height_large_screen"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/privacy_container"
             app:layout_constraintTop_toTopOf="parent"

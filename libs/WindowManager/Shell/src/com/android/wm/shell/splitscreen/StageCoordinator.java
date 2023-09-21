@@ -228,6 +228,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final Toast mSplitUnsupportedToast;
     private SplitRequest mSplitRequest;
 
+    /**
+     * Since StageCoordinator only coordinates MainStage and SideStage, it shouldn't support
+     * CompatUI layouts. CompatUI is handled separately by MainStage and SideStage.
+     */
+    @Override
+    public boolean supportCompatUI() {
+        return false;
+    }
+
     class SplitRequest {
         @SplitPosition
         int mActivatePosition;
@@ -466,10 +475,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void requestEnterSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
-            WindowContainerTransaction wct) {
+            WindowContainerTransaction wct, int splitPosition, Rect taskBounds) {
         boolean enteredSplitSelect = false;
         for (SplitScreen.SplitSelectListener listener : mSelectListeners) {
-            enteredSplitSelect |= listener.onRequestEnterSplitSelect(taskInfo);
+            enteredSplitSelect |= listener.onRequestEnterSplitSelect(taskInfo, splitPosition,
+                    taskBounds);
         }
         if (enteredSplitSelect) mTaskOrganizer.applyTransaction(wct);
     }

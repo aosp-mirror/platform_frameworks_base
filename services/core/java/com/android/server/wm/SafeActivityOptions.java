@@ -148,7 +148,8 @@ public class SafeActivityOptions {
                 .setPendingIntentBackgroundActivityStartMode(
                         options.getPendingIntentBackgroundActivityStartMode())
                 .setPendingIntentCreatorBackgroundActivityStartMode(
-                        options.getPendingIntentCreatorBackgroundActivityStartMode());
+                        options.getPendingIntentCreatorBackgroundActivityStartMode())
+                .setRemoteTransition(options.getRemoteTransition());
     }
 
     /**

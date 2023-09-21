@@ -67,10 +67,10 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.classifier.Classifier;
-import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
@@ -101,6 +101,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
@@ -147,11 +148,11 @@ public class QuickSettingsController implements Dumpable {
     private final MediaHierarchyManager mMediaHierarchyManager;
     private final AmbientState mAmbientState;
     private final RecordingController mRecordingController;
-    private final FalsingCollector mFalsingCollector;
     private final LockscreenGestureLogger mLockscreenGestureLogger;
     private final ShadeLogger mShadeLog;
     private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     private final CastController mCastController;
+    private final SplitShadeStateController mSplitShadeStateController;
     private final FeatureFlags mFeatureFlags;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final ShadeRepository mShadeRepository;
@@ -201,8 +202,6 @@ public class QuickSettingsController implements Dumpable {
     private float mInitialTouchY;
     /** whether current touch Y delta is above falsing threshold */
     private boolean mTouchAboveFalsingThreshold;
-    /** whether we are tracking a touch on QS container */
-    private boolean mTracking;
     /** pointerId of the pointer we're currently tracking */
     private int mTrackingPointer;
 
@@ -335,7 +334,6 @@ public class QuickSettingsController implements Dumpable {
             AmbientState ambientState,
             RecordingController recordingController,
             FalsingManager falsingManager,
-            FalsingCollector falsingCollector,
             AccessibilityManager accessibilityManager,
             LockscreenGestureLogger lockscreenGestureLogger,
             MetricsLogger metricsLogger,
@@ -347,14 +345,16 @@ public class QuickSettingsController implements Dumpable {
             ShadeRepository shadeRepository,
             ShadeInteractor shadeInteractor,
             JavaAdapter javaAdapter,
-            CastController castController
+            CastController castController,
+            SplitShadeStateController splitShadeStateController
     ) {
         mPanelViewControllerLazy = panelViewControllerLazy;
         mPanelView = panelView;
         mQsFrame = mPanelView.findViewById(R.id.qs_frame);
         mKeyguardStatusBar = mPanelView.findViewById(R.id.keyguard_header);
         mResources = mPanelView.getResources();
-        mSplitShadeEnabled = LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
+        mSplitShadeStateController = splitShadeStateController;
+        mSplitShadeEnabled = mSplitShadeStateController.shouldUseSplitNotificationShade(mResources);
         mQsFrameTranslateController = qsFrameTranslateController;
         mShadeTransitionController = shadeTransitionController;
         mPulseExpansionHandler = pulseExpansionHandler;
@@ -381,7 +381,6 @@ public class QuickSettingsController implements Dumpable {
         mAmbientState = ambientState;
         mRecordingController = recordingController;
         mFalsingManager = falsingManager;
-        mFalsingCollector = falsingCollector;
         mAccessibilityManager = accessibilityManager;
 
         mLockscreenGestureLogger = lockscreenGestureLogger;
@@ -441,7 +440,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     void updateResources() {
-        mSplitShadeEnabled = LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
+        mSplitShadeEnabled = mSplitShadeStateController.shouldUseSplitNotificationShade(mResources);
         if (mQs != null) {
             mQs.setInSplitShade(mSplitShadeEnabled);
         }
@@ -600,7 +599,7 @@ public class QuickSettingsController implements Dumpable {
 
     @VisibleForTesting
     boolean isTracking() {
-        return mTracking;
+        return mShadeRepository.getLegacyQsTracking().getValue();
     }
 
     public boolean getFullyExpanded() {
@@ -613,8 +612,12 @@ public class QuickSettingsController implements Dumpable {
         // split shade as there QS are always expanded so every collapsing motion is motion from
         // expanded QS to closed panel
         return mExpandImmediate || (mExpanded
-                && !mTracking && !isExpansionAnimating()
+                && !isTracking() && !isExpansionAnimating()
                 && !mExpansionFromOverscroll);
+    }
+
+    private void setTracking(boolean tracking) {
+        mShadeRepository.setLegacyQsTracking(tracking);
     }
 
     private boolean isQsFragmentCreated() {
@@ -1601,7 +1604,7 @@ public class QuickSettingsController implements Dumpable {
         if (action == MotionEvent.ACTION_DOWN && expandedShadeCollapsedQs) {
             // Down in the empty area while fully expanded - go to QS.
             mShadeLog.logMotionEvent(event, "handleQsTouch: down action, QS tracking enabled");
-            mTracking = true;
+            setTracking(true);
             traceQsJank(true, false);
             mConflictingExpansionGesture = true;
             onExpansionStarted();
@@ -1616,9 +1619,9 @@ public class QuickSettingsController implements Dumpable {
         // as sometimes the qsExpansionFraction can be a tiny value instead of 0 when in QQS.
         if (!mSplitShadeEnabled && !mLastShadeFlingWasExpanding
                 && computeExpansionFraction() <= 0.01 && mShadeExpandedFraction < 1.0) {
-            mTracking = false;
+            setTracking(false);
         }
-        if (!isExpandImmediate() && mTracking) {
+        if (!isExpandImmediate() && isTracking()) {
             onTouch(event);
             if (!mConflictingExpansionGesture && !mSplitShadeEnabled) {
                 return true;
@@ -1660,10 +1663,9 @@ public class QuickSettingsController implements Dumpable {
                 }
             }
             if (shouldQuickSettingsIntercept(event.getX(), event.getY(), -1)) {
-                mFalsingCollector.onQsDown();
                 mShadeLog.logMotionEvent(event,
                         "handleQsDown: down action, QS tracking enabled");
-                mTracking = true;
+                setTracking(true);
                 onExpansionStarted();
                 mInitialHeightOnTouch = mExpansionHeight;
                 mInitialTouchY = event.getY();
@@ -1689,7 +1691,7 @@ public class QuickSettingsController implements Dumpable {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mShadeLog.logMotionEvent(event, "onQsTouch: down action, QS tracking enabled");
-                mTracking = true;
+                setTracking(true);
                 traceQsJank(true, false);
                 mInitialTouchY = y;
                 mInitialTouchX = x;
@@ -1726,7 +1728,7 @@ public class QuickSettingsController implements Dumpable {
             case MotionEvent.ACTION_CANCEL:
                 mShadeLog.logMotionEvent(event,
                         "onQsTouch: up/cancel action, QS tracking disabled");
-                mTracking = false;
+                setTracking(false);
                 mTrackingPointer = -1;
                 trackMovement(event);
                 float fraction = computeExpansionFraction();
@@ -1775,13 +1777,15 @@ public class QuickSettingsController implements Dumpable {
                     // Dragging down on the lockscreen statusbar should prohibit other interactions
                     // immediately, otherwise we'll wait on the touchslop. This is to allow
                     // dragging down to expanded quick settings directly on the lockscreen.
-                    mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
+                    if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+                        mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
+                    }
                 }
                 if (mExpansionAnimator != null) {
                     mInitialHeightOnTouch = mExpansionHeight;
                     mShadeLog.logMotionEvent(event,
                             "onQsIntercept: down action, QS tracking enabled");
-                    mTracking = true;
+                    setTracking(true);
                     traceQsJank(true, false);
                     mNotificationStackScrollLayoutController.cancelLongPress();
                 }
@@ -1800,7 +1804,7 @@ public class QuickSettingsController implements Dumpable {
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
                 trackMovement(event);
-                if (mTracking) {
+                if (isTracking()) {
                     // Already tracking because onOverscrolled was called. We need to update here
                     // so we don't stop for a frame until the next touch event gets handled in
                     // onTouchEvent.
@@ -1818,9 +1822,11 @@ public class QuickSettingsController implements Dumpable {
                         && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldQuickSettingsIntercept(
                         mInitialTouchX, mInitialTouchY, h)) {
-                    mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
+                    if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+                        mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
+                    }
                     mShadeLog.onQsInterceptMoveQsTrackingEnabled(h);
-                    mTracking = true;
+                    setTracking(true);
                     traceQsJank(true, false);
                     onExpansionStarted();
                     mPanelViewControllerLazy.get().notifyExpandingFinished();
@@ -1840,7 +1846,7 @@ public class QuickSettingsController implements Dumpable {
             case MotionEvent.ACTION_UP:
                 trackMovement(event);
                 mShadeLog.logMotionEvent(event, "onQsIntercept: up action, QS tracking disabled");
-                mTracking = false;
+                setTracking(false);
                 break;
         }
         return false;
@@ -2066,7 +2072,7 @@ public class QuickSettingsController implements Dumpable {
         ipw.print("mTouchAboveFalsingThreshold=");
         ipw.println(mTouchAboveFalsingThreshold);
         ipw.print("mTracking=");
-        ipw.println(mTracking);
+        ipw.println(isTracking());
         ipw.print("mTrackingPointer=");
         ipw.println(mTrackingPointer);
         ipw.print("mExpanded=");

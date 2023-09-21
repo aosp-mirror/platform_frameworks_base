@@ -17,22 +17,17 @@
 package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
-import static android.hardware.biometrics.BiometricManager.Authenticators;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -48,7 +43,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -69,7 +63,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserManager;
@@ -86,17 +79,14 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
-import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -177,8 +167,6 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private PromptSelectorInteractor mPromptSelectionInteractor;
     @Mock
-    private AuthBiometricFingerprintViewModel mAuthBiometricFingerprintViewModel;
-    @Mock
     private CredentialViewModel mCredentialViewModel;
     @Mock
     private PromptViewModel mPromptViewModel;
@@ -210,10 +198,6 @@ public class AuthControllerTest extends SysuiTestCase {
 
     @Before
     public void setup() throws RemoteException {
-        // TODO(b/278622168): remove with flag
-        // AuthController simply passes this through to AuthContainerView (does not impact test)
-        mFeatureFlags.set(Flags.BIOMETRIC_BP_STRONG, false);
-
         mContextSpy = spy(mContext);
         mExecution = new FakeExecution();
         mTestableLooper = TestableLooper.get(this);
@@ -466,7 +450,7 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testShowInvoked_whenSystemRequested() {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
-        verify(mDialog1).show(any(), any());
+        verify(mDialog1).show(any());
     }
 
     @Test
@@ -667,7 +651,7 @@ public class AuthControllerTest extends SysuiTestCase {
         // 2) Client cancels authentication
 
         showDialog(new int[0] /* sensorIds */, true /* credentialAllowed */);
-        verify(mDialog1).show(any(), any());
+        verify(mDialog1).show(any());
 
         final byte[] credentialAttestation = generateRandomHAT();
 
@@ -683,7 +667,7 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testShowNewDialog_beforeOldDialogDismissed_SkipsAnimations() {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
-        verify(mDialog1).show(any(), any());
+        verify(mDialog1).show(any());
 
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
 
@@ -691,59 +675,7 @@ public class AuthControllerTest extends SysuiTestCase {
         verify(mDialog1).dismissWithoutCallback(eq(false) /* animate */);
 
         // Second dialog should be shown without animation
-        verify(mDialog2).show(any(), any());
-    }
-
-    @Test
-    public void testConfigurationPersists_whenOnConfigurationChanged() {
-        showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
-        verify(mDialog1).show(any(), any());
-
-        // Return that the UI is in "showing" state
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            Bundle savedState = (Bundle) args[0];
-            savedState.putBoolean(AuthDialog.KEY_CONTAINER_GOING_AWAY, false);
-            return null; // onSaveState returns void
-        }).when(mDialog1).onSaveState(any());
-
-        mAuthController.onConfigurationChanged(new Configuration());
-
-        ArgumentCaptor<Bundle> captor = ArgumentCaptor.forClass(Bundle.class);
-        verify(mDialog1).onSaveState(captor.capture());
-
-        // Old dialog doesn't animate
-        verify(mDialog1).dismissWithoutCallback(eq(false /* animate */));
-
-        // Saved state is restored into new dialog
-        ArgumentCaptor<Bundle> captor2 = ArgumentCaptor.forClass(Bundle.class);
-        verify(mDialog2).show(any(), captor2.capture());
-
-        // TODO: This should check all values we want to save/restore
-        assertEquals(captor.getValue(), captor2.getValue());
-    }
-
-    @Test
-    public void testConfigurationPersists_whenBiometricFallbackToCredential() {
-        showDialog(new int[] {1} /* sensorIds */, true /* credentialAllowed */);
-        verify(mDialog1).show(any(), any());
-
-        // Pretend that the UI is now showing device credential UI.
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            Bundle savedState = (Bundle) args[0];
-            savedState.putBoolean(AuthDialog.KEY_CONTAINER_GOING_AWAY, false);
-            savedState.putBoolean(AuthDialog.KEY_CREDENTIAL_SHOWING, true);
-            return null; // onSaveState returns void
-        }).when(mDialog1).onSaveState(any());
-
-        mAuthController.onConfigurationChanged(new Configuration());
-
-        // Check that the new dialog was initialized to the credential UI.
-        ArgumentCaptor<Bundle> captor = ArgumentCaptor.forClass(Bundle.class);
-        verify(mDialog2).show(any(), captor.capture());
-        assertEquals(Authenticators.DEVICE_CREDENTIAL,
-                mAuthController.mLastBiometricPromptInfo.getAuthenticators());
+        verify(mDialog2).show(any());
     }
 
     @Test
@@ -1013,7 +945,7 @@ public class AuthControllerTest extends SysuiTestCase {
                 REQUEST_ID);
 
         assertNull(mAuthController.mCurrentDialog);
-        verify(mDialog1, never()).show(any(), any());
+        verify(mDialog1, never()).show(any());
     }
 
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {
@@ -1095,11 +1027,10 @@ public class AuthControllerTest extends SysuiTestCase {
                     mFingerprintManager, mFaceManager, () -> mUdfpsController,
                     () -> mSideFpsController, mDisplayManager, mWakefulnessLifecycle,
                     mPanelInteractionDetector, mUserManager, mLockPatternUtils, mUdfpsLogger,
-                    mLogContextInteractor, () -> mAuthBiometricFingerprintViewModel,
-                    () -> mBiometricPromptCredentialInteractor, () -> mPromptSelectionInteractor,
-                    () -> mCredentialViewModel, () -> mPromptViewModel,
-                    mInteractionJankMonitor, mHandler,
-                    mBackgroundExecutor, mUdfpsUtils, mVibratorHelper);
+                    mLogContextInteractor, () -> mBiometricPromptCredentialInteractor,
+                    () -> mPromptSelectionInteractor, () -> mCredentialViewModel,
+                    () -> mPromptViewModel, mInteractionJankMonitor, mHandler, mBackgroundExecutor,
+                    mUdfpsUtils, mVibratorHelper);
         }
 
         @Override

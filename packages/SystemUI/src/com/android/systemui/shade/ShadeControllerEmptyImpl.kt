@@ -23,6 +23,7 @@ import javax.inject.Inject
 /** Empty implementation of ShadeController for variants of Android without shades. */
 @SysUISingleton
 open class ShadeControllerEmptyImpl @Inject constructor() : ShadeController {
+    override fun isShadeEnabled() = false
     override fun start() {}
     override fun instantExpandShade() {}
     override fun instantCollapseShade() {}

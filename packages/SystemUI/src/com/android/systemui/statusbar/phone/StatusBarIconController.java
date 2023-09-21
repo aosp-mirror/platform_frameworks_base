@@ -81,11 +81,7 @@ public interface StatusBarIconController {
     /** Removes an icon that had come from an active tile service. */
     void removeIconForTile(String slot);
 
-    /**
-     * Adds or updates an icon for the given slot for **internal system icons**.
-     *
-     * TODO(b/265307726): Re-name this to `setInternalIcon`.
-     */
+    /** Adds or updates an icon for the given slot for **internal system icons**. */
     void setIcon(String slot, int resourceId, CharSequence contentDescription);
 
     /**
@@ -126,11 +122,6 @@ public interface StatusBarIconController {
      * TAG_PRIMARY to refer to the first icon at a given slot.
      */
     void removeIcon(String slot, int tag);
-
-    /**
-     * TODO(b/265307726): Re-name this to `removeAllIconsForInternalSlot`.
-     */
-    void removeAllIconsForSlot(String slot);
 
     // TODO: See if we can rename this tunable name.
     String ICON_HIDE_LIST = "icon_blacklist";

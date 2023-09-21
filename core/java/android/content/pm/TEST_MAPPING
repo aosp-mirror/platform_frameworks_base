@@ -48,9 +48,6 @@
             "name":"CarrierAppIntegrationTestCases"
         },
         {
-            "name":"ApkVerityTest"
-        },
-        {
             "name":"CtsSilentUpdateHostTestCases"
         },
         {

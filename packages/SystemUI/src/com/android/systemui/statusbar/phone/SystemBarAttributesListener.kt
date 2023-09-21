@@ -26,7 +26,6 @@ import com.android.internal.view.AppearanceRegion
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.SysuiStatusBarStateController
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -43,7 +42,6 @@ class SystemBarAttributesListener
 internal constructor(
     private val centralSurfaces: CentralSurfaces,
     private val letterboxAppearanceCalculator: LetterboxAppearanceCalculator,
-    private val statusBarStateController: SysuiStatusBarStateController,
     private val lightBarController: LightBarController,
     dumpManager: DumpManager,
 ) : Dumpable, StatusBarBoundsProvider.BoundsChangeListener {
@@ -101,8 +99,6 @@ internal constructor(
             appearanceRegions, barModeChanged, centralSurfaces.barMode, navbarColorManagedByIme)
 
         centralSurfaces.updateBubblesVisibility()
-        statusBarStateController.setSystemBarAttributes(
-            appearance, behavior, requestedVisibleTypes, packageName)
     }
 
     private fun modifyAppearanceIfNeeded(

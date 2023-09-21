@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.scene.domain.startable
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
+import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.classifier.FalsingCollectorActual
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.updateFlags
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -40,7 +43,12 @@ import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SE
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -57,20 +65,25 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
     private val keyguardInteractor: KeyguardInteractor,
-    private val featureFlags: FeatureFlags,
+    private val flags: SceneContainerFlags,
     private val sysUiState: SysUiState,
     @DisplayId private val displayId: Int,
     private val sceneLogger: SceneLogger,
+    @FalsingCollectorActual private val falsingCollector: FalsingCollector,
 ) : CoreStartable {
 
     override fun start() {
-        if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+        if (flags.isEnabled()) {
             sceneLogger.logFrameworkEnabled(isEnabled = true)
             hydrateVisibility()
             automaticallySwitchScenes()
             hydrateSystemUiState()
+            collectFalsingSignals()
         } else {
-            sceneLogger.logFrameworkEnabled(isEnabled = false)
+            sceneLogger.logFrameworkEnabled(
+                isEnabled = false,
+                reason = flags.requirementDescription(),
+            )
         }
     }
 
@@ -221,6 +234,66 @@ constructor(
                         SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING to
                             (sceneKey == SceneKey.Lockscreen),
                     )
+                }
+        }
+    }
+
+    /** Collects and reports signals into the falsing system. */
+    private fun collectFalsingSignals() {
+        applicationScope.launch {
+            authenticationInteractor.isLockscreenDismissed.collect { isLockscreenDismissed ->
+                if (isLockscreenDismissed) {
+                    falsingCollector.onSuccessfulUnlock()
+                }
+            }
+        }
+
+        applicationScope.launch {
+            keyguardInteractor.isDozing.distinctUntilChanged().collect { isDozing ->
+                falsingCollector.setShowingAod(isDozing)
+            }
+        }
+
+        applicationScope.launch {
+            keyguardInteractor.isAodAvailable
+                .flatMapLatest { isAodAvailable ->
+                    if (!isAodAvailable) {
+                        keyguardInteractor.wakefulnessModel
+                    } else {
+                        emptyFlow()
+                    }
+                }
+                .map { wakefulnessModel ->
+                    val wakeChange: Boolean? =
+                        when (wakefulnessModel.state) {
+                            WakefulnessState.STARTING_TO_WAKE -> true
+                            WakefulnessState.ASLEEP -> false
+                            else -> null
+                        }
+                    (wakeChange to wakefulnessModel.lastWakeReason).takeIf { wakeChange != null }
+                }
+                .filterNotNull()
+                .distinctUntilChangedBy { it.first }
+                .collect { (wakeChange, wakeReason) ->
+                    when {
+                        wakeChange == true && wakeReason.isTouch ->
+                            falsingCollector.onScreenOnFromTouch()
+                        wakeChange == true -> falsingCollector.onScreenTurningOn()
+                        wakeChange == false -> falsingCollector.onScreenOff()
+                    }
+                }
+        }
+
+        applicationScope.launch {
+            sceneInteractor.desiredScene
+                .map { it.key == SceneKey.Bouncer }
+                .distinctUntilChanged()
+                .collect { switchedToBouncerScene ->
+                    if (switchedToBouncerScene) {
+                        falsingCollector.onBouncerShown()
+                    } else {
+                        falsingCollector.onBouncerHidden()
+                    }
                 }
         }
     }

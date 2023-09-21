@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.quickswitch
 
-import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.common.datatypes.Rect
 import android.tools.common.traces.component.ComponentNameMatcher
@@ -51,6 +50,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 298544839)
 class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     private val testApp1 = SimpleAppHelper(instrumentation)
     private val testApp2 = NonResizeableAppHelper(instrumentation)
@@ -92,7 +92,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
      * Checks that the transition starts with [testApp1]'s windows filling/covering exactly the
      * entirety of the display.
      */
-    @Presubmit
     @Test
     open fun startsWithApp1WindowsCoverFullScreen() {
         flicker.assertWmStart {
@@ -112,7 +111,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
     }
 
     /** Checks that the transition starts with [testApp1] being the top window. */
-    @Presubmit
     @Test
     open fun startsWithApp1WindowBeingOnTop() {
         flicker.assertWmStart { this.isAppWindowOnTop(testApp1) }
@@ -122,7 +120,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
      * Checks that [testApp2] windows fill the entire screen (i.e. is "fullscreen") at the end of
      * the transition once we have fully quick switched from [testApp1] back to the [testApp2].
      */
-    @Presubmit
     @Test
     open fun endsWithApp2WindowsCoveringFullScreen() {
         flicker.assertWmEnd { this.visibleRegion(testApp2).coversExactly(startDisplayBounds) }
@@ -132,7 +129,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
      * Checks that [testApp2] layers fill the entire screen (i.e. is "fullscreen") at the end of the
      * transition once we have fully quick switched from [testApp1] back to the [testApp2].
      */
-    @Presubmit
     @Test
     open fun endsWithApp2LayersCoveringFullScreen() {
         flicker.assertLayersEnd {
@@ -145,7 +141,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
      * Checks that [testApp2] is the top window at the end of the transition once we have fully
      * quick switched from [testApp1] back to the [testApp2].
      */
-    @Presubmit
     @Test
     open fun endsWithApp2BeingOnTop() {
         flicker.assertWmEnd { this.isAppWindowOnTop(testApp2) }
@@ -155,7 +150,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
      * Checks that [testApp2]'s window starts off invisible and becomes visible at some point before
      * the end of the transition and then stays visible until the end of the transition.
      */
-    @Presubmit
     @Test
     open fun app2WindowBecomesAndStaysVisible() {
         flicker.assertWm {
@@ -171,7 +165,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
      * Checks that [testApp2]'s layer starts off invisible and becomes visible at some point before
      * the end of the transition and then stays visible until the end of the transition.
      */
-    @Presubmit
     @Test
     open fun app2LayerBecomesAndStaysVisible() {
         flicker.assertLayers { this.isInvisible(testApp2).then().isVisible(testApp2) }
@@ -181,7 +174,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
      * Checks that [testApp1]'s window starts off visible and becomes invisible at some point before
      * the end of the transition and then stays invisible until the end of the transition.
      */
-    @Presubmit
     @Test
     open fun app1WindowBecomesAndStaysInvisible() {
         flicker.assertWm { this.isAppWindowVisible(testApp1).then().isAppWindowInvisible(testApp1) }
@@ -191,7 +183,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
      * Checks that [testApp1]'s layer starts off visible and becomes invisible at some point before
      * the end of the transition and then stays invisible until the end of the transition.
      */
-    @Presubmit
     @Test
     open fun app1LayerBecomesAndStaysInvisible() {
         flicker.assertLayers { this.isVisible(testApp1).then().isInvisible(testApp1) }
@@ -202,7 +193,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
      * Ensures that at any point, either [testApp2] or [testApp1]'s windows are at least partially
      * visible.
      */
-    @Presubmit
     @Test
     open fun app2WindowIsVisibleOnceApp1WindowIsInvisible() {
         flicker.assertWm {
@@ -221,7 +211,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
      * Ensures that at any point, either [testApp2] or [testApp1]'s windows are at least partially
      * visible.
      */
-    @Presubmit
     @Test
     open fun app2LayerIsVisibleOnceApp1LayerIsInvisible() {
         flicker.assertLayers {
@@ -236,7 +225,6 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
     }
 
     /** {@inheritDoc} */
-    @Presubmit
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
@@ -245,14 +233,34 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
-    @FlakyTest(bugId = 246284708)
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @FlakyTest(bugId = 250518877)
+    @Test override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+
+    @Test override fun entireScreenCovered() = super.entireScreenCovered()
+
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    @Test
+    override fun navBarWindowIsVisibleAtStartAndEnd() = super.navBarWindowIsVisibleAtStartAndEnd()
+
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
+
+    @Test override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+
+    @Test override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
+
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         private var startDisplayBounds = Rect.EMPTY

@@ -16,11 +16,17 @@
 
 package com.android.server.biometrics;
 
+import android.util.Slog;
+
 /**
  * Utility class for on-device biometric authentication data, including total authentication,
  * rejections, and the number of sent enrollment notifications.
  */
 public class AuthenticationStats {
+
+    private static final String TAG = "AuthenticationStats";
+
+    private static final float FRR_NOT_ENOUGH_ATTEMPTS = -1.0f;
 
     private final int mUserId;
     private int mTotalAttempts;
@@ -70,7 +76,7 @@ public class AuthenticationStats {
         if (mTotalAttempts > 0) {
             return mRejectedAttempts / (float) mTotalAttempts;
         } else {
-            return -1.0f;
+            return FRR_NOT_ENOUGH_ATTEMPTS;
         }
     }
 
@@ -86,5 +92,39 @@ public class AuthenticationStats {
     public void resetData() {
         mTotalAttempts = 0;
         mRejectedAttempts = 0;
+        Slog.d(TAG, "Reset Counters.");
+    }
+
+    /** Update enrollment notification counter after sending a notification. */
+    public void updateNotificationCounter() {
+        mEnrollmentNotifications++;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof AuthenticationStats)) {
+            return false;
+        }
+
+        AuthenticationStats target = (AuthenticationStats) obj;
+        return this.getUserId() == target.getUserId()
+                && this.getTotalAttempts()
+                == target.getTotalAttempts()
+                && this.getRejectedAttempts()
+                == target.getRejectedAttempts()
+                && this.getEnrollmentNotifications()
+                == target.getEnrollmentNotifications()
+                && this.getModality() == target.getModality();
+    }
+
+    @Override
+    public int hashCode() {
+        return String.format("userId: %d, totalAttempts: %d, rejectedAttempts: %d, "
+                + "enrollmentNotifications: %d, modality: %d", mUserId, mTotalAttempts,
+                mRejectedAttempts, mEnrollmentNotifications, mModality).hashCode();
     }
 }

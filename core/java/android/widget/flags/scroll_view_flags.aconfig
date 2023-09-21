@@ -1,0 +1,8 @@
+package: "android.widget.flags"
+
+flag {
+    namespace: "widget"
+    name: "platform_widget_haptic_scroll_feedback"
+    description: "Enables haptic scroll feedback in platform widgets"
+    bug: "287914819"
+}

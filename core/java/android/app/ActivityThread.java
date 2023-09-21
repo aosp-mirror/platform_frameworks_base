@@ -29,14 +29,16 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
+import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
+import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
-
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
+import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -52,6 +54,8 @@ import android.app.backup.BackupAgent;
 import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupAnnotations.OperationType;
 import android.app.compat.CompatChanges;
+import android.app.sdksandbox.sandboxactivity.ActivityContextInfo;
+import android.app.sdksandbox.sandboxactivity.ActivityContextInfoProvider;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -206,6 +210,7 @@ import android.window.WindowContextInfo;
 import android.window.WindowProviderService;
 import android.window.WindowTokenClientController;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
@@ -223,6 +228,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.am.MemInfoDumpProto;
 
+import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.AppSpecializationHooks;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
@@ -1282,8 +1288,13 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         private void updateCompatOverrideScale(CompatibilityInfo info) {
-            CompatibilityInfo.setOverrideInvertedScale(
-                    info.hasOverrideScaling() ? info.applicationInvertedScale : 1f);
+            if (info.hasOverrideScaling()) {
+                CompatibilityInfo.setOverrideInvertedScale(info.applicationInvertedScale,
+                        info.applicationDensityInvertedScale);
+            } else {
+                CompatibilityInfo.setOverrideInvertedScale(/* invertScale */ 1f,
+                        /* densityInvertScale */1f);
+            }
         }
 
         public final void runIsolatedEntryPoint(String entryPoint, String[] entryPointArgs) {
@@ -1496,6 +1507,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        @NeverCompile
         @Override
         public void dumpMemInfo(ParcelFileDescriptor pfd, Debug.MemoryInfo mem, boolean checkin,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
@@ -1510,6 +1522,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        @NeverCompile
         private void dumpMemInfo(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
@@ -1666,6 +1679,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        @NeverCompile
         @Override
         public void dumpMemInfoProto(ParcelFileDescriptor pfd, Debug.MemoryInfo mem,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
@@ -1679,6 +1693,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        @NeverCompile
         private void dumpMemInfo(ProtoOutputStream proto, Debug.MemoryInfo memInfo,
                 boolean dumpFullInfo, boolean dumpDalvik,
                 boolean dumpSummaryOnly, boolean dumpUnreachable) {
@@ -3020,6 +3035,7 @@ public final class ActivityThread extends ClientTransactionHandler
         pw.println(String.format(format, objs));
     }
 
+    @NeverCompile
     public static void dumpMemInfoTable(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
             boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
             int pid, String processName,
@@ -3349,6 +3365,7 @@ public final class ActivityThread extends ClientTransactionHandler
     /**
      * Dump mem info data to proto.
      */
+    @NeverCompile
     public static void dumpMemInfoTable(ProtoOutputStream proto, Debug.MemoryInfo memInfo,
             boolean dumpDalvik, boolean dumpSummaryOnly,
             long nativeMax, long nativeAllocated, long nativeFree,
@@ -3580,6 +3597,12 @@ public final class ActivityThread extends ClientTransactionHandler
         return mActivities.get(token);
     }
 
+    @Nullable
+    @Override
+    public Context getWindowContext(@NonNull IBinder clientToken) {
+        return WindowTokenClientController.getInstance().getWindowContext(clientToken);
+    }
+
     @VisibleForTesting(visibility = PACKAGE)
     public Configuration getConfiguration() {
         return mConfigurationController.getConfiguration();
@@ -3635,15 +3658,16 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @UnsupportedAppUsage
-    public final void sendActivityResult(
-            IBinder token, String id, int requestCode,
+    public void sendActivityResult(
+            IBinder activityToken, String id, int requestCode,
             int resultCode, Intent data) {
         if (DEBUG_RESULTS) Slog.v(TAG, "sendActivityResult: id=" + id
                 + " req=" + requestCode + " res=" + resultCode + " data=" + data);
         ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
         list.add(new ResultInfo(id, requestCode, resultCode, data));
-        final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread, token);
-        clientTransaction.addCallback(ActivityResultItem.obtain(list));
+        final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread,
+                activityToken);
+        clientTransaction.addCallback(ActivityResultItem.obtain(activityToken, list));
         try {
             mAppThread.scheduleTransaction(clientTransaction);
         } catch (RemoteException e) {
@@ -3696,7 +3720,19 @@ public final class ActivityThread extends ClientTransactionHandler
     /**  Core implementation of activity launch. */
     private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
         ActivityInfo aInfo = r.activityInfo;
-        if (r.packageInfo == null) {
+
+        if (getInstrumentation() != null
+                && getInstrumentation().getContext() != null
+                && getInstrumentation().getContext().getApplicationInfo() != null
+                && getInstrumentation().isSdkSandboxAllowedToStartActivities()) {
+            // Activities launched from CTS-in-sandbox tests use a customized ApplicationInfo. See
+            // also {@link SdkSandboxManagerLocal#getSdkSandboxApplicationInfoForInstrumentation}.
+            r.packageInfo =
+                    getPackageInfo(
+                            getInstrumentation().getContext().getApplicationInfo(),
+                            mCompatibilityInfo,
+                            Context.CONTEXT_INCLUDE_CODE);
+        } else if (r.packageInfo == null) {
             r.packageInfo = getPackageInfo(aInfo.applicationInfo, mCompatibilityInfo,
                     Context.CONTEXT_INCLUDE_CODE);
         }
@@ -3713,16 +3749,38 @@ public final class ActivityThread extends ClientTransactionHandler
                     r.activityInfo.targetActivity);
         }
 
-        ContextImpl appContext = createBaseContextForActivity(r);
+        boolean isSandboxActivityContext = sandboxActivitySdkBasedContext()
+                && r.intent.isSandboxActivity(mSystemContext);
+        boolean isSandboxedSdkContextUsed = false;
+        ContextImpl activityBaseContext;
+        if (isSandboxActivityContext) {
+            activityBaseContext = createBaseContextForSandboxActivity(r);
+            if (activityBaseContext == null) {
+                // Failed to retrieve the SDK based sandbox activity context, falling back to the
+                // app based context.
+                activityBaseContext = createBaseContextForActivity(r);
+            } else {
+                isSandboxedSdkContextUsed = true;
+            }
+        } else {
+            activityBaseContext = createBaseContextForActivity(r);
+        }
         Activity activity = null;
         try {
-            java.lang.ClassLoader cl = appContext.getClassLoader();
+            java.lang.ClassLoader cl;
+            if (isSandboxedSdkContextUsed) {
+                // In case of sandbox activity, the context refers to the an SDK with no visibility
+                // on the SandboxedActivity java class, the App context should be used instead.
+                cl = activityBaseContext.getApplicationContext().getClassLoader();
+            } else {
+                cl = activityBaseContext.getClassLoader();
+            }
             activity = mInstrumentation.newActivity(
                     cl, component.getClassName(), r.intent);
             StrictMode.incrementExpectedActivityCount(activity.getClass());
             r.intent.setExtrasClassLoader(cl);
             r.intent.prepareToEnterProcess(isProtectedComponent(r.activityInfo),
-                    appContext.getAttributionSource());
+                    activityBaseContext.getAttributionSource());
             if (r.state != null) {
                 r.state.setClassLoader(cl);
             }
@@ -3753,7 +3811,8 @@ public final class ActivityThread extends ClientTransactionHandler
             }
 
             if (activity != null) {
-                CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
+                CharSequence title =
+                        r.activityInfo.loadLabel(activityBaseContext.getPackageManager());
                 Configuration config =
                         new Configuration(mConfigurationController.getCompatConfiguration());
                 if (r.overrideConfig != null) {
@@ -3770,11 +3829,11 @@ public final class ActivityThread extends ClientTransactionHandler
 
                 // Activity resources must be initialized with the same loaders as the
                 // application context.
-                appContext.getResources().addLoaders(
+                activityBaseContext.getResources().addLoaders(
                         app.getResources().getLoaders().toArray(new ResourcesLoader[0]));
 
-                appContext.setOuterContext(activity);
-                activity.attach(appContext, this, getInstrumentation(), r.token,
+                activityBaseContext.setOuterContext(activity);
+                activity.attach(activityBaseContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
                         r.embeddedID, r.lastNonConfigurationInstances, config,
                         r.referrer, r.voiceInteractor, window, r.activityConfigCallback,
@@ -3928,6 +3987,44 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
         return appContext;
+    }
+
+    /**
+     * Creates the base context for the sandbox activity based on its corresponding SDK {@link
+     * ApplicationInfo} and flags.
+     */
+    @Nullable
+    private ContextImpl createBaseContextForSandboxActivity(@NonNull ActivityClientRecord r) {
+        ActivityContextInfoProvider contextInfoProvider = ActivityContextInfoProvider.getInstance();
+
+        ActivityContextInfo contextInfo;
+        try {
+            contextInfo = contextInfoProvider.getActivityContextInfo(r.intent);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Passed intent does not match an expected sandbox activity", e);
+            return null;
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "SDK customized context flag is disabled", e);
+            return null;
+        } catch (Exception e) { // generic catch to unexpected exceptions
+            Log.e(TAG, "Failed to create context for sandbox activity", e);
+            return null;
+        }
+
+        final int displayId = ActivityClient.getInstance().getDisplayId(r.token);
+        final LoadedApk sdkApk = getPackageInfo(
+                contextInfo.getSdkApplicationInfo(),
+                r.packageInfo.getCompatibilityInfo(),
+                ActivityContextInfo.CONTEXT_FLAGS);
+
+        final ContextImpl activityContext = ContextImpl.createActivityContext(
+                this, sdkApk, r.activityInfo, r.token, displayId, r.overrideConfig);
+
+        // Set sandbox app's context as the application context for sdk context
+        activityContext.mPackageInfo.makeApplicationInner(
+                /*forceDefaultAppClass=*/false, mInstrumentation);
+
+        return activityContext;
     }
 
     /**
@@ -4345,16 +4442,16 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private void schedulePauseWithUserLeavingHint(ActivityClientRecord r) {
         final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
-        transaction.setLifecycleStateRequest(PauseActivityItem.obtain(r.activity.isFinishing(),
-                /* userLeaving */ true, r.activity.mConfigChangeFlags, /* dontReport */ false,
-                /* autoEnteringPip */ false));
+        transaction.setLifecycleStateRequest(PauseActivityItem.obtain(r.token,
+                r.activity.isFinishing(), /* userLeaving */ true, r.activity.mConfigChangeFlags,
+                /* dontReport */ false, /* autoEnteringPip */ false));
         executeTransaction(transaction);
     }
 
     private void scheduleResume(ActivityClientRecord r) {
         final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
-        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(/* isForward */ false,
-                /* shouldSendCompatFakeFocus */ false));
+        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(r.token,
+                /* isForward */ false, /* shouldSendCompatFakeFocus */ false));
         executeTransaction(transaction);
     }
 
@@ -5938,8 +6035,8 @@ public final class ActivityThread extends ClientTransactionHandler
                         ? r.createdConfig : mConfigurationController.getConfiguration(),
                 r.overrideConfig);
         final ActivityRelaunchItem activityRelaunchItem = ActivityRelaunchItem.obtain(
-                null /* pendingResults */, null /* pendingIntents */, 0 /* configChanges */,
-                mergedConfiguration, r.mPreserveWindow);
+                r.token, null /* pendingResults */, null /* pendingIntents */,
+                0 /* configChanges */, mergedConfiguration, r.mPreserveWindow);
         // Make sure to match the existing lifecycle state in the end of the transaction.
         final ActivityLifecycleItem lifecycleRequest =
                 TransactionExecutorHelper.getLifecycleRequestForCurrentState(r);
@@ -6099,9 +6196,21 @@ public final class ActivityThread extends ClientTransactionHandler
         final boolean shouldUpdateResources = hasPublicResConfigChange
                 || shouldUpdateResources(activityToken, currentResConfig, newConfig,
                 amOverrideConfig, movedToDifferentDisplay, hasPublicResConfigChange);
-        final boolean shouldReportChange = shouldReportChange(
-                activity.mCurrentConfig, newConfig, r.mSizeConfigurations,
-                activity.mActivityInfo.getRealConfigChanged(), alwaysReportChange);
+
+        // TODO(b/274944389): remove once a longer-term solution is implemented.
+        boolean skipActivityRelaunchWhenDocking = activity.getResources().getBoolean(
+                R.bool.config_skipActivityRelaunchWhenDocking);
+        int handledConfigChanges = activity.mActivityInfo.getRealConfigChanged();
+        if (skipActivityRelaunchWhenDocking && onlyDeskInUiModeChanged(activity.mCurrentConfig,
+                newConfig)) {
+            // If we're not relaunching this activity when docking, we should send the configuration
+            // changed event. Pretend as if the activity is handling uiMode config changes in its
+            // manifest so that we'll report any dock changes.
+            handledConfigChanges |= ActivityInfo.CONFIG_UI_MODE;
+        }
+
+        final boolean shouldReportChange = shouldReportChange(activity.mCurrentConfig, newConfig,
+                r.mSizeConfigurations, handledConfigChanges, alwaysReportChange);
         // Nothing significant, don't proceed with updating and reporting.
         if (!shouldUpdateResources && !shouldReportChange) {
             return null;
@@ -6145,6 +6254,25 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         return configToReport;
+    }
+
+    /**
+     * Returns true if the uiMode configuration changed, and desk mode
+     * ({@link android.content.res.Configuration#UI_MODE_TYPE_DESK}) was the only change to uiMode.
+     */
+    private boolean onlyDeskInUiModeChanged(Configuration oldConfig, Configuration newConfig) {
+        boolean deskModeChanged = isInDeskUiMode(oldConfig) != isInDeskUiMode(newConfig);
+
+        // UI mode contains fields other than the UI mode type, so determine if any other fields
+        // changed.
+        boolean uiModeOtherFieldsChanged =
+                (oldConfig.uiMode & ~UI_MODE_TYPE_MASK) != (newConfig.uiMode & ~UI_MODE_TYPE_MASK);
+
+        return deskModeChanged && !uiModeOtherFieldsChanged;
+    }
+
+    private static boolean isInDeskUiMode(Configuration config) {
+        return (config.uiMode & UI_MODE_TYPE_MASK) == UI_MODE_TYPE_DESK;
     }
 
     /**

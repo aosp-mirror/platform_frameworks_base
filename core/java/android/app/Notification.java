@@ -1628,6 +1628,14 @@ public class Notification implements Parcelable
      */
     public static final int GROUP_ALERT_CHILDREN = 2;
 
+    /**
+     * Constant for the {@link Builder#setGroup(String) group key} that is added to notifications
+     * that are not already grouped when {@link Builder#setSilent()} is used.
+     *
+     * @hide
+     */
+    public static final String GROUP_KEY_SILENT = "silent";
+
     private int mGroupAlertBehavior = GROUP_ALERT_ALL;
 
     /**
@@ -2892,11 +2900,6 @@ public class Notification implements Parcelable
                 }
             }
 
-            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
-            if (person != null) {
-                person.visitUris(visitor);
-            }
-
             final RemoteInputHistoryItem[] history = extras.getParcelableArray(
                     Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
                     RemoteInputHistoryItem.class);
@@ -2908,9 +2911,14 @@ public class Notification implements Parcelable
                     }
                 }
             }
-        }
 
-        if (isStyle(MessagingStyle.class) && extras != null) {
+            // Extras for MessagingStyle. We visit them even if not isStyle(MessagingStyle), since
+            // Notification Listeners might use directly (without the isStyle check).
+            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
+            if (person != null) {
+                person.visitUris(visitor);
+            }
+
             final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES,
                     Parcelable.class);
             if (!ArrayUtils.isEmpty(messages)) {
@@ -2930,9 +2938,8 @@ public class Notification implements Parcelable
             }
 
             visitIconUri(visitor, extras.getParcelable(EXTRA_CONVERSATION_ICON, Icon.class));
-        }
 
-        if (isStyle(CallStyle.class) & extras != null) {
+            // Extras for CallStyle (same reason for visiting without checking isStyle).
             Person callPerson = extras.getParcelable(EXTRA_CALL_PERSON, Person.class);
             if (callPerson != null) {
                 callPerson.visitUris(visitor);
@@ -4285,6 +4292,35 @@ public class Notification implements Parcelable
             mN.setSmallIcon(icon);
             if (icon != null && icon.getType() == Icon.TYPE_RESOURCE) {
                 mN.icon = icon.getResId();
+            }
+            return this;
+        }
+
+        /**
+         * If {@code true}, silences this instance of the notification, regardless of the sounds or
+         * vibrations set on the notification or notification channel. If {@code false}, then the
+         * normal sound and vibration logic applies.
+         *
+         * @hide
+         */
+        public @NonNull Builder setSilent(boolean silent) {
+            if (!silent) {
+                return this;
+            }
+            if (mN.isGroupSummary()) {
+                setGroupAlertBehavior(GROUP_ALERT_CHILDREN);
+            } else {
+                setGroupAlertBehavior(GROUP_ALERT_SUMMARY);
+            }
+
+            setVibrate(null);
+            setSound(null);
+            mN.defaults &= ~DEFAULT_SOUND;
+            mN.defaults &= ~DEFAULT_VIBRATE;
+            setDefaults(mN.defaults);
+
+            if (TextUtils.isEmpty(mN.mGroupKey)) {
+                setGroup(GROUP_KEY_SILENT);
             }
             return this;
         }
@@ -7634,14 +7670,17 @@ public class Notification implements Parcelable
             }
             extras.putBoolean(EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED, mShowBigPictureWhenCollapsed);
 
-            // If the icon contains a bitmap, use the old extra so that listeners which look for
-            // that extra can still find the picture.  Don't include the new extra in that case,
-            // to avoid duplicating data.
-            if (mPictureIcon != null && mPictureIcon.getType() == Icon.TYPE_BITMAP) {
+            if (mPictureIcon == null) {
+                extras.remove(EXTRA_PICTURE_ICON);
+                extras.remove(EXTRA_PICTURE);
+            } else if (mPictureIcon.getType() == Icon.TYPE_BITMAP) {
+                // If the icon contains a bitmap, use the old extra so that listeners which look
+                // for that extra can still find the picture. Don't include the new extra in
+                // that case, to avoid duplicating data.
                 extras.putParcelable(EXTRA_PICTURE, mPictureIcon.getBitmap());
-                extras.putParcelable(EXTRA_PICTURE_ICON, null);
+                extras.remove(EXTRA_PICTURE_ICON);
             } else {
-                extras.putParcelable(EXTRA_PICTURE, null);
+                extras.remove(EXTRA_PICTURE);
                 extras.putParcelable(EXTRA_PICTURE_ICON, mPictureIcon);
             }
         }
@@ -12819,7 +12858,6 @@ public class Notification implements Parcelable
                 } else {
                     mBackgroundColor = rawColor;
                 }
-                mProtectionColor = COLOR_INVALID;  // filled in at the end
                 mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
                         ContrastColorUtil.resolvePrimaryColor(ctx, mBackgroundColor, nightMode),
                         mBackgroundColor, 4.5);
@@ -12836,7 +12874,6 @@ public class Notification implements Parcelable
             } else {
                 int[] attrs = {
                         R.attr.colorSurface,
-                        R.attr.colorBackgroundFloating,
                         R.attr.textColorPrimary,
                         R.attr.textColorSecondary,
                         R.attr.colorAccent,
@@ -12848,15 +12885,14 @@ public class Notification implements Parcelable
                 };
                 try (TypedArray ta = obtainDayNightAttributes(ctx, attrs)) {
                     mBackgroundColor = getColor(ta, 0, nightMode ? Color.BLACK : Color.WHITE);
-                    mProtectionColor = getColor(ta, 1, COLOR_INVALID);
-                    mPrimaryTextColor = getColor(ta, 2, COLOR_INVALID);
-                    mSecondaryTextColor = getColor(ta, 3, COLOR_INVALID);
-                    mPrimaryAccentColor = getColor(ta, 4, COLOR_INVALID);
-                    mSecondaryAccentColor = getColor(ta, 5, COLOR_INVALID);
-                    mTertiaryAccentColor = getColor(ta, 6, COLOR_INVALID);
-                    mOnAccentTextColor = getColor(ta, 7, COLOR_INVALID);
-                    mErrorColor = getColor(ta, 8, COLOR_INVALID);
-                    mRippleAlpha = Color.alpha(getColor(ta, 9, 0x33ffffff));
+                    mPrimaryTextColor = getColor(ta, 1, COLOR_INVALID);
+                    mSecondaryTextColor = getColor(ta, 2, COLOR_INVALID);
+                    mPrimaryAccentColor = getColor(ta, 3, COLOR_INVALID);
+                    mSecondaryAccentColor = getColor(ta, 4, COLOR_INVALID);
+                    mTertiaryAccentColor = getColor(ta, 5, COLOR_INVALID);
+                    mOnAccentTextColor = getColor(ta, 6, COLOR_INVALID);
+                    mErrorColor = getColor(ta, 7, COLOR_INVALID);
+                    mRippleAlpha = Color.alpha(getColor(ta, 8, 0x33ffffff));
                 }
                 mContrastColor = calculateContrastColor(ctx, rawColor, mPrimaryAccentColor,
                         mBackgroundColor, nightMode);
@@ -12889,9 +12925,7 @@ public class Notification implements Parcelable
                 }
             }
             // make sure every color has a valid value
-            if (mProtectionColor == COLOR_INVALID) {
-                mProtectionColor = ColorUtils.blendARGB(mPrimaryTextColor, mBackgroundColor, 0.8f);
-            }
+            mProtectionColor = ColorUtils.blendARGB(mPrimaryTextColor, mBackgroundColor, 0.9f);
         }
 
         /** calculates the contrast color for the non-colorized notifications */

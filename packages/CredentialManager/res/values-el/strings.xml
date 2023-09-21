@@ -53,7 +53,7 @@
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Θέλετε να αποθηκεύσετε τον κωδικό πρόσβασης σε κάποια άλλη συσκευή;"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Θέλετε να αποθηκεύσετε τα στοιχεία σύνδεσης σε κάποια άλλη συσκευή;"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Να χρησιμοποιηθεί το <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> για όλες τις συνδέσεις σας;"</string>
-    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Αυτός ο διαχειριστής κωδικών πρόσβασης για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g> θα αποθηκεύει τους κωδικούς πρόσβασης και τα κλειδιά πρόσβασης, για πιο εύκολη πρόσβαση"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Αυτός ο διαχειριστής κωδικών πρόσβασης για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g> θα αποθηκεύει τους κωδικούς και τα κλειδιά πρόσβασης, για πιο εύκολη σύνδεση"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Ορισμός ως προεπιλογής"</string>
     <string name="settings" msgid="6536394145760913145">"Ρυθμίσεις"</string>
     <string name="use_once" msgid="9027366575315399714">"Χρήση μία φορά"</string>

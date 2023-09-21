@@ -30,6 +30,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,6 +53,8 @@ import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
+import com.android.systemui.flags.FakeFeatureFlagsClassic;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.statusbar.CommandQueue;
@@ -79,6 +83,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
+    private final FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
     @Mock
     private CarrierTextController mCarrierTextController;
     @Mock
@@ -131,6 +136,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, false);
         mShadeViewStateProvider = new TestShadeViewStateProvider();
 
         MockitoAnnotations.initMocks(this);
@@ -166,6 +172,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mBiometricUnlockController,
                 mStatusBarStateController,
                 mStatusBarContentInsetsProvider,
+                mFeatureFlags,
                 mUserManager,
                 mStatusBarUserChipViewModel,
                 mSecureSettings,
@@ -227,6 +234,30 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         verify(mStatusBarIconController).removeIconGroup(any());
     }
 
+    @Test
+    public void onViewReAttached_flagOff_iconManagerNotReRegistered() {
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, false);
+        mController.onViewAttached();
+        mController.onViewDetached();
+        reset(mStatusBarIconController);
+
+        mController.onViewAttached();
+
+        verify(mStatusBarIconController, never()).addIconGroup(any());
+    }
+
+    @Test
+    public void onViewReAttached_flagOn_iconManagerReRegistered() {
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
+        mController.onViewAttached();
+        mController.onViewDetached();
+        reset(mStatusBarIconController);
+
+        mController.onViewAttached();
+
+        verify(mStatusBarIconController).addIconGroup(any());
+    }
+    
     @Test
     public void setBatteryListening_true_callbackAdded() {
         mController.setBatteryListening(true);

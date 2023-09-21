@@ -24,6 +24,8 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.os.UserHandle;
 
+import com.android.media.flags.Flags;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -53,15 +55,10 @@ import java.util.Objects;
             return new NoOpBluetoothRouteController();
         }
 
-        MediaFeatureFlagManager flagManager = MediaFeatureFlagManager.getInstance();
-        boolean isUsingLegacyController = flagManager.getBoolean(
-                MediaFeatureFlagManager.FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER,
-                true);
-
-        if (isUsingLegacyController) {
-            return new LegacyBluetoothRouteController(context, btAdapter, listener);
-        } else {
+        if (Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
             return new AudioPoliciesBluetoothRouteController(context, btAdapter, listener);
+        } else {
+            return new LegacyBluetoothRouteController(context, btAdapter, listener);
         }
     }
 

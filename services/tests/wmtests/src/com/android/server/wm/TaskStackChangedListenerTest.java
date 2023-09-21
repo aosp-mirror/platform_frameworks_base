@@ -354,25 +354,37 @@ public class TaskStackChangedListenerTest {
             }
         });
 
-        final LandscapeActivity activity =
-                (LandscapeActivity) startTestActivity(LandscapeActivity.class);
+        final boolean isIgnoringOrientationRequest =
+                CommonUtils.getIgnoreOrientationRequest(Display.DEFAULT_DISPLAY);
+        if (isIgnoringOrientationRequest) {
+            CommonUtils.setIgnoreOrientationRequest(Display.DEFAULT_DISPLAY, false);
+        }
 
-        int[] taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
-                candidate -> candidate[0] == activity.getTaskId());
-        assertNotNull(taskIdAndOrientation);
-        assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE, taskIdAndOrientation[1]);
+        try {
+            final LandscapeActivity activity =
+                    (LandscapeActivity) startTestActivity(LandscapeActivity.class);
 
-        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-        taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
-                candidate -> candidate[0] == activity.getTaskId());
-        assertNotNull(taskIdAndOrientation);
-        assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT, taskIdAndOrientation[1]);
+            int[] taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
+                    candidate -> candidate[0] == activity.getTaskId());
+            assertNotNull(taskIdAndOrientation);
+            assertEquals(
+                    ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE, taskIdAndOrientation[1]);
 
-        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
-                candidate -> candidate[0] == activity.getTaskId());
-        assertNotNull(taskIdAndOrientation);
-        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, taskIdAndOrientation[1]);
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+            taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
+                    candidate -> candidate[0] == activity.getTaskId());
+            assertNotNull(taskIdAndOrientation);
+            assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT, taskIdAndOrientation[1]);
+
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
+                    candidate -> candidate[0] == activity.getTaskId());
+            assertNotNull(taskIdAndOrientation);
+            assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, taskIdAndOrientation[1]);
+        } finally {
+            CommonUtils.setIgnoreOrientationRequest(
+                    Display.DEFAULT_DISPLAY, isIgnoringOrientationRequest);
+        }
     }
 
     /**

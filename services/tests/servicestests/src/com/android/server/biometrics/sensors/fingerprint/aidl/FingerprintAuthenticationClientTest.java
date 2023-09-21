@@ -392,7 +392,6 @@ public class FingerprintAuthenticationClientTest {
         final ActivityManager.RunningTaskInfo topTask = new ActivityManager.RunningTaskInfo();
         topTask.topActivity = new ComponentName("other", "thing");
         when(mActivityTaskManager.getTasks(anyInt())).thenReturn(List.of(topTask));
-        when(mHal.authenticateWithContext(anyLong(), any())).thenReturn(mCancellationSignal);
 
         final FingerprintAuthenticationClient client = createClientWithoutBackgroundAuth();
         client.start(mCallback);
@@ -406,21 +405,50 @@ public class FingerprintAuthenticationClientTest {
                 .onError(anyInt(), anyInt(), eq(BIOMETRIC_ERROR_CANCELED), anyInt());
     }
 
+    @Test
+    public void testOnAuthenticatedFalseWhenListenerIsNull() throws RemoteException {
+        final FingerprintAuthenticationClient client = createClientWithNullListener();
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */,
+                        2 /* deviceId */), false /* authenticated */, new ArrayList<>());
+
+        verify(mCallback, never()).onClientFinished(eq(client), anyBoolean());
+    }
+
+    @Test
+    public void testOnAuthenticatedTrueWhenListenerIsNull() throws RemoteException {
+        final FingerprintAuthenticationClient client = createClientWithNullListener();
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */,
+                2 /* deviceId */), true /* authenticated */, new ArrayList<>());
+
+        verify(mCallback).onClientFinished(client, true);
+    }
+
     private FingerprintAuthenticationClient createClient() throws RemoteException {
-        return createClient(100 /* version */, true /* allowBackgroundAuthentication */);
+        return createClient(100 /* version */, true /* allowBackgroundAuthentication */,
+                mClientMonitorCallbackConverter);
     }
 
     private FingerprintAuthenticationClient createClientWithoutBackgroundAuth()
             throws RemoteException {
-        return createClient(100 /* version */, false /* allowBackgroundAuthentication */);
+        return createClient(100 /* version */, false /* allowBackgroundAuthentication */,
+                mClientMonitorCallbackConverter);
     }
 
     private FingerprintAuthenticationClient createClient(int version) throws RemoteException {
-        return createClient(version, true /* allowBackgroundAuthentication */);
+        return createClient(version, true /* allowBackgroundAuthentication */,
+                mClientMonitorCallbackConverter);
+    }
+
+    private FingerprintAuthenticationClient createClientWithNullListener() throws RemoteException {
+        return createClient(100 /* version */, true /* allowBackgroundAuthentication */,
+                null /* listener */);
     }
 
     private FingerprintAuthenticationClient createClient(int version,
-            boolean allowBackgroundAuthentication) throws RemoteException {
+            boolean allowBackgroundAuthentication, ClientMonitorCallbackConverter listener)
+            throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
@@ -430,7 +458,7 @@ public class FingerprintAuthenticationClientTest {
                 .setSensorId(9)
                 .build();
         return new FingerprintAuthenticationClient(mContext, () -> aidl, mToken,
-                REQUEST_ID, mClientMonitorCallbackConverter, OP_ID,
+                REQUEST_ID, listener, OP_ID,
                 false /* restricted */, options, 4 /* cookie */,
                 false /* requireConfirmation */,
                 mBiometricLogger, mBiometricContext,

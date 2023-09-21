@@ -50,7 +50,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserManager;
@@ -67,13 +66,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.settingslib.udfps.UdfpsOverlayParams;
-import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
-import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel;
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
 import com.android.systemui.dagger.SysUISingleton;
@@ -89,8 +86,6 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
-import kotlin.Unit;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,6 +98,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import kotlin.Unit;
 
 import kotlinx.coroutines.CoroutineScope;
 
@@ -134,8 +131,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     private final CoroutineScope mApplicationCoroutineScope;
 
     // TODO: these should be migrated out once ready
-    @NonNull private final Provider<AuthBiometricFingerprintViewModel>
-            mAuthBiometricFingerprintViewModelProvider;
     @NonNull private final Provider<PromptCredentialInteractor> mPromptCredentialInteractor;
     @NonNull private final Provider<PromptSelectorInteractor> mPromptSelectorInteractor;
     @NonNull private final Provider<CredentialViewModel> mCredentialViewModelProvider;
@@ -765,8 +760,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull UdfpsLogger udfpsLogger,
             @NonNull LogContextInteractor logContextInteractor,
-            @NonNull Provider<AuthBiometricFingerprintViewModel>
-                    authBiometricFingerprintViewModelProvider,
             @NonNull Provider<PromptCredentialInteractor> promptCredentialInteractorProvider,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
@@ -801,7 +794,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         mVibratorHelper = vibratorHelper;
 
         mLogContextInteractor = logContextInteractor;
-        mAuthBiometricFingerprintViewModelProvider = authBiometricFingerprintViewModelProvider;
         mPromptSelectorInteractor = promptSelectorInteractorProvider;
         mPromptCredentialInteractor = promptCredentialInteractorProvider;
         mPromptViewModelProvider = promptViewModelProvider;
@@ -973,7 +965,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             skipAnimation = true;
         }
 
-        showDialog(args, skipAnimation, null /* savedState */, mPromptViewModelProvider.get());
+        showDialog(args, skipAnimation, mPromptViewModelProvider.get());
     }
 
     /**
@@ -1205,7 +1197,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         return mFpEnrolledForUser.getOrDefault(userId, false);
     }
 
-    private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState,
+    private void showDialog(SomeArgs args, boolean skipAnimation,
             @Nullable PromptViewModel viewModel) {
         mCurrentDialogArgs = args;
 
@@ -1245,7 +1237,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
 
         if (DEBUG) {
             Log.d(TAG, "userId: " + userId
-                    + " savedState: " + savedState
                     + " mCurrentDialog: " + mCurrentDialog
                     + " newDialog: " + newDialog);
         }
@@ -1267,7 +1258,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         if (!promptInfo.isAllowBackgroundAuthentication() && !isOwnerInForeground()) {
             cancelIfOwnerIsNotInForeground();
         } else {
-            mCurrentDialog.show(mWindowManager, savedState);
+            mCurrentDialog.show(mWindowManager);
         }
     }
 
@@ -1289,29 +1280,12 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     public void onConfigurationChanged(Configuration newConfig) {
         updateSensorLocations();
 
-        // Save the state of the current dialog (buttons showing, etc)
+        // TODO(b/287311775): consider removing this to retain the UI cleanly vs re-creating
         if (mCurrentDialog != null) {
             final PromptViewModel viewModel = mCurrentDialog.getViewModel();
-            final Bundle savedState = new Bundle();
-            mCurrentDialog.onSaveState(savedState);
             mCurrentDialog.dismissWithoutCallback(false /* animate */);
             mCurrentDialog = null;
-
-            // Only show the dialog if necessary. If it was animating out, the dialog is supposed
-            // to send its pending callback immediately.
-            if (!savedState.getBoolean(AuthDialog.KEY_CONTAINER_GOING_AWAY, false)) {
-                final boolean credentialShowing =
-                        savedState.getBoolean(AuthDialog.KEY_CREDENTIAL_SHOWING);
-                if (credentialShowing) {
-                    // There may be a cleaner way to do this, rather than altering the current
-                    // authentication's parameters. This gets the job done and should be clear
-                    // enough for now.
-                    PromptInfo promptInfo = (PromptInfo) mCurrentDialogArgs.arg1;
-                    promptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);
-                }
-
-                showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState, viewModel);
-            }
+            showDialog(mCurrentDialogArgs, true /* skipAnimation */, viewModel);
         }
     }
 
@@ -1344,9 +1318,8 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         config.mScaleProvider = this::getScaleFactor;
         return new AuthContainerView(config, mFeatureFlags, mApplicationCoroutineScope, mFpProps, mFaceProps,
                 wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
-                mInteractionJankMonitor, mAuthBiometricFingerprintViewModelProvider,
-                mPromptCredentialInteractor, mPromptSelectorInteractor, viewModel,
-                mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
+                mInteractionJankMonitor, mPromptCredentialInteractor, mPromptSelectorInteractor,
+                viewModel, mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
     }
 
     @Override

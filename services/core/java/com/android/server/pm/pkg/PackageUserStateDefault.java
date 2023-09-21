@@ -77,6 +77,11 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     }
 
     @Override
+    public long getDeDataInode() {
+        return 0;
+    }
+
+    @Override
     public int getDistractionFlags() {
         return 0;
     }
@@ -195,5 +200,10 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     @Override
     public ArchiveState getArchiveState() {
         return null;
+    }
+
+    @Override
+    public boolean dataExists() {
+        return true;
     }
 }

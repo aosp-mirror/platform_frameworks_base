@@ -68,7 +68,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     // TODO(b/203389579): Remove this once the dialog width on large screens has been agreed on.
     private static final String FLAG_TABLET_DIALOG_WIDTH =
             "persist.systemui.flag_tablet_dialog_width";
-    private static final boolean DEFAULT_DISMISS_ON_DEVICE_LOCK = true;
+    public static final boolean DEFAULT_DISMISS_ON_DEVICE_LOCK = true;
 
     private final Context mContext;
     private final FeatureFlags mFeatureFlags;

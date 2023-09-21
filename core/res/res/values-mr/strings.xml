@@ -618,8 +618,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"बायोमेट्रिक किंवा स्क्रीन लॉक वापरा"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"हे तुम्हीच आहात याची पडताळणी करा"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"पुढे सुरू ठेवण्यासाठी तुमचे बायोमेट्रिक वापरा"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"पुढे सुरू ठेवण्‍यासाठी तुमची फिंगरप्रिंट वापरा"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"पुढे सुरू ठेवण्यासाठी तुमचा चेहरा वापरा"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"पुढे सुरू ठेवण्यासाठी तुमचे बायोमेट्रिक किंवा स्क्रीन लॉक वापरा"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"बायोमेट्रिक हार्डवेअर उपलब्ध नाही"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ऑथेंटिकेशन रद्द केले"</string>
@@ -645,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिंट ओळखली नाही"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिंट ओळखली नाही"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"चेहरा ओळखू शकत नाही. त्याऐवजी फिंगरप्रिंट वापरा."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिंट ऑथेंटिकेट केली आहे"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म प्रेस करा"</string>
@@ -670,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"काहीतरी चूक झाली. पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फिंगरप्रिंट आयकन"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"डिव्हाइस अनलॉक"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"अनलॉक करण्याचा दुसरी पद्धत वापरून पहा"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"तुमचे फिंगरप्रिंट ओळखले जात नाही, तेव्हा फेस अनलॉक वापरा, जसे की तुमची बोटे ओली असताना"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"तुमचा चेहरा ओळखला जात नाही, तेव्हा फिंगरप्रिंट अनलॉक वापरा, जसे की पुरेसा प्रकाश नसताना"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"फेस अनलॉक"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"फेस अनलॉकसंबंधित समस्या"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"फेस मॉडेल हटवण्यासाठी टॅप करा, त्यानंतर तुमचा चेहरा पुन्हा जोडा"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"फेस अनलॉक सेट करा"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"तुमच्या फोनकडे पाहून तो अनलॉक करा"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"फेस अनलॉक वापरण्यासाठी, सेटिंग्ज &gt; गोपनीयता येथे "<b>"कॅमेरा अ‍ॅक्सेस"</b>" सुरू करा"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"अनलॉक करण्याच्या आणखी पद्धती सेट करा"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"फिंगरप्रिंट जोडण्यासाठी टॅप करा"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"फिंगरप्रिंट अनलॉक"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"फिंगरप्रिंट सेन्सर वापरू शकत नाही"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"दुरुस्तीच्या सेवा पुरवठादाराला भेट द्या."</string>
@@ -807,11 +806,11 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"होल्डरला वापरकर्त्याच्या कृतीशिवाय पूर्वी इंस्टॉल केलेले अ‍ॅप अपडेट करण्याची अनुमती देते"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियम सेट करा"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्क्रीन लॉक पासवर्ड आणि पिन मध्ये अनुमती दिलेले लांबी आणि वर्ण नियंत्रित करा."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"स्क्रीन अनलॉक प्रयत्नांचे परीक्षण करा"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"स्क्रीन अनलॉक प्रयत्नांवर लक्ष ठेवा"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"टाइप केलेल्या अयोग्य पासवर्डांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा टॅबलेट लॉक करा किंवा बरेच पासवर्ड टाइप केले असल्यास टॅबलेटचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्ड संख्येचे परीक्षण करते आणि Android TV डिव्हाइस लॉक करते किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास Android TV डिव्हाइसचा सर्व डेटा मिटवते."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"टाइप केलेल्या चुकीच्या पासवर्डच्या संख्येचे निरीक्षण करा. स्क्रीन अनलॉक करताना, इंफोटेनमेंट सिस्टीम लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास, इंफोटेनमेंट सिस्टीमचा सर्व डेटा मिटवा."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"टाइप केलेल्या अयोग्य पासवर्डांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा फोन लॉक करा किंवा बरेच पासवर्ड टाइप केले असल्यास फोनचा सर्व डेटा मिटवा."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"स्क्रीन अनलॉक करताना टाइप केलेल्या अयोग्य पासवर्डच्या संख्येवर लक्ष ठेवा. बरेच पासवर्ड टाइप केले असल्यास फोन लॉक करा किंवा फोनचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्डांच्या संख्येचे परीक्षण करा आणि टॅबलेट लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास या वापरकर्त्याचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्ड संख्येचे परीक्षण करते आणि Android TV डिव्हाइस लॉक करते किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास वापरकर्त्याचा सर्व डेटा मिटवते."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्डच्या संख्येचे निरीक्षण करा आणि इंफोटेनमेंट सिस्टीम लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास, या प्रोफाइलचा सर्व डेटा मिटवा."</string>
@@ -1597,7 +1596,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"प्रतिबंध काढण्यासाठी टॅप करा."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"मोबाइल डेटाचा उच्च वापर"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"तुमच्या अ‍ॅप्सनी नेहमीपेक्षा जास्त डेटा वापरला आहे"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> ने नेहमीपेक्षा जास्त डेटा वपरला आहे"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> ने नेहमीपेक्षा जास्त डेटा वापरला आहे"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"सुरक्षितता प्रमाणपत्र"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"हे प्रमाणपत्र वैध आहे."</string>
     <string name="issued_to" msgid="5975877665505297662">"यावर जारी केले:"</string>
@@ -1868,6 +1867,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2 रे कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3 रे कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> क्लोन केलेले"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"खाजगी <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"अनपिन करण्‍यापूर्वी पिन विचारा"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"अनपिन करण्‍यापूर्वी अनलॉक नमुन्यासाठी विचारा"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
@@ -2032,7 +2032,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" मध्ये अपडेट करायचे का?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g>, "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" मध्ये अपडेट करायचे का?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> आणि <xliff:g id="TYPE_1">%2$s</xliff:g>, "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" मध्ये अपडेट करायचे का?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"हे आयटम "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> आणि <xliff:g id="TYPE_2">%3$s</xliff:g> मध्ये अपडेट करायचे का?"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"हे आयटम "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> आणि <xliff:g id="TYPE_2">%3$s</xliff:g> मध्ये अपडेट करायचे आहेत का?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"सेव्ह करा"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"नाही, नको"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"आता नको"</string>

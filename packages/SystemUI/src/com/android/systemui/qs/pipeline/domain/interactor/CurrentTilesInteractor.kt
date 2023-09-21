@@ -27,8 +27,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.nano.SystemUIProtoDump
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.qs.QSFactory
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.external.CustomTile
@@ -39,6 +37,7 @@ import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepositor
 import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.domain.model.TileModel
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.qs.toProto
@@ -139,7 +138,7 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
     private val logger: QSPipelineLogger,
-    featureFlags: FeatureFlags,
+    featureFlags: QSPipelineFlagsRepository,
 ) : CurrentTilesInteractor {
 
     private val _currentSpecsAndTiles: MutableStateFlow<List<TileModel>> =
@@ -171,7 +170,7 @@ constructor(
         }
 
     init {
-        if (featureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {
+        if (featureFlags.pipelineHostEnabled) {
             startTileCollection()
         }
     }

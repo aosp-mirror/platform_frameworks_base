@@ -1842,6 +1842,10 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED);
+        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED,
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED);
@@ -1926,6 +1930,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
                 SecureSettingsProto.Assist.LONG_PRESS_HOME_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED,
+                SecureSettingsProto.Assist.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED,
+                SecureSettingsProto.Assist.SEARCH_LONG_PRESS_HOME_ENABLED);
         p.end(assistToken);
 
         final long assistHandlesToken = p.start(SecureSettingsProto.ASSIST_HANDLES);

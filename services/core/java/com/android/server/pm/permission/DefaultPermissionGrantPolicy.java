@@ -218,6 +218,7 @@ final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED);
     }
 
     private static final Set<String> NEARBY_DEVICES_PERMISSIONS = new ArraySet<>();
@@ -1490,12 +1491,9 @@ final class DefaultPermissionGrantPolicy {
         if (dir.isDirectory() && dir.canRead()) {
             Collections.addAll(ret, dir.listFiles());
         }
-        // For IoT devices, we check the oem partition for default permissions for each app.
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_EMBEDDED, 0)) {
-            dir = new File(Environment.getOemDirectory(), "etc/default-permissions");
-            if (dir.isDirectory() && dir.canRead()) {
-                Collections.addAll(ret, dir.listFiles());
-            }
+        dir = new File(Environment.getOemDirectory(), "etc/default-permissions");
+        if (dir.isDirectory() && dir.canRead()) {
+            Collections.addAll(ret, dir.listFiles());
         }
         return ret.isEmpty() ? null : ret.toArray(new File[0]);
     }

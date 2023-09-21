@@ -1175,7 +1175,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     final boolean resumeTopActivity(ActivityRecord prev, ActivityOptions options,
-            boolean deferPause) {
+            boolean skipPause) {
         ActivityRecord next = topRunningActivity(true /* focusableOnly */);
         if (next == null || !next.canResumeByCompat()) {
             return false;
@@ -1183,11 +1183,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
         next.delayedResume = false;
 
-        // If we are currently pausing an activity, then don't do anything until that is done.
-        final boolean allPausedComplete = mRootWindowContainer.allPausedActivitiesComplete();
-        if (!allPausedComplete) {
-            ProtoLog.v(WM_DEBUG_STATES,
-                    "resumeTopActivity: Skip resume: some activity pausing.");
+        if (!skipPause && !mRootWindowContainer.allPausedActivitiesComplete()) {
+            // If we aren't skipping pause, then we have to wait for currently pausing activities.
+            ProtoLog.v(WM_DEBUG_STATES, "resumeTopActivity: Skip resume: some activity pausing.");
             return false;
         }
 
@@ -1251,7 +1249,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             lastResumed = lastFocusedRootTask.getTopResumedActivity();
         }
 
-        boolean pausing = !deferPause && taskDisplayArea.pauseBackTasks(next);
+        boolean pausing = !skipPause && taskDisplayArea.pauseBackTasks(next);
         if (mResumedActivity != null) {
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivity: Pausing %s", mResumedActivity);
             pausing |= startPausing(mTaskSupervisor.mUserLeaving, false /* uiSleeping */,
@@ -1468,13 +1466,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         if (DEBUG_RESULTS) {
                             Slog.v(TAG_RESULTS, "Delivering results to " + next + ": " + a);
                         }
-                        transaction.addCallback(ActivityResultItem.obtain(a));
+                        transaction.addCallback(ActivityResultItem.obtain(next.token, a));
                     }
                 }
 
                 if (next.newIntents != null) {
                     transaction.addCallback(
-                            NewIntentItem.obtain(next.newIntents, true /* resume */));
+                            NewIntentItem.obtain(next.token, next.newIntents, true /* resume */));
                 }
 
                 // Well the app will no longer be stopped.
@@ -1488,7 +1486,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(mAtmService.mTopProcessState);
                 next.abortAndClearOptionsAnimation();
                 transaction.setLifecycleStateRequest(
-                        ResumeActivityItem.obtain(next.app.getReportedProcState(),
+                        ResumeActivityItem.obtain(next.token, next.app.getReportedProcState(),
                                 dc.isNextTransitionForward(), next.shouldSendCompatFakeFocus()));
                 mAtmService.getLifecycleManager().scheduleTransaction(transaction);
 
@@ -1645,7 +1643,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             // next activity.
             final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
                     "shouldAutoPipWhilePausing", userLeaving);
-            if (userLeaving && resumingOccludesParent && lastResumedCanPip
+
+            if (ActivityTaskManagerService.isPip2ExperimentEnabled()) {
+                // If a new task is being launched, then mark the existing top activity as
+                // supporting picture-in-picture while pausing only if the starting activity
+                // would not be considered an overlay on top of the current activity
+                // (eg. not fullscreen, or the assistant)
+                Task.enableEnterPipOnTaskSwitch(prev, resuming.getTask(),
+                        resuming, resuming.getOptions());
+            }
+            if (prev.supportsEnterPipOnTaskSwitch && userLeaving
+                    && resumingOccludesParent && lastResumedCanPip
                     && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
                 shouldAutoPip = true;
             } else if (!lastResumedCanPip) {
@@ -1658,7 +1666,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
 
         if (prev.attachedToProcess()) {
-            if (shouldAutoPip) {
+            if (shouldAutoPip && ActivityTaskManagerService.isPip2ExperimentEnabled()) {
+                prev.mPauseSchedulePendingForPip = true;
+                boolean willAutoPip = mAtmService.prepareAutoEnterPictureAndPictureMode(prev);
+                ProtoLog.d(WM_DEBUG_STATES, "Auto-PIP allowed, requesting PIP mode "
+                        + "via requestStartTransition(): %s, willAutoPip: %b", prev, willAutoPip);
+            } else if (shouldAutoPip) {
                 prev.mPauseSchedulePendingForPip = true;
                 boolean didAutoPip = mAtmService.enterPictureInPictureMode(
                         prev, prev.pictureInPictureArgs, false /* fromClient */);
@@ -1728,7 +1741,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     prev.shortComponentName, "userLeaving=" + userLeaving, reason);
 
             mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
-                    prev.token, PauseActivityItem.obtain(prev.finishing, userLeaving,
+                    prev.token, PauseActivityItem.obtain(prev.token, prev.finishing, userLeaving,
                             prev.configChangeFlags, pauseImmediately, autoEnteringPip));
         } catch (Exception e) {
             // Ignore exception, if process died other code will cleanup.

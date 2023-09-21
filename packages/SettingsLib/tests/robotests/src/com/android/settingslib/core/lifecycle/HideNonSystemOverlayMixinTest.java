@@ -29,16 +29,16 @@ import android.view.WindowManager;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.settingslib.R;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
+import org.robolectric.annotation.LooperMode;
 
 @RunWith(RobolectricTestRunner.class)
+@LooperMode(LooperMode.Mode.PAUSED)
 public class HideNonSystemOverlayMixinTest {
 
     private ActivityController<TestActivity> mActivityController;
@@ -93,7 +93,7 @@ public class HideNonSystemOverlayMixinTest {
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            setTheme(R.style.Theme_AppCompat);
+            setTheme(androidx.appcompat.R.style.Theme_AppCompat);
             getLifecycle().addObserver(new HideNonSystemOverlayMixin(this));
         }
     }

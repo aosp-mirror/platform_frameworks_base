@@ -16,6 +16,7 @@
 
 package com.android.server.alarm;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__ALLOW_LIST;
 import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__CHANGE_DISABLED;
 import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__LISTENER;
@@ -31,7 +32,6 @@ import android.app.StatsManager;
 import android.content.Context;
 import android.os.SystemClock;
 
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.function.Supplier;
@@ -51,7 +51,7 @@ class MetricsHelper {
     void registerPuller(Supplier<AlarmStore> alarmStoreSupplier) {
         final StatsManager statsManager = mContext.getSystemService(StatsManager.class);
         statsManager.setPullAtomCallback(FrameworkStatsLog.PENDING_ALARM_INFO, null,
-                BackgroundThread.getExecutor(), (atomTag, data) -> {
+                DIRECT_EXECUTOR, (atomTag, data) -> {
                     if (atomTag != FrameworkStatsLog.PENDING_ALARM_INFO) {
                         throw new UnsupportedOperationException("Unknown tag" + atomTag);
                     }

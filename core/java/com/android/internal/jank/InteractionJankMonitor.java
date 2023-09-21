@@ -70,7 +70,6 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_CLEAR_ALL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_DIALOG_OPEN;
-import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_EXPAND_FROM_STATUS_BAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_APPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_DISAPPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_ADD;
@@ -82,6 +81,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_SCROLL_FLING;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_AVD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_ENTER;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_EXIT;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_RESIZE;
@@ -268,11 +268,12 @@ public class InteractionJankMonitor {
      * eg: Exit the app using back gesture.
      */
     public static final int CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK = 78;
-    public static final int CUJ_SHADE_EXPAND_FROM_STATUS_BAR = 79;
     public static final int CUJ_IME_INSETS_SHOW_ANIMATION = 80;
     public static final int CUJ_IME_INSETS_HIDE_ANIMATION = 81;
 
-    private static final int LAST_CUJ = CUJ_IME_INSETS_HIDE_ANIMATION;
+    public static final int CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER = 82;
+
+    private static final int LAST_CUJ = CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
     private static final int NO_STATSD_LOGGING = -1;
 
     // Used to convert CujType to InteractionType enum value for statsd logging.
@@ -361,9 +362,10 @@ public class InteractionJankMonitor {
         CUJ_TO_STATSD_INTERACTION_TYPE[76] = NO_STATSD_LOGGING;
         CUJ_TO_STATSD_INTERACTION_TYPE[77] = NO_STATSD_LOGGING;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK;
-        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SHADE_EXPAND_FROM_STATUS_BAR] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_EXPAND_FROM_STATUS_BAR;
+        CUJ_TO_STATSD_INTERACTION_TYPE[79] = NO_STATSD_LOGGING; // This is deprecated.
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_IME_INSETS_SHOW_ANIMATION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_SHOW_ANIMATION;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_IME_INSETS_HIDE_ANIMATION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_HIDE_ANIMATION;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
     }
 
     private static class InstanceHolder {
@@ -463,9 +465,9 @@ public class InteractionJankMonitor {
             CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION,
             CUJ_LAUNCHER_OPEN_SEARCH_RESULT,
             CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK,
-            CUJ_SHADE_EXPAND_FROM_STATUS_BAR,
             CUJ_IME_INSETS_SHOW_ANIMATION,
             CUJ_IME_INSETS_HIDE_ANIMATION,
+            CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -1077,12 +1079,12 @@ public class InteractionJankMonitor {
                 return "LAUNCHER_OPEN_SEARCH_RESULT";
             case CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK:
                 return "LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK";
-            case CUJ_SHADE_EXPAND_FROM_STATUS_BAR:
-                return "SHADE_EXPAND_FROM_STATUS_BAR";
             case CUJ_IME_INSETS_SHOW_ANIMATION:
                 return "IME_INSETS_SHOW_ANIMATION";
             case CUJ_IME_INSETS_HIDE_ANIMATION:
                 return "IME_INSETS_HIDE_ANIMATION";
+            case CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER:
+                return "SPLIT_SCREEN_DOUBLE_TAP_DIVIDER";
         }
         return "UNKNOWN";
     }

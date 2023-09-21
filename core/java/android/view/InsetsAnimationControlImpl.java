@@ -16,7 +16,7 @@
 
 package android.view;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.EventLogTags.IMF_IME_ANIM_CANCEL;
 import static android.view.EventLogTags.IMF_IME_ANIM_FINISH;
 import static android.view.EventLogTags.IMF_IME_ANIM_START;
@@ -28,7 +28,6 @@ import static android.view.InsetsAnimationControlImplProto.PENDING_FRACTION;
 import static android.view.InsetsAnimationControlImplProto.PENDING_INSETS;
 import static android.view.InsetsAnimationControlImplProto.SHOWN_ON_FINISH;
 import static android.view.InsetsAnimationControlImplProto.TMP_MATRIX;
-import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
@@ -40,6 +39,7 @@ import static android.view.InsetsState.ISIDE_LEFT;
 import static android.view.InsetsState.ISIDE_RIGHT;
 import static android.view.InsetsState.ISIDE_TOP;
 import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
 import static android.view.inputmethod.ImeTracker.TOKEN_NONE;
@@ -63,7 +63,6 @@ import android.view.InsetsState.InternalInsetsSide;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
-import android.view.WindowManager.LayoutParams;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.ImeTracker;
 
@@ -285,15 +284,11 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
             return false;
         }
         final Insets offset = Insets.subtract(mShownInsets, mPendingInsets);
-        ArrayList<SurfaceParams> params = new ArrayList<>();
-        updateLeashesForSide(ISIDE_LEFT, offset.left, mPendingInsets.left, params, outState,
-                mPendingAlpha);
-        updateLeashesForSide(ISIDE_TOP, offset.top, mPendingInsets.top, params, outState,
-                mPendingAlpha);
-        updateLeashesForSide(ISIDE_RIGHT, offset.right, mPendingInsets.right, params, outState,
-                mPendingAlpha);
-        updateLeashesForSide(ISIDE_BOTTOM, offset.bottom, mPendingInsets.bottom, params, outState,
-                mPendingAlpha);
+        final ArrayList<SurfaceParams> params = new ArrayList<>();
+        updateLeashesForSide(ISIDE_LEFT, offset.left, params, outState, mPendingAlpha);
+        updateLeashesForSide(ISIDE_TOP, offset.top, params, outState, mPendingAlpha);
+        updateLeashesForSide(ISIDE_RIGHT, offset.right, params, outState, mPendingAlpha);
+        updateLeashesForSide(ISIDE_BOTTOM, offset.bottom, params, outState, mPendingAlpha);
 
         mController.applySurfaceParams(params.toArray(new SurfaceParams[params.size()]));
         mCurrentInsets = mPendingInsets;
@@ -401,10 +396,9 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     private Insets getInsetsFromState(InsetsState state, Rect frame,
             @Nullable @InternalInsetsSide SparseIntArray idSideMap) {
         return state.calculateInsets(frame, null /* ignoringVisibilityState */,
-                false /* isScreenRound */, false /* alwaysConsumeSystemBars */,
-                LayoutParams.SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode*/,
+                false /* isScreenRound */, SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode */,
                 0 /* legacyWindowFlags */, 0 /* legacySystemUiFlags */, TYPE_APPLICATION,
-                WINDOWING_MODE_UNDEFINED, idSideMap).getInsets(mTypes);
+                ACTIVITY_TYPE_UNDEFINED, idSideMap).getInsets(mTypes);
     }
 
     /** Computes the insets relative to the given frame. */
@@ -457,7 +451,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         return alpha >= 1 ? 1 : (alpha <= 0 ? 0 : alpha);
     }
 
-    private void updateLeashesForSide(@InternalInsetsSide int side, int offset, int inset,
+    private void updateLeashesForSide(@InternalInsetsSide int side, int offset,
             ArrayList<SurfaceParams> surfaceParams, @Nullable InsetsState outState, float alpha) {
         final ArraySet<InsetsSourceControl> controls = mSideControlsMap.get(side);
         if (controls == null) {
@@ -475,9 +469,9 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
             }
             addTranslationToMatrix(side, offset, mTmpMatrix, mTmpFrame);
 
-            final boolean visible = mHasZeroInsetsIme && side == ISIDE_BOTTOM
-                    ? (mAnimationType == ANIMATION_TYPE_SHOW || !mFinished)
-                    : inset != 0;
+            final boolean visible = mPendingFraction == 0 && source != null
+                    ? source.isVisible()
+                    : !mFinished || mShownOnFinish;
 
             if (outState != null && source != null) {
                 outState.addSource(new InsetsSource(source)

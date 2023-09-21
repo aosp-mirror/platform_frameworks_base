@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"기기가 잠겨 PIN을 입력해야 합니다."</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"기기가 잠겨 비밀번호를 입력해야 합니다."</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"기기가 잠겨 패턴을 입력해야 합니다."</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"기기를 사용하지 않을 때 업데이트가 설치됩니다."</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"보안을 강화해야 합니다. 한동안 PIN이 사용되지 않았습니다."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"보안을 강화해야 합니다. 한동안 비밀번호가 사용되지 않았습니다."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"보안을 강화해야 합니다. 한동안 패턴이 사용되지 않았습니다."</string>

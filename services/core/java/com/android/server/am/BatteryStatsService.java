@@ -27,9 +27,12 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.RequiresNoPermission;
+import android.annotation.SuppressLint;
 import android.app.StatsManager;
 import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -81,6 +84,7 @@ import android.os.health.HealthStatsParceler;
 import android.os.health.HealthStatsWriter;
 import android.os.health.UidHealthStats;
 import android.power.PowerStatsInternal;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
@@ -94,7 +98,6 @@ import android.util.StatsEvent;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.CpuScalingPolicyReader;
@@ -156,6 +159,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     private final PowerProfile mPowerProfile;
     private final CpuScalingPolicies mCpuScalingPolicies;
+    private final BatteryStatsImpl.BatteryStatsConfig mBatteryStatsConfig;
     final BatteryStatsImpl mStats;
     final CpuWakeupStats mCpuWakeupStats;
     private final BatteryUsageStatsStore mBatteryUsageStatsStore;
@@ -173,6 +177,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     .replaceWith("?");
     private static final int MAX_LOW_POWER_STATS_SIZE = 32768;
     private static final int POWER_STATS_QUERY_TIMEOUT_MILLIS = 2000;
+    private static final String MIN_CONSUMED_POWER_THRESHOLD_KEY = "min_consumed_power_threshold";
     private static final String EMPTY = "Empty";
 
     private final HandlerThread mHandlerThread;
@@ -374,22 +379,24 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mPowerProfile = new PowerProfile(context);
         mCpuScalingPolicies = new CpuScalingPolicyReader().read();
 
-        mStats = new BatteryStatsImpl(systemDir, handler, this,
+        final boolean resetOnUnplugHighBatteryLevel = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_batteryStatsResetOnUnplugHighBatteryLevel);
+        final boolean resetOnUnplugAfterSignificantCharge = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_batteryStatsResetOnUnplugAfterSignificantCharge);
+        final long powerStatsThrottlePeriodCpu = context.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultPowerStatsThrottlePeriodCpu);
+        mBatteryStatsConfig =
+                new BatteryStatsImpl.BatteryStatsConfig.Builder()
+                        .setResetOnUnplugHighBatteryLevel(resetOnUnplugHighBatteryLevel)
+                        .setResetOnUnplugAfterSignificantCharge(resetOnUnplugAfterSignificantCharge)
+                        .setPowerStatsThrottlePeriodCpu(powerStatsThrottlePeriodCpu)
+                        .build();
+        mStats = new BatteryStatsImpl(mBatteryStatsConfig, systemDir, handler, this,
                 this, mUserManagerUserInfoProvider, mPowerProfile, mCpuScalingPolicies);
         mWorker = new BatteryExternalStatsWorker(context, mStats);
         mStats.setExternalStatsSyncLocked(mWorker);
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout) * 1000L);
-
-        final boolean resetOnUnplugHighBatteryLevel = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_batteryStatsResetOnUnplugHighBatteryLevel);
-        final boolean resetOnUnplugAfterSignificantCharge = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_batteryStatsResetOnUnplugAfterSignificantCharge);
-        mStats.setBatteryStatsConfig(
-                new BatteryStatsImpl.BatteryStatsConfig.Builder()
-                        .setResetOnUnplugHighBatteryLevel(resetOnUnplugHighBatteryLevel)
-                        .setResetOnUnplugAfterSignificantCharge(resetOnUnplugAfterSignificantCharge)
-                        .build());
         mStats.startTrackingSystemServerCpuTime();
 
         if (BATTERY_USAGE_STORE_ENABLED) {
@@ -841,15 +848,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(), pullAtomCallback);
+                DIRECT_EXECUTOR, pullAtomCallback);
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET_USING_POWER_PROFILE_MODEL,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(), pullAtomCallback);
+                DIRECT_EXECUTOR, pullAtomCallback);
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(), pullAtomCallback);
+                DIRECT_EXECUTOR, pullAtomCallback);
     }
 
     /** StatsPullAtomCallback for pulling BatteryUsageStats data. */
@@ -859,12 +866,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final BatteryUsageStats bus;
             switch (atomTag) {
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET:
+                    @SuppressLint("MissingPermission")
+                    final double minConsumedPowerThreshold =
+                            DeviceConfig.getFloat(DeviceConfig.NAMESPACE_BATTERY_STATS,
+                                    MIN_CONSUMED_POWER_THRESHOLD_KEY, 0);
                     final BatteryUsageStatsQuery querySinceReset =
                             new BatteryUsageStatsQuery.Builder()
                                     .setMaxStatsAgeMs(0)
                                     .includeProcessStateData()
                                     .includeVirtualUids()
                                     .includePowerModels()
+                                    .setMinConsumedPowerThreshold(minConsumedPowerThreshold)
                                     .build();
                     bus = getBatteryUsageStats(List.of(querySinceReset)).get(0);
                     break;
@@ -2591,6 +2603,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("     --proto: output as a binary protobuffer");
         pw.println("     --model power-profile: use the power profile model"
                 + " even if measured energy is available");
+        pw.println("  --sample: collect and dump a sample of stats for debugging purpose");
         pw.println("  <package.name>: optional name of package to filter output by.");
         pw.println("  -h: print this help text.");
         pw.println("Battery stats (batterystats) commands:");
@@ -2621,6 +2634,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.dumpCpuStatsLocked(pw);
         }
+    }
+
+    private void dumpStatsSample(PrintWriter pw) {
+        mStats.dumpStatsSample(pw);
+    }
+
+    private void dumpAggregatedStats(PrintWriter pw) {
+        mStats.dumpAggregatedStats(pw, /* startTime */ 0, /* endTime */0);
     }
 
     private void dumpMeasuredEnergyStats(PrintWriter pw) {
@@ -2864,6 +2885,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     mCpuWakeupStats.dump(new IndentingPrintWriter(pw, "  "),
                             SystemClock.elapsedRealtime());
                     return;
+                } else if ("--sample".equals(arg)) {
+                    dumpStatsSample(pw);
+                    return;
+                } else if ("--aggregated".equals(arg)) {
+                    dumpAggregatedStats(pw);
+                    return;
                 } else if ("-a".equals(arg)) {
                     flags |= BatteryStats.DUMP_VERBOSE;
                 } else if (arg.length() > 0 && arg.charAt(0) == '-'){
@@ -2924,6 +2951,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.unmarshall(raw, 0, raw.length);
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
+                                        mBatteryStatsConfig,
                                         null, mStats.mHandler, null, null,
                                         mUserManagerUserInfoProvider, mPowerProfile,
                                         mCpuScalingPolicies);
@@ -2965,6 +2993,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.unmarshall(raw, 0, raw.length);
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
+                                        mBatteryStatsConfig,
                                         null, mStats.mHandler, null, null,
                                         mUserManagerUserInfoProvider, mPowerProfile,
                                         mCpuScalingPolicies);

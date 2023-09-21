@@ -505,45 +505,32 @@ public class FileUtilsTest {
 
     @Test
     public void testRoundStorageSize() throws Exception {
-        final long GB1 = DataUnit.GIGABYTES.toBytes(1);
-        final long GiB1 = DataUnit.GIBIBYTES.toBytes(1);
-        final long GB2 = DataUnit.GIGABYTES.toBytes(2);
-        final long GiB2 = DataUnit.GIBIBYTES.toBytes(2);
-        final long GiB128 = DataUnit.GIBIBYTES.toBytes(128);
-        final long GB256 = DataUnit.GIGABYTES.toBytes(256);
-        final long GiB256 = DataUnit.GIBIBYTES.toBytes(256);
-        final long GB512 = DataUnit.GIGABYTES.toBytes(512);
-        final long GiB512 = DataUnit.GIBIBYTES.toBytes(512);
-        final long TB1 = DataUnit.TERABYTES.toBytes(1);
-        final long TiB1 = DataUnit.TEBIBYTES.toBytes(1);
-        final long TB2 = DataUnit.TERABYTES.toBytes(2);
-        final long TiB2 = DataUnit.TEBIBYTES.toBytes(2);
-        final long TB4 = DataUnit.TERABYTES.toBytes(4);
-        final long TiB4 = DataUnit.TEBIBYTES.toBytes(4);
-        final long TB8 = DataUnit.TERABYTES.toBytes(8);
-        final long TiB8 = DataUnit.TEBIBYTES.toBytes(8);
+        final long M256 = DataUnit.MEGABYTES.toBytes(256);
+        final long M512 = DataUnit.MEGABYTES.toBytes(512);
+        final long G1 = DataUnit.GIGABYTES.toBytes(1);
+        final long G2 = DataUnit.GIGABYTES.toBytes(2);
+        final long G32 = DataUnit.GIGABYTES.toBytes(32);
+        final long G64 = DataUnit.GIGABYTES.toBytes(64);
+        final long G512 = DataUnit.GIGABYTES.toBytes(512);
+        final long G1000 = DataUnit.TERABYTES.toBytes(1);
+        final long G2000 = DataUnit.TERABYTES.toBytes(2);
 
-        assertEquals(GB1, roundStorageSize(GB1 - 1));
-        assertEquals(GB1, roundStorageSize(GB1));
-        assertEquals(GB1, roundStorageSize(GB1 + 1));
-        assertEquals(GB1, roundStorageSize(GiB1 - 1));
-        assertEquals(GB1, roundStorageSize(GiB1));
-        assertEquals(GB2, roundStorageSize(GiB1 + 1));
-        assertEquals(GB2, roundStorageSize(GiB2));
+        assertEquals(M256, roundStorageSize(M256 - 1));
+        assertEquals(M256, roundStorageSize(M256));
+        assertEquals(M512, roundStorageSize(M256 + 1));
+        assertEquals(M512, roundStorageSize(M512 - 1));
+        assertEquals(M512, roundStorageSize(M512));
+        assertEquals(G1, roundStorageSize(M512 + 1));
+        assertEquals(G1, roundStorageSize(G1));
+        assertEquals(G2, roundStorageSize(G1 + 1));
 
-        assertEquals(GB256, roundStorageSize(GiB128 + 1));
-        assertEquals(GB256, roundStorageSize(GiB256));
-        assertEquals(GB512, roundStorageSize(GiB256 + 1));
-        assertEquals(GB512, roundStorageSize(GiB512));
-        assertEquals(TB1, roundStorageSize(GiB512 + 1));
-        assertEquals(TB1, roundStorageSize(TiB1));
-        assertEquals(TB2, roundStorageSize(TiB1 + 1));
-        assertEquals(TB2, roundStorageSize(TiB2));
-        assertEquals(TB4, roundStorageSize(TiB2 + 1));
-        assertEquals(TB4, roundStorageSize(TiB4));
-        assertEquals(TB8, roundStorageSize(TiB4 + 1));
-        assertEquals(TB8, roundStorageSize(TiB8));
-        assertEquals(TB1, roundStorageSize(1013077688320L)); // b/268571529
+        assertEquals(G32, roundStorageSize(G32 - 1));
+        assertEquals(G32, roundStorageSize(G32));
+        assertEquals(G64, roundStorageSize(G32 + 1));
+
+        assertEquals(G512, roundStorageSize(G512 - 1));
+        assertEquals(G1000, roundStorageSize(G512 + 1));
+        assertEquals(G2000, roundStorageSize(G1000 + 1));
     }
 
     @Test

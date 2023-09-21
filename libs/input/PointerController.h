@@ -47,7 +47,7 @@ class PointerController : public PointerControllerInterface {
 public:
     static std::shared_ptr<PointerController> create(
             const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-            const sp<SpriteController>& spriteController);
+            SpriteController& spriteController, bool enabled);
 
     ~PointerController() override;
 
@@ -70,12 +70,12 @@ public:
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
     void reloadPointerResources();
-    void onDisplayViewportsUpdated(std::vector<DisplayViewport>& viewports);
+    void onDisplayViewportsUpdated(const std::vector<DisplayViewport>& viewports);
 
     void onDisplayInfosChangedLocked(const std::vector<gui::DisplayInfo>& displayInfos)
             REQUIRES(getLock());
 
-    void dump(std::string& dump);
+    std::string dump();
 
 protected:
     using WindowListenerConsumer =
@@ -83,13 +83,13 @@ protected:
 
     // Constructor used to test WindowInfosListener registration.
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-                      const sp<SpriteController>& spriteController,
+                      SpriteController& spriteController, bool enabled,
                       WindowListenerConsumer registerListener,
                       WindowListenerConsumer unregisterListener);
 
 private:
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-                      const sp<SpriteController>& spriteController);
+                      SpriteController& spriteController, bool enabled);
 
     friend PointerControllerContext::LooperCallback;
     friend PointerControllerContext::MessageHandler;
@@ -99,6 +99,8 @@ private:
     // is given away. To avoid the small overhead of using two separate locks in these two objects,
     // we use the DisplayInfoListener's lock in PointerController.
     std::mutex& getLock() const;
+
+    const bool mEnabled;
 
     PointerControllerContext mContext;
 

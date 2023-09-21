@@ -134,6 +134,22 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
         verify(shadeViewController, times(1)).showAodUi()
     }
 
+    @Test
+    fun testAodUiShowNotInvokedIfWakingUp() {
+        `when`(dozeParameters.canControlUnlockedScreenOff()).thenReturn(true)
+        `when`(powerManager.isInteractive).thenReturn(false)
+
+        val callbackCaptor = ArgumentCaptor.forClass(Runnable::class.java)
+        controller.startAnimation()
+        controller.onStartedWakingUp()
+
+        verify(handler).postDelayed(callbackCaptor.capture(), anyLong())
+
+        callbackCaptor.value.run()
+
+        verify(shadeViewController, never()).showAodUi()
+    }
+
     /**
      * The AOD UI is shown during the screen off animation, after a delay to allow the light reveal
      * animation to start. If the device is woken up during the screen off, we should *never* do

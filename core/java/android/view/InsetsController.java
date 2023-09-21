@@ -16,10 +16,12 @@
 
 package android.view;
 
+import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.InsetsControllerProto.CONTROL;
 import static android.view.InsetsControllerProto.STATE;
 import static android.view.InsetsSource.ID_IME;
+import static android.view.InsetsSource.ID_IME_CAPTION_BAR;
 import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.LAST;
@@ -40,6 +42,7 @@ import android.app.ActivityThread;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -649,9 +652,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private int mLastLegacySoftInputMode;
     private int mLastLegacyWindowFlags;
     private int mLastLegacySystemUiFlags;
-    private int mLastWindowingMode;
+    private int mLastActivityType;
     private boolean mStartingAnimation;
     private int mCaptionInsetsHeight = 0;
+    private int mImeCaptionBarInsetsHeight = 0;
     private boolean mAnimationsDisabled;
     private boolean mCompatSysUiVisibilityStaled;
 
@@ -661,9 +665,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     /** Set of inset types for which an animation was started since last resetting this field */
     private @InsetsType int mLastStartedAnimTypes;
-
-    /** Set of inset types which cannot be controlled by the user animation */
-    private @InsetsType int mDisabledUserAnimationInsetsTypes;
 
     /** Set of inset types which are existing */
     private @InsetsType int mExistingTypes = 0;
@@ -691,6 +692,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 @Override
                 public void onIdNotFoundInState2(int index1, InsetsSource source1) {
                     if (!CAPTION_ON_SHELL && source1.getType() == captionBar()) {
+                        return;
+                    }
+                    if (source1.getId() == ID_IME_CAPTION_BAR) {
                         return;
                     }
 
@@ -796,10 +800,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 }
             }
 
-            WindowInsets insets = state.calculateInsets(mFrame, mState /* ignoringVisibilityState*/,
-                    mLastInsets.isRound(), false /* alwaysConsumeSystemBars */,
+            WindowInsets insets = state.calculateInsets(mFrame,
+                    mState /* ignoringVisibilityState */, mLastInsets.isRound(),
                     mLastLegacySoftInputMode, mLastLegacyWindowFlags, mLastLegacySystemUiFlags,
-                    mWindowType, mLastWindowingMode, null /* idSideMap */);
+                    mWindowType, mLastActivityType, null /* idSideMap */);
             mHost.dispatchWindowInsetsAnimationProgress(insets,
                     Collections.unmodifiableList(runningAnimations));
             if (DEBUG) {
@@ -822,6 +826,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public void onFrameChanged(Rect frame) {
         if (mFrame.equals(frame)) {
             return;
+        }
+        if (mImeCaptionBarInsetsHeight != 0) {
+            setImeCaptionBarInsetsHeight(mImeCaptionBarInsetsHeight);
         }
         mHost.notifyInsetsChanged();
         mFrame.set(frame);
@@ -877,21 +884,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         mState.set(newState, 0 /* types */);
         @InsetsType int existingTypes = 0;
         @InsetsType int visibleTypes = 0;
-        @InsetsType int disabledUserAnimationTypes = 0;
         @InsetsType int[] cancelledUserAnimationTypes = {0};
         for (int i = 0, size = newState.sourceSize(); i < size; i++) {
             final InsetsSource source = newState.sourceAt(i);
             @InsetsType int type = source.getType();
             @AnimationType int animationType = getAnimationType(type);
-            if (!source.isUserControllable()) {
-                // The user animation is not allowed when visible frame is empty.
-                disabledUserAnimationTypes |= type;
-                if (animationType == ANIMATION_TYPE_USER) {
-                    // Existing user animation needs to be cancelled.
-                    animationType = ANIMATION_TYPE_NONE;
-                    cancelledUserAnimationTypes[0] |= type;
-                }
-            }
             final InsetsSourceConsumer consumer = mSourceConsumers.get(source.getId());
             if (consumer != null) {
                 consumer.updateSource(source, animationType);
@@ -921,25 +918,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
         InsetsState.traverse(mState, newState, mRemoveGoneSources);
 
-        updateDisabledUserAnimationTypes(disabledUserAnimationTypes);
-
         if (cancelledUserAnimationTypes[0] != 0) {
             mHandler.post(() -> show(cancelledUserAnimationTypes[0]));
-        }
-    }
-
-    private void updateDisabledUserAnimationTypes(@InsetsType int disabledUserAnimationTypes) {
-        @InsetsType int diff = mDisabledUserAnimationInsetsTypes ^ disabledUserAnimationTypes;
-        if (diff != 0) {
-            for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
-                InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
-                if (consumer.getControl() != null && (consumer.getType() & diff) != 0) {
-                    mHandler.removeCallbacks(mInvokeControllableInsetsChangedListeners);
-                    mHandler.post(mInvokeControllableInsetsChangedListeners);
-                    break;
-                }
-            }
-            mDisabledUserAnimationInsetsTypes = disabledUserAnimationTypes;
         }
     }
 
@@ -959,30 +939,29 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
-     * @see InsetsState#calculateInsets(Rect, InsetsState, boolean, boolean, int, int, int, int,
-     *      int, android.util.SparseIntArray)
+     * @see InsetsState#calculateInsets(Rect, InsetsState, boolean, int, int, int, int, int,
+     *      android.util.SparseIntArray)
      */
     @VisibleForTesting
-    public WindowInsets calculateInsets(boolean isScreenRound, boolean alwaysConsumeSystemBars,
-            int windowType, int windowingMode, int legacySoftInputMode, int legacyWindowFlags,
-            int legacySystemUiFlags) {
+    public WindowInsets calculateInsets(boolean isScreenRound, int windowType, int activityType,
+            int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags) {
         mWindowType = windowType;
-        mLastWindowingMode = windowingMode;
+        mLastActivityType = activityType;
         mLastLegacySoftInputMode = legacySoftInputMode;
         mLastLegacyWindowFlags = legacyWindowFlags;
         mLastLegacySystemUiFlags = legacySystemUiFlags;
-        mLastInsets = mState.calculateInsets(mFrame, null /* ignoringVisibilityState*/,
-                isScreenRound, alwaysConsumeSystemBars, legacySoftInputMode, legacyWindowFlags,
-                legacySystemUiFlags, windowType, windowingMode, null /* idSideMap */);
+        mLastInsets = mState.calculateInsets(mFrame, null /* ignoringVisibilityState */,
+                isScreenRound, legacySoftInputMode, legacyWindowFlags,
+                legacySystemUiFlags, windowType, activityType, null /* idSideMap */);
         return mLastInsets;
     }
 
     /**
      * @see InsetsState#calculateVisibleInsets(Rect, int, int, int, int)
      */
-    public Insets calculateVisibleInsets(int windowType, int windowingMode,
+    public Insets calculateVisibleInsets(int windowType, int activityType,
             @SoftInputModeFlags int softInputMode, int windowFlags) {
-        return mState.calculateVisibleInsets(mFrame, windowType, windowingMode, softInputMode,
+        return mState.calculateVisibleInsets(mFrame, windowType, activityType, softInputMode,
                 windowFlags);
     }
 
@@ -1007,6 +986,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         // Ensure to update all existing source consumers
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
+            if (consumer.getId() == ID_IME_CAPTION_BAR) {
+                // The inset control for the IME caption bar will never be dispatched
+                // by the server.
+                continue;
+            }
+
             final InsetsSourceControl control = mTmpControlArray.get(consumer.getId());
             if (control != null) {
                 controllableTypes |= control.getType();
@@ -1316,26 +1301,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     + " while an existing " + Type.toString(mTypesBeingCancelled)
                     + " is being cancelled.");
         }
-        if (animationType == ANIMATION_TYPE_USER) {
-            final @InsetsType int disabledTypes = types & mDisabledUserAnimationInsetsTypes;
-            if (DEBUG) Log.d(TAG, "user animation disabled types: " + disabledTypes);
-            types &= ~mDisabledUserAnimationInsetsTypes;
-
-            if ((disabledTypes & ime()) != 0) {
-                ImeTracker.forLogging().onFailed(statsToken,
-                        ImeTracker.PHASE_CLIENT_DISABLED_USER_ANIMATION);
-
-                if (fromIme
-                        && !mState.isSourceOrDefaultVisible(mImeSourceConsumer.getId(), ime())) {
-                    // We've requested IMM to show IME, but the IME is not controllable. We need to
-                    // cancel the request.
-                    setRequestedVisibleTypes(0 /* visibleTypes */, ime());
-                    if (mImeSourceConsumer.onAnimationStateChanged(false /* running */)) {
-                        notifyVisibilityChanged();
-                    }
-                }
-            }
-        }
         if (types == 0) {
             // nothing to animate.
             listener.onCancelled(null);
@@ -1499,7 +1464,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 continue;
             }
             final InsetsSourceControl control = consumer.getControl();
-            if (control != null && control.getLeash() != null) {
+            if (control != null
+                    && (control.getLeash() != null || control.getId() == ID_IME_CAPTION_BAR)) {
                 controls.put(control.getId(), new InsetsSourceControl(control));
                 typesReady |= consumer.getType();
             }
@@ -1885,6 +1851,35 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     @Override
+    public void setImeCaptionBarInsetsHeight(int height) {
+        if (!ENABLE_HIDE_IME_CAPTION_BAR) {
+            return;
+        }
+        Rect newFrame = new Rect(mFrame.left, mFrame.bottom - height, mFrame.right, mFrame.bottom);
+        InsetsSource source = mState.peekSource(ID_IME_CAPTION_BAR);
+        if (mImeCaptionBarInsetsHeight != height
+                || (source != null && !newFrame.equals(source.getFrame()))) {
+            mImeCaptionBarInsetsHeight = height;
+            if (mImeCaptionBarInsetsHeight != 0) {
+                mState.getOrCreateSource(ID_IME_CAPTION_BAR, captionBar())
+                        .setFrame(newFrame);
+                getSourceConsumer(ID_IME_CAPTION_BAR, captionBar()).setControl(
+                        new InsetsSourceControl(ID_IME_CAPTION_BAR, captionBar(),
+                                null /* leash */, false /* initialVisible */,
+                                new Point(), Insets.NONE),
+                        new int[1], new int[1]);
+            } else {
+                mState.removeSource(ID_IME_CAPTION_BAR);
+                InsetsSourceConsumer sourceConsumer = mSourceConsumers.get(ID_IME_CAPTION_BAR);
+                if (sourceConsumer != null) {
+                    sourceConsumer.setControl(null, new int[1], new int[1]);
+                }
+            }
+            mHost.notifyInsetsChanged();
+        }
+    }
+
+    @Override
     public void setSystemBarsBehavior(@Behavior int behavior) {
         mHost.setSystemBarsBehavior(behavior);
     }
@@ -1908,7 +1903,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
             InsetsSource source = mState.peekSource(consumer.getId());
-            if (consumer.getControl() != null && source != null && source.isUserControllable()) {
+            if (consumer.getControl() != null && source != null) {
                 result |= consumer.getType();
             }
         }

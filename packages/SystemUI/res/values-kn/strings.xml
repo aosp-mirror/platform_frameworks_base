@@ -57,6 +57,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"ಬೇರೊಂದು ಸಾಧನದಿಂದ ಸಿಸ್ಟಮ್ ಭಾಷೆಯ ಬದಲಾವಣೆಯನ್ನು ವಿನಂತಿಸಲಾಗಿದೆ"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"ಭಾಷೆಯನ್ನು ಬದಲಾಯಿಸಿ"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"ಪ್ರಸ್ತುತ ಭಾಷೆಯನ್ನೇ ಇರಿಸಿ"</string>
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"ವೈ-ಫೈ ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"ಈ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸಬೇಕೆ?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"ನೆಟ್‌ವರ್ಕ್ ಹೆಸರು (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nವೈ-ಫೈ ವಿಳಾಸ (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"ಈ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ಅನುಮತಿಸಿ"</string>
@@ -158,6 +159,7 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ಪ್ಯಾಟರ್ನ್ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ಪಾಸ್‌ವರ್ಡ್ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"ಹಲವಾರು ತಪ್ಪು ಪ್ರಯತ್ನಗಳು.\nಮತ್ತೆ <xliff:g id="NUMBER">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"ತುರ್ತು"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ. <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> ಪ್ರಯತ್ನಗಳು."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"ನಿಮ್ಮ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"ಮುಂದಿನ ಪ್ರಯತ್ನದಲ್ಲಿ ನೀವು ತಪ್ಪಾದ ಪ್ಯಾಟರ್ನ್‌ ನಮೂದಿಸಿದರೆ, ಈ ಸಾಧನದ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
@@ -230,7 +232,7 @@
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"ಮೊಬೈಲ್ ಡೇಟಾವನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"ಡೇಟಾ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"ಡೇಟಾ ಬಳಕೆಯು ನೀವು ಹೊಂದಿಸಿರುವ ಮಿತಿಯನ್ನು ತಲುಪಿದೆ. ಹೀಗಾಗಿ ನೀವು ಈಗ ಮೊಬೈಲ್ ಡೇಟಾ ಬಳಸುತ್ತಿಲ್ಲ.\n\nನೀವು ಮುಂದುವರಿದರೆ, ಡೇಟಾ ಬಳಕೆಗೆ ಶುಲ್ಕ ತೆರಬೇಕಾಗಬಹುದು."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"ಮುಂದುವರಿಸು"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"ಮುಂದುವರಿಸಿ"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"ಸ್ಥಳ ವಿನಂತಿಗಳು ಸಕ್ರಿಯವಾಗಿವೆ"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"ಸೆನ್ಸರ್‌ಗಳು ಆಫ್ ಆಗಿವೆ"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರವುಗೊಳಿಸು."</string>
@@ -295,6 +297,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ಮಿತಿ"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ಎಚ್ಚರಿಕೆ"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳು"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ನೈಟ್ ಲೈಟ್"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ಸೂರ್ಯಾಸ್ತದಲ್ಲಿ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ಸೂರ್ಯೋದಯದವರೆಗೆ"</string>
@@ -410,6 +413,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"ನೀವು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುತ್ತಿರುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಕಾಣಿಸುವ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುತ್ತಿರುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಈ ಆಯ್ಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದೆ"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"ಕ್ಯಾಸ್ಟ್ ಮಾಡಲು ಪ್ರಾರಂಭಿಸಬೇಕೇ?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"ನೀವು ಕ್ಯಾಸ್ಟ್ ಮಾಡುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಕಾಣಿಸುವ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ Android ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ Android ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
@@ -500,7 +504,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಮೇಲೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಅನ್‌ಪಿನ್ ಮಾಡಲು ಹೋಲ್ಡ್ ಮಾಡಿ."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅವಲೋಕನವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹೋಲ್ಡ್ ಮಾಡಿ."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಮುಖಪುಟವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿಹಿಡಿಯಿರಿ."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು (ಉದಾ, ಸಂಪರ್ಕಗಳು ಮತ್ತು ಇಮೇಲ್ ವಿಷಯ)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಬಹುದು(ಉದಾ, ಸಂಪರ್ಕಗಳು ಮತ್ತು ಇಮೇಲ್ ಕಂಟೆಂಟ್‍)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ಪಿನ್ ಮಾಡಲಾದ ಆ್ಯಪ್ ಇತರ ಆ್ಯಪ್‌ಗಳನ್ನು ತೆರೆಯಬಹುದು."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಸಮಗ್ರ ನೋಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ &amp; ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಮುಖಪುಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ &amp; ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
@@ -647,7 +651,7 @@
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ಮುಖಪುಟ"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"ಇತ್ತೀಚಿನವುಗಳು"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"ಹಿಂದೆ"</string>
-    <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"ಅಧಿಸೂಚನೆಗಳು"</string>
+    <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"ನೋಟಿಫಿಕೇಶನ್‌ಗಳು"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"ಕೀಬೋರ್ಡ್‌ ಲೇಔಟ್‌ ಬದಲಾಯಿಸಿ"</string>
     <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"ಪಠ್ಯ ತೆರವುಗೊಳಿಸಿ"</string>
@@ -859,11 +863,20 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"ಕೆಳಗೆ ಸರಿಸಿ"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ಎಡಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"ಬಲಕ್ಕೆ ಸರಿಸಿ"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ಝೂಮ್ ಮಾಡುವ ಸ್ವಿಚ್"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಹಿಗ್ಗಿಸಿ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ಸ್ಕ್ರೀನ್‌ನ ಅರ್ಧಭಾಗವನ್ನು ಝೂಮ್ ಮಾಡಿ"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"ಹಿಗ್ಗಿಸುವಿಕೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"ಮ್ಯಾಗ್ನಿಫಿಕೇಶನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮುಚ್ಚಿರಿ"</string>
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"ಎಡಿಟ್ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"ಮರುಗಾತ್ರಗೊಳಿಸಲು ಮೂಲೆಯನ್ನು ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ಡಯಾಗನಲ್ ಸ್ಕ್ರೋಲಿಂಗ್ ಅನ್ನು ಅನುಮತಿಸಿ"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"ಮರುಗಾತ್ರಗೊಳಿಸಿ"</string>
@@ -1038,7 +1051,7 @@
     <string name="game_status" msgid="1340694320630973259">"ಪ್ಲೇ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"ಸ್ನೇಹಿತರು"</string>
     <string name="empty_status" msgid="5938893404951307749">"ರಾತ್ರಿ ಚಾಟ್ ಮಾಡೋಣ!"</string>
-    <string name="status_before_loading" msgid="1500477307859631381">"ವಿಷಯ ಶೀಘ್ರದಲ್ಲೇ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ"</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"ಕಂಟೆಂಟ್‌ ಶೀಘ್ರದಲ್ಲೇ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ"</string>
     <string name="missed_call" msgid="4228016077700161689">"ಮಿಸ್ಡ್ ಕಾಲ್"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ಇತ್ತೀಚಿನ ಸಂದೇಶಗಳು, ಮಿಸ್ಡ್ ಕಾಲ್‌ಗಳು ಮತ್ತು ಸ್ಥಿತಿ ಅಪ್‌ಡೇಟ್‌ಗಳು"</string>
@@ -1124,7 +1137,7 @@
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"ಅಪರಿಚಿತ"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
-    <string name="log_access_confirmation_title" msgid="4843557604739943395">"ಎಲ್ಲಾ ಸಾಧನದ ಲಾಗ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ಗೆ ಅನುಮತಿಸುವುದೇ?"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"ಎಲ್ಲಾ ಸಾಧನದ ಲಾಗ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ಗೆ ಅನುಮತಿಸಬೇಕೆ?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"ಒಂದು ಬಾರಿಯ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸಿ"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ಅನುಮತಿಸಬೇಡಿ"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಕಾರ್ಯಾಚರಣೆಗಳನ್ನು ಸಾಧನದ ಲಾಗ್‌ಗಳು ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತವೆ. ಸಮಸ್ಯೆಗಳನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಮತ್ತು ಪರಿಹರಿಸಲು ಆ್ಯಪ್‌ಗಳು ಈ ಲಾಗ್ ಅನ್ನು ಬಳಸಬಹುದು.\n\nಕೆಲವು ಲಾಗ್‌ಗಳು ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು, ಆದ್ದರಿಂದ ನಿಮ್ಮ ವಿಶ್ವಾಸಾರ್ಹ ಆ್ಯಪ್‌ಗಳಿಗೆ ಮಾತ್ರ ಸಾಧನದ ಎಲ್ಲಾ ಲಾಗ್‌ಗಳಿಗೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸಿ. \n\nಎಲ್ಲಾ ಸಾಧನ ಲಾಗ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ನೀವು ಈ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸದಿದ್ದರೆ, ಅದು ಆಗಲೂ ತನ್ನದೇ ಆದ ಲಾಗ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಬಹುದು. ನಿಮ್ಮ ಸಾಧನ ತಯಾರಕರಿಗೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಕೆಲವು ಲಾಗ್‌ಗಳು ಅಥವಾ ಮಾಹಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಲು ಈಗಲೂ ಸಾಧ್ಯವಾಗುತ್ತದೆ."</string>
@@ -1133,7 +1146,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"ವಾಲೆಟ್ ಆ್ಯಪ್ ಅನ್ನು ಶಾರ್ಟ್‌ಕಟ್ ಆಗಿ ಸೇರಿಸಲು, ಆ್ಯಪ್ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"ವಾಲೆಟ್ ಆ್ಯಪ್ ಅನ್ನು ಶಾರ್ಟ್‌ಕಟ್ ಆಗಿ ಸೇರಿಸಲು, ಕನಿಷ್ಠ ಒಂದು ಕಾರ್ಡ್ ಅನ್ನು ಸೇರಿಸಲಾಗಿದೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR ಕೋಡ್ ಸ್ಕ್ಯಾನರ್ ಅನ್ನು ಶಾರ್ಟ್‌ಕಟ್ ಆಗಿ ಸೇರಿಸಲು, ಕ್ಯಾಮರಾ ಆ್ಯಪ್ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home ಆ್ಯಪ್ ಅನ್ನು ಶಾರ್ಟ್‌ಕಟ್ ಆಗಿ ಸೇರಿಸಲು, ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• ಕನಿಷ್ಠ ಒಂದು ಸಾಧನ ಲಭ್ಯವಿದೆ"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"ನೋಟ್ಸ್ ಮಾಡಿಕೊಳ್ಳುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ಬಳಸಲು ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -1166,6 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant ನಿಮ್ಮ ಮಾತನ್ನು ಆಲಿಸುತ್ತಿದೆ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಅನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="install_app" msgid="5066668100199613936">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ಬಾಹ್ಯ ಡಿಸ್‌ಪ್ಲೇಗೆ ಪ್ರತಿಬಿಂಬಿಸಬೇಕೆ?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"ಮೈಕ್ರೊಫೋನ್ ಮತ್ತು ಕ್ಯಾಮರಾ"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್ ಬಳಕೆ"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"ಇತ್ತೀಚಿನ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ನೋಡಿ"</string>

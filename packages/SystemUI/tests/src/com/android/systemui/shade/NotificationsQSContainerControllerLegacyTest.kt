@@ -39,6 +39,7 @@ import com.android.systemui.plugins.qs.QS
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.whenever
@@ -100,7 +101,11 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         fakeSystemClock = FakeSystemClock()
         delayableExecutor = FakeExecutor(fakeSystemClock)
-        featureFlags = FakeFeatureFlags().apply { set(Flags.MIGRATE_NSSL, false) }
+        featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.MIGRATE_NSSL, false)
+                set(Flags.QS_CONTAINER_GRAPH_OPTIMIZER, false)
+            }
         mContext.ensureTestableResources()
         whenever(view.context).thenReturn(mContext)
         whenever(view.resources).thenReturn(mContext.resources)
@@ -118,6 +123,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
                 delayableExecutor,
                 featureFlags,
                 notificationStackScrollLayoutController,
+                ResourcesSplitShadeStateController()
             )
 
         overrideResource(R.dimen.split_shade_notifications_scrim_margin_bottom, SCRIM_MARGIN)
@@ -474,6 +480,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
                 delayableExecutor,
                 featureFlags,
                 notificationStackScrollLayoutController,
+                ResourcesSplitShadeStateController()
             )
         controller.updateConstraints()
 

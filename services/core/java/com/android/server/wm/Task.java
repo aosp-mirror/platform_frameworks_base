@@ -725,7 +725,7 @@ class Task extends TaskFragment {
             } catch (RemoteException e) {
             }
         }
-        if (autoRemoveFromRecents(oldParent.asTaskFragment()) || isVoiceSession) {
+        if (shouldAutoRemoveFromRecents(oldParent.asTaskFragment()) || isVoiceSession) {
             // Task creator asked to remove this when done, or this task was a voice
             // interaction, so it should not remain on the recent tasks list.
             mTaskSupervisor.mRecentTasks.remove(this);
@@ -1262,6 +1262,37 @@ class Task extends TaskFragment {
         return null;
     }
 
+    boolean pauseActivityIfNeeded(@Nullable ActivityRecord resuming, @NonNull String reason) {
+        if (!isLeafTask()) {
+            return false;
+        }
+
+        final int[] someActivityPaused = {0};
+        // Check if the direct child resumed activity in the leaf task needed to be paused if
+        // the leaf task is not a leaf task fragment.
+        if (!isLeafTaskFragment()) {
+            final ActivityRecord top = topRunningActivity();
+            final ActivityRecord resumedActivity = getResumedActivity();
+            if (resumedActivity != null && top.getTaskFragment() != this) {
+                // Pausing the resumed activity because it is occluded by other task fragment.
+                if (startPausing(false /* uiSleeping*/, resuming, reason)) {
+                    someActivityPaused[0]++;
+                }
+            }
+        }
+
+        forAllLeafTaskFragments((taskFrag) -> {
+            final ActivityRecord resumedActivity = taskFrag.getResumedActivity();
+            if (resumedActivity != null && !taskFrag.canBeResumed(resuming)) {
+                if (taskFrag.startPausing(false /* uiSleeping*/, resuming, reason)) {
+                    someActivityPaused[0]++;
+                }
+            }
+        }, true /* traverseTopToBottom */);
+
+        return someActivityPaused[0] > 0;
+    }
+
     void updateTaskMovement(boolean toTop, boolean toBottom, int position) {
         EventLogTags.writeWmTaskMoved(mTaskId, getRootTaskId(), getDisplayId(), toTop ? 1 : 0,
                 position);
@@ -1558,12 +1589,14 @@ class Task extends TaskFragment {
         return count > 0;
     }
 
-    private boolean autoRemoveFromRecents(TaskFragment oldParentFragment) {
+    private boolean shouldAutoRemoveFromRecents(TaskFragment oldParentFragment) {
         // We will automatically remove the task either if it has explicitly asked for
         // this, or it is empty and has never contained an activity that got shown to
-        // the user, or it was being embedded in another Task.
-        return autoRemoveRecents || (!hasChild() && !getHasBeenVisible()
-                || (oldParentFragment != null && oldParentFragment.isEmbedded()));
+        // the user, or it was being embedded in another Task, or the display policy
+        // doesn't allow recents,
+        return autoRemoveRecents || (!hasChild() && !getHasBeenVisible())
+                || (oldParentFragment != null && oldParentFragment.isEmbedded())
+                || (mDisplayContent != null && !mDisplayContent.canShowTasksInHostDeviceRecents());
     }
 
     private void clearPinnedTaskIfNeed() {
@@ -2813,7 +2846,7 @@ class Task extends TaskFragment {
         final WindowManager.LayoutParams attrs = win.mAttrs;
         visibleFrame.set(win.getFrame());
         visibleFrame.inset(win.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                visibleFrame, attrs.type, win.getWindowingMode(), attrs.softInputMode,
+                visibleFrame, attrs.type, win.getActivityType(), attrs.softInputMode,
                 attrs.flags));
         out.union(visibleFrame);
     }
@@ -3459,6 +3492,8 @@ class Task extends TaskFragment {
         info.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxHeight = TaskInfo.PROPERTY_VALUE_UNSET;
+        info.isUserFullscreenOverrideEnabled = top != null
+                && top.mLetterboxUiController.shouldApplyUserFullscreenOverride();
         info.isFromLetterboxDoubleTap = top != null && top.mLetterboxUiController.isFromDoubleTap();
         if (info.isLetterboxDoubleTapEnabled) {
             info.topActivityLetterboxWidth = top.getBounds().width();
@@ -3474,9 +3509,9 @@ class Task extends TaskFragment {
             }
         }
         // User Aspect Ratio Settings is enabled if the app is not in SCM
-        info.topActivityEligibleForUserAspectRatioButton =
-                mWmService.mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
-                        && top != null && !info.topActivityInSizeCompat;
+        info.topActivityEligibleForUserAspectRatioButton = top != null
+                && !info.topActivityInSizeCompat
+                && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings();
         info.topActivityBoundsLetterboxed = top != null && top.areBoundsLetterboxed();
     }
 
@@ -3539,11 +3574,6 @@ class Task extends TaskFragment {
                 ? null : new PictureInPictureParams(top.pictureInPictureArgs);
     }
 
-    private boolean shouldDockBigOverlays() {
-        final ActivityRecord topMostActivity = getTopMostActivity();
-        return topMostActivity != null && topMostActivity.shouldDockBigOverlays;
-    }
-
     Rect getDisplayCutoutInsets() {
         if (mDisplayContent == null || getDisplayInfo().displayCutout == null) return null;
         final WindowState w = getTopVisibleAppMainWindow();
@@ -3575,7 +3605,7 @@ class Task extends TaskFragment {
                 && activity.info != info.taskInfo.topActivityInfo
                 ? activity.info : null;
         info.isKeyguardOccluded =
-            mAtmService.mKeyguardController.isDisplayOccluded(DEFAULT_DISPLAY);
+                mAtmService.mKeyguardController.isKeyguardOccluded(info.taskInfo.displayId);
 
         info.startingWindowTypeParameter = activity.mStartingData != null
                 ? activity.mStartingData.mTypeParams
@@ -5103,7 +5133,6 @@ class Task extends TaskFragment {
 
     void startActivityLocked(ActivityRecord r, @Nullable Task topTask, boolean newTask,
             boolean isTaskSwitch, ActivityOptions options, @Nullable ActivityRecord sourceRecord) {
-        final ActivityRecord pipCandidate = findEnterPipOnTaskSwitchCandidate(topTask);
         Task rTask = r.getTask();
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
         final boolean isOrhasTask = rTask == this || hasChild(rTask);
@@ -5167,8 +5196,10 @@ class Task extends TaskFragment {
             // supporting picture-in-picture while pausing only if the starting activity
             // would not be considered an overlay on top of the current activity
             // (eg. not fullscreen, or the assistant)
-            enableEnterPipOnTaskSwitch(pipCandidate,
-                    null /* toFrontTask */, r, options);
+            if (!ActivityTaskManagerService.isPip2ExperimentEnabled()) {
+                final ActivityRecord pipCandidate = findEnterPipOnTaskSwitchCandidate(topTask);
+                enableEnterPipOnTaskSwitch(pipCandidate, null /* toFrontTask */, r, options);
+            }
         }
         boolean doShow = true;
         if (newTask) {
@@ -5241,7 +5272,7 @@ class Task extends TaskFragment {
      * enter PiP while it is pausing (if supported). Only one of {@param toFrontTask} or
      * {@param toFrontActivity} should be set.
      */
-    private static void enableEnterPipOnTaskSwitch(@Nullable ActivityRecord pipCandidate,
+    static void enableEnterPipOnTaskSwitch(@Nullable ActivityRecord pipCandidate,
             @Nullable Task toFrontTask, @Nullable ActivityRecord toFrontActivity,
             @Nullable ActivityOptions opts) {
         if (pipCandidate == null) {

@@ -54,8 +54,9 @@ public interface NotificationRowContentBinder {
      *
      * @param entry notification
      * @param row notification row to cancel bind on
+     * @return true if an on-going bind operation was cancelled
      */
-    void cancelBind(
+    boolean cancelBind(
             @NonNull NotificationEntry entry,
             @NonNull ExpandableNotificationRow row);
 

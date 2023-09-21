@@ -107,7 +107,6 @@ public class LocalDisplayAdapterTest {
     private LightsManager mMockedLightsManager;
     @Mock
     private LogicalLight mMockedBacklight;
-
     private Handler mHandler;
 
     private TestListener mListener = new TestListener();
@@ -1061,6 +1060,53 @@ public class LocalDisplayAdapterTest {
 
         assertThat(info.displayCutout).isNull();
         assertThat(info.roundedCorners).isNull();
+    }
+
+    @Test
+    public void test_createLocalExternalDisplay_displayManagementEnabled_shouldHaveDefaultGroup()
+            throws Exception {
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        display.info.isInternal = false;
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        DisplayDevice displayDevice = mListener.addedDisplays.get(0);
+
+        // Turn on / initialize
+        Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 0,
+                0);
+        changeStateRunnable.run();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        mListener.changedDisplays.clear();
+
+        DisplayDeviceInfo info = displayDevice.getDisplayDeviceInfoLocked();
+
+        assertThat(info.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP).isEqualTo(0);
+    }
+    @Test
+    public void test_createLocalExternalDisplay_displayManagementDisabled_shouldNotHaveOwnGroup()
+            throws Exception {
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        display.info.isInternal = false;
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        DisplayDevice displayDevice = mListener.addedDisplays.get(0);
+
+        // Turn on / initialize
+        Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 0,
+                0);
+        changeStateRunnable.run();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        mListener.changedDisplays.clear();
+
+        DisplayDeviceInfo info = displayDevice.getDisplayDeviceInfoLocked();
+
+        assertThat(info.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP).isEqualTo(0);
     }
 
     private void setupCutoutAndRoundedCorners() {

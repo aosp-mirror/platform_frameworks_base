@@ -95,6 +95,7 @@ import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.settings.SecureSettings;
@@ -179,7 +180,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
 
-        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, false);
+        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, true);
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
         when(mKeyguardTransitionRepo.getTransitions()).thenReturn(emptyFlow());
@@ -628,6 +629,16 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(eq(false), anyBoolean());
     }
 
+    @Test
+    public void updateEmptyShadeView_onKeyguardOccludedTransitionToAod_hidesView() {
+        initController(/* viewIsAttached= */ true);
+        mController.onKeyguardTransitionChanged(
+                new TransitionStep(
+                        /* from= */ KeyguardState.OCCLUDED,
+                        /* to= */ KeyguardState.AOD));
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(eq(false), anyBoolean());
+    }
+
     private LogMaker logMatcher(int category, int type) {
         return argThat(new LogMatcher(category, type));
     }
@@ -703,7 +714,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mNotificationTargetsHelper,
                 mSecureSettings,
                 mock(NotificationDismissibilityProvider.class),
-                mActivityStarter
+                mActivityStarter,
+                new ResourcesSplitShadeStateController()
         );
     }
 

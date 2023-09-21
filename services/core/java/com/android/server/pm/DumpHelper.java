@@ -619,7 +619,7 @@ final class DumpHelper {
         pw.println("    --checkin: dump for a checkin");
         pw.println("    -f: print details of intent filters");
         pw.println("    -h: print this help");
-        pw.println("    ---proto: dump data to proto");
+        pw.println("    --proto: dump data to proto");
         pw.println("    --all-components: include all component names in package dump");
         pw.println("    --include-apex: includes the apex packages in package dump");
         pw.println("  cmd may be one of:");

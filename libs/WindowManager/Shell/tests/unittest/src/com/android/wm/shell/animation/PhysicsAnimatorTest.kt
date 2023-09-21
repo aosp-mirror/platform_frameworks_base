@@ -424,6 +424,7 @@ class PhysicsAnimatorTest : ShellTestCase() {
                         eq(-5f), anyFloat(), eq(true))
     }
 
+    @Ignore("Started flaking despite no changes, tracking in b/299636216")
     @Test
     fun testIsPropertyAnimating() {
         PhysicsAnimatorTestUtils.setAllAnimationsBlock(false)

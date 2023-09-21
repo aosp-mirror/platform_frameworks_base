@@ -96,7 +96,7 @@ void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
       auto value = target_entry_value.second;
 
       print(target_entry_value.first.to_string(), false, "config: %s",
-          target_entry_value.first.toString().string());
+          target_entry_value.first.toString().c_str());
 
       print(value.data_type, "type: %s",
             utils::DataTypeToString(value.data_type).data());

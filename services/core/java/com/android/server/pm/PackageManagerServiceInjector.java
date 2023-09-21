@@ -127,6 +127,7 @@ public class PackageManagerServiceInjector {
             mPreparingPackageParserProducer;
     private final Singleton<PackageInstallerService>
             mPackageInstallerServiceProducer;
+
     private final ProducerWithArgument<InstantAppResolverConnection, ComponentName>
             mInstantAppResolverConnectionProducer;
     private final Singleton<LegacyPermissionManagerInternal>

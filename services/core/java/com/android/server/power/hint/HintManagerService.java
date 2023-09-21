@@ -16,6 +16,8 @@
 
 package com.android.server.power.hint;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -37,7 +39,6 @@ import android.util.StatsEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
@@ -142,7 +143,7 @@ public final class HintManagerService extends SystemService {
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.ADPF_SYSTEM_COMPONENT_INFO,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 this::onPullAtom);
     }
 

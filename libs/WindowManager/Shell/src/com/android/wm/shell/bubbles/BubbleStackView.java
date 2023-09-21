@@ -25,6 +25,7 @@ import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+import static com.android.wm.shell.common.bubbles.BubbleConstants.BUBBLE_EXPANDED_SCRIM_ALPHA;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.animation.Animator;
@@ -46,7 +47,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Choreographer;
@@ -108,12 +108,6 @@ import java.util.stream.Collectors;
  */
 public class BubbleStackView extends FrameLayout
         implements ViewTreeObserver.OnComputeInternalInsetsListener {
-
-    // LINT.IfChange
-    public static final boolean ENABLE_FLING_TO_DISMISS_BUBBLE =
-            SystemProperties.getBoolean("persist.wm.debug.fling_to_dismiss_bubble", true);
-    // LINT.ThenChange(com/android/launcher3/taskbar/bubbles/BubbleDismissController.java)
-
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleStackView" : TAG_BUBBLES;
 
     /** How far the flyout needs to be dragged before it's dismissed regardless of velocity. */
@@ -137,8 +131,6 @@ public class BubbleStackView extends FrameLayout
     private static final float EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT = 0.1f;
 
     private static final int EXPANDED_VIEW_ALPHA_ANIMATION_DURATION = 150;
-
-    private static final float SCRIM_ALPHA = 0.6f;
 
     /** Minimum alpha value for scrim when alpha is being changed via drag */
     private static final float MIN_SCRIM_ALPHA_FOR_DRAG = 0.2f;
@@ -312,8 +304,7 @@ public class BubbleStackView extends FrameLayout
 
         String bubblesOnScreen = BubbleDebugConfig.formatBubblesString(
                 getBubblesOnScreen(), getExpandedBubble());
-        pw.print("  stack visibility :       "); pw.println(getVisibility());
-        pw.print("  bubbles on screen:       "); pw.println(bubblesOnScreen);
+        pw.println("  bubbles on screen:       "); pw.println(bubblesOnScreen);
         pw.print("  gestureInProgress:       "); pw.println(mIsGestureInProgress);
         pw.print("  showingDismiss:          "); pw.println(mDismissView.isShowing());
         pw.print("  isExpansionAnimating:    "); pw.println(mIsExpansionAnimating);
@@ -321,7 +312,8 @@ public class BubbleStackView extends FrameLayout
         pw.print("  expandedContainerAlpha:  "); pw.println(mExpandedViewContainer.getAlpha());
         pw.print("  expandedContainerMatrix: ");
         pw.println(mExpandedViewContainer.getAnimationMatrix());
-
+        pw.print("  stack visibility :       "); pw.println(getVisibility());
+        pw.print("  temporarilyInvisible:    "); pw.println(mTemporarilyInvisible);
         mStackAnimationController.dump(pw);
         mExpandedAnimationController.dump(pw);
 
@@ -786,14 +778,15 @@ public class BubbleStackView extends FrameLayout
         private float getScrimAlphaForDrag(float dragAmount) {
             // dragAmount should be negative as we allow scroll up only
             if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
-                float alphaRange = SCRIM_ALPHA - MIN_SCRIM_ALPHA_FOR_DRAG;
+                float alphaRange = BUBBLE_EXPANDED_SCRIM_ALPHA - MIN_SCRIM_ALPHA_FOR_DRAG;
 
                 int dragMax = mExpandedBubble.getExpandedView().getContentHeight();
                 float dragFraction = dragAmount / dragMax;
 
-                return Math.max(SCRIM_ALPHA - alphaRange * dragFraction, MIN_SCRIM_ALPHA_FOR_DRAG);
+                return Math.max(BUBBLE_EXPANDED_SCRIM_ALPHA - alphaRange * dragFraction,
+                        MIN_SCRIM_ALPHA_FOR_DRAG);
             }
-            return SCRIM_ALPHA;
+            return BUBBLE_EXPANDED_SCRIM_ALPHA;
         }
     };
 
@@ -1291,6 +1284,12 @@ public class BubbleStackView extends FrameLayout
         if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
             Log.d(TAG, "Show manage edu: " + shouldShow);
         }
+        if (shouldShow && BubbleDebugConfig.neverShowUserEducation(mContext)) {
+            if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
+                Log.d(TAG, "Want to show manage edu, but it is forced hidden");
+            }
+            return false;
+        }
         return shouldShow;
     }
 
@@ -1322,6 +1321,12 @@ public class BubbleStackView extends FrameLayout
         final boolean shouldShow = !seen || BubbleDebugConfig.forceShowUserEducation(mContext);
         if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
             Log.d(TAG, "Show stack edu: " + shouldShow);
+        }
+        if (shouldShow && BubbleDebugConfig.neverShowUserEducation(mContext)) {
+            if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
+                Log.d(TAG, "Want to show stack edu, but it is forced hidden");
+            }
+            return false;
         }
         return shouldShow;
     }
@@ -1770,13 +1775,26 @@ public class BubbleStackView extends FrameLayout
             return;
         }
 
+        if (firstBubble && bubble.isAppBubble() && !mPositioner.hasUserModifiedDefaultPosition()) {
+            // TODO (b/294284894): update language around "app bubble" here
+            // If it's an app bubble and we don't have a previous resting position, update the
+            // controllers to use the default position for the app bubble (it'd be different from
+            // the position initialized with the controllers originally).
+            PointF startPosition =  mPositioner.getDefaultStartPosition(true /* isAppBubble */);
+            mStackOnLeftOrWillBe = mPositioner.isStackOnLeft(startPosition);
+            mStackAnimationController.setStackPosition(startPosition);
+            mExpandedAnimationController.setCollapsePoint(startPosition);
+            // Set the translation x so that this bubble will animate in from the same side they
+            // expand / collapse on.
+            bubble.getIconView().setTranslationX(startPosition.x);
+        } else if (firstBubble) {
+            mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
+        }
+
         mBubbleContainer.addView(bubble.getIconView(), 0,
                 new FrameLayout.LayoutParams(mPositioner.getBubbleSize(),
                         mPositioner.getBubbleSize()));
 
-        if (firstBubble) {
-            mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
-        }
         // Set the dot position to the opposite of the side the stack is resting on, since the stack
         // resting slightly off-screen would result in the dot also being off-screen.
         bubble.getIconView().setDotBadgeOnLeft(!mStackOnLeftOrWillBe /* onLeft */);
@@ -2019,6 +2037,7 @@ public class BubbleStackView extends FrameLayout
             });
         }
         notifyExpansionChanged(mExpandedBubble, mIsExpanded);
+        announceExpandForAccessibility(mExpandedBubble, mIsExpanded);
     }
 
     /**
@@ -2032,6 +2051,34 @@ public class BubbleStackView extends FrameLayout
             mBubblesNavBarGestureTracker = new BubblesNavBarGestureTracker(mContext, mPositioner);
             mBubblesNavBarGestureTracker.start(mSwipeUpListener);
             setOnTouchListener(mContainerSwipeListener);
+        }
+    }
+
+    private void announceExpandForAccessibility(BubbleViewProvider bubble, boolean expanded) {
+        if (bubble instanceof Bubble) {
+            String contentDescription = getBubbleContentDescription((Bubble) bubble);
+            String message = getResources().getString(
+                    expanded
+                            ? R.string.bubble_accessibility_announce_expand
+                            : R.string.bubble_accessibility_announce_collapse, contentDescription);
+            announceForAccessibility(message);
+        }
+    }
+
+    @NonNull
+    private String getBubbleContentDescription(Bubble bubble) {
+        final String appName = bubble.getAppName();
+        final String title = bubble.getTitle() != null
+                ? bubble.getTitle()
+                : getResources().getString(R.string.notification_bubble_title);
+
+        if (appName == null || title.equals(appName)) {
+            // App bubble title equals the app name, so return only the title to avoid having
+            // content description like: `<app> from <app>`.
+            return title;
+        } else {
+            return getResources().getString(
+                    R.string.bubble_content_description_single, title, appName);
         }
     }
 
@@ -2196,7 +2243,7 @@ public class BubbleStackView extends FrameLayout
         if (show) {
             mScrim.animate()
                     .setInterpolator(ALPHA_IN)
-                    .alpha(SCRIM_ALPHA)
+                    .alpha(BUBBLE_EXPANDED_SCRIM_ALPHA)
                     .setListener(listener)
                     .start();
         } else {
@@ -2925,7 +2972,7 @@ public class BubbleStackView extends FrameLayout
         mBubbleController.getSysuiProxy().onManageMenuExpandChanged(show);
         mManageMenuScrim.animate()
                 .setInterpolator(show ? ALPHA_IN : ALPHA_OUT)
-                .alpha(show ? SCRIM_ALPHA : 0f)
+                .alpha(show ? BUBBLE_EXPANDED_SCRIM_ALPHA : 0f)
                 .withEndAction(endAction)
                 .start();
 

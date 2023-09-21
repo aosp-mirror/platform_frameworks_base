@@ -25,6 +25,8 @@ import android.media.IAudioService;
 import android.media.MediaRoute2Info;
 import android.os.ServiceManager;
 
+import com.android.media.flags.Flags;
+
 /**
  * Controls device routes.
  *
@@ -44,18 +46,13 @@ import android.os.ServiceManager;
         IAudioService audioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
 
-        MediaFeatureFlagManager flagManager = MediaFeatureFlagManager.getInstance();
-        boolean isUsingLegacyController = flagManager.getBoolean(
-                MediaFeatureFlagManager.FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER,
-                true);
-
-        if (isUsingLegacyController) {
-            return new LegacyDeviceRouteController(context,
+        if (Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
+            return new AudioPoliciesDeviceRouteController(context,
                     audioManager,
                     audioService,
                     onDeviceRouteChangedListener);
         } else {
-            return new AudioPoliciesDeviceRouteController(context,
+            return new LegacyDeviceRouteController(context,
                     audioManager,
                     audioService,
                     onDeviceRouteChangedListener);

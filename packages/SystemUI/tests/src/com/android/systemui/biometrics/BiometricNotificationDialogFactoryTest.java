@@ -17,9 +17,10 @@
 package com.android.systemui.biometrics;
 
 import static com.google.common.truth.Truth.assertThat;
-
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -76,16 +78,20 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
     public void setUp() throws ExecutionException, InterruptedException {
         mContext.addMockSystemService(FingerprintManager.class, mFingerprintManager);
         mContext.addMockSystemService(FaceManager.class, mFaceManager);
+        mContextSpy = spy(mContext);
 
         when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
+        doNothing().when(mContextSpy).startActivity(any());
 
-        mContextSpy = spy(mContext);
         mDialogFactory = new BiometricNotificationDialogFactory();
     }
 
     @Test
     public void testFingerprintReEnrollDialog_onRemovalSucceeded() {
+        assumeTrue(getContext().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT));
+
         mDialogFactory.createReenrollDialog(mContextSpy, mDialog,
                 BiometricSourceType.FINGERPRINT);
 
@@ -109,6 +115,9 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
 
     @Test
     public void testFingerprintReEnrollDialog_onRemovalError() {
+        assumeTrue(getContext().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT));
+
         mDialogFactory.createReenrollDialog(mContextSpy, mDialog,
                 BiometricSourceType.FINGERPRINT);
 
@@ -130,6 +139,9 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
 
     @Test
     public void testFaceReEnrollDialog_onRemovalSucceeded() {
+        assumeTrue(getContext().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_FACE));
+
         mDialogFactory.createReenrollDialog(mContextSpy, mDialog,
                 BiometricSourceType.FACE);
 
@@ -153,6 +165,9 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
 
     @Test
     public void testFaceReEnrollDialog_onRemovalError() {
+        assumeTrue(getContext().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_FACE));
+
         mDialogFactory.createReenrollDialog(mContextSpy, mDialog,
                 BiometricSourceType.FACE);
 

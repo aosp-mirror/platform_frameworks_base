@@ -65,7 +65,6 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Di
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -73,6 +72,8 @@ import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -86,8 +87,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import dagger.Lazy;
 
 /**
  * Handles tasks and state related to media notifications. For example, there is a 'current' media
@@ -133,7 +132,6 @@ public class NotificationMediaManager implements Dumpable {
 
     private final Context mContext;
     private final ArrayList<MediaListener> mMediaListeners;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final MediaArtworkProcessor mMediaArtworkProcessor;
     private final Set<AsyncTask<?, ?, ?>> mProcessArtworkTasks = new ArraySet<>();
 
@@ -186,7 +184,6 @@ public class NotificationMediaManager implements Dumpable {
      */
     public NotificationMediaManager(
             Context context,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationVisibilityProvider visibilityProvider,
             MediaArtworkProcessor mediaArtworkProcessor,
@@ -205,8 +202,6 @@ public class NotificationMediaManager implements Dumpable {
         mMediaArtworkProcessor = mediaArtworkProcessor;
         mKeyguardBypassController = keyguardBypassController;
         mMediaListeners = new ArrayList<>();
-        // TODO: use KeyguardStateController#isOccluded to remove this dependency
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mVisibilityProvider = visibilityProvider;
         mMainExecutor = mainExecutor;
@@ -619,9 +614,7 @@ public class NotificationMediaManager implements Dumpable {
 
         NotificationShadeWindowController windowController =
                 mNotificationShadeWindowController.get();
-        boolean hideBecauseOccluded =
-                mCentralSurfacesOptionalLazy.get()
-                        .map(CentralSurfaces::isOccluded).orElse(false);
+        boolean hideBecauseOccluded = mKeyguardStateController.isOccluded();
 
         final boolean hasArtwork = artworkDrawable != null;
         mColorExtractor.setHasMediaArtwork(hasMediaArtwork);

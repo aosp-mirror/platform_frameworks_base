@@ -5270,6 +5270,16 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SHOW_FOREGROUND_SERVICE_MANAGER =
             "android.intent.action.SHOW_FOREGROUND_SERVICE_MANAGER";
 
+    /**
+     * Broadcast Action: Sent to the responsible installer of an archived package when unarchival
+     * is requested.
+     *
+     * @see android.content.pm.PackageInstaller#requestUnarchive(String)
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_UNARCHIVE_PACKAGE = "android.intent.action.UNARCHIVE_PACKAGE";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
@@ -6260,6 +6270,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_REPLACING = "android.intent.extra.REPLACING";
 
     /**
+     * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_ADDED} and
+     * {@link android.content.Intent#ACTION_PACKAGE_REMOVED} intents to indicate that
+     * the package is being archived. Either by removing the existing APK, or by installing
+     * a package without an APK.
+     */
+    public static final String EXTRA_ARCHIVAL = "android.intent.extra.ARCHIVAL";
+
+    /**
      * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED}
      * intents to indicate that this is a system update uninstall.
      * @hide
@@ -6704,6 +6722,15 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_VISIBILITY_ALLOW_LIST =
             "android.intent.extra.VISIBILITY_ALLOW_LIST";
+
+    /**
+     * A boolean extra used with {@link #ACTION_PACKAGE_DATA_CLEARED} which indicates if the intent
+     * is broadcast as part of a restore operation.
+     *
+     * @hide
+     */
+    public static final String EXTRA_IS_RESTORE =
+            "android.intent.extra.IS_RESTORE";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -12489,6 +12516,7 @@ public class Intent implements Parcelable, Cloneable {
         return (mFlags & FLAG_ACTIVITY_NEW_DOCUMENT) == FLAG_ACTIVITY_NEW_DOCUMENT;
     }
 
+    // TODO(b/299109198): Refactor into the {@link SdkSandboxManagerLocal}
     /** @hide */
     public boolean isSandboxActivity(@NonNull Context context) {
         if (mAction != null && mAction.equals(ACTION_START_SANDBOXED_ACTIVITY)) {

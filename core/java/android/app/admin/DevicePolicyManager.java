@@ -11806,6 +11806,34 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns the list of {@link EnforcingAdmin}s who have set this restriction.
+     *
+     * <p>Note that for {@link #POLICY_SUSPEND_PACKAGES} it returns the PO or DO to keep the
+     * behavior the same as before the bug fix for b/192245204.
+     *
+     * <p>This API is only callable by the system UID
+     *
+     * @param userId      The user for whom to retrieve the information.
+     * @param restriction The restriction enforced by admins. It could be any user restriction or
+     *                    policy like {@link DevicePolicyManager#POLICY_DISABLE_CAMERA} and
+     *                    {@link DevicePolicyManager#POLICY_DISABLE_SCREEN_CAPTURE}.
+     *
+     * @hide
+     */
+    public @NonNull Set<EnforcingAdmin> getEnforcingAdminsForRestriction(int userId,
+            @NonNull String restriction) {
+        if (mService != null) {
+            try {
+                return new HashSet<>(mService.getEnforcingAdminsForRestriction(
+                        userId, restriction));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Hide or unhide packages. When a package is hidden it is unavailable for use, but the data and
      * actual package file remain. This function can be called by a device owner, profile owner, or
      * by a delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
@@ -16110,11 +16138,6 @@ public class DevicePolicyManager {
     /**
      * Called by a profile owner of an organization-owned managed profile to suspend personal
      * apps on the device. When personal apps are suspended the device can only be used for calls.
-     *
-     * <p>When personal apps are suspended, an ongoing notification about that is shown to the user.
-     * When the user taps the notification, system invokes {@link #ACTION_CHECK_POLICY_COMPLIANCE}
-     * in the profile owner package. Profile owner implementation that uses personal apps suspension
-     * must handle this intent.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with
      * @param suspended Whether personal apps should be suspended.

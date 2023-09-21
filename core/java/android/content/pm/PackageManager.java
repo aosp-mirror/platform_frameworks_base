@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.LongDef;
@@ -29,6 +30,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -787,6 +789,7 @@ public abstract class PackageManager {
             MATCH_DEBUG_TRIAGED_MISSING,
             MATCH_INSTANT,
             MATCH_APEX,
+            MATCH_ARCHIVED_PACKAGES,
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
@@ -811,6 +814,7 @@ public abstract class PackageManager {
             GET_UNINSTALLED_PACKAGES,
             MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS,
             MATCH_APEX,
+            MATCH_ARCHIVED_PACKAGES,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoFlagsBits {}
@@ -1233,6 +1237,22 @@ public abstract class PackageManager {
      * {@link PackageInfo} flag: return all attributions declared in the package manifest
      */
     public static final long GET_ATTRIBUTIONS_LONG = 0x80000000L;
+
+    /**
+     * Flag parameter to also retrieve some information about archived packages.
+     * Packages can be archived through
+     * {@link PackageInstaller#requestArchive(String, IntentSender)} and do not have any APKs stored
+     * on the device, but do keep the data directory.
+     * <p> Note: Archived apps are a subset of apps returned by {@link #MATCH_UNINSTALLED_PACKAGES}.
+     * <p> Note: this flag may cause less information about currently installed
+     * applications to be returned.
+     * <p> Note: use of this flag requires the android.permission.QUERY_ALL_PACKAGES
+     * permission to see uninstalled packages.
+     * @hide
+     */
+    // TODO(b/278553670) Unhide and update @links before launch.
+    @SystemApi
+    public static final long MATCH_ARCHIVED_PACKAGES = 1L << 32;
 
     /**
      * @hide
@@ -1682,6 +1702,13 @@ public abstract class PackageManager {
     public static final int INSTALL_FROM_MANAGED_USER_OR_PROFILE = 1 << 26;
 
     /**
+     * Flag parameter for {@link PackageInstaller.SessionParams} to indicate that this
+     * session is for archived package installation.
+     * @hide
+     */
+    public static final int INSTALL_ARCHIVED = 1 << 27;
+
+    /**
      * Flag parameter for {@link #installPackage} to force a non-staged update of an APEX. This is
      * a development-only feature and should not be used on end user devices.
      *
@@ -1730,6 +1757,8 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED)
     public static final int FLAG_SUSPEND_QUARANTINED = 0x00000001;
 
     /** @hide */
@@ -2518,6 +2547,15 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int DELETE_DONT_KILL_APP = 0x00000008;
+
+    /**
+     * Flag parameter for {@link #deletePackage} to indicate that the deletion is an archival. This
+     * flag is only for internal usage as part of
+     * {@link PackageInstaller#requestArchive(String, IntentSender)}.
+     *
+     * @hide
+     */
+    public static final int DELETE_ARCHIVE = 0x00000010;
 
     /**
      * Flag parameter for {@link #deletePackage} to indicate that package deletion
@@ -9727,7 +9765,10 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED)
     @RequiresPermission(value=Manifest.permission.SUSPEND_APPS, conditional=true)
+    @SuppressLint("NullableCollection")
     @Nullable
     public String[] setPackagesSuspended(@Nullable String[] packageNames, boolean suspended,
             @Nullable PersistableBundle appExtras, @Nullable PersistableBundle launcherExtras,

@@ -49,6 +49,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.AuthenticationStatsBroadcastReceiver;
 import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
@@ -113,8 +114,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     private final BiometricContext mBiometricContext;
     @NonNull
     private final AuthSessionCoordinator mAuthSessionCoordinator;
-    @NonNull
-    private final AuthenticationStatsCollector mAuthenticationStatsCollector;
+    @Nullable
+    private AuthenticationStatsCollector mAuthenticationStatsCollector;
     @Nullable
     private IFace mDaemon;
 
@@ -176,8 +177,14 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mAuthSessionCoordinator = mBiometricContext.getAuthSessionCoordinator();
         mDaemon = daemon;
 
-        mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
-                BiometricsProtoEnums.MODALITY_FACE);
+        AuthenticationStatsBroadcastReceiver mBroadcastReceiver =
+                new AuthenticationStatsBroadcastReceiver(
+                        mContext,
+                        BiometricsProtoEnums.MODALITY_FACE,
+                        (AuthenticationStatsCollector collector) -> {
+                            Slog.d(getTag(), "Initializing AuthenticationStatsCollector");
+                            mAuthenticationStatsCollector = collector;
+                        });
 
         for (SensorProps prop : props) {
             final int sensorId = prop.commonProps.sensorId;

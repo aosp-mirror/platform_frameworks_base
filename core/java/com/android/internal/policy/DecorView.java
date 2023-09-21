@@ -1113,15 +1113,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             if (insets != null) {
                 mLastForceConsumingTypes = insets.getForceConsumingTypes();
 
-                @InsetsType int compatInsetsTypes =
+                final boolean clearsCompatInsets = clearsCompatInsets(attrs.type, attrs.flags,
+                        getResources().getConfiguration().windowConfiguration.getActivityType(),
+                        mLastForceConsumingTypes);
+                final @InsetsType int compatInsetsTypes =
                         WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout();
-                if (clearsCompatInsets(attrs.type, attrs.flags,
-                        getResources().getConfiguration().windowConfiguration.getWindowingMode())) {
-                    compatInsetsTypes &= mLastForceConsumingTypes;
-                }
                 final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
                         WindowInsets.Type.systemBars());
-                final Insets systemInsets = compatInsetsTypes == 0
+                final Insets systemInsets = clearsCompatInsets
                         ? Insets.NONE
                         : Insets.min(insets.getInsets(compatInsetsTypes), stableBarInsets);
                 mLastTopInset = systemInsets.top;
@@ -1161,7 +1160,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     mForceWindowDrawsBarBackgrounds, requestedVisibleTypes);
             boolean oldDrawLegacy = mDrawLegacyNavigationBarBackground;
             mDrawLegacyNavigationBarBackground =
-                    (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
+                    ((requestedVisibleTypes | mLastForceConsumingTypes)
+                            & WindowInsets.Type.navigationBars()) != 0
+                    && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
             if (oldDrawLegacy != mDrawLegacyNavigationBarBackground) {
                 mDrawLegacyNavigationBarBackgroundHandled =
                         mWindow.onDrawLegacyNavigationBarBackgroundChanged(
@@ -2625,8 +2626,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     @Override
     public String toString() {
-        return "DecorView@" + Integer.toHexString(this.hashCode()) + "["
-                + getTitleSuffix(mWindow.getAttributes()) + "]";
+        return super.toString() + "[" + getTitleSuffix(mWindow.getAttributes()) + "]";
     }
 
     private static class ColorViewState {

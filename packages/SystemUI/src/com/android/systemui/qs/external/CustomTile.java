@@ -36,7 +36,6 @@ import android.provider.Settings;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.IWindowManager;
@@ -190,13 +189,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             if (updateIcon) {
                 mTile.setIcon(mDefaultIcon);
             }
-            // Update the label if there is no label or it is the default label.
-            boolean updateLabel = mTile.getLabel() == null
-                    || TextUtils.equals(mTile.getLabel(), mDefaultLabel);
             mDefaultLabel = info.loadLabel(pm);
-            if (updateLabel) {
-                mTile.setLabel(mDefaultLabel);
-            }
+            mTile.setDefaultLabel(mDefaultLabel);
         } catch (PackageManager.NameNotFoundException e) {
             mDefaultIcon = null;
             mDefaultLabel = null;
@@ -291,8 +285,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         if (tile.getIcon() != null || overwriteNulls) {
             mTile.setIcon(tile.getIcon());
         }
-        if (tile.getLabel() != null || overwriteNulls) {
-            mTile.setLabel(tile.getLabel());
+        if (tile.getCustomLabel() != null || overwriteNulls) {
+            mTile.setLabel(tile.getCustomLabel());
         }
         if (tile.getSubtitle() != null || overwriteNulls) {
             mTile.setSubtitle(tile.getSubtitle());

@@ -129,6 +129,7 @@ public class SystemSensorManager extends SensorManager {
             mDynamicSensorCallbacks = new HashMap<>();
     private BroadcastReceiver mDynamicSensorBroadcastReceiver;
     private BroadcastReceiver mRuntimeSensorBroadcastReceiver;
+    private VirtualDeviceManager.VirtualDeviceListener mVirtualDeviceListener;
 
     // Looper associated with the context in which this instance was created.
     private final Looper mMainLooper;
@@ -518,7 +519,11 @@ public class SystemSensorManager extends SensorManager {
     }
 
     private List<Sensor> createRuntimeSensorListLocked(int deviceId) {
-        setupRuntimeSensorBroadcastReceiver();
+        if (android.companion.virtual.flags.Flags.vdmPublicApis()) {
+            setupVirtualDeviceListener();
+        } else {
+            setupRuntimeSensorBroadcastReceiver();
+        }
         List<Sensor> list = new ArrayList<>();
         nativeGetRuntimeSensors(mNativeInstance, deviceId, list);
         mFullRuntimeSensorListByDevice.put(deviceId, list);
@@ -558,6 +563,34 @@ public class SystemSensorManager extends SensorManager {
         }
     }
 
+    private void setupVirtualDeviceListener() {
+        if (mVirtualDeviceListener != null) {
+            return;
+        }
+        if (mVdm == null) {
+            mVdm = mContext.getSystemService(VirtualDeviceManager.class);
+            if (mVdm == null) {
+                return;
+            }
+        }
+        mVirtualDeviceListener = new VirtualDeviceManager.VirtualDeviceListener() {
+            @Override
+            public void onVirtualDeviceClosed(int deviceId) {
+                synchronized (mFullRuntimeSensorListByDevice) {
+                    List<Sensor> removedSensors =
+                            mFullRuntimeSensorListByDevice.removeReturnOld(deviceId);
+                    if (removedSensors != null) {
+                        for (Sensor s : removedSensors) {
+                            cleanupSensorConnection(s);
+                        }
+                    }
+                    mRuntimeSensorListByDeviceByType.remove(deviceId);
+                }
+            }
+        };
+        mVdm.registerVirtualDeviceListener(mContext.getMainExecutor(), mVirtualDeviceListener);
+    }
+
     private void setupDynamicSensorBroadcastReceiver() {
         if (mDynamicSensorBroadcastReceiver == null) {
             mDynamicSensorBroadcastReceiver = new BroadcastReceiver() {
@@ -579,12 +612,6 @@ public class SystemSensorManager extends SensorManager {
             mContext.registerReceiver(mDynamicSensorBroadcastReceiver, filter,
                     Context.RECEIVER_NOT_EXPORTED);
         }
-    }
-
-    private void teardownDynamicSensorBroadcastReceiver() {
-        mDynamicSensorCallbacks.clear();
-        mContext.unregisterReceiver(mDynamicSensorBroadcastReceiver);
-        mDynamicSensorBroadcastReceiver = null;
     }
 
     /** @hide */

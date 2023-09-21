@@ -87,7 +87,6 @@ public class SettingsToPropertiesMapper {
         DeviceConfig.NAMESPACE_CAMERA_NATIVE,
         DeviceConfig.NAMESPACE_CONFIGURATION,
         DeviceConfig.NAMESPACE_CONNECTIVITY,
-        DeviceConfig.NAMESPACE_CORE_EXPERIMENTS_TEAM_INTERNAL,
         DeviceConfig.NAMESPACE_EDGETPU_NATIVE,
         DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_INTELLIGENCE_CONTENT_SUGGESTIONS,
@@ -115,19 +114,67 @@ public class SettingsToPropertiesMapper {
         NAMESPACE_TETHERING_U_OR_LATER_NATIVE
     };
 
+    // All the aconfig flags under the listed DeviceConfig scopes will be synced to native level.
+    // The list is sorted.
+    @VisibleForTesting
+    static final String[] sDeviceConfigAconfigScopes = new String[] {
+        "android_core_networking",
+        "angle",
+        "arc_next",
+        "bluetooth",
+        "biometrics_framework",
+        "biometrics_integration",
+        "camera_platform",
+        "car_framework",
+        "car_perception",
+        "car_security",
+        "car_telemetry",
+        "codec_fwk",
+        "companion",
+        "context_hub",
+        "core_experiments_team_internal",
+        "haptics",
+        "hardware_backed_security_mainline",
+        "media_audio",
+        "media_solutions",
+        "nfc",
+        "pixel_system_sw_touch",
+        "pixel_watch",
+        "platform_security",
+        "power",
+        "preload_safety",
+        "responsible_apis",
+        "rust",
+        "system_performance",
+        "test_suites",
+        "text",
+        "threadnetwork",
+        "tv_system_ui",
+        "vibrator",
+        "wear_frameworks",
+        "wear_system_health",
+        "wear_systems",
+        "window_surfaces",
+        "windowing_frontend"
+    };
+
     private final String[] mGlobalSettings;
 
     private final String[] mDeviceConfigScopes;
+
+    private final String[] mDeviceConfigAconfigScopes;
 
     private final ContentResolver mContentResolver;
 
     @VisibleForTesting
     protected SettingsToPropertiesMapper(ContentResolver contentResolver,
             String[] globalSettings,
-            String[] deviceConfigScopes) {
+            String[] deviceConfigScopes,
+            String[] deviceConfigAconfigScopes) {
         mContentResolver = contentResolver;
         mGlobalSettings = globalSettings;
         mDeviceConfigScopes = deviceConfigScopes;
+        mDeviceConfigAconfigScopes = deviceConfigAconfigScopes;
     }
 
     @VisibleForTesting
@@ -173,6 +220,36 @@ public class SettingsToPropertiesMapper {
                                 return;
                             }
                             setProperty(propertyName, properties.getString(key, null));
+
+                            // for legacy namespaces, they can also be used for trunk stable
+                            // purposes. so push flag also into trunk stable slot in sys prop,
+                            // later all legacy usage will be refactored and the sync to old
+                            // sys prop slot can be removed.
+                            String aconfigPropertyName = makeAconfigFlagPropertyName(scope, key);
+                            if (aconfigPropertyName == null) {
+                                log("unable to construct system property for " + scope + "/"
+                                        + key);
+                                return;
+                            }
+                            setProperty(aconfigPropertyName, properties.getString(key, null));
+                        }
+                    });
+        }
+
+        for (String deviceConfigAconfigScope : mDeviceConfigAconfigScopes) {
+            DeviceConfig.addOnPropertiesChangedListener(
+                    deviceConfigAconfigScope,
+                    AsyncTask.THREAD_POOL_EXECUTOR,
+                    (DeviceConfig.Properties properties) -> {
+                        String scope = properties.getNamespace();
+                        for (String key : properties.getKeyset()) {
+                            String aconfigPropertyName = makeAconfigFlagPropertyName(scope, key);
+                            if (aconfigPropertyName == null) {
+                                log("unable to construct system property for " + scope + "/"
+                                        + key);
+                                return;
+                            }
+                            setProperty(aconfigPropertyName, properties.getString(key, null));
                         }
                     });
         }
@@ -180,7 +257,10 @@ public class SettingsToPropertiesMapper {
 
     public static SettingsToPropertiesMapper start(ContentResolver contentResolver) {
         SettingsToPropertiesMapper mapper =  new SettingsToPropertiesMapper(
-                contentResolver, sGlobalSettings, sDeviceConfigScopes);
+                contentResolver,
+                sGlobalSettings,
+                sDeviceConfigScopes,
+                sDeviceConfigAconfigScopes);
         mapper.updatePropertiesFromSettings();
         return mapper;
     }
@@ -234,6 +314,28 @@ public class SettingsToPropertiesMapper {
     @VisibleForTesting
     static String makePropertyName(String categoryName, String flagName) {
         String propertyName = SYSTEM_PROPERTY_PREFIX + categoryName + "." + flagName;
+
+        if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
+                || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {
+            return null;
+        }
+
+        return propertyName;
+    }
+
+    /**
+     * system property name constructing rule for aconfig flags:
+     * "persist.device_config.aconfig_flags.[category_name].[flag_name]".
+     * If the name contains invalid characters or substrings for system property name,
+     * will return null.
+     * @param categoryName
+     * @param flagName
+     * @return
+     */
+    @VisibleForTesting
+    static String makeAconfigFlagPropertyName(String categoryName, String flagName) {
+        String propertyName = SYSTEM_PROPERTY_PREFIX + "aconfig_flags." +
+                              categoryName + "." + flagName;
 
         if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
                 || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {

@@ -619,8 +619,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Koristi biometriju ili zaključavanje ekrana"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Potvrdite identitet"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Koristite biometriju da nastavite"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Potvrdite identitet otiskom prsta da nastavite"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Potvrdite identitet licem da nastavite"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Koristite biometriju ili zaključavanje ekrana da nastavite"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrijski hardver nije dostupan"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentifikacija je otkazana"</string>
@@ -646,6 +644,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Otisak prsta nije prepoznat"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Otisak prsta nije prepoznat"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Nije moguće prepoznati lice. Koristite otisak prsta."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Otisak prsta je potvrđen"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Lice je provjereno"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Lice je provjereno, pritisnite dugme za potvrdu"</string>
@@ -671,14 +670,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Nešto nije uredu. Pokušajte ponovo."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona za otisak prsta"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Otključavanje uređaja"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Pokušajte s drugim načinom zaključavanja"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Koristite otključavanje licem kada se vaš otisak prsta ne prepozna, naprimjer kada su vam prsti mokri"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Koristite otključavanje otiskom prsta kada se vaše lice ne prepozna, naprimjer kada nema dovoljno svjetla"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Otključavanje licem"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem s otključavanjem licem"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Dodirnite da izbrišete model lica, a zatim ponovo dodajte lice"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Postavite otključavanje licem"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Otključajte telefon gledajući u njega"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Da koristite otključavanje licem, uključite "<b>"Pristup kameri"</b>" u meniju Postavke &gt; Privatnost"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Postavite više načina otključavanja"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Dodirnite da dodate otisak prsta"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Otključavanje otiskom prsta"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nije moguće koristiti senzor za otisak prsta"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Posjetite pružaoca usluga za popravke."</string>
@@ -1869,6 +1868,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2. poslovni <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. poslovni <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Kloniranje aplikacije <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"<xliff:g id="LABEL">%1$s</xliff:g> – privatno"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Traži PIN prije nego se otkači"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Traži uzorak za otključavanje prije poništavanja kačenja"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Traži lozinku prije nego se otkači"</string>
@@ -2033,7 +2033,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"Ažurirati u "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"Ažurirati <xliff:g id="TYPE">%1$s</xliff:g> u "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Ažurirati <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> u "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Ažurirati ove stavke u "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"Ažurirati ove stavke u oznaci "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Sačuvaj"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Ne, hvala"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Ne sada"</string>

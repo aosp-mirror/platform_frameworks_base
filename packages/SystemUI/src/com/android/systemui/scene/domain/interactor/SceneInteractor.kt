@@ -18,19 +18,17 @@ package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.power.data.repository.PowerRepository
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.RemoteUserInput
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -45,8 +43,9 @@ import kotlinx.coroutines.flow.stateIn
 class SceneInteractor
 @Inject
 constructor(
-    @Application applicationScope: CoroutineScope,
+    @Application private val applicationScope: CoroutineScope,
     private val repository: SceneContainerRepository,
+    private val powerRepository: PowerRepository,
     private val logger: SceneLogger,
 ) {
 
@@ -109,10 +108,6 @@ constructor(
     /** Whether the scene container is visible. */
     val isVisible: StateFlow<Boolean> = repository.isVisible
 
-    private val _remoteUserInput: MutableStateFlow<RemoteUserInput?> = MutableStateFlow(null)
-    /** A flow of motion events originating from outside of the scene framework. */
-    val remoteUserInput: StateFlow<RemoteUserInput?> = _remoteUserInput.asStateFlow()
-
     /**
      * Returns the keys of all scenes in the container.
      *
@@ -151,6 +146,28 @@ constructor(
         return repository.setVisible(isVisible)
     }
 
+    /** True if there is a transition happening from and to the specified scenes. */
+    fun transitioning(from: SceneKey, to: SceneKey): StateFlow<Boolean> {
+        fun transitioning(
+            state: ObservableTransitionState,
+            from: SceneKey,
+            to: SceneKey,
+        ): Boolean {
+            return (state as? ObservableTransitionState.Transition)?.let {
+                it.fromScene == from && it.toScene == to
+            }
+                ?: false
+        }
+
+        return transitionState
+            .map { state -> transitioning(state, from, to) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = transitioning(transitionState.value, from, to),
+            )
+    }
+
     /**
      * Binds the given flow so the system remembers it.
      *
@@ -160,9 +177,9 @@ constructor(
         repository.setTransitionState(transitionState)
     }
 
-    /** Handles a remote user input. */
-    fun onRemoteUserInput(input: RemoteUserInput) {
-        _remoteUserInput.value = input
+    /** Handles a user input event. */
+    fun onUserInput() {
+        powerRepository.userTouch()
     }
 
     /**
@@ -173,7 +190,7 @@ constructor(
      * Once a transition between one scene and another passes a threshold, the UI invokes this
      * method to report it, updating the value in [desiredScene] to match what the UI shows.
      */
-    internal fun onSceneChanged(scene: SceneModel, loggingReason: String) {
+    fun onSceneChanged(scene: SceneModel, loggingReason: String) {
         updateDesiredScene(scene, loggingReason, logger::logSceneChangeCommitted)
     }
 

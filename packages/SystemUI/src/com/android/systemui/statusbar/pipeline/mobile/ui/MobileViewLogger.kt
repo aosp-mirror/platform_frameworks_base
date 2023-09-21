@@ -57,7 +57,7 @@ constructor(
             {
                 str1 = view.getIdForLogging()
                 str2 = viewModel.getIdForLogging()
-                str3 = viewModel.locationName
+                str3 = viewModel.location.name
             },
             { "New view binding. viewId=$str1, viewModelId=$str2, viewModelLocation=$str3" },
         )
@@ -71,7 +71,7 @@ constructor(
             {
                 str1 = view.getIdForLogging()
                 str2 = viewModel.getIdForLogging()
-                str3 = viewModel.locationName
+                str3 = viewModel.location.name
             },
             { "Collection started. viewId=$str1, viewModelId=$str2, viewModelLocation=$str3" },
         )
@@ -85,7 +85,7 @@ constructor(
             {
                 str1 = view.getIdForLogging()
                 str2 = viewModel.getIdForLogging()
-                str3 = viewModel.locationName
+                str3 = viewModel.location.name
             },
             { "Collection stopped. viewId=$str1, viewModelId=$str2, viewModelLocation=$str3" },
         )

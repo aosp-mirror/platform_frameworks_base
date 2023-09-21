@@ -21,7 +21,7 @@ import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
+import android.os.VibratorInfo;
 
 /**
  * Representation of a single segment of a {@link VibrationEffect}.
@@ -65,7 +65,7 @@ public abstract class VibrationEffectSegment implements Parcelable {
      *
      * @hide
      */
-    public abstract boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator);
+    public abstract boolean areVibrationFeaturesSupported(@NonNull VibratorInfo vibratorInfo);
 
     /**
      * Returns true if this segment could be a haptic feedback effect candidate.

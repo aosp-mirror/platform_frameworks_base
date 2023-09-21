@@ -27,8 +27,14 @@ import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.communal.data.repository.FakeCommunalRepository
+import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -37,12 +43,13 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.RemoteUserInput
-import com.android.systemui.scene.shared.model.RemoteUserInputAction
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.mockito.mock
@@ -64,11 +71,8 @@ class SceneTestUtils(
 ) {
     val testDispatcher = StandardTestDispatcher()
     val testScope = TestScope(testDispatcher)
-    val featureFlags =
-        FakeFeatureFlags().apply {
-            set(Flags.SCENE_CONTAINER, true)
-            set(Flags.FACE_AUTH_REFACTOR, false)
-        }
+    val featureFlags = FakeFeatureFlagsClassic().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
+    val sceneContainerFlags = FakeSceneContainerFlags().apply { enabled = true }
     private val userRepository: UserRepository by lazy {
         FakeUserRepository().apply {
             val users = listOf(UserInfo(/* id=  */ 0, "name", /* flags= */ 0))
@@ -93,8 +97,16 @@ class SceneTestUtils(
             )
         }
     }
+    val communalRepository: FakeCommunalRepository by lazy { FakeCommunalRepository() }
+    private val communalWidgetRepository: FakeCommunalWidgetRepository by lazy {
+        FakeCommunalWidgetRepository()
+    }
+    val powerRepository: FakePowerRepository by lazy { FakePowerRepository() }
 
     private val context = test.context
+
+    private val falsingCollectorFake: FalsingCollector by lazy { FalsingCollectorFake() }
+    private var falsingInteractor: FalsingInteractor? = null
 
     fun fakeSceneContainerRepository(
         containerConfig: SceneContainerConfig = fakeSceneContainerConfig(),
@@ -121,12 +133,14 @@ class SceneTestUtils(
         )
     }
 
+    @JvmOverloads
     fun sceneInteractor(
         repository: SceneContainerRepository = fakeSceneContainerRepository()
     ): SceneInteractor {
         return SceneInteractor(
             applicationScope = applicationScope(),
             repository = repository,
+            powerRepository = powerRepository,
             logger = mock(),
         )
     }
@@ -150,17 +164,23 @@ class SceneTestUtils(
         )
     }
 
-    fun keyguardRepository(): FakeKeyguardRepository {
-        return keyguardRepository
-    }
-
     fun keyguardInteractor(repository: KeyguardRepository): KeyguardInteractor {
         return KeyguardInteractor(
             repository = repository,
             commandQueue = FakeCommandQueue(),
             featureFlags = featureFlags,
+            sceneContainerFlags = sceneContainerFlags,
             bouncerRepository = FakeKeyguardBouncerRepository(),
-            configurationRepository = FakeConfigurationRepository()
+            configurationRepository = FakeConfigurationRepository(),
+            shadeRepository = FakeShadeRepository(),
+            sceneInteractorProvider = { sceneInteractor() },
+        )
+    }
+
+    fun communalInteractor(): CommunalInteractor {
+        return CommunalInteractor(
+            communalRepository = communalRepository,
+            widgetRepository = communalWidgetRepository,
         )
     }
 
@@ -174,7 +194,8 @@ class SceneTestUtils(
             repository = BouncerRepository(),
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
-            featureFlags = featureFlags,
+            flags = sceneContainerFlags,
+            falsingInteractor = falsingInteractor(),
         )
     }
 
@@ -187,8 +208,16 @@ class SceneTestUtils(
             applicationScope = applicationScope(),
             bouncerInteractor = bouncerInteractor,
             authenticationInteractor = authenticationInteractor,
-            featureFlags = featureFlags,
+            flags = sceneContainerFlags,
         )
+    }
+
+    fun falsingInteractor(collector: FalsingCollector = falsingCollector()): FalsingInteractor {
+        return falsingInteractor ?: FalsingInteractor(collector).also { falsingInteractor = it }
+    }
+
+    fun falsingCollector(): FalsingCollector {
+        return falsingCollectorFake
     }
 
     private fun applicationScope(): CoroutineScope {
@@ -196,15 +225,6 @@ class SceneTestUtils(
     }
 
     companion object {
-        val REMOTE_INPUT_DOWN_GESTURE =
-            listOf(
-                RemoteUserInput(10f, 10f, RemoteUserInputAction.DOWN),
-                RemoteUserInput(10f, 20f, RemoteUserInputAction.MOVE),
-                RemoteUserInput(10f, 30f, RemoteUserInputAction.MOVE),
-                RemoteUserInput(10f, 40f, RemoteUserInputAction.MOVE),
-                RemoteUserInput(10f, 40f, RemoteUserInputAction.UP),
-            )
-
         fun DomainLayerAuthenticationMethodModel.toDataLayer(): DataLayerAuthenticationMethodModel {
             return when (this) {
                 DomainLayerAuthenticationMethodModel.None -> DataLayerAuthenticationMethodModel.None

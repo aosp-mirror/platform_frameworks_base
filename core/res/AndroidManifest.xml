@@ -1466,10 +1466,9 @@
 
     <!-- Allows an application to initiate a phone call without going through
         the Dialer user interface for the user to confirm the call.
-        <p>
-        <em>Note: An app holding this permission can also call carrier MMI codes to change settings
-        such as call forwarding or call waiting preferences.
-        <p>Protection level: dangerous
+        <p class="note"><b>Note:</b> An app holding this permission can also call carrier MMI
+        codes to change settings such as call forwarding or call waiting preferences.</p>
+        <p>Protection level: dangerous</p>
     -->
     <permission android:name="android.permission.CALL_PHONE"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -1698,6 +1697,15 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_cameraOpenCloseListener"
         android:description="@string/permdesc_cameraOpenCloseListener"
+        android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows camera access by Headless System User 0 when device is running in
+            HSUM Mode.
+    @hide -->
+    <permission android:name="android.permission.CAMERA_HEADLESS_SYSTEM_USER"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:label="@string/permlab_cameraHeadlessSystemUser"
+        android:description="@string/permdesc_cameraHeadlessSystemUser"
         android:protectionLevel="signature" />
 
     <!-- ====================================================================== -->
@@ -2094,6 +2102,16 @@
     <permission android:name="android.permission.MANAGE_TEST_NETWORKS"
         android:protectionLevel="signature" />
 
+    <!-- Allows direct access to the <RemoteAuth>Service interfaces.
+         @hide @TestApi @SystemApi(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES) -->
+    <permission android:name="android.permission.MANAGE_REMOTE_AUTH"
+                android:protectionLevel="signature" />
+
+    <!-- Allows direct access to the <RemoteAuth>Service authentication methods.
+         @hide @TestApi @SystemApi(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES) -->
+    <permission android:name="android.permission.USE_REMOTE_AUTH"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi @hide Allows applications to read Wi-Fi credential.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.READ_WIFI_CREDENTIAL"
@@ -2265,6 +2283,14 @@
     <!-- @SystemApi @hide Allows an application to manage ethernet networks.
          <p>Not for use by third-party or privileged applications. -->
     <permission android:name="android.permission.MANAGE_ETHERNET_NETWORKS"
+        android:protectionLevel="signature" />
+
+    <!-- Allows system apps to call methods to register itself as a mDNS offload engine.
+        <p>Not for use by third-party or privileged applications.
+        @SystemApi
+        @hide This should only be used by system apps.
+    -->
+    <permission android:name="android.permission.REGISTER_NSD_OFFLOAD_ENGINE"
         android:protectionLevel="signature" />
 
     <!-- ======================================= -->
@@ -6091,6 +6117,10 @@
         android:protectionLevel="signature|privileged|development|appop|retailDemo" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
+    <!-- @SystemApi @hide Allows trusted system components to report events to UsageStatsManager -->
+    <permission android:name="android.permission.REPORT_USAGE_STATS"
+                android:protectionLevel="signature|module" />
+
     <!-- Allows an application to query broadcast response stats (see
          {@link android.app.usage.BroadcastResponseStats}).
          @SystemApi
@@ -6922,6 +6952,11 @@
     <permission android:name="android.permission.MANAGE_SMARTSPACE"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to access the smartspace service as a client.
+     @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.ACCESS_SMARTSPACE"
+        android:protectionLevel="signature|privileged|development" />
+
     <!-- @SystemApi Allows an application to manage the wallpaper effects
      generation service.
      @hide  <p>Not for use by third-party applications.</p> -->
@@ -7628,6 +7663,10 @@
     <permission android:name="android.permission.DELETE_STAGED_HEALTH_CONNECT_REMOTE_DATA"
                 android:protectionLevel="signature" />
 
+    <!-- @hide @TestApi Allows tests running in CTS-in-sandbox mode to launch activities -->
+    <permission android:name="android.permission.START_ACTIVITIES_FROM_SDK_SANDBOX"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows the holder to call health connect migration APIs.
         @hide -->
     <permission android:name="android.permission.MIGRATE_HEALTH_CONNECT_DATA"
@@ -7691,6 +7730,15 @@
          <p>Protection level: signature
     -->
     <permission android:name="android.permission.WRITE_FLAGS"
+        android:protectionLevel="signature" />
+
+    <!-- @hide Allows internal applications to manage displays.
+        <p>This means intercept internal signals about displays being (dis-)connected
+        and being able to enable or disable the external displays.
+        <p>Not for use by third-party applications.
+        <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.MANAGE_DISPLAYS"
         android:protectionLevel="signature" />
 
     <!-- Attribution for Geofencing service. -->
@@ -7790,8 +7838,9 @@
                 android:process=":ui">
         </activity>
         <activity android:name="com.android.internal.app.PlatLogoActivity"
-                android:theme="@style/Theme.Wallpaper.NoTitleBar.Fullscreen"
+                android:theme="@style/Theme.NoTitleBar.Fullscreen"
                 android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+                android:enableOnBackInvokedCallback="true"
                 android:icon="@drawable/platlogo"
                 android:process=":ui">
         </activity>
@@ -7861,12 +7910,6 @@
                 <action android:name="android.intent.action.REBOOT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <activity android:name="com.android.internal.app.NetInitiatedActivity"
-                android:theme="@style/Theme.Dialog.Confirmation"
-                android:excludeFromRecents="true"
-                android:process=":ui">
         </activity>
 
         <activity android:name="com.android.internal.app.SystemUserHomeActivity"
@@ -8209,6 +8252,10 @@
 
         <service android:name="com.android.server.notification.NotificationHistoryJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
+        <service android:name="com.android.server.notification.NotificationBitmapJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
         <service android:name="com.android.server.healthconnect.HealthConnectDailyService"

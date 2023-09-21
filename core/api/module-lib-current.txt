@@ -6,7 +6,9 @@ package android {
     field public static final String CONTROL_AUTOMOTIVE_GNSS = "android.permission.CONTROL_AUTOMOTIVE_GNSS";
     field public static final String GET_INTENT_SENDER_INTENT = "android.permission.GET_INTENT_SENDER_INTENT";
     field public static final String MAKE_UID_VISIBLE = "android.permission.MAKE_UID_VISIBLE";
+    field public static final String MANAGE_REMOTE_AUTH = "android.permission.MANAGE_REMOTE_AUTH";
     field public static final String USE_COMPANION_TRANSPORTS = "android.permission.USE_COMPANION_TRANSPORTS";
+    field public static final String USE_REMOTE_AUTH = "android.permission.USE_REMOTE_AUTH";
   }
 
 }
@@ -180,16 +182,6 @@ package android.hardware.usb {
     field public static final int USB_HAL_V1_2 = 12; // 0xc
     field public static final int USB_HAL_V1_3 = 13; // 0xd
     field public static final int USB_HAL_V2_0 = 20; // 0x14
-  }
-
-}
-
-package android.location {
-
-  public class LocationManager {
-    method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public boolean injectLocation(@NonNull android.location.Location);
-    method @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS) public boolean isAutomotiveGnssSuspended();
-    method @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS) public void setAutomotiveGnssSuspended(boolean);
   }
 
 }
@@ -527,6 +519,7 @@ package android.provider {
   public static final class Settings.Config extends android.provider.Settings.NameValueTable {
     method @RequiresPermission(android.Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS) public static void clearMonitorCallback(@NonNull android.content.ContentResolver);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean deleteString(@NonNull String, @NonNull String);
+    method @NonNull public static java.util.Map<java.lang.String,java.lang.String> getAllStrings();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static java.util.Map<java.lang.String,java.lang.String> getStrings(@NonNull String, @NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static int getSyncDisabledMode();

@@ -73,6 +73,7 @@ import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.translation.TranslationCapability;
 import android.view.translation.TranslationSpec.DataFormat;
 import android.view.translation.ViewTranslationRequest;
+import android.webkit.WebView;
 import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.R;
@@ -3720,9 +3721,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return afm.shouldIncludeAllChildrenViewsWithAutofillTypeNotNoneInAssistStructure();
     }
 
-    private boolean shouldIncludeAllChildrenViews(AutofillManager afm){
+    private boolean shouldIncludeAllChildrenViews(AutofillManager afm) {
         if (afm == null) return false;
         return afm.shouldIncludeAllChildrenViewInAssistStructure();
+    }
+
+    private boolean shouldAlwaysIncludeWebview(AutofillManager afm) {
+        if (afm == null) return false;
+        return afm.shouldAlwaysIncludeWebviewInAssistStructure();
     }
 
     /** @hide */
@@ -3741,11 +3747,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     ? mChildren[childIndex] : preorderedList.get(childIndex);
             if ((flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
                     || child.isImportantForAutofill()
+                    || (child instanceof WebView && shouldAlwaysIncludeWebview(afm))
                     || (child.isMatchingAutofillableHeuristics()
                         && !child.isActivityDeniedForAutofillForUnimportantView())
                     || (shouldIncludeAllChildrenViewWithAutofillTypeNotNone(afm)
                         && child.getAutofillType() != AUTOFILL_TYPE_NONE)
-                    || shouldIncludeAllChildrenViews(afm)){
+                    || shouldIncludeAllChildrenViews(afm)
+                    || (child instanceof ViewGroup && child.getVisibility() != View.VISIBLE)) {
+                // If the child is a ViewGroup object and its visibility is not visible, include
+                // it as part of the assist structure. The children of these invisible ViewGroup
+                // objects are parsed and included in the assist structure. When the Autofill
+                // Provider determines the visibility of these children, it looks at their
+                // visibility as well as their parent's visibility. Omitting invisible parents
+                // will lead to the Autofill Provider incorrectly assuming that these children
+                // of invisible parents are actually visible.
                 list.add(child);
             } else if (child instanceof ViewGroup) {
                 ((ViewGroup) child).populateChildrenForAutofill(list, flags);
@@ -4430,7 +4445,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param drawingPosition the drawing order position.
      * @return the container position of a child for this drawing order position.
      *
-     * @see #getChildDrawingOrder(int, int)}
+     * @see #getChildDrawingOrder(int, int)
      */
     public final int getChildDrawingOrder(int drawingPosition) {
         return getChildDrawingOrder(getChildCount(), drawingPosition);
@@ -7359,6 +7374,126 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (parent != null) {
             parent.subtractObscuredTouchableRegion(touchableRegion, this);
         }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean getChildLocalHitRegion(@NonNull View child, @NonNull Region region,
+            @NonNull Matrix matrix, boolean isHover) {
+        if (!child.hasIdentityMatrix()) {
+            matrix.preConcat(child.getInverseMatrix());
+        }
+
+        final int dx = child.mLeft - mScrollX;
+        final int dy = child.mTop - mScrollY;
+        matrix.preTranslate(-dx, -dy);
+
+        final int width = mRight - mLeft;
+        final int height = mBottom - mTop;
+
+        // Map the bounds of this view into the region's coordinates and clip the region.
+        final RectF rect = mAttachInfo != null ? mAttachInfo.mTmpTransformRect : new RectF();
+        rect.set(0, 0, width, height);
+        matrix.mapRect(rect);
+
+        boolean notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                Math.round(rect.right), Math.round(rect.bottom), Region.Op.INTERSECT);
+
+        if (isHover) {
+            HoverTarget target = mFirstHoverTarget;
+            boolean childIsHit = false;
+            while (target != null) {
+                final HoverTarget next = target.next;
+                if (target.child == child) {
+                    childIsHit = true;
+                    break;
+                }
+                target = next;
+            }
+            if (!childIsHit && mFirstHoverTarget != null) {
+                target = mFirstHoverTarget;
+                final ArrayList<View> preorderedList = buildTouchDispatchChildList();
+                while (notEmpty && target != null) {
+                    final HoverTarget next = target.next;
+                    final View hoveredView = target.child;
+
+                    if (!isOnTop(child, hoveredView, preorderedList)) {
+                        rect.set(hoveredView.mLeft, hoveredView.mTop, hoveredView.mRight,
+                                hoveredView.mBottom);
+                        matrix.mapRect(rect);
+                        notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                                Math.round(rect.right), Math.round(rect.bottom),
+                                Region.Op.DIFFERENCE);
+                    }
+                    target = next;
+                }
+                if (preorderedList != null) {
+                    preorderedList.clear();
+                }
+            }
+        } else {
+            TouchTarget target = mFirstTouchTarget;
+            boolean childIsHit = false;
+            while (target != null) {
+                final TouchTarget next = target.next;
+                if (target.child == child) {
+                    childIsHit = true;
+                    break;
+                }
+                target = next;
+            }
+            if (!childIsHit && mFirstTouchTarget != null) {
+                target = mFirstTouchTarget;
+                final ArrayList<View> preorderedList = buildOrderedChildList();
+                while (notEmpty && target != null) {
+                    final TouchTarget next = target.next;
+                    final View touchedView = target.child;
+
+                    if (!isOnTop(child, touchedView, preorderedList)) {
+                        rect.set(touchedView.mLeft, touchedView.mTop, touchedView.mRight,
+                                touchedView.mBottom);
+                        matrix.mapRect(rect);
+                        notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                                Math.round(rect.right), Math.round(rect.bottom),
+                                Region.Op.DIFFERENCE);
+                    }
+                    target = next;
+                }
+                if (preorderedList != null) {
+                    preorderedList.clear();
+                }
+            }
+        }
+
+        if (notEmpty && mParent != null) {
+            notEmpty = mParent.getChildLocalHitRegion(this, region, matrix, isHover);
+        }
+        return notEmpty;
+    }
+
+    /**
+     * Return true if the given {@code view} is drawn on top of the {@code otherView}.
+     * Both the {@code view} and {@code otherView} must be children of this ViewGroup.
+     * Otherwise, the returned value is meaningless.
+     */
+    private boolean isOnTop(View view, View otherView, ArrayList<View> preorderedList) {
+        final int childrenCount = mChildrenCount;
+        final boolean customOrder = preorderedList == null && isChildrenDrawingOrderEnabled();
+        final View[] children = mChildren;
+        for (int i = childrenCount - 1; i >= 0; i--) {
+            final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+            final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
+            if (child == view) {
+                return true;
+            }
+            if (child == otherView) {
+                return false;
+            }
+        }
+        // Can't find the view and otherView in the children list. Return value is meaningless.
+        return false;
     }
 
     private static void applyOpToRegionByBounds(Region region, View view, Region.Op op) {

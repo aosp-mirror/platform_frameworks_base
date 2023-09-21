@@ -56,11 +56,12 @@ import com.android.systemui.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -115,12 +116,13 @@ class SideFpsControllerTest : SysuiTestCase() {
     @Captor lateinit var overlayCaptor: ArgumentCaptor<View>
     @Captor lateinit var overlayViewParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
+    private lateinit var displayRepository: FakeDisplayRepository
+    private lateinit var displayStateRepository: FakeDisplayStateRepository
     private lateinit var keyguardBouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     private lateinit var displayStateInteractor: DisplayStateInteractor
 
     private val executor = FakeExecutor(FakeSystemClock())
-    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
     private val testScope = TestScope(StandardTestDispatcher())
 
     private lateinit var overlayController: ISidefpsController
@@ -142,6 +144,8 @@ class SideFpsControllerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        displayRepository = FakeDisplayRepository()
+        displayStateRepository = FakeDisplayStateRepository()
         keyguardBouncerRepository = FakeKeyguardBouncerRepository()
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
@@ -157,7 +161,8 @@ class SideFpsControllerTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 context,
                 executor,
-                rearDisplayStateRepository
+                displayStateRepository,
+                displayRepository,
             )
 
         context.addMockSystemService(DisplayManager::class.java, displayManager)
@@ -268,7 +273,7 @@ class SideFpsControllerTest : SysuiTestCase() {
                 TestCoroutineScope(),
                 dumpManager
             )
-        rearDisplayStateRepository.setIsInRearDisplayMode(inRearDisplayMode)
+        displayStateRepository.setIsInRearDisplayMode(inRearDisplayMode)
 
         overlayController =
             ArgumentCaptor.forClass(ISidefpsController::class.java)

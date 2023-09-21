@@ -34,6 +34,7 @@ android_test {
         "platform-test-annotations",
         "platformprotosnano",
         "statsdprotolite",
+        "StatsdTestUtils",
         "hamcrest-library",
         "servicestests-utils",
         "testables",

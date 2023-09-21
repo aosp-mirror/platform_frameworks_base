@@ -263,7 +263,7 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 220;
         bi.noteLongPartialWakelockFinish(name, historyName, ISOLATED_UID);
 
-        final BatteryStatsHistoryIterator iterator =  bi.iterateBatteryStatsHistory();
+        final BatteryStatsHistoryIterator iterator =  bi.iterateBatteryStatsHistory(0, 0);
 
         BatteryStats.HistoryItem item;
 
@@ -319,7 +319,7 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 220;
         bi.noteLongPartialWakelockFinish(name, historyName, ISOLATED_UID);
 
-        final BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory();
+        final BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory(0, 0);
 
         BatteryStats.HistoryItem item;
 
@@ -933,7 +933,7 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 5000;
         bi.noteAlarmFinishLocked("foo", null, UID);
 
-        BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory();
+        BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory(0, 0);
         HistoryItem item;
 
         assertThat(item = iterator.next()).isNotNull();
@@ -972,7 +972,7 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 5000;
         bi.noteAlarmFinishLocked("foo", ws, UID);
 
-        BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory();
+        BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory(0, 0);
         HistoryItem item;
 
         assertThat(item = iterator.next()).isNotNull();

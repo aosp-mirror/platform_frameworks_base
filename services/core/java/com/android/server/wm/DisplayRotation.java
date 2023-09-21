@@ -435,7 +435,7 @@ public class DisplayRotation {
                 PackageManager.FEATURE_LEANBACK);
         mDefaultFixedToUserRotation =
                 (isCar || isTv || mService.mIsPc || mDisplayContent.forceDesktopMode()
-                        || mDisplayContent.isDisplayOrientationFixed())
+                        || !mDisplayContent.shouldRotateWithContent())
                 // For debug purposes the next line turns this feature off with:
                 // $ adb shell setprop config.override_forced_orient true
                 // $ adb shell wm size reset
@@ -948,7 +948,7 @@ public class DisplayRotation {
         mDisplayWindowSettings.setUserRotation(mDisplayContent, userRotationMode,
                 userRotation);
         if (changed) {
-            mService.updateRotation(true /* alwaysSendConfiguration */,
+            mService.updateRotation(false /* alwaysSendConfiguration */,
                     false /* forceRelayout */);
         }
     }
@@ -2127,7 +2127,7 @@ public class DisplayRotation {
         @Override
         public void onChange(boolean selfChange) {
             if (updateSettings()) {
-                mService.updateRotation(true /* alwaysSendConfiguration */,
+                mService.updateRotation(false /* alwaysSendConfiguration */,
                         false /* forceRelayout */);
             }
         }

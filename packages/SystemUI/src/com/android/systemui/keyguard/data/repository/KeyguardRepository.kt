@@ -35,8 +35,10 @@ import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
+import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
 import com.android.systemui.keyguard.shared.model.ScreenModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -53,9 +55,11 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
@@ -158,7 +162,7 @@ interface KeyguardRepository {
     val lastDozeTapToWakePosition: StateFlow<Point?>
 
     /** Observable for the [StatusBarState] */
-    val statusBarState: Flow<StatusBarState>
+    val statusBarState: StateFlow<StatusBarState>
 
     /** Observable for device wake/sleep state */
     val wakefulness: StateFlow<WakefulnessModel>
@@ -186,6 +190,12 @@ interface KeyguardRepository {
 
     /** Receive an event for doze time tick */
     val dozeTimeTick: Flow<Long>
+
+    /** Observable for DismissAction */
+    val dismissAction: StateFlow<DismissAction>
+
+    /** Observable updated when keyguardDone should be called either now or soon. */
+    val keyguardDone: Flow<KeyguardDone>
 
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
@@ -239,6 +249,10 @@ interface KeyguardRepository {
     fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean)
 
     fun dozeTimeTick()
+
+    fun setDismissAction(dismissAction: DismissAction)
+
+    suspend fun setKeyguardDone(keyguardDoneType: KeyguardDone)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -261,6 +275,19 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val systemClock: SystemClock,
 ) : KeyguardRepository {
+    private val _dismissAction: MutableStateFlow<DismissAction> =
+        MutableStateFlow(DismissAction.None)
+    override val dismissAction = _dismissAction.asStateFlow()
+    override fun setDismissAction(dismissAction: DismissAction) {
+        _dismissAction.value = dismissAction
+    }
+
+    private val _keyguardDone: MutableSharedFlow<KeyguardDone> = MutableSharedFlow()
+    override val keyguardDone = _keyguardDone.asSharedFlow()
+    override suspend fun setKeyguardDone(keyguardDoneType: KeyguardDone) {
+        _keyguardDone.emit(keyguardDoneType)
+    }
+
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
         _animateBottomAreaDozingTransitions.asStateFlow()
@@ -520,23 +547,29 @@ constructor(
         return keyguardBypassController.bypassEnabled
     }
 
-    override val statusBarState: Flow<StatusBarState> = conflatedCallbackFlow {
-        val callback =
-            object : StatusBarStateController.StateListener {
-                override fun onStateChanged(state: Int) {
-                    trySendWithFailureLogging(statusBarStateIntToObject(state), TAG, "state")
-                }
+    // TODO(b/297345631): Expose this at the interactor level instead so that it can be powered by
+    // [SceneInteractor] when scenes are ready.
+    override val statusBarState: StateFlow<StatusBarState> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : StatusBarStateController.StateListener {
+                        override fun onStateChanged(state: Int) {
+                            trySendWithFailureLogging(
+                                statusBarStateIntToObject(state),
+                                TAG,
+                                "state"
+                            )
+                        }
+                    }
+
+                statusBarStateController.addCallback(callback)
+                awaitClose { statusBarStateController.removeCallback(callback) }
             }
-
-        statusBarStateController.addCallback(callback)
-        trySendWithFailureLogging(
-            statusBarStateIntToObject(statusBarStateController.getState()),
-            TAG,
-            "initial state"
-        )
-
-        awaitClose { statusBarStateController.removeCallback(callback) }
-    }
+            .stateIn(
+                scope,
+                SharingStarted.Eagerly,
+                statusBarStateIntToObject(statusBarStateController.state)
+            )
 
     override val biometricUnlockState: Flow<BiometricUnlockModel> = conflatedCallbackFlow {
         fun dispatchUpdate() {

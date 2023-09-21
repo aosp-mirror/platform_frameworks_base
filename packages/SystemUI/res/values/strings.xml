@@ -156,6 +156,9 @@
     <!-- Button label for declining language change [CHAR LIMIT=25] -->
     <string name="hdmi_cec_set_menu_language_decline">Keep current language</string>
 
+    <!-- Button label to share wifi [CHAR_LIMIT=20] -->
+    <string name="share_wifi_button_text">Share Wi\u2011Fi</string>
+
     <!-- Title of confirmation dialog for wireless debugging [CHAR LIMIT=NONE] -->
     <string name="wifi_debugging_title">Allow wireless debugging on this network?</string>
 
@@ -386,6 +389,8 @@
     <string name="biometric_dialog_wrong_password">Wrong password</string>
     <!-- Error string shown when the user enters too many incorrect attempts [CHAR LIMIT=120]-->
     <string name="biometric_dialog_credential_too_many_attempts">Too many incorrect attempts.\nTry again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+    <!-- Button text shown on an authentication screen giving the user the option to make an emergency call without unlocking their device [CHAR LIMIT=20] -->
+    <string name="work_challenge_emergency_button_text">Emergency</string>
 
     <!-- Error string shown when the user enters an incorrect PIN/pattern/password and it counts towards the max attempts before the data on the device is wiped. [CHAR LIMIT=NONE]-->
     <string name="biometric_dialog_credential_attempts_before_wipe">Try again. Attempt <xliff:g id="attempts" example="1">%1$d</xliff:g> of <xliff:g id="max_attempts" example="3">%2$d</xliff:g>.</string>
@@ -1102,6 +1107,8 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app">When you’re sharing, recording, or casting an app, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- 1P/3P apps media projection permission button to continue with app selection or recording [CHAR LIMIT=60] -->
     <string name="media_projection_entry_app_permission_dialog_continue">Start</string>
+    <!-- 1P/3P apps disabled the single app projection option. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_entry_app_permission_dialog_single_app_disabled"><xliff:g id="app_name" example="Meet">%1$s</xliff:g> has disabled this option</string>
 
     <!-- Casting that launched by SysUI (i.e. when there is no app name) -->
     <!-- System casting media projection permission dialog title. [CHAR LIMIT=100] -->
@@ -2396,6 +2403,16 @@
     <string name="accessibility_control_move_left">Move left</string>
     <!-- Action in accessibility menu to move the magnification window right. [CHAR LIMIT=30] -->
     <string name="accessibility_control_move_right">Move right</string>
+
+    <!-- Action in accessibility menu to increase the magnification window width. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_increase_window_width">Increase width of magnifier</string>
+    <!-- Action in accessibility menu to decrease the magnification window width. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_decrease_window_width">Decrease width of magnifier</string>
+    <!-- Action in accessibility menu to increase the magnification window height. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_increase_window_height">Increase height of magnifier</string>
+    <!-- Action in accessibility menu to decrease the magnification window height. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_decrease_window_height">Decrease height of magnifier</string>
+
     <!-- Content description for magnification mode switch. [CHAR LIMIT=NONE] -->
     <string name="magnification_mode_switch_description">Magnification switch</string>
     <!-- A11y state description for magnification mode switch that device is in full-screen mode. [CHAR LIMIT=NONE] -->
@@ -3176,6 +3193,12 @@
 
     <!-- Label for a button that, when clicked, sends the user to the app store to install an app. [CHAR LIMIT=64]. -->
     <string name="install_app">Install app</string>
+
+    <!--- Title of the dialog appearing when an external display is connected, asking whether to start mirroring [CHAR LIMIT=NONE]-->
+    <string name="connected_display_dialog_start_mirroring">Mirror to external display?</string>
+
+    <!--- Label of the "enable display" button of the dialog appearing when an external display is connected [CHAR LIMIT=NONE]-->
+    <string name="enable_display">Enable display</string>
 
     <!-- Title of the privacy dialog, shown for active / recent app usage of some phone sensors [CHAR LIMIT=30] -->
     <string name="privacy_dialog_title">Microphone &amp; Camera</string>

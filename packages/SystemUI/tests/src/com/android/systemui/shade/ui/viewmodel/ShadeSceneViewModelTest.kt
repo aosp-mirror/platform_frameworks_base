@@ -23,10 +23,18 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -45,16 +53,50 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             sceneInteractor = sceneInteractor,
         )
 
-    private val underTest =
-        ShadeSceneViewModel(
-            applicationScope = testScope.backgroundScope,
-            authenticationInteractor = authenticationInteractor,
-            bouncerInteractor =
-                utils.bouncerInteractor(
-                    authenticationInteractor = authenticationInteractor,
-                    sceneInteractor = sceneInteractor,
+    private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
+
+    private var mobileIconsViewModel: MobileIconsViewModel =
+        MobileIconsViewModel(
+            logger = mock(),
+            verboseLogger = mock(),
+            interactor = mobileIconsInteractor,
+            airplaneModeInteractor =
+                AirplaneModeInteractor(
+                    FakeAirplaneModeRepository(),
+                    FakeConnectivityRepository(),
                 ),
+            constants = mock(),
+            scope = testScope.backgroundScope,
         )
+
+    private lateinit var shadeHeaderViewModel: ShadeHeaderViewModel
+
+    private lateinit var underTest: ShadeSceneViewModel
+
+    @Before
+    fun setUp() {
+        shadeHeaderViewModel =
+            ShadeHeaderViewModel(
+                applicationScope = testScope.backgroundScope,
+                context = context,
+                sceneInteractor = sceneInteractor,
+                mobileIconsInteractor = mobileIconsInteractor,
+                mobileIconsViewModel = mobileIconsViewModel,
+                broadcastDispatcher = fakeBroadcastDispatcher,
+            )
+
+        underTest =
+            ShadeSceneViewModel(
+                applicationScope = testScope.backgroundScope,
+                authenticationInteractor = authenticationInteractor,
+                bouncerInteractor =
+                    utils.bouncerInteractor(
+                        authenticationInteractor = authenticationInteractor,
+                        sceneInteractor = sceneInteractor,
+                    ),
+                shadeHeaderViewModel = shadeHeaderViewModel,
+            )
+    }
 
     @Test
     fun upTransitionSceneKey_deviceLocked_lockScreen() =

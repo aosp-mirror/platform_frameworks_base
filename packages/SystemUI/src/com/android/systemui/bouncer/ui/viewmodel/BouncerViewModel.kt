@@ -23,8 +23,7 @@ import com.android.systemui.authentication.domain.model.AuthenticationMethodMode
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import javax.inject.Inject
 import kotlin.math.ceil
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +46,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val bouncerInteractor: BouncerInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
-    featureFlags: FeatureFlags,
+    flags: SceneContainerFlags,
 ) {
     private val isInputEnabled: StateFlow<Boolean> =
         bouncerInteractor.isThrottled
@@ -102,7 +101,7 @@ constructor(
             )
 
     init {
-        if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+        if (flags.isEnabled()) {
             applicationScope.launch {
                 bouncerInteractor.isThrottled
                     .map { isThrottled ->

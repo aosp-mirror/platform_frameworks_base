@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+#define _POSIX_THREAD_SAFE_FUNCTIONS  // For mingw localtime_r().
+
 #include "io/FileSystem.h"
 
 #include <dirent.h>
+#include <sys/stat.h>
 
 #include "android-base/errors.h"
 #include "androidfw/Source.h"
@@ -52,6 +55,23 @@ std::unique_ptr<io::InputStream> RegularFile::OpenInputStream() {
 
 const android::Source& RegularFile::GetSource() const {
   return source_;
+}
+
+bool RegularFile::GetModificationTime(struct tm* buf) const {
+  if (buf == nullptr) {
+    return false;
+  }
+  struct stat stat_buf;
+  if (stat(source_.path.c_str(), &stat_buf) != 0) {
+    return false;
+  }
+
+  struct tm* ptm;
+  struct tm tm_result;
+  ptm = localtime_r(&stat_buf.st_mtime, &tm_result);
+
+  *buf = *ptm;
+  return true;
 }
 
 FileCollectionIterator::FileCollectionIterator(FileCollection* collection)

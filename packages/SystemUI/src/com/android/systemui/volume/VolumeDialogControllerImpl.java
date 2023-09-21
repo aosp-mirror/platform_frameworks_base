@@ -67,7 +67,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
@@ -84,6 +83,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
@@ -134,7 +134,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final Receiver mReceiver = new Receiver();
     private final RingerModeObservers mRingerModeObservers;
     private final MediaSessions mMediaSessions;
-    private CaptioningManager mCaptioningManager;
+    private final AtomicReference<CaptioningManager> mCaptioningManager = new AtomicReference<>();
     private final KeyguardManager mKeyguardManager;
     private final ActivityManager mActivityManager;
     private final UserTracker mUserTracker;
@@ -158,16 +158,16 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     private final WakefulnessLifecycle.Observer mWakefullnessLifecycleObserver =
             new WakefulnessLifecycle.Observer() {
-        @Override
-        public void onStartedWakingUp() {
-            mDeviceInteractive = true;
-        }
+                @Override
+                public void onStartedWakingUp() {
+                    mDeviceInteractive = true;
+                }
 
-        @Override
-        public void onFinishedGoingToSleep() {
-            mDeviceInteractive = false;
-        }
-    };
+                @Override
+                public void onFinishedGoingToSleep() {
+                    mDeviceInteractive = false;
+                }
+            };
 
     @Inject
     public VolumeDialogControllerImpl(
@@ -185,8 +185,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             KeyguardManager keyguardManager,
             ActivityManager activityManager,
             UserTracker userTracker,
-            DumpManager dumpManager,
-            @Main Handler mainHandler
+            DumpManager dumpManager
     ) {
         mContext = context.getApplicationContext();
         mPackageManager = packageManager;
@@ -215,7 +214,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mKeyguardManager = keyguardManager;
         mActivityManager = activityManager;
         mUserTracker = userTracker;
-        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mainHandler));
+        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mWorker));
         createCaptioningManagerServiceByUserContext(mUserTracker.getUserContext());
 
         dumpManager.registerDumpable("VolumeDialogControllerImpl", this);
@@ -223,8 +222,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         boolean accessibilityVolumeStreamActive = accessibilityManager
                 .isAccessibilityVolumeStreamActive();
         mVolumeController.setA11yMode(accessibilityVolumeStreamActive ?
-                    VolumePolicy.A11Y_MODE_INDEPENDENT_A11Y_VOLUME :
-                        VolumePolicy.A11Y_MODE_MEDIA_A11Y_VOLUME);
+                VolumePolicy.A11Y_MODE_INDEPENDENT_A11Y_VOLUME :
+                VolumePolicy.A11Y_MODE_MEDIA_A11Y_VOLUME);
 
         mWakefulnessLifecycle.addObserver(mWakefullnessLifecycleObserver);
     }
@@ -337,15 +336,15 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             };
 
     private void createCaptioningManagerServiceByUserContext(@NonNull Context userContext) {
-        mCaptioningManager = userContext.getSystemService(CaptioningManager.class);
+        mCaptioningManager.set(userContext.getSystemService(CaptioningManager.class));
     }
 
-    public boolean areCaptionsEnabled() {
-        return mCaptioningManager.isSystemAudioCaptioningEnabled();
+    public void getCaptionsEnabledState(boolean checkForSwitchState) {
+        mWorker.obtainMessage(W.GET_CAPTIONS_ENABLED_STATE, checkForSwitchState).sendToTarget();
     }
 
-    public void setCaptionsEnabled(boolean isEnabled) {
-        mCaptioningManager.setSystemAudioCaptioningEnabled(isEnabled);
+    public void setCaptionsEnabledState(boolean enabled) {
+        mWorker.obtainMessage(W.SET_CAPTIONS_ENABLED_STATE, enabled).sendToTarget();
     }
 
     public void getCaptionsComponentState(boolean fromTooltip) {
@@ -386,8 +385,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     public void setEnableDialogs(boolean volumeUi, boolean safetyWarning) {
-      mShowVolumeDialog = volumeUi;
-      mShowSafetyWarning = safetyWarning;
+        mShowVolumeDialog = volumeUi;
+        mShowSafetyWarning = safetyWarning;
     }
 
     @Override
@@ -438,12 +437,38 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onShowCsdWarningW(@AudioManager.CsdWarning int csdWarning, int durationMs) {
-            mCallbacks.onShowCsdWarning(csdWarning, durationMs);
+        mCallbacks.onShowCsdWarning(csdWarning, durationMs);
     }
 
     private void onGetCaptionsComponentStateW(boolean fromTooltip) {
-        mCallbacks.onCaptionComponentStateChanged(
-                mCaptioningManager.isSystemAudioCaptioningUiEnabled(), fromTooltip);
+        CaptioningManager captioningManager = mCaptioningManager.get();
+        if (null != captioningManager) {
+            mCallbacks.onCaptionComponentStateChanged(
+                    captioningManager.isSystemAudioCaptioningUiEnabled(), fromTooltip);
+        } else {
+            Log.e(TAG, "onGetCaptionsComponentStateW(), null captioningManager");
+        }
+    }
+
+    private void onGetCaptionsEnabledStateW(boolean checkForSwitchState) {
+        CaptioningManager captioningManager = mCaptioningManager.get();
+        if (null != captioningManager) {
+            mCallbacks.onCaptionEnabledStateChanged(
+                    captioningManager.isSystemAudioCaptioningEnabled(), checkForSwitchState);
+        } else {
+            Log.e(TAG, "onGetCaptionsEnabledStateW(), null captioningManager");
+        }
+    }
+
+    private void onSetCaptionsEnabledStateW(boolean enabled) {
+        CaptioningManager captioningManager = mCaptioningManager.get();
+        if (null != captioningManager) {
+            captioningManager.setSystemAudioCaptioningEnabled(enabled);
+            mCallbacks.onCaptionEnabledStateChanged(
+                    captioningManager.isSystemAudioCaptioningEnabled(), false);
+        } else {
+            Log.e(TAG, "onGetCaptionsEnabledStateW(), null captioningManager");
+        }
     }
 
     private void onAccessibilityModeChanged(Boolean showA11yStream) {
@@ -822,6 +847,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         private static final int ACCESSIBILITY_MODE_CHANGED = 15;
         private static final int GET_CAPTIONS_COMPONENT_STATE = 16;
         private static final int SHOW_CSD_WARNING = 17;
+        private static final int GET_CAPTIONS_ENABLED_STATE = 18;
+        private static final int SET_CAPTIONS_ENABLED_STATE = 19;
 
         W(Looper looper) {
             super(looper);
@@ -849,6 +876,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 case ACCESSIBILITY_MODE_CHANGED: onAccessibilityModeChanged((Boolean) msg.obj);
                     break;
                 case SHOW_CSD_WARNING: onShowCsdWarningW(msg.arg1, msg.arg2); break;
+                case GET_CAPTIONS_ENABLED_STATE:
+                    onGetCaptionsEnabledStateW((Boolean) msg.obj); break;
+                case SET_CAPTIONS_ENABLED_STATE:
+                    onSetCaptionsEnabledStateW((Boolean) msg.obj); break;
             }
         }
     }
@@ -1017,6 +1048,17 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                                 componentEnabled, fromTooltip));
             }
         }
+
+        @Override
+        public void onCaptionEnabledStateChanged(Boolean isEnabled, Boolean checkBeforeSwitch) {
+            boolean captionsEnabled = isEnabled != null && isEnabled;
+            for (final Map.Entry<Callbacks, Handler> entry : mCallbackMap.entrySet()) {
+                entry.getValue().post(
+                        () -> entry.getKey().onCaptionEnabledStateChanged(
+                                captionsEnabled, checkBeforeSwitch));
+            }
+        }
+
     }
 
     private final class RingerModeObservers {

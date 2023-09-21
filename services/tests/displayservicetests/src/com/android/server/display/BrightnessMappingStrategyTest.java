@@ -445,7 +445,7 @@ public class BrightnessMappingStrategyTest {
 
         // Add a data point in the middle of the curve where the user has set the brightness max
         final int idx = LUX_LEVELS.length / 2;
-        strategy.addUserDataPoint(LUX_LEVELS[idx], 1.0f);
+        strategy.addUserDataPoint(LUX_LEVELS[idx], /* brightness= */ 1.0f);
 
         // Then make sure that all control points after the middle lux level are also set to max...
         for (int i = idx; i < LUX_LEVELS.length; i++) {
@@ -662,11 +662,11 @@ public class BrightnessMappingStrategyTest {
                 GAMMA_CORRECTION_NITS);
         BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources, ddc,
                 mMockDwbc);
-        assertEquals(0.0f, strategy.getAutoBrightnessAdjustment(), 0.0001f /* tolerance */);
-        strategy.addUserDataPoint(2500, 1.0f);
-        assertEquals(+1.0f, strategy.getAutoBrightnessAdjustment(), 0.0001f /* tolerance */);
-        strategy.addUserDataPoint(2500, 0.0f);
-        assertEquals(-1.0f, strategy.getAutoBrightnessAdjustment(), 0.0001f /* tolerance */);
+        assertEquals(0.0f, strategy.getAutoBrightnessAdjustment(), /* delta= */ 0.0001f);
+        strategy.addUserDataPoint(/* lux= */ 2500, /* brightness= */ 1.0f);
+        assertEquals(+1.0f, strategy.getAutoBrightnessAdjustment(), /* delta= */ 0.0001f);
+        strategy.addUserDataPoint(/* lux= */ 2500, /* brightness= */ 0.0f);
+        assertEquals(-1.0f, strategy.getAutoBrightnessAdjustment(), /* delta= */ 0.0001f);
     }
 
     @Test
@@ -701,7 +701,7 @@ public class BrightnessMappingStrategyTest {
         // Similarly, if we set a user data point at (x4, 1.0), the adjustment should be 1 - y4.
         adjustment = 1.0f - y4;
         gamma = (float) MathUtils.pow(MAXIMUM_GAMMA, -adjustment);
-        strategy.addUserDataPoint(x4, 1.0f);
+        strategy.addUserDataPoint(x4, /* brightness= */ 1.0f);
         assertEquals(MathUtils.pow(y0, gamma), strategy.getBrightness(x0), 0.0001f /* tolerance */);
         assertEquals(MathUtils.pow(y2, gamma), strategy.getBrightness(x2), 0.0001f /* tolerance */);
         assertEquals(1.0f, strategy.getBrightness(x4), 0.0001f /* tolerance */);

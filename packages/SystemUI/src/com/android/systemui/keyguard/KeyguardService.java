@@ -298,18 +298,18 @@ public class KeyguardService extends Service {
     }
 
     @Inject
-    public KeyguardService(KeyguardViewMediator keyguardViewMediator,
-                           KeyguardLifecyclesDispatcher keyguardLifecyclesDispatcher,
-                           ScreenOnCoordinator screenOnCoordinator,
-                           ShellTransitions shellTransitions,
-                           DisplayTracker displayTracker,
-                           WindowManagerLockscreenVisibilityViewModel
-                                   wmLockscreenVisibilityViewModel,
-                           WindowManagerLockscreenVisibilityManager wmLockscreenVisibilityManager,
-                           KeyguardSurfaceBehindViewModel keyguardSurfaceBehindViewModel,
-                           KeyguardSurfaceBehindParamsApplier keyguardSurfaceBehindAnimator,
-                           @Application CoroutineScope scope,
-                           FeatureFlags featureFlags) {
+    public KeyguardService(
+            KeyguardViewMediator keyguardViewMediator,
+            KeyguardLifecyclesDispatcher keyguardLifecyclesDispatcher,
+            ScreenOnCoordinator screenOnCoordinator,
+            ShellTransitions shellTransitions,
+            DisplayTracker displayTracker,
+            WindowManagerLockscreenVisibilityViewModel wmLockscreenVisibilityViewModel,
+            WindowManagerLockscreenVisibilityManager wmLockscreenVisibilityManager,
+            KeyguardSurfaceBehindViewModel keyguardSurfaceBehindViewModel,
+            KeyguardSurfaceBehindParamsApplier keyguardSurfaceBehindAnimator,
+            @Application CoroutineScope scope,
+            FeatureFlags featureFlags) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;

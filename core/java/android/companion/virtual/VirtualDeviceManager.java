@@ -19,6 +19,7 @@ package android.companion.virtual;
 import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -32,6 +33,7 @@ import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
 import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback;
+import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.content.ComponentName;
 import android.content.Context;
@@ -53,16 +55,20 @@ import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.hardware.input.VirtualTouchscreen;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.media.AudioManager;
+import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Surface;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -143,6 +149,9 @@ public final class VirtualDeviceManager {
     private final IVirtualDeviceManager mService;
     private final Context mContext;
 
+    @GuardedBy("mVirtualDeviceListeners")
+    private final List<VirtualDeviceListenerDelegate> mVirtualDeviceListeners = new ArrayList<>();
+
     /** @hide */
     public VirtualDeviceManager(
             @Nullable IVirtualDeviceManager service, @NonNull Context context) {
@@ -173,6 +182,9 @@ public final class VirtualDeviceManager {
             int associationId,
             @NonNull VirtualDeviceParams params) {
         Objects.requireNonNull(params, "params must not be null");
+        if (Flags.moreLogs()) {
+            Log.i(TAG, "Creating VirtualDevice");
+        }
         try {
             return new VirtualDevice(mService, mContext, associationId, params);
         } catch (RemoteException e) {
@@ -184,7 +196,11 @@ public final class VirtualDeviceManager {
      * Returns the details of all available virtual devices.
      *
      * <p>The returned objects are read-only representations that expose the properties of all
-     * existing virtual devices.
+     * existing virtual devices.</p>
+     *
+     * <p>Note that if a virtual device is closed and becomes invalid, the returned objects will
+     * not be updated and may contain stale values. Use a {@link VirtualDeviceListener} for real
+     * time updates of the availability of virtual devices.</p>
      */
     @NonNull
     public List<android.companion.virtual.VirtualDevice> getVirtualDevices() {
@@ -196,6 +212,95 @@ public final class VirtualDeviceManager {
             return mService.getVirtualDevices();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the details of the virtual device with the given ID, if any.
+     *
+     * <p>The returned object is a read-only representation of the virtual device that expose its
+     * properties.</p>
+     *
+     * <p>Note that if the virtual device is closed and becomes invalid, the returned object will
+     * not be updated and may contain stale values. Use a {@link VirtualDeviceListener} for real
+     * time updates of the availability of virtual devices.</p>
+     *
+     * @return the virtual device with the requested ID, or {@code null} if no such device exists or
+     *   it has already been closed.
+     */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    @Nullable
+    public android.companion.virtual.VirtualDevice getVirtualDevice(int deviceId) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
+            return null;
+        }
+        if (deviceId == Context.DEVICE_ID_INVALID || deviceId == Context.DEVICE_ID_DEFAULT) {
+            return null;  // Don't even bother making a Binder call.
+        }
+        try {
+            return mService.getVirtualDevice(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers a virtual device listener to receive notifications when virtual devices are created
+     * or closed.
+     *
+     * @param executor The executor where the listener is executed on.
+     * @param listener The listener to add.
+     * @see #unregisterVirtualDeviceListener
+     */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    public void registerVirtualDeviceListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull VirtualDeviceListener listener) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to register listener; no virtual device manager service.");
+            return;
+        }
+        final VirtualDeviceListenerDelegate delegate =
+                new VirtualDeviceListenerDelegate(Objects.requireNonNull(executor),
+                        Objects.requireNonNull(listener));
+        synchronized (mVirtualDeviceListeners) {
+            try {
+                mService.registerVirtualDeviceListener(delegate);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mVirtualDeviceListeners.add(delegate);
+        }
+    }
+
+    /**
+     * Unregisters a virtual device listener previously registered with
+     * {@link #registerVirtualDeviceListener}.
+     *
+     * @param listener The listener to unregister.
+     * @see #registerVirtualDeviceListener
+     */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    public void unregisterVirtualDeviceListener(@NonNull VirtualDeviceListener listener) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to unregister listener; no virtual device manager service.");
+            return;
+        }
+        Objects.requireNonNull(listener);
+        synchronized (mVirtualDeviceListeners) {
+            final Iterator<VirtualDeviceListenerDelegate> it = mVirtualDeviceListeners.iterator();
+            while (it.hasNext()) {
+                final VirtualDeviceListenerDelegate delegate = it.next();
+                if (delegate.mListener == listener) {
+                    try {
+                        mService.unregisterVirtualDeviceListener(delegate);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                    it.remove();
+                }
+            }
         }
     }
 
@@ -509,6 +614,71 @@ public final class VirtualDeviceManager {
         }
 
         /**
+         * Specifies a policy for this virtual device.
+         *
+         * <p>Policies define the system behavior that may be specific for this virtual device. The
+         * given policy must be able to be changed dynamically during the lifetime of the device.
+         *
+         * @param policyType the type of policy, i.e. which behavior to specify a policy for.
+         * @param devicePolicy the value of the policy, i.e. how to interpret the device behavior.
+         *
+         * @see VirtualDeviceParams#POLICY_TYPE_RECENTS
+         * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
+         */
+        @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
+                @VirtualDeviceParams.DevicePolicy int devicePolicy) {
+            mVirtualDeviceInternal.setDevicePolicy(policyType, devicePolicy);
+        }
+
+        /**
+         * Specifies a component name to be exempt from the current activity launch policy.
+         *
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVIY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT},
+         * then the specified component will be blocked from launching.
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}, then
+         * the specified component will be allowed to launch.</p>
+         *
+         * <p>Note that changing the activity launch policy will not affect current set of exempt
+         * components and it needs to be updated separately.</p>
+         *
+         * @see #removeActivityPolicyExemption
+         * @see #setDevicePolicy
+         */
+        @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void addActivityPolicyExemption(@NonNull ComponentName componentName) {
+            mVirtualDeviceInternal.addActivityPolicyExemption(
+                    Objects.requireNonNull(componentName));
+        }
+
+        /**
+         * Makes the specified component name to adhere to the default activity launch policy.
+         *
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVIY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT},
+         * then the specified component will be allowed to launch.
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}, then
+         * the specified component will be blocked from launching.</p>
+         *
+         * <p>Note that changing the activity launch policy will not affect current set of exempt
+         * components and it needs to be updated separately.</p>
+         *
+         * @see #addActivityPolicyExemption
+         * @see #setDevicePolicy
+         */
+        @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
+            mVirtualDeviceInternal.removeActivityPolicyExemption(
+                    Objects.requireNonNull(componentName));
+        }
+
+        /**
          * Creates a virtual dpad.
          *
          * @param config the configurations of the virtual dpad.
@@ -719,7 +889,7 @@ public final class VirtualDeviceManager {
          *
          * @param executor The executor where the listener is executed on.
          * @param soundEffectListener The listener to add.
-         * @see #removeActivityListener(ActivityListener)
+         * @see #removeSoundEffectListener(SoundEffectListener)
          */
         public void addSoundEffectListener(@CallbackExecutor @NonNull Executor executor,
                 @NonNull SoundEffectListener soundEffectListener) {
@@ -847,5 +1017,62 @@ public final class VirtualDeviceManager {
          * @see android.media.AudioManager.SystemSoundEffect
          */
         void onPlaySoundEffect(@AudioManager.SystemSoundEffect int effectType);
+    }
+
+    /**
+     * Listener for changes in the available virtual devices.
+     *
+     * @see #registerVirtualDeviceListener
+     */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    public interface VirtualDeviceListener {
+        /**
+         * Called whenever a new virtual device has been added to the system.
+         * Use {@link VirtualDeviceManager#getVirtualDevice(int)} to get more information about
+         * the device.
+         *
+         * @param deviceId The id of the virtual device that was added.
+         */
+        default void onVirtualDeviceCreated(int deviceId) {}
+
+        /**
+         * Called whenever a virtual device has been removed from the system.
+         *
+         * @param deviceId The id of the virtual device that was removed.
+         */
+        default void onVirtualDeviceClosed(int deviceId) {}
+    }
+
+    /**
+     * A wrapper for {@link VirtualDeviceListener} that executes callbacks on the given executor.
+     */
+    private static class VirtualDeviceListenerDelegate extends IVirtualDeviceListener.Stub {
+        private final VirtualDeviceListener mListener;
+        private final Executor mExecutor;
+
+        private VirtualDeviceListenerDelegate(Executor executor, VirtualDeviceListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onVirtualDeviceCreated(int deviceId) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mListener.onVirtualDeviceCreated(deviceId));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void onVirtualDeviceClosed(int deviceId) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mListener.onVirtualDeviceClosed(deviceId));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     }
 }

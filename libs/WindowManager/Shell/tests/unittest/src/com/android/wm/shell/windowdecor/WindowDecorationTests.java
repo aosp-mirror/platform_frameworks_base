@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -116,6 +117,7 @@ public class WindowDecorationTests extends ShellTestCase {
     private SurfaceControl.Transaction mMockSurfaceControlFinishT;
     private SurfaceControl.Transaction mMockSurfaceControlAddWindowT;
     private WindowDecoration.RelayoutParams mRelayoutParams = new WindowDecoration.RelayoutParams();
+    private Configuration mWindowConfiguration = new Configuration();
     private int mCaptionMenuWidthId;
     private int mCaptionMenuShadowRadiusId;
     private int mCaptionMenuCornerRadiusId;
@@ -296,6 +298,7 @@ public class WindowDecorationTests extends ShellTestCase {
         taskInfo.isFocused = true;
         // Density is 2. Shadow radius is 10px. Caption height is 64px.
         taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
+        mWindowConfiguration.densityDpi = taskInfo.configuration.densityDpi;
 
         final SurfaceControl taskSurface = mock(SurfaceControl.class);
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo, taskSurface);
@@ -516,7 +519,7 @@ public class WindowDecorationTests extends ShellTestCase {
     private TestWindowDecoration createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo, SurfaceControl testSurface) {
         return new TestWindowDecoration(mContext, mMockDisplayController, mMockShellTaskOrganizer,
-                taskInfo, testSurface,
+                taskInfo, testSurface, mWindowConfiguration,
                 new MockObjectSupplier<>(mMockSurfaceControlBuilders,
                         () -> createMockSurfaceControlBuilder(mock(SurfaceControl.class))),
                 new MockObjectSupplier<>(mMockSurfaceControlTransactions,
@@ -556,13 +559,15 @@ public class WindowDecorationTests extends ShellTestCase {
         TestWindowDecoration(Context context, DisplayController displayController,
                 ShellTaskOrganizer taskOrganizer, ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,
+                Configuration windowConfiguration,
                 Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
                 Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
                 Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
                 SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
             super(context, displayController, taskOrganizer, taskInfo, taskSurface,
-                    surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
-                    windowContainerTransactionSupplier, surfaceControlViewHostFactory);
+                    windowConfiguration, surfaceControlBuilderSupplier,
+                    surfaceControlTransactionSupplier, windowContainerTransactionSupplier,
+                    surfaceControlViewHostFactory);
         }
 
         @Override

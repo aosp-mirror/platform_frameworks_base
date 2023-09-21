@@ -144,7 +144,7 @@ internal fun TogglePermissionAppListModel<out AppRecord>.TogglePermissionAppInfo
         footerContent = { AnnotatedText(footerResId) },
         packageManagers = packageManagers,
     ) {
-        val model = createSwitchModel(applicationInfo)
+        val model = createSwitchModel(checkNotNull(applicationInfo))
         val restrictions = Restrictions(userId, switchRestrictionKeys)
         RestrictedSwitchPreference(model, restrictions, restrictionsProviderFactory)
     }

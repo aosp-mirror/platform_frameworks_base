@@ -187,6 +187,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mConfigurationController.removeCallback(mConfigurationListener);
     }
 
+    /** Sets the StatusView as shown on an external display. */
+    public void setDisplayedOnSecondaryDisplay() {
+        mKeyguardClockSwitchController.setShownOnSecondaryDisplay(true);
+    }
+
     /**
      * Called in notificationPanelViewController to avoid leak
      */

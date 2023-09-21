@@ -955,6 +955,13 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
+    public final boolean isPackageQuarantinedForUser(@NonNull String packageName,
+            @UserIdInt int userId) {
+        return snapshot().isPackageQuarantinedForUser(packageName, userId);
+    }
+
+    @Override
+    @Deprecated
     public final boolean isSafeMode() {
         // allow instant applications
         return mService.getSafeMode();

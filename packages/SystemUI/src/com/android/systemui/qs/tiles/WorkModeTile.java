@@ -122,10 +122,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
             onManagedProfileRemoved();
         }
 
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
-
         if (arg instanceof Boolean) {
             state.value = (Boolean) arg;
         } else {
@@ -133,11 +129,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
         }
 
         state.icon = mIcon;
-        if (state.value) {
-            state.slash.isSlashed = false;
-        } else {
-            state.slash.isSlashed = true;
-        }
         state.label = getTileLabel();
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();

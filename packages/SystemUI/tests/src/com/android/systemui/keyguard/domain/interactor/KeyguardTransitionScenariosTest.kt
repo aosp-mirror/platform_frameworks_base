@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.app.StatusBarManager
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
@@ -24,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
@@ -71,6 +73,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
+    private lateinit var commandQueue: FakeCommandQueue
     private lateinit var shadeRepository: ShadeRepository
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
     private lateinit var transitionInteractor: KeyguardTransitionInteractor
@@ -99,6 +102,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
         keyguardRepository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
+        commandQueue = FakeCommandQueue()
         shadeRepository = FakeShadeRepository()
         transitionRepository = spy(FakeKeyguardTransitionRepository())
 
@@ -1045,7 +1049,6 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     @Test
     fun occludedToAlternateBouncer() =
         testScope.runTest {
-
             // GIVEN a prior transition has run to OCCLUDED
             runTransition(KeyguardState.LOCKSCREEN, KeyguardState.OCCLUDED)
             keyguardRepository.setKeyguardOccluded(true)
@@ -1063,6 +1066,31 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.OCCLUDED)
             assertThat(info.to).isEqualTo(KeyguardState.ALTERNATE_BOUNCER)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun occludedToPrimaryBouncer() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to OCCLUDED
+            runTransition(KeyguardState.LOCKSCREEN, KeyguardState.OCCLUDED)
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            // WHEN primary bouncer shows
+            bouncerRepository.setPrimaryShow(true) // beverlyt
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to AlternateBouncer should occur
+            assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.OCCLUDED)
+            assertThat(info.to).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
             assertThat(info.animator).isNotNull()
 
             coroutineContext.cancelChildren()
@@ -1152,6 +1180,39 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             coroutineContext.cancelChildren()
         }
 
+    @Test
+    fun lockscreenToOccluded_fromCameraGesture() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to LOCKSCREEN
+            runTransition(KeyguardState.AOD, KeyguardState.LOCKSCREEN)
+            runCurrent()
+
+            // WHEN the device begins to sleep (first power button press)...
+            keyguardRepository.setWakefulnessModel(startingToSleep())
+            runCurrent()
+            reset(transitionRepository)
+
+            // ...AND WHEN the camera gesture is detected quickly afterwards
+            commandQueue.doForEachCallback {
+                it.onCameraLaunchGestureDetected(
+                    StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
+                )
+            }
+            runCurrent()
+
+            // THEN a transition from LOCKSCREEN => OCCLUDED should occur
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.to).isEqualTo(KeyguardState.OCCLUDED)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
     private fun startingToWake() =
         WakefulnessModel(
             WakefulnessState.STARTING_TO_WAKE,
@@ -1170,6 +1231,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         return KeyguardInteractorFactory.create(
                 featureFlags = featureFlags,
                 repository = keyguardRepository,
+                commandQueue = commandQueue,
                 bouncerRepository = bouncerRepository,
             )
             .keyguardInteractor

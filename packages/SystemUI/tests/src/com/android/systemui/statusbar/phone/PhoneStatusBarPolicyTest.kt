@@ -29,6 +29,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
@@ -316,5 +317,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         suspend fun emit(value: State) = flow.emit(value)
         override val connectedDisplayState: Flow<State>
             get() = flow
+        override val pendingDisplay: Flow<PendingDisplay?>
+            get() = TODO("Not yet implemented")
     }
 }

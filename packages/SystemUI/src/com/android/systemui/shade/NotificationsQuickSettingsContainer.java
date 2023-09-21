@@ -16,6 +16,8 @@
 
 package com.android.systemui.shade;
 
+import static androidx.constraintlayout.core.widgets.Optimizer.OPTIMIZATION_GRAPH;
+
 import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -24,7 +26,6 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.WindowInsets;
 
 import androidx.annotation.Nullable;
@@ -181,6 +182,10 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     void setMigratingNSSL(boolean isMigrating) {
         mIsMigratingNSSL = isMigrating;
+    }
+
+    void enableGraphOptimization() {
+        setOptimizationLevel(getOptimizationLevel() | OPTIMIZATION_GRAPH);
     }
 
     @Override

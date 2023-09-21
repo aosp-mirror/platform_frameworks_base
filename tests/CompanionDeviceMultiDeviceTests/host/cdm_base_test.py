@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Lint as: python3
 """
 Base class for setting up devices for CDM functionalities.

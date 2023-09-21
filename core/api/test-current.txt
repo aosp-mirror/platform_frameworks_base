@@ -28,6 +28,7 @@ package android {
     field public static final String MANAGE_APP_OPS_MODES = "android.permission.MANAGE_APP_OPS_MODES";
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
     field public static final String MANAGE_NOTIFICATION_LISTENERS = "android.permission.MANAGE_NOTIFICATION_LISTENERS";
+    field public static final String MANAGE_REMOTE_AUTH = "android.permission.MANAGE_REMOTE_AUTH";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
     field public static final String MANAGE_TOAST_RATE_LIMITING = "android.permission.MANAGE_TOAST_RATE_LIMITING";
     field public static final String MODIFY_HDR_CONVERSION_MODE = "android.permission.MODIFY_HDR_CONVERSION_MODE";
@@ -49,11 +50,13 @@ package android {
     field public static final String SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS = "android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS";
     field public static final String SET_GAME_SERVICE = "android.permission.SET_GAME_SERVICE";
     field public static final String SET_KEYBOARD_LAYOUT = "android.permission.SET_KEYBOARD_LAYOUT";
+    field public static final String START_ACTIVITIES_FROM_SDK_SANDBOX = "android.permission.START_ACTIVITIES_FROM_SDK_SANDBOX";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
     field public static final String TEST_BIOMETRIC = "android.permission.TEST_BIOMETRIC";
     field public static final String TEST_INPUT_METHOD = "android.permission.TEST_INPUT_METHOD";
     field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
+    field public static final String USE_REMOTE_AUTH = "android.permission.USE_REMOTE_AUTH";
     field public static final String WRITE_ALLOWLISTED_DEVICE_CONFIG = "android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG";
     field public static final String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
     field @Deprecated public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
@@ -496,15 +499,15 @@ package android.app {
     method public int compareTo(android.app.WindowConfiguration);
     method public int describeContents();
     method public int getActivityType();
-    method public android.graphics.Rect getAppBounds();
-    method public android.graphics.Rect getBounds();
+    method @Nullable public android.graphics.Rect getAppBounds();
+    method @NonNull public android.graphics.Rect getBounds();
     method @NonNull public android.graphics.Rect getMaxBounds();
     method public int getRotation();
     method public int getWindowingMode();
     method public static boolean isFloating(int);
     method public void setActivityType(int);
-    method public void setAppBounds(android.graphics.Rect);
-    method public void setBounds(android.graphics.Rect);
+    method public void setAppBounds(@Nullable android.graphics.Rect);
+    method public void setBounds(@Nullable android.graphics.Rect);
     method public void setMaxBounds(@Nullable android.graphics.Rect);
     method public void setRotation(int);
     method public void setTo(android.app.WindowConfiguration);
@@ -837,6 +840,23 @@ package android.appwidget {
 
 package android.companion {
 
+  public static final class AssociationInfo.Builder {
+    ctor public AssociationInfo.Builder(int, int, @NonNull String);
+    ctor public AssociationInfo.Builder(@NonNull android.companion.AssociationInfo);
+    method @NonNull public android.companion.AssociationInfo build();
+    method @NonNull public android.companion.AssociationInfo.Builder setAssociatedDevice(@Nullable android.companion.AssociatedDevice);
+    method @NonNull public android.companion.AssociationInfo.Builder setDeviceMacAddress(@Nullable android.net.MacAddress);
+    method @NonNull public android.companion.AssociationInfo.Builder setDeviceProfile(@Nullable String);
+    method @NonNull public android.companion.AssociationInfo.Builder setDisplayName(@Nullable CharSequence);
+    method @NonNull public android.companion.AssociationInfo.Builder setLastTimeConnected(long);
+    method @NonNull public android.companion.AssociationInfo.Builder setNotifyOnDeviceNearby(boolean);
+    method @NonNull public android.companion.AssociationInfo.Builder setRevoked(boolean);
+    method @NonNull public android.companion.AssociationInfo.Builder setSelfManaged(boolean);
+    method @NonNull public android.companion.AssociationInfo.Builder setSystemDataSyncFlags(int);
+    method @NonNull public android.companion.AssociationInfo.Builder setTag(@Nullable String);
+    method @NonNull public android.companion.AssociationInfo.Builder setTimeApproved(long);
+  }
+
   public final class CompanionDeviceManager {
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void enableSecureTransport(boolean);
     field public static final int MESSAGE_REQUEST_PING = 1669362552; // 0x63807378
@@ -1164,6 +1184,7 @@ package android.credentials {
     method @Nullable public CharSequence getSettingsSubtitle();
     method @NonNull public boolean hasCapability(@NonNull String);
     method public boolean isEnabled();
+    method public boolean isPrimary();
     method public boolean isSystemProvider();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.CredentialProviderInfo> CREATOR;
@@ -1728,109 +1749,6 @@ package android.inputmethodservice {
 
 }
 
-package android.location {
-
-  public final class GnssClock implements android.os.Parcelable {
-    ctor public GnssClock();
-    method public void reset();
-    method public void resetBiasNanos();
-    method public void resetBiasUncertaintyNanos();
-    method public void resetDriftNanosPerSecond();
-    method public void resetDriftUncertaintyNanosPerSecond();
-    method public void resetElapsedRealtimeNanos();
-    method public void resetElapsedRealtimeUncertaintyNanos();
-    method public void resetFullBiasNanos();
-    method public void resetLeapSecond();
-    method public void resetReferenceCarrierFrequencyHzForIsb();
-    method public void resetReferenceCodeTypeForIsb();
-    method public void resetReferenceConstellationTypeForIsb();
-    method public void resetTimeUncertaintyNanos();
-    method public void set(android.location.GnssClock);
-    method public void setBiasNanos(double);
-    method public void setBiasUncertaintyNanos(@FloatRange(from=0.0f) double);
-    method public void setDriftNanosPerSecond(double);
-    method public void setDriftUncertaintyNanosPerSecond(@FloatRange(from=0.0f) double);
-    method public void setElapsedRealtimeNanos(long);
-    method public void setElapsedRealtimeUncertaintyNanos(@FloatRange(from=0.0f) double);
-    method public void setFullBiasNanos(long);
-    method public void setHardwareClockDiscontinuityCount(int);
-    method public void setLeapSecond(int);
-    method public void setReferenceCarrierFrequencyHzForIsb(@FloatRange(from=0.0) double);
-    method public void setReferenceCodeTypeForIsb(@NonNull String);
-    method public void setReferenceConstellationTypeForIsb(int);
-    method public void setTimeNanos(long);
-    method public void setTimeUncertaintyNanos(@FloatRange(from=0.0f) double);
-  }
-
-  public final class GnssMeasurement implements android.os.Parcelable {
-    ctor public GnssMeasurement();
-    method public void reset();
-    method public void resetAutomaticGainControlLevel();
-    method public void resetBasebandCn0DbHz();
-    method @Deprecated public void resetCarrierCycles();
-    method public void resetCarrierFrequencyHz();
-    method @Deprecated public void resetCarrierPhase();
-    method @Deprecated public void resetCarrierPhaseUncertainty();
-    method public void resetCodeType();
-    method public void resetCorrelationVectors();
-    method public void resetFullInterSignalBiasNanos();
-    method public void resetFullInterSignalBiasUncertaintyNanos();
-    method public void resetSatelliteInterSignalBiasNanos();
-    method public void resetSatelliteInterSignalBiasUncertaintyNanos();
-    method public void resetSatellitePvt();
-    method public void resetSnrInDb();
-    method public void set(android.location.GnssMeasurement);
-    method public void setAccumulatedDeltaRangeMeters(double);
-    method public void setAccumulatedDeltaRangeState(int);
-    method public void setAccumulatedDeltaRangeUncertaintyMeters(double);
-    method @Deprecated public void setAutomaticGainControlLevelInDb(double);
-    method public void setBasebandCn0DbHz(double);
-    method @Deprecated public void setCarrierCycles(long);
-    method public void setCarrierFrequencyHz(float);
-    method @Deprecated public void setCarrierPhase(double);
-    method @Deprecated public void setCarrierPhaseUncertainty(double);
-    method public void setCn0DbHz(double);
-    method public void setCodeType(@NonNull String);
-    method public void setConstellationType(int);
-    method public void setCorrelationVectors(@Nullable java.util.Collection<android.location.CorrelationVector>);
-    method public void setFullInterSignalBiasNanos(double);
-    method public void setFullInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
-    method public void setMultipathIndicator(int);
-    method public void setPseudorangeRateMetersPerSecond(double);
-    method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
-    method public void setReceivedSvTimeNanos(long);
-    method public void setReceivedSvTimeUncertaintyNanos(long);
-    method public void setSatelliteInterSignalBiasNanos(double);
-    method public void setSatelliteInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
-    method public void setSatellitePvt(@Nullable android.location.SatellitePvt);
-    method public void setSnrInDb(double);
-    method public void setState(int);
-    method public void setSvid(int);
-    method public void setTimeOffsetNanos(double);
-    field public static final int ADR_STATE_ALL = 31; // 0x1f
-  }
-
-  public final class GnssNavigationMessage implements android.os.Parcelable {
-    ctor public GnssNavigationMessage();
-    method public void reset();
-    method public void set(android.location.GnssNavigationMessage);
-    method public void setData(byte[]);
-    method public void setMessageId(@IntRange(from=0xffffffff, to=120) int);
-    method public void setStatus(int);
-    method public void setSubmessageId(@IntRange(from=1) int);
-    method public void setSvid(@IntRange(from=1, to=200) int);
-    method public void setType(int);
-  }
-
-  public class LocationManager {
-    method @NonNull public String[] getBackgroundThrottlingWhitelist();
-    method @NonNull public android.os.PackageTagsList getIgnoreSettingsAllowlist();
-    method @Deprecated @NonNull public String[] getIgnoreSettingsWhitelist();
-    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public java.util.List<java.lang.String> getProviderPackages(@NonNull String);
-  }
-
-}
-
 package android.media {
 
   public final class AudioAttributes implements android.os.Parcelable {
@@ -1877,6 +1795,8 @@ package android.media {
 
   public class AudioManager {
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int abandonAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String);
+    method @RequiresPermission("Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED") public boolean enterAudioFocusFreezeForTest(@NonNull java.util.List<java.lang.Integer>);
+    method @RequiresPermission("Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED") public boolean exitAudioFocusFreezeForTest();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void forceComputeCsdOnAllDevices(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void forceUseFrameworkMel(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioRecord getCallDownlinkExtractionAudioRecord(@NonNull android.media.AudioFormat);
@@ -1884,6 +1804,9 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public float getCsd();
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
+    method @NonNull @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public java.util.List<java.lang.Integer> getFocusDuckedUidsForTest();
+    method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFocusFadeOutDurationForTest();
+    method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFocusUnmuteDelayAfterFadeOutForTest();
     method @Nullable public static android.media.AudioHalVersionInfo getHalVersion();
     method public static final int[] getPublicStreamTypes();
     method @NonNull public java.util.List<java.lang.Integer> getReportedSurroundFormats();
@@ -2193,6 +2116,7 @@ package android.net.wifi.sharedconnectivity.app {
 
   public class SharedConnectivityManager {
     method @Nullable public static android.net.wifi.sharedconnectivity.app.SharedConnectivityManager create(@NonNull android.content.Context, @NonNull String, @NonNull String);
+    method @NonNull public android.content.BroadcastReceiver getBroadcastReceiver();
     method @Nullable public android.content.ServiceConnection getServiceConnection();
     method public void setService(@Nullable android.os.IInterface);
   }
@@ -2220,6 +2144,10 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void setChargerAcOnline(boolean, boolean);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void suspendBatteryInput();
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void unplugBattery(boolean);
+  }
+
+  public final class BugreportParams {
+    field public static final int BUGREPORT_MODE_MAX_VALUE = 7; // 0x7
   }
 
   public class Build {
@@ -2682,8 +2610,14 @@ package android.os.vibrator {
 
 package android.os.vibrator.persistence {
 
+  public class ParsedVibration {
+    method @NonNull public java.util.List<android.os.VibrationEffect> getVibrationEffects();
+    method @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
+  }
+
   public final class VibrationXmlParser {
-    method @Nullable public static android.os.VibrationEffect parse(@NonNull java.io.Reader) throws java.io.IOException;
+    method @Nullable public static android.os.vibrator.persistence.ParsedVibration parseDocument(@NonNull java.io.Reader) throws java.io.IOException;
+    method @Nullable public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.Reader) throws java.io.IOException;
   }
 
   public final class VibrationXmlSerializer {

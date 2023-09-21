@@ -53,6 +53,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.FakeWindowRootViewComponent;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -61,6 +62,8 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import com.google.common.util.concurrent.MoreExecutors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -72,6 +75,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -97,6 +101,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private ShadeWindowLogger mShadeWindowLogger;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
+    private final Executor mBackgroundExecutor = MoreExecutors.directExecutor();
 
     private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
     private float mPreferredRefreshRate = -1;
@@ -114,11 +119,23 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
-        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
-                mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
-                mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
-                mColorExtractor, mDumpManager, mKeyguardStateController,
-                mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
+        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
+                mContext,
+                new FakeWindowRootViewComponent.Factory(mNotificationShadeWindowView),
+                mWindowManager,
+                mActivityManager,
+                mDozeParameters,
+                mStatusBarStateController,
+                mConfigurationController,
+                mKeyguardViewMediator,
+                mKeyguardBypassController,
+                mBackgroundExecutor,
+                mColorExtractor,
+                mDumpManager,
+                mKeyguardStateController,
+                mScreenOffAnimationController,
+                mAuthController,
+                mShadeExpansionStateManager,
                 mShadeWindowLogger) {
                     @Override
                     protected boolean isDebuggable() {
@@ -126,7 +143,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                     }
             };
         mNotificationShadeWindowController.setScrimsVisibilityListener((visibility) -> {});
-        mNotificationShadeWindowController.setWindowRootView(mNotificationShadeWindowView);
+        mNotificationShadeWindowController.fetchWindowRootView();
 
         mNotificationShadeWindowController.attach();
         verify(mWindowManager).addView(eq(mNotificationShadeWindowView), any());

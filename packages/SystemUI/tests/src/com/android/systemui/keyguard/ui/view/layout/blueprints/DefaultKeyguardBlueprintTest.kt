@@ -19,21 +19,30 @@ package com.android.systemui.keyguard.ui.view.layout.blueprints
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
+import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
+import com.android.systemui.util.mockito.whenever
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -50,7 +59,10 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     private lateinit var defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection
     @Mock private lateinit var defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection
     @Mock private lateinit var defaultStatusViewSection: DefaultStatusViewSection
+    @Mock private lateinit var defaultStatusBarViewSection: DefaultStatusBarSection
+    @Mock private lateinit var defaultNSSLSection: DefaultNotificationStackScrollLayoutSection
     @Mock private lateinit var splitShadeGuidelines: SplitShadeGuidelines
+    @Mock private lateinit var aodNotificationIconsSection: AodNotificationIconsSection
 
     @Before
     fun setup() {
@@ -64,20 +76,40 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultAmbientIndicationAreaSection,
                 defaultSettingsPopupMenuSection,
                 defaultStatusViewSection,
+                defaultStatusBarViewSection,
+                defaultNSSLSection,
                 splitShadeGuidelines,
+                aodNotificationIconsSection,
             )
     }
 
     @Test
-    fun apply() {
+    fun replaceViews() {
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.replaceViews(null, constraintLayout)
+        underTest.sections.forEach { verify(it).addViews(constraintLayout) }
+    }
+
+    @Test
+    fun replaceViews_withPrevBlueprint() {
+        val prevBlueprint = mock(KeyguardBlueprint::class.java)
+        val someSection = mock(KeyguardSection::class.java)
+        whenever(prevBlueprint.sections)
+            .thenReturn(underTest.sections.minus(defaultLockIconSection).plus(someSection))
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.replaceViews(prevBlueprint, constraintLayout)
+        underTest.sections.minus(defaultLockIconSection).forEach {
+            verify(it, never()).addViews(constraintLayout)
+        }
+
+        verify(defaultLockIconSection).addViews(constraintLayout)
+        verify(someSection).removeViews(constraintLayout)
+    }
+
+    @Test
+    fun applyConstraints() {
         val cs = ConstraintSet()
-        underTest.apply(cs)
-        verify(defaultIndicationAreaSection).apply(cs)
-        verify(defaultLockIconSection).apply(cs)
-        verify(defaultShortcutsSection).apply(cs)
-        verify(defaultAmbientIndicationAreaSection).apply(cs)
-        verify(defaultSettingsPopupMenuSection).apply(cs)
-        verify(defaultStatusViewSection).apply(cs)
-        verify(splitShadeGuidelines).apply(cs)
+        underTest.applyConstraints(cs)
+        underTest.sections.forEach { verify(it).applyConstraints(cs) }
     }
 }

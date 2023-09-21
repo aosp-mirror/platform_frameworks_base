@@ -464,7 +464,8 @@ public class FingerprintService extends SystemService {
         public void prepareForAuthentication(IBinder token, long operationId,
                 IBiometricSensorReceiver sensorReceiver,
                 @NonNull FingerprintAuthenticateOptions options,
-                long requestId, int cookie, boolean allowBackgroundAuthentication) {
+                long requestId, int cookie, boolean allowBackgroundAuthentication,
+                boolean isForLegacyFingerprintManager) {
             super.prepareForAuthentication_enforcePermission();
 
             final ServiceProvider provider = mRegistry.getProviderForSensor(options.getSensorId());
@@ -473,10 +474,13 @@ public class FingerprintService extends SystemService {
                 return;
             }
 
+            final int statsClient =
+                    isForLegacyFingerprintManager ? BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER
+                            : BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT;
             final boolean restricted = true; // BiometricPrompt is always restricted
             provider.scheduleAuthenticate(token, operationId, cookie,
                     new ClientMonitorCallbackConverter(sensorReceiver), options, requestId,
-                    restricted, BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                    restricted, statsClient,
                     allowBackgroundAuthentication);
         }
 

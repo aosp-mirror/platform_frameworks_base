@@ -57,6 +57,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"किसी दूसरे डिवाइस से, सिस्टम की भाषा बदलने का अनुरोध किया गया"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"भाषा बदलें"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"मौजूदा भाषा रखें"</string>
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"वाई-फ़ाई शेयर करें"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"क्या आप इस नेटवर्क पर वॉयरलेस डीबगिंग के इस्तेमाल की अनुमति देना चाहते हैं?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"नेटवर्क का नाम (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nवाई-फ़ाई का पता (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"इस नेटवर्क पर हमेशा अनुमति दें"</string>
@@ -158,6 +159,7 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"गलत पैटर्न"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"गलत पासवर्ड"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"आपकी कोशिशें बहुत बार गलत हुई हैं.\nआप <xliff:g id="NUMBER">%d</xliff:g> सेकंड में फिर से कोशिश कर सकते हैं."</string>
+    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"आपातकालीन कॉल"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"फिर से कोशिश करें. आप <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> में से <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> बार कोशिश कर चुके हैं."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"आपका डेटा मिटा दिया जाएगा"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"अगर आप फिर से गलत पैटर्न डालते हैं, तो इस डिवाइस का डेटा मिटा दिया जाएगा."</string>
@@ -295,8 +297,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> सीमा"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"वर्क ऐप्लिकेशन"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"रोकी गई"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"नाइट लाइट"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"शाम को चालू की जाएगी"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"शाम को चालू होगी"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"सुबह तक चालू रहेगी"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> पर चालू की जाएगी"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> तक"</string>
@@ -410,6 +413,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"शेयर, रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> के पास स्क्रीन पर दिख रहे कॉन्टेंट या डिवाइस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, और डिवाइस पर चल रहे ऑडियो और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"किसी ऐप्लिकेशन को शेयर, रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> के पास उस ऐप्लिकेशन पर दिख रहे कॉन्टेंट या उस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, और डिवाइस पर चल रहे ऑडियो और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"शुरू करें"</string>
+    <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ने इस विकल्प को बंद कर दिया है"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"क्या मीडिया कास्ट करना है?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"कास्ट करते समय, Android के पास स्क्रीन पर दिख रहे कॉन्टेंट या डिवाइस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, और डिवाइस पर चल रहे ऑडियो और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"किसी ऐप्लिकेशन को कास्ट करते समय, Android के पास उस ऐप्लिकेशन पर दिख रहे कॉन्टेंट या उस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, और डिवाइस पर चल रहे ऑडियो और वीडियो को लेकर सावधानी बरतें."</string>
@@ -859,11 +863,20 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"नीचे ले जाएं"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"बाईं ओर ले जाएं"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"दाईं ओर ले जाएं"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ज़ूम करने की सुविधा वाला स्विच"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"फ़ुल स्क्रीन को ज़ूम करें"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीन के किसी हिस्से को ज़ूम करें"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"ज़ूम करने की सुविधा वाली सेटिंग खोलें"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"ज़ूम करने की सुविधा वाली सेटिंग को बंद करें"</string>
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"बदलाव मोड से बाहर निकलें"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"साइज़ बदलने के लिए, कोने को खींचें और छोड़ें"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"तिरछी दिशा में स्क्रोल करने की अनुमति दें"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"साइज़ बदलें"</string>
@@ -900,8 +913,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"कंट्रोल जोड़ने के लिए ऐप्लिकेशन चुनें"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# कंट्रोल जोड़ा गया.}one{# कंट्रोल जोड़ा गया.}other{# कंट्रोल जोड़े गए.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"हटाया गया"</string>
-    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> को जोड़ना है?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> यह चुन सकता है कि इस पैनल पर कौनसे कंट्रोल और कॉन्टेंट दिखे."</string>
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ऐप्लिकेशन को जोड़ना है?"</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> ऐप्लिकेशन यह चुन सकता है कि इस पैनल पर कौनसे कंट्रोल और कॉन्टेंट दिखे."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> के लिए कंट्रोल हटाने हैं?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"पसंदीदा बनाया गया"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"पसंदीदा बनाया गया, क्रम संख्या <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1124,7 +1137,7 @@
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"कोई जानकारी नहीं"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
-    <string name="log_access_confirmation_title" msgid="4843557604739943395">"क्या <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> को डिवाइस लॉग का ऐक्सेस देना है?"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> को डिवाइस लॉग ऐक्सेस करने की अनुमति देनी है?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"एक बार ऐक्सेस करने की अनुमति दें"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"अनुमति न दें"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"डिवाइस लॉग में आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें ठीक करने के लिए कर सकते हैं.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस दें. \n\nअगर इस ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी यह डिवाइस पर मौजूद अपने लॉग ऐक्सेस कर सकता है. डिवाइस को बनाने वाली कंपनी फिर भी डिवाइस के कुछ लॉग या जानकारी ऐक्सेस कर सकती है."</string>
@@ -1133,7 +1146,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> खोलें"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet ऐप्लिकेशन को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि ऐप्लिकेशन इंस्टॉल किया गया हो"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet ऐप्लिकेशन को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि कम से कम एक कार्ड जोड़ा गया हो"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"क्यूआर कोड स्कैनर को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि कैमरा ऐप्लिकेशन इंस्टॉल किया गया हो"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home ऐप्लिकेशन को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि ऐप्लिकेशन इंस्टॉल किया गया हो"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• कम से कम एक डिवाइस उपलब्ध है"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"नोट लेने से जुड़ा शॉर्टकट इस्तेमाल करने के लिए, नोट लेने का डिफ़ॉल्ट ऐप्लिकेशन चुनें"</string>
@@ -1166,9 +1178,11 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant आपकी बातें सुन रही है"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"सेटिंग में जाकर, नोट लेने की सुविधा देने वाले ऐप्लिकेशन को डिफ़ॉल्ट के तौर पर सेट करें"</string>
     <string name="install_app" msgid="5066668100199613936">"ऐप्लिकेशन इंस्टॉल करें"</string>
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"बाहरी डिसप्ले को अन्य डिवाइस पर दिखाना है?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"डिसप्ले चालू करें"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"माइक्रोफ़ोन और कैमरा"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"हाल ही में इस्तेमाल करने वाला ऐप्लिकेशन"</string>
-    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"हाल ही का ऐक्सेस देखें"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"हाल में ऐक्सेस करने वाले ऐप"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"हो गया"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"बड़ा करें और विकल्प दिखाएं"</string>
     <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"छोटा करें"</string>
@@ -1179,7 +1193,7 @@
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"फ़ोन कॉल पर इस्तेमाल किया जा रहा है"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"हाल ही में, फ़ोन कॉल में इस्तेमाल किया गया"</string>
     <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर इस्तेमाल किया जा रहा है"</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"हाल ही में, <xliff:g id="APP_NAME">%1$s</xliff:g> ने इस्तेमाल किया"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"हाल ही में <xliff:g id="APP_NAME">%1$s</xliff:g> पर इस्तेमाल किया गया"</string>
     <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) पर इस्तेमाल किया जा रहा है"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"हाल ही में, <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) ने इस्तेमाल किया"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) पर इस्तेमाल किया जा रहा है"</string>

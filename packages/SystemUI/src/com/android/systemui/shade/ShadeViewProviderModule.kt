@@ -22,18 +22,17 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewStub
 import androidx.constraintlayout.motion.widget.MotionLayout
-import com.android.keyguard.LockIconView
 import com.android.systemui.R
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.biometrics.AuthRippleView
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.privacy.OngoingPrivacyChip
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.ui.view.SceneWindowRootView
@@ -71,15 +70,13 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         fun providesWindowRootView(
             layoutInflater: LayoutInflater,
-            featureFlags: FeatureFlags,
+            sceneContainerFlags: SceneContainerFlags,
             viewModelProvider: Provider<SceneContainerViewModel>,
             containerConfigProvider: Provider<SceneContainerConfig>,
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
             layoutInsetController: NotificationInsetsController,
         ): WindowRootView {
-            return if (
-                featureFlags.isEnabled(Flags.SCENE_CONTAINER) && ComposeFacade.isComposeAvailable()
-            ) {
+            return if (sceneContainerFlags.isEnabled()) {
                 val sceneWindowRootView =
                     layoutInflater.inflate(R.layout.scene_window_root, null) as SceneWindowRootView
                 sceneWindowRootView.init(
@@ -96,16 +93,16 @@ abstract class ShadeViewProviderModule {
                 ?: throw IllegalStateException("Window root view could not be properly inflated")
         }
 
-        @Provides
-        @SysUISingleton
         // TODO(b/277762009): Do something similar to
         //  {@link StatusBarWindowModule.InternalWindowView} so that only
         //  {@link NotificationShadeWindowViewController} can inject this view.
+        @Provides
+        @SysUISingleton
         fun providesNotificationShadeWindowView(
             root: WindowRootView,
-            featureFlags: FeatureFlags,
+            sceneContainerFlags: SceneContainerFlags,
         ): NotificationShadeWindowView {
-            if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+            if (sceneContainerFlags.isEnabled()) {
                 return root.requireViewById(R.id.legacy_window_root)
             }
             return root as NotificationShadeWindowView?
@@ -201,21 +198,6 @@ abstract class ShadeViewProviderModule {
             notificationShadeWindowView: NotificationShadeWindowView,
         ): AuthRippleView? {
             return notificationShadeWindowView.requireViewById(R.id.auth_ripple)
-        }
-
-        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
-        @Provides
-        @SysUISingleton
-        fun providesLockIconView(
-            keyguardRootView: KeyguardRootView,
-            notificationPanelView: NotificationPanelView,
-            featureFlags: FeatureFlags
-        ): LockIconView {
-            if (featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
-                return keyguardRootView.requireViewById(R.id.lock_icon_view)
-            } else {
-                return notificationPanelView.requireViewById(R.id.lock_icon_view)
-            }
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.

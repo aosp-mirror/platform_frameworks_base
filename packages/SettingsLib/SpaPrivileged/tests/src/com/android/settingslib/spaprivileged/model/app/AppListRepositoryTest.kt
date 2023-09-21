@@ -38,16 +38,15 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.any
-import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.eq
-import org.mockito.Mockito.verify
 import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class AppListRepositoryTest {
@@ -75,7 +74,7 @@ class AppListRepositoryTest {
             .thenReturn(emptyArray())
         whenever(context.packageManager).thenReturn(packageManager)
         whenever(context.userManager).thenReturn(userManager)
-        whenever(packageManager.getInstalledModules(anyInt())).thenReturn(emptyList())
+        whenever(packageManager.getInstalledModules(any())).thenReturn(emptyList())
         whenever(packageManager.getHomeActivities(any())).thenAnswer {
             @Suppress("UNCHECKED_CAST")
             val resolveInfos = it.arguments[0] as MutableList<ResolveInfo>
@@ -83,7 +82,7 @@ class AppListRepositoryTest {
             null
         }
         whenever(
-            packageManager.queryIntentActivitiesAsUser(any(), any<ResolveInfoFlags>(), anyInt())
+            packageManager.queryIntentActivitiesAsUser(any(), any<ResolveInfoFlags>(), any<Int>())
         ).thenReturn(listOf(resolveInfoOf(packageName = IN_LAUNCHER_APP.packageName)))
         whenever(userManager.getUserInfo(ADMIN_USER_ID)).thenReturn(UserInfo().apply {
             flags = UserInfo.FLAG_ADMIN
@@ -134,12 +133,13 @@ class AppListRepositoryTest {
         )
 
         assertThat(appList).containsExactly(NORMAL_APP)
-        val flags = ArgumentCaptor.forClass(ApplicationInfoFlags::class.java)
-        verify(packageManager).getInstalledApplicationsAsUser(flags.capture(), eq(ADMIN_USER_ID))
-        assertThat(flags.value.value).isEqualTo(
-            PackageManager.MATCH_DISABLED_COMPONENTS or
-                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
-        )
+        argumentCaptor<ApplicationInfoFlags> {
+            verify(packageManager).getInstalledApplicationsAsUser(capture(), eq(ADMIN_USER_ID))
+            assertThat(firstValue.value).isEqualTo(
+                PackageManager.MATCH_DISABLED_COMPONENTS or
+                    PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+            )
+        }
     }
 
     @Test
@@ -152,9 +152,11 @@ class AppListRepositoryTest {
         )
 
         assertThat(appList).containsExactly(NORMAL_APP)
-        val flags = ArgumentCaptor.forClass(ApplicationInfoFlags::class.java)
-        verify(packageManager).getInstalledApplicationsAsUser(flags.capture(), eq(ADMIN_USER_ID))
-        assertThat(flags.value.value and PackageManager.MATCH_ANY_USER.toLong()).isGreaterThan(0L)
+        argumentCaptor<ApplicationInfoFlags> {
+            verify(packageManager).getInstalledApplicationsAsUser(capture(), eq(ADMIN_USER_ID))
+            assertThat(firstValue.value and PackageManager.MATCH_ANY_USER.toLong())
+                .isGreaterThan(0L)
+        }
     }
 
     @Test

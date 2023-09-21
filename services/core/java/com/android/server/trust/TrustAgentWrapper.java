@@ -49,6 +49,7 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.infra.AndroidFuture;
+import com.android.server.utils.Slogf;
 
 import java.util.Collections;
 import java.util.List;
@@ -120,9 +121,6 @@ public class TrustAgentWrapper {
     private final BroadcastReceiver mTrustableDowngradeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (!TrustManagerService.ENABLE_ACTIVE_UNLOCK_FLAG) {
-                return;
-            }
             // are these the broadcasts we want to listen to
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 downgradeToTrustable();
@@ -327,8 +325,8 @@ public class TrustAgentWrapper {
                 int flags,
                 AndroidFuture resultCallback) {
             if (DEBUG) {
-                Slog.d(TAG, "enableTrust(" + message + ", durationMs = " + durationMs
-                        + ", flags = " + flags + ")");
+                Slogf.d(TAG, "grantTrust(message=\"%s\", durationMs=%d, flags=0x%x)",
+                        message, durationMs, flags);
             }
 
             Message msg = mHandler.obtainMessage(
@@ -345,30 +343,32 @@ public class TrustAgentWrapper {
 
         @Override
         public void lockUser() {
+            if (DEBUG) Slog.d(TAG, "lockUser()");
             mHandler.sendEmptyMessage(MSG_LOCK_USER);
         }
 
         @Override
         public void setManagingTrust(boolean managingTrust) {
-            if (DEBUG) Slog.d(TAG, "managingTrust()");
+            if (DEBUG) Slogf.d(TAG, "setManagingTrust(%s)", managingTrust);
             mHandler.obtainMessage(MSG_MANAGING_TRUST, managingTrust ? 1 : 0, 0).sendToTarget();
         }
 
         @Override
         public void onConfigureCompleted(boolean result, IBinder token) {
-            if (DEBUG) Slog.d(TAG, "onSetTrustAgentFeaturesEnabledCompleted(result=" + result);
+            if (DEBUG) Slogf.d(TAG, "onConfigureCompleted(result=%s)", result);
             mHandler.obtainMessage(MSG_SET_TRUST_AGENT_FEATURES_COMPLETED,
                     result ? 1 : 0, 0, token).sendToTarget();
         }
 
         @Override
         public void addEscrowToken(byte[] token, int userId) {
+            // 'token' is secret; never log it.
+            if (DEBUG) Slogf.d(TAG, "addEscrowToken(userId=%d)", userId);
+
             if (mContext.getResources()
                     .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
-                throw  new SecurityException("Escrow token API is not allowed.");
+                throw new SecurityException("Escrow token API is not allowed.");
             }
-
-            if (DEBUG) Slog.d(TAG, "adding escrow token for user " + userId);
             Message msg = mHandler.obtainMessage(MSG_ADD_ESCROW_TOKEN);
             msg.getData().putByteArray(DATA_ESCROW_TOKEN, token);
             msg.getData().putInt(DATA_USER_ID, userId);
@@ -377,12 +377,12 @@ public class TrustAgentWrapper {
 
         @Override
         public void isEscrowTokenActive(long handle, int userId) {
+            if (DEBUG) Slogf.d(TAG, "isEscrowTokenActive(handle=%016x, userId=%d)", handle, userId);
+
             if (mContext.getResources()
                     .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
                 throw new SecurityException("Escrow token API is not allowed.");
             }
-
-            if (DEBUG) Slog.d(TAG, "checking the state of escrow token on user " + userId);
             Message msg = mHandler.obtainMessage(MSG_ESCROW_TOKEN_STATE);
             msg.getData().putLong(DATA_HANDLE, handle);
             msg.getData().putInt(DATA_USER_ID, userId);
@@ -391,12 +391,12 @@ public class TrustAgentWrapper {
 
         @Override
         public void removeEscrowToken(long handle, int userId) {
+            if (DEBUG) Slogf.d(TAG, "removeEscrowToken(handle=%016x, userId=%d)", handle, userId);
+
             if (mContext.getResources()
                     .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
                 throw new SecurityException("Escrow token API is not allowed.");
             }
-
-            if (DEBUG) Slog.d(TAG, "removing escrow token on user " + userId);
             Message msg = mHandler.obtainMessage(MSG_REMOVE_ESCROW_TOKEN);
             msg.getData().putLong(DATA_HANDLE, handle);
             msg.getData().putInt(DATA_USER_ID, userId);
@@ -405,12 +405,13 @@ public class TrustAgentWrapper {
 
         @Override
         public void unlockUserWithToken(long handle, byte[] token, int userId) {
+            // 'token' is secret; never log it.
+            if (DEBUG) Slogf.d(TAG, "unlockUserWithToken(handle=%016x, userId=%d)", handle, userId);
+
             if (mContext.getResources()
                     .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
                 throw new SecurityException("Escrow token API is not allowed.");
             }
-
-            if (DEBUG) Slog.d(TAG, "unlocking user " + userId);
             Message msg = mHandler.obtainMessage(MSG_UNLOCK_USER);
             msg.getData().putInt(DATA_USER_ID, userId);
             msg.getData().putLong(DATA_HANDLE, handle);
@@ -420,7 +421,7 @@ public class TrustAgentWrapper {
 
         @Override
         public void showKeyguardErrorMessage(CharSequence message) {
-            if (DEBUG) Slog.d(TAG, "Showing keyguard error message: " + message);
+            if (DEBUG) Slogf.d(TAG, "showKeyguardErrorMessage(\"%s\")", message);
             Message msg = mHandler.obtainMessage(MSG_SHOW_KEYGUARD_ERROR_MESSAGE);
             msg.getData().putCharSequence(DATA_MESSAGE, message);
             msg.sendToTarget();

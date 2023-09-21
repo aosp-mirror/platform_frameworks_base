@@ -24,4 +24,7 @@ java_library_static {
         "app-compat-annotations",
         "service-permission.stubs.system_server",
     ],
+    static_libs: [
+        "device_policy_aconfig_flags_lib",
+    ],
 }

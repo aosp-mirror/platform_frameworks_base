@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -30,6 +31,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -45,6 +47,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManagerInternal;
+import android.content.res.Resources;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerGlobal;
@@ -79,11 +82,14 @@ import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
 import android.provider.Settings;
 import android.util.ArraySet;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.Display;
+import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.FrameworkStatsLog;
@@ -168,6 +174,8 @@ public class VibratorManagerServiceTest {
     private AudioManager mAudioManagerMock;
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
+
+    private SparseArray<VibrationEffect>  mHapticFeedbackVibrationMap = new SparseArray<>();
 
     private VibratorManagerService mService;
     private Context mContextSpy;
@@ -308,6 +316,12 @@ public class VibratorManagerServiceTest {
                         Object serviceInstance = service;
                         mExternalVibratorService =
                                 (VibratorManagerService.ExternalVibratorService) serviceInstance;
+                    }
+
+                    HapticFeedbackVibrationProvider createHapticFeedbackVibrationProvider(
+                            Resources resources, VibratorInfo vibratorInfo) {
+                        return new HapticFeedbackVibrationProvider(
+                                resources, vibratorInfo, mHapticFeedbackVibrationMap);
                     }
                 });
         return mService;
@@ -623,6 +637,18 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    public void vibrate_withoutVibratePermission_throwsSecurityException() {
+        denyPermission(android.Manifest.permission.VIBRATE);
+        VibratorManagerService service = createSystemReadyService();
+
+        assertThrows("Expected vibrating without permission to fail!",
+                SecurityException.class,
+                () -> vibrate(service,
+                        VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK),
+                        VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH)));
+    }
+
+    @Test
     public void vibrate_withRingtone_usesRingerModeSettings() throws Exception {
         mockVibrators(1);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
@@ -809,6 +835,7 @@ public class VibratorManagerServiceTest {
                         eq(AudioAttributes.USAGE_UNKNOWN), anyInt(), anyString());
     }
 
+    @FlakyTest
     @Test
     public void vibrate_withOngoingRepeatingVibration_ignoresEffect() throws Exception {
         mockVibrators(1);
@@ -895,6 +922,7 @@ public class VibratorManagerServiceTest {
         cancelVibrate(service);  // Clean up repeating effect.
     }
 
+    @FlakyTest
     @Test
     public void vibrate_withNewSameImportanceVibrationButOngoingIsRepeating_ignoreNewVibration()
             throws Exception {
@@ -948,6 +976,7 @@ public class VibratorManagerServiceTest {
         cancelVibrate(service);  // Clean up repeating effect.
     }
 
+    @FlakyTest
     @Test
     public void vibrate_withNewUnknownUsageVibrationAndNotRepeating_ignoreNewVibration()
             throws Exception {
@@ -1271,6 +1300,60 @@ public class VibratorManagerServiceTest {
         verify(mNativeWrapperMock).prepareSynced(eq(new int[]{1, 2}));
         verify(mNativeWrapperMock).triggerSynced(anyLong());
         verify(mNativeWrapperMock, times(2)).cancelSynced(); // Trigger on service creation too.
+    }
+
+    @Test
+    public void performHapticFeedback_doesNotRequirePermission() throws Exception {
+        denyPermission(android.Manifest.permission.VIBRATE);
+        mHapticFeedbackVibrationMap.put(
+                HapticFeedbackConstants.KEYBOARD_TAP,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        HalVibration vibration =
+                performHapticFeedbackAndWaitUntilFinished(
+                        service, HapticFeedbackConstants.KEYBOARD_TAP, /* always= */ true);
+
+        List<VibrationEffectSegment> playedSegments = fakeVibrator.getAllEffectSegments();
+        assertEquals(1, playedSegments.size());
+        PrebakedSegment segment = (PrebakedSegment) playedSegments.get(0);
+        assertEquals(VibrationEffect.EFFECT_CLICK, segment.getEffectId());
+        assertEquals(VibrationAttributes.USAGE_TOUCH, vibration.callerInfo.attrs.getUsage());
+    }
+
+    @Test
+    public void performHapticFeedback_doesNotVibrateWhenVibratorInfoNotReady() throws Exception {
+        denyPermission(android.Manifest.permission.VIBRATE);
+        mHapticFeedbackVibrationMap.put(
+                HapticFeedbackConstants.KEYBOARD_TAP,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setVibratorInfoLoadSuccessful(false);
+        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        VibratorManagerService service = createService();
+
+        performHapticFeedbackAndWaitUntilFinished(
+                service, HapticFeedbackConstants.KEYBOARD_TAP, /* always= */ true);
+
+        assertTrue(fakeVibrator.getAllEffectSegments().isEmpty());
+    }
+
+    @Test
+    public void performHapticFeedback_doesNotVibrateForInvalidConstant() throws Exception {
+        denyPermission(android.Manifest.permission.VIBRATE);
+        mockVibrators(1);
+        VibratorManagerService service = createSystemReadyService();
+
+        // These are bad haptic feedback IDs, so expect no vibration played.
+        performHapticFeedbackAndWaitUntilFinished(service, /* constant= */ -1, /* always= */ false);
+        performHapticFeedbackAndWaitUntilFinished(
+                service, HapticFeedbackConstants.NO_HAPTICS, /* always= */ true);
+
+        assertTrue(mVibratorProviders.get(1).getAllEffectSegments().isEmpty());
     }
 
     @Test
@@ -1685,6 +1768,7 @@ public class VibratorManagerServiceTest {
         cancelVibrate(service);  // Clean up long effect.
     }
 
+    @FlakyTest
     @Test
     public void onExternalVibration_withNewSameImportanceButRepeating_cancelsOngoingVibration()
             throws Exception {
@@ -2231,6 +2315,18 @@ public class VibratorManagerServiceTest {
                 mContextSpy.getContentResolver(), settingName, value, UserHandle.USER_CURRENT);
     }
 
+    private HalVibration performHapticFeedbackAndWaitUntilFinished(VibratorManagerService service,
+                int constant, boolean always) throws InterruptedException {
+        HalVibration vib =
+                service.performHapticFeedbackInternal(UID, Display.DEFAULT_DISPLAY, PACKAGE_NAME,
+                        constant, always, "some reason", service);
+        if (vib != null) {
+            vib.waitForEnd();
+        }
+
+        return vib;
+    }
+
     private void vibrateAndWaitUntilFinished(VibratorManagerService service, VibrationEffect effect,
             VibrationAttributes attrs) throws InterruptedException {
         vibrateAndWaitUntilFinished(service, CombinedVibration.createParallel(effect), attrs);
@@ -2239,8 +2335,8 @@ public class VibratorManagerServiceTest {
     private void vibrateAndWaitUntilFinished(VibratorManagerService service,
             CombinedVibration effect, VibrationAttributes attrs) throws InterruptedException {
         HalVibration vib =
-                service.vibrateInternal(UID, Display.DEFAULT_DISPLAY, PACKAGE_NAME, effect, attrs,
-                        "some reason", service);
+                service.vibrateWithPermissionCheck(UID, Display.DEFAULT_DISPLAY, PACKAGE_NAME,
+                        effect, attrs, "some reason", service);
         if (vib != null) {
             vib.waitForEnd();
         }
@@ -2270,5 +2366,10 @@ public class VibratorManagerServiceTest {
             predicateResult = predicate.test(service);
         }
         return predicateResult;
+    }
+
+    private void denyPermission(String permission) {
+        doThrow(new SecurityException()).when(mContextSpy)
+                .enforceCallingOrSelfPermission(eq(permission), anyString());
     }
 }

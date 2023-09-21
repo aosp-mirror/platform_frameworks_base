@@ -16,12 +16,14 @@
 
 package androidx.window.extensions;
 
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.content.Context;
 import android.window.TaskFragmentOrganizer;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.RawFoldingFeatureProducer;
 import androidx.window.extensions.area.WindowAreaComponent;
@@ -111,9 +113,13 @@ public class WindowExtensionsImpl implements WindowExtensions {
      * {@link WindowExtensions#getWindowLayoutComponent()}.
      * @return {@link ActivityEmbeddingComponent} OEM implementation.
      */
-    @NonNull
+    @Nullable
     public ActivityEmbeddingComponent getActivityEmbeddingComponent() {
         if (mSplitController == null) {
+            if (!ActivityTaskManager.supportsMultiWindow(getApplication())) {
+                // Disable AE for device that doesn't support multi window.
+                return null;
+            }
             synchronized (mLock) {
                 if (mSplitController == null) {
                     mSplitController = new SplitController(

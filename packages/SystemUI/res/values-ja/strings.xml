@@ -57,6 +57,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"他のデバイスからシステム言語の変更が要求されました"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"言語を変更"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"現在の言語を変更しない"</string>
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"Wi-Fi を共有"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"このネットワークでワイヤレス デバッグを許可しますか？"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"ネットワーク名（SSID）\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi アドレス（BSSID）\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"このネットワークで常に許可する"</string>
@@ -158,6 +159,7 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"パターンが正しくありません"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"パスワードが正しくありません"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"間違えた回数が上限を超えました。\n<xliff:g id="NUMBER">%d</xliff:g> 秒後にもう一度お試しください。"</string>
+    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"緊急通報"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"もう一度お試しください。入力回数: <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> 回"</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"データが削除されます"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"パターンをあと 1 回間違えると、このデバイスのデータが削除されます。"</string>
@@ -295,6 +297,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"上限: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"警告: 上限は<xliff:g id="DATA_LIMIT">%s</xliff:g>です"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"仕事用アプリ"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"一時停止中"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"夜間モード"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"日の入りに ON"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"日の出まで"</string>
@@ -410,6 +413,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"共有、録画、キャスト中は、画面に表示される内容やデバイスで再生される内容に <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"アプリの共有、録画、キャスト中は、そのアプリで表示または再生される内容に <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"開始"</string>
+    <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> がこのオプションを無効にしています"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"キャスト開始しますか？"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"キャスト中は、画面に表示される内容やデバイスで再生される内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"アプリのキャスト中は、そのアプリで表示または再生される内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
@@ -859,11 +863,20 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"下に移動"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"左に移動"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"右に移動"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"拡大スイッチ"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"画面全体を拡大します"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"画面の一部を拡大します"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"画面の拡大設定を開く"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"拡大の設定を閉じる"</string>
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"編集モードを終了"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"サイズを変更するには角をドラッグ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"斜めスクロールを許可"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"サイズ変更"</string>
@@ -901,7 +914,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# 件のコントロールを追加しました。}other{# 件のコントロールを追加しました。}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"削除済み"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> を追加しますか？"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> はここに表示されるコントロールとコンテンツを選択できます。"</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"ここに表示されるコントロールとコンテンツを <xliff:g id="APPNAME">%s</xliff:g> が選択できるようになります。"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> のコントロールを削除しますか？"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"お気に入りに追加済み"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"お気に入りに追加済み、位置: <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1133,7 +1146,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> を開く"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"ウォレット アプリをショートカットとして追加するには、アプリがインストールされていることを確認してください"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"ウォレット アプリをショートカットとして追加するには、カードが 1 枚以上追加されていることを確認してください"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR コードスキャナをショートカットとして追加するには、カメラアプリがインストールされていることを確認してください"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Google Home アプリをショートカットとして追加するには、アプリがインストールされていることを確認してください"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• 利用できるデバイスが 1 台以上ある"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"メモのショートカットを使用するデフォルトのメモアプリを選択してください"</string>
@@ -1166,6 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"アシスタントは起動済みです"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"[設定] でデフォルトのメモアプリを設定してください"</string>
     <string name="install_app" msgid="5066668100199613936">"アプリをインストール"</string>
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"外部ディスプレイにミラーリングしますか？"</string>
+    <string name="enable_display" msgid="8308309634883321977">"ディスプレイを有効にする"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"マイクとカメラ"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"最近のアプリの使用状況"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"最近のアクセスを表示"</string>

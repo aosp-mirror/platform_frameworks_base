@@ -1,8 +1,0 @@
-package: "com.android.systemui.aconfig"
-
-flag {
-    name: "example_flag"
-    namespace: "systemui"
-    description: "An Example Flag"
-    bug: "292511372"
-}

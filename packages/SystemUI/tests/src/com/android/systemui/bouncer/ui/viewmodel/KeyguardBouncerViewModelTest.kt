@@ -29,6 +29,8 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
@@ -155,5 +157,25 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
         runCurrent()
         assertThat(isShowing).isEqualTo(false)
         job.cancel()
+    }
+
+    @Test
+    fun keyguardPosition_noValueSet_emptyByDefault() = runTest {
+        val positionValues by collectValues(underTest.keyguardPosition)
+
+        runCurrent()
+
+        assertThat(positionValues).isEmpty()
+    }
+
+    @Test
+    fun keyguardPosition_valueSet_returnsValue() = runTest {
+        val position by collectLastValue(underTest.keyguardPosition)
+        runCurrent()
+
+        repository.setKeyguardPosition(123f)
+        runCurrent()
+
+        assertThat(position).isEqualTo(123f)
     }
 }

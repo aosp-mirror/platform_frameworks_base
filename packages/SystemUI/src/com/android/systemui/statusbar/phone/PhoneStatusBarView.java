@@ -40,6 +40,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.leak.RotationUtils;
@@ -51,7 +52,7 @@ public class PhoneStatusBarView extends FrameLayout {
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
 
     private DarkReceiver mBattery;
-    private DarkReceiver mClock;
+    private Clock mClock;
     private int mRotationOrientation = -1;
     @Nullable
     private View mCutoutSpace;
@@ -121,6 +122,10 @@ public class PhoneStatusBarView extends FrameLayout {
             updateLayoutForCutout();
             requestLayout();
         }
+    }
+
+    void onDensityOrFontScaleChanged() {
+        mClock.onDensityOrFontScaleChanged();
     }
 
     @Override

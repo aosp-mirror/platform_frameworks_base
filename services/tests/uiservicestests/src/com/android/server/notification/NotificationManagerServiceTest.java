@@ -22,12 +22,15 @@ import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_
 import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.SHOW_IMMEDIATELY;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.Notification.EXTRA_ALLOW_DURING_SETUP;
+import static android.app.Notification.EXTRA_PICTURE;
+import static android.app.Notification.EXTRA_PICTURE_ICON;
 import static android.app.Notification.FLAG_AUTO_CANCEL;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_CAN_COLORIZE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
+import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
 import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED;
@@ -83,11 +86,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.FSI_FORCE_DEMOTE;
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI;
-import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.WAKE_LOCK_FOR_POSTING_NOTIFICATION;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
+import static com.android.server.notification.NotificationManagerService.BITMAP_EXPIRATION_TIME_MS;
 import static com.android.server.notification.NotificationManagerService.DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_ADJUSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED;
@@ -128,7 +131,6 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import static java.util.Collections.emptyList;
@@ -180,6 +182,7 @@ import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
@@ -232,6 +235,7 @@ import android.widget.RemoteViews;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.Flag;
 import com.android.internal.config.sysui.TestableFlagResolver;
@@ -596,9 +600,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     mAcquiredWakeLocks.add(wl);
                     return wl;
                 });
-        mTestFlagResolver.setFlagOverride(WAKE_LOCK_FOR_POSTING_NOTIFICATION, true);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NOTIFY_WAKELOCK, "true", false);
 
         // apps allowed as convos
         mService.setStringArrayResourceValue(PKG_O);
@@ -1961,34 +1962,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         inOrder.verify(wakeLock).acquire(anyLong());
         inOrder.verify(wakeLock).release();
         inOrder.verifyNoMoreInteractions();
-    }
-
-    @Test
-    public void enqueueNotification_wakeLockSystemPropertyOff_noWakeLock() throws Exception {
-        mTestFlagResolver.setFlagOverride(WAKE_LOCK_FOR_POSTING_NOTIFICATION, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NOTIFY_WAKELOCK, "true", false);
-
-        mBinderService.enqueueNotificationWithTag(PKG, PKG,
-                "enqueueNotification_setsWakeLockWorkSource", 0,
-                generateNotificationRecord(null).getNotification(), 0);
-        waitForIdle();
-
-        verifyZeroInteractions(mPowerManager);
-    }
-
-    @Test
-    public void enqueueNotification_wakeLockDeviceConfigOff_noWakeLock() throws Exception {
-        mTestFlagResolver.setFlagOverride(WAKE_LOCK_FOR_POSTING_NOTIFICATION, true);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NOTIFY_WAKELOCK, "false", false);
-
-        mBinderService.enqueueNotificationWithTag(PKG, PKG,
-                "enqueueNotification_setsWakeLockWorkSource", 0,
-                generateNotificationRecord(null).getNotification(), 0);
-        waitForIdle();
-
-        verifyZeroInteractions(mPowerManager);
     }
 
     @Test
@@ -6044,6 +6017,51 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testVisitUris_styleExtrasWithoutStyle() {
+        Notification.Builder notification = new Notification.Builder(mContext, "a")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+
+        Bundle messagingExtras = new Bundle();
+        messagingExtras.putParcelable(Notification.EXTRA_MESSAGING_PERSON,
+                personWithIcon("content://user"));
+        messagingExtras.putParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES,
+                new Bundle[] { new Notification.MessagingStyle.Message("Heyhey!",
+                        System.currentTimeMillis() - 100,
+                        personWithIcon("content://historicalMessenger")).toBundle()});
+        messagingExtras.putParcelableArray(Notification.EXTRA_MESSAGES,
+                new Bundle[] { new Notification.MessagingStyle.Message("Are you there?",
+                        System.currentTimeMillis(),
+                        personWithIcon("content://messenger")).toBundle()});
+        messagingExtras.putParcelable(Notification.EXTRA_CONVERSATION_ICON,
+                Icon.createWithContentUri("content://conversationShortcut"));
+        notification.addExtras(messagingExtras);
+
+        Bundle callExtras = new Bundle();
+        callExtras.putParcelable(Notification.EXTRA_CALL_PERSON,
+                personWithIcon("content://caller"));
+        callExtras.putParcelable(Notification.EXTRA_VERIFICATION_ICON,
+                Icon.createWithContentUri("content://callVerification"));
+        notification.addExtras(callExtras);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        notification.build().visitUris(visitor);
+
+        verify(visitor).accept(eq(Uri.parse("content://user")));
+        verify(visitor).accept(eq(Uri.parse("content://historicalMessenger")));
+        verify(visitor).accept(eq(Uri.parse("content://messenger")));
+        verify(visitor).accept(eq(Uri.parse("content://conversationShortcut")));
+        verify(visitor).accept(eq(Uri.parse("content://caller")));
+        verify(visitor).accept(eq(Uri.parse("content://callVerification")));
+    }
+
+    private static Person personWithIcon(String iconUri) {
+        return new Person.Builder()
+                .setName("Mr " + iconUri)
+                .setIcon(Icon.createWithContentUri(iconUri))
+                .build();
+    }
+
+    @Test
     public void testVisitUris_wearableExtender() {
         Icon actionIcon = Icon.createWithContentUri("content://media/action");
         Icon wearActionIcon = Icon.createWithContentUri("content://media/wearAction");
@@ -7753,7 +7771,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testOnNotificationActionClick() {
         final int actionIndex = 2;
         final Notification.Action action =
-                new Notification.Action.Builder(null, "text", null).build();
+                new Notification.Action.Builder(null, "text", PendingIntent.getActivity(
+                        mContext, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE)).build();
         final boolean generatedByAssistant = false;
 
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
@@ -7777,7 +7796,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testOnAssistantNotificationActionClick() {
         final int actionIndex = 1;
         final Notification.Action action =
-                new Notification.Action.Builder(null, "text", null).build();
+                new Notification.Action.Builder(null, "text", PendingIntent.getActivity(
+                        mContext, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE)).build();
         final boolean generatedByAssistant = true;
 
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
@@ -11265,6 +11285,144 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
                 r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isTrue();
+    }
+
+    private NotificationRecord createBigPictureRecord(boolean isBigPictureStyle, boolean hasImage,
+                                                      boolean isImageBitmap, boolean isExpired) {
+        Notification.Builder builder = new Notification.Builder(mContext);
+        Notification.BigPictureStyle style = new Notification.BigPictureStyle();
+
+        if (isBigPictureStyle && hasImage) {
+            if (isImageBitmap) {
+                style = style.bigPicture(Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888));
+            } else {
+                style = style.bigPicture(Icon.createWithResource(mContext, R.drawable.btn_plus));
+            }
+        }
+        if (isBigPictureStyle) {
+            builder.setStyle(style);
+        }
+
+        Notification notification = builder.setChannelId(TEST_CHANNEL_ID).build();
+
+        long timePostedMs = System.currentTimeMillis();
+        if (isExpired) {
+            timePostedMs -= BITMAP_EXPIRATION_TIME_MS;
+        }
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                notification, UserHandle.getUserHandleForUid(mUid), null, timePostedMs);
+
+        return new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+    }
+
+    private void addRecordAndRemoveBitmaps(NotificationRecord record) {
+        mService.addNotification(record);
+        mInternalService.removeBitmaps();
+        waitForIdle();
+    }
+
+    @Test
+    public void testRemoveBitmaps_notBigPicture_noRepost() {
+        addRecordAndRemoveBitmaps(
+                createBigPictureRecord(
+                        /* isBigPictureStyle= */ false,
+                        /* hasImage= */ false,
+                        /* isImageBitmap= */ false,
+                        /* isExpired= */ false));
+        verify(mWorkerHandler, never())
+                .post(any(NotificationManagerService.EnqueueNotificationRunnable.class));
+    }
+
+    @Test
+    public void testRemoveBitmaps_bigPictureNoImage_noRepost() {
+        addRecordAndRemoveBitmaps(
+                createBigPictureRecord(
+                        /* isBigPictureStyle= */ true,
+                        /* hasImage= */ false,
+                        /* isImageBitmap= */ false,
+                        /* isExpired= */ false));
+        verify(mWorkerHandler, never())
+                .post(any(NotificationManagerService.EnqueueNotificationRunnable.class));
+    }
+
+    @Test
+    public void testRemoveBitmaps_notExpired_noRepost() {
+        addRecordAndRemoveBitmaps(
+                createBigPictureRecord(
+                        /* isBigPictureStyle= */ true,
+                        /* hasImage= */ true,
+                        /* isImageBitmap= */ true,
+                        /* isExpired= */ false));
+        verify(mWorkerHandler, never())
+                .post(any(NotificationManagerService.EnqueueNotificationRunnable.class));
+    }
+
+    @Test
+    public void testRemoveBitmaps_bitmapExpired_repost() {
+        addRecordAndRemoveBitmaps(
+                createBigPictureRecord(
+                        /* isBigPictureStyle= */ true,
+                        /* hasImage= */ true,
+                        /* isImageBitmap= */ true,
+                        /* isExpired= */ true));
+        verify(mWorkerHandler, times(1))
+                .post(any(NotificationManagerService.EnqueueNotificationRunnable.class));
+    }
+
+    @Test
+    public void testRemoveBitmaps_bitmapExpired_bitmapGone() {
+        NotificationRecord record = createBigPictureRecord(
+                /* isBigPictureStyle= */ true,
+                /* hasImage= */ true,
+                /* isImageBitmap= */ true,
+                /* isExpired= */ true);
+        addRecordAndRemoveBitmaps(record);
+        assertThat(record.getNotification().extras.containsKey(EXTRA_PICTURE)).isFalse();
+    }
+
+    @Test
+    public void testRemoveBitmaps_bitmapExpired_silent() {
+        NotificationRecord record = createBigPictureRecord(
+                /* isBigPictureStyle= */ true,
+                /* hasImage= */ true,
+                /* isImageBitmap= */ true,
+                /* isExpired= */ true);
+        addRecordAndRemoveBitmaps(record);
+        assertThat(record.getNotification().flags & FLAG_ONLY_ALERT_ONCE).isNotEqualTo(0);
+    }
+
+    @Test
+    public void testRemoveBitmaps_iconExpired_repost() {
+        addRecordAndRemoveBitmaps(
+                createBigPictureRecord(
+                        /* isBigPictureStyle= */ true,
+                        /* hasImage= */ true,
+                        /* isImageBitmap= */ false,
+                        /* isExpired= */ true));
+        verify(mWorkerHandler, times(1))
+                .post(any(NotificationManagerService.EnqueueNotificationRunnable.class));
+    }
+
+    @Test
+    public void testRemoveBitmaps_iconExpired_iconGone() {
+        NotificationRecord record = createBigPictureRecord(
+                /* isBigPictureStyle= */ true,
+                /* hasImage= */ true,
+                /* isImageBitmap= */ false,
+                /* isExpired= */ true);
+        addRecordAndRemoveBitmaps(record);
+        assertThat(record.getNotification().extras.containsKey(EXTRA_PICTURE_ICON)).isFalse();
+    }
+
+    @Test
+    public void testRemoveBitmaps_iconExpired_silent() {
+        NotificationRecord record = createBigPictureRecord(
+                /* isBigPictureStyle= */ true,
+                /* hasImage= */ true,
+                /* isImageBitmap= */ false,
+                /* isExpired= */ true);
+        addRecordAndRemoveBitmaps(record);
+        assertThat(record.getNotification().flags & FLAG_ONLY_ALERT_ONCE).isNotEqualTo(0);
     }
 
     @Test

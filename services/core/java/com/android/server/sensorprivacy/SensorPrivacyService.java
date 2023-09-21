@@ -27,6 +27,7 @@ import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO;
+import static android.app.AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -1125,6 +1126,8 @@ public final class SensorPrivacyService extends SystemService {
                 case MICROPHONE:
                     mAppOpsManagerInternal.setGlobalRestriction(OP_RECORD_AUDIO, enabled,
                             mAppOpsRestrictionToken);
+                    mAppOpsManagerInternal.setGlobalRestriction(
+                                OP_RECEIVE_SANDBOX_TRIGGER_AUDIO, enabled, mAppOpsRestrictionToken);
                     mAppOpsManagerInternal.setGlobalRestriction(OP_PHONE_CALL_MICROPHONE, enabled,
                             mAppOpsRestrictionToken);
                     // We don't show the dialog for RECEIVE_SOUNDTRIGGER_AUDIO, but still want to

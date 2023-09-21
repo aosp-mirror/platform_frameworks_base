@@ -16,6 +16,11 @@
 
 package com.android.server.policy;
 
+import static com.android.server.policy.PhoneWindowManager.DOUBLE_TAP_HOME_RECENT_SYSTEM_UI;
+import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_ALL_APPS;
+import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_ASSIST;
+import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_NOTIFICATION_PANEL;
+
 import android.platform.test.annotations.Presubmit;
 import android.view.KeyEvent;
 
@@ -65,6 +70,12 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                         KeyboardLogEvent.RECENT_APPS, KeyEvent.KEYCODE_TAB, ALT_ON},
                 {"BACK key -> Go back", new int[]{KeyEvent.KEYCODE_BACK}, KeyboardLogEvent.BACK,
                         KeyEvent.KEYCODE_BACK, 0},
+                {"Meta + `(grave) -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_GRAVE},
+                        KeyboardLogEvent.BACK, KeyEvent.KEYCODE_GRAVE, META_ON},
+                {"Meta + Left arrow -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_DPAD_LEFT},
+                        KeyboardLogEvent.BACK, KeyEvent.KEYCODE_DPAD_LEFT, META_ON},
+                {"Meta + Del -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_DEL},
+                        KeyboardLogEvent.BACK, KeyEvent.KEYCODE_DEL, META_ON},
                 {"APP_SWITCH key -> Open App switcher", new int[]{KeyEvent.KEYCODE_APP_SWITCH},
                         KeyboardLogEvent.APP_SWITCH, KeyEvent.KEYCODE_APP_SWITCH, 0},
                 {"ASSIST key -> Launch assistant", new int[]{KeyEvent.KEYCODE_ASSIST},
@@ -220,6 +231,59 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                         KeyboardLogEvent.LAUNCH_DEFAULT_MESSAGING, KeyEvent.KEYCODE_S, META_ON}};
     }
 
+    @Keep
+    private static Object[][] longPressOnHomeTestArguments() {
+        // testName, testKeys, longPressOnHomeBehavior, expectedLogEvent, expectedKey,
+        // expectedModifierState
+        return new Object[][]{
+                {"Long press HOME key -> Toggle Notification panel",
+                        new int[]{KeyEvent.KEYCODE_HOME}, LONG_PRESS_HOME_NOTIFICATION_PANEL,
+                        KeyboardLogEvent.TOGGLE_NOTIFICATION_PANEL, KeyEvent.KEYCODE_HOME, 0},
+                {"Long press META + ENTER -> Toggle Notification panel",
+                        new int[]{META_KEY, KeyEvent.KEYCODE_ENTER},
+                        LONG_PRESS_HOME_NOTIFICATION_PANEL,
+                        KeyboardLogEvent.TOGGLE_NOTIFICATION_PANEL, KeyEvent.KEYCODE_ENTER,
+                        META_ON},
+                {"Long press META + H -> Toggle Notification panel",
+                        new int[]{META_KEY, KeyEvent.KEYCODE_H}, LONG_PRESS_HOME_NOTIFICATION_PANEL,
+                        KeyboardLogEvent.TOGGLE_NOTIFICATION_PANEL, KeyEvent.KEYCODE_H, META_ON},
+                {"Long press HOME key -> Launch assistant",
+                        new int[]{KeyEvent.KEYCODE_HOME}, LONG_PRESS_HOME_ASSIST,
+                        KeyboardLogEvent.LAUNCH_ASSISTANT, KeyEvent.KEYCODE_HOME, 0},
+                {"Long press META + ENTER -> Launch assistant",
+                        new int[]{META_KEY, KeyEvent.KEYCODE_ENTER}, LONG_PRESS_HOME_ASSIST,
+                        KeyboardLogEvent.LAUNCH_ASSISTANT, KeyEvent.KEYCODE_ENTER, META_ON},
+                {"Long press META + H -> Launch assistant",
+                        new int[]{META_KEY, KeyEvent.KEYCODE_H}, LONG_PRESS_HOME_ASSIST,
+                        KeyboardLogEvent.LAUNCH_ASSISTANT, KeyEvent.KEYCODE_H, META_ON},
+                {"Long press HOME key -> Open App Drawer",
+                        new int[]{KeyEvent.KEYCODE_HOME}, LONG_PRESS_HOME_ALL_APPS,
+                        KeyboardLogEvent.ALL_APPS, KeyEvent.KEYCODE_HOME, 0},
+                {"Long press META + ENTER -> Open App Drawer",
+                        new int[]{META_KEY, KeyEvent.KEYCODE_ENTER}, LONG_PRESS_HOME_ALL_APPS,
+                        KeyboardLogEvent.ALL_APPS, KeyEvent.KEYCODE_ENTER, META_ON},
+                {"Long press META + H -> Open App Drawer", new int[]{META_KEY, KeyEvent.KEYCODE_H},
+                        LONG_PRESS_HOME_ALL_APPS, KeyboardLogEvent.ALL_APPS,
+                        KeyEvent.KEYCODE_H, META_ON}};
+    }
+
+    @Keep
+    private static Object[][] doubleTapOnHomeTestArguments() {
+        // testName, testKeys, doubleTapOnHomeBehavior, expectedLogEvent, expectedKey,
+        // expectedModifierState
+        return new Object[][]{
+                {"Double tap HOME -> Open App switcher",
+                        new int[]{KeyEvent.KEYCODE_HOME}, DOUBLE_TAP_HOME_RECENT_SYSTEM_UI,
+                        KeyboardLogEvent.APP_SWITCH, KeyEvent.KEYCODE_HOME, 0},
+                {"Double tap META + ENTER -> Open App switcher",
+                        new int[]{META_KEY, KeyEvent.KEYCODE_ENTER},
+                        DOUBLE_TAP_HOME_RECENT_SYSTEM_UI, KeyboardLogEvent.APP_SWITCH,
+                        KeyEvent.KEYCODE_ENTER, META_ON},
+                {"Double tap META + H -> Open App switcher",
+                        new int[]{META_KEY, KeyEvent.KEYCODE_H}, DOUBLE_TAP_HOME_RECENT_SYSTEM_UI,
+                        KeyboardLogEvent.APP_SWITCH, KeyEvent.KEYCODE_H, META_ON}};
+    }
+
     @Before
     public void setUp() {
         setUpPhoneWindowManager(/*supportSettingsUpdate*/ true);
@@ -231,13 +295,38 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.overrideStatusBarManagerInternal();
         mPhoneWindowManager.overrideStartActivity();
         mPhoneWindowManager.overrideUserSetupComplete();
+        mPhoneWindowManager.setupAssistForLaunch();
+        mPhoneWindowManager.overrideTogglePanel();
+        mPhoneWindowManager.overrideInjectKeyEvent();
     }
 
     @Test
     @Parameters(method = "shortcutTestArguments")
     public void testShortcuts(String testName, int[] testKeys, KeyboardLogEvent expectedLogEvent,
             int expectedKey, int expectedModifierState) {
-        sendKeyCombination(testKeys, 0);
+        sendKeyCombination(testKeys, 0 /* duration */);
+        mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
+                expectedKey, expectedModifierState, "Failed while executing " + testName);
+    }
+
+    @Test
+    @Parameters(method = "longPressOnHomeTestArguments")
+    public void testLongPressOnHome(String testName, int[] testKeys, int longPressOnHomeBehavior,
+            KeyboardLogEvent expectedLogEvent, int expectedKey, int expectedModifierState) {
+        mPhoneWindowManager.overrideLongPressOnHomeBehavior(longPressOnHomeBehavior);
+        sendLongPressKeyCombination(testKeys);
+        mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
+                expectedKey, expectedModifierState, "Failed while executing " + testName);
+    }
+
+    @Test
+    @Parameters(method = "doubleTapOnHomeTestArguments")
+    public void testDoubleTapOnHomeBehavior(String testName, int[] testKeys,
+            int doubleTapOnHomeBehavior, KeyboardLogEvent expectedLogEvent, int expectedKey,
+            int expectedModifierState) {
+        mPhoneWindowManager.overriderDoubleTapOnHomeBehavior(doubleTapOnHomeBehavior);
+        sendKeyCombination(testKeys, 0 /* duration */);
+        sendKeyCombination(testKeys, 0 /* duration */);
         mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
                 expectedKey, expectedModifierState, "Failed while executing " + testName);
     }

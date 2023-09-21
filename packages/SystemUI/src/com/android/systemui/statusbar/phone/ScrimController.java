@@ -709,6 +709,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
     }
 
+    public void onUnlockAnimationFinished() {
+        mAnimatingPanelExpansionOnUnlock = false;
+        applyAndDispatchState();
+    }
+
     /**
      * Set the amount of progress we are currently in if we're transitioning to the full shade.
      * 0.0f means we're not transitioning yet, while 1 means we're all the way in the full
@@ -758,7 +763,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
      * Sets the amount of vertical over scroll that should be performed on the notifications scrim.
      */
     public void setNotificationsOverScrollAmount(int overScrollAmount) {
-        mNotificationsScrim.setTranslationY(overScrollAmount);
+        if (mNotificationsScrim != null) mNotificationsScrim.setTranslationY(overScrollAmount);
     }
 
     /**
@@ -1475,7 +1480,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     public void setScrimBehindChangeRunnable(Runnable changeRunnable) {
         // TODO: remove this. This is necessary because of an order-of-operations limitation.
-        // The fix is to move more of these class into @CentralSurfacesScope
+        // The fix is to move more of these class into @SysUISingleton.
         if (mScrimBehind == null) {
             mScrimBehindChangeRunnable = changeRunnable;
         } else {

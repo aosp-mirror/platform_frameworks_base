@@ -57,6 +57,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.AuthenticationStatsBroadcastReceiver;
 import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
@@ -123,7 +124,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     @Nullable private ISidefpsController mSidefpsController;
     private AuthSessionCoordinator mAuthSessionCoordinator;
-    @NonNull private final AuthenticationStatsCollector mAuthenticationStatsCollector;
+    @Nullable private AuthenticationStatsCollector mAuthenticationStatsCollector;
 
     private final class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -183,8 +184,14 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mAuthSessionCoordinator = mBiometricContext.getAuthSessionCoordinator();
         mDaemon = daemon;
 
-        mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT);
+        AuthenticationStatsBroadcastReceiver mBroadcastReceiver =
+                new AuthenticationStatsBroadcastReceiver(
+                        mContext,
+                        BiometricsProtoEnums.MODALITY_FINGERPRINT,
+                        (AuthenticationStatsCollector collector) -> {
+                            Slog.d(getTag(), "Initializing AuthenticationStatsCollector");
+                            mAuthenticationStatsCollector = collector;
+                        });
 
         final List<SensorLocationInternal> workaroundLocations = getWorkaroundSensorProps(context);
 

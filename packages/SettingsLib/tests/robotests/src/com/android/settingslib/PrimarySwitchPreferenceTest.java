@@ -54,7 +54,7 @@ public class PrimarySwitchPreferenceTest {
         mPreference = new PrimarySwitchPreference(mContext);
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mHolder = PreferenceViewHolder.createInstanceForTests(inflater.inflate(
-                com.android.settingslib.R.layout.preference_two_target, null));
+                com.android.settingslib.widget.R.layout.preference_two_target, null));
         mWidgetView = mHolder.itemView.findViewById(android.R.id.widget_frame);
         inflater.inflate(R.layout.preference_widget_primary_switch, mWidgetView, true);
     }

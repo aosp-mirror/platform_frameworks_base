@@ -28,10 +28,10 @@ import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
 import androidx.annotation.VisibleForTesting
+import com.android.app.animation.Interpolators
 import com.android.systemui.Dumpable
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
-import com.android.app.animation.Interpolators
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
@@ -76,6 +76,7 @@ constructor(
     companion object {
         private val SPRING_BACK_ANIMATION_LENGTH_MS = 375
     }
+
     private val mPowerManager: PowerManager?
 
     private var mInitialTouchX: Float = 0.0f
@@ -94,7 +95,10 @@ constructor(
                         pulseExpandAbortListener?.run()
                     }
                 }
-                headsUpManager.unpinAll(true /* userUnPinned */)
+                headsUpManager.unpinAll(
+                    /*userUnPinned= */
+                    true,
+                )
             }
         }
     var leavingLockscreen: Boolean = false
@@ -168,7 +172,6 @@ constructor(
             MotionEvent.ACTION_MOVE -> {
                 val h = y - mInitialTouchY
                 if (h > touchSlop && h > Math.abs(x - mInitialTouchX)) {
-                    falsingCollector.onStartExpandingFromPulse()
                     isExpanding = true
                     captureStartingChild(mInitialTouchX, mInitialTouchY)
                     mInitialTouchY = y
@@ -200,14 +203,14 @@ constructor(
             event.action == MotionEvent.ACTION_UP) && isExpanding
 
         val isDraggingNotificationOrCanBypass = mStartingChild?.showingPulsing() == true ||
-                bypassController.canBypass()
+            bypassController.canBypass()
         if ((!canHandleMotionEvent() || !isDraggingNotificationOrCanBypass) && !finishExpanding) {
             // We allow cancellations/finishing to still go through here to clean up the state
             return false
         }
 
         if (velocityTracker == null || !isExpanding ||
-                event.actionMasked == MotionEvent.ACTION_DOWN) {
+            event.actionMasked == MotionEvent.ACTION_DOWN) {
             return startExpansion(event)
         }
         velocityTracker!!.addMovement(event)
@@ -217,9 +220,12 @@ constructor(
         when (event.actionMasked) {
             MotionEvent.ACTION_MOVE -> updateExpansionHeight(moveDistance)
             MotionEvent.ACTION_UP -> {
-                velocityTracker!!.computeCurrentVelocity(1000 /* units */)
+                velocityTracker!!.computeCurrentVelocity(
+                    /* units= */
+                    1000,
+                )
                 val canExpand = moveDistance > 0 && velocityTracker!!.getYVelocity() > -1000 &&
-                        statusBarStateController.state != StatusBarState.SHADE
+                    statusBarStateController.state != StatusBarState.SHADE
                 if (!falsingManager.isUnlockingDisabled && !isFalseTouch && canExpand) {
                     finishExpansion()
                 } else {
@@ -227,6 +233,7 @@ constructor(
                 }
                 recycleVelocityTracker()
             }
+
             MotionEvent.ACTION_CANCEL -> {
                 cancelExpansion()
                 recycleVelocityTracker()
@@ -243,17 +250,25 @@ constructor(
         }
         if (statusBarStateController.isDozing) {
             wakeUpCoordinator.willWakeUp = true
-            mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
-                    "com.android.systemui:PULSEDRAG")
+            mPowerManager!!.wakeUp(
+                SystemClock.uptimeMillis(),
+                PowerManager.WAKE_REASON_GESTURE,
+                "com.android.systemui:PULSEDRAG"
+            )
         }
-        lockscreenShadeTransitionController.goToLockedShade(startingChild,
-                needsQSAnimation = false)
+        lockscreenShadeTransitionController.goToLockedShade(
+            startingChild,
+            needsQSAnimation = false
+        )
         lockscreenShadeTransitionController.finishPulseAnimation(cancelled = false)
         leavingLockscreen = true
         isExpanding = false
         if (mStartingChild is ExpandableNotificationRow) {
             val row = mStartingChild as ExpandableNotificationRow?
-            row!!.onExpandedByGesture(true /* userExpanded */)
+            row!!.onExpandedByGesture(
+                /*userExpanded= */
+                true,
+            )
         }
     }
 
@@ -261,15 +276,20 @@ constructor(
         var expansionHeight = max(height, 0.0f)
         if (mStartingChild != null) {
             val child = mStartingChild!!
-            val newHeight = Math.min((child.collapsedHeight + expansionHeight).toInt(),
-                    child.maxContentHeight)
+            val newHeight = Math.min(
+                (child.collapsedHeight + expansionHeight).toInt(),
+                child.maxContentHeight
+            )
             child.actualHeight = newHeight
         } else {
             wakeUpCoordinator.setNotificationsVisibleForExpansion(
                 height
                     > lockscreenShadeTransitionController.distanceUntilShowingPulsingNotifications,
-                true /* animate */,
-                true /* increaseSpeed */)
+                /*animate= */
+                true,
+                /*increaseSpeed= */
+                true
+            )
         }
         lockscreenShadeTransitionController.setPulseHeight(expansionHeight, animate = false)
     }
@@ -285,8 +305,8 @@ constructor(
 
     @VisibleForTesting
     fun reset(
-            child: ExpandableView,
-            animationDuration: Long = SPRING_BACK_ANIMATION_LENGTH_MS.toLong()
+        child: ExpandableView,
+        animationDuration: Long = SPRING_BACK_ANIMATION_LENGTH_MS.toLong()
     ) {
         if (child.actualHeight == child.collapsedHeight) {
             setUserLocked(child, false)
@@ -315,15 +335,19 @@ constructor(
 
     private fun cancelExpansion() {
         isExpanding = false
-        falsingCollector.onExpansionFromPulseStopped()
         if (mStartingChild != null) {
             reset(mStartingChild!!)
             mStartingChild = null
         }
         lockscreenShadeTransitionController.finishPulseAnimation(cancelled = true)
-        wakeUpCoordinator.setNotificationsVisibleForExpansion(false /* visible */,
-                true /* animate */,
-                false /* increaseSpeed */)
+        wakeUpCoordinator.setNotificationsVisibleForExpansion(
+            /*visible= */
+            false,
+            /*animate= */
+            true,
+            /*increaseSpeed= */
+            false
+        )
     }
 
     private fun findView(x: Float, y: Float): ExpandableView? {
@@ -335,7 +359,9 @@ constructor(
         val childAtRawPosition = stackScrollerController.getChildAtRawPosition(totalX, totalY)
         return if (childAtRawPosition != null && childAtRawPosition.isContentExpandable) {
             childAtRawPosition
-        } else null
+        } else {
+            null
+        }
     }
 
     fun setUp(stackScrollerController: NotificationStackScrollLayoutController) {

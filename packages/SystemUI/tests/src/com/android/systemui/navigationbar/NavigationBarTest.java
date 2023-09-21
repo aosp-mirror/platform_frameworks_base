@@ -30,6 +30,8 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_B
 import static com.android.systemui.navigationbar.NavigationBar.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -93,7 +95,6 @@ import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowView;
-import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -330,6 +331,58 @@ public class NavigationBarTest extends SysuiTestCase {
     }
 
     @Test
+    public void onHomeTouch_isRinging_keyguardShowing_touchBlocked() {
+        when(mTelecomManager.isRinging()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+
+        boolean result = mNavigationBar.onHomeTouch(
+                mNavigationBar.getView(),
+                    MotionEvent.obtain(
+                    /*downTime=*/SystemClock.uptimeMillis(),
+                    /*eventTime=*/SystemClock.uptimeMillis(),
+                    /*action=*/MotionEvent.ACTION_DOWN,
+                    0, 0, 0));
+
+        assertThat(result).isTrue();
+
+        // Verify subsequent touches are also blocked
+        boolean nextTouchEvent = mNavigationBar.onHomeTouch(
+                mNavigationBar.getView(),
+                MotionEvent.obtain(
+                        /*downTime=*/SystemClock.uptimeMillis(),
+                        /*eventTime=*/SystemClock.uptimeMillis(),
+                        /*action=*/MotionEvent.ACTION_MOVE,
+                        0, 0, 0));
+        assertThat(nextTouchEvent).isTrue();
+    }
+
+    @Test
+    public void onHomeTouch_isRinging_keyguardNotShowing_touchNotBlocked() {
+        when(mTelecomManager.isRinging()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+
+        boolean result = mNavigationBar.onHomeTouch(
+                mNavigationBar.getView(),
+                MotionEvent.obtain(
+                        /*downTime=*/SystemClock.uptimeMillis(),
+                        /*eventTime=*/SystemClock.uptimeMillis(),
+                        /*action=*/MotionEvent.ACTION_DOWN,
+                        0, 0, 0));
+
+        assertThat(result).isFalse();
+
+        // Verify subsequent touches are also not blocked
+        boolean nextTouchEvent = mNavigationBar.onHomeTouch(
+                mNavigationBar.getView(),
+                MotionEvent.obtain(
+                        /*downTime=*/SystemClock.uptimeMillis(),
+                        /*eventTime=*/SystemClock.uptimeMillis(),
+                        /*action=*/MotionEvent.ACTION_MOVE,
+                        0, 0, 0));
+        assertThat(nextTouchEvent).isFalse();
+    }
+
+    @Test
     public void testRegisteredWithUserTracker() {
         mNavigationBar.init();
         mNavigationBar.onViewAttached();
@@ -468,7 +521,6 @@ public class NavigationBarTest extends SysuiTestCase {
         when(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
         return spy(new NavigationBar(
                 mNavigationBarView,
-                mock(ShadeController.class),
                 mNavigationBarFrame,
                 null,
                 context,
@@ -487,6 +539,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 Optional.of(mock(Pip.class)),
                 Optional.of(mock(Recents.class)),
                 () -> Optional.of(mCentralSurfaces),
+                mKeyguardStateController,
                 mock(ShadeViewController.class),
                 mock(NotificationRemoteInputManager.class),
                 mock(NotificationShadeDepthController.class),

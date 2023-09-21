@@ -16,8 +16,9 @@
 
 package com.android.systemui.qs.pipeline.domain.autoaddable
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.pipeline.domain.model.AutoAddSignal
@@ -35,7 +36,8 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 class CallbackControllerAutoAddableTest : SysuiTestCase() {
 
     @Test

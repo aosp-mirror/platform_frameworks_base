@@ -68,5 +68,8 @@ sealed interface TransitionState {
          * when flinging quickly during a swipe gesture.
          */
         val progress: Float
+
+        /** Whether the transition was triggered by user input rather than being programmatic. */
+        val isUserInputDriven: Boolean
     }
 }

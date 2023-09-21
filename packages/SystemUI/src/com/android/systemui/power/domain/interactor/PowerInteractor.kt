@@ -19,6 +19,7 @@ package com.android.systemui.power.domain.interactor
 
 import android.os.PowerManager
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.classifier.FalsingCollectorActual
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -34,7 +35,7 @@ class PowerInteractor
 constructor(
     private val repository: PowerRepository,
     private val keyguardRepository: KeyguardRepository,
-    private val falsingCollector: FalsingCollector,
+    @FalsingCollectorActual private val falsingCollector: FalsingCollector,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val statusBarStateController: StatusBarStateController,
 ) {

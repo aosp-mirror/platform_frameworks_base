@@ -421,7 +421,7 @@ public class AttachedChoreographerTest {
 
     @Test
     public void testChoreographerAttachedAfterSetFrameRate() {
-        Log.i(TAG, "adyabr: starting testChoreographerAttachedAfterSetFrameRate");
+        Log.i(TAG, "starting testChoreographerAttachedAfterSetFrameRate");
 
         class TransactionGenerator implements SurfaceControl.TransactionCommittedListener {
             private SurfaceControl mSc;

@@ -28,21 +28,22 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.graphics.Region;
 import android.os.Handler;
-import android.testing.AndroidTestingRunner;
 import android.view.AttachedSurfaceControl;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.complication.ComplicationHostViewController;
-import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
+import com.android.systemui.complication.ComplicationHostViewController;
+import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.statusbar.BlurUtils;
 
 import org.junit.Before;
@@ -52,8 +53,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@RoboPilotTest
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     private static final int MAX_BURN_IN_OFFSET = 20;
     private static final long BURN_IN_PROTECTION_UPDATE_INTERVAL = 10;

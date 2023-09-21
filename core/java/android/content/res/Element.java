@@ -42,7 +42,7 @@ public class Element {
     public static final int MAX_ATTR_LEN_PATH = 4000;
     public static final int MAX_ATTR_LEN_DATA_VALUE = 4000;
 
-    private static final String BAD_COMPONENT_NAME_CHARS = ";,[](){}:?-%^*|/\\";
+    private static final String BAD_COMPONENT_NAME_CHARS = ";,[](){}:?%^*|/\\";
 
     private static final String TAG = "PackageParsing";
     protected static final String TAG_ACTION = "action";

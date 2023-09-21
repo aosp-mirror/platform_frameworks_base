@@ -23,6 +23,7 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import com.android.wm.shell.flicker.pip.common.PipTransition
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith

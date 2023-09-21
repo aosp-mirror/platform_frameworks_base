@@ -20,9 +20,11 @@ import android.app.Service;
 
 import com.android.systemui.screenshot.ImageCapture;
 import com.android.systemui.screenshot.ImageCaptureImpl;
+import com.android.systemui.screenshot.RequestProcessor;
 import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
 import com.android.systemui.screenshot.ScreenshotProxyService;
+import com.android.systemui.screenshot.ScreenshotRequestProcessor;
 import com.android.systemui.screenshot.TakeScreenshotService;
 import com.android.systemui.screenshot.appclips.AppClipsScreenshotHelperService;
 import com.android.systemui.screenshot.appclips.AppClipsService;
@@ -63,4 +65,8 @@ public abstract class ScreenshotModule {
     @IntoMap
     @ClassKey(AppClipsService.class)
     abstract Service bindAppClipsService(AppClipsService service);
+
+    @Binds
+    abstract ScreenshotRequestProcessor bindScreenshotRequestProcessor(
+            RequestProcessor requestProcessor);
 }

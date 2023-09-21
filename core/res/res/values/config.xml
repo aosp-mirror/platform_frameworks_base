@@ -45,9 +45,7 @@
         <item><xliff:g id="id">@string/status_bar_phone_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_secure</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_connected_display</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_camera</xliff:g></item>
@@ -56,6 +54,8 @@
         <item><xliff:g id="id">@string/status_bar_mute</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_volume</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_zen</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_ethernet</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_wifi</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
@@ -542,6 +542,9 @@
     <bool name="config_goToSleepOnButtonPressTheaterMode">true</bool>
     <!-- If this is true, long press on power button will be available from the non-interactive state -->
     <bool name="config_supportLongPressPowerWhenNonInteractive">false</bool>
+    <!-- If this is true, short press on power button will be available whenever the default display
+         is on even if the device is non-interactive (dreaming). -->
+    <bool name="config_supportShortPressPowerWhenDefaultDisplayOn">false</bool>
 
     <!-- If this is true, then keep dreaming when unplugging.
          This config was formerly known as config_keepDreamingWhenUndocking.
@@ -932,6 +935,9 @@
          without impacting power, performance, and app compatibility (e.g. protected content). -->
     <bool name="config_reduceBrightColorsAvailable">@bool/config_setColorTransformAccelerated</bool>
 
+    <!-- Whether to show Fold lock behavior setting feature in Settings App -->
+    <bool name="config_fold_lock_behavior">false</bool>
+
     <string-array name="config_reduceBrightColorsCoefficientsNonlinear">
         <!-- a-coefficient --> <item>-0.4429953456</item>
         <!-- b-coefficient --> <item>-0.2434077725</item>
@@ -1182,6 +1188,9 @@
     -->
     <integer name="config_shortPressOnSleepBehavior">0</integer>
 
+    <!-- Whether to silence telephony ringer on sleep key event -->
+    <bool name="config_silenceRingerOnSleepKey">false</bool>
+
     <!-- Control the behavior when the user long presses the stem primary button.
          Stem primary button is only used on watch form factor. If a device is not
          a watch, setting this config is no-op.
@@ -1207,13 +1216,16 @@
     <integer name="config_triplePressOnStemPrimaryBehavior">0</integer>
 
     <!-- Control the behavior when the user short presses the stem primary button.
-         Stem primary button is only used on watch form factor. If a device is not
-         a watch, setting this config is no-op.
-            0 - Nothing
-            1 - Go to launch all apps
+        Stem primary button is only used on watch form factor. If a device is not
+        a watch, setting this config is no-op.
+           0 - Nothing
+           1 - Go to launch all apps
+           2 - Launch target activity defined by config_primaryShortPressTargetActivity if available
     -->
     <integer name="config_shortPressOnStemPrimaryBehavior">0</integer>
 
+   <!-- Activity name for the default target activity to be launched. [DO NOT TRANSLATE] -->
+   <string name="config_primaryShortPressTargetActivity" translatable="false"></string>
 
     <!-- Control the behavior of the search key.
             0 - Launch default search activity
@@ -2802,7 +2814,7 @@
 
     <!-- Base "handwriting slop" value used by ViewConfiguration as a
      movement threshold where stylus handwriting should begin. -->
-    <dimen name="config_viewConfigurationHandwritingSlop">4dp</dimen>
+    <dimen name="config_viewConfigurationHandwritingSlop">2dp</dimen>
 
     <!-- Base "hover slop" value used by ViewConfiguration as a
          movement threshold under which hover is considered "stationary". -->
@@ -3036,14 +3048,15 @@
          on the headphone/microphone jack. When false use the older uevent framework. -->
     <bool name="config_useDevInputEventForAudioJack">false</bool>
 
-    <!-- Whether safe headphone volume is enabled or not (country specific). -->
+    <!-- Whether safe headphone hearing is enforced by any regulation (e.g.
+         EN50332-3, EN50332-2) or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">true</bool>
 
-    <!-- Whether safe headphone sound dosage warning is enabled or not
-         (country specific). This value should only be overlaid to true
-         when a vendor supports offload and has the HAL sound dose
-         interfaces implemented. Otherwise, this can lead to a compliance
-         issue with the safe hearing standards EN50332-3 and IEC62368-1.
+    <!-- Whether safe headphone sound dosage warning is enabled or not.
+         This value should only be overlaid to true when a vendor supports
+         offload and has the HAL sound dose interfaces implemented.
+         Otherwise, this can lead to a compliance issue with the safe
+         hearing standards EN50332-3 and IEC62368-1.
     -->
     <bool name="config_safe_sound_dosage_enabled">false</bool>
 
@@ -3480,7 +3493,8 @@
     <!-- Whether this device prefers to show snapshot or splash screen on back predict target.
          When set true, there will create windowless starting surface for the preview target, so it
          won't affect activity's lifecycle. This should only be disabled on low-ram device. -->
-    <bool name="config_predictShowStartingSurface">true</bool>
+    <!-- TODO(b/268563842) enable once activity snapshot is ready -->
+    <bool name="config_predictShowStartingSurface">false</bool>
 
     <!-- default window ShowCircularMask property -->
     <bool name="config_windowShowCircularMask">false</bool>
@@ -5040,6 +5054,21 @@
     </array>
 
     <!-- See DisplayWhiteBalanceController.
+         A float array containing a list of ambient brightnesses, in Lux. This array,
+         together with config_displayWhiteBalanceLowLightAmbientBiasesStrong, is used to generate a
+         lookup table used in DisplayWhiteBalanceController. This lookup table is used to map
+         ambient brightness readings to a bias, where the bias is used to linearly interpolate
+         between ambient color temperature and
+         config_displayWhiteBalanceLowLightAmbientColorTemperatureIdle.
+         This table is optional. If used, this array must,
+         1) Contain at least two entries
+         2) Be the same length as config_displayWhiteBalanceLowLightAmbientBiasesStrong. -->
+    <array name ="config_displayWhiteBalanceLowLightAmbientBrightnessesStrong">
+        <item>10.0</item>
+        <item>10.0</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
          An array containing a list of biases. See
          config_displayWhiteBalanceLowLightAmbientBrightnesses for additional details.
          This array must be in the range of [0.0, 1.0]. -->
@@ -5049,10 +5078,26 @@
     </array>
 
     <!-- See DisplayWhiteBalanceController.
+         An array containing a list of biases. See
+         config_displayWhiteBalanceLowLightAmbientBrightnessesStrong for additional details.
+         This array must be in the range of [0.0, 1.0]. -->
+    <array name ="config_displayWhiteBalanceLowLightAmbientBiasesStrong">
+        <item>0.0</item>
+        <item>1.0</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
          The ambient color temperature (in cct) to which we interpolate towards using the
          the look up table generated by config_displayWhiteBalanceLowLightAmbientBrightnesses
          and config_displayWhiteBalanceLowLightAmbientBiases. -->
     <item name="config_displayWhiteBalanceLowLightAmbientColorTemperature" format="float" type="dimen">6500.0</item>
+
+    <!-- See DisplayWhiteBalanceController.
+         The ambient color temperature (in cct) to which we interpolate towards using the
+         the look up table generated by config_displayWhiteBalanceLowLightAmbientBrightnessesStrong
+         and config_displayWhiteBalanceLowLightAmbientBiasesStrong. Used when device is in Idle Screen
+         Brightness mode. -->
+    <item name="config_displayWhiteBalanceLowLightAmbientColorTemperatureStrong" format="float" type="dimen">6500.0</item>
 
     <!-- See DisplayWhiteBalanceController.
          A float array containing a list of ambient brightnesses, in Lux. This array,
@@ -5068,6 +5113,19 @@
     </array>
 
     <!-- See DisplayWhiteBalanceController.
+         A float array containing a list of ambient brightnesses, in Lux. This array,
+         together with config_displayWhiteBalanceHighLightAmbientBiasesStrong, is used to generate a
+         lookup table used in DisplayWhiteBalanceController. This lookup table is used to map
+         ambient brightness readings to a bias, where the bias is used to linearly interpolate
+         between ambient color temperature and
+         config_displayWhiteBalanceHighLightAmbientColorTemperatureStrong.
+         This table is optional. If used, this array must,
+         1) Contain at least two entries
+         2) Be the same length as config_displayWhiteBalanceHighLightAmbientBiasesStrong. -->
+    <array name ="config_displayWhiteBalanceHighLightAmbientBrightnessesStrong">
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
          An array containing a list of biases. See
          config_displayWhiteBalanceHighLightAmbientBrightnesses for additional details.
          This array must be in the range of [0.0, 1.0]. -->
@@ -5075,10 +5133,24 @@
     </array>
 
     <!-- See DisplayWhiteBalanceController.
+         An array containing a list of biases. See
+         config_displayWhiteBalanceHighLightAmbientBrightnessesStrong for additional details.
+         This array must be in the range of [0.0, 1.0]. -->
+    <array name ="config_displayWhiteBalanceHighLightAmbientBiasesStrong">
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
          The ambient color temperature (in cct) to which we interpolate towards using the
          the look up table generated by config_displayWhiteBalanceHighLightAmbientBrightnesses
          and config_displayWhiteBalanceHighLightAmbientBiases. -->
     <item name="config_displayWhiteBalanceHighLightAmbientColorTemperature" format="float" type="dimen">8000.0</item>
+
+    <!-- See DisplayWhiteBalanceController.
+         The ambient color temperature (in cct) to which we interpolate towards using the
+         the look up table generated by config_displayWhiteBalanceHighLightAmbientBrightnessesStrong
+         and config_displayWhiteBalanceHighLightAmbientBiasesStrong. Used when device is in Idle
+         Screen Brightness mode. -->
+    <item name="config_displayWhiteBalanceHighLightAmbientColorTemperatureStrong" format="float" type="dimen">8000.0</item>
 
     <!-- See DisplayWhiteBalanceController.
          A float array containing a list of ambient color temperatures, in Kelvin. This array,
@@ -5294,6 +5366,7 @@
         <item>1,1,1.0,0,1</item>
         <item>1,1,1.0,.4,1</item>
         <item>1,1,1.0,.15,15</item>
+        <item>0,0,0.7,0,1</item>
     </string-array>
 
     <!-- The integer index of the selected option in config_udfps_touch_detection_options -->
@@ -5376,7 +5449,11 @@
          fingerprint and face. If a dual-modality device only enrolled a single biometric and
          experiences high FRR (above threshold), system notification will be sent to encourage user
          to enroll the other eligible biometric. -->
-    <fraction name="config_biometricNotificationFrrThreshold">30%</fraction>
+    <fraction name="config_biometricNotificationFrrThreshold">25%</fraction>
+
+    <!-- Whether to enable the biometric notification for dual-modality device that enrolled a
+         single biometric and experiences high FRR. -->
+    <bool name="config_biometricFrrNotificationEnabled">false</bool>
 
     <!-- The component name for the default profile supervisor, which can be set as a profile owner
     even after user setup is complete. The defined component should be used for supervision purposes
@@ -5409,6 +5486,13 @@
     <!-- The list of packages to automatically opt out of refresh rates higher than 60hz because
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
+
+    <!-- The list of packages to automatically opt in to refresh rate suppressing by small area
+    detection. Format of this array should be packageName:threshold and threshold value should
+     be between 0 to 1-->
+    <string-array name="config_smallAreaDetectionAllowlist" translatable="false">
+        <!-- Add packages:threshold here -->
+    </string-array>
 
     <!-- The list of packages to force slowJpegMode for Apps using Camera API1 -->
     <string-array name="config_forceSlowJpegModeList" translatable="false">
@@ -5637,13 +5721,13 @@
 
     <!-- Blur radius for the Option 3 in R.integer.config_letterboxBackgroundType. Values < 0 are
         ignored and 0 is used. -->
-    <dimen name="config_letterboxBackgroundWallpaperBlurRadius">24dp</dimen>
+    <dimen name="config_letterboxBackgroundWallpaperBlurRadius">38dp</dimen>
 
     <!-- Alpha of a black translucent scrim showed over wallpaper letterbox background when
         the Option 3 is selected for R.integer.config_letterboxBackgroundType.
         Values < 0 or >= 1 are ignored and 0.0 (transparent) is used instead. -->
     <item name="config_letterboxBackgroundWallaperDarkScrimAlpha" format="float" type="dimen">
-        0.75
+        0.54
     </item>
 
     <!-- Corners appearance of the letterbox background.
@@ -5876,9 +5960,9 @@
     <bool name="config_cecPowerControlModeTv_allowed">true</bool>
     <bool name="config_cecPowerControlModeTv_default">false</bool>
     <bool name="config_cecPowerControlModeTvAndAudioSystem_allowed">true</bool>
-    <bool name="config_cecPowerControlModeTvAndAudioSystem_default">true</bool>
+    <bool name="config_cecPowerControlModeTvAndAudioSystem_default">false</bool>
     <bool name="config_cecPowerControlModeBroadcast_allowed">true</bool>
-    <bool name="config_cecPowerControlModeBroadcast_default">false</bool>
+    <bool name="config_cecPowerControlModeBroadcast_default">true</bool>
     <bool name="config_cecPowerControlModeNone_allowed">true</bool>
     <bool name="config_cecPowerControlModeNone_default">false</bool>
 
@@ -6112,6 +6196,11 @@
     <bool name="config_assistLongPressHomeEnabledDefault">true</bool>
     <!-- Default value for Settings.ASSIST_TOUCH_GESTURE_ENABLED -->
     <bool name="config_assistTouchGestureEnabledDefault">true</bool>
+
+    <!-- Default value for Settings.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED -->
+    <bool name="config_searchPressHoldNavHandleEnabledDefault">true</bool>
+    <!-- Default value for Settings.ASSIST_LONG_PRESS_HOME_ENABLED for search overlay -->
+    <bool name="config_searchLongPressHomeEnabledDefault">true</bool>
 
     <!-- The maximum byte size of the information contained in the bundle of
     HotwordDetectedResult. -->
@@ -6465,8 +6554,19 @@
 
     <!-- Interval in milliseconds to average light sensor values for camera light brightness -->
     <integer name="config_cameraPrivacyLightAlsAveragingIntervalMillis">3000</integer>
-    <!-- Light sensor's lux value to use as the threshold between using day or night brightness -->
-    <integer name="config_cameraPrivacyLightAlsNightThreshold">4</integer>
+    <!-- Ambient Light sensor's lux values to use as the threshold between brightness colors defined
+         by config_cameraPrivacyLightColors. If the ambient brightness less than the first element
+         in this array then lights of type "camera" will be set to the color in position 0 of
+         config_cameraPrivacyLightColors. This array must be strictly increasing and have a length
+         of zero means there is only one brightness -->
+    <integer-array name="config_cameraPrivacyLightAlsLuxThresholds">
+    </integer-array>
+    <!-- Colors to configure the camera privacy light at different brightnesses. This array must
+         have exactly one more entry than config_cameraPrivacyLightAlsLuxThresholds,
+         or a length of zero if the feature isn't supported. If nonempty and the device doesn't have
+         an ambient light sensor the last element in this array will be the only one used -->
+    <array name="config_cameraPrivacyLightColors">
+    </array>
 
     <!-- List of system components which are allowed to receive ServiceState entries in an
          un-sanitized form, even if the location toggle is off. This is intended ONLY for system
@@ -6559,11 +6659,6 @@
     <!-- Whether to show weather on the lock screen by default. -->
     <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>
 
-    <!-- Whether to reset Battery Stats on unplug when the battery level is high. -->
-    <bool name="config_batteryStatsResetOnUnplugHighBatteryLevel">true</bool>
-    <!-- Whether to reset Battery Stats on unplug if the battery was significantly charged -->
-    <bool name="config_batteryStatsResetOnUnplugAfterSignificantCharge">true</bool>
-
     <!-- Whether we should persist the brightness value in nits for the default display even if
          the underlying display device changes. -->
     <bool name="config_persistBrightnessNitsForDefaultDisplay">false</bool>
@@ -6604,4 +6699,16 @@
 
     <!-- Whether or not ActivityManager PSS profiling is disabled. -->
     <bool name="config_am_disablePssProfiling">false</bool>
+
+    <!-- Whether unlocking and waking a device are sequenced -->
+    <bool name="config_orderUnlockAndWake">false</bool>
+
+    <!-- Floating windows can be fullscreen (i.e. windowIsFloating can still have fullscreen
+     window that does not wrap content). -->
+    <bool name="config_allowFloatingWindowsFillScreen">false</bool>
+
+    <!-- Whether scroll haptic feedback is enabled for rotary encoder scrolls on
+         {@link MotionEvent#AXIS_SCROLL} generated by {@link InputDevice#SOURCE_ROTARY_ENCODER}
+         devices. -->
+    <bool name="config_viewRotaryEncoderHapticScrollFedbackEnabled">false</bool>
 </resources>

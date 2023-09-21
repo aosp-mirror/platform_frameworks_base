@@ -86,7 +86,9 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_TIMEOUT_MS),
                         (reason) -> updateKeyRepeatInfo(getLatestLongPressTimeoutValue())),
                 Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_DELAY_MS),
-                        (reason) -> updateKeyRepeatInfo(getLatestLongPressTimeoutValue())));
+                        (reason) -> updateKeyRepeatInfo(getLatestLongPressTimeoutValue())),
+                Map.entry(Settings.System.getUriFor(Settings.System.SHOW_ROTARY_INPUT),
+                        (reason) -> updateShowRotaryInput()));
     }
 
     /**
@@ -164,8 +166,11 @@ class InputSettingsObserver extends ContentObserver {
     }
 
     private void updateShowKeyPresses() {
-        mService.updateFocusEventDebugViewEnabled(
-                getBoolean(Settings.System.SHOW_KEY_PRESSES, false));
+        mService.updateShowKeyPresses(getBoolean(Settings.System.SHOW_KEY_PRESSES, false));
+    }
+
+    private void updateShowRotaryInput() {
+        mService.updateShowRotaryInput(getBoolean(Settings.System.SHOW_ROTARY_INPUT, false));
     }
 
     private void updateAccessibilityLargePointer() {

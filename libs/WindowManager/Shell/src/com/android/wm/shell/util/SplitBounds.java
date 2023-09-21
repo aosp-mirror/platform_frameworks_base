@@ -26,6 +26,8 @@ import java.util.Objects;
  * tasks/leashes/etc in Launcher
  */
 public class SplitBounds implements Parcelable {
+    public static final String KEY_EXTRA_SPLIT_BOUNDS = "key_SplitBounds";
+
     public final Rect leftTopBounds;
     public final Rect rightBottomBounds;
     /** This rect represents the actual gap between the two apps */

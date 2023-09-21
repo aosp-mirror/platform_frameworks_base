@@ -57,6 +57,14 @@
         <option name="test-file-name" value="{MODULE}.apk"/>
         <option name="test-file-name" value="FlickerTestApp.apk"/>
     </target_preparer>
+    <!-- Enable mocking GPS location by the test app -->
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command"
+                value="appops set com.android.wm.shell.flicker.pip.apps android:mock_location allow"/>
+        <option name="teardown-command"
+                value="appops set com.android.wm.shell.flicker.pip.apps android:mock_location deny"/>
+    </target_preparer>
+
     <!-- Needed for pushing the trace config file -->
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
@@ -73,7 +81,9 @@
         <option name="shell-timeout" value="6600s"/>
         <option name="test-timeout" value="6000s"/>
         <option name="hidden-api-checks" value="false"/>
+        <!-- TODO(b/288396763): re-enable when PerfettoListener is fixed
         <option name="device-listeners" value="android.device.collectors.PerfettoListener"/>
+        -->
         <!-- PerfettoListener related arguments -->
         <option name="instrumentation-arg" key="perfetto_config_text_proto" value="true"/>
         <option name="instrumentation-arg"
@@ -94,7 +104,7 @@
         <option name="directory-keys"
                 value="/data/user/0/com.android.wm.shell.flicker.splitscreen/files"/>
         <option name="directory-keys"
-            value="/data/user/0/com.android.server.wm.flicker.service/files"/>
+                value="/data/user/0/com.android.wm.shell.flicker.service/files"/>
         <option name="collect-on-run-ended-only" value="true"/>
         <option name="clean-up" value="true"/>
     </metrics_collector>

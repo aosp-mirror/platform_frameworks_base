@@ -705,13 +705,21 @@ class TransitionController {
         try {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
-            ActivityManager.RunningTaskInfo info = null;
+            ActivityManager.RunningTaskInfo startTaskInfo = null;
+            ActivityManager.RunningTaskInfo pipTaskInfo = null;
             if (startTask != null) {
-                info = new ActivityManager.RunningTaskInfo();
-                startTask.fillTaskInfo(info);
+                startTaskInfo = startTask.getTaskInfo();
             }
-            final TransitionRequestInfo request = new TransitionRequestInfo(
-                    transition.mType, info, remoteTransition, displayChange);
+
+            // set the pip task in the request if provided
+            if (mCollectingTransition.getPipActivity() != null) {
+                pipTaskInfo = mCollectingTransition.getPipActivity().getTask().getTaskInfo();
+            }
+
+            final TransitionRequestInfo request = new TransitionRequestInfo(transition.mType,
+                    startTaskInfo, pipTaskInfo, remoteTransition, displayChange,
+                    transition.getFlags());
+
             transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             transition.mLogger.mRequest = request;
             mTransitionPlayer.requestStartTransition(transition.getToken(), request);
@@ -1124,14 +1132,15 @@ class TransitionController {
                         + "track #%d", transition.getSyncId(), track);
             }
         }
-        if (sync) {
+        transition.mAnimationTrack = track;
+        info.setTrack(track);
+        mTrackCount = Math.max(mTrackCount, track + 1);
+        if (sync && mTrackCount > 1) {
+            // If there are >1 tracks, mark as sync so that all tracks finish.
             info.setFlags(info.getFlags() | TransitionInfo.FLAG_SYNC);
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Marking #%d animation as SYNC.",
                     transition.getSyncId());
         }
-        transition.mAnimationTrack = track;
-        info.setTrack(track);
-        mTrackCount = Math.max(mTrackCount, track + 1);
     }
 
     void updateAnimatingState(SurfaceControl.Transaction t) {
@@ -1146,6 +1155,7 @@ class TransitionController {
             Transition.asyncTraceBegin("animating", 0x41bfaf1 /* hashcode of TAG */);
         } else if (!animatingState && mAnimatingState) {
             t.setEarlyWakeupEnd();
+            mAtm.mWindowManager.scheduleAnimationLocked();
             mSnapshotController.setPause(false);
             mAnimatingState = false;
             Transition.asyncTraceEnd(0x41bfaf1 /* hashcode of TAG */);

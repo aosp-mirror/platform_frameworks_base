@@ -1,0 +1,8 @@
+package: "com.android.systemui"
+
+flag {
+    name: "floating_menu_overlaps_nav_bars_flag"
+    namespace: "accessibility"
+    description: "Adjusts bounds to allow the floating menu to render on top of navigation bars."
+    bug: "283768342"
+}

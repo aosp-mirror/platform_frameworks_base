@@ -50,6 +50,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.platform.test.annotations.FlakyTest;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.view.InputDevice;
@@ -307,6 +308,7 @@ public class WindowMagnificationManagerTest {
                 MagnificationScaleProvider.MAX_SCALE);
     }
 
+    @FlakyTest(bugId = 297879435)
     @Test
     public void logTrackingTypingFocus_processScroll_logDuration() {
         WindowMagnificationManager spyWindowMagnificationManager = spy(mWindowMagnificationManager);

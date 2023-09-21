@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.content.pm.UserInfo
 import android.hardware.biometrics.BiometricFaceConstants
 import android.os.Handler
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -25,6 +26,8 @@ import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
+import com.android.systemui.biometrics.shared.model.LockoutMode
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor
@@ -48,6 +51,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -76,6 +80,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
     private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     private lateinit var faceAuthRepository: FakeDeviceEntryFaceAuthRepository
     private lateinit var fakeUserRepository: FakeUserRepository
+    private lateinit var facePropertyRepository: FakeFacePropertyRepository
     private lateinit var fakeDeviceEntryFingerprintAuthRepository:
         FakeDeviceEntryFingerprintAuthRepository
 
@@ -101,6 +106,8 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
 
         fakeDeviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
         fakeUserRepository = FakeUserRepository()
+        fakeUserRepository.setUserInfos(listOf(primaryUser, secondaryUser))
+        facePropertyRepository = FakeFacePropertyRepository()
         underTest =
             SystemUIKeyguardFaceAuthInteractor(
                 mContext,
@@ -136,6 +143,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 keyguardUpdateMonitor,
                 fakeDeviceEntryFingerprintAuthRepository,
                 fakeUserRepository,
+                facePropertyRepository,
             )
     }
 
@@ -216,35 +224,33 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun faceAuthIsPausedWhenUserSwitchingIsInProgress() =
+    fun faceAuthLockedOutStateIsUpdatedAfterUserSwitch() =
         testScope.runTest {
             underTest.start()
 
-            fakeUserRepository.setUserSwitching(false)
-            runCurrent()
-            fakeUserRepository.setUserSwitching(true)
-            runCurrent()
-
-            assertThat(faceAuthRepository.isFaceAuthPaused()).isTrue()
-        }
-
-    @Test
-    fun faceAuthIsUnpausedWhenUserSwitchingIsInComplete() =
-        testScope.runTest {
-            underTest.start()
-
-            // previously running
-            fakeUserRepository.setUserSwitching(true)
-            runCurrent()
-            fakeUserRepository.setUserSwitching(false)
+            // User switching has started
+            fakeUserRepository.setSelectedUserInfo(primaryUser, SelectionStatus.SELECTION_COMPLETE)
+            fakeUserRepository.setSelectedUserInfo(
+                primaryUser,
+                SelectionStatus.SELECTION_IN_PROGRESS
+            )
             runCurrent()
 
-            assertThat(faceAuthRepository.isFaceAuthPaused()).isFalse()
+            bouncerRepository.setPrimaryShow(true)
+            // New user is not locked out.
+            facePropertyRepository.setLockoutMode(secondaryUser.id, LockoutMode.NONE)
+            fakeUserRepository.setSelectedUserInfo(
+                secondaryUser,
+                SelectionStatus.SELECTION_COMPLETE
+            )
+            runCurrent()
+
+            assertThat(faceAuthRepository.isLockedOut.value).isFalse()
 
             runCurrent()
             assertThat(faceAuthRepository.runningAuthRequest.value!!.first)
                 .isEqualTo(FaceAuthUiEvent.FACE_AUTH_UPDATED_USER_SWITCHING)
-            assertThat(faceAuthRepository.runningAuthRequest.value!!.second).isEqualTo(true)
+            assertThat(faceAuthRepository.runningAuthRequest.value!!.second).isEqualTo(false)
         }
 
     @Test
@@ -259,7 +265,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
 
             runCurrent()
             assertThat(faceAuthRepository.runningAuthRequest.value)
-                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_UPDATED_PRIMARY_BOUNCER_SHOWN, true))
+                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_UPDATED_PRIMARY_BOUNCER_SHOWN, false))
         }
 
     @Test
@@ -385,6 +391,13 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
             fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
             runCurrent()
 
-            assertThat(faceAuthRepository.wasDisabled).isTrue()
+            assertThat(faceAuthRepository.isLockedOut.value).isTrue()
         }
+
+    companion object {
+        private const val primaryUserId = 1
+        private val primaryUser = UserInfo(primaryUserId, "test user", UserInfo.FLAG_PRIMARY)
+
+        private val secondaryUser = UserInfo(2, "secondary user", 0)
+    }
 }

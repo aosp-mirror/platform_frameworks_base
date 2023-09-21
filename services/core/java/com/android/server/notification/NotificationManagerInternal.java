@@ -52,4 +52,6 @@ public interface NotificationManagerInternal {
     void sendReviewPermissionsNotification();
 
     void cleanupHistoryFiles();
+
+    void removeBitmaps();
 }

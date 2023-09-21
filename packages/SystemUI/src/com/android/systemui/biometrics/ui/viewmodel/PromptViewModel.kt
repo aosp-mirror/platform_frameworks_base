@@ -15,15 +15,21 @@
  */
 package com.android.systemui.biometrics.ui.viewmodel
 
+import android.content.Context
+import android.graphics.Rect
 import android.hardware.biometrics.BiometricPrompt
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
-import com.android.systemui.biometrics.AuthBiometricView
+import com.android.systemui.biometrics.Utils
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
-import com.android.systemui.biometrics.domain.model.BiometricModalities
+import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
+import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.PromptKind
+import com.android.systemui.biometrics.ui.binder.Spaghetti
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.statusbar.VibratorHelper
@@ -45,17 +51,25 @@ import kotlinx.coroutines.launch
 class PromptViewModel
 @Inject
 constructor(
-    private val interactor: PromptSelectorInteractor,
+    private val displayStateInteractor: DisplayStateInteractor,
+    private val promptSelectorInteractor: PromptSelectorInteractor,
     private val vibrator: VibratorHelper,
+    @Application context: Context,
     private val featureFlags: FeatureFlags,
 ) {
+    /** Models UI of [BiometricPromptLayout.iconView] */
+    val fingerprintIconViewModel: PromptFingerprintIconViewModel =
+        PromptFingerprintIconViewModel(displayStateInteractor, promptSelectorInteractor)
+
     /** The set of modalities available for this prompt */
     val modalities: Flow<BiometricModalities> =
-        interactor.prompt.map { it?.modalities ?: BiometricModalities() }.distinctUntilChanged()
+        promptSelectorInteractor.prompt
+            .map { it?.modalities ?: BiometricModalities() }
+            .distinctUntilChanged()
 
     // TODO(b/251476085): remove after icon controllers are migrated - do not keep this state
-    private var _legacyState = MutableStateFlow(AuthBiometricView.STATE_AUTHENTICATING_ANIMATING_IN)
-    val legacyState: StateFlow<Int> = _legacyState.asStateFlow()
+    private var _legacyState = MutableStateFlow(Spaghetti.BiometricState.STATE_IDLE)
+    val legacyState: StateFlow<Spaghetti.BiometricState> = _legacyState.asStateFlow()
 
     private val _isAuthenticating: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -70,22 +84,12 @@ constructor(
 
     private val _isOverlayTouched: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    /**
-     * If the API caller or the user's personal preferences require explicit confirmation after
-     * successful authentication.
-     */
-    val isConfirmationRequired: Flow<Boolean> =
-        combine(_isOverlayTouched, interactor.isConfirmationRequired) {
-            isOverlayTouched,
-            isConfirmationRequired ->
-            !isOverlayTouched && isConfirmationRequired
-        }
-
     /** The kind of credential the user has. */
-    val credentialKind: Flow<PromptKind> = interactor.credentialKind
+    val credentialKind: Flow<PromptKind> = promptSelectorInteractor.credentialKind
 
     /** The label to use for the cancel button. */
-    val negativeButtonText: Flow<String> = interactor.prompt.map { it?.negativeButtonText ?: "" }
+    val negativeButtonText: Flow<String> =
+        promptSelectorInteractor.prompt.map { it?.negativeButtonText ?: "" }
 
     private val _message: MutableStateFlow<PromptMessage> = MutableStateFlow(PromptMessage.Empty)
 
@@ -113,7 +117,7 @@ constructor(
                 _forceLargeSize,
                 _forceMediumSize,
                 modalities,
-                interactor.isConfirmationRequired,
+                promptSelectorInteractor.isConfirmationRequired,
                 fingerprintStartMode,
             ) { forceLarge, forceMedium, modalities, confirmationRequired, fpStartMode ->
                 when {
@@ -128,15 +132,43 @@ constructor(
             }
             .distinctUntilChanged()
 
+    /**
+     * If the API caller or the user's personal preferences require explicit confirmation after
+     * successful authentication. Confirmation always required when in explicit flow.
+     */
+    val isConfirmationRequired: Flow<Boolean> =
+        combine(_isOverlayTouched, size) { isOverlayTouched, size ->
+            !isOverlayTouched && size.isNotSmall
+        }
+
+    /** Padding for prompt UI elements */
+    val promptPadding: Flow<Rect> =
+        combine(size, displayStateInteractor.currentRotation) { size, rotation ->
+            if (size != PromptSize.LARGE) {
+                val navBarInsets = Utils.getNavbarInsets(context)
+                if (rotation == DisplayRotation.ROTATION_90) {
+                    Rect(0, 0, navBarInsets.right, 0)
+                } else if (rotation == DisplayRotation.ROTATION_270) {
+                    Rect(navBarInsets.left, 0, 0, 0)
+                } else {
+                    Rect(0, 0, 0, navBarInsets.bottom)
+                }
+            } else {
+                Rect(0, 0, 0, 0)
+            }
+        }
+
     /** Title for the prompt. */
-    val title: Flow<String> = interactor.prompt.map { it?.title ?: "" }.distinctUntilChanged()
+    val title: Flow<String> =
+        promptSelectorInteractor.prompt.map { it?.title ?: "" }.distinctUntilChanged()
 
     /** Subtitle for the prompt. */
-    val subtitle: Flow<String> = interactor.prompt.map { it?.subtitle ?: "" }.distinctUntilChanged()
+    val subtitle: Flow<String> =
+        promptSelectorInteractor.prompt.map { it?.subtitle ?: "" }.distinctUntilChanged()
 
     /** Description for the prompt. */
     val description: Flow<String> =
-        interactor.prompt.map { it?.description ?: "" }.distinctUntilChanged()
+        promptSelectorInteractor.prompt.map { it?.description ?: "" }.distinctUntilChanged()
 
     /** If the indicator (help, error) message should be shown. */
     val isIndicatorMessageVisible: Flow<Boolean> =
@@ -159,17 +191,14 @@ constructor(
             .distinctUntilChanged()
 
     /** If the icon can be used as a confirmation button. */
-    val isIconConfirmButton: Flow<Boolean> =
-        combine(size, interactor.isConfirmationRequired) { size, isConfirmationRequired ->
-            size.isNotSmall && isConfirmationRequired
-        }
+    val isIconConfirmButton: Flow<Boolean> = size.map { it.isNotSmall }.distinctUntilChanged()
 
     /** If the negative button should be shown. */
     val isNegativeButtonVisible: Flow<Boolean> =
         combine(
                 size,
                 isAuthenticated,
-                interactor.isCredentialAllowed,
+                promptSelectorInteractor.isCredentialAllowed,
             ) { size, authState, credentialAllowed ->
                 size.isNotSmall && authState.isNotAuthenticated && !credentialAllowed
             }
@@ -221,7 +250,7 @@ constructor(
         combine(
                 size,
                 isAuthenticated,
-                interactor.isCredentialAllowed,
+                promptSelectorInteractor.isCredentialAllowed,
             ) { size, authState, credentialAllowed ->
                 size.isNotSmall && authState.isNotAuthenticated && credentialAllowed
             }
@@ -264,7 +293,7 @@ constructor(
         _isAuthenticated.value = PromptAuthState(false)
         _forceMediumSize.value = true
         _message.value = PromptMessage.Error(message)
-        _legacyState.value = AuthBiometricView.STATE_ERROR
+        _legacyState.value = Spaghetti.BiometricState.STATE_ERROR
 
         if (hapticFeedback) {
             vibrator.error(failedModality)
@@ -276,7 +305,7 @@ constructor(
             if (authenticateAfterError) {
                 showAuthenticating(messageAfterError)
             } else {
-                showHelp(messageAfterError)
+                showInfo(messageAfterError)
             }
         }
     }
@@ -296,12 +325,15 @@ constructor(
     private fun supportsRetry(failedModality: BiometricModality) =
         failedModality == BiometricModality.Face
 
+    suspend fun showHelp(message: String) = showHelp(message, clearIconError = false)
+    suspend fun showInfo(message: String) = showHelp(message, clearIconError = true)
+
     /**
      * Show a persistent help message.
      *
      * Will be show even if the user has already authenticated.
      */
-    suspend fun showHelp(message: String) {
+    private suspend fun showHelp(message: String, clearIconError: Boolean) {
         val alreadyAuthenticated = _isAuthenticated.value.isAuthenticated
         if (!alreadyAuthenticated) {
             _isAuthenticating.value = false
@@ -313,11 +345,13 @@ constructor(
         _forceMediumSize.value = true
         _legacyState.value =
             if (alreadyAuthenticated && isConfirmationRequired.first()) {
-                AuthBiometricView.STATE_PENDING_CONFIRMATION
+                Spaghetti.BiometricState.STATE_PENDING_CONFIRMATION
             } else if (alreadyAuthenticated && !isConfirmationRequired.first()) {
-                AuthBiometricView.STATE_AUTHENTICATED
+                Spaghetti.BiometricState.STATE_AUTHENTICATED
+            } else if (clearIconError) {
+                Spaghetti.BiometricState.STATE_IDLE
             } else {
-                AuthBiometricView.STATE_HELP
+                Spaghetti.BiometricState.STATE_HELP
             }
 
         messageJob?.cancel()
@@ -342,7 +376,7 @@ constructor(
         _message.value =
             if (message.isNotBlank()) PromptMessage.Help(message) else PromptMessage.Empty
         _forceMediumSize.value = true
-        _legacyState.value = AuthBiometricView.STATE_HELP
+        _legacyState.value = Spaghetti.BiometricState.STATE_HELP
 
         messageJob?.cancel()
         messageJob = launch {
@@ -362,7 +396,7 @@ constructor(
         _isAuthenticating.value = true
         _isAuthenticated.value = PromptAuthState(false)
         _message.value = if (message.isBlank()) PromptMessage.Empty else PromptMessage.Help(message)
-        _legacyState.value = AuthBiometricView.STATE_AUTHENTICATING
+        _legacyState.value = Spaghetti.BiometricState.STATE_AUTHENTICATING
 
         // reset the try again button(s) after the user attempts a retry
         if (isRetry) {
@@ -395,9 +429,9 @@ constructor(
         _message.value = PromptMessage.Empty
         _legacyState.value =
             if (needsUserConfirmation) {
-                AuthBiometricView.STATE_PENDING_CONFIRMATION
+                Spaghetti.BiometricState.STATE_PENDING_CONFIRMATION
             } else {
-                AuthBiometricView.STATE_AUTHENTICATED
+                Spaghetti.BiometricState.STATE_AUTHENTICATED
             }
 
         if (!needsUserConfirmation) {
@@ -438,7 +472,7 @@ constructor(
 
         _isAuthenticated.value = authState.asExplicitlyConfirmed()
         _message.value = PromptMessage.Empty
-        _legacyState.value = AuthBiometricView.STATE_AUTHENTICATED
+        _legacyState.value = Spaghetti.BiometricState.STATE_AUTHENTICATED
 
         vibrator.success(authState.authenticatedModality)
 

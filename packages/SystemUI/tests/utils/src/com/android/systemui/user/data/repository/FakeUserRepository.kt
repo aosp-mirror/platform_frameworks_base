@@ -56,10 +56,6 @@ class FakeUserRepository : UserRepository {
         )
     override val selectedUserInfo: Flow<UserInfo> = selectedUser.map { it.userInfo }
 
-    private val _userSwitchingInProgress = MutableStateFlow(false)
-    override val userSwitchingInProgress: Flow<Boolean>
-        get() = _userSwitchingInProgress
-
     override var mainUserId: Int = MAIN_USER_ID
     override var lastSelectedNonGuestUserId: Int = mainUserId
 
@@ -119,9 +115,5 @@ class FakeUserRepository : UserRepository {
 
     fun setGuestUserAutoCreated(value: Boolean) {
         _isGuestUserAutoCreated = value
-    }
-
-    fun setUserSwitching(value: Boolean) {
-        _userSwitchingInProgress.value = value
     }
 }

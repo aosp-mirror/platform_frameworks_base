@@ -80,10 +80,10 @@ final class LetterboxConfiguration {
 
     // Whether per-app user aspect ratio override settings is enabled
     private static final String KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS =
-            "enable_app_compat_user_aspect_ratio_settings";
+            "enable_app_compat_aspect_ratio_user_settings";
 
     // TODO(b/288142656): Enable user aspect ratio settings by default.
-    private static final boolean DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_SETTINGS = false;
+    private static final boolean DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_SETTINGS = true;
 
     // Whether per-app fullscreen user aspect ratio override option is enabled
     private static final String KEY_ENABLE_USER_ASPECT_RATIO_FULLSCREEN =
@@ -878,6 +878,58 @@ final class LetterboxConfiguration {
         mDefaultPositionForVerticalReachability =
                 readLetterboxVerticalReachabilityPositionFromConfig(mContext,
                         false /* forTabletopMode */);
+    }
+
+    /**
+     * Overrides persistent horizontal position of the letterboxed app window when horizontal
+     * reachability is enabled.
+     */
+    void setPersistentLetterboxPositionForHorizontalReachability(boolean forBookMode,
+            @LetterboxHorizontalReachabilityPosition int position) {
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                forBookMode, position);
+    }
+
+    /**
+     * Overrides persistent vertical position of the letterboxed app window when vertical
+     * reachability is enabled.
+     */
+    void setPersistentLetterboxPositionForVerticalReachability(boolean forTabletopMode,
+            @LetterboxVerticalReachabilityPosition int position) {
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                forTabletopMode, position);
+    }
+
+    /**
+     * Resets persistent horizontal position of the letterboxed app window when horizontal
+     * reachability
+     * is enabled to default position.
+     */
+    void resetPersistentLetterboxPositionForHorizontalReachability() {
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                false /* forBookMode */,
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext,
+                        false /* forBookMode */));
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                true /* forBookMode */,
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext,
+                        true /* forBookMode */));
+    }
+
+    /**
+     * Resets persistent vertical position of the letterboxed app window when vertical reachability
+     * is
+     * enabled to default position.
+     */
+    void resetPersistentLetterboxPositionForVerticalReachability() {
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                false /* forTabletopMode */,
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext,
+                        false /* forTabletopMode */));
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                true /* forTabletopMode */,
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext,
+                        true /* forTabletopMode */));
     }
 
     @LetterboxHorizontalReachabilityPosition

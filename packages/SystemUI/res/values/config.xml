@@ -592,6 +592,11 @@
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">false</bool>
 
+    <!-- Whether to force split shade.
+    For now, this value has effect only when flag lockscreen.enable_landscape is enabled.
+    TODO (b/293290851) - change this comment/resource when flag is enabled -->
+    <bool name="force_config_use_split_notification_shade">false</bool>
+
     <!-- Whether we use large screen shade header which takes only one row compared to QS header -->
     <bool name="config_use_large_screen_shade_header">false</bool>
 
@@ -661,6 +666,14 @@
          if it doesn't meet a threshold % of authentication frames specified by.
          config_face_help_msgs_defer_until_timeout_threshold. -->
     <integer-array name="config_face_help_msgs_defer_until_timeout">
+    </integer-array>
+
+    <!-- Which face help messages to ignore when determining the % of frames that meet
+         config_face_help_msgs_defer_until_timeout_threshold -->
+    <integer-array name="config_face_help_msgs_ignore">
+        <item>20</item> <!-- FACE_ACQUIRED_START -->
+        <item>23</item> <!-- FACE_ACQUIRED_UNKNOWN -->
+        <item>24</item> <!-- FACE_ACQUIRED_FIRST_FRAME_RECEIVED -->
     </integer-array>
 
     <!-- Percentage of face auth frames received required to show a deferred message at
@@ -923,4 +936,15 @@
     "$packageName" part that will be replaced by the code with the package name of the target app.
     -->
     <string name="config_appStoreAppLinkTemplate" translatable="false"></string>
+
+    <!-- Flag controlling whether visual query attention detection has been enabled. -->
+    <bool name="config_enableVisualQueryAttentionDetection">false</bool>
+
+    <!--
+    Whether the scene container framework is enabled.
+
+    The scene container framework is a newer (2023) way to organize the various "scenes" between the
+    bouncer, lockscreen, shade, and quick settings.
+    -->
+    <bool name="config_sceneContainerFrameworkEnabled">true</bool>
 </resources>

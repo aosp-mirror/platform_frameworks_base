@@ -17,19 +17,10 @@
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import android.content.Context
-import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
-import com.android.settingslib.AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH
-import com.android.settingslib.AccessibilityContentDescriptions.WIFI_NO_CONNECTION
-import com.android.systemui.R
-import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
-import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
-import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
-import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_NETWORK
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule.Companion.FIRST_MOBILE_SUB_SHOWING_NETWORK_TYPE_ICON
 import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
@@ -75,39 +66,6 @@ constructor(
     @Application private val scope: CoroutineScope,
     wifiConstants: WifiConstants,
 ) : WifiViewModelCommon {
-    /** Returns the icon to use based on the given network. */
-    private fun WifiNetworkModel.icon(): WifiIcon {
-        return when (this) {
-            is WifiNetworkModel.Unavailable -> WifiIcon.Hidden
-            is WifiNetworkModel.Invalid -> WifiIcon.Hidden
-            is WifiNetworkModel.CarrierMerged -> WifiIcon.Hidden
-            is WifiNetworkModel.Inactive ->
-                WifiIcon.Visible(
-                    res = WIFI_NO_NETWORK,
-                    ContentDescription.Loaded(
-                        "${context.getString(WIFI_NO_CONNECTION)},${context.getString(NO_INTERNET)}"
-                    )
-                )
-            is WifiNetworkModel.Active -> {
-                val levelDesc = context.getString(WIFI_CONNECTION_STRENGTH[this.level])
-                when {
-                    this.isValidated ->
-                        WifiIcon.Visible(
-                            WIFI_FULL_ICONS[this.level],
-                            ContentDescription.Loaded(levelDesc),
-                        )
-                    else ->
-                        WifiIcon.Visible(
-                            WIFI_NO_INTERNET_ICONS[this.level],
-                            ContentDescription.Loaded(
-                                "$levelDesc,${context.getString(NO_INTERNET)}"
-                            ),
-                        )
-                }
-            }
-        }
-    }
-
     override val wifiIcon: StateFlow<WifiIcon> =
         combine(
                 interactor.isEnabled,
@@ -119,7 +77,8 @@ constructor(
                     return@combine WifiIcon.Hidden
                 }
 
-                val icon = wifiNetwork.icon()
+                // Don't show any hotspot info in the status bar.
+                val icon = WifiIcon.fromModel(wifiNetwork, context, showHotspotInfo = false)
 
                 return@combine when {
                     isDefault -> icon
@@ -186,10 +145,4 @@ constructor(
         airplaneModeViewModel.isAirplaneModeIconVisible
 
     override val isSignalSpacerVisible: Flow<Boolean> = shouldShowSignalSpacerProvider.get()
-
-    companion object {
-        @StringRes
-        @VisibleForTesting
-        internal val NO_INTERNET = R.string.data_connection_no_internet
-    }
 }

@@ -16,8 +16,6 @@
 
 package com.android.systemui.biometrics
 
-import android.annotation.IdRes
-import android.content.Context
 import android.hardware.biometrics.BiometricManager.Authenticators
 import android.hardware.biometrics.ComponentInfoInternal
 import android.hardware.biometrics.PromptInfo
@@ -27,57 +25,6 @@ import android.hardware.face.FaceSensorProperties
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
-import android.os.Bundle
-import android.testing.ViewUtils
-import android.view.LayoutInflater
-
-/**
- * Inflate the given BiometricPrompt layout and initialize it with test parameters.
- *
- * This attaches the view so be sure to call [destroyDialog] at the end of the test.
- */
-@IdRes
-internal fun <T : AuthBiometricView> Int.asTestAuthBiometricView(
-    context: Context,
-    callback: AuthBiometricView.Callback,
-    panelController: AuthPanelController,
-    allowDeviceCredential: Boolean = false,
-    savedState: Bundle? = null,
-    hideDelay: Int = 0
-): T {
-    val view = LayoutInflater.from(context).inflate(this, null, false) as T
-    view.mAnimationDurationLong = 0
-    view.mAnimationDurationShort = 0
-    view.mAnimationDurationHideDialog = hideDelay
-    view.setPromptInfo(buildPromptInfo(allowDeviceCredential))
-    view.setCallback(callback)
-    view.restoreState(savedState)
-    view.setPanelController(panelController)
-
-    ViewUtils.attachView(view)
-
-    return view
-}
-
-private fun buildPromptInfo(allowDeviceCredential: Boolean): PromptInfo {
-    val promptInfo = PromptInfo()
-    promptInfo.title = "Title"
-    var authenticators = Authenticators.BIOMETRIC_WEAK
-    if (allowDeviceCredential) {
-        authenticators = authenticators or Authenticators.DEVICE_CREDENTIAL
-    } else {
-        promptInfo.negativeButtonText = "Negative"
-    }
-    promptInfo.authenticators = authenticators
-    return promptInfo
-}
-
-/** Detach the view, if needed. */
-internal fun AuthBiometricView?.destroyDialog() {
-    if (this != null && isAttachedToWindow) {
-        ViewUtils.detachView(this)
-    }
-}
 
 /** Create [FingerprintSensorPropertiesInternal] for a test. */
 internal fun fingerprintSensorPropertiesInternal(

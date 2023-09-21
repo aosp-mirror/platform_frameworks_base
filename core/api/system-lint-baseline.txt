@@ -21,28 +21,10 @@ ListenerLast: android.telephony.satellite.SatelliteManager#stopSatelliteTransmis
     Listeners should always be at end of argument list (method `stopSatelliteTransmissionUpdates`)
 
 
-MissingGetterMatchingBuilder: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallViaAudioProcessing(boolean):
-    android.telecom.CallScreeningService.CallResponse does not declare a `shouldScreenCallViaAudioProcessing()` method matching method android.telecom.CallScreeningService.CallResponse.Builder.setShouldScreenCallViaAudioProcessing(boolean)
-MissingGetterMatchingBuilder: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
-    android.telephony.mbms.DownloadRequest does not declare a `getServiceId()` method matching method android.telephony.mbms.DownloadRequest.Builder.setServiceId(String)
-
-
 MissingNullability: android.media.soundtrigger.SoundTriggerDetectionService#onUnbind(android.content.Intent) parameter #0:
     Missing nullability on parameter `intent` in method `onUnbind`
-MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #0:
-    Missing nullability on parameter `inputId` in method `onEvent`
-MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #1:
-    Missing nullability on parameter `eventType` in method `onEvent`
-MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #2:
-    Missing nullability on parameter `eventArgs` in method `onEvent`
 MissingNullability: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context) parameter #0:
     Missing nullability on parameter `base` in method `attachBaseContext`
-MissingNullability: android.provider.ContactsContract.MetadataSync#CONTENT_URI:
-    Missing nullability on field `CONTENT_URI` in class `class android.provider.ContactsContract.MetadataSync`
-MissingNullability: android.provider.ContactsContract.MetadataSync#METADATA_AUTHORITY_URI:
-    Missing nullability on field `METADATA_AUTHORITY_URI` in class `class android.provider.ContactsContract.MetadataSync`
-MissingNullability: android.provider.ContactsContract.MetadataSyncState#CONTENT_URI:
-    Missing nullability on field `CONTENT_URI` in class `class android.provider.ContactsContract.MetadataSyncState`
 MissingNullability: android.provider.SearchIndexablesProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #0:
     Missing nullability on parameter `context` in method `attachInfo`
 MissingNullability: android.provider.SearchIndexablesProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #1:
@@ -61,10 +43,6 @@ MissingNullability: android.telephony.NetworkService#onUnbind(android.content.In
     Missing nullability on parameter `intent` in method `onUnbind`
 MissingNullability: android.telephony.data.DataService#onUnbind(android.content.Intent) parameter #0:
     Missing nullability on parameter `intent` in method `onUnbind`
-MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
-    Missing nullability on method `setServiceId` return
-MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String) parameter #0:
-    Missing nullability on parameter `serviceId` in method `setServiceId`
 
 
 ProtectedMember: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context):
@@ -135,16 +113,6 @@ SamShouldBeLast: android.content.pm.ResolveInfo#dump(android.util.Printer, Strin
     SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.ResolveInfo.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.location.Location#dump(android.util.Printer, String):
     SAM-compatible parameters (such as parameter 1, "pw", in android.location.Location.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):
-    SAM-compatible parameters (such as parameter 1, "listener", in android.location.LocationManager.addNmeaListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(String, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioFocusRequest.Builder#setOnAudioFocusChangeListener(android.media.AudioManager.OnAudioFocusChangeListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioFocusRequest.Builder.setOnAudioFocusChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int):
@@ -183,12 +151,6 @@ SamShouldBeLast: android.nfc.NfcAdapter#enableReaderMode(android.app.Activity, a
     SAM-compatible parameters (such as parameter 2, "callback", in android.nfc.NfcAdapter.enableReaderMode) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.nfc.NfcAdapter#ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 3, "tagRemovedListener", in android.nfc.NfcAdapter.ignore) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.nfc.NfcAdapter#setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity):
-    SAM-compatible parameters (such as parameter 1, "callback", in android.nfc.NfcAdapter.setBeamPushUrisCallback) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.nfc.NfcAdapter#setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...):
-    SAM-compatible parameters (such as parameter 1, "callback", in android.nfc.NfcAdapter.setNdefPushMessageCallback) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.nfc.NfcAdapter#setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...):
-    SAM-compatible parameters (such as parameter 1, "callback", in android.nfc.NfcAdapter.setOnNdefPushCompleteCallback) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Binder#attachInterface(android.os.IInterface, String):
     SAM-compatible parameters (such as parameter 1, "owner", in android.os.Binder.attachInterface) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Binder#linkToDeath(android.os.IBinder.DeathRecipient, int):
@@ -233,3 +195,413 @@ SamShouldBeLast: android.view.accessibility.AccessibilityManager#addTouchExplora
     SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addTouchExplorationStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.webkit.WebChromeClient#onShowFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams):
     SAM-compatible parameters (such as parameter 2, "filePathCallback", in android.webkit.WebChromeClient.onShowFileChooser) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+
+
+UnflaggedApi: android.Manifest.permission#ACCESS_SMARTSPACE:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.ACCESS_SMARTSPACE
+UnflaggedApi: android.Manifest.permission#ALWAYS_UPDATE_WALLPAPER:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.ALWAYS_UPDATE_WALLPAPER
+UnflaggedApi: android.Manifest.permission#CAMERA_HEADLESS_SYSTEM_USER:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.CAMERA_HEADLESS_SYSTEM_USER
+UnflaggedApi: android.Manifest.permission#LAUNCH_PERMISSION_SETTINGS:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.LAUNCH_PERMISSION_SETTINGS
+UnflaggedApi: android.Manifest.permission#READ_INSTALLED_SESSION_PATHS:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.READ_INSTALLED_SESSION_PATHS
+UnflaggedApi: android.Manifest.permission#REGISTER_NSD_OFFLOAD_ENGINE:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.REGISTER_NSD_OFFLOAD_ENGINE
+UnflaggedApi: android.Manifest.permission#REPORT_USAGE_STATS:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.REPORT_USAGE_STATS
+UnflaggedApi: android.R.string#config_defaultRetailDemo:
+    New API must be flagged with @FlaggedApi: field android.R.string.config_defaultRetailDemo
+UnflaggedApi: android.app.ActivityManager#getExternalHistoricalProcessStartReasons(String, int):
+    New API must be flagged with @FlaggedApi: method android.app.ActivityManager.getExternalHistoricalProcessStartReasons(String,int)
+UnflaggedApi: android.app.AppOpsManager#OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO:
+    New API must be flagged with @FlaggedApi: field android.app.AppOpsManager.OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO
+UnflaggedApi: android.companion.virtual.VirtualDeviceManager.VirtualDevice#getPersistentDeviceId():
+    New API must be flagged with @FlaggedApi: method android.companion.virtual.VirtualDeviceManager.VirtualDevice.getPersistentDeviceId()
+UnflaggedApi: android.content.Context#THREAD_NETWORK_SERVICE:
+    New API must be flagged with @FlaggedApi: field android.content.Context.THREAD_NETWORK_SERVICE
+UnflaggedApi: android.content.Intent#ACTION_UNARCHIVE_PACKAGE:
+    New API must be flagged with @FlaggedApi: field android.content.Intent.ACTION_UNARCHIVE_PACKAGE
+UnflaggedApi: android.content.pm.PackageInstaller#readInstallInfo(android.os.ParcelFileDescriptor, String, int):
+    New API must be flagged with @FlaggedApi: method android.content.pm.PackageInstaller.readInstallInfo(android.os.ParcelFileDescriptor,String,int)
+UnflaggedApi: android.content.pm.PackageInstaller.InstallInfo#calculateInstalledSize(android.content.pm.PackageInstaller.SessionParams, android.os.ParcelFileDescriptor):
+    New API must be flagged with @FlaggedApi: method android.content.pm.PackageInstaller.InstallInfo.calculateInstalledSize(android.content.pm.PackageInstaller.SessionParams,android.os.ParcelFileDescriptor)
+UnflaggedApi: android.content.pm.PackageInstaller.SessionInfo#getResolvedBaseApkPath():
+    New API must be flagged with @FlaggedApi: method android.content.pm.PackageInstaller.SessionInfo.getResolvedBaseApkPath()
+UnflaggedApi: android.content.pm.PackageManager#EXTRA_REQUEST_PERMISSIONS_DEVICE_ID:
+    New API must be flagged with @FlaggedApi: field android.content.pm.PackageManager.EXTRA_REQUEST_PERMISSIONS_DEVICE_ID
+UnflaggedApi: android.content.pm.PackageManager#MATCH_ARCHIVED_PACKAGES:
+    New API must be flagged with @FlaggedApi: field android.content.pm.PackageManager.MATCH_ARCHIVED_PACKAGES
+UnflaggedApi: android.media.audiopolicy.AudioMix#CREATOR:
+    New API must be flagged with @FlaggedApi: field android.media.audiopolicy.AudioMix.CREATOR
+UnflaggedApi: android.media.audiopolicy.AudioMix#describeContents():
+    New API must be flagged with @FlaggedApi: method android.media.audiopolicy.AudioMix.describeContents()
+UnflaggedApi: android.media.audiopolicy.AudioMix#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.media.audiopolicy.AudioMix.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.media.audiopolicy.AudioMixingRule#CREATOR:
+    New API must be flagged with @FlaggedApi: field android.media.audiopolicy.AudioMixingRule.CREATOR
+UnflaggedApi: android.media.audiopolicy.AudioMixingRule#describeContents():
+    New API must be flagged with @FlaggedApi: method android.media.audiopolicy.AudioMixingRule.describeContents()
+UnflaggedApi: android.media.audiopolicy.AudioMixingRule#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.media.audiopolicy.AudioMixingRule.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.media.audiopolicy.AudioPolicy#updateMixingRules(java.util.List<android.util.Pair<android.media.audiopolicy.AudioMix,android.media.audiopolicy.AudioMixingRule>>):
+    New API must be flagged with @FlaggedApi: method android.media.audiopolicy.AudioPolicy.updateMixingRules(java.util.List<android.util.Pair<android.media.audiopolicy.AudioMix,android.media.audiopolicy.AudioMixingRule>>)
+UnflaggedApi: android.net.wifi.sharedconnectivity.app.NetworkProviderInfo#isBatteryCharging():
+    New API must be flagged with @FlaggedApi: method android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.isBatteryCharging()
+UnflaggedApi: android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder#setBatteryCharging(boolean):
+    New API must be flagged with @FlaggedApi: method android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder.setBatteryCharging(boolean)
+UnflaggedApi: android.os.BugreportParams#BUGREPORT_MODE_ONBOARDING:
+    New API must be flagged with @FlaggedApi: field android.os.BugreportParams.BUGREPORT_MODE_ONBOARDING
+UnflaggedApi: android.provider.Settings#ACTION_APP_PERMISSIONS_SETTINGS:
+    New API must be flagged with @FlaggedApi: field android.provider.Settings.ACTION_APP_PERMISSIONS_SETTINGS
+UnflaggedApi: android.provider.Settings.System#putString(android.content.ContentResolver, String, String, boolean, boolean):
+    New API must be flagged with @FlaggedApi: method android.provider.Settings.System.putString(android.content.ContentResolver,String,String,boolean,boolean)
+UnflaggedApi: android.provider.Settings.System#resetToDefaults(android.content.ContentResolver, String):
+    New API must be flagged with @FlaggedApi: method android.provider.Settings.System.resetToDefaults(android.content.ContentResolver,String)
+UnflaggedApi: android.service.voice.HotwordTrainingAudio:
+    New API must be flagged with @FlaggedApi: class android.service.voice.HotwordTrainingAudio
+UnflaggedApi: android.service.voice.HotwordTrainingAudio#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingAudio.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.service.voice.HotwordTrainingAudio#CREATOR:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingAudio.CREATOR
+UnflaggedApi: android.service.voice.HotwordTrainingAudio#HOTWORD_OFFSET_UNSET:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingAudio.HOTWORD_OFFSET_UNSET
+UnflaggedApi: android.service.voice.HotwordTrainingAudio#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingAudio.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.service.voice.HotwordTrainingAudio#describeContents():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingAudio.describeContents()
+UnflaggedApi: android.service.voice.HotwordTrainingAudio#getAudioFormat():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingAudio.getAudioFormat()
+UnflaggedApi: android.service.voice.HotwordTrainingAudio#getAudioType():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingAudio.getAudioType()
+UnflaggedApi: android.service.voice.HotwordTrainingAudio#getHotwordAudio():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingAudio.getHotwordAudio()
+UnflaggedApi: android.service.voice.HotwordTrainingAudio#getHotwordOffsetMillis():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingAudio.getHotwordOffsetMillis()
+UnflaggedApi: android.service.voice.HotwordTrainingAudio#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingAudio.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.service.voice.HotwordTrainingAudio.Builder:
+    New API must be flagged with @FlaggedApi: class android.service.voice.HotwordTrainingAudio.Builder
+UnflaggedApi: android.service.voice.HotwordTrainingAudio.Builder#Builder(byte[], android.media.AudioFormat):
+    New API must be flagged with @FlaggedApi: constructor android.service.voice.HotwordTrainingAudio.Builder(byte[],android.media.AudioFormat)
+UnflaggedApi: android.service.voice.HotwordTrainingAudio.Builder#build():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingAudio.Builder.build()
+UnflaggedApi: android.service.voice.HotwordTrainingAudio.Builder#setAudioFormat(android.media.AudioFormat):
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingAudio.Builder.setAudioFormat(android.media.AudioFormat)
+UnflaggedApi: android.service.voice.HotwordTrainingAudio.Builder#setAudioType(int):
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingAudio.Builder.setAudioType(int)
+UnflaggedApi: android.service.voice.HotwordTrainingAudio.Builder#setHotwordOffsetMillis(int):
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingAudio.Builder.setHotwordOffsetMillis(int)
+UnflaggedApi: android.service.voice.HotwordTrainingData:
+    New API must be flagged with @FlaggedApi: class android.service.voice.HotwordTrainingData
+UnflaggedApi: android.service.voice.HotwordTrainingData#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingData.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.service.voice.HotwordTrainingData#CREATOR:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingData.CREATOR
+UnflaggedApi: android.service.voice.HotwordTrainingData#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingData.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.service.voice.HotwordTrainingData#TIMEOUT_STAGE_EARLY:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingData.TIMEOUT_STAGE_EARLY
+UnflaggedApi: android.service.voice.HotwordTrainingData#TIMEOUT_STAGE_LATE:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingData.TIMEOUT_STAGE_LATE
+UnflaggedApi: android.service.voice.HotwordTrainingData#TIMEOUT_STAGE_MIDDLE:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingData.TIMEOUT_STAGE_MIDDLE
+UnflaggedApi: android.service.voice.HotwordTrainingData#TIMEOUT_STAGE_UNKNOWN:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingData.TIMEOUT_STAGE_UNKNOWN
+UnflaggedApi: android.service.voice.HotwordTrainingData#TIMEOUT_STAGE_VERY_EARLY:
+    New API must be flagged with @FlaggedApi: field android.service.voice.HotwordTrainingData.TIMEOUT_STAGE_VERY_EARLY
+UnflaggedApi: android.service.voice.HotwordTrainingData#describeContents():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.describeContents()
+UnflaggedApi: android.service.voice.HotwordTrainingData#getMaxTrainingDataSize():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.getMaxTrainingDataSize()
+UnflaggedApi: android.service.voice.HotwordTrainingData#getTimeoutStage():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.getTimeoutStage()
+UnflaggedApi: android.service.voice.HotwordTrainingData#getTrainingAudios():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.getTrainingAudios()
+UnflaggedApi: android.service.voice.HotwordTrainingData#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.service.voice.HotwordTrainingData.Builder:
+    New API must be flagged with @FlaggedApi: class android.service.voice.HotwordTrainingData.Builder
+UnflaggedApi: android.service.voice.HotwordTrainingData.Builder#Builder():
+    New API must be flagged with @FlaggedApi: constructor android.service.voice.HotwordTrainingData.Builder()
+UnflaggedApi: android.service.voice.HotwordTrainingData.Builder#addTrainingAudio(android.service.voice.HotwordTrainingAudio):
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.Builder.addTrainingAudio(android.service.voice.HotwordTrainingAudio)
+UnflaggedApi: android.service.voice.HotwordTrainingData.Builder#build():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.Builder.build()
+UnflaggedApi: android.service.voice.HotwordTrainingData.Builder#setTimeoutStage(int):
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.Builder.setTimeoutStage(int)
+UnflaggedApi: android.service.voice.HotwordTrainingData.Builder#setTrainingAudios(java.util.List<android.service.voice.HotwordTrainingAudio>):
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.Builder.setTrainingAudios(java.util.List<android.service.voice.HotwordTrainingAudio>)
+UnflaggedApi: android.telecom.StreamingCall#EXTRA_CALL_ID:
+    New API must be flagged with @FlaggedApi: field android.telecom.StreamingCall.EXTRA_CALL_ID
+UnflaggedApi: android.telephony.NetworkRegistrationInfo.Builder#setIsNonTerrestrialNetwork(boolean):
+    New API must be flagged with @FlaggedApi: method android.telephony.NetworkRegistrationInfo.Builder.setIsNonTerrestrialNetwork(boolean)
+UnflaggedApi: android.telephony.mbms.vendor.MbmsDownloadServiceBase#DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.mbms.vendor.MbmsDownloadServiceBase.DESCRIPTOR
+UnflaggedApi: android.telephony.mbms.vendor.MbmsStreamingServiceBase#DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.mbms.vendor.MbmsStreamingServiceBase.DESCRIPTOR
+UnflaggedApi: android.telephony.satellite.AntennaDirection:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.AntennaDirection
+UnflaggedApi: android.telephony.satellite.AntennaDirection#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.AntennaDirection.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.telephony.satellite.AntennaDirection#CREATOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.AntennaDirection.CREATOR
+UnflaggedApi: android.telephony.satellite.AntennaDirection#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.AntennaDirection.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.telephony.satellite.AntennaDirection#describeContents():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.AntennaDirection.describeContents()
+UnflaggedApi: android.telephony.satellite.AntennaDirection#getX():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.AntennaDirection.getX()
+UnflaggedApi: android.telephony.satellite.AntennaDirection#getY():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.AntennaDirection.getY()
+UnflaggedApi: android.telephony.satellite.AntennaDirection#getZ():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.AntennaDirection.getZ()
+UnflaggedApi: android.telephony.satellite.AntennaDirection#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.AntennaDirection.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.telephony.satellite.AntennaPosition:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.AntennaPosition
+UnflaggedApi: android.telephony.satellite.AntennaPosition#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.AntennaPosition.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.telephony.satellite.AntennaPosition#CREATOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.AntennaPosition.CREATOR
+UnflaggedApi: android.telephony.satellite.AntennaPosition#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.AntennaPosition.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.telephony.satellite.AntennaPosition#describeContents():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.AntennaPosition.describeContents()
+UnflaggedApi: android.telephony.satellite.AntennaPosition#getAntennaDirection():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.AntennaPosition.getAntennaDirection()
+UnflaggedApi: android.telephony.satellite.AntennaPosition#getSuggestedHoldPosition():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.AntennaPosition.getSuggestedHoldPosition()
+UnflaggedApi: android.telephony.satellite.AntennaPosition#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.AntennaPosition.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.telephony.satellite.PointingInfo:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.PointingInfo
+UnflaggedApi: android.telephony.satellite.PointingInfo#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.PointingInfo.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.telephony.satellite.PointingInfo#CREATOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.PointingInfo.CREATOR
+UnflaggedApi: android.telephony.satellite.PointingInfo#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.PointingInfo.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.telephony.satellite.PointingInfo#describeContents():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.PointingInfo.describeContents()
+UnflaggedApi: android.telephony.satellite.PointingInfo#getSatelliteAzimuthDegrees():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.PointingInfo.getSatelliteAzimuthDegrees()
+UnflaggedApi: android.telephony.satellite.PointingInfo#getSatelliteElevationDegrees():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.PointingInfo.getSatelliteElevationDegrees()
+UnflaggedApi: android.telephony.satellite.PointingInfo#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.PointingInfo.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.telephony.satellite.SatelliteCapabilities:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteCapabilities
+UnflaggedApi: android.telephony.satellite.SatelliteCapabilities#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteCapabilities.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.telephony.satellite.SatelliteCapabilities#CREATOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteCapabilities.CREATOR
+UnflaggedApi: android.telephony.satellite.SatelliteCapabilities#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteCapabilities.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.telephony.satellite.SatelliteCapabilities#describeContents():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteCapabilities.describeContents()
+UnflaggedApi: android.telephony.satellite.SatelliteCapabilities#getAntennaPositionMap():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteCapabilities.getAntennaPositionMap()
+UnflaggedApi: android.telephony.satellite.SatelliteCapabilities#getMaxBytesPerOutgoingDatagram():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteCapabilities.getMaxBytesPerOutgoingDatagram()
+UnflaggedApi: android.telephony.satellite.SatelliteCapabilities#getSupportedRadioTechnologies():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteCapabilities.getSupportedRadioTechnologies()
+UnflaggedApi: android.telephony.satellite.SatelliteCapabilities#isPointingRequired():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteCapabilities.isPointingRequired()
+UnflaggedApi: android.telephony.satellite.SatelliteCapabilities#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteCapabilities.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.telephony.satellite.SatelliteDatagram:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteDatagram
+UnflaggedApi: android.telephony.satellite.SatelliteDatagram#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteDatagram.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.telephony.satellite.SatelliteDatagram#CREATOR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteDatagram.CREATOR
+UnflaggedApi: android.telephony.satellite.SatelliteDatagram#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteDatagram.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.telephony.satellite.SatelliteDatagram#describeContents():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteDatagram.describeContents()
+UnflaggedApi: android.telephony.satellite.SatelliteDatagram#getSatelliteDatagram():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteDatagram.getSatelliteDatagram()
+UnflaggedApi: android.telephony.satellite.SatelliteDatagram#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteDatagram.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.telephony.satellite.SatelliteDatagramCallback:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteDatagramCallback
+UnflaggedApi: android.telephony.satellite.SatelliteDatagramCallback#onSatelliteDatagramReceived(long, android.telephony.satellite.SatelliteDatagram, int, java.util.function.Consumer<java.lang.Void>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteDatagramCallback.onSatelliteDatagramReceived(long,android.telephony.satellite.SatelliteDatagram,int,java.util.function.Consumer<java.lang.Void>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteManager
+UnflaggedApi: android.telephony.satellite.SatelliteManager#DATAGRAM_TYPE_LOCATION_SHARING:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.DATAGRAM_TYPE_LOCATION_SHARING
+UnflaggedApi: android.telephony.satellite.SatelliteManager#DATAGRAM_TYPE_SOS_MESSAGE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.DATAGRAM_TYPE_SOS_MESSAGE
+UnflaggedApi: android.telephony.satellite.SatelliteManager#DATAGRAM_TYPE_UNKNOWN:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.DATAGRAM_TYPE_UNKNOWN
+UnflaggedApi: android.telephony.satellite.SatelliteManager#DEVICE_HOLD_POSITION_LANDSCAPE_LEFT:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.DEVICE_HOLD_POSITION_LANDSCAPE_LEFT
+UnflaggedApi: android.telephony.satellite.SatelliteManager#DEVICE_HOLD_POSITION_LANDSCAPE_RIGHT:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.DEVICE_HOLD_POSITION_LANDSCAPE_RIGHT
+UnflaggedApi: android.telephony.satellite.SatelliteManager#DEVICE_HOLD_POSITION_PORTRAIT:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.DEVICE_HOLD_POSITION_PORTRAIT
+UnflaggedApi: android.telephony.satellite.SatelliteManager#DEVICE_HOLD_POSITION_UNKNOWN:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.DEVICE_HOLD_POSITION_UNKNOWN
+UnflaggedApi: android.telephony.satellite.SatelliteManager#DISPLAY_MODE_CLOSED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.DISPLAY_MODE_CLOSED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#DISPLAY_MODE_FIXED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.DISPLAY_MODE_FIXED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#DISPLAY_MODE_OPENED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.DISPLAY_MODE_OPENED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#DISPLAY_MODE_UNKNOWN:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.DISPLAY_MODE_UNKNOWN
+UnflaggedApi: android.telephony.satellite.SatelliteManager#NT_RADIO_TECHNOLOGY_EMTC_NTN:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.NT_RADIO_TECHNOLOGY_EMTC_NTN
+UnflaggedApi: android.telephony.satellite.SatelliteManager#NT_RADIO_TECHNOLOGY_NB_IOT_NTN:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.NT_RADIO_TECHNOLOGY_NB_IOT_NTN
+UnflaggedApi: android.telephony.satellite.SatelliteManager#NT_RADIO_TECHNOLOGY_NR_NTN:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.NT_RADIO_TECHNOLOGY_NR_NTN
+UnflaggedApi: android.telephony.satellite.SatelliteManager#NT_RADIO_TECHNOLOGY_PROPRIETARY:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.NT_RADIO_TECHNOLOGY_PROPRIETARY
+UnflaggedApi: android.telephony.satellite.SatelliteManager#NT_RADIO_TECHNOLOGY_UNKNOWN:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.NT_RADIO_TECHNOLOGY_UNKNOWN
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_FAILED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_FAILED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_NONE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_NONE
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_SUCCESS:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_SUCCESS
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVING:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVING
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_DATAGRAM_TRANSFER_STATE_SENDING:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_DATAGRAM_TRANSFER_STATE_SENDING
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_FAILED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_FAILED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_SUCCESS:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_SUCCESS
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_DATAGRAM_TRANSFER_STATE_UNKNOWN:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_DATAGRAM_TRANSFER_STATE_UNKNOWN
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_MODEM_STATE_DATAGRAM_RETRYING:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_DATAGRAM_RETRYING
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_MODEM_STATE_IDLE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_IDLE
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_MODEM_STATE_LISTENING:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_LISTENING
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_MODEM_STATE_OFF:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_OFF
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_MODEM_STATE_UNAVAILABLE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_UNAVAILABLE
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_MODEM_STATE_UNKNOWN:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_UNKNOWN
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_ACCESS_BARRED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_ACCESS_BARRED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_ERROR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_ERROR
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_INVALID_ARGUMENTS:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_INVALID_ARGUMENTS
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_INVALID_MODEM_STATE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_INVALID_MODEM_STATE
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_INVALID_TELEPHONY_STATE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_INVALID_TELEPHONY_STATE
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_MODEM_BUSY:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_MODEM_BUSY
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_MODEM_ERROR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_MODEM_ERROR
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_NETWORK_ERROR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_NETWORK_ERROR
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_NETWORK_TIMEOUT:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_NETWORK_TIMEOUT
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_NOT_AUTHORIZED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_NOT_AUTHORIZED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_NOT_REACHABLE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_NOT_REACHABLE
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_NOT_SUPPORTED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_NOT_SUPPORTED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_NO_RESOURCES:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_NO_RESOURCES
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_RADIO_NOT_AVAILABLE:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_RADIO_NOT_AVAILABLE
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_REQUEST_ABORTED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_REQUEST_ABORTED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_REQUEST_FAILED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_REQUEST_FAILED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_REQUEST_IN_PROGRESS:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_REQUEST_IN_PROGRESS
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_REQUEST_NOT_SUPPORTED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_SERVER_ERROR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SERVER_ERROR
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_SERVICE_ERROR:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SERVICE_ERROR
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_SERVICE_NOT_PROVISIONED:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SERVICE_NOT_PROVISIONED
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_SERVICE_PROVISION_IN_PROGRESS:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SERVICE_PROVISION_IN_PROGRESS
+UnflaggedApi: android.telephony.satellite.SatelliteManager#SATELLITE_RESULT_SUCCESS:
+    New API must be flagged with @FlaggedApi: field android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS
+UnflaggedApi: android.telephony.satellite.SatelliteManager#deprovisionSatelliteService(String, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.deprovisionSatelliteService(String,java.util.concurrent.Executor,java.util.function.Consumer<java.lang.Integer>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#pollPendingSatelliteDatagrams(java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.pollPendingSatelliteDatagrams(java.util.concurrent.Executor,java.util.function.Consumer<java.lang.Integer>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#provisionSatelliteService(String, byte[], android.os.CancellationSignal, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.provisionSatelliteService(String,byte[],android.os.CancellationSignal,java.util.concurrent.Executor,java.util.function.Consumer<java.lang.Integer>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#registerForSatelliteDatagram(java.util.concurrent.Executor, android.telephony.satellite.SatelliteDatagramCallback):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.registerForSatelliteDatagram(java.util.concurrent.Executor,android.telephony.satellite.SatelliteDatagramCallback)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#registerForSatelliteModemStateChanged(java.util.concurrent.Executor, android.telephony.satellite.SatelliteStateCallback):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.registerForSatelliteModemStateChanged(java.util.concurrent.Executor,android.telephony.satellite.SatelliteStateCallback)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#registerForSatelliteProvisionStateChanged(java.util.concurrent.Executor, android.telephony.satellite.SatelliteProvisionStateCallback):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.registerForSatelliteProvisionStateChanged(java.util.concurrent.Executor,android.telephony.satellite.SatelliteProvisionStateCallback)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#requestIsDemoModeEnabled(java.util.concurrent.Executor, android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.requestIsDemoModeEnabled(java.util.concurrent.Executor,android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#requestIsSatelliteCommunicationAllowedForCurrentLocation(java.util.concurrent.Executor, android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.requestIsSatelliteCommunicationAllowedForCurrentLocation(java.util.concurrent.Executor,android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#requestIsSatelliteEnabled(java.util.concurrent.Executor, android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.requestIsSatelliteEnabled(java.util.concurrent.Executor,android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#requestIsSatelliteProvisioned(java.util.concurrent.Executor, android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.requestIsSatelliteProvisioned(java.util.concurrent.Executor,android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#requestIsSatelliteSupported(java.util.concurrent.Executor, android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.requestIsSatelliteSupported(java.util.concurrent.Executor,android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#requestSatelliteCapabilities(java.util.concurrent.Executor, android.os.OutcomeReceiver<android.telephony.satellite.SatelliteCapabilities,android.telephony.satellite.SatelliteManager.SatelliteException>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.requestSatelliteCapabilities(java.util.concurrent.Executor,android.os.OutcomeReceiver<android.telephony.satellite.SatelliteCapabilities,android.telephony.satellite.SatelliteManager.SatelliteException>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#requestSatelliteEnabled(boolean, boolean, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.requestSatelliteEnabled(boolean,boolean,java.util.concurrent.Executor,java.util.function.Consumer<java.lang.Integer>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#requestTimeForNextSatelliteVisibility(java.util.concurrent.Executor, android.os.OutcomeReceiver<java.time.Duration,android.telephony.satellite.SatelliteManager.SatelliteException>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.requestTimeForNextSatelliteVisibility(java.util.concurrent.Executor,android.os.OutcomeReceiver<java.time.Duration,android.telephony.satellite.SatelliteManager.SatelliteException>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#sendSatelliteDatagram(int, android.telephony.satellite.SatelliteDatagram, boolean, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.sendSatelliteDatagram(int,android.telephony.satellite.SatelliteDatagram,boolean,java.util.concurrent.Executor,java.util.function.Consumer<java.lang.Integer>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#setDeviceAlignedWithSatellite(boolean):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.setDeviceAlignedWithSatellite(boolean)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#startSatelliteTransmissionUpdates(java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>, android.telephony.satellite.SatelliteTransmissionUpdateCallback):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.startSatelliteTransmissionUpdates(java.util.concurrent.Executor,java.util.function.Consumer<java.lang.Integer>,android.telephony.satellite.SatelliteTransmissionUpdateCallback)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#stopSatelliteTransmissionUpdates(android.telephony.satellite.SatelliteTransmissionUpdateCallback, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.stopSatelliteTransmissionUpdates(android.telephony.satellite.SatelliteTransmissionUpdateCallback,java.util.concurrent.Executor,java.util.function.Consumer<java.lang.Integer>)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#unregisterForSatelliteDatagram(android.telephony.satellite.SatelliteDatagramCallback):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.unregisterForSatelliteDatagram(android.telephony.satellite.SatelliteDatagramCallback)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#unregisterForSatelliteModemStateChanged(android.telephony.satellite.SatelliteStateCallback):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.unregisterForSatelliteModemStateChanged(android.telephony.satellite.SatelliteStateCallback)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#unregisterForSatelliteProvisionStateChanged(android.telephony.satellite.SatelliteProvisionStateCallback):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.unregisterForSatelliteProvisionStateChanged(android.telephony.satellite.SatelliteProvisionStateCallback)
+UnflaggedApi: android.telephony.satellite.SatelliteManager.SatelliteException:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteManager.SatelliteException
+UnflaggedApi: android.telephony.satellite.SatelliteManager.SatelliteException#SatelliteException(int):
+    New API must be flagged with @FlaggedApi: constructor android.telephony.satellite.SatelliteManager.SatelliteException(int)
+UnflaggedApi: android.telephony.satellite.SatelliteManager.SatelliteException#getErrorCode():
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.SatelliteException.getErrorCode()
+UnflaggedApi: android.telephony.satellite.SatelliteProvisionStateCallback:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteProvisionStateCallback
+UnflaggedApi: android.telephony.satellite.SatelliteProvisionStateCallback#onSatelliteProvisionStateChanged(boolean):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteProvisionStateCallback.onSatelliteProvisionStateChanged(boolean)
+UnflaggedApi: android.telephony.satellite.SatelliteStateCallback:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteStateCallback
+UnflaggedApi: android.telephony.satellite.SatelliteStateCallback#onSatelliteModemStateChanged(int):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteStateCallback.onSatelliteModemStateChanged(int)
+UnflaggedApi: android.telephony.satellite.SatelliteTransmissionUpdateCallback:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteTransmissionUpdateCallback
+UnflaggedApi: android.telephony.satellite.SatelliteTransmissionUpdateCallback#onReceiveDatagramStateChanged(int, int, int):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteTransmissionUpdateCallback.onReceiveDatagramStateChanged(int,int,int)
+UnflaggedApi: android.telephony.satellite.SatelliteTransmissionUpdateCallback#onSatellitePositionChanged(android.telephony.satellite.PointingInfo):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteTransmissionUpdateCallback.onSatellitePositionChanged(android.telephony.satellite.PointingInfo)
+UnflaggedApi: android.telephony.satellite.SatelliteTransmissionUpdateCallback#onSendDatagramStateChanged(int, int, int):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteTransmissionUpdateCallback.onSendDatagramStateChanged(int,int,int)

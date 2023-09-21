@@ -108,6 +108,7 @@ interface IMediaProjectionManager {
                 + ".permission.MANAGE_MEDIA_PROJECTION)")
     void notifyActiveProjectionCapturedContentVisibilityChanged(boolean isVisible);
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
                 + ".permission.MANAGE_MEDIA_PROJECTION)")
     void addCallback(IMediaProjectionWatcherCallback callback);

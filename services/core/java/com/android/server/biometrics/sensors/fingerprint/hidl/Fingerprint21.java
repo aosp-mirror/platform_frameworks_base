@@ -52,6 +52,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.biometrics.AuthenticationStatsBroadcastReceiver;
 import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
@@ -124,7 +125,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     @Nullable private ISidefpsController mSidefpsController;
     @NonNull private final BiometricContext mBiometricContext;
-    @NonNull private final AuthenticationStatsCollector mAuthenticationStatsCollector;
+    @Nullable private AuthenticationStatsCollector mAuthenticationStatsCollector;
     // for requests that do not use biometric prompt
     @NonNull private final AtomicLong mRequestCounter = new AtomicLong(0);
     private int mCurrentUserId = UserHandle.USER_NULL;
@@ -353,8 +354,14 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             mCurrentUserId = UserHandle.USER_NULL;
         });
 
-        mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT);
+        AuthenticationStatsBroadcastReceiver mBroadcastReceiver =
+                new AuthenticationStatsBroadcastReceiver(
+                        mContext,
+                        BiometricsProtoEnums.MODALITY_FINGERPRINT,
+                        (AuthenticationStatsCollector collector) -> {
+                            Slog.d(TAG, "Initializing AuthenticationStatsCollector");
+                            mAuthenticationStatsCollector = collector;
+                        });
 
         try {
             ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);

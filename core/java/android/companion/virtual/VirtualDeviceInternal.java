@@ -145,7 +145,7 @@ public class VirtualDeviceInternal {
         mContext = context.getApplicationContext();
         mVirtualDevice = service.createVirtualDevice(
                 new Binder(),
-                mContext.getPackageName(),
+                mContext.getAttributionSource(),
                 associationId,
                 params,
                 mActivityListenerBinder,
@@ -235,6 +235,31 @@ public class VirtualDeviceInternal {
         if (mVirtualAudioDevice != null) {
             mVirtualAudioDevice.close();
             mVirtualAudioDevice = null;
+        }
+    }
+
+    void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
+            @VirtualDeviceParams.DevicePolicy int devicePolicy) {
+        try {
+            mVirtualDevice.setDevicePolicy(policyType, devicePolicy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void addActivityPolicyExemption(@NonNull ComponentName componentName) {
+        try {
+            mVirtualDevice.addActivityPolicyExemption(componentName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
+        try {
+            mVirtualDevice.removeActivityPolicyExemption(componentName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

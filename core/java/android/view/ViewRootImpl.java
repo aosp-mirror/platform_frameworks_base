@@ -128,6 +128,7 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
@@ -321,13 +322,6 @@ public final class ViewRootImpl implements ViewParent,
             SystemProperties.getBoolean("persist.wm.debug.client_immersive_confirmation", false);
 
     /**
-     * Whether the client should compute the window frame on its own.
-     * @hide
-     */
-    public static final boolean LOCAL_LAYOUT =
-            SystemProperties.getBoolean("persist.debug.local_layout", true);
-
-    /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
@@ -466,6 +460,9 @@ public final class ViewRootImpl implements ViewParent,
     final IWindowSession mWindowSession;
     @NonNull Display mDisplay;
     final String mBasePackageName;
+
+    // If we would like to keep a particular eye on the corresponding package.
+    final boolean mExtraDisplayListenerLogging;
 
     final int[] mTmpLocation = new int[2];
 
@@ -1016,6 +1013,8 @@ public final class ViewRootImpl implements ViewParent,
         mWindowLayout = windowLayout;
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
+        final String name = DisplayProperties.debug_vri_package().orElse(null);
+        mExtraDisplayListenerLogging = !TextUtils.isEmpty(name) && name.equals(mBasePackageName);
         mThread = Thread.currentThread();
         mLocation = new WindowLeaked(null);
         mLocation.fillInStackTrace();
@@ -1450,6 +1449,10 @@ public final class ViewRootImpl implements ViewParent,
                 // We should update mAttachInfo.mDisplayState after registerDisplayListener
                 // because displayState might be changed before registerDisplayListener.
                 mAttachInfo.mDisplayState = mDisplay.getState();
+                if (mExtraDisplayListenerLogging) {
+                    Slog.i(mTag, "(" + mBasePackageName + ") Initial DisplayState: "
+                            + mAttachInfo.mDisplayState, new Throwable());
+                }
                 if ((res & WindowManagerGlobal.ADD_FLAG_USE_BLAST) != 0) {
                     mUseBLASTAdapter = true;
                 }
@@ -1534,6 +1537,9 @@ public final class ViewRootImpl implements ViewParent,
      * Register any kind of listeners if setView was success.
      */
     private void registerListeners() {
+        if (mExtraDisplayListenerLogging) {
+            Slog.i(mTag, "Register listeners: " + mBasePackageName);
+        }
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityInteractionConnectionManager, mHandler);
         mAccessibilityManager.addHighTextContrastStateChangeListener(
@@ -1559,6 +1565,9 @@ public final class ViewRootImpl implements ViewParent,
         DisplayManagerGlobal
                 .getInstance()
                 .unregisterDisplayListener(mDisplayListener);
+        if (mExtraDisplayListenerLogging) {
+            Slog.w(mTag, "Unregister listeners: " + mBasePackageName, new Throwable());
+        }
     }
 
     private void setTag() {
@@ -1911,8 +1920,8 @@ public final class ViewRootImpl implements ViewParent,
         final float compatScale = frames.compatScale;
         final boolean frameChanged = !mWinFrame.equals(frame);
         final boolean configChanged = !mLastReportedMergedConfiguration.equals(mergedConfiguration);
-        final boolean attachedFrameChanged = LOCAL_LAYOUT
-                && !Objects.equals(mTmpFrames.attachedFrame, attachedFrame);
+        final boolean attachedFrameChanged =
+                !Objects.equals(mTmpFrames.attachedFrame, attachedFrame);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
         final boolean compatScaleChanged = mTmpFrames.compatScale != compatScale;
         final boolean dragResizingChanged = mPendingDragResizing != dragResizing;
@@ -1966,9 +1975,16 @@ public final class ViewRootImpl implements ViewParent,
     private final DisplayListener mDisplayListener = new DisplayListener() {
         @Override
         public void onDisplayChanged(int displayId) {
+            if (mExtraDisplayListenerLogging) {
+                Slog.i(mTag, "Received onDisplayChanged - " + mView);
+            }
             if (mView != null && mDisplay.getDisplayId() == displayId) {
                 final int oldDisplayState = mAttachInfo.mDisplayState;
                 final int newDisplayState = mDisplay.getState();
+                if (mExtraDisplayListenerLogging) {
+                    Slog.i(mTag, "DisplayState - old: " + oldDisplayState
+                            + ", new: " + newDisplayState);
+                }
                 if (oldDisplayState != newDisplayState) {
                     mAttachInfo.mDisplayState = newDisplayState;
                     pokeDrawLockIfNeeded();
@@ -2394,6 +2410,22 @@ public final class ViewRootImpl implements ViewParent,
         // Note: don't apply scroll offset, because we want to know its
         // visibility in the virtual canvas being given to the view hierarchy.
         return r.intersect(0, 0, mWidth, mHeight);
+    }
+
+    @Override
+    public boolean getChildLocalHitRegion(@NonNull View child, @NonNull Region region,
+            @NonNull Matrix matrix, boolean isHover) {
+        if (child != mView) {
+            throw new IllegalArgumentException("child " + child + " is not the root view "
+                    + mView + " managed by this ViewRootImpl");
+        }
+
+        RectF rectF = new RectF(0, 0, mWidth, mHeight);
+        matrix.mapRect(rectF);
+        // Note: don't apply scroll offset, because we want to know its
+        // visibility in the virtual canvas being given to the view hierarchy.
+        return region.op(Math.round(rectF.left), Math.round(rectF.top),
+                Math.round(rectF.right), Math.round(rectF.bottom), Region.Op.INTERSECT);
     }
 
     @Override
@@ -2838,16 +2870,15 @@ public final class ViewRootImpl implements ViewParent,
         if (mLastWindowInsets == null || forceConstruct) {
             final Configuration config = getConfiguration();
             mLastWindowInsets = mInsetsController.calculateInsets(
-                    config.isScreenRound(), mAttachInfo.mAlwaysConsumeSystemBars,
-                    mWindowAttributes.type, config.windowConfiguration.getWindowingMode(),
-                    mWindowAttributes.softInputMode, mWindowAttributes.flags,
-                    (mWindowAttributes.systemUiVisibility
+                    config.isScreenRound(), mWindowAttributes.type,
+                    config.windowConfiguration.getActivityType(), mWindowAttributes.softInputMode,
+                    mWindowAttributes.flags, (mWindowAttributes.systemUiVisibility
                             | mWindowAttributes.subtreeSystemUiVisibility));
 
             mAttachInfo.mContentInsets.set(mLastWindowInsets.getSystemWindowInsets().toRect());
             mAttachInfo.mStableInsets.set(mLastWindowInsets.getStableInsets().toRect());
             mAttachInfo.mVisibleInsets.set(mInsetsController.calculateVisibleInsets(
-                    mWindowAttributes.type, config.windowConfiguration.getWindowingMode(),
+                    mWindowAttributes.type, config.windowConfiguration.getActivityType(),
                     mWindowAttributes.softInputMode, mWindowAttributes.flags).toRect());
         }
         return mLastWindowInsets;
@@ -3986,8 +4017,6 @@ public final class ViewRootImpl implements ViewParent,
             mWindowFocusChanged = false;
             hasWindowFocus = mUpcomingWindowFocus;
         }
-        // TODO (b/131181940): Make sure this doesn't leak Activity with mActivityConfigCallback
-        // config changes.
         if (hasWindowFocus) {
             mInsetsController.onWindowFocusGained(
                     getFocusedViewOrNull() != null /* hasViewFocused */);
@@ -4117,7 +4146,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void fireAccessibilityFocusEventIfHasFocusedNode() {
-        if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
+        if (!mAccessibilityManager.isEnabled()) {
             return;
         }
         final View focusedView = mView.findFocus();
@@ -5169,8 +5198,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean getAccessibilityFocusedRect(Rect bounds) {
-        final AccessibilityManager manager = AccessibilityManager.getInstance(mView.mContext);
-        if (!manager.isEnabled() || !manager.isTouchExplorationEnabled()) {
+        if (mView == null) {
+            Slog.w(TAG, "calling getAccessibilityFocusedRect() while the mView is null");
+            return false;
+        }
+        if (!mAccessibilityManager.isEnabled()
+                || !mAccessibilityManager.isTouchExplorationEnabled()) {
             return false;
         }
 
@@ -7238,8 +7271,8 @@ public final class ViewRootImpl implements ViewParent,
                 && action != MotionEvent.ACTION_HOVER_EXIT) {
             return;
         }
-        AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
-        if (manager.isEnabled() && manager.isTouchExplorationEnabled()) {
+        if (mAccessibilityManager.isEnabled()
+                && mAccessibilityManager.isTouchExplorationEnabled()) {
             return;
         }
         if (mView == null) {
@@ -8292,8 +8325,7 @@ public final class ViewRootImpl implements ViewParent,
         final int measuredWidth = mMeasuredWidth;
         final int measuredHeight = mMeasuredHeight;
         final boolean relayoutAsync;
-        if (LOCAL_LAYOUT
-                && (mViewFrameInfo.flags & FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED) == 0
+        if ((mViewFrameInfo.flags & FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED) == 0
                 && mWindowAttributes.type != TYPE_APPLICATION_STARTING
                 && mSyncSeqId <= mLastSyncSeqId
                 && winConfigFromAm.diff(winConfigFromWm, false /* compareUndefined */) == 0) {
@@ -8401,10 +8433,20 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (mSurfaceControl.isValid() && !HardwareRenderer.isDrawingEnabled()) {
-            // When drawing is disabled the window layer won't have a valid buffer.
-            // Set a window crop so input can get delivered to the window.
-            mTransaction.setWindowCrop(mSurfaceControl, mSurfaceSize.x, mSurfaceSize.y).apply();
+        if (mSurfaceControl.isValid()) {
+            if (mPendingDragResizing && !mSurfaceSize.equals(
+                    mWinFrameInScreen.width(), mWinFrameInScreen.height())) {
+                // During drag-resize, a single fullscreen-sized surface is reused for optimization.
+                // Crop to the content size instead of the surface size to avoid exposing garbage
+                // content that is still on the surface from previous re-layouts (e.g. when
+                // resizing to a larger size).
+                mTransaction.setWindowCrop(mSurfaceControl,
+                        mWinFrameInScreen.width(), mWinFrameInScreen.height());
+            } else if (!HardwareRenderer.isDrawingEnabled()) {
+                // When drawing is disabled the window layer won't have a valid buffer.
+                // Set a window crop so input can get delivered to the window.
+                mTransaction.setWindowCrop(mSurfaceControl, mSurfaceSize.x, mSurfaceSize.y).apply();
+            }
         }
 
         mLastTransformHint = transformHint;
@@ -11040,7 +11082,7 @@ public final class ViewRootImpl implements ViewParent,
                 return;
             }
             // The accessibility may be turned off while we were waiting so check again.
-            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            if (mAccessibilityManager.isEnabled()) {
                 mLastEventTimeMillis = SystemClock.uptimeMillis();
                 AccessibilityEvent event = AccessibilityEvent.obtain();
                 event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);

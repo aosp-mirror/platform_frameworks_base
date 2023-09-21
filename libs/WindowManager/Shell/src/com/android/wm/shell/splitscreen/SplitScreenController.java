@@ -23,7 +23,6 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
-
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -43,6 +42,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.app.TaskInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
@@ -130,6 +130,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public static final int EXIT_REASON_CHILD_TASK_ENTER_PIP = 9;
     public static final int EXIT_REASON_RECREATE_SPLIT = 10;
     public static final int EXIT_REASON_FULLSCREEN_SHORTCUT = 11;
+    public static final int EXIT_REASON_ENTER_DESKTOP = 12;
     @IntDef(value = {
             EXIT_REASON_UNKNOWN,
             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW,
@@ -143,6 +144,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             EXIT_REASON_CHILD_TASK_ENTER_PIP,
             EXIT_REASON_RECREATE_SPLIT,
             EXIT_REASON_FULLSCREEN_SHORTCUT,
+            EXIT_REASON_ENTER_DESKTOP
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ExitReason{}
@@ -507,10 +509,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      * Move a task to split select
      * @param taskInfo the task being moved to split select
      * @param wct transaction to apply if this is a valid request
+     * @param splitPosition the split position this task should move to
+     * @param taskBounds current freeform bounds of the task entering split
      */
     public void requestEnterSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
-            WindowContainerTransaction wct) {
-        mStageCoordinator.requestEnterSplitSelect(taskInfo, wct);
+            WindowContainerTransaction wct, int splitPosition, Rect taskBounds) {
+        mStageCoordinator.requestEnterSplitSelect(taskInfo, wct, splitPosition, taskBounds);
     }
 
     public void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {
@@ -812,21 +816,22 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         final String packageName1 = SplitScreenUtils.getPackageName(intent);
         final String packageName2 = getPackageName(reverseSplitPosition(position));
         final int userId2 = getUserId(reverseSplitPosition(position));
+        final ComponentName component = intent.getIntent().getComponent();
+
+        // To prevent accumulating large number of instances in the background, reuse task
+        // in the background. If we don't explicitly reuse, new may be created even if the app
+        // isn't multi-instance because WM won't automatically remove/reuse the previous instance
+        final ActivityManager.RecentTaskInfo taskInfo = mRecentTasksOptional
+                .map(recentTasks -> recentTasks.findTaskInBackground(component, userId1))
+                .orElse(null);
+        if (taskInfo != null) {
+            startTask(taskInfo.taskId, position, options);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                    "Start task in background");
+            return;
+        }
         if (samePackage(packageName1, packageName2, userId1, userId2)) {
             if (supportMultiInstancesSplit(packageName1)) {
-                // To prevent accumulating large number of instances in the background, reuse task
-                // in the background with priority.
-                final ActivityManager.RecentTaskInfo taskInfo = mRecentTasksOptional
-                        .map(recentTasks -> recentTasks.findTaskInBackground(
-                                intent.getIntent().getComponent(), userId1))
-                        .orElse(null);
-                if (taskInfo != null) {
-                    startTask(taskInfo.taskId, position, options);
-                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
-                            "Start task in background");
-                    return;
-                }
-
                 // Flag with MULTIPLE_TASK if this is launching the same activity into both sides of
                 // the split and there is no reusable background task.
                 fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
@@ -1007,6 +1012,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 return "CHILD_TASK_ENTER_PIP";
             case EXIT_REASON_RECREATE_SPLIT:
                 return "RECREATE_SPLIT";
+            case EXIT_REASON_ENTER_DESKTOP:
+                return "ENTER_DESKTOP";
             default:
                 return "unknown reason, reason int = " + exitReason;
         }
@@ -1135,9 +1142,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 new SplitScreen.SplitSelectListener() {
                     @Override
                     public boolean onRequestEnterSplitSelect(
-                            ActivityManager.RunningTaskInfo taskInfo) {
+                            ActivityManager.RunningTaskInfo taskInfo, int splitPosition,
+                            Rect taskBounds) {
                         AtomicBoolean result = new AtomicBoolean(false);
-                        mSelectListener.call(l -> result.set(l.onRequestSplitSelect(taskInfo)));
+                        mSelectListener.call(l -> result.set(l.onRequestSplitSelect(taskInfo,
+                                splitPosition, taskBounds)));
                         return result.get();
                     }
                 };

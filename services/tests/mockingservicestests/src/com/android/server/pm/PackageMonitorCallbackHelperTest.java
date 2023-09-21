@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.reset;
@@ -183,7 +182,7 @@ public class PackageMonitorCallbackHelperTest {
         mPackageMonitorCallbackHelper.registerPackageMonitorCallback(callback, 0 /* userId */,
                 Binder.getCallingUid());
         mPackageMonitorCallbackHelper.notifyPackageAddedForNewUsers(FAKE_PACKAGE_NAME,
-                FAKE_PACKAGE_UID, new int[]{0} /* userIds */, new int[0],
+                FAKE_PACKAGE_UID, new int[]{0} /* userIds */, new int[0], false /* isArchived */,
                 PackageInstaller.DATA_LOADER_TYPE_STREAMING, null /* broadcastAllowList */);
 
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);

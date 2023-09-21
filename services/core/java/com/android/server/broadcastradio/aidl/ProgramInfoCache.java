@@ -17,9 +17,11 @@
 package com.android.server.broadcastradio.aidl;
 
 import android.annotation.Nullable;
+import android.hardware.broadcastradio.ProgramListChunk;
 import android.hardware.radio.ProgramList;
-import android.hardware.radio.ProgramSelector;
+import android.hardware.radio.ProgramSelector.Identifier;
 import android.hardware.radio.RadioManager;
+import android.hardware.radio.UniqueProgramIdentifier;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -30,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -40,24 +41,25 @@ final class ProgramInfoCache {
 
     private static final String TAG = "BcRadioAidlSrv.cache";
     /**
-     * Maximum number of {@link RadioManager#ProgramInfo} elements that will be put into a
+     * Maximum number of {@link RadioManager.ProgramInfo} elements that will be put into a
      * ProgramList.Chunk.mModified array. Used to try to ensure a single ProgramList.Chunk
      * stays within the AIDL data size limit.
      */
     private static final int MAX_NUM_MODIFIED_PER_CHUNK = 100;
 
     /**
-     * Maximum number of {@link ProgramSelector#Identifier} elements that will be put
-     * into the removed array of {@link ProgramList#Chunk}. Used to try to ensure a single
-     * {@link ProgramList#Chunk} stays within the AIDL data size limit.
+     * Maximum number of {@link Identifier} elements that will be put into the removed array
+     * of {@link ProgramList.Chunk}. Use to attempt and keep the single {@link ProgramList.Chunk}
+     * within the AIDL data size limit.
      */
     private static final int MAX_NUM_REMOVED_PER_CHUNK = 500;
 
     /**
-     * Map from primary identifier to corresponding {@link RadioManager#ProgramInfo}.
+     * Map from primary identifier to {@link UniqueProgramIdentifier} and then to corresponding
+     * {@link RadioManager.ProgramInfo}.
      */
-    private final Map<ProgramSelector.Identifier, RadioManager.ProgramInfo> mProgramInfoMap =
-            new ArrayMap<>();
+    private final ArrayMap<Identifier, ArrayMap<UniqueProgramIdentifier, RadioManager.ProgramInfo>>
+            mProgramInfoMap = new ArrayMap<>();
 
     /**
      * Flag indicating whether mProgramInfoMap is considered complete based upon the received
@@ -81,13 +83,17 @@ final class ProgramInfoCache {
         mFilter = filter;
         mComplete = complete;
         for (int i = 0; i < programInfos.length; i++) {
-            mProgramInfoMap.put(programInfos[i].getSelector().getPrimaryId(), programInfos[i]);
+            putInfo(programInfos[i]);
         }
     }
 
     @VisibleForTesting
     List<RadioManager.ProgramInfo> toProgramInfoList() {
-        return new ArrayList<>(mProgramInfoMap.values());
+        List<RadioManager.ProgramInfo> programInfoList = new ArrayList<>();
+        for (int index = 0; index < mProgramInfoMap.size(); index++) {
+            programInfoList.addAll(mProgramInfoMap.valueAt(index).values());
+        }
+        return programInfoList;
     }
 
     @Override
@@ -97,10 +103,14 @@ final class ProgramInfoCache {
         sb.append(", mFilter = ");
         sb.append(mFilter);
         sb.append(", mProgramInfoMap = [");
-        mProgramInfoMap.forEach((id, programInfo) -> {
-            sb.append(", ");
-            sb.append(programInfo);
-        });
+        for (int index = 0; index < mProgramInfoMap.size(); index++) {
+            ArrayMap<UniqueProgramIdentifier, RadioManager.ProgramInfo> entries =
+                    mProgramInfoMap.valueAt(index);
+            for (int entryIndex = 0; entryIndex < entries.size(); entryIndex++) {
+                sb.append(", ");
+                sb.append(entries.valueAt(entryIndex));
+            }
+        }
         return sb.append("])").toString();
     }
 
@@ -114,8 +124,7 @@ final class ProgramInfoCache {
     }
 
     @VisibleForTesting
-    void updateFromHalProgramListChunk(
-            android.hardware.broadcastradio.ProgramListChunk chunk) {
+    void updateFromHalProgramListChunk(ProgramListChunk chunk) {
         if (chunk.purge) {
             mProgramInfoMap.clear();
         }
@@ -125,8 +134,9 @@ final class ProgramInfoCache {
             if (programInfo == null) {
                 Slogf.e(TAG, "Program info in program info %s in chunk is not valid",
                         chunk.modified[i]);
+                continue;
             }
-            mProgramInfoMap.put(programInfo.getSelector().getPrimaryId(), programInfo);
+            putInfo(programInfo);
         }
         if (chunk.removed != null) {
             for (int i = 0; i < chunk.removed.length; i++) {
@@ -155,25 +165,31 @@ final class ProgramInfoCache {
             purge = true;
         }
 
-        Set<RadioManager.ProgramInfo> modified = new ArraySet<>();
-        Set<ProgramSelector.Identifier> removed = new ArraySet<>(mProgramInfoMap.keySet());
-        for (Map.Entry<ProgramSelector.Identifier, RadioManager.ProgramInfo> entry
-                : other.mProgramInfoMap.entrySet()) {
-            ProgramSelector.Identifier id = entry.getKey();
+        ArraySet<RadioManager.ProgramInfo> modified = new ArraySet<>();
+        ArraySet<UniqueProgramIdentifier> removed = new ArraySet<>();
+        for (int index = 0; index < mProgramInfoMap.size(); index++) {
+            removed.addAll(mProgramInfoMap.valueAt(index).keySet());
+        }
+        for (int index = 0; index < other.mProgramInfoMap.size(); index++) {
+            Identifier id = other.mProgramInfoMap.keyAt(index);
             if (!passesFilter(id)) {
                 continue;
             }
-            removed.remove(id);
+            ArrayMap<UniqueProgramIdentifier, RadioManager.ProgramInfo> entries =
+                    other.mProgramInfoMap.valueAt(index);
+            for (int entryIndex = 0; entryIndex < entries.size(); entryIndex++) {
+                removed.remove(entries.keyAt(entryIndex));
 
-            RadioManager.ProgramInfo newInfo = entry.getValue();
-            if (!shouldIncludeInModified(newInfo)) {
-                continue;
+                RadioManager.ProgramInfo newInfo = entries.valueAt(entryIndex);
+                if (!shouldIncludeInModified(newInfo)) {
+                    continue;
+                }
+                putInfo(newInfo);
+                modified.add(newInfo);
             }
-            mProgramInfoMap.put(id, newInfo);
-            modified.add(newInfo);
         }
-        for (ProgramSelector.Identifier rem : removed) {
-            mProgramInfoMap.remove(rem);
+        for (int removedIndex = 0; removedIndex < removed.size(); removedIndex++) {
+            removeUniqueId(removed.valueAt(removedIndex));
         }
         mComplete = other.mComplete;
         return buildChunks(purge, mComplete, modified, maxNumModifiedPerChunk, removed,
@@ -181,45 +197,61 @@ final class ProgramInfoCache {
     }
 
     @Nullable
-    List<ProgramList.Chunk> filterAndApplyChunk(ProgramList.Chunk chunk) {
+    List<ProgramList.Chunk> filterAndApplyChunk(ProgramListChunk chunk) {
         return filterAndApplyChunkInternal(chunk, MAX_NUM_MODIFIED_PER_CHUNK,
                 MAX_NUM_REMOVED_PER_CHUNK);
     }
 
     @VisibleForTesting
     @Nullable
-    List<ProgramList.Chunk> filterAndApplyChunkInternal(ProgramList.Chunk chunk,
+    List<ProgramList.Chunk> filterAndApplyChunkInternal(ProgramListChunk chunk,
             int maxNumModifiedPerChunk, int maxNumRemovedPerChunk) {
-        if (chunk.isPurge()) {
+        if (chunk.purge) {
             mProgramInfoMap.clear();
         }
 
         Set<RadioManager.ProgramInfo> modified = new ArraySet<>();
-        Set<ProgramSelector.Identifier> removed = new ArraySet<>();
-        for (RadioManager.ProgramInfo info : chunk.getModified()) {
-            ProgramSelector.Identifier id = info.getSelector().getPrimaryId();
-            if (!passesFilter(id) || !shouldIncludeInModified(info)) {
+        for (int i = 0; i < chunk.modified.length; i++) {
+            RadioManager.ProgramInfo info =
+                    ConversionUtils.programInfoFromHalProgramInfo(chunk.modified[i]);
+            if (info == null) {
+                Slogf.w(TAG, "Program info %s in program list chunk is not valid",
+                        chunk.modified[i]);
                 continue;
             }
-            mProgramInfoMap.put(id, info);
+            Identifier primaryId = info.getSelector().getPrimaryId();
+            if (!passesFilter(primaryId) || !shouldIncludeInModified(info)) {
+                continue;
+            }
+            putInfo(info);
             modified.add(info);
         }
-        for (ProgramSelector.Identifier id : chunk.getRemoved()) {
-            if (mProgramInfoMap.containsKey(id)) {
-                mProgramInfoMap.remove(id);
-                removed.add(id);
+        Set<UniqueProgramIdentifier> removed = new ArraySet<>();
+        if (chunk.removed != null) {
+            for (int i = 0; i < chunk.removed.length; i++) {
+                Identifier removedId = ConversionUtils.identifierFromHalProgramIdentifier(
+                        chunk.removed[i]);
+                if (removedId == null) {
+                    Slogf.w(TAG, "Removed identifier %s in program list chunk is not valid",
+                            chunk.modified[i]);
+                    continue;
+                }
+                if (mProgramInfoMap.containsKey(removedId)) {
+                    removed.addAll(mProgramInfoMap.get(removedId).keySet());
+                    mProgramInfoMap.remove(removedId);
+                }
             }
         }
-        if (modified.isEmpty() && removed.isEmpty() && mComplete == chunk.isComplete()
-                && !chunk.isPurge()) {
+        if (modified.isEmpty() && removed.isEmpty() && mComplete == chunk.complete
+                && !chunk.purge) {
             return null;
         }
-        mComplete = chunk.isComplete();
-        return buildChunks(chunk.isPurge(), mComplete, modified, maxNumModifiedPerChunk, removed,
+        mComplete = chunk.complete;
+        return buildChunks(chunk.purge, mComplete, modified, maxNumModifiedPerChunk, removed,
                 maxNumRemovedPerChunk);
     }
 
-    private boolean passesFilter(ProgramSelector.Identifier id) {
+    private boolean passesFilter(Identifier id) {
         if (mFilter == null) {
             return true;
         }
@@ -233,9 +265,32 @@ final class ProgramInfoCache {
         return mFilter.areCategoriesIncluded() || !id.isCategoryType();
     }
 
+    private void putInfo(RadioManager.ProgramInfo info) {
+        Identifier primaryId = info.getSelector().getPrimaryId();
+        if (!mProgramInfoMap.containsKey(primaryId)) {
+            mProgramInfoMap.put(primaryId, new ArrayMap<>());
+        }
+        mProgramInfoMap.get(primaryId).put(new UniqueProgramIdentifier(info.getSelector()), info);
+    }
+
+    private void removeUniqueId(UniqueProgramIdentifier uniqueId) {
+        Identifier primaryId =  uniqueId.getPrimaryId();
+        if (!mProgramInfoMap.containsKey(primaryId)) {
+            return;
+        }
+        mProgramInfoMap.get(primaryId).remove(uniqueId);
+        if (mProgramInfoMap.get(primaryId).isEmpty()) {
+            mProgramInfoMap.remove(primaryId);
+        }
+    }
+
     private boolean shouldIncludeInModified(RadioManager.ProgramInfo newInfo) {
-        RadioManager.ProgramInfo oldInfo = mProgramInfoMap.get(
-                newInfo.getSelector().getPrimaryId());
+        Identifier primaryId = newInfo.getSelector().getPrimaryId();
+        RadioManager.ProgramInfo oldInfo = null;
+        if (mProgramInfoMap.containsKey(primaryId)) {
+            UniqueProgramIdentifier uniqueId = new UniqueProgramIdentifier(newInfo.getSelector());
+            oldInfo = mProgramInfoMap.get(primaryId).get(uniqueId);
+        }
         if (oldInfo == null) {
             return true;
         }
@@ -251,7 +306,7 @@ final class ProgramInfoCache {
 
     private static List<ProgramList.Chunk> buildChunks(boolean purge, boolean complete,
             @Nullable Collection<RadioManager.ProgramInfo> modified, int maxNumModifiedPerChunk,
-            @Nullable Collection<ProgramSelector.Identifier> removed, int maxNumRemovedPerChunk) {
+            @Nullable Collection<UniqueProgramIdentifier> removed, int maxNumRemovedPerChunk) {
         // Communication protocol requires that if purge is set, removed is empty.
         if (purge) {
             removed = null;
@@ -275,7 +330,7 @@ final class ProgramInfoCache {
         int modifiedPerChunk = 0;
         int removedPerChunk = 0;
         Iterator<RadioManager.ProgramInfo> modifiedIter = null;
-        Iterator<ProgramSelector.Identifier> removedIter = null;
+        Iterator<UniqueProgramIdentifier> removedIter = null;
         if (modified != null) {
             modifiedPerChunk = roundUpFraction(modified.size(), numChunks);
             modifiedIter = modified.iterator();
@@ -287,7 +342,7 @@ final class ProgramInfoCache {
         List<ProgramList.Chunk> chunks = new ArrayList<>(numChunks);
         for (int i = 0; i < numChunks; i++) {
             ArraySet<RadioManager.ProgramInfo> modifiedChunk = new ArraySet<>();
-            ArraySet<ProgramSelector.Identifier> removedChunk = new ArraySet<>();
+            ArraySet<UniqueProgramIdentifier> removedChunk = new ArraySet<>();
             if (modifiedIter != null) {
                 for (int j = 0; j < modifiedPerChunk && modifiedIter.hasNext(); j++) {
                     modifiedChunk.add(modifiedIter.next());

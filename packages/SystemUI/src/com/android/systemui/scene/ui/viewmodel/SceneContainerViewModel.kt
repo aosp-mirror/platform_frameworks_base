@@ -17,10 +17,10 @@
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.RemoteUserInput
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
@@ -32,28 +32,26 @@ import kotlinx.coroutines.flow.StateFlow
 class SceneContainerViewModel
 @Inject
 constructor(
-    private val interactor: SceneInteractor,
+    private val sceneInteractor: SceneInteractor,
+    private val falsingInteractor: FalsingInteractor,
 ) {
-    /** A flow of motion events originating from outside of the scene framework. */
-    val remoteUserInput: StateFlow<RemoteUserInput?> = interactor.remoteUserInput
-
     /**
      * Keys of all scenes in the container.
      *
      * The scenes will be sorted in z-order such that the last one is the one that should be
      * rendered on top of all previous ones.
      */
-    val allSceneKeys: List<SceneKey> = interactor.allSceneKeys()
+    val allSceneKeys: List<SceneKey> = sceneInteractor.allSceneKeys()
 
     /** The scene that should be rendered. */
-    val currentScene: StateFlow<SceneModel> = interactor.desiredScene
+    val currentScene: StateFlow<SceneModel> = sceneInteractor.desiredScene
 
     /** Whether the container is visible. */
-    val isVisible: StateFlow<Boolean> = interactor.isVisible
+    val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
 
     /** Notifies that the UI has transitioned sufficiently to the given scene. */
     fun onSceneChanged(scene: SceneModel) {
-        interactor.onSceneChanged(
+        sceneInteractor.onSceneChanged(
             scene = scene,
             loggingReason = SCENE_TRANSITION_LOGGING_REASON,
         )
@@ -65,12 +63,27 @@ constructor(
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
-        interactor.setTransitionState(transitionState)
+        sceneInteractor.setTransitionState(transitionState)
     }
 
-    /** Handles a [MotionEvent] representing remote user input. */
-    fun onRemoteUserInput(event: MotionEvent) {
-        interactor.onRemoteUserInput(RemoteUserInput.translateMotionEvent(event))
+    /**
+     * Notifies that a [MotionEvent] is first seen at the top of the scene container UI.
+     *
+     * Call this before the [MotionEvent] starts to propagate through the UI hierarchy.
+     */
+    fun onMotionEvent(event: MotionEvent) {
+        sceneInteractor.onUserInput()
+        falsingInteractor.onTouchEvent(event)
+    }
+
+    /**
+     * Notifies that a [MotionEvent] that was previously sent to [onMotionEvent] has passed through
+     * the scene container UI.
+     *
+     * Call this after the [MotionEvent] propagates completely through the UI hierarchy.
+     */
+    fun onMotionEventComplete() {
+        falsingInteractor.onMotionEventComplete()
     }
 
     companion object {

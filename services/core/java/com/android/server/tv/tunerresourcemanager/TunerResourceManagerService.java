@@ -1454,6 +1454,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         boolean hasDesiredDemuxCap = request.desiredFilterTypes
                 != DemuxFilterMainType.UNDEFINED;
         int smallestNumOfSupportedCaps = Integer.SIZE + 1;
+        int smallestNumOfSupportedCapsInUse = Integer.SIZE + 1;
         for (DemuxResource dr : getDemuxResources().values()) {
             if (!hasDesiredDemuxCap || dr.hasSufficientCaps(request.desiredFilterTypes)) {
                 if (!dr.isInUse()) {
@@ -1476,12 +1477,18 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                             currentLowestPriority = priority;
                             isRequestFromSameProcess = (requestClient.getProcessId()
                                 == (getClientProfile(dr.getOwnerClientId())).getProcessId());
+
+                            // reset the smallest caps when lower priority resource is found
+                            smallestNumOfSupportedCapsInUse = numOfSupportedCaps;
+
                             shouldUpdate = true;
-                        }
-                        // update smallest caps
-                        if (smallestNumOfSupportedCaps > numOfSupportedCaps) {
-                            smallestNumOfSupportedCaps = numOfSupportedCaps;
-                            shouldUpdate = true;
+                        } else {
+                            // This is the case when the priority is the same as previously found
+                            // one. Update smallest caps when priority.
+                            if (smallestNumOfSupportedCapsInUse > numOfSupportedCaps) {
+                                smallestNumOfSupportedCapsInUse = numOfSupportedCaps;
+                                shouldUpdate = true;
+                            }
                         }
                         if (shouldUpdate) {
                             inUseLowestPriorityDrHandle = dr.getHandle();

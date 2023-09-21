@@ -20,7 +20,7 @@ import android.app.AppOpsManager;
 import android.app.AsyncNotedAppOp;
 import android.app.SyncNotedAppOp;
 import android.app.RuntimeAppOpAccessMessage;
-import android.content.AttributionSource;
+import android.content.AttributionSourceState;
 import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import android.os.PackageTagsList;
@@ -57,16 +57,16 @@ interface IAppOpsService {
     // End of methods also called by native code.
     // Any new method exposed to native must be added after the last one, do not reorder
 
-    SyncNotedAppOp noteProxyOperation(int code, in AttributionSource attributionSource,
+    SyncNotedAppOp noteProxyOperation(int code, in AttributionSourceState attributionSourceState,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation);
     SyncNotedAppOp startProxyOperation(IBinder clientId, int code,
-            in AttributionSource attributionSource, boolean startIfModeDefault,
+            in AttributionSourceState attributionSourceState, boolean startIfModeDefault,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation, int proxyAttributionFlags, int proxiedAttributionFlags,
             int attributionChainId);
-    void finishProxyOperation(IBinder clientId, int code, in AttributionSource attributionSource,
-            boolean skipProxyOperation);
+    void finishProxyOperation(IBinder clientId, int code,
+            in AttributionSourceState attributionSourceState, boolean skipProxyOperation);
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);

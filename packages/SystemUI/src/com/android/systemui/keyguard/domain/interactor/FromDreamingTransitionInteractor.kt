@@ -51,6 +51,7 @@ constructor(
         listenForDreamingToOccluded()
         listenForDreamingToGone()
         listenForDreamingToDozing()
+        listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
     fun startToLockscreenTransition() {

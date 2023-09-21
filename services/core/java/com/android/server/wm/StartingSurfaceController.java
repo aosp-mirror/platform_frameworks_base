@@ -19,12 +19,12 @@ package com.android.server.wm;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_DRAWN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_ICON;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN;
 
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_TYPE_SNAPSHOT;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
@@ -40,6 +40,7 @@ import android.compat.annotation.EnabledSince;
 import android.content.pm.ApplicationInfo;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.window.ITaskOrganizer;
 import android.window.SplashScreenView;
 import android.window.TaskSnapshot;
 
@@ -79,12 +80,13 @@ public class StartingSurfaceController {
     }
 
     StartingSurface createSplashScreenStartingSurface(ActivityRecord activity, int theme) {
-
         synchronized (mService.mGlobalLock) {
             final Task task = activity.getTask();
-            if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(
-                    task, activity, theme, null /* taskSnapshot */)) {
-                return new StartingSurface(task);
+            final TaskOrganizerController controller =
+                    mService.mAtmService.mTaskOrganizerController;
+            if (task != null && controller.addStartingWindow(task, activity, theme,
+                    null /* taskSnapshot */)) {
+                return new StartingSurface(task, controller.getTaskOrganizer());
             }
         }
         return null;
@@ -100,7 +102,7 @@ public class StartingSurfaceController {
 
     static int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
             boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated,
-            boolean isSolidColor, boolean useLegacy, boolean activityDrawn, int startingWindowType,
+            boolean allowIcon, boolean useLegacy, boolean activityDrawn, int startingWindowType,
             String packageName, int userId) {
         int parameter = 0;
         if (newTask) {
@@ -118,8 +120,8 @@ public class StartingSurfaceController {
         if (activityCreated || startingWindowType == STARTING_WINDOW_TYPE_SNAPSHOT) {
             parameter |= TYPE_PARAMETER_ACTIVITY_CREATED;
         }
-        if (isSolidColor) {
-            parameter |= TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN;
+        if (allowIcon) {
+            parameter |= TYPE_PARAMETER_ALLOW_ICON;
         }
         if (useLegacy) {
             parameter |= TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
@@ -166,9 +168,12 @@ public class StartingSurfaceController {
                 activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
                         activity, false /* checkOpening */);
             }
-                mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
-                        activity, 0 /* launchTheme */, taskSnapshot);
-            return new StartingSurface(task);
+            final TaskOrganizerController controller =
+                    mService.mAtmService.mTaskOrganizerController;
+            if (controller.addStartingWindow(task, activity, 0 /* launchTheme */, taskSnapshot)) {
+                return new StartingSurface(task, controller.getTaskOrganizer());
+            }
+            return null;
         }
     }
 
@@ -256,9 +261,12 @@ public class StartingSurfaceController {
 
     final class StartingSurface {
         private final Task mTask;
+        // The task organizer which hold the client side reference of this surface.
+        final ITaskOrganizer mTaskOrganizer;
 
-        StartingSurface(Task task) {
+        StartingSurface(Task task, ITaskOrganizer taskOrganizer) {
             mTask = task;
+            mTaskOrganizer = taskOrganizer;
         }
 
         /**
@@ -268,7 +276,8 @@ public class StartingSurfaceController {
          */
         public void remove(boolean animate) {
             synchronized (mService.mGlobalLock) {
-                mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask, animate);
+                mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask,
+                        mTaskOrganizer, animate);
             }
         }
     }

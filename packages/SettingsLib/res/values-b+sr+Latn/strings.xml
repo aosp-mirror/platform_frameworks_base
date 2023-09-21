@@ -107,8 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prenos datoteke"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Ulazni uređaj"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Pristup Internetu"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Deljenje kontakata i istorije poziva"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Koristite za deljenje kontakata i istorije poziva"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Dozvoli kontakte i istoriju poziva"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Informacije će se koristiti za obaveštenja o pozivima i drugo"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Deljenje internet veze"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS-ovi"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Pristup SIM kartici"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Otkaži"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Uparivanje omogućava pristup kontaktima i istoriji poziva nakon povezivanja."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Uparivanje sa uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguće."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguće zbog netačnog PIN-a ili pristupnog koda."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguće zbog netačnog PIN-a ili pristupnog ključa."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nije moguće komunicirati sa uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> je odbio/la uparivanje"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Računar"</string>
@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Omogućava promenu veličine svih aktivnosti za režim sa više prozora, bez obzira na vrednosti manifesta."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Omogući prozore proizvoljnog formata"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Omogućava podršku za eksperimentalne prozore proizvoljnog formata."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Režim za računare"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Lozinka rezervne kopije za računar"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Rezervne kopije čitavog sistema trenutno nisu zaštićene"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Dodirnite da biste promenili ili uklonili lozinku za pravljenje rezervnih kopija čitavog sistema na računaru"</string>
@@ -685,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije za pokret povratka sa predviđanjem"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogućite animacije sistema za pokret povratka sa predviđanjem."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ovo podešavanje omogućava animacije sistema za pokret povratka sa predviđanjem. Zahteva podešavanje dozvole enableOnBackInvokedCallback po aplikaciji na true u fajlu manifesta."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Pomerite nalevo"</item>
-    <item msgid="5425394847942513942">"Pomerite nadole"</item>
-    <item msgid="7728484337962740316">"Pomerite nadesno"</item>
-    <item msgid="324200556467459329">"Pomerite nagore"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"Nije navedeno"</string>
     <string name="neuter" msgid="2075249330106127310">"Srednji rod"</string>

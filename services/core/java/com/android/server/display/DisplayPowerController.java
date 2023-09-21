@@ -75,6 +75,7 @@ import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
@@ -430,6 +431,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private float mBrightnessRampRateFastIncrease;
     private float mBrightnessRampRateSlowDecrease;
     private float mBrightnessRampRateSlowIncrease;
+    private float mBrightnessRampRateSlowDecreaseIdle;
+    private float mBrightnessRampRateSlowIncreaseIdle;
 
     // Report HBM brightness change to StatsD
     private int mDisplayStatsId;
@@ -590,7 +593,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             SensorManager sensorManager, DisplayBlanker blanker, LogicalDisplay logicalDisplay,
             BrightnessTracker brightnessTracker, BrightnessSetting brightnessSetting,
             Runnable onBrightnessChangeRunnable, HighBrightnessModeMetadata hbmMetadata,
-            boolean bootCompleted) {
+            boolean bootCompleted, DisplayManagerFlags flags) {
 
         mInjector = injector != null ? injector : new Injector();
         mClock = mInjector.getClock();
@@ -675,7 +678,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         HighBrightnessModeController hbmController = createHbmControllerLocked(modeChangeCallback);
 
         mBrightnessRangeController = new BrightnessRangeController(hbmController,
-                modeChangeCallback, mDisplayDeviceConfig);
+                modeChangeCallback, mDisplayDeviceConfig, mHandler, flags);
 
         mBrightnessThrottler = createBrightnessThrottlerLocked();
 
@@ -1232,6 +1235,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     .getAutoBrightnessBrighteningLightDebounce();
             long darkeningLightDebounce = mDisplayDeviceConfig
                     .getAutoBrightnessDarkeningLightDebounce();
+            long brighteningLightDebounceIdle = mDisplayDeviceConfig
+                    .getAutoBrightnessBrighteningLightDebounceIdle();
+            long darkeningLightDebounceIdle = mDisplayDeviceConfig
+                    .getAutoBrightnessDarkeningLightDebounceIdle();
             boolean autoBrightnessResetAmbientLuxAfterWarmUp = resources.getBoolean(
                     com.android.internal.R.bool.config_autoBrightnessResetAmbientLuxAfterWarmUp);
 
@@ -1271,7 +1278,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     mInteractiveModeBrightnessMapper, lightSensorWarmUpTimeConfig,
                     PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, dozeScaleFactor,
                     lightSensorRate, initialLightSensorRate, brighteningLightDebounce,
-                    darkeningLightDebounce, autoBrightnessResetAmbientLuxAfterWarmUp,
+                    darkeningLightDebounce, brighteningLightDebounceIdle,
+                    darkeningLightDebounceIdle, autoBrightnessResetAmbientLuxAfterWarmUp,
                     ambientBrightnessThresholds, screenBrightnessThresholds,
                     ambientBrightnessThresholdsIdle, screenBrightnessThresholdsIdle, mContext,
                     mBrightnessRangeController, mBrightnessThrottler, mIdleModeBrightnessMapper,
@@ -1307,6 +1315,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mBrightnessRampRateFastIncrease = mDisplayDeviceConfig.getBrightnessRampFastIncrease();
         mBrightnessRampRateSlowDecrease = mDisplayDeviceConfig.getBrightnessRampSlowDecrease();
         mBrightnessRampRateSlowIncrease = mDisplayDeviceConfig.getBrightnessRampSlowIncrease();
+        mBrightnessRampRateSlowDecreaseIdle =
+                mDisplayDeviceConfig.getBrightnessRampSlowDecreaseIdle();
+        mBrightnessRampRateSlowIncreaseIdle =
+                mDisplayDeviceConfig.getBrightnessRampSlowIncreaseIdle();
         mBrightnessRampDecreaseMaxTimeMillis =
                 mDisplayDeviceConfig.getBrightnessRampDecreaseMaxMillis();
         mBrightnessRampIncreaseMaxTimeMillis =
@@ -1906,22 +1918,44 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             final float currentBrightness = mPowerState.getScreenBrightness();
             final float currentSdrBrightness = mPowerState.getSdrScreenBrightness();
+
             if (isValidBrightnessValue(animateValue)
                     && (animateValue != currentBrightness
                     || sdrAnimateValue != currentSdrBrightness)) {
-                if (initialRampSkip || hasBrightnessBuckets
-                        || !isDisplayContentVisible || brightnessIsTemporary) {
+                boolean skipAnimation = initialRampSkip || hasBrightnessBuckets
+                        || !isDisplayContentVisible || brightnessIsTemporary;
+                if (!skipAnimation && BrightnessSynchronizer.floatEquals(
+                        sdrAnimateValue, currentSdrBrightness)) {
+                    // Going from HDR to no HDR; visually this should be a "no-op" anyway
+                    // as the remaining SDR content's brightness should be holding steady
+                    // due to the sdr brightness not shifting
+                    if (BrightnessSynchronizer.floatEquals(sdrAnimateValue, animateValue)) {
+                        skipAnimation = true;
+                    }
+
+                    // Going from no HDR to HDR; visually this is a significant scene change
+                    // and the animation just prevents advanced clients from doing their own
+                    // handling of enter/exit animations if they would like to do such a thing
+                    if (BrightnessSynchronizer.floatEquals(sdrAnimateValue, currentBrightness)) {
+                        skipAnimation = true;
+                    }
+                }
+                if (skipAnimation) {
                     animateScreenBrightness(animateValue, sdrAnimateValue,
                             SCREEN_ANIMATION_RATE_MINIMUM);
                 } else {
                     boolean isIncreasing = animateValue > currentBrightness;
                     final float rampSpeed;
+                    final boolean idle = mAutomaticBrightnessController != null
+                            && mAutomaticBrightnessController.isInIdleMode();
                     if (isIncreasing && slowChange) {
-                        rampSpeed = mBrightnessRampRateSlowIncrease;
+                        rampSpeed = idle ? mBrightnessRampRateSlowIncreaseIdle
+                                : mBrightnessRampRateSlowIncrease;
                     } else if (isIncreasing && !slowChange) {
                         rampSpeed = mBrightnessRampRateFastIncrease;
                     } else if (!isIncreasing && slowChange) {
-                        rampSpeed = mBrightnessRampRateSlowDecrease;
+                        rampSpeed = idle ? mBrightnessRampRateSlowDecreaseIdle
+                                : mBrightnessRampRateSlowDecrease;
                     } else {
                         rampSpeed = mBrightnessRampRateFastDecrease;
                     }
@@ -3520,7 +3554,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         DisplayPowerState getDisplayPowerState(DisplayBlanker blanker, ColorFade colorFade,
                 int displayId, int displayState) {
-            return new DisplayPowerState(blanker, colorFade, displayId, displayState);
+            return new DisplayPowerState(blanker, colorFade, displayId, displayState,
+                    new Handler(/*async=*/ true));
         }
 
         DualRampAnimator<DisplayPowerState> getDualRampAnimator(DisplayPowerState dps,
@@ -3536,6 +3571,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 int lightSensorWarmUpTime, float brightnessMin, float brightnessMax,
                 float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
                 long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
+                long brighteningLightDebounceConfigIdle, long darkeningLightDebounceConfigIdle,
                 boolean resetAmbientLuxAfterWarmUpConfig,
                 HysteresisLevels ambientBrightnessThresholds,
                 HysteresisLevels screenBrightnessThresholds,
@@ -3549,6 +3585,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     interactiveModeBrightnessMapper, lightSensorWarmUpTime, brightnessMin,
                     brightnessMax, dozeScaleFactor, lightSensorRate, initialLightSensorRate,
                     brighteningLightDebounceConfig, darkeningLightDebounceConfig,
+                    brighteningLightDebounceConfigIdle, darkeningLightDebounceConfigIdle,
                     resetAmbientLuxAfterWarmUpConfig, ambientBrightnessThresholds,
                     screenBrightnessThresholds, ambientBrightnessThresholdsIdle,
                     screenBrightnessThresholdsIdle, context, brightnessRangeController,

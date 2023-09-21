@@ -29,12 +29,14 @@ import android.util.Log
 import android.view.WindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -43,10 +45,12 @@ import javax.inject.Inject
  * Helps with handling camera-related gestures (for example, double-tap the power button to launch
  * the camera).
  */
+@SysUISingleton
 class CameraGestureHelper @Inject constructor(
     private val context: Context,
     private val centralSurfaces: CentralSurfaces,
     private val keyguardStateController: KeyguardStateController,
+    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     private val packageManager: PackageManager,
     private val activityManager: ActivityManager,
     private val activityStarter: ActivityStarter,
@@ -133,7 +137,7 @@ class CameraGestureHelper @Inject constructor(
         centralSurfaces.startLaunchTransitionTimeout()
         // Call this to make sure the keyguard is ready to be dismissed once the next intent is
         // handled by the OS (in our case it is the activity we started right above)
-        centralSurfaces.readyForKeyguardDone()
+        statusBarKeyguardViewManager.readyForKeyguardDone()
     }
 
     /**

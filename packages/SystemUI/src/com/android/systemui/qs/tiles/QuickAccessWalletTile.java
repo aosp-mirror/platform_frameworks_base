@@ -20,6 +20,7 @@ import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.provider.Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT;
 
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE;
+import static com.android.systemui.wallet.util.WalletCardUtilsKt.getPaymentCards;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -210,7 +211,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         public void onWalletCardsRetrieved(@NonNull GetWalletCardsResponse response) {
             Log.i(TAG, "Successfully retrieved wallet cards.");
             mIsWalletUpdating = false;
-            List<WalletCard> cards = response.getWalletCards();
+            List<WalletCard> cards = getPaymentCards(response.getWalletCards());
             if (cards.isEmpty()) {
                 Log.d(TAG, "No wallet cards exist.");
                 mCardViewDrawable = null;

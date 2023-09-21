@@ -25,7 +25,7 @@ import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.wm.shell.flicker.service.Utils
+import com.android.wm.shell.flicker.service.common.Utils
 import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import org.junit.After
 import org.junit.Before
@@ -48,11 +48,12 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
     @Before
     fun setup() {
-        tapl.setEnableRotation(true)
-        tapl.setExpectedRotation(rotation.value)
         tapl.workspace.switchToOverview().dismissAllTasks()
 
-        SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
+        tapl.setEnableRotation(true)
+        tapl.setExpectedRotation(rotation.value)
+
+        SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp, rotation)
     }
 
     @Test

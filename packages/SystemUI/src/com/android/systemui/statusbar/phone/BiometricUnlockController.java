@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
-
-import static com.android.systemui.flags.Flags.FP_LISTEN_OCCLUDING_APPS;
 import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.UNKNOWN_LAST_WAKE_TIME;
 
@@ -177,6 +175,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final VibratorHelper mVibratorHelper;
     private final BiometricUnlockLogger mLogger;
     private final SystemClock mSystemClock;
+    private final boolean mOrderUnlockAndWake;
 
     private long mLastFpFailureUptimeMillis;
     private int mNumConsecutiveFpFailures;
@@ -316,6 +315,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mLogger = biometricUnlockLogger;
         mSystemClock = systemClock;
         mFeatureFlags = featureFlags;
+        mOrderUnlockAndWake = resources.getBoolean(
+                com.android.internal.R.bool.config_orderUnlockAndWake);
 
         dumpManager.registerDumpable(this);
     }
@@ -470,10 +471,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             Trace.endSection();
         };
 
-        final boolean wakingFromDream = mMode == MODE_WAKE_AND_UNLOCK_FROM_DREAM
-                && mPowerManager.isInteractive();
+        final boolean wakeInKeyguard = mMode == MODE_WAKE_AND_UNLOCK_FROM_DREAM
+                && mPowerManager.isInteractive() && mOrderUnlockAndWake
+                && mOrderUnlockAndWake;
 
-        if (mMode != MODE_NONE && !wakingFromDream) {
+        if (mMode != MODE_NONE && !wakeInKeyguard) {
             wakeUp.run();
         }
         switch (mMode) {
@@ -509,7 +511,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     // later to awaken.
                 }
                 mNotificationShadeWindowController.setNotificationShadeFocusable(false);
-                mKeyguardViewMediator.onWakeAndUnlocking(wakingFromDream);
+                mKeyguardViewMediator.onWakeAndUnlocking(wakeInKeyguard);
                 Trace.endSection();
                 break;
             case MODE_ONLY_WAKE:
@@ -698,8 +700,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
 
         final boolean screenOff = !mUpdateMonitor.isDeviceInteractive();
-        if (!mVibratorHelper.hasVibrator() && (screenOff || (mUpdateMonitor.isDreaming()
-                && !mFeatureFlags.isEnabled(FP_LISTEN_OCCLUDING_APPS)))) {
+        if (!mVibratorHelper.hasVibrator() && screenOff) {
             mLogger.d("wakeup device on authentication failure (device doesn't have a vibrator)");
             startWakeAndUnlock(MODE_ONLY_WAKE);
         } else if (biometricSourceType == BiometricSourceType.FINGERPRINT

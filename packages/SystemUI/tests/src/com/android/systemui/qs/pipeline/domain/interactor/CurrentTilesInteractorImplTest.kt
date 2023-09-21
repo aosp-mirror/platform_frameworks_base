@@ -22,8 +22,9 @@ import android.content.Intent
 import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.service.quicksettings.Tile
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dump.nano.SystemUIProtoDump
@@ -42,6 +43,7 @@ import com.android.systemui.qs.pipeline.data.repository.FakeInstalledTilesCompon
 import com.android.systemui.qs.pipeline.data.repository.FakeTileSpecRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.domain.model.TileModel
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.qs.toProto
@@ -68,7 +70,8 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
@@ -79,6 +82,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
     private val customTileAddedRepository: CustomTileAddedRepository =
         FakeCustomTileAddedRepository()
     private val featureFlags = FakeFeatureFlags()
+    private val pipelineFlags = QSPipelineFlagsRepository(featureFlags)
     private val tileLifecycleManagerFactory = TLMFactory()
 
     @Mock private lateinit var customTileStatePersister: CustomTileStatePersister
@@ -120,7 +124,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
                 backgroundDispatcher = testDispatcher,
                 scope = testScope.backgroundScope,
                 logger = logger,
-                featureFlags = featureFlags,
+                featureFlags = pipelineFlags,
             )
     }
 

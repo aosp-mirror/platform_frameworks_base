@@ -73,6 +73,7 @@ import kotlin.test.assertNotNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -705,12 +706,12 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     fun updateNoteTaskAsUser_sameUser_shouldUpdateShortcuts() {
         val user = UserHandle.CURRENT
         val controller = spy(createNoteTaskController())
-        doNothing().whenever(controller).updateNoteTaskAsUserInternal(any())
+        doNothing().whenever(controller).launchUpdateNoteTaskAsUser(any())
         whenever(controller.getCurrentRunningUser()).thenReturn(user)
 
         controller.updateNoteTaskAsUser(user)
 
-        verify(controller).updateNoteTaskAsUserInternal(user)
+        verify(controller).launchUpdateNoteTaskAsUser(user)
         verify(context, never()).startServiceAsUser(any(), any())
     }
 
@@ -718,12 +719,12 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     fun updateNoteTaskAsUser_differentUser_shouldUpdateShortcutsInUserProcess() {
         val user = UserHandle.CURRENT
         val controller = spy(createNoteTaskController(isEnabled = true))
-        doNothing().whenever(controller).updateNoteTaskAsUserInternal(any())
+        doNothing().whenever(controller).launchUpdateNoteTaskAsUser(any())
         whenever(controller.getCurrentRunningUser()).thenReturn(UserHandle.SYSTEM)
 
         controller.updateNoteTaskAsUser(user)
 
-        verify(controller, never()).updateNoteTaskAsUserInternal(any())
+        verify(controller, never()).launchUpdateNoteTaskAsUser(any())
         val intent = withArgCaptor { verify(context).startServiceAsUser(capture(), eq(user)) }
         assertThat(intent).hasComponentClass(NoteTaskControllerUpdateService::class.java)
     }
@@ -733,7 +734,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     @Test
     fun updateNoteTaskAsUserInternal_withNotesRole_withShortcuts_shouldUpdateShortcuts() {
         createNoteTaskController(isEnabled = true)
-            .updateNoteTaskAsUserInternal(userTracker.userHandle)
+            .launchUpdateNoteTaskAsUser(userTracker.userHandle)
+        testScope.runCurrent()
 
         val actualComponent = argumentCaptor<ComponentName>()
         verify(context.packageManager)
@@ -768,7 +770,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .thenReturn(emptyList())
 
         createNoteTaskController(isEnabled = true)
-            .updateNoteTaskAsUserInternal(userTracker.userHandle)
+            .launchUpdateNoteTaskAsUser(userTracker.userHandle)
+        testScope.runCurrent()
 
         val argument = argumentCaptor<ComponentName>()
         verify(context.packageManager)
@@ -787,7 +790,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     @Test
     fun updateNoteTaskAsUserInternal_flagDisabled_shouldDisableShortcuts() {
         createNoteTaskController(isEnabled = false)
-            .updateNoteTaskAsUserInternal(userTracker.userHandle)
+            .launchUpdateNoteTaskAsUser(userTracker.userHandle)
+        testScope.runCurrent()
 
         val argument = argumentCaptor<ComponentName>()
         verify(context.packageManager)

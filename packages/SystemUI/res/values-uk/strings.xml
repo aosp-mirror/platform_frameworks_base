@@ -57,6 +57,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Запит на змінення мови системи надіслано з іншого пристрою"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Змінити мову"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Залишити поточну мову"</string>
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"Поділитися Wi‑Fi"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Дозволити налагодження через Wi-Fi у цій мережі?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Ім\'я мережі (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nАдреса Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Завжди дозволяти в цій мережі"</string>
@@ -158,6 +159,7 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Неправильний ключ"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Неправильний пароль"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Забагато невдалих спроб.\nПовторіть за <xliff:g id="NUMBER">%d</xliff:g> с."</string>
+    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"Екстрений виклик"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Спробуйте ще. Спроба <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> із <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Ваші дані буде видалено"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Якщо наступного разу ви введете неправильний ключ, дані на цьому пристрої буде видалено."</string>
@@ -295,8 +297,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Обмеження: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Застереження: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Робочі додатки"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Призупинено"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нічний екран"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Вмикається ввечері"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Запуск увечері"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До сходу сонця"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Вмикається о <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"До <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -410,6 +413,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Коли ви показуєте, записуєте або транслюєте екран, додаток <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> отримує доступ до всього, що відображається на екрані чи відтворюється на пристрої. Тому будьте уважні з паролями, повідомленнями, фотографіями, аудіо, відео, платіжною інформацією тощо."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Коли ви показуєте, записуєте або транслюєте додаток, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> отримує доступ до всього, що відображається або відтворюється в цьому додатку. Тому будьте уважні з паролями, повідомленнями, фотографіями, аудіо, відео, платіжною інформацією тощо."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Почати"</string>
+    <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> вимкнув цю опцію"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Почати трансляцію?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Під час трансляції ОС Android отримує доступ до всього, що відображається на екрані чи відтворюється на пристрої. Тому будьте уважні з паролями, повідомленнями, фотографіями, аудіо, відео, платіжною інформацією тощо."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Коли ви транслюєте додаток, ОС Android отримує доступ до всього, що відображається або відтворюється в ньому. Тому будьте уважні з паролями, повідомленнями, фотографіями, аудіо, відео, платіжною інформацією тощо."</string>
@@ -750,7 +754,7 @@
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"вилучити опцію"</string>
     <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"додати опцію в кінець"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Перемістити опцію"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Додати опцію"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Додати панель"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Перемістити на позицію <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Додати на позицію <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Позиція <xliff:g id="POSITION">%1$d</xliff:g>"</string>
@@ -859,11 +863,20 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Перемістити вниз"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Перемістити ліворуч"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Перемістити праворуч"</string>
+    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
+    <skip />
+    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
+    <skip />
+    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
+    <skip />
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Перемикач режиму збільшення"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Збільшення всього екрана"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Збільшити частину екрана"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Відкрити налаштування збільшення"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Закрити налаштування збільшення"</string>
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"Вийти з режиму редагування"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Потягніть кут, щоб змінити розмір"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Дозволити прокручування по діагоналі"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Змінити розмір"</string>
@@ -1133,7 +1146,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Відкрити <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Щоб додати ярлик для запуску додатка Google Гаманець, переконайтеся, що додаток установлено"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Щоб додати ярлик для запуску додатка Google Гаманець, переконайтеся, що він містить дані принаймні однієї картки"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Щоб додати ярлик для запуску сканера QR-коду, переконайтеся, що встановлено додаток для камери"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Щоб додати ярлик для запуску додатка Google Home, переконайтеся, що додаток установлено"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Принаймні один пристрій доступний"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Виберіть стандартний додаток для нотаток, щоб створювати їх за допомогою ярлика"</string>
@@ -1166,6 +1178,8 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Асистента активовано"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Призначте стандартний додаток для нотаток у налаштуваннях"</string>
     <string name="install_app" msgid="5066668100199613936">"Установити додаток"</string>
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Дублювати на зовнішньому екрані?"</string>
+    <string name="enable_display" msgid="8308309634883321977">"Увімкнути екран"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Мікрофон і камера"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Нещодавнє використання додатками"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Переглянути нещодавній доступ"</string>
@@ -1178,10 +1192,10 @@
     <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Керувати доступом"</string>
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Використовується (телефонний дзвінок)"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Нещодавно використано (телефонний дзвінок)"</string>
-    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Використовується (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Нещодавно використано (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
-    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Використовується (<xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Використовується додатком <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Нещодавно використано додатком <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Використовується додатком <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Нещодавно використано (<xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
-    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Використовується (<xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Використовується додатком <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Нещодавно використано (<xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
 </resources>

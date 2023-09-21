@@ -1,0 +1,8 @@
+package: "com.android.text.flags"
+
+flag {
+  name: "phrase_strict_fallback"
+  namespace: "text"
+  description: "Feature flag for automatic fallback from phrase based line break to strict line break."
+  bug: "281970875"
+}

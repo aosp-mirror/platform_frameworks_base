@@ -770,17 +770,6 @@ public class AppProfiler {
                 swapPss * 1024, rss * 1024, statType, procState, pssDuration);
         profile.setLastPssTime(now);
         profile.addPss(pss, uss, rss, true, statType, pssDuration);
-        proc.getPkgList().forEachPackageProcessStats(holder -> {
-            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
-                    proc.info.uid,
-                    holder.state.getName(),
-                    holder.state.getPackage(),
-                    pss, uss, rss,
-                    statType, pssDuration,
-                    holder.appVersion,
-                    profile.getCurrentHostingComponentTypes(),
-                    profile.getHistoricalHostingComponentTypes());
-        });
         if (DEBUG_PSS) {
             Slog.d(TAG_PSS,
                     "pss of " + proc.toShortString() + ": " + pss
@@ -1843,7 +1832,8 @@ public class AppProfiler {
         dropBuilder.append(catSw.toString());
         FrameworkStatsLog.write(FrameworkStatsLog.LOW_MEM_REPORTED);
         mService.addErrorToDropBox("lowmem", null, "system_server", null,
-                null, null, tag.toString(), dropBuilder.toString(), null, null, null, null, null);
+                null, null, tag.toString(), dropBuilder.toString(), null, null, null, null, null,
+                null);
         synchronized (mService) {
             long now = SystemClock.uptimeMillis();
             if (mLastMemUsageReportTime < now) {

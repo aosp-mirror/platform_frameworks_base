@@ -107,8 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ਫਾਈਲ ਟ੍ਰਾਂਸਫਰ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ਇਨਪੁੱਟ ਡੀਵਾਈਸ"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ਇੰਟਰਨੈੱਟ ਪਹੁੰਚ"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"ਸੰਪਰਕ ਅਤੇ ਕਾਲ ਇਤਿਹਾਸ ਸਾਂਝਾ ਕਰਨਾ"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"ਸੰਪਰਕ ਅਤੇ ਕਾਲ ਇਤਿਹਾਸ ਸਾਂਝਾ ਕਰਨ ਲਈ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"ਸੰਪਰਕਾਂ ਅਤੇ ਕਾਲ ਇਤਿਹਾਸ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"ਜਾਣਕਾਰੀ ਦੀ ਵਰਤੋਂ ਕਾਲ ਘੋਸ਼ਣਾਵਾਂ ਅਤੇ ਹੋਰ ਚੀਜ਼ਾਂ ਲਈ ਕੀਤੀ ਜਾਵੇਗੀ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ਇੰਟਰਨੈੱਟ ਕਨੈਕਸ਼ਨ ਸਾਂਝਾਕਰਨ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"ਲਿਖਤ ਸੁਨੇਹੇ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ਸਿਮ ਪਹੁੰਚ"</string>
@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ਮੈਨੀਫ਼ੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਮਲਟੀ-ਵਿੰਡੋ ਲਈ ਸਾਰੀਆਂ ਸਰਗਰਮੀਆਂ ਨੂੰ ਆਕਾਰ ਬਦਲਣਯੋਗ ਬਣਾਓ।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ਪ੍ਰਯੋਗਮਈ ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਲਈ ਸਮਰਥਨ ਨੂੰ ਚਾਲੂ ਕਰੋ।"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"ਡੈਸਕਟਾਪ ਮੋਡ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ਡੈਸਕਟਾਪ ਬੈਕਅੱਪ ਪਾਸਵਰਡ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ਡੈਸਕਟਾਪ ਦੇ ਪੂਰੇ ਬੈਕਅੱਪ ਇਸ ਵੇਲੇ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਹਨ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ਡੈਸਕਟਾਪ ਦੇ ਮੁਕੰਮਲ ਬੈਕਅੱਪਾਂ ਲਈ ਪਾਸਵਰਡ ਨੂੰ ਬਦਲਣ ਜਾਂ ਹਟਾਉਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
@@ -685,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ਪਿਛਲੇ ਐਨੀਮੇਸ਼ਨਾਂ ਦਾ ਪੂਰਵ-ਅਨੁਮਾਨ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ਪੂਰਵ-ਅਨੁਮਾਨ ਵਾਪਸੀ ਲਈ ਸਿਸਟਮ ਐਨੀਮੇਸ਼ਨਾਂ ਨੂੰ ਚਾਲੂ ਕਰੋ।"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ਇਹ ਸੈਟਿੰਗ ਪੂਰਵ-ਅਨੁਮਾਨ ਇਸ਼ਾਰਾ ਐਨੀਮੇਸ਼ਨ ਲਈ ਸਿਸਟਮ ਐਨੀਮੇਸ਼ਨਾਂ ਨੂੰ ਚਾਲੂ ਕਰਦੀ ਹੈ। ਮੈਨੀਫ਼ੈਸਟ ਫ਼ਾਈਲ ਵਿੱਚ enableOnBackInvokedCallback ਸੈਟਿੰਗ ਨੂੰ ਪ੍ਰਤੀ-ਐਪ \'ਸਹੀ\' \'ਤੇ ਕਰਨ ਦੀ ਲੋੜ ਹੈ।"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"ਖੱਬੇ ਲਿਜਾਓ"</item>
-    <item msgid="5425394847942513942">"ਹੇਠਾਂ ਲਿਜਾਓ"</item>
-    <item msgid="7728484337962740316">"ਸੱਜੇ ਲਿਜਾਓ"</item>
-    <item msgid="324200556467459329">"ਉੱਪਰ ਲਿਜਾਓ"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"ਨਿਰਧਾਰਿਤ ਨਹੀਂ"</string>
     <string name="neuter" msgid="2075249330106127310">"ਨਿਰਪੱਖ"</string>

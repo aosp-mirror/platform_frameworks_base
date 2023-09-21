@@ -17,8 +17,9 @@
 package com.android.systemui.qs.pipeline.data.repository
 
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -34,7 +35,8 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 class AutoAddSettingsRepositoryTest : SysuiTestCase() {
     private val secureSettings = FakeSettings()
 

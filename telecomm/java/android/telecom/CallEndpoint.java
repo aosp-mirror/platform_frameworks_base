@@ -127,7 +127,7 @@ public final class CallEndpoint implements Parcelable {
             return false;
         }
         CallEndpoint endpoint = (CallEndpoint) obj;
-        return getEndpointName().toString().contentEquals(endpoint.getEndpointName())
+        return Objects.equals(getEndpointName(), endpoint.getEndpointName())
                 && getEndpointType() == endpoint.getEndpointType()
                 && getIdentifier().equals(endpoint.getIdentifier());
     }

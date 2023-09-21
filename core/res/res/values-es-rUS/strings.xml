@@ -619,8 +619,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Usar datos biométricos o bloqueo de pantalla"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Comprueba que eres tú"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Usa tus datos biométricos para continuar"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Usa tu huella dactilar para continuar"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Usa el rostro para continuar"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Usa tus datos biométricos o bloqueo de pantalla para continuar"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"No hay hardware biométrico disponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Se canceló la autenticación"</string>
@@ -646,6 +644,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"No se reconoció la huella dactilar"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"No se reconoció la huella dactilar"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"No se reconoce el rostro. Usa la huella dactilar."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Se autenticó la huella dactilar"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Se autenticó el rostro"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Se autenticó el rostro; presiona Confirmar"</string>
@@ -671,14 +670,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Se produjo un error. Vuelve a intentarlo."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícono de huella dactilar"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Desbloqueo del dispositivo"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Prueba otra forma para desbloquear el dispositivo"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Usa el Desbloqueo facial si no se reconoce tu huella dactilar (p. ej., si tienes los dedos mojados)"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Usa el Desbloqueo con huellas dactilares si no se reconoce tu rostro (p. ej., si hay poca luz)"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueo facial"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema con el Desbloqueo facial"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Presiona para borrar el modelo de rostro y, luego, vuelve a agregar tu rostro"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura Desbloqueo facial"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para usar Desbloqueo facial, activa el "<b>"Acceso a la cámara"</b>" en Configuración y privacidad"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloquear el dispositivo"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Presiona para agregar una huella dactilar"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo con huellas dactilares"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"No se puede usar el sensor de huellas dactilares"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Consulta a un proveedor de reparaciones."</string>
@@ -1869,6 +1868,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 3"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Clon de <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"<xliff:g id="LABEL">%1$s</xliff:g> privado"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Solicitar PIN para quitar fijación"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Solicitar desbloqueo para quitar fijación"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Solicitar contraseña para quitar fijación"</string>
@@ -2033,7 +2033,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"¿Quieres actualizar en "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"¿Quieres actualizar <xliff:g id="TYPE">%1$s</xliff:g> en "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"¿Quieres actualizar <xliff:g id="TYPE_0">%1$s</xliff:g> y <xliff:g id="TYPE_1">%2$s</xliff:g> en "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"¿Quieres actualizar estos elementos en "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> y <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"¿Quieres actualizar estos elementos en "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> y <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Guardar"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"No, gracias"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Ahora no"</string>

@@ -24,6 +24,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -77,13 +78,18 @@ class ConversationCoordinatorTest : SysuiTestCase() {
 
     private lateinit var coordinator: ConversationCoordinator
 
+    private val featureFlags = FakeFeatureFlagsClassic()
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         coordinator = ConversationCoordinator(
             peopleNotificationIdentifier,
             conversationIconManager,
-            HighPriorityProvider(peopleNotificationIdentifier, GroupMembershipManagerImpl()),
+            HighPriorityProvider(
+                peopleNotificationIdentifier,
+                GroupMembershipManagerImpl(featureFlags)
+            ),
             headerController
         )
         whenever(channel.isImportantConversation).thenReturn(true)
@@ -182,7 +188,7 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testInAlertingPeopleSectionWhenThereIsAnImportantChild(){
+    fun testInAlertingPeopleSectionWhenThereIsAnImportantChild() {
         // GIVEN
         val altChildA = NotificationEntryBuilder().setTag("A")
                 .setImportance(IMPORTANCE_DEFAULT).build()

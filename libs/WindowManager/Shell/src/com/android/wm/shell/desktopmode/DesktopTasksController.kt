@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.R
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
@@ -26,8 +25,8 @@ import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
-import android.content.res.TypedArray
 import android.graphics.Point
+import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.Region
 import android.os.IBinder
@@ -42,6 +41,7 @@ import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.annotation.BinderThread
+import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
@@ -54,9 +54,13 @@ import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.annotations.ExternalThread
 import com.android.wm.shell.common.annotations.ShellMainThread
+import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
+import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
+import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.TO_DESKTOP_INDICATOR
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.splitscreen.SplitScreenController
+import com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_ENTER_DESKTOP
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
@@ -104,14 +108,20 @@ class DesktopTasksController(
 
     private val transitionAreaHeight
         get() = context.resources.getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_transition_area_height)
+                com.android.wm.shell.R.dimen.desktop_mode_transition_area_height
+        )
+
+    private val transitionAreaWidth
+        get() = context.resources.getDimensionPixelSize(
+            com.android.wm.shell.R.dimen.desktop_mode_transition_area_width
+        )
 
     // This is public to avoid cyclic dependency; it is set by SplitScreenController
     lateinit var splitScreenController: SplitScreenController
 
     init {
         desktopMode = DesktopModeImpl()
-        if (DesktopModeStatus.isProto2Enabled()) {
+        if (DesktopModeStatus.isEnabled()) {
             shellInit.addInitCallback({ onInit() }, this)
         }
     }
@@ -203,6 +213,7 @@ class DesktopTasksController(
             "DesktopTasksController: moveToDesktop taskId=%d",
             task.taskId
         )
+        exitSplitIfApplicable(wct, task)
         // Bring other apps to front first
         bringDesktopAppsToFront(task.displayId, wct)
         addMoveToDesktopChanges(wct, task)
@@ -230,6 +241,7 @@ class DesktopTasksController(
             taskInfo.taskId
         )
         val wct = WindowContainerTransaction()
+        exitSplitIfApplicable(wct, taskInfo)
         moveHomeTaskToFront(wct)
         addMoveToDesktopChanges(wct, taskInfo)
         wct.setBounds(taskInfo.token, startBounds)
@@ -298,6 +310,31 @@ class DesktopTasksController(
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    /** Move a desktop app to split screen. */
+    fun moveToSplit(task: RunningTaskInfo) {
+        KtProtoLog.v(
+            WM_SHELL_DESKTOP_MODE,
+            "DesktopTasksController: moveToSplit taskId=%d",
+            task.taskId
+        )
+        val wct = WindowContainerTransaction()
+        wct.setWindowingMode(task.token, WINDOWING_MODE_MULTI_WINDOW)
+        wct.setBounds(task.token, Rect())
+        wct.setDensityDpi(task.token, getDefaultDensityDpi())
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    private fun exitSplitIfApplicable(wct: WindowContainerTransaction, taskInfo: RunningTaskInfo) {
+        if (taskInfo.windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
+            splitScreenController.prepareExitSplitScreen(wct,
+                splitScreenController.getStageOfTask(taskInfo.taskId), EXIT_REASON_ENTER_DESKTOP)
         }
     }
 
@@ -466,6 +503,55 @@ class DesktopTasksController(
         }
     }
 
+    /**
+     * Quick-resize to the right or left half of the stable bounds.
+     *
+     * @param position the portion of the screen (RIGHT or LEFT) we want to snap the task to.
+     */
+    fun snapToHalfScreen(
+            taskInfo: RunningTaskInfo,
+            windowDecor: DesktopModeWindowDecoration,
+            position: SnapPosition
+    ) {
+        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
+
+        val stableBounds = Rect()
+        displayLayout.getStableBounds(stableBounds)
+
+        val destinationWidth = stableBounds.width() / 2
+        val destinationBounds = when (position) {
+            SnapPosition.LEFT -> {
+                Rect(
+                        stableBounds.left,
+                        stableBounds.top,
+                        stableBounds.left + destinationWidth,
+                        stableBounds.bottom
+                )
+            }
+            SnapPosition.RIGHT -> {
+                Rect(
+                        stableBounds.right - destinationWidth,
+                        stableBounds.top,
+                        stableBounds.right,
+                        stableBounds.bottom
+                )
+            }
+        }
+
+        if (destinationBounds == taskInfo.configuration.windowConfiguration.bounds) return
+
+        val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            toggleResizeDesktopTaskTransitionHandler.startTransition(
+                    wct,
+                    taskInfo.taskId,
+                    windowDecor
+            )
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
     private fun getDefaultDesktopTaskBounds(density: Float, stableBounds: Rect, outBounds: Rect) {
         val width = (DESKTOP_MODE_DEFAULT_WIDTH_DP * density + 0.5f).toInt()
         val height = (DESKTOP_MODE_DEFAULT_HEIGHT_DP * density + 0.5f).toInt()
@@ -618,10 +704,7 @@ class DesktopTasksController(
             finishTransaction: SurfaceControl.Transaction
     ) {
         // Add rounded corners to freeform windows
-        val ta: TypedArray = context.obtainStyledAttributes(
-                intArrayOf(R.attr.dialogCornerRadius))
-        val cornerRadius = ta.getDimensionPixelSize(0, 0).toFloat()
-        ta.recycle()
+        val cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
         info.changes
                 .filter { it.taskInfo?.windowingMode == WINDOWING_MODE_FREEFORM }
                 .forEach { finishTransaction.setCornerRadius(it.leash, cornerRadius) }
@@ -736,7 +819,8 @@ class DesktopTasksController(
         ) {
             val wct = WindowContainerTransaction()
             addMoveToSplitChanges(wct, taskInfo)
-            splitScreenController.requestEnterSplitSelect(taskInfo, wct)
+            splitScreenController.requestEnterSplitSelect(taskInfo, wct,
+                SPLIT_POSITION_BOTTOM_OR_RIGHT, taskInfo.configuration.windowConfiguration.bounds)
         }
     }
 
@@ -760,25 +844,36 @@ class DesktopTasksController(
 
     /**
      * Perform checks required on drag move. Create/release fullscreen indicator as needed.
+     * Different sources for x and y coordinates are used due to different needs for each:
+     * We want split transitions to be based on input coordinates but fullscreen transition
+     * to be based on task edge coordinate.
      *
      * @param taskInfo the task being dragged.
      * @param taskSurface SurfaceControl of dragged task.
-     * @param y coordinate of dragged task. Used for checks against status bar height.
+     * @param inputCoordinate coordinates of input. Used for checks against left/right edge of screen.
+     * @param taskBounds bounds of dragged task. Used for checks against status bar height.
      */
     fun onDragPositioningMove(
-            taskInfo: RunningTaskInfo,
-            taskSurface: SurfaceControl,
-            y: Float
+        taskInfo: RunningTaskInfo,
+        taskSurface: SurfaceControl,
+        inputCoordinate: PointF,
+        taskBounds: Rect
     ) {
-        if (taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
-            if (y <= transitionAreaHeight && visualIndicator == null) {
-                visualIndicator = DesktopModeVisualIndicator(syncQueue, taskInfo,
-                        displayController, context, taskSurface, shellTaskOrganizer,
-                        rootTaskDisplayAreaOrganizer)
-                visualIndicator?.createFullscreenIndicatorWithAnimatedBounds()
-            } else if (y > transitionAreaHeight && visualIndicator != null) {
-                releaseVisualIndicator()
-            }
+        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
+        if (taskInfo.windowingMode != WINDOWING_MODE_FREEFORM) return
+        var type = DesktopModeVisualIndicator.determineIndicatorType(inputCoordinate,
+            taskBounds, displayLayout, context)
+        if (type != DesktopModeVisualIndicator.INVALID_INDICATOR && visualIndicator == null) {
+            visualIndicator = DesktopModeVisualIndicator(
+                syncQueue, taskInfo,
+                displayController, context, taskSurface, shellTaskOrganizer,
+                rootTaskDisplayAreaOrganizer, type)
+            visualIndicator?.createIndicatorWithAnimatedBounds()
+            return
+        }
+        if (visualIndicator?.eventOutsideRange(inputCoordinate.x,
+                taskBounds.top.toFloat()) == true) {
+            releaseVisualIndicator()
         }
     }
 
@@ -787,18 +882,38 @@ class DesktopTasksController(
      *
      * @param taskInfo the task being dragged.
      * @param position position of surface when drag ends.
-     * @param y the Y position of the top edge of the task
+     * @param inputCoordinate the coordinates of the motion event
+     * @param taskBounds the updated bounds of the task being dragged.
      * @param windowDecor the window decoration for the task being dragged
      */
     fun onDragPositioningEnd(
-            taskInfo: RunningTaskInfo,
-            position: Point,
-            y: Float,
-            windowDecor: DesktopModeWindowDecoration
+        taskInfo: RunningTaskInfo,
+        position: Point,
+        inputCoordinate: PointF,
+        taskBounds: Rect,
+        windowDecor: DesktopModeWindowDecoration
     ) {
-        if (y <= transitionAreaHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+        if (taskInfo.configuration.windowConfiguration.windowingMode != WINDOWING_MODE_FREEFORM) {
+            return
+        }
+        if (taskBounds.top <= transitionAreaHeight) {
             windowDecor.incrementRelayoutBlock()
             moveToFullscreenWithAnimation(taskInfo, position)
+        }
+        if (inputCoordinate.x <= transitionAreaWidth) {
+            releaseVisualIndicator()
+            var wct = WindowContainerTransaction()
+            addMoveToSplitChanges(wct, taskInfo)
+            splitScreenController.requestEnterSplitSelect(taskInfo, wct,
+                SPLIT_POSITION_TOP_OR_LEFT, taskBounds)
+        }
+        if (inputCoordinate.x >= (displayController.getDisplayLayout(taskInfo.displayId)?.width()
+            ?.minus(transitionAreaWidth) ?: return)) {
+            releaseVisualIndicator()
+            var wct = WindowContainerTransaction()
+            addMoveToSplitChanges(wct, taskInfo)
+            splitScreenController.requestEnterSplitSelect(taskInfo, wct,
+                SPLIT_POSITION_BOTTOM_OR_RIGHT, taskBounds)
         }
     }
 
@@ -823,8 +938,8 @@ class DesktopTasksController(
         if (visualIndicator == null) {
             visualIndicator = DesktopModeVisualIndicator(syncQueue, taskInfo,
                     displayController, context, taskSurface, shellTaskOrganizer,
-                    rootTaskDisplayAreaOrganizer)
-            visualIndicator?.createFullscreenIndicator()
+                    rootTaskDisplayAreaOrganizer, TO_DESKTOP_INDICATOR)
+            visualIndicator?.createIndicatorWithAnimatedBounds()
         }
         val indicator = visualIndicator ?: return
         if (y >= getFreeformTransitionStatusBarDragThreshold(taskInfo)) {
@@ -862,17 +977,17 @@ class DesktopTasksController(
     }
 
     /**
-     * Update the corner region for a specified task
+     * Update the exclusion region for a specified task
      */
-    fun onTaskCornersChanged(taskId: Int, corner: Region) {
-        desktopModeTaskRepository.updateTaskCorners(taskId, corner)
+    fun onExclusionRegionChanged(taskId: Int, exclusionRegion: Region) {
+        desktopModeTaskRepository.updateTaskExclusionRegions(taskId, exclusionRegion)
     }
 
     /**
-     * Remove a previously tracked corner region for a specified task.
+     * Remove a previously tracked exclusion region for a specified task.
      */
-    fun removeCornersForTask(taskId: Int) {
-        desktopModeTaskRepository.removeTaskCorners(taskId)
+    fun removeExclusionRegionForTask(taskId: Int) {
+        desktopModeTaskRepository.removeExclusionRegion(taskId)
     }
 
     /**
@@ -886,16 +1001,16 @@ class DesktopTasksController(
     }
 
     /**
-     * Adds a listener to track changes to desktop task corners
+     * Adds a listener to track changes to desktop task gesture exclusion regions
      *
      * @param listener the listener to add.
      * @param callbackExecutor the executor to call the listener on.
      */
-    fun setTaskCornerListener(
+    fun setTaskRegionListener(
             listener: Consumer<Region>,
             callbackExecutor: Executor
     ) {
-        desktopModeTaskRepository.setTaskCornerListener(listener, callbackExecutor)
+        desktopModeTaskRepository.setExclusionRegionListener(listener, callbackExecutor)
     }
 
     private fun dump(pw: PrintWriter, prefix: String) {
@@ -921,7 +1036,7 @@ class DesktopTasksController(
                 callbackExecutor: Executor
         ) {
             mainExecutor.execute {
-                this@DesktopTasksController.setTaskCornerListener(listener, callbackExecutor)
+                this@DesktopTasksController.setTaskRegionListener(listener, callbackExecutor)
             }
         }
     }
@@ -1058,4 +1173,7 @@ class DesktopTasksController(
             return DESKTOP_DENSITY_OVERRIDE in DESKTOP_DENSITY_ALLOWED_RANGE
         }
     }
+
+    /** The positions on a screen that a task can snap to. */
+    enum class SnapPosition { RIGHT, LEFT }
 }

@@ -79,6 +79,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Tests for the {@link MediaProjectionManagerService} class.
  *
@@ -199,6 +202,29 @@ public class MediaProjectionManagerServiceTest {
         // This is a new projection.
         assertThat(secondProjection).isNotNull();
         assertThat(secondProjection).isNotEqualTo(projection);
+    }
+
+    @Test
+    public void testCreateProjection_priorProjectionGrant() throws
+            NameNotFoundException, InterruptedException {
+        // Create a first projection.
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        FakeIMediaProjectionCallback callback1 = new FakeIMediaProjectionCallback();
+        projection.start(callback1);
+
+        // Create a second projection.
+        MediaProjectionManagerService.MediaProjection secondProjection =
+                startProjectionPreconditions();
+        FakeIMediaProjectionCallback callback2 = new FakeIMediaProjectionCallback();
+        secondProjection.start(callback2);
+
+        // Check that the first projection get stopped, but not the second projection.
+        final int timeout = 5;
+        boolean stoppedCallback1 = callback1.mLatch.await(timeout, TimeUnit.SECONDS);
+        boolean stoppedCallback2 = callback2.mLatch.await(timeout, TimeUnit.SECONDS);
+
+        assertThat(stoppedCallback1).isTrue();
+        assertThat(stoppedCallback2).isFalse();
     }
 
     @Test
@@ -785,8 +811,10 @@ public class MediaProjectionManagerServiceTest {
     }
 
     private static class FakeIMediaProjectionCallback extends IMediaProjectionCallback.Stub {
+        CountDownLatch mLatch = new CountDownLatch(1);
         @Override
         public void onStop() throws RemoteException {
+            mLatch.countDown();
         }
 
         @Override

@@ -84,7 +84,8 @@ void MinikinUtils::getBounds(const Paint* paint, minikin::Bidi bidiFlags, const 
 
 float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
                                 const Typeface* typeface, const uint16_t* buf, size_t start,
-                                size_t count, size_t bufSize, float* advances) {
+                                size_t count, size_t bufSize, float* advances,
+                                minikin::MinikinRect* bounds) {
     minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
     const minikin::U16StringPiece textBuf(buf, bufSize);
     const minikin::Range range(start, start + count);
@@ -92,7 +93,7 @@ float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
     const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
 
     return minikin::Layout::measureText(textBuf, range, bidiFlags, minikinPaint, startHyphen,
-                                        endHyphen, advances);
+                                        endHyphen, advances, bounds);
 }
 
 minikin::MinikinExtent MinikinUtils::getFontExtent(const Paint* paint, minikin::Bidi bidiFlags,

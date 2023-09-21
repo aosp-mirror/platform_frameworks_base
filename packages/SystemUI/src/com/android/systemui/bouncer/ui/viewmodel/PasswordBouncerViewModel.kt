@@ -34,21 +34,27 @@ class PasswordBouncerViewModel(
     ) {
 
     private val _password = MutableStateFlow("")
+
     /** The password entered so far. */
     val password: StateFlow<String> = _password.asStateFlow()
 
     /** Notifies that the UI has been shown to the user. */
     fun onShown() {
+        _password.value = ""
         interactor.resetMessage()
     }
 
     /** Notifies that the user has changed the password input. */
-    fun onPasswordInputChanged(password: String) {
-        if (this.password.value.isEmpty() && password.isNotEmpty()) {
+    fun onPasswordInputChanged(newPassword: String) {
+        if (this.password.value.isEmpty() && newPassword.isNotEmpty()) {
             interactor.clearMessage()
         }
 
-        _password.value = password
+        if (newPassword.isNotEmpty()) {
+            interactor.onIntentionalUserInput()
+        }
+
+        _password.value = newPassword
     }
 
     /** Notifies that the user has pressed the key for attempting to authenticate the password. */

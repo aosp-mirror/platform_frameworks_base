@@ -618,8 +618,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"გამოიყენეთ ბიომეტრიული სისტემა ან ეკრანის დაბლოკვა"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"დაადასტურეთ ვინაობა"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"გასაგრძელებლად გამოიყენეთ თქვენი ბიომეტრიული მონაცემები"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"გასაგრძელებლად გამოიყენეთ თქვენი თითის ანაბეჭდი"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"გასაგრძელებლად გამოიყენეთ სახის ამოცნობა"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"გასაგრძელებლად გამოიყენეთ თქვენი ბიომეტრიული მონაცემები ან ეკრანის განბლოკვის ნიმუში"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ბიომეტრიული აპარატურა მიუწვდომელია"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ავტორიზაცია გაუქმდა"</string>
@@ -645,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"თითის ანაბეჭდის ამოცნობა ვერ მოხერხდა"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"თითის ანაბეჭდის ამოცნობა ვერ მოხერხდა"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"სახის ამოცნობა ვერ ხერხდება. სანაცვლოდ თითის ანაბეჭდი გამოიყენეთ."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"თითის ანაბეჭდი ავტორიზებულია"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"სახე ავტორიზებულია"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"სახე ავტორიზებულია, დააჭირეთ დადასტურებას"</string>
@@ -670,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"რაღაც შეცდომა მოხდა. ცადეთ ხელახლა."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"თითის ანაბეჭდის ხატულა"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"მოწყობილობის განბლოკვა"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"ცადეთ სხვა გზით განბლოკვა"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"გამოიყენეთ სახით განბლოკვა, როდესაც თქვენი თითის ანაბეჭდის ამოცნობა ვერ ხდება, მაგალითად, როდესაც თქვენი თითები სველია"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"გამოიყენეთ ანაბეჭდით განბლოკვა, როდესაც თქვენი სახის ამოცნობა ვერ ხდება, მაგალითად, არასაკმარისი განათების დროს"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"განბლოკვა სახით"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"პრობლემა სახით განბლოკვასთან დაკავშირებით"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"შეეხეთ თქვენი სახის მოდელის წასაშლელად, შემდეგ დაამატეთ სახე ხელახლა"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"სახით განბლოკვის პარამეტრების დაყენება"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"განბლოკეთ თქვენი ტელეფონი შეხედვით"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"იმისთვის, რომ სახით განბლოკვით ისარგებლოთ, ჩართეთ "<b>"კამერაზე წვდომა"</b>" პარამეტრებსა და კონფიდენციალურობაში"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"დააყენეთ განბლოკვის სხვა ხერხები"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"შეეხეთ თითის ანაბეჭდის დასამატებლად"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"თითის ანაბეჭდით განბლოკვა"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"თითის ანაბეჭდის სენსორის გამოყენება ვერ ხერხდება"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ეწვიეთ შეკეთების სერვისის პროვაიდერს."</string>
@@ -1868,6 +1867,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"მე-2 სამსახური <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"მე-3 სამსახური <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> კლონის შექმნა"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"პირადი <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ფიქსაციის მოხსნამდე PIN-ის მოთხოვნა"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ფიქსაციის მოხსნამდე განბლოკვის ნიმუშის მოთხოვნა"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ფიქსაციის მოხსნამდე პაროლის მოთხოვნა"</string>
@@ -2032,7 +2032,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"გსურთ "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"-ში განახლება?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"გსურთ, "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"-ში განაახლოთ <xliff:g id="TYPE">%1$s</xliff:g>?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"გსურთ, "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"-ში განაახლოთ <xliff:g id="TYPE_0">%1$s</xliff:g> და <xliff:g id="TYPE_1">%2$s</xliff:g>?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"გსურთ, "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"-ში განაახლოთ <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> და <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"განახლდეს ეს ერთეულები "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"-ში: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> და <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"შენახვა"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"არა, გმადლობთ"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ახლა არა"</string>

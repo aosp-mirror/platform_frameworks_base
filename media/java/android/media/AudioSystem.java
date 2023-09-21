@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.media.audio.common.AidlConversion;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.os.Build;
 import android.os.IBinder;
@@ -1954,6 +1955,11 @@ public class AudioSystem
 
     /** @hide */
     public static native int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register);
+
+    /** @hide */
+    public static native int updatePolicyMixes(
+            AudioMix[] mixes,
+            AudioMixingRule[] updatedMixingRules);
 
     /** @hide see AudioPolicy.setUidDeviceAffinities() */
     public static native int setUidDeviceAffinities(int uid, @NonNull int[] types,

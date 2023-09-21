@@ -1450,7 +1450,7 @@ public final class Settings {
 
     /**
      * Activity Action: Ask the user to allow an app to ignore battery optimizations (that is,
-     * put them on the whitelist of apps shown by
+     * put them on the allowlist of apps shown by
      * {@link #ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}).  For an app to use this, it also
      * must hold the {@link android.Manifest.permission#REQUEST_IGNORE_BATTERY_OPTIMIZATIONS}
      * permission.
@@ -2831,7 +2831,7 @@ public final class Settings {
     /** @hide - Private call() method to query the 'global' table */
     public static final String CALL_METHOD_LIST_GLOBAL = "LIST_global";
 
-    /** @hide - Private call() method to reset to defaults the 'configuration' table */
+    /** @hide - Private call() method to query the 'configuration' table */
     public static final String CALL_METHOD_LIST_CONFIG = "LIST_config";
 
     /** @hide - Private call() method to disable / re-enable syncs to the 'configuration' table */
@@ -3524,7 +3524,6 @@ public final class Settings {
         public ArrayMap<String, String> getStringsForPrefix(ContentResolver cr, String prefix,
                 List<String> names) {
             String namespace = prefix.substring(0, prefix.length() - 1);
-            Config.enforceReadPermission(namespace);
             ArrayMap<String, String> keyValues = new ArrayMap<>();
             int currentGeneration = -1;
             boolean needsGenerationTracker = false;
@@ -3597,12 +3596,9 @@ public final class Settings {
                 }
 
                 Bundle b;
-                // b/252663068: if we're in system server and the caller did not call
+                // If we're in system server and the caller did not call
                 // clearCallingIdentity, the read would fail due to mismatched AttributionSources.
-                // TODO(b/256013480): remove this bypass after fixing the callers in system server.
-                if (namespace.equals(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER)
-                        && Settings.isInSystemServer()
-                        && Binder.getCallingUid() != Process.myUid()) {
+                if (Settings.isInSystemServer() && Binder.getCallingUid() != Process.myUid()) {
                     final long token = Binder.clearCallingIdentity();
                     try {
                         // Fetch all flags for the namespace at once for caching purposes
@@ -4580,6 +4576,16 @@ public final class Settings {
         public static final String WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE =
                 "wear_accessibility_gesture_enabled_during_oobe";
 
+
+        /**
+         * If the text-to-speech pre-warm is enabled.
+         * Set to 1 for true and 0 for false.
+         *
+         * This setting is used only internally.
+         * @hide
+         */
+        public static final String WEAR_TTS_PREWARM_ENABLED = "wear_tts_prewarm_enabled";
+
         /**
          * @deprecated Use {@link android.provider.Settings.Global#AIRPLANE_MODE_ON} instead
          */
@@ -4862,13 +4868,13 @@ public final class Settings {
         public static final String PEAK_REFRESH_RATE = "peak_refresh_rate";
 
         /**
-         * Control whether to stay awake on fold
+         * Control lock behavior on fold
          *
          * If this isn't set, the system falls back to a device specific default.
          * @hide
          */
         @Readable
-        public static final String STAY_AWAKE_ON_FOLD = "stay_awake_on_fold";
+        public static final String FOLD_LOCK_BEHAVIOR = "fold_lock_behavior_setting";
 
         /**
          * The amount of time in milliseconds before the device goes to sleep or begins
@@ -5302,7 +5308,6 @@ public final class Settings {
         public static final Uri DEFAULT_RINGTONE_URI = getUriFor(RINGTONE);
 
         /** {@hide} */
-        @Readable
         public static final String RINGTONE_CACHE = "ringtone_cache";
         /** {@hide} */
         public static final Uri RINGTONE_CACHE_URI = getUriFor(RINGTONE_CACHE);
@@ -5627,12 +5632,20 @@ public final class Settings {
         public static final String SHOW_TOUCHES = "show_touches";
 
         /**
-         * Show key presses and other events dispatched to focused windows on the screen.
+         * Show key presses dispatched to focused windows on the screen.
          * 0 = no
          * 1 = yes
          * @hide
          */
         public static final String SHOW_KEY_PRESSES = "show_key_presses";
+
+        /**
+         * Show rotary input dispatched to focused windows on the screen.
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String SHOW_ROTARY_INPUT = "show_rotary_input";
 
         /**
          * Log raw orientation data from
@@ -5869,15 +5882,6 @@ public final class Settings {
         public static final String MULTI_AUDIO_FOCUS_ENABLED = "multi_audio_focus_enabled";
 
         /**
-         * Whether desktop mode is enabled or not.
-         * 0 = off
-         * 1 = on
-         * @hide
-         */
-        @Readable
-        public static final String DESKTOP_MODE = "desktop_mode";
-
-        /**
          * The information of locale preference. This records user's preference to avoid
          * unsynchronized and existing locale preference in
          * {@link Locale#getDefault(Locale.Category)}.
@@ -6010,6 +6014,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(ADVANCED_SETTINGS);
             PRIVATE_SETTINGS.add(WEAR_ACCESSIBILITY_GESTURE_ENABLED);
             PRIVATE_SETTINGS.add(WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE);
+            PRIVATE_SETTINGS.add(WEAR_TTS_PREWARM_ENABLED);
             PRIVATE_SETTINGS.add(SCREEN_AUTO_BRIGHTNESS_ADJ);
             PRIVATE_SETTINGS.add(VIBRATE_INPUT_DEVICES);
             PRIVATE_SETTINGS.add(VOLUME_MASTER);
@@ -6049,7 +6054,6 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE_VENDOR_HINT);
-            PRIVATE_SETTINGS.add(DESKTOP_MODE);
             PRIVATE_SETTINGS.add(LOCALE_PREFERENCES);
             PRIVATE_SETTINGS.add(TOUCHPAD_POINTER_SPEED);
             PRIVATE_SETTINGS.add(TOUCHPAD_NATURAL_SCROLLING);
@@ -10126,6 +10130,13 @@ public final class Settings {
         public static final String AUDIO_DEVICE_INVENTORY = "audio_device_inventory";
 
         /**
+         * Stores a boolean that defines whether the CSD as a feature is enabled or not.
+         * @hide
+         */
+        public static final String AUDIO_SAFE_CSD_AS_A_FEATURE_ENABLED =
+                "audio_safe_csd_as_a_feature_enabled";
+
+        /**
          * Indicates whether notification display on the lock screen is enabled.
          * <p>
          * Type: int (0 for false, 1 for true)
@@ -10642,18 +10653,20 @@ public final class Settings {
                 "assist_long_press_home_enabled";
 
         /**
-         * Control whether Trust Agents are in active unlock or extend unlock mode.
+         * Whether press and hold on nav handle can trigger search.
+         *
          * @hide
          */
-        @Readable
-        public static final String TRUST_AGENTS_EXTEND_UNLOCK = "trust_agents_extend_unlock";
+        public static final String SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED =
+                "search_press_hold_nav_handle_enabled";
 
         /**
-         * Control whether the screen locks when trust is lost.
+         * Whether long-pressing on the home button can trigger search.
+         *
          * @hide
          */
-        @Readable
-        public static final String LOCK_SCREEN_WHEN_TRUST_LOST = "lock_screen_when_trust_lost";
+        public static final String SEARCH_LONG_PRESS_HOME_ENABLED =
+                "search_long_press_home_enabled";
 
         /**
          * Control whether Night display is currently activated.
@@ -11624,6 +11637,21 @@ public final class Settings {
                 "accessibility_floating_menu_migration_tooltip_prompt";
 
         /**
+         * For the force dark theme feature which inverts any apps that don't already support dark
+         * theme.
+         *
+         * If true, it will automatically invert any app that is mainly light.
+         *
+         * This is related to the force dark override setting, however it will always force the apps
+         * colors and will ignore any developer hints or opt-out APIs.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED =
+                "accessibility_force_invert_color_enabled";
+
+        /**
          * Whether the Adaptive connectivity option is enabled.
          *
          * @hide
@@ -12355,7 +12383,7 @@ public final class Settings {
         public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
 
         /**
-         * The package name for the custom bugreport handler app. This app must be whitelisted.
+         * The package name for the custom bugreport handler app. This app must be allowlisted.
          * This is currently used only by Power Menu short press.
          * @deprecated Use {@link android.provider.Settings.Secure#CUSTOM_BUGREPORT_HANDLER_APP}
          * instead
@@ -12771,7 +12799,7 @@ public final class Settings {
                 "location_background_throttle_proximity_alert_interval_ms";
 
         /**
-         * Packages that are whitelisted for background throttling (throttling will not be applied).
+         * Packages that are allowlisted for background throttling (throttling will not be applied).
          * @hide
          */
         @Readable
@@ -12779,7 +12807,7 @@ public final class Settings {
             "location_background_throttle_package_whitelist";
 
         /**
-         * Packages that are whitelisted for ignoring location settings (may retrieve location even
+         * Packages that are allowlisted for ignoring location settings (may retrieve location even
          * when user location settings are off), for emergency purposes.
          * @deprecated No longer used from Android 12+
          * @hide
@@ -13363,7 +13391,7 @@ public final class Settings {
 
         /**
          * List of certificate (hex string representation of the application's certificate - SHA-1
-         * or SHA-256) and carrier app package pairs which are whitelisted to prompt the user for
+         * or SHA-256) and carrier app package pairs which are allowlisted to prompt the user for
          * install when a sim card with matching UICC carrier privilege rules is inserted.  The
          * certificate is used as a key, so the certificate encoding here must be the same as the
          * certificate encoding used on the SIM.
@@ -16764,7 +16792,7 @@ public final class Settings {
                 "enable_adb_incremental_install_default";
 
         /**
-         * The packages whitelisted to be run in autofill compatibility mode. The list
+         * The packages allowlisted to be run in autofill compatibility mode. The list
          * of packages is {@code ":"} colon delimited, and each entry has the name of the
          * package and an optional list of url bar resource ids (the list is delimited by
          * brackets&mdash{@code [} and {@code ]}&mdash and is also comma delimited).
@@ -16824,7 +16852,7 @@ public final class Settings {
         public static final String STYLUS_EVER_USED = "stylus_ever_used";
 
         /**
-         * Exemptions to the hidden API blacklist.
+         * Exemptions to the hidden API denylist.
          *
          * @hide
          */
@@ -18323,24 +18351,28 @@ public final class Settings {
              * If hotword detection should be enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String HOTWORD_DETECTION_ENABLED = "hotword_detection_enabled";
 
             /**
              * Whether Smart Replies are enabled within Wear.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SMART_REPLIES_ENABLED = "smart_replies_enabled";
 
             /**
              * The default vibration pattern.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String DEFAULT_VIBRATION = "default_vibration";
 
             /**
              * If FLP should obtain location data from the paired device.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String OBTAIN_PAIRED_DEVICE_LOCATION =
                     "obtain_paired_device_location";
 
@@ -18348,6 +18380,7 @@ public final class Settings {
              * The play store availability on companion phone.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String PHONE_PLAY_STORE_AVAILABILITY =
                     "phone_play_store_availability";
 
@@ -18363,6 +18396,7 @@ public final class Settings {
              * Whether the bug report is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String BUG_REPORT = "bug_report";
 
             // Possible bug report states
@@ -18375,12 +18409,14 @@ public final class Settings {
              * The enabled/disabled state of the SmartIlluminate.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SMART_ILLUMINATE_ENABLED = "smart_illuminate_enabled";
 
             /**
              * Whether automatic time is enabled on the watch.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CLOCKWORK_AUTO_TIME = "clockwork_auto_time";
 
             // Possible clockwork auto time states
@@ -18398,6 +18434,7 @@ public final class Settings {
              * Whether automatic time zone is enabled on the watch.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CLOCKWORK_AUTO_TIME_ZONE = "clockwork_auto_time_zone";
 
             // Possible clockwork auto time zone states
@@ -18414,12 +18451,14 @@ public final class Settings {
              * Whether 24 hour time format is enabled on the watch.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CLOCKWORK_24HR_TIME = "clockwork_24hr_time";
 
             /**
              * Whether the auto wifi toggle setting is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AUTO_WIFI = "auto_wifi";
 
             // Possible force wifi on states
@@ -18439,6 +18478,7 @@ public final class Settings {
              * wifi requirement until this time). The time is in millis since epoch.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS =
                     "alt_bypass_wifi_requirement_time_millis";
 
@@ -18446,6 +18486,7 @@ public final class Settings {
              * Whether the setup was skipped.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SETUP_SKIPPED = "setup_skipped";
 
             // Possible setup_skipped states
@@ -18460,6 +18501,7 @@ public final class Settings {
              * The last requested call forwarding action.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String LAST_CALL_FORWARD_ACTION = "last_call_forward_action";
 
             // Possible call forwarding actions
@@ -18472,22 +18514,31 @@ public final class Settings {
 
             // Stem button settings.
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_1_TYPE = "STEM_1_TYPE";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_1_DATA = "STEM_1_DATA";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_1_DEFAULT_DATA = "STEM_1_DEFAULT_DATA";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_2_TYPE = "STEM_2_TYPE";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_2_DATA = "STEM_2_DATA";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_2_DEFAULT_DATA = "STEM_2_DEFAULT_DATA";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_3_TYPE = "STEM_3_TYPE";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_3_DATA = "STEM_3_DATA";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_3_DEFAULT_DATA = "STEM_3_DEFAULT_DATA";
 
             // Stem types
@@ -18502,12 +18553,14 @@ public final class Settings {
              * If the device should be muted when off body.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String MUTE_WHEN_OFF_BODY_ENABLED = "obtain_mute_when_off_body";
 
             /**
              * Wear OS version string.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WEAR_OS_VERSION_STRING = "wear_os_version_string";
 
             /**
@@ -18520,24 +18573,28 @@ public final class Settings {
              * The android wear system version.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String ANDROID_WEAR_VERSION = "android_wear_version";
 
             /**
              * The wear system capabiltiies.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SYSTEM_CAPABILITIES = "system_capabilities";
 
             /**
              * The android wear system edition.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SYSTEM_EDITION = "android_wear_system_edition";
 
             /**
              * The Wear platform MR number.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WEAR_PLATFORM_MR_NUMBER = "wear_platform_mr_number";
 
             /**
@@ -18551,36 +18608,42 @@ public final class Settings {
              * Whether ambient is currently enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_ENABLED = "ambient_enabled";
 
             /**
              * Whether ambient tilt to wake is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_TILT_TO_WAKE = "ambient_tilt_to_wake";
 
             /**
              * Whether ambient low bit mode is enabled by developer options.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_LOW_BIT_ENABLED_DEV = "ambient_low_bit_enabled_dev";
 
             /**
              * Whether ambient touch to wake is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_TOUCH_TO_WAKE = "ambient_touch_to_wake";
 
             /**
              * Whether ambient tilt to bright is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_TILT_TO_BRIGHT = "ambient_tilt_to_bright";
 
             /**
              * Whether touch and hold to edit WF is enabled
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String GESTURE_TOUCH_AND_HOLD_WATCH_FACE_ENABLED =
                     "gesture_touch_and_hold_watchface_enabled";
 
@@ -18594,6 +18657,7 @@ public final class Settings {
              * Whether bedtime mode is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String BEDTIME_MODE = "bedtime_mode";
 
             /**
@@ -18605,31 +18669,35 @@ public final class Settings {
              * Whether the current watchface is decomposable.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String DECOMPOSABLE_WATCHFACE = "current_watchface_decomposable";
 
             /**
              * Whether to force ambient when docked.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_FORCE_WHEN_DOCKED = "ambient_force_when_docked";
 
             /**
              * Whether the ambient low bit mode is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_LOW_BIT_ENABLED = "ambient_low_bit_enabled";
 
             /**
              * The timeout duration in minutes of ambient mode when plugged in.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_PLUGGED_TIMEOUT_MIN = "ambient_plugged_timeout_min";
 
             /**
              * What OS does paired device has.
              * @hide
              */
-            @Readable
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String PAIRED_DEVICE_OS_TYPE = "paired_device_os_type";
 
             // Possible values of PAIRED_DEVICE_OS_TYPE
@@ -18662,6 +18730,7 @@ public final class Settings {
              * The user's last setting for hfp client.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String USER_HFP_CLIENT_SETTING = "user_hfp_client_setting";
 
             // Possible hfp client user setting values
@@ -18686,6 +18755,7 @@ public final class Settings {
              * The companion App name.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String COMPANION_APP_NAME = "wear_companion_app_name";
 
             /**
@@ -18693,18 +18763,21 @@ public final class Settings {
              * wear. 1 for supporting, 0 for not supporting.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String ENABLE_ALL_LANGUAGES = "enable_all_languages";
 
             /**
              * The Locale (as language tag) the user chose at startup.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SETUP_LOCALE = "setup_locale";
 
             /**
              * The version of oem setup present.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String OEM_SETUP_VERSION = "oem_setup_version";
 
             /**
@@ -18750,6 +18823,7 @@ public final class Settings {
              * -{@link BATTERY_SAVER_MODE_CUSTOM}
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String BATTERY_SAVER_MODE = "battery_saver_mode";
 
             /**
@@ -18782,6 +18856,7 @@ public final class Settings {
              * The maximum ambient mode duration when an activity is allowed to auto resume.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS =
                     "wear_activity_auto_resume_timeout_ms";
 
@@ -18797,6 +18872,7 @@ public final class Settings {
              * If burn in protection is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String BURN_IN_PROTECTION_ENABLED = "burn_in_protection";
 
             /**
@@ -18815,6 +18891,7 @@ public final class Settings {
              *          RIGHT_WRIST_ROTATION_0 = "2", RIGHT_WRIST_ROTATION_180 = "3"
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WRIST_ORIENTATION_MODE = "wear_wrist_orientation_mode";
 
             /**
@@ -18853,6 +18930,7 @@ public final class Settings {
              *
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CLOCKWORK_SYSUI_PACKAGE = "clockwork_sysui_package";
 
             /**
@@ -18882,6 +18960,7 @@ public final class Settings {
              * Whether the device has Wet Mode/ Touch Lock Mode enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WET_MODE_ON = "wet_mode_on";
 
             /**
@@ -18900,6 +18979,7 @@ public final class Settings {
              * Whether charging sounds are enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CHARGING_SOUNDS_ENABLED = "wear_charging_sounds_enabled";
 
             /**
@@ -18908,6 +18988,7 @@ public final class Settings {
              *
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String DYNAMIC_COLOR_THEME_ENABLED = "dynamic_color_theme_enabled";
 
             /**
@@ -18999,6 +19080,7 @@ public final class Settings {
              * The key to indicate the data migration status on device upgrade in Wear Services.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String UPGRADE_DATA_MIGRATION_STATUS =
                     "upgrade_data_migration_status";
 
@@ -19049,17 +19131,20 @@ public final class Settings {
              * The custom foreground color.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CUSTOM_COLOR_FOREGROUND = "custom_foreground_color";
 
             /**
              * The custom background color.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CUSTOM_COLOR_BACKGROUND = "custom_background_color";
 
             /** The status of the phone switching process.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String PHONE_SWITCHING_STATUS = "phone_switching_status";
 
             /**
@@ -19140,6 +19225,7 @@ public final class Settings {
              * (0 = false, 1 = true)
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String REDUCE_MOTION = "reduce_motion";
 
             /**
@@ -19174,6 +19260,10 @@ public final class Settings {
              */
             public static final int TETHERED_CONFIG_TETHERED = 2;
 
+            /**
+             * Device is set in restricted mode.
+             */
+            public static final int TETHERED_CONFIG_RESTRICTED = 3;
 
             /**
              * Whether phone switching is supported.
@@ -19201,6 +19291,7 @@ public final class Settings {
              * Controls the launcher ui mode on wearable devices.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WEAR_LAUNCHER_UI_MODE = "wear_launcher_ui_mode";
 
             /** Whether Wear Power Anomaly Service is enabled.
@@ -19324,6 +19415,36 @@ public final class Settings {
         public static Map<String, String> getStrings(@NonNull String namespace,
                 @NonNull List<String> names) {
             return getStrings(getContentResolver(), namespace, names);
+        }
+
+        /**
+         * Return all stored flags.
+         *
+         * The keys take the form {@code namespace/flag}, and the values are the flag values.
+         *
+         * @hide
+         */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @NonNull
+        public static Map<String, String> getAllStrings() {
+            HashMap<String, String> allFlags = new HashMap<String, String>();
+            try {
+                ContentResolver resolver = getContentResolver();
+                Bundle arg = new Bundle();
+                arg.putInt(Settings.CALL_METHOD_USER_KEY, resolver.getUserId());
+                IContentProvider cp = sProviderHolder.getProvider(resolver);
+                Bundle b = cp.call(resolver.getAttributionSource(),
+                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_LIST_CONFIG, null, arg);
+                if (b != null) {
+                    Map<String, String> flagsToValues =
+                            (HashMap) b.getSerializable(Settings.NameValueTable.VALUE,
+                                            java.util.HashMap.class);
+                    allFlags.putAll(flagsToValues);
+                }
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't query configuration table for " + CONTENT_URI, e);
+            }
+            return allFlags;
         }
 
         /**
@@ -19623,21 +19744,6 @@ public final class Settings {
         public static int checkCallingOrSelfPermission(@NonNull @PermissionName String permission) {
             return ActivityThread.currentApplication()
                .getApplicationContext().checkCallingOrSelfPermission(permission);
-        }
-
-        /**
-         * Enforces READ_DEVICE_CONFIG permission if namespace is not one of public namespaces.
-         * @hide
-         */
-        public static void enforceReadPermission(String namespace) {
-            if (ActivityThread.currentApplication().getApplicationContext()
-                    .checkCallingOrSelfPermission(Manifest.permission.READ_DEVICE_CONFIG)
-                    != PackageManager.PERMISSION_GRANTED) {
-                if (!DeviceConfig.getPublicNamespaces().contains(namespace)) {
-                    throw new SecurityException("Permission denial: reading from settings requires:"
-                        + Manifest.permission.READ_DEVICE_CONFIG);
-                }
-            }
         }
 
         private static void setMonitorCallbackAsUser(

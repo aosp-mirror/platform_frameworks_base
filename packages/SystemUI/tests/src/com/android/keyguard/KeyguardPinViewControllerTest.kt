@@ -16,16 +16,17 @@
 
 package com.android.keyguard
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
@@ -52,7 +53,8 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class KeyguardPinViewControllerTest : SysuiTestCase() {
 
@@ -111,6 +113,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         // For posture tests:
         `when`(mockKeyguardPinView.buttons).thenReturn(arrayOf())
         `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
+        `when`(featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)).thenReturn(false)
 
         objectKeyguardPINView =
             View.inflate(mContext, R.layout.keyguard_pin_view, null)
@@ -175,7 +178,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
 
     private fun getPinTopGuideline(): Float {
         val cs = ConstraintSet()
-        val container = objectKeyguardPINView.requireViewById(R.id.pin_container) as ConstraintLayout
+        val container =
+            objectKeyguardPINView.requireViewById(R.id.pin_container) as ConstraintLayout
         cs.clone(container)
         return cs.getConstraint(R.id.pin_pad_top_guideline).layout.guidePercent
     }
@@ -185,27 +189,27 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun startAppearAnimation() {
+    fun testOnViewAttached() {
         val pinViewController = constructPinViewController(mockKeyguardPinView)
 
-        pinViewController.startAppearAnimation()
+        pinViewController.onViewAttached()
 
         verify(keyguardMessageAreaController)
             .setMessage(context.resources.getString(R.string.keyguard_enter_your_pin), false)
     }
 
     @Test
-    fun startAppearAnimation_withExistingMessage() {
+    fun testOnViewAttached_withExistingMessage() {
         val pinViewController = constructPinViewController(mockKeyguardPinView)
         Mockito.`when`(keyguardMessageAreaController.message).thenReturn("Unlock to continue.")
 
-        pinViewController.startAppearAnimation()
+        pinViewController.onViewAttached()
 
         verify(keyguardMessageAreaController, Mockito.never()).setMessage(anyString(), anyBoolean())
     }
 
     @Test
-    fun startAppearAnimation_withAutoPinConfirmationFailedPasswordAttemptsLessThan5() {
+    fun testOnViewAttached_withAutoPinConfirmationFailedPasswordAttemptsLessThan5() {
         val pinViewController = constructPinViewController(mockKeyguardPinView)
         `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
         `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
@@ -213,7 +217,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(3)
         `when`(passwordTextView.text).thenReturn("")
 
-        pinViewController.startAppearAnimation()
+        pinViewController.onViewAttached()
 
         verify(deleteButton).visibility = View.INVISIBLE
         verify(enterButton).visibility = View.INVISIBLE
@@ -222,7 +226,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun startAppearAnimation_withAutoPinConfirmationFailedPasswordAttemptsMoreThan5() {
+    fun testOnViewAttached_withAutoPinConfirmationFailedPasswordAttemptsMoreThan5() {
         val pinViewController = constructPinViewController(mockKeyguardPinView)
         `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
         `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
@@ -230,7 +234,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(6)
         `when`(passwordTextView.text).thenReturn("")
 
-        pinViewController.startAppearAnimation()
+        pinViewController.onViewAttached()
 
         verify(deleteButton).visibility = View.VISIBLE
         verify(enterButton).visibility = View.VISIBLE

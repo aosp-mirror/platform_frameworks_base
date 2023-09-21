@@ -24,7 +24,6 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_FIRST_ORDERED_ID;
 import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_FIRST_ORDERED_ID;
@@ -41,11 +40,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -60,7 +57,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -76,7 +72,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -242,26 +237,27 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.type = Display.TYPE_VIRTUAL;
         DisplayContent virtualDisplay = createNewDisplay(displayInfo);
+        final KeyguardController keyguardController = mSupervisor.getKeyguardController();
 
         // Make sure we're starting out with 2 unlocked displays
         assertEquals(2, mRootWindowContainer.getChildCount());
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertFalse(displayContent.isKeyguardLocked());
-            assertFalse(displayContent.isAodShowing());
+            assertFalse(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
 
         // Check that setLockScreenShown locks both displays
         mAtm.setLockScreenShown(true, true);
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertTrue(displayContent.isKeyguardLocked());
-            assertTrue(displayContent.isAodShowing());
+            assertTrue(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
 
         // Check setLockScreenShown unlocking both displays
         mAtm.setLockScreenShown(false, false);
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertFalse(displayContent.isKeyguardLocked());
-            assertFalse(displayContent.isAodShowing());
+            assertFalse(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
     }
 
@@ -275,25 +271,26 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         displayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
         displayInfo.flags = Display.FLAG_OWN_DISPLAY_GROUP | Display.FLAG_ALWAYS_UNLOCKED;
         DisplayContent newDisplay = createNewDisplay(displayInfo);
+        final KeyguardController keyguardController = mSupervisor.getKeyguardController();
 
         // Make sure we're starting out with 2 unlocked displays
         assertEquals(2, mRootWindowContainer.getChildCount());
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertFalse(displayContent.isKeyguardLocked());
-            assertFalse(displayContent.isAodShowing());
+            assertFalse(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
 
         // setLockScreenShown should only lock the default display, not the virtual one
         mAtm.setLockScreenShown(true, true);
 
         assertTrue(mDefaultDisplay.isKeyguardLocked());
-        assertTrue(mDefaultDisplay.isAodShowing());
+        assertTrue(keyguardController.isAodShowing(mDefaultDisplay.mDisplayId));
 
         DisplayContent virtualDisplay = mRootWindowContainer.getDisplayContent(
                 newDisplay.getDisplayId());
         assertNotEquals(Display.DEFAULT_DISPLAY, virtualDisplay.getDisplayId());
         assertFalse(virtualDisplay.isKeyguardLocked());
-        assertFalse(virtualDisplay.isAodShowing());
+        assertFalse(keyguardController.isAodShowing(virtualDisplay.mDisplayId));
     }
 
     /*
@@ -304,18 +301,11 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
      */
     @Test
     public void testEnterPipModeWhenRecordParentChangesToNull() {
-        MockitoSession mockSession = mockitoSession()
-                .initMocks(this)
-                .mockStatic(ActivityRecord.class)
-                .startMocking();
-
-        ActivityRecord record = mock(ActivityRecord.class);
-        IBinder token = mock(IBinder.class);
+        final ActivityRecord record = new ActivityBuilder(mAtm).setCreateTask(true).build();
         PictureInPictureParams params = mock(PictureInPictureParams.class);
         record.pictureInPictureArgs = params;
 
         //mock operations in private method ensureValidPictureInPictureActivityParamsLocked()
-        when(ActivityRecord.forTokenLocked(token)).thenReturn(record);
         doReturn(true).when(record).supportsPictureInPicture();
         doReturn(false).when(params).hasSetAspectRatio();
 
@@ -323,15 +313,13 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         doReturn(true).when(record)
                 .checkEnterPictureInPictureState("enterPictureInPictureMode", false);
         doReturn(false).when(record).inPinnedWindowingMode();
-        doReturn(false).when(mAtm).isKeyguardLocked(anyInt());
+        doReturn(false).when(record).isKeyguardLocked();
 
         //to simulate NPE
         doReturn(null).when(record).getParent();
 
-        mAtm.mActivityClientController.enterPictureInPictureMode(token, params);
+        mAtm.mActivityClientController.enterPictureInPictureMode(record.token, params);
         //if record's null parent is not handled gracefully, test will fail with NPE
-
-        mockSession.finishMocking();
     }
 
     @Test

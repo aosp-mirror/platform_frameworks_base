@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.notification.stack
 
 import android.annotation.DimenRes
+import android.content.pm.PackageManager
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
@@ -14,6 +15,8 @@ import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.notification.row.FooterView
+import com.android.systemui.statusbar.notification.row.FooterView.FooterViewState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Expect
@@ -21,6 +24,7 @@ import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,6 +51,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private val emptyShadeView = EmptyShadeView(context, /* attrs= */ null).apply {
         layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)
     }
+    private val footerView = FooterView(context, /*attrs=*/null)
     private val ambientState = AmbientState(
             context,
             dumpManager,
@@ -66,11 +71,17 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        Assume.assumeFalse(isTv())
+
         whenever(notificationShelf.viewState).thenReturn(ExpandableViewState())
         whenever(notificationRow.viewState).thenReturn(ExpandableViewState())
         ambientState.isSmallScreen = true
 
         hostView.addView(notificationRow)
+    }
+
+    private fun isTv(): Boolean {
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
     }
 
     @Test
@@ -322,6 +333,57 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
         assertThat(notificationRow.viewState.alpha).isEqualTo(expected)
+    }
+
+    @Test
+    fun resetViewStates_noSpaceForFooter_footerHidden() {
+        ambientState.isShadeExpanded = true
+        ambientState.stackEndHeight = 0f // no space for the footer in the stack
+        hostView.addView(footerView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
+    }
+
+    @Test
+    fun resetViewStates_clearAllInProgress_hasNonClearableRow_footerVisible() {
+        whenever(notificationRow.canViewBeCleared()).thenReturn(false)
+        ambientState.isClearAllInProgress = true
+        ambientState.isShadeExpanded = true
+        ambientState.stackEndHeight = 1000f // plenty space for the footer in the stack
+        hostView.addView(footerView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat(footerView.viewState.hidden).isFalse()
+        assertThat((footerView.viewState as FooterViewState).hideContent).isFalse()
+    }
+
+    @Test
+    fun resetViewStates_clearAllInProgress_allRowsClearable_footerHidden() {
+        whenever(notificationRow.canViewBeCleared()).thenReturn(true)
+        ambientState.isClearAllInProgress = true
+        ambientState.isShadeExpanded = true
+        ambientState.stackEndHeight = 1000f // plenty space for the footer in the stack
+        hostView.addView(footerView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
+    }
+
+    @Test
+    fun resetViewStates_clearAllInProgress_allRowsRemoved_emptyShade_footerHidden() {
+        ambientState.isClearAllInProgress = true
+        ambientState.isShadeExpanded = true
+        ambientState.stackEndHeight = 1000f // plenty space for the footer in the stack
+        hostView.removeAllViews() // remove all rows
+        hostView.addView(footerView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
     }
 
     @Test

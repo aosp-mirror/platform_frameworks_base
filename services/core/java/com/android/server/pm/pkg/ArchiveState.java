@@ -56,8 +56,11 @@ public class ArchiveState {
         @NonNull
         private final String mTitle;
 
-        /** The path to the stored icon of the activity in the app's locale. */
-        @NonNull
+        /**
+         * The path to the stored icon of the activity in the app's locale. Null if the app does
+         * not define any icon (default icon would be shown on the launcher).
+         */
+        @Nullable
         private final Path mIconBitmap;
 
         /** See {@link #mIconBitmap}. Only set if the app defined a monochrome icon. */
@@ -85,21 +88,20 @@ public class ArchiveState {
          * @param title
          *   Corresponds to the activity's android:label in the app's locale.
          * @param iconBitmap
-         *   The path to the stored icon of the activity in the app's locale.
+         *   The path to the stored icon of the activity in the app's locale. Null if the app does
+         *   not define any icon (default icon would be shown on the launcher).
          * @param monochromeIconBitmap
          *   See {@link #mIconBitmap}. Only set if the app defined a monochrome icon.
          */
         @DataClass.Generated.Member
         public ArchiveActivityInfo(
                 @NonNull String title,
-                @NonNull Path iconBitmap,
+                @Nullable Path iconBitmap,
                 @Nullable Path monochromeIconBitmap) {
             this.mTitle = title;
             com.android.internal.util.AnnotationValidations.validate(
                     NonNull.class, null, mTitle);
             this.mIconBitmap = iconBitmap;
-            com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mIconBitmap);
             this.mMonochromeIconBitmap = monochromeIconBitmap;
 
             // onConstructed(); // You can define this method to get a callback
@@ -114,10 +116,11 @@ public class ArchiveState {
         }
 
         /**
-         * The path to the stored icon of the activity in the app's locale.
+         * The path to the stored icon of the activity in the app's locale. Null if the app does
+         * not define any icon (default icon would be shown on the launcher).
          */
         @DataClass.Generated.Member
-        public @NonNull Path getIconBitmap() {
+        public @Nullable Path getIconBitmap() {
             return mIconBitmap;
         }
 
@@ -174,10 +177,10 @@ public class ArchiveState {
         }
 
         @DataClass.Generated(
-                time = 1689169065133L,
+                time = 1693590309015L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/ArchiveState.java",
-                inputSignatures = "private final @android.annotation.NonNull java.lang.String mTitle\nprivate final @android.annotation.NonNull java.nio.file.Path mIconBitmap\nprivate final @android.annotation.Nullable java.nio.file.Path mMonochromeIconBitmap\nclass ArchiveActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true)")
+                inputSignatures = "private final @android.annotation.NonNull java.lang.String mTitle\nprivate final @android.annotation.Nullable java.nio.file.Path mIconBitmap\nprivate final @android.annotation.Nullable java.nio.file.Path mMonochromeIconBitmap\nclass ArchiveActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true)")
         @Deprecated
         private void __metadata() {}
 
@@ -292,7 +295,7 @@ public class ArchiveState {
     }
 
     @DataClass.Generated(
-            time = 1689169065144L,
+            time = 1693590309027L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/ArchiveState.java",
             inputSignatures = "private final @android.annotation.NonNull java.util.List<com.android.server.pm.pkg.ArchiveActivityInfo> mActivityInfos\nprivate final @android.annotation.NonNull java.lang.String mInstallerTitle\nclass ArchiveState extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true)")

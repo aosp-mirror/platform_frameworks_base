@@ -222,16 +222,8 @@ constructor(
                 str2 = state.label?.toString()
                 str3 = state.icon?.toString()
                 int1 = state.state
-                if (state is QSTile.SignalState) {
-                    bool1 = true
-                    bool2 = state.activityIn
-                    bool3 = state.activityOut
-                }
             },
-            {
-                "[$str1] Tile updated. Label=$str2. State=$int1. Icon=$str3." +
-                    if (bool1) " Activity in/out=$bool2/$bool3" else ""
-            }
+            { "[$str1] Tile updated. Label=$str2. State=$int1. Icon=$str3." }
         )
     }
 

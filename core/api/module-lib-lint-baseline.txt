@@ -17,18 +17,6 @@ SamShouldBeLast: android.content.pm.PackageItemInfo#dumpBack(android.util.Printe
     SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.PackageItemInfo.dumpBack) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.content.pm.PackageItemInfo#dumpFront(android.util.Printer, String):
     SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.PackageItemInfo.dumpFront) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):
-    SAM-compatible parameters (such as parameter 1, "listener", in android.location.LocationManager.addNmeaListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(String, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioManager#abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes):
     SAM-compatible parameters (such as parameter 1, "l", in android.media.AudioManager.abandonAudioFocus) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int):
@@ -47,13 +35,43 @@ SamShouldBeLast: android.media.session.MediaSessionManager#setOnMediaKeyListener
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.session.MediaSessionManager.setOnMediaKeyListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.session.MediaSessionManager#setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.session.MediaSessionManager.setOnVolumeKeyLongPressListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.Binder#attachInterface(android.os.IInterface, String):
-    SAM-compatible parameters (such as parameter 1, "owner", in android.os.Binder.attachInterface) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.Binder#linkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.Binder.linkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.Binder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.Binder.unlinkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.IBinder#linkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.IBinder.linkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.IBinder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.IBinder.unlinkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+
+
+UnflaggedApi: android.Manifest.permission#MANAGE_REMOTE_AUTH:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.MANAGE_REMOTE_AUTH
+UnflaggedApi: android.Manifest.permission#USE_COMPANION_TRANSPORTS:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.USE_COMPANION_TRANSPORTS
+UnflaggedApi: android.Manifest.permission#USE_REMOTE_AUTH:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.USE_REMOTE_AUTH
+UnflaggedApi: android.app.Activity#isResumed():
+    New API must be flagged with @FlaggedApi: method android.app.Activity.isResumed()
+UnflaggedApi: android.companion.CompanionDeviceManager#MESSAGE_REQUEST_CONTEXT_SYNC:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_SYNC
+UnflaggedApi: android.companion.CompanionDeviceManager#MESSAGE_REQUEST_PERMISSION_RESTORE:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PERMISSION_RESTORE
+UnflaggedApi: android.companion.CompanionDeviceManager#MESSAGE_REQUEST_REMOTE_AUTHENTICATION:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceManager.MESSAGE_REQUEST_REMOTE_AUTHENTICATION
+UnflaggedApi: android.companion.CompanionDeviceManager#addOnMessageReceivedListener(java.util.concurrent.Executor, int, android.companion.CompanionDeviceManager.OnMessageReceivedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.addOnMessageReceivedListener(java.util.concurrent.Executor,int,android.companion.CompanionDeviceManager.OnMessageReceivedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#addOnTransportsChangedListener(java.util.concurrent.Executor, android.companion.CompanionDeviceManager.OnTransportsChangedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.addOnTransportsChangedListener(java.util.concurrent.Executor,android.companion.CompanionDeviceManager.OnTransportsChangedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#removeOnMessageReceivedListener(int, android.companion.CompanionDeviceManager.OnMessageReceivedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.removeOnMessageReceivedListener(int,android.companion.CompanionDeviceManager.OnMessageReceivedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#removeOnTransportsChangedListener(android.companion.CompanionDeviceManager.OnTransportsChangedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.removeOnTransportsChangedListener(android.companion.CompanionDeviceManager.OnTransportsChangedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#sendMessage(int, byte[], int[]):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.sendMessage(int,byte[],int[])
+UnflaggedApi: android.companion.CompanionDeviceManager.OnMessageReceivedListener:
+    New API must be flagged with @FlaggedApi: class android.companion.CompanionDeviceManager.OnMessageReceivedListener
+UnflaggedApi: android.companion.CompanionDeviceManager.OnMessageReceivedListener#onMessageReceived(int, byte[]):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.OnMessageReceivedListener.onMessageReceived(int,byte[])
+UnflaggedApi: android.companion.CompanionDeviceManager.OnTransportsChangedListener:
+    New API must be flagged with @FlaggedApi: class android.companion.CompanionDeviceManager.OnTransportsChangedListener
+UnflaggedApi: android.companion.CompanionDeviceManager.OnTransportsChangedListener#onTransportsChanged(java.util.List<android.companion.AssociationInfo>):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.OnTransportsChangedListener.onTransportsChanged(java.util.List<android.companion.AssociationInfo>)
+UnflaggedApi: android.content.Context#REMOTE_AUTH_SERVICE:
+    New API must be flagged with @FlaggedApi: field android.content.Context.REMOTE_AUTH_SERVICE
+UnflaggedApi: android.os.IpcDataCache#MODULE_TELEPHONY:
+    New API must be flagged with @FlaggedApi: field android.os.IpcDataCache.MODULE_TELEPHONY
+UnflaggedApi: android.provider.Settings.Config#getAllStrings():
+    New API must be flagged with @FlaggedApi: method android.provider.Settings.Config.getAllStrings()

@@ -261,6 +261,8 @@ public final class SurfaceControl implements Parcelable {
             float frameRate, int compatibility, int changeFrameRateStrategy);
     private static native void nativeSetDefaultFrameRateCompatibility(long transactionObj,
             long nativeObject, int compatibility);
+    private static native void nativeSetFrameRateCategory(
+            long transactionObj, long nativeObject, int category);
     private static native long nativeGetHandle(long nativeObject);
 
     private static native void nativeSetFixedTransformHint(long transactionObj, long nativeObject,
@@ -3624,6 +3626,45 @@ public final class SurfaceControl implements Parcelable {
                 @Surface.FrameRateCompatibility int compatibility) {
             checkPreconditions(sc);
             nativeSetDefaultFrameRateCompatibility(mNativeObject, sc.mNativeObject, compatibility);
+            return this;
+        }
+
+        /**
+         * Sets the frame rate category for the {@link SurfaceControl}.
+         *
+         * This helps instruct the system on choosing a display refresh rate based on the surface's
+         * chosen category, which is a device-specific range of frame rates.
+         * {@link #setFrameRateCategory} should be used by components such as animations that do not
+         * require an exact frame rate, but has an opinion on an approximate desirable frame rate.
+         * The values of {@code category} gives example use cases for which category to choose.
+         *
+         * To instead specify an exact frame rate, use
+         * {@link #setFrameRate(SurfaceControl, float, int, int)}, which is more suitable for
+         * content that knows specifically which frame rate is optimal.
+         * Although not a common use case, {@link #setFrameRateCategory} and {@link #setFrameRate}
+         * can be called together, with both calls potentially influencing the display refresh rate.
+         * For example, considering only one {@link SurfaceControl}: if {@link #setFrameRate}'s
+         * value is 24 and {@link #setFrameRateCategory}'s value is
+         * {@link Surface#FRAME_RATE_CATEGORY_HIGH}, defined to be the range [90,120] fps for an
+         * example device, then the best refresh rate for the SurfaceControl should be 120 fps.
+         * This is because 120 fps is a multiple of 24 fps, and 120 fps is in the specified
+         * category's range.
+         *
+         * @param sc The SurfaceControl to specify the frame rate category of.
+         * @param category The frame rate category of this surface. The category value may influence
+         * the system's choice of display frame rate.
+         *
+         * @return This transaction object.
+         *
+         * @see #setFrameRate(SurfaceControl, float, int, int)
+         *
+         * @hide
+         */
+        @NonNull
+        public Transaction setFrameRateCategory(
+                @NonNull SurfaceControl sc, @Surface.FrameRateCategory int category) {
+            checkPreconditions(sc);
+            nativeSetFrameRateCategory(mNativeObject, sc.mNativeObject, category);
             return this;
         }
 

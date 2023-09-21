@@ -158,6 +158,7 @@ android_library {
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "iconloader_base",
+        "com_android_wm_shell_flags_lib",
         "WindowManager-Shell-proto",
         "dagger2",
         "jsr330",

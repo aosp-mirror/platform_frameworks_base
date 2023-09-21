@@ -184,14 +184,31 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
 
         void dispose() {
+            boolean wasVisible = false;
             for (int i = mOrganizedTaskFragments.size() - 1; i >= 0; i--) {
+                final TaskFragment taskFragment = mOrganizedTaskFragments.get(i);
+                if (taskFragment.isVisibleRequested()) {
+                    wasVisible = true;
+                }
                 // Cleanup the TaskFragmentOrganizer from all TaskFragments it organized before
                 // removing the windows to prevent it from adding any additional TaskFragment
                 // pending event.
-                final TaskFragment taskFragment = mOrganizedTaskFragments.get(i);
                 taskFragment.onTaskFragmentOrganizerRemoved();
             }
 
+            final TransitionController transitionController = mAtmService.getTransitionController();
+            if (wasVisible && transitionController.isShellTransitionsEnabled()
+                    && !transitionController.isCollecting()) {
+                final Task task = mOrganizedTaskFragments.get(0).getTask();
+                final boolean containsNonEmbeddedActivity =
+                        task != null && task.getActivity(a -> !a.isEmbedded()) != null;
+                transitionController.requestStartTransition(
+                        transitionController.createTransition(WindowManager.TRANSIT_CLOSE),
+                        // The task will be removed if all its activities are embedded, then the
+                        // task is the trigger.
+                        containsNonEmbeddedActivity ? null : task,
+                        null /* remoteTransition */, null /* displayChange */);
+            }
             // Defer to avoid unnecessary layout when there are multiple TaskFragments removal.
             mAtmService.deferWindowLayout();
             try {

@@ -1,0 +1,6 @@
+{
+    // TODO: Change to presubmit.
+    "postsubmit": [
+        { "name": "tiny-framework-dump-test" }
+    ]
+}

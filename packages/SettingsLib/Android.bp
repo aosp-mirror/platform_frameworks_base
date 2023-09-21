@@ -8,7 +8,6 @@ package {
 }
 
 android_library {
-
     name: "SettingsLib",
 
     static_libs: [
@@ -26,50 +25,63 @@ android_library {
         "iconloader",
 
         "WifiTrackerLibRes",
-        "SettingsLibHelpUtils",
-        "SettingsLibRestrictedLockUtils",
-        "SettingsLibActionBarShadow",
-        "SettingsLibAppPreference",
-        "SettingsLibSearchWidget",
-        "SettingsLibSettingsSpinner",
-        "SettingsLibIllustrationPreference",
-        "SettingsLibLayoutPreference",
-        "SettingsLibMainSwitchPreference",
-        "SettingsLibActionButtonsPreference",
-        "SettingsLibEntityHeaderWidgets",
-        "SettingsLibBarChartPreference",
-        "SettingsLibProgressBar",
-        "SettingsLibAdaptiveIcon",
-        "SettingsLibRadioButtonPreference",
-        "SettingsLibSelectorWithWidgetPreference",
-        "SettingsLibDisplayUtils",
-        "SettingsLibUtils",
-        "SettingsLibEmergencyNumber",
-        "SettingsLibTopIntroPreference",
-        "SettingsLibBannerMessagePreference",
-        "SettingsLibFooterPreference",
-        "SettingsLibUsageProgressBarPreference",
-        "SettingsLibCollapsingToolbarBaseActivity",
-        "SettingsLibTwoTargetPreference",
-        "SettingsLibSettingsTransition",
-        "SettingsLibButtonPreference",
         "SettingsLibDeviceStateRotationLock",
-        "SettingsLibProfileSelector",
+        "SettingsLibDisplayUtils",
+        "SettingsLibEmergencyNumber",
+        "SettingsLibSearchWidget",
+        "SettingsLibUtils",
+        "SettingsLibWidget",
         "setupdesign",
         "zxing-core-1.7",
         "androidx.room_room-runtime",
         "settingslib_flags_lib",
-
     ],
 
     plugins: ["androidx.room_room-compiler-plugin"],
-
+    use_resource_processor: true,
     resource_dirs: ["res"],
 
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
     ],
+}
+
+// Group all the libraries with namespace "com.android.settingslib.widget", to allow SettingsLib to
+// set use_resource_processor = true.
+// We can remove SettingsLibWidget when all these libraries have its own namespace.
+android_library {
+    name: "SettingsLibWidget",
+    visibility: ["//visibility:private"],
+    manifest: "AndroidManifest-SettingsLibWidget.xml",
+    static_libs: [
+        "SettingsLibActionBarShadow",
+        "SettingsLibActionButtonsPreference",
+        "SettingsLibAdaptiveIcon",
+        "SettingsLibAppPreference",
+        "SettingsLibBannerMessagePreference",
+        "SettingsLibBarChartPreference",
+        "SettingsLibButtonPreference",
+        "SettingsLibCollapsingToolbarBaseActivity",
+        "SettingsLibEntityHeaderWidgets",
+        "SettingsLibFooterPreference",
+        "SettingsLibHelpUtils",
+        "SettingsLibIllustrationPreference",
+        "SettingsLibLayoutPreference",
+        "SettingsLibMainSwitchPreference",
+        "SettingsLibProfileSelector",
+        "SettingsLibProgressBar",
+        "SettingsLibRadioButtonPreference",
+        "SettingsLibRestrictedLockUtils",
+        "SettingsLibSelectorWithWidgetPreference",
+        "SettingsLibSettingsSpinner",
+        "SettingsLibSettingsTransition",
+        "SettingsLibTopIntroPreference",
+        "SettingsLibTwoTargetPreference",
+        "SettingsLibUsageProgressBarPreference",
+    ],
+
+    resource_dirs: [],
 }
 
 // NOTE: Keep this module in sync with ./common.mk

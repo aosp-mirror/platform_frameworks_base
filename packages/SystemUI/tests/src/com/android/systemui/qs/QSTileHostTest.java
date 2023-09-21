@@ -53,7 +53,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.nano.SystemUIProtoDump;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.PluginManager;
@@ -65,6 +64,7 @@ import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServiceKey;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
@@ -131,6 +131,8 @@ public class QSTileHostTest extends SysuiTestCase {
 
     private FakeFeatureFlags mFeatureFlags;
 
+    private QSPipelineFlagsRepository mQSPipelineFlagsRepository;
+
     private FakeExecutor mMainExecutor;
 
     private QSTileHost mQSTileHost;
@@ -142,6 +144,7 @@ public class QSTileHostTest extends SysuiTestCase {
 
         mFeatureFlags.set(Flags.QS_PIPELINE_NEW_HOST, false);
         mFeatureFlags.set(Flags.QS_PIPELINE_AUTO_ADD, false);
+        mQSPipelineFlagsRepository = new QSPipelineFlagsRepository(mFeatureFlags);
 
         mMainExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -164,7 +167,7 @@ public class QSTileHostTest extends SysuiTestCase {
         mQSTileHost = new TestQSTileHost(mContext, mDefaultFactory, mMainExecutor,
                 mPluginManager, mTunerService, () -> mAutoTiles, mShadeController,
                 mQSLogger, mUserTracker, mSecureSettings, mCustomTileStatePersister,
-                mTileLifecycleManagerFactory, mUserFileManager, mFeatureFlags);
+                mTileLifecycleManagerFactory, mUserFileManager, mQSPipelineFlagsRepository);
         mMainExecutor.runAllReady();
 
         mSecureSettings.registerContentObserverForUser(SETTING, new ContentObserver(null) {
@@ -708,7 +711,7 @@ public class QSTileHostTest extends SysuiTestCase {
                 UserTracker userTracker, SecureSettings secureSettings,
                 CustomTileStatePersister customTileStatePersister,
                 TileLifecycleManager.Factory tileLifecycleManagerFactory,
-                UserFileManager userFileManager, FeatureFlags featureFlags) {
+                UserFileManager userFileManager, QSPipelineFlagsRepository featureFlags) {
             super(context, defaultFactory, mainExecutor, pluginManager,
                     tunerService, autoTiles,  shadeController, qsLogger,
                     userTracker, secureSettings, customTileStatePersister,

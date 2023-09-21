@@ -61,11 +61,11 @@ android_test {
         "testng",
         "servicestests-utils",
         "device-time-shell-utils",
+        "testables",
     ],
 
     libs: [
         "android.test.runner",
-        "testables",
         "org.apache.http.legacy",
         "android.test.base",
         "android.test.mock",
@@ -88,7 +88,7 @@ android_test {
 
     resource_dirs: ["res"],
     resource_zips: [":FrameworksCoreTests_apks_as_resources"],
-    java_resources: [":ApkVerityTestCertDer"],
+    java_resources: [":FrameworksCoreTests_unit_test_cert_der"],
 
     data: [
         ":BinderDeathRecipientHelperApp1",

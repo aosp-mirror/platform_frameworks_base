@@ -1002,6 +1002,24 @@ public class UserManager {
     public static final String DISALLOW_ADD_CLONE_PROFILE = "no_add_clone_profile";
 
     /**
+     * Specifies if a user is disallowed from creating a private profile.
+     * <p>The default value for an unmanaged user is <code>false</code>.
+     * For users with a device owner set, the default is <code>true</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILES}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     * @hide
+     */
+    public static final String DISALLOW_ADD_PRIVATE_PROFILE = "no_add_private_profile";
+
+    /**
      * Specifies if a user is disallowed from disabling application verification. The default
      * value is <code>false</code>.
      *
@@ -1832,6 +1850,31 @@ public class UserManager {
     public static final String DISALLOW_ULTRA_WIDEBAND_RADIO = "no_ultra_wideband_radio";
 
     /**
+     * This user restriction specifies if Near-field communication is disallowed on the device. If
+     * Near-field communication is disallowed it cannot be turned on via Settings.
+     *
+     * <p>This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile on the parent profile.
+     * In both cases, the restriction applies globally on the device and will turn off the
+     * Near-field communication radio if it's currently on and prevent the radio from being turned
+     * on in the future.
+     *
+     * <p>
+     * Near-field communication (NFC) is a radio technology that allows two devices (like your phone
+     * and a payments terminal) to communicate with each other when they're close together.
+     *
+     * <p>Default is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO =
+            "no_near_field_communication_radio";
+
+    /**
      * List of key values that can be passed into the various user restriction related methods
      * in {@link UserManager} & {@link DevicePolicyManager}.
      * Note: This is slightly different from the real set of user restrictions listed in {@link
@@ -1870,6 +1913,7 @@ public class UserManager {
             DISALLOW_ADD_USER,
             DISALLOW_ADD_MANAGED_PROFILE,
             DISALLOW_ADD_CLONE_PROFILE,
+            DISALLOW_ADD_PRIVATE_PROFILE,
             ENSURE_VERIFY_APPS,
             DISALLOW_CONFIG_CELL_BROADCASTS,
             DISALLOW_CONFIG_MOBILE_NETWORKS,
@@ -1915,6 +1959,7 @@ public class UserManager {
             DISALLOW_CELLULAR_2G,
             DISALLOW_ULTRA_WIDEBAND_RADIO,
             DISALLOW_GRANT_ADMIN,
+            DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}
@@ -4615,26 +4660,6 @@ public class UserManager {
     public @NonNull List<UserInfo> getAliveUsers() {
         return getUsers(/*excludePartial= */ true, /* excludeDying= */ true,
                 /* excludePreCreated= */ true);
-    }
-
-    /**
-     * Returns number of full users on the device.
-     * @hide
-     */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.CREATE_USERS
-    })
-    public int getFullUserCount() {
-        List<UserInfo> users = getUsers(/* excludePartial= */ true, /* excludeDying= */ true,
-                /* excludePreCreated= */ true);
-        int count = 0;
-        for (UserInfo user : users) {
-            if (user.isFull()) {
-                count++;
-            }
-        }
-        return count;
     }
 
     /**

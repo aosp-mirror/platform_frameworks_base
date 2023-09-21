@@ -34,14 +34,87 @@ interface ShadeRepository {
     /** ShadeModel information regarding shade expansion events */
     val shadeModel: Flow<ShadeModel>
 
-    /** Amount qs has expanded. Quick Settings can be expanded without the full shade expansion. */
+    /**
+     * Amount qs has expanded, [0-1]. 0 means fully collapsed, 1 means fully expanded. Quick
+     * Settings can be expanded without the full shade expansion.
+     */
     val qsExpansion: StateFlow<Float>
+
+    /**
+     * The amount the lockscreen shade has dragged down by the user, [0-1]. 0 means fully collapsed,
+     * 1 means fully expanded. Value resets to 0 when the user finishes dragging.
+     */
+    val lockscreenShadeExpansion: StateFlow<Float>
+
+    /**
+     * NotificationPanelViewController.mExpandedFraction as a StateFlow. This nominally represents
+     * the amount the shade has expanded 0-1 like many other flows in this repo, but there are cases
+     * where its value will be 1 and no shade will be rendered, e.g. whenever the keyguard is
+     * visible and when quick settings is expanded. The confusing nature and impending deletion of
+     * this makes it unsuitable for future development, so usage is discouraged.
+     */
+    @Deprecated("Use ShadeInteractor.shadeExpansion instead")
+    val legacyShadeExpansion: StateFlow<Float>
+
+    /**
+     * NotificationPanelViewController.mTracking as a flow. "Tracking" means that the user is moving
+     * the shade up or down with a pointer. Going forward, this concept will be replaced by checks
+     * for whether a transition was driven by user input instead of whether a pointer is currently
+     * touching the screen, i.e. after the user has lifted their finger to fling the shade, these
+     * values would be different.
+     */
+    @Deprecated("Use ShadeInteractor instead") val legacyShadeTracking: StateFlow<Boolean>
+
+    /**
+     * QuickSettingsController.mTracking as a flow. "Tracking" means that the user is moving quick
+     * settings up or down with a pointer. Going forward, this concept will be replaced by checks
+     * for whether a transition was driven by user input instead of whether a pointer is currently
+     * touching the screen, i.e. after the user has lifted their finger to fling the QS, these
+     * values would be different.
+     */
+    @Deprecated("Use ShadeInteractor instead") val legacyQsTracking: StateFlow<Boolean>
+
+    /**
+     * NotificationPanelViewController.mPanelExpanded as a flow. This value is true whenever the
+     * expansion fraction is greater than zero or NPVC is about to accept an input transfer from the
+     * status bar, home screen, or trackpad.
+     */
+    @Deprecated("Use ShadeInteractor instead")
+    val legacyExpandedOrAwaitingInputTransfer: StateFlow<Boolean>
+
+    /**
+     * Sets whether the expansion fraction is greater than zero or NPVC is about to accept an input
+     * transfer from the status bar, home screen, or trackpad.
+     */
+    @Deprecated("Use ShadeInteractor instead")
+    fun setLegacyExpandedOrAwaitingInputTransfer(legacyExpandedOrAwaitingInputTransfer: Boolean)
+
+    /** Sets whether the user is moving Quick Settings with a pointer */
+    fun setLegacyQsTracking(legacyQsTracking: Boolean)
+
+    /** Sets whether the user is moving the shade with a pointer */
+    fun setLegacyShadeTracking(tracking: Boolean)
 
     /** Amount shade has expanded with regard to the UDFPS location */
     val udfpsTransitionToFullShadeProgress: StateFlow<Float>
 
+    /** The amount QS has expanded without notifications */
     fun setQsExpansion(qsExpansion: Float)
+
     fun setUdfpsTransitionToFullShadeProgress(progress: Float)
+
+    /**
+     * Set the amount the shade has dragged down by the user, [0-1]. 0 means fully collapsed, 1
+     * means fully expanded.
+     */
+    fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float)
+
+    /**
+     * Set the legacy expansion value. This should only be called whenever the value of
+     * NotificationPanelViewController.mExpandedFraction changes or in tests.
+     */
+    @Deprecated("Should only be called by NPVC and tests")
+    fun setLegacyShadeExpansion(expandedFraction: Float)
 }
 
 /** Business logic for shade interactions */
@@ -69,7 +142,6 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
 
                 val currentState = shadeExpansionStateManager.addExpansionListener(callback)
                 callback.onPanelExpansionChanged(currentState)
-                trySendWithFailureLogging(ShadeModel(), TAG, "initial shade expansion info")
 
                 awaitClose { shadeExpansionStateManager.removeExpansionListener(callback) }
             }
@@ -78,11 +150,59 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     private val _qsExpansion = MutableStateFlow(0f)
     override val qsExpansion: StateFlow<Float> = _qsExpansion.asStateFlow()
 
+    private val _lockscreenShadeExpansion = MutableStateFlow(0f)
+    override val lockscreenShadeExpansion: StateFlow<Float> =
+        _lockscreenShadeExpansion.asStateFlow()
+
     private var _udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
     override val udfpsTransitionToFullShadeProgress: StateFlow<Float> =
         _udfpsTransitionToFullShadeProgress.asStateFlow()
+
+    private val _legacyShadeExpansion = MutableStateFlow(0f)
+    @Deprecated("Use ShadeInteractor.shadeExpansion instead")
+    override val legacyShadeExpansion: StateFlow<Float> = _legacyShadeExpansion.asStateFlow()
+
+    private val _legacyShadeTracking = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyShadeTracking: StateFlow<Boolean> = _legacyShadeTracking.asStateFlow()
+
+    private val _legacyQsTracking = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyQsTracking: StateFlow<Boolean> = _legacyQsTracking.asStateFlow()
+
+    private val _legacyExpandedOrAwaitingInputTransfer = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyExpandedOrAwaitingInputTransfer: StateFlow<Boolean> =
+        _legacyExpandedOrAwaitingInputTransfer.asStateFlow()
+
+    @Deprecated("Use ShadeInteractor instead")
+    override fun setLegacyExpandedOrAwaitingInputTransfer(
+        legacyExpandedOrAwaitingInputTransfer: Boolean
+    ) {
+        _legacyExpandedOrAwaitingInputTransfer.value = legacyExpandedOrAwaitingInputTransfer
+    }
+
+    @Deprecated("Should only be called by NPVC and tests")
+    override fun setLegacyQsTracking(legacyQsTracking: Boolean) {
+        _legacyQsTracking.value = legacyQsTracking
+    }
+
+    @Deprecated("Should only be called by NPVC and tests")
+    override fun setLegacyShadeTracking(tracking: Boolean) {
+        _legacyShadeTracking.value = tracking
+    }
+
     override fun setQsExpansion(qsExpansion: Float) {
         _qsExpansion.value = qsExpansion
+    }
+
+    @Deprecated("Should only be called by NPVC and tests")
+    override fun setLegacyShadeExpansion(expandedFraction: Float) {
+        _legacyShadeExpansion.value = expandedFraction
+    }
+
+    override fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float) {
+        _lockscreenShadeExpansion.value = lockscreenShadeExpansion
     }
 
     override fun setUdfpsTransitionToFullShadeProgress(progress: Float) {

@@ -28,7 +28,6 @@ import static com.android.systemui.statusbar.notification.stack.NotificationStac
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_HIGH_PRIORITY;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.SelectedRows;
-import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.content.res.Configuration;
@@ -129,6 +128,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.Compile;
@@ -150,6 +150,7 @@ import javax.inject.Named;
 public class NotificationStackScrollLayoutController {
     private static final String TAG = "StackScrollerController";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
+    private static final String HIGH_PRIORITY = "high_priority";
 
     private final boolean mAllowLongPress;
     private final NotificationGutsManager mNotificationGutsManager;
@@ -455,7 +456,6 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public void onDragCancelled(View v) {
-                    mFalsingCollector.onNotificationStopDismissing();
                 }
 
                 /**
@@ -501,7 +501,6 @@ public class NotificationStackScrollLayoutController {
                     }
 
                     mView.addSwipedOutView(view);
-                    mFalsingCollector.onNotificationDismissed();
                     if (mFalsingCollector.shouldEnforceBouncer()) {
                         mActivityStarter.executeRunnableDismissingKeyguard(
                                 null,
@@ -549,7 +548,6 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public void onBeginDrag(View v) {
-                    mFalsingCollector.onNotificationStartDismissing();
                     mView.onSwipeBegin(v);
                 }
 
@@ -675,7 +673,8 @@ public class NotificationStackScrollLayoutController {
             NotificationTargetsHelper notificationTargetsHelper,
             SecureSettings secureSettings,
             NotificationDismissibilityProvider dismissibilityProvider,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter,
+            SplitShadeStateController splitShadeStateController) {
         mView = view;
         mKeyguardTransitionRepo = keyguardTransitionRepo;
         mStackStateLogger = stackLogger;
@@ -725,6 +724,7 @@ public class NotificationStackScrollLayoutController {
         mSecureSettings = secureSettings;
         mDismissibilityProvider = dismissibilityProvider;
         mActivityStarter = activityStarter;
+        mView.passSplitShadeStateController(splitShadeStateController);
         updateResources();
         setUpView();
     }
@@ -1203,10 +1203,6 @@ public class NotificationStackScrollLayoutController {
         mView.setHeadsUpBoundaries(height, bottomBarHeight);
     }
 
-    public void setUnlockHintRunning(boolean running) {
-        mView.setUnlockHintRunning(running);
-    }
-
     public void setPanelFlinging(boolean flinging) {
         mView.setPanelFlinging(flinging);
     }
@@ -1662,8 +1658,9 @@ public class NotificationStackScrollLayoutController {
 
     @VisibleForTesting
     void onKeyguardTransitionChanged(TransitionStep transitionStep) {
-        boolean isTransitionToAod = transitionStep.getFrom().equals(KeyguardState.GONE)
-                && transitionStep.getTo().equals(KeyguardState.AOD);
+        boolean isTransitionToAod = transitionStep.getTo().equals(KeyguardState.AOD)
+                && (transitionStep.getFrom().equals(KeyguardState.GONE)
+                || transitionStep.getFrom().equals(KeyguardState.OCCLUDED));
         if (mIsInTransitionToAod != isTransitionToAod) {
             mIsInTransitionToAod = isTransitionToAod;
             updateShowEmptyShadeView();

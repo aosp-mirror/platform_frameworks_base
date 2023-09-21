@@ -19,18 +19,20 @@ package com.android.systemui.keyguard.shared.model
 import android.os.PowerManager
 
 /** The reason we're waking up or going to sleep, such as pressing the power button. */
-enum class WakeSleepReason {
+enum class WakeSleepReason(
+    val isTouch: Boolean,
+) {
     /** The physical power button was pressed to wake up or sleep the device. */
-    POWER_BUTTON,
+    POWER_BUTTON(isTouch = false),
 
     /** The user has tapped or double tapped to wake the screen. */
-    TAP,
+    TAP(isTouch = true),
 
     /** The user performed some sort of gesture to wake the screen. */
-    GESTURE,
+    GESTURE(isTouch = true),
 
     /** Something else happened to wake up or sleep the device. */
-    OTHER;
+    OTHER(isTouch = false);
 
     companion object {
         fun fromPowerManagerWakeReason(reason: Int): WakeSleepReason {

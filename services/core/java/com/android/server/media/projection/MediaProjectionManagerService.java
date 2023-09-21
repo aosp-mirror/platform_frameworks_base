@@ -735,12 +735,9 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         @Override //Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
         public void addCallback(final IMediaProjectionWatcherCallback callback) {
-            if (mContext.checkCallingPermission(MANAGE_MEDIA_PROJECTION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to add "
-                        + "projection callbacks");
-            }
+            addCallback_enforcePermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 MediaProjectionManagerService.this.addCallback(callback);
@@ -935,6 +932,7 @@ public final class MediaProjectionManagerService extends SystemService
             if (callback == null) {
                 throw new IllegalArgumentException("callback must not be null");
             }
+            Slog.v(TAG, "Start the token instance " + this);
             // Cache result of calling into ActivityManagerService outside of the lock, to prevent
             // deadlock with WindowManagerService.
             final boolean hasFGS = mActivityManagerInternal.hasRunningForegroundService(
@@ -954,9 +952,6 @@ public final class MediaProjectionManagerService extends SystemService
                     throw new SecurityException("Media projections require a foreground service"
                             + " of type ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION");
                 }
-
-                mCallback = callback;
-                registerCallback(mCallback);
                 try {
                     mToken = callback.asBinder();
                     mDeathEater = () -> {
@@ -1001,6 +996,11 @@ public final class MediaProjectionManagerService extends SystemService
                     }
                 }
                 startProjectionLocked(this);
+
+                // Register new callbacks after stop has been dispatched to previous session.
+                mCallback = callback;
+                registerCallback(mCallback);
+
                 // Mark this token as used when the app gets the MediaProjection instance.
                 mCountStarts++;
             }

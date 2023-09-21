@@ -19,11 +19,12 @@ package com.android.wm.shell.flicker.service.splitscreen.scenarios
 import android.app.Instrumentation
 import android.tools.common.NavBar
 import android.tools.common.Rotation
+import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.wm.shell.flicker.service.Utils
+import com.android.wm.shell.flicker.service.common.Utils
 import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import org.junit.After
 import org.junit.Assume
@@ -50,14 +51,16 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun setup() {
         Assume.assumeTrue(tapl.isTablet)
 
-        tapl.setEnableRotation(true)
-        tapl.setExpectedRotation(rotation.value)
-
         // Send a notification
         sendNotificationApp.launchViaIntent(wmHelper)
         sendNotificationApp.postNotification(wmHelper)
         tapl.goHome()
+
+        tapl.setEnableRotation(true)
+        tapl.setExpectedRotation(rotation.value)
+
         primaryApp.launchViaIntent(wmHelper)
+        ChangeDisplayOrientationRule.setRotation(rotation)
     }
 
     @Test

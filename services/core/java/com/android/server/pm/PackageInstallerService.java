@@ -18,9 +18,7 @@ package com.android.server.pm;
 
 import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_DELETED_BY_DO;
 import static android.os.Process.INVALID_UID;
-
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
-
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -111,7 +109,6 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -183,6 +180,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             Manifest.permission.USE_FULL_SCREEN_INTENT
     );
 
+    final PackageArchiver mPackageArchiver;
+
     private final Context mContext;
     private final PackageManagerService mPm;
     private final ApexManager mApexManager;
@@ -230,7 +229,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     /** Historical sessions kept around for debugging purposes */
     @GuardedBy("mSessions")
-    private final List<String> mHistoricalSessions = new ArrayList<>();
+    private final List<PackageInstallerHistoricalSession> mHistoricalSessions = new ArrayList<>();
 
     @GuardedBy("mSessions")
     private final SparseIntArray mHistoricalSessionsByInstaller = new SparseIntArray();
@@ -302,6 +301,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 apexParserSupplier, mInstallThread.getLooper());
         mGentleUpdateHelper = new GentleUpdateHelper(
                 context, mInstallThread.getLooper(), new AppStateHelper(context));
+        mPackageArchiver = new PackageArchiver(mContext, mPm);
 
         LocalServices.getService(SystemServiceManager.class).startService(
                 new Lifecycle(context, this));
@@ -570,14 +570,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     @GuardedBy("mSessions")
     private void addHistoricalSessionLocked(PackageInstallerSession session) {
-        CharArrayWriter writer = new CharArrayWriter();
-        IndentingPrintWriter pw = new IndentingPrintWriter(writer, "    ");
-        session.dump(pw);
         if (mHistoricalSessions.size() > HISTORICAL_SESSIONS_THRESHOLD) {
             Slog.d(TAG, "Historical sessions size reaches threshold, clear the oldest");
             mHistoricalSessions.subList(0, HISTORICAL_CLEAR_SIZE).clear();
         }
-        mHistoricalSessions.add(writer.toString());
+        mHistoricalSessions.add(session.createHistoricalSession());
 
         int installerUid = session.getInstallerUid();
         // Increment the number of sessions by this installerUid.
@@ -1223,11 +1220,39 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         return new ParceledListSlice<>(result);
     }
 
+    ParceledListSlice<SessionInfo> getHistoricalSessions(int userId) {
+        final int callingUid = Binder.getCallingUid();
+        final Computer snapshot = mPm.snapshotComputer();
+        snapshot.enforceCrossUserPermission(callingUid, userId, true, false, "getAllSessions");
+
+        final List<SessionInfo> result = new ArrayList<>();
+        synchronized (mSessions) {
+            for (int i = 0; i < mHistoricalSessions.size(); i++) {
+                final PackageInstallerHistoricalSession session = mHistoricalSessions.get(i);
+                if (userId == UserHandle.USER_ALL || session.userId == userId) {
+                    result.add(session.generateInfo());
+                }
+            }
+        }
+        result.removeIf(info -> shouldFilterSession(snapshot, callingUid, info));
+        return new ParceledListSlice<>(result);
+    }
+
     @Override
     public void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags,
                 IntentSender statusReceiver, int userId) {
+        uninstall(
+                versionedPackage,
+                callerPackageName,
+                flags,
+                statusReceiver,
+                userId,
+                Binder.getCallingUid());
+    }
+
+    void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags,
+            IntentSender statusReceiver, int userId, int callingUid) {
         final Computer snapshot = mPm.snapshotComputer();
-        final int callingUid = Binder.getCallingUid();
         snapshot.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
         if (!PackageManagerServiceUtils.isRootOrShell(callingUid)) {
             mAppOps.checkPackage(callingUid, callerPackageName);
@@ -1243,7 +1268,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
                 canSilentlyInstallPackage, userId);
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
@@ -1478,6 +1503,24 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             throw new SecurityException("Caller not allowed to set silent updates throttle time");
         }
         mSilentUpdatePolicy.setSilentUpdatesThrottleTime(throttleTimeInSeconds);
+    }
+
+    @Override
+    public void requestArchive(
+            @NonNull String packageName,
+            @NonNull String callerPackageName,
+            @NonNull IntentSender intentSender,
+            @NonNull UserHandle userHandle) {
+        mPackageArchiver.requestArchive(packageName, callerPackageName, intentSender,
+                userHandle);
+    }
+
+    @Override
+    public void requestUnarchive(
+            @NonNull String packageName,
+            @NonNull String callerPackageName,
+            @NonNull UserHandle userHandle) {
+        mPackageArchiver.requestUnarchive(packageName, callerPackageName, userHandle);
     }
 
     private static int getSessionCount(SparseArray<PackageInstallerSession> sessions,
@@ -1837,7 +1880,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             pw.increaseIndent();
             N = mHistoricalSessions.size();
             for (int i = 0; i < N; i++) {
-                pw.print(mHistoricalSessions.get(i));
+                mHistoricalSessions.get(i).dump(pw);
                 pw.println();
             }
             pw.println();

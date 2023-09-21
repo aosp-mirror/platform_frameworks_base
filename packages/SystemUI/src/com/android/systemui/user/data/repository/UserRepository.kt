@@ -31,7 +31,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
@@ -49,7 +48,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -76,9 +74,6 @@ interface UserRepository {
 
     /** [UserInfo] of the currently-selected user. */
     val selectedUserInfo: Flow<UserInfo>
-
-    /** Whether user switching is currently in progress. */
-    val userSwitchingInProgress: Flow<Boolean>
 
     /** User ID of the main user. */
     val mainUserId: Int
@@ -162,10 +157,6 @@ constructor(
     private var _isGuestUserResetting: Boolean = false
     override var isGuestUserResetting: Boolean = _isGuestUserResetting
 
-    private val _isUserSwitchingInProgress = MutableStateFlow(false)
-    override val userSwitchingInProgress: Flow<Boolean>
-        get() = _isUserSwitchingInProgress
-
     override val isGuestUserCreationScheduled = AtomicBoolean()
 
     override val isStatusBarUserChipEnabled: Boolean =
@@ -174,12 +165,6 @@ constructor(
     override var secondaryUserId: Int = UserHandle.USER_NULL
 
     override var isRefreshUsersPaused: Boolean = false
-
-    init {
-        if (featureFlags.isEnabled(FACE_AUTH_REFACTOR)) {
-            observeUserSwitching()
-        }
-    }
 
     override val selectedUser: StateFlow<SelectedUserModel> = run {
         // Some callbacks don't modify the selection status, so maintain the current value.
@@ -257,28 +242,6 @@ constructor(
 
     override fun isUserSwitcherEnabled(): Boolean {
         return _userSwitcherSettings.value.isUserSwitcherEnabled
-    }
-
-    private fun observeUserSwitching() {
-        conflatedCallbackFlow {
-                val callback =
-                    object : UserTracker.Callback {
-                        override fun onUserChanging(newUser: Int, userContext: Context) {
-                            trySendWithFailureLogging(true, TAG, "userSwitching started")
-                        }
-
-                        override fun onUserChanged(newUserId: Int, userContext: Context) {
-                            trySendWithFailureLogging(false, TAG, "userSwitching completed")
-                        }
-                    }
-                tracker.addCallback(callback, mainDispatcher.asExecutor())
-                trySendWithFailureLogging(false, TAG, "initial value defaulting to false")
-                awaitClose { tracker.removeCallback(callback) }
-            }
-            .onEach { _isUserSwitchingInProgress.value = it }
-            // TODO (b/262838215), Make this stateIn and initialize directly in field declaration
-            //  once the flag is launched
-            .launchIn(applicationScope)
     }
 
     private suspend fun getSettings(): UserSwitcherSettingsModel {

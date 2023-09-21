@@ -145,6 +145,8 @@ public:
      */
     void updateChildren(std::function<void(RenderNode*)> updateFn);
 
+    void visit(std::function<void(const RenderNode&)> func) const;
+
     /**
      *  Returns true if there is a child render node that is a projection receiver.
      */

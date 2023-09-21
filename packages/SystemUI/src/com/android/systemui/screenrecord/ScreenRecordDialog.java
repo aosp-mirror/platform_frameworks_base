@@ -18,7 +18,6 @@ package com.android.systemui.screenrecord;
 
 import static android.app.Activity.RESULT_OK;
 
-import static com.android.systemui.media.MediaProjectionAppSelectorActivity.EXTRA_CAPTURE_REGION_RESULT_RECEIVER;
 import static com.android.systemui.media.MediaProjectionAppSelectorActivity.KEY_CAPTURE_TARGET;
 import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.INTERNAL;
 import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC;
@@ -28,13 +27,11 @@ import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.NONE;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.view.Gravity;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -45,13 +42,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.DialogLaunchAnimator;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
-import com.android.systemui.media.MediaProjectionAppSelectorActivity;
 import com.android.systemui.media.MediaProjectionCaptureTarget;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
@@ -71,23 +62,15 @@ public class ScreenRecordDialog extends SystemUIDialog {
     private final UserContextProvider mUserContextProvider;
     @Nullable
     private final Runnable mOnStartRecordingClicked;
-    private final ActivityStarter mActivityStarter;
-    private final FeatureFlags mFlags;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
     private Switch mTapsSwitch;
     private Switch mAudioSwitch;
     private Spinner mOptions;
 
     public ScreenRecordDialog(Context context, RecordingController controller,
-            ActivityStarter activityStarter, UserContextProvider userContextProvider,
-            FeatureFlags flags, DialogLaunchAnimator dialogLaunchAnimator,
-            @Nullable Runnable onStartRecordingClicked) {
+            UserContextProvider userContextProvider, @Nullable Runnable onStartRecordingClicked) {
         super(context);
         mController = controller;
         mUserContextProvider = userContextProvider;
-        mActivityStarter = activityStarter;
-        mDialogLaunchAnimator = dialogLaunchAnimator;
-        mFlags = flags;
         mOnStartRecordingClicked = onStartRecordingClicked;
     }
 
@@ -119,31 +102,6 @@ public class ScreenRecordDialog extends SystemUIDialog {
             requestScreenCapture(/* captureTarget= */ null);
             dismiss();
         });
-
-        if (mFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)) {
-            TextView appBtn = findViewById(R.id.button_app);
-
-            appBtn.setVisibility(View.VISIBLE);
-            appBtn.setOnClickListener(v -> {
-                Intent intent = new Intent(getContext(), MediaProjectionAppSelectorActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                // We can't start activity for result here so we use result receiver to get
-                // the selected target to capture
-                intent.putExtra(EXTRA_CAPTURE_REGION_RESULT_RECEIVER,
-                        new CaptureTargetResultReceiver());
-
-                ActivityLaunchAnimator.Controller animationController =
-                        mDialogLaunchAnimator.createActivityLaunchController(appBtn);
-
-                if (animationController == null) {
-                    dismiss();
-                }
-
-                mActivityStarter.startActivity(intent, /* dismissShade= */ true,
-                        animationController);
-            });
-        }
 
         mAudioSwitch = findViewById(R.id.screenrecord_audio_switch);
         mTapsSwitch = findViewById(R.id.screenrecord_taps_switch);

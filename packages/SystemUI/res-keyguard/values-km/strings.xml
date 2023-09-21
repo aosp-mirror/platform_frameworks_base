@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"ត្រូវការកូដ PIN បន្ទាប់ពីការចាក់សោ"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"ត្រូវការពាក្យសម្ងាត់បន្ទាប់ពីការចាក់សោ"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"ត្រូវការលំនាំបន្ទាប់ពីការចាក់សោ"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"កំណែថ្មីនឹងត្រូវបានដំឡើង នៅពេលឧបករណ៍មិនជាប់ប្រើ"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"ត្រូវការសុវត្ថិភាពបន្ថែម។ មិនបានប្រើកូដ PIN មួយរយៈ។"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"ត្រូវការសុវត្ថិភាពបន្ថែម។ មិនបានប្រើពាក្យសម្ងាត់មួយរយៈ។"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"ត្រូវការសុវត្ថិភាពបន្ថែម។ មិនបានប្រើលំនាំមួយរយៈ។"</string>

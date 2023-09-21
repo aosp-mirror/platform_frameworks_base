@@ -227,6 +227,25 @@ class ClockRegistryTest : SysuiTestCase() {
     }
 
     @Test
+    fun activeClockId_changeAfterPluginConnected() {
+        val plugin1 = FakeClockPlugin()
+            .addClock("clock_1", "clock 1")
+            .addClock("clock_2", "clock 2")
+
+        val plugin2 = FakeClockPlugin()
+            .addClock("clock_3", "clock 3", { mockClock })
+            .addClock("clock_4", "clock 4")
+
+        registry.applySettings(ClockSettings("clock_3", null))
+
+        pluginListener.onPluginLoaded(plugin1, mockContext, mockPluginLifecycle)
+        assertEquals(DEFAULT_CLOCK_ID, registry.activeClockId)
+
+        pluginListener.onPluginLoaded(plugin2, mockContext, mockPluginLifecycle)
+        assertEquals("clock_3", registry.activeClockId)
+    }
+
+    @Test
     fun createDefaultClock_pluginDisconnected() {
         val plugin1 = FakeClockPlugin()
             .addClock("clock_1", "clock 1")
@@ -321,9 +340,9 @@ class ClockRegistryTest : SysuiTestCase() {
     @Test
     fun knownPluginAttached_clockAndListChanged_notLoaded() {
         val mockPluginLifecycle1 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
-        whenever(mockPluginLifecycle1.getPackage()).thenReturn("com.android.systemui.falcon.one")
+        whenever(mockPluginLifecycle1.getPackage()).thenReturn("com.android.systemui.clocks.metro")
         val mockPluginLifecycle2 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
-        whenever(mockPluginLifecycle2.getPackage()).thenReturn("com.android.systemui.falcon.two")
+        whenever(mockPluginLifecycle2.getPackage()).thenReturn("com.android.systemui.clocks.bignum")
 
         var changeCallCount = 0
         var listChangeCallCount = 0

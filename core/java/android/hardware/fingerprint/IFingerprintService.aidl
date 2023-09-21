@@ -74,7 +74,8 @@ interface IFingerprintService {
     @EnforcePermission("MANAGE_BIOMETRIC")
     void prepareForAuthentication(IBinder token, long operationId,
             IBiometricSensorReceiver sensorReceiver, in FingerprintAuthenticateOptions options, long requestId,
-            int cookie, boolean allowBackgroundAuthentication);
+            int cookie, boolean allowBackgroundAuthentication,
+            boolean isForLegacyFingerprintManager);
 
     // Starts authentication with the previously prepared client.
     @EnforcePermission("MANAGE_BIOMETRIC")

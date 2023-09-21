@@ -567,9 +567,8 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
 
     @Throws(Exception::class)
     private fun stageInstantAppResolverScan() {
-        whenever(mocks.resources.getStringArray(R.array.config_ephemeralResolverPackage)) {
-            arrayOf("com.android.test.ephemeral.resolver")
-        }
+        doReturn(arrayOf("com.android.test.ephemeral.resolver"))
+            .whenever(mocks.resources).getStringArray(R.array.config_ephemeralResolverPackage)
         stageScanNewPackage("com.android.test.ephemeral.resolver",
                 1L, getPartitionFromFlag(PackageManagerService.SCAN_AS_PRODUCT).privAppFolder,
                 withPackage = { pkg: PackageImpl ->

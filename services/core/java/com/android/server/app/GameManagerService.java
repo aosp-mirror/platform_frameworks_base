@@ -25,6 +25,7 @@ import static com.android.internal.R.styleable.GameModeConfig_allowGameDownscali
 import static com.android.internal.R.styleable.GameModeConfig_allowGameFpsOverride;
 import static com.android.internal.R.styleable.GameModeConfig_supportsBatteryGameMode;
 import static com.android.internal.R.styleable.GameModeConfig_supportsPerformanceGameMode;
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -2087,17 +2088,17 @@ public final class GameManagerService extends IGameManagerService.Stub {
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.GAME_MODE_INFO,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 this::onPullAtom);
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.GAME_MODE_CONFIGURATION,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 this::onPullAtom);
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.GAME_MODE_LISTENER,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 this::onPullAtom);
     }
 

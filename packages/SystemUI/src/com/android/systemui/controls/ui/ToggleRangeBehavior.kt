@@ -235,7 +235,7 @@ class ToggleRangeBehavior : Behavior {
         if (isDragging) {
             val isEdge = newLevel == MIN_LEVEL || newLevel == MAX_LEVEL
             if (clipLayer.level != newLevel) {
-                cvh.controlActionCoordinator.drag(isEdge)
+                cvh.controlActionCoordinator.drag(cvh, isEdge)
                 clipLayer.level = newLevel
             }
         } else if (newLevel != clipLayer.level) {

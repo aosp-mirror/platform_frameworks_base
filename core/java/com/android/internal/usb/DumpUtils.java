@@ -16,6 +16,7 @@
 
 package com.android.internal.usb;
 
+import static android.hardware.usb.UsbPort.FLAG_ALT_MODE_TYPE_DISPLAYPORT;
 import static android.hardware.usb.UsbPortStatus.MODE_AUDIO_ACCESSORY;
 import static android.hardware.usb.UsbPortStatus.MODE_DEBUG_ACCESSORY;
 import static android.hardware.usb.UsbPortStatus.MODE_DFP;
@@ -26,6 +27,7 @@ import static android.hardware.usb.UsbPortStatus.MODE_UFP;
 import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
 
 import android.annotation.NonNull;
+import android.hardware.usb.DisplayPortAltModeInfo;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbConfiguration;
 import android.hardware.usb.UsbDevice;
@@ -177,6 +179,10 @@ public class DumpUtils {
         dump.write("supports_compliance_warnings",
                 UsbPortProto.SUPPORTS_COMPLIANCE_WARNINGS,
                 port.supportsComplianceWarnings());
+        if (port.isAltModeSupported(FLAG_ALT_MODE_TYPE_DISPLAYPORT)) {
+            dump.write("supported_alt_modes", UsbPortProto.SUPPORTED_ALT_MODES,
+                    FLAG_ALT_MODE_TYPE_DISPLAYPORT);
+        }
 
         dump.end(token);
     }
@@ -255,6 +261,12 @@ public class DumpUtils {
                 UsbPort.powerBrickConnectionStatusToString(status.getPowerBrickConnectionStatus()));
         dump.write("compliance_warning_status", UsbPortStatusProto.COMPLIANCE_WARNINGS_STRING,
                 UsbPort.complianceWarningsToString(status.getComplianceWarnings()));
+        DisplayPortAltModeInfo displayPortAltModeInfo = status.getDisplayPortAltModeInfo();
+        if (displayPortAltModeInfo != null) {
+            dump.write("displayport_alt_mode_status",
+                    UsbPortStatusProto.DISPLAYPORT_ALT_MODE_STATUS,
+                    status.getDisplayPortAltModeInfo().toString());
+        }
         dump.end(token);
     }
 }

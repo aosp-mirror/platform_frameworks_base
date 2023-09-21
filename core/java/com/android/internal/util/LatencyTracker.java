@@ -342,7 +342,11 @@ public class LatencyTracker {
         synchronized (mLock) {
             int samplingInterval = properties.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
                     DEFAULT_SAMPLING_INTERVAL);
+            boolean wasEnabled = mEnabled;
             mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
+            if (wasEnabled != mEnabled) {
+                Log.d(TAG, "Latency tracker " + (mEnabled ? "enabled" : "disabled") + ".");
+            }
             for (int action : ACTIONS_ALL) {
                 String actionName = getNameOfAction(STATSD_ACTION[action]).toLowerCase(Locale.ROOT);
                 int legacyActionTraceThreshold = properties.getInt(

@@ -64,6 +64,13 @@ public abstract class KeyguardInputView extends LinearLayout {
         return false;
     }
 
+    /** Updates the keyguard view's constraints (single or split constraints).
+     *  Split constraints are only used for small landscape screens.
+     *  Only called when flag LANDSCAPE_ENABLE_LOCKSCREEN is enabled. */
+    protected void updateConstraints(boolean useSplitBouncer) {
+        //Unless overridden, never update constrains (keeping default portrait constraints)
+    }
+
     protected AnimatorListenerAdapter getAnimationListener(int cuj) {
         return new AnimatorListenerAdapter() {
             private boolean mIsCancel;

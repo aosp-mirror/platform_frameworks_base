@@ -55,6 +55,7 @@ import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
@@ -81,10 +82,11 @@ constructor(
 ) : ComposableScene {
     override val key = SceneKey.Bouncer
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
-        MutableStateFlow<Map<UserAction, SceneModel>>(
+    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
+        MutableStateFlow(
                 mapOf(
                     UserAction.Back to SceneModel(SceneKey.Lockscreen),
+                    UserAction.Swipe(Direction.DOWN) to SceneModel(SceneKey.Lockscreen),
                 )
             )
             .asStateFlow()

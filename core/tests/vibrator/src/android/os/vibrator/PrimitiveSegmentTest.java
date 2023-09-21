@@ -25,18 +25,14 @@ import static org.testng.Assert.assertThrows;
 
 import android.hardware.vibrator.IVibrator;
 import android.os.Parcel;
-import android.os.SystemVibrator;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.os.VibratorInfo;
-
-import androidx.test.InstrumentationRegistry;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.runners.JUnit4;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(JUnit4.class)
 public class PrimitiveSegmentTest {
     private static final float TOLERANCE = 1e-2f;
 
@@ -146,15 +142,15 @@ public class PrimitiveSegmentTest {
     public void testVibrationFeaturesSupport_primitiveSupportedByVibrator() {
         assertTrue(createSegment(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .areVibrationFeaturesSupported(
-                        createVibratorWithSupportedPrimitive(
+                        createVibratorInfoWithSupportedPrimitive(
                                 VibrationEffect.Composition.PRIMITIVE_CLICK)));
         assertTrue(createSegment(VibrationEffect.Composition.PRIMITIVE_THUD)
                 .areVibrationFeaturesSupported(
-                        createVibratorWithSupportedPrimitive(
+                        createVibratorInfoWithSupportedPrimitive(
                                 VibrationEffect.Composition.PRIMITIVE_THUD)));
         assertTrue(createSegment(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE)
                 .areVibrationFeaturesSupported(
-                        createVibratorWithSupportedPrimitive(
+                        createVibratorInfoWithSupportedPrimitive(
                                 VibrationEffect.Composition.PRIMITIVE_QUICK_RISE)));
     }
 
@@ -162,15 +158,15 @@ public class PrimitiveSegmentTest {
     public void testVibrationFeaturesSupport_primitiveNotSupportedByVibrator() {
         assertFalse(createSegment(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .areVibrationFeaturesSupported(
-                        createVibratorWithSupportedPrimitive(
+                        createVibratorInfoWithSupportedPrimitive(
                                 VibrationEffect.Composition.PRIMITIVE_THUD)));
         assertFalse(createSegment(VibrationEffect.Composition.PRIMITIVE_THUD)
                 .areVibrationFeaturesSupported(
-                        createVibratorWithSupportedPrimitive(
+                        createVibratorInfoWithSupportedPrimitive(
                                 VibrationEffect.Composition.PRIMITIVE_CLICK)));
         assertFalse(createSegment(VibrationEffect.Composition.PRIMITIVE_THUD)
                 .areVibrationFeaturesSupported(
-                        createVibratorWithSupportedPrimitive(
+                        createVibratorInfoWithSupportedPrimitive(
                                 VibrationEffect.Composition.PRIMITIVE_QUICK_RISE)));
     }
 
@@ -193,15 +189,10 @@ public class PrimitiveSegmentTest {
         return new PrimitiveSegment(primitiveId, 0.2f, 10);
     }
 
-    private static Vibrator createVibratorWithSupportedPrimitive(int primitiveId) {
-        return new SystemVibrator(InstrumentationRegistry.getContext()) {
-            @Override
-            public VibratorInfo getInfo() {
-                return new VibratorInfo.Builder(/* id= */ 1)
-                        .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
-                        .setSupportedPrimitive(primitiveId, 10)
-                        .build();
-                }
-        };
+    private static VibratorInfo createVibratorInfoWithSupportedPrimitive(int primitiveId) {
+        return new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(primitiveId, 10)
+                .build();
     }
 }

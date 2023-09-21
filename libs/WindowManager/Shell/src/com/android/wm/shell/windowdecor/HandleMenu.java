@@ -26,7 +26,10 @@ import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
@@ -167,10 +170,9 @@ class HandleMenu {
             desktopBtn.setOnClickListener(mOnClickListener);
             // The button corresponding to the windowing mode that the task is currently in uses a
             // different color than the others.
-            final ColorStateList activeColorStateList = ColorStateList.valueOf(
-                    mContext.getColor(R.color.desktop_mode_caption_menu_buttons_color_active));
-            final ColorStateList inActiveColorStateList = ColorStateList.valueOf(
-                    mContext.getColor(R.color.desktop_mode_caption_menu_buttons_color_inactive));
+            final int[] iconColors = getWindowingIconColor();
+            final ColorStateList inActiveColorStateList = ColorStateList.valueOf(iconColors[0]);
+            final ColorStateList activeColorStateList = ColorStateList.valueOf(iconColors[1]);
             fullscreenBtn.setImageTintList(
                     mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                             ? activeColorStateList : inActiveColorStateList);
@@ -186,9 +188,31 @@ class HandleMenu {
         // More Actions pill setup.
         final View moreActionsPillView = mMoreActionsPill.mWindowViewHost.getView();
         final Button closeBtn = moreActionsPillView.findViewById(R.id.close_button);
-        closeBtn.setOnClickListener(mOnClickListener);
+        if (shouldShowCloseButton()) {
+            closeBtn.setVisibility(View.GONE);
+        } else {
+            closeBtn.setVisibility(View.VISIBLE);
+            closeBtn.setOnClickListener(mOnClickListener);
+        }
         final Button selectBtn = moreActionsPillView.findViewById(R.id.select_button);
         selectBtn.setOnClickListener(mOnClickListener);
+    }
+
+    /**
+     * Returns array of windowing icon color based on current UI theme. First element of the
+     * array is for inactive icons and the second is for active icons.
+     */
+    private int[] getWindowingIconColor() {
+        final int mode = mContext.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK;
+        final boolean isNightMode = (mode == Configuration.UI_MODE_NIGHT_YES);
+        final TypedArray typedArray = mContext.obtainStyledAttributes(new int[]{
+                com.android.internal.R.attr.materialColorOnSurface,
+                com.android.internal.R.attr.materialColorPrimary});
+        final int inActiveColor = typedArray.getColor(0, isNightMode ? Color.WHITE : Color.BLACK);
+        final int activeColor = typedArray.getColor(1, isNightMode ? Color.WHITE : Color.BLACK);
+        typedArray.recycle();
+        return new int[] {inActiveColor, activeColor};
     }
 
     /**
@@ -228,7 +252,6 @@ class HandleMenu {
 
     /**
      * Update pill layout, in case task changes have caused positioning to change.
-     * @param t
      */
     void relayout(SurfaceControl.Transaction t) {
         if (mAppInfoPill != null) {
@@ -236,7 +259,7 @@ class HandleMenu {
             t.setPosition(mAppInfoPill.mWindowSurface,
                     mAppInfoPillPosition.x, mAppInfoPillPosition.y);
             // Only show windowing buttons in proto2. Proto1 uses a system-level mode only.
-            final boolean shouldShowWindowingPill = DesktopModeStatus.isProto2Enabled();
+            final boolean shouldShowWindowingPill = DesktopModeStatus.isEnabled();
             if (shouldShowWindowingPill) {
                 t.setPosition(mWindowingPill.mWindowSurface,
                         mWindowingPillPosition.x, mWindowingPillPosition.y);
@@ -245,10 +268,12 @@ class HandleMenu {
                     mMoreActionsPillPosition.x, mMoreActionsPillPosition.y);
         }
     }
+
     /**
      * Check a passed MotionEvent if a click has occurred on any button on this caption
      * Note this should only be called when a regular onClick is not possible
      * (i.e. the button was clicked through status bar layer)
+     *
      * @param ev the MotionEvent to compare against.
      */
     void checkClickEvent(MotionEvent ev) {
@@ -267,6 +292,7 @@ class HandleMenu {
      * A valid menu input is one of the following:
      * An input that happens in the menu views.
      * Any input before the views have been laid out.
+     *
      * @param inputPoint the input to compare against.
      */
     boolean isValidMenuInput(PointF inputPoint) {
@@ -297,7 +323,6 @@ class HandleMenu {
 
     /**
      * Check if the views for handle menu can be seen.
-     * @return
      */
     private boolean viewsLaidOut() {
         return mAppInfoPill.mWindowViewHost.getView().isLaidOut();
@@ -318,8 +343,11 @@ class HandleMenu {
                 R.dimen.desktop_mode_handle_menu_app_info_pill_height);
         mWindowingPillHeight = loadDimensionPixelSize(resources,
                 R.dimen.desktop_mode_handle_menu_windowing_pill_height);
-        mMoreActionsPillHeight = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
+        mMoreActionsPillHeight = shouldShowCloseButton()
+                ? loadDimensionPixelSize(resources,
+                        R.dimen.desktop_mode_handle_menu_more_actions_pill_freeform_height)
+                : loadDimensionPixelSize(resources,
+                        R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
         mShadowRadius = loadDimensionPixelSize(resources,
                 R.dimen.desktop_mode_handle_menu_shadow_radius);
         mCornerRadius = loadDimensionPixelSize(resources,
@@ -331,6 +359,10 @@ class HandleMenu {
             return 0;
         }
         return resources.getDimensionPixelSize(resourceId);
+    }
+
+    private boolean shouldShowCloseButton() {
+        return mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
     }
 
     void close() {

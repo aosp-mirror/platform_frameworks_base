@@ -58,6 +58,7 @@ class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
         return false
     }
     override fun onBackPressed() {}
+    override fun onBackProgressed(progressFraction: Float) {}
     override fun setIsLaunchAnimationRunning(running: Boolean) {}
     override fun setAlpha(alpha: Int, animate: Boolean) {}
     override fun setAlphaChangeAnimationEndAction(r: Runnable) {}
@@ -72,7 +73,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
         return false
     }
     override fun transitionToExpandedShade(delay: Long) {}
-    override val isUnlockHintRunning: Boolean = false
 
     override fun resetViewGroupFade() {}
     override fun setKeyguardTransitionProgress(keyguardAlpha: Float, keyguardTranslationY: Int) {}
@@ -85,7 +85,11 @@ class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
     override fun handleExternalTouch(event: MotionEvent): Boolean {
         return false
     }
-    override fun startTrackingExpansionFromStatusBar() {}
+    override fun startInputFocusTransfer() {}
+    override fun cancelInputFocusTransfer() {}
+    override fun finishInputFocusTransfer(velocity: Float) {}
+    override fun performHapticFeedback(constant: Int) {}
+
     override val shadeHeadsUpTracker = ShadeHeadsUpTrackerEmptyImpl()
     override val shadeFoldAnimator = ShadeFoldAnimatorEmptyImpl()
 }

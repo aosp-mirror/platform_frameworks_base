@@ -48,6 +48,8 @@ import androidx.annotation.StringRes;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * This is a utility class for defining some utility methods and constants
@@ -63,15 +65,23 @@ public class PackageUtil {
     //intent attribute strings related to uninstall
     public static final String INTENT_ATTR_PACKAGE_NAME=PREFIX+"PackageName";
     private static final String DOWNLOADS_AUTHORITY = "downloads";
+    private static final String SPLIT_BASE_APK_END_WITH = "base.apk";
 
     /**
      * Utility method to get package information for a given {@link File}
      */
     @Nullable
     public static PackageInfo getPackageInfo(Context context, File sourceFile, int flags) {
+        String filePath = sourceFile.getAbsolutePath();
+        if (filePath.endsWith(SPLIT_BASE_APK_END_WITH)) {
+            File dir = sourceFile.getParentFile();
+            if (dir.listFiles().length > 1) {
+                // split apks, use file directory to get archive info
+                filePath = dir.getPath();
+            }
+        }
         try {
-            return context.getPackageManager().getPackageArchiveInfo(sourceFile.getAbsolutePath(),
-                    flags);
+            return context.getPackageManager().getPackageArchiveInfo(filePath, flags);
         } catch (Exception ignored) {
             return null;
         }
@@ -191,6 +201,17 @@ public class PackageUtil {
         PackageManager pm = pContext.getPackageManager();
         appInfo.publicSourceDir = archiveFilePath;
 
+        if (appInfo.splitNames != null && appInfo.splitSourceDirs == null) {
+            final File[] files = sourceFile.getParentFile().listFiles();
+            final String[] splits = Arrays.stream(appInfo.splitNames)
+                    .map(i -> findFilePath(files, i + ".apk"))
+                    .filter(Objects::nonNull)
+                    .toArray(String[]::new);
+
+            appInfo.splitSourceDirs = splits;
+            appInfo.splitPublicSourceDirs = splits;
+        }
+
         CharSequence label = null;
         // Try to load the label from the package's resources. If an app has not explicitly
         // specified any label, just use the package name.
@@ -221,6 +242,16 @@ public class PackageUtil {
             Log.i(LOG_TAG, "Could not load app icon", e);
         }
         return new PackageUtil.AppSnippet(label, icon);
+    }
+
+    private static String findFilePath(File[] files, String postfix) {
+        for (File file : files) {
+            final String path = file.getAbsolutePath();
+            if (path.endsWith(postfix)) {
+                return path;
+            }
+        }
+        return null;
     }
 
     /**

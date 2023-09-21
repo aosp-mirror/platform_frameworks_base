@@ -79,6 +79,7 @@ public class SettingsBackupTest {
                     Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
                     Settings.System.SHOW_TOUCHES,
                     Settings.System.SHOW_KEY_PRESSES,
+                    Settings.System.SHOW_ROTARY_INPUT,
                     Settings.System.SIP_ADDRESS_ONLY, // value, not a setting
                     Settings.System.SIP_ALWAYS, // value, not a setting
                     Settings.System.SYSTEM_LOCALES, // bug?
@@ -97,11 +98,11 @@ public class SettingsBackupTest {
                     Settings.System.VOLUME_VOICE, // deprecated since API 2?
                     Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
                     Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
-                    Settings.System.DESKTOP_MODE, // developer setting for internal prototyping
                     Settings.System.MIN_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.SCREEN_BRIGHTNESS_FLOAT,
                     Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
+                    Settings.System.WEAR_TTS_PREWARM_ENABLED,
                     Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
                     Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
                     );
@@ -656,7 +657,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.COMPANION_BLE_ROLE,
                     Settings.Global.Wearable.COMPANION_NAME,
                     Settings.Global.Wearable.COMPANION_APP_NAME,
-                    Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
                     Settings.Global.Wearable.COMPANION_OS_VERSION,
                     Settings.Global.Wearable.ENABLE_ALL_LANGUAGES,
                     Settings.Global.Wearable.SETUP_LOCALE,
@@ -671,16 +671,12 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.CLOCKWORK_LONG_PRESS_TO_ASSISTANT_ENABLED,
                     Settings.Global.Wearable.WET_MODE_ON,
                     Settings.Global.Wearable.COOLDOWN_MODE_ON,
-                    Settings.Global.Wearable.CHARGING_SOUNDS_ENABLED,
-                    Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
                     Settings.Global.Wearable.BEDTIME_MODE,
                     Settings.Global.Wearable.BEDTIME_HARD_MODE,
-                    Settings.Global.Wearable.RSB_WAKE_ENABLED,
                     Settings.Global.Wearable.LOCK_SCREEN_STATE,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
-                    Settings.Global.Wearable.SCREENSHOT_ENABLED,
                     Settings.Global.Wearable.DISABLE_AOD_WHILE_PLUGGED,
                     Settings.Global.Wearable.NETWORK_LOCATION_OPT_IN,
                     Settings.Global.Wearable.CUSTOM_COLOR_FOREGROUND,
@@ -723,7 +719,8 @@ public class SettingsBackupTest {
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_TURNED_OFF_BY_POLICY,
-                 Settings.Secure.AUDIO_DEVICE_INVENTORY, // setting not controllable by user
+                 Settings.Secure.AUDIO_DEVICE_INVENTORY, // not controllable by user
+                 Settings.Secure.AUDIO_SAFE_CSD_AS_A_FEATURE_ENABLED, // not controllable by user
                  Settings.Secure.BACKUP_AUTO_RESTORE,
                  Settings.Secure.BACKUP_ENABLED,
                  Settings.Secure.BACKUP_PROVISIONED,

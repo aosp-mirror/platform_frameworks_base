@@ -1802,6 +1802,15 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertFalse(ScrimState.UNLOCKED.mAnimateChange);
     }
 
+    @Test
+    public void testNotifScrimAlpha_1f_afterUnlockFinishedAndExpanded() {
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        when(mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()).thenReturn(true);
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.onUnlockAnimationFinished();
+        assertAlphaAfterExpansion(mNotificationsScrim, 1f, 1f);
+    }
+
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
         mScrimController.setRawPanelExpansionFraction(expansion);
         finishAnimationsImmediately();

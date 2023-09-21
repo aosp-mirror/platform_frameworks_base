@@ -85,9 +85,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBar;
@@ -97,6 +95,7 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
@@ -105,7 +104,6 @@ import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
@@ -118,7 +116,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
@@ -144,13 +141,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private final Context mContext;
     private final FeatureFlags mFeatureFlags;
+    private final SceneContainerFlags mSceneContainerFlags;
     private final Executor mMainExecutor;
     private final ShellInterface mShellInterface;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final Lazy<ShadeViewController> mShadeViewControllerLazy;
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
+    private final ScreenPinningRequest mScreenPinningRequest;
     private final NotificationShadeWindowController mStatusBarWinController;
     private final Provider<SceneInteractor> mSceneInteractor;
 
@@ -185,9 +183,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void startScreenPinning(int taskId) {
             verifyCallerAndClearCallingIdentityPostMain("startScreenPinning", () ->
-                    mCentralSurfacesOptionalLazy.get().ifPresent(
-                            statusBar -> statusBar.showScreenPinningRequest(taskId,
-                                    false /* allowCancel */)));
+                    mScreenPinningRequest.showPrompt(taskId, false /* allowCancel */));
         }
 
         @Override
@@ -206,40 +202,38 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void onStatusBarTouchEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentity("onStatusBarTouchEvent", () -> {
                 // TODO move this logic to message queue
-                mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
-                    if (event.getActionMasked() == ACTION_DOWN) {
-                        mShadeViewControllerLazy.get().startExpandLatencyTracking();
+                if (event.getActionMasked() == ACTION_DOWN) {
+                    mShadeViewControllerLazy.get().startExpandLatencyTracking();
+                }
+                mHandler.post(() -> {
+                    int action = event.getActionMasked();
+                    if (action == ACTION_DOWN) {
+                        mInputFocusTransferStarted = true;
+                        mInputFocusTransferStartY = event.getY();
+                        mInputFocusTransferStartMillis = event.getEventTime();
+
+                        // If scene framework is enabled, set the scene container window to
+                        // visible and let the touch "slip" into that window.
+                        if (mSceneContainerFlags.isEnabled()) {
+                            mSceneInteractor.get().setVisible(true, "swipe down on launcher");
+                        } else {
+                            mShadeViewControllerLazy.get().startInputFocusTransfer();
+                        }
                     }
-                    mHandler.post(() -> {
-                        int action = event.getActionMasked();
-                        if (action == ACTION_DOWN) {
-                            mInputFocusTransferStarted = true;
-                            mInputFocusTransferStartY = event.getY();
-                            mInputFocusTransferStartMillis = event.getEventTime();
+                    if (action == ACTION_UP || action == ACTION_CANCEL) {
+                        mInputFocusTransferStarted = false;
 
-                            // If scene framework is enabled, set the scene container window to
-                            // visible and let the touch "slip" into that window.
-                            if (mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
-                                mSceneInteractor.get().setVisible(true, "swipe down on launcher");
+                        if (!mSceneContainerFlags.isEnabled()) {
+                            float velocity = (event.getY() - mInputFocusTransferStartY)
+                                    / (event.getEventTime() - mInputFocusTransferStartMillis);
+                            if (action == ACTION_CANCEL) {
+                                mShadeViewControllerLazy.get().cancelInputFocusTransfer();
                             } else {
-                                centralSurfaces.onInputFocusTransfer(
-                                        mInputFocusTransferStarted, false /* cancel */,
-                                        0 /* velocity */);
+                                mShadeViewControllerLazy.get().finishInputFocusTransfer(velocity);
                             }
                         }
-                        if (action == ACTION_UP || action == ACTION_CANCEL) {
-                            mInputFocusTransferStarted = false;
-
-                            if (!mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
-                                float velocity = (event.getY() - mInputFocusTransferStartY)
-                                        / (event.getEventTime() - mInputFocusTransferStartMillis);
-                                centralSurfaces.onInputFocusTransfer(mInputFocusTransferStarted,
-                                        action == ACTION_CANCEL,
-                                        velocity);
-                            }
-                        }
-                        event.recycle();
-                    });
+                    }
+                    event.recycle();
                 });
             });
         }
@@ -247,8 +241,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void onStatusBarTrackpadEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentityPostMain("onStatusBarTrackpadEvent", () ->
-                    mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces ->
-                            centralSurfaces.onStatusBarTrackpadEvent(event)));
+                    mShadeViewControllerLazy.get().handleExternalTouch(event));
         }
 
         @Override
@@ -324,6 +317,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void startAssistant(Bundle bundle) {
             verifyCallerAndClearCallingIdentityPostMain("startAssistant", () ->
                     notifyStartAssistant(bundle));
+        }
+
+        @Override
+        public void setAssistantOverridesRequested(int[] invocationTypes) {
+            verifyCallerAndClearCallingIdentityPostMain("setAssistantOverridesRequested", () ->
+                    notifyAssistantOverrideRequested(invocationTypes));
         }
 
         @Override
@@ -487,9 +486,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             notifySystemUiStateFlags(mSysUiState.getFlags());
 
             notifyConnectionChanged();
-            if (mLatchForOnUserChanging != null) {
-                mLatchForOnUserChanging.countDown();
-                mLatchForOnUserChanging = null;
+            if (mDoneUserChanging != null) {
+                mDoneUserChanging.run();
+                mDoneUserChanging = null;
             }
         }
 
@@ -545,14 +544,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     };
 
-    private CountDownLatch mLatchForOnUserChanging;
+    private Runnable mDoneUserChanging;
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {
                 @Override
                 public void onUserChanging(int newUser, @NonNull Context userContext,
-                        CountDownLatch latch) {
+                        @NonNull Runnable resultCallback) {
                     mConnectionBackoffAttempts = 0;
-                    mLatchForOnUserChanging = latch;
+                    mDoneUserChanging = resultCallback;
                     internalConnectToCurrentUser("User changed");
                 }
             };
@@ -564,20 +563,20 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             CommandQueue commandQueue,
             ShellInterface shellInterface,
             Lazy<NavigationBarController> navBarControllerLazy,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<ShadeViewController> shadeViewControllerLazy,
+            ScreenPinningRequest screenPinningRequest,
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController,
             SysUiState sysUiState,
             Provider<SceneInteractor> sceneInteractor,
             UserTracker userTracker,
-            ScreenLifecycle screenLifecycle,
             WakefulnessLifecycle wakefulnessLifecycle,
             UiEventLogger uiEventLogger,
             DisplayTracker displayTracker,
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             AssistUtils assistUtils,
             FeatureFlags featureFlags,
+            SceneContainerFlags sceneContainerFlags,
             DumpManager dumpManager,
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder
     ) {
@@ -588,12 +587,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         mContext = context;
         mFeatureFlags = featureFlags;
+        mSceneContainerFlags = sceneContainerFlags;
         mMainExecutor = mainExecutor;
         mShellInterface = shellInterface;
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mShadeViewControllerLazy = shadeViewControllerLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
+        mScreenPinningRequest = screenPinningRequest;
         mStatusBarWinController = statusBarWinController;
         mSceneInteractor = sceneInteractor;
         mUserTracker = userTracker;
@@ -651,7 +651,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         // Listen for user setup
         mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
 
-        screenLifecycle.addObserver(mScreenLifecycleObserver);
         wakefulnessLifecycle.addObserver(mWakefulnessLifecycleObserver);
         // Connect to the service
         updateEnabledAndBinding();
@@ -765,10 +764,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public void cleanupAfterDeath() {
         if (mInputFocusTransferStarted) {
             mHandler.post(() -> {
-                mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
-                    mInputFocusTransferStarted = false;
-                    centralSurfaces.onInputFocusTransfer(false, true /* cancel */, 0 /* velocity */);
-                });
+                mInputFocusTransferStarted = false;
+                mShadeViewControllerLazy.get().cancelInputFocusTransfer();
             });
         }
         startConnectionToCurrentUser();
@@ -911,6 +908,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private void notifyAssistantOverrideRequested(int[] invocationTypes) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).setAssistantOverridesRequested(invocationTypes);
+        }
+    }
+
     public void notifyAssistantVisibilityChanged(float visibility) {
         try {
             if (mOverviewProxy != null) {
@@ -922,60 +925,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             Log.e(TAG_OPS, "Failed to call notifyAssistantVisibilityChanged()", e);
         }
     }
-
-    private final ScreenLifecycle.Observer mScreenLifecycleObserver =
-            new ScreenLifecycle.Observer() {
-                /**
-                 * Notifies the Launcher that screen turned on and ready to use
-                 */
-                @Override
-                public void onScreenTurnedOn() {
-                    try {
-                        if (mOverviewProxy != null) {
-                            mOverviewProxy.onScreenTurnedOn();
-                        } else {
-                            Log.e(TAG_OPS,
-                                    "Failed to get overview proxy for screen turned on event.");
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG_OPS, "Failed to call onScreenTurnedOn()", e);
-                    }
-                }
-
-                /**
-                 * Notifies the Launcher that screen is starting to turn on.
-                 */
-                @Override
-                public void onScreenTurningOff() {
-                    try {
-                        if (mOverviewProxy != null) {
-                            mOverviewProxy.onScreenTurningOff();
-                        } else {
-                            Log.e(TAG_OPS,
-                                    "Failed to get overview proxy for screen turning off event.");
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG_OPS, "Failed to call onScreenTurningOff()", e);
-                    }
-                }
-
-                /**
-                 * Notifies the Launcher that screen is starting to turn on.
-                 */
-                @Override
-                public void onScreenTurningOn() {
-                    try {
-                        if (mOverviewProxy != null) {
-                            mOverviewProxy.onScreenTurningOn();
-                        } else {
-                            Log.e(TAG_OPS,
-                                    "Failed to get overview proxy for screen turning on event.");
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG_OPS, "Failed to call onScreenTurningOn()", e);
-                    }
-                }
-            };
 
     private final WakefulnessLifecycle.Observer mWakefulnessLifecycleObserver =
             new WakefulnessLifecycle.Observer() {
@@ -1108,6 +1057,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}
+        default void setAssistantOverridesRequested(int[] invocationTypes) {}
     }
 
     /**

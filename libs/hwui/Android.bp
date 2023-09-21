@@ -28,6 +28,19 @@ license {
     ],
 }
 
+aconfig_declarations {
+    name: "hwui_flags",
+    package: "com.android.graphics.hwui.flags",
+    srcs: [
+        "aconfig/hwui_flags.aconfig",
+    ],
+}
+
+cc_aconfig_library {
+    name: "hwui_flags_cc_lib",
+    aconfig_declarations: "hwui_flags",
+}
+
 cc_defaults {
     name: "hwui_defaults",
     defaults: [
@@ -139,6 +152,7 @@ cc_defaults {
                 "libstatspull_lazy",
                 "libstatssocket_lazy",
                 "libtonemap",
+                "hwui_flags_cc_lib",
             ],
         },
         host: {
@@ -718,6 +732,7 @@ cc_test {
         "tests/unit/EglManagerTests.cpp",
         "tests/unit/FatVectorTests.cpp",
         "tests/unit/GraphicsStatsServiceTests.cpp",
+        "tests/unit/HintSessionWrapperTests.cpp",
         "tests/unit/JankTrackerTests.cpp",
         "tests/unit/FrameMetricsReporterTests.cpp",
         "tests/unit/LayerUpdateQueueTests.cpp",

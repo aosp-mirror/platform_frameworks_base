@@ -37,6 +37,16 @@ constructor(private val keyguardBlueprintRepository: KeyguardBlueprintRepository
         return keyguardBlueprintRepository.applyBlueprint(blueprintId)
     }
 
+    /**
+     * Transitions to a blueprint.
+     *
+     * @param blueprintId
+     * @return whether the transition has succeeded.
+     */
+    fun transitionToBlueprint(blueprintId: Int): Boolean {
+        return keyguardBlueprintRepository.applyBlueprint(blueprintId)
+    }
+
     /** Re-emits the blueprint value to the collectors. */
     fun refreshBlueprint() {
         keyguardBlueprintRepository.refreshBlueprint()

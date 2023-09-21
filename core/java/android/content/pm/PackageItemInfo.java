@@ -21,6 +21,7 @@ import static android.text.TextUtils.SAFE_STRING_FLAG_SINGLE_LINE;
 import static android.text.TextUtils.SAFE_STRING_FLAG_TRIM;
 import static android.text.TextUtils.makeSafeForPresentation;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -173,6 +174,18 @@ public class PackageItemInfo {
      */
     public int showUserIcon;
 
+    /**
+     * Whether the package is currently in an archived state.
+     *
+     * <p>Packages can be archived through {@link PackageArchiver} and do not have any APKs stored
+     * on the device, but do keep the data directory.
+     * @hide
+     */
+    // TODO(b/278553670) Unhide and update @links before launch.
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public boolean isArchived;
+
     public PackageItemInfo() {
         showUserIcon = UserHandle.USER_NULL;
     }
@@ -189,6 +202,7 @@ public class PackageItemInfo {
         logo = orig.logo;
         metaData = orig.metaData;
         showUserIcon = orig.showUserIcon;
+        isArchived = orig.isArchived;
     }
 
     /**
@@ -442,6 +456,7 @@ public class PackageItemInfo {
         dest.writeBundle(metaData);
         dest.writeInt(banner);
         dest.writeInt(showUserIcon);
+        dest.writeBoolean(isArchived);
     }
 
     /**
@@ -459,6 +474,7 @@ public class PackageItemInfo {
         }
         proto.write(PackageItemInfoProto.ICON, icon);
         proto.write(PackageItemInfoProto.BANNER, banner);
+        proto.write(PackageItemInfoProto.IS_ARCHIVED, isArchived);
         proto.end(token);
     }
 
@@ -473,6 +489,7 @@ public class PackageItemInfo {
         metaData = source.readBundle();
         banner = source.readInt();
         showUserIcon = source.readInt();
+        isArchived = source.readBoolean();
     }
 
     /**

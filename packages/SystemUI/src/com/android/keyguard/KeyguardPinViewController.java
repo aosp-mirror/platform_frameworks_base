@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
+
 import android.view.View;
 
 import com.android.internal.util.LatencyTracker;
@@ -61,6 +63,7 @@ public class KeyguardPinViewController
         mPostureController = postureController;
         mLockPatternUtils = lockPatternUtils;
         mFeatureFlags = featureFlags;
+        view.setIsLockScreenLandscapeEnabled(mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE));
         mBackspaceKey = view.findViewById(R.id.delete_button);
         mPinLength = mLockPatternUtils.getPinLength(KeyguardUpdateMonitor.getCurrentUser());
     }
@@ -79,6 +82,10 @@ public class KeyguardPinViewController
         mPasswordEntry.setUserActivityListener(this::onUserInput);
         mView.onDevicePostureChanged(mPostureController.getDevicePosture());
         mPostureController.addCallback(mPostureCallback);
+        if (mFeatureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)) {
+            mPasswordEntry.setUsePinShapes(true);
+            updateAutoConfirmationState();
+        }
     }
 
     protected void onUserInput() {
@@ -100,10 +107,6 @@ public class KeyguardPinViewController
 
     @Override
     public void startAppearAnimation() {
-        if (mFeatureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)) {
-            mPasswordEntry.setUsePinShapes(true);
-            updateAutoConfirmationState();
-        }
         super.startAppearAnimation();
     }
 

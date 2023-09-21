@@ -28,12 +28,14 @@ android_test {
 
     static_libs: [
         "androidx.test.ext.junit",
+        "androidx.test.rules",
         "frameworks-base-testutils",
         "junit",
         "junit-params",
         "mockingservicestests-utils-mockito",
         "platform-compat-test-rules",
         "platform-test-annotations",
+        "service-permission.stubs.system_server",
         "services.core",
         "servicestests-utils",
         "testables",

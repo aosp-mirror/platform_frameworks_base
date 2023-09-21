@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"లాక్‌డౌన్ తర్వాత PIN అవసరం"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"లాక్‌డౌన్ తర్వాత పాస్‌వర్డ్ అవసరం"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"లాక్‌డౌన్ తర్వాత ఆకృతి అవసరం"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"పరికరం ఉపయోగంలో లేనప్పుడు అప్‌డేట్ ఇన్‌స్టాల్ చేయబడుతుంది"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"మరింత సెక్యూరిటీ యాడ్ చెయ్యాలి. PINని ఈమధ్య వాడలేదు."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"యాడెడ్ సెక్యూరిటీ కావాలి. పాస్‌వర్డ్ ఈ మధ్య వాడలేదు."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"మరింత సెక్యూరిటీ కావాలి. ఆకృతిని ఈ మధ్య వాడలేదు."</string>

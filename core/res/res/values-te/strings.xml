@@ -322,7 +322,7 @@
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"చిత్రాలను తీయడానికి మరియు వీడియోను రికార్డ్ చేయడానికి"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"సమీపంలోని పరికరాలు"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"సమీప పరికరాలను కనుగొనండి అలాగే కనెక్ట్ చేయండి"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"కాల్ లాగ్‌లు"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"కాల్ లాగ్స్‌"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ఫోన్ కాల్ లాగ్‌ని చదవండి మరియు రాయండి"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ఫోన్"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ఫోన్ కాల్స్‌ చేయడం మరియు నిర్వహించడం"</string>
@@ -618,8 +618,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"బయోమెట్రిక్స్‌ను లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"ఇది మీరేనని వెరిఫై చేసుకోండి"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"కొనసాగించడానికి, మీ బయోమెట్రిక్‌ను ఉపయోగించండి"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"కొనసాగించడానికి మీ వేలిముద్రను ఉపయోగించండి"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"కొనసాగించడానికి మీ ముఖాన్ని ఉపయోగించండి"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"కొనసాగించడానికి మీ బయోమెట్రిక్ లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"బయోమెట్రిక్ హార్డ్‌వేర్‌ అందుబాటులో లేదు"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ప్రమాణీకరణ రద్దు చేయబడింది"</string>
@@ -645,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"వేలిముద్ర గుర్తించబడలేదు"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"వేలిముద్ర గుర్తించబడలేదు"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"ముఖం గుర్తించలేము. బదులుగా వేలిముద్ర ఉపయోగించండి."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"వేలిముద్ర ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ముఖం ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ముఖం ప్రమాణీకరించబడింది, దయచేసి ధృవీకరించును నొక్కండి"</string>
@@ -670,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"ఏదో తప్పు జరిగింది. మళ్లీ ట్రై చేయండి."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"వేలిముద్ర చిహ్నం"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"పరికర అన్‌లాక్"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"అన్‌లాక్ చేయడానికి మరొక మార్గాన్ని ట్రై చేయండి"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"మీ వేలిముద్ర గుర్తించబడనప్పుడు, మీ వేళ్లు తడిగా ఉన్నప్పుడు ఫేస్ అన్‌లాక్‌ను ఉపయోగించండి"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"మీ ఫేస్ గుర్తించబడనప్పుడు, తగినంత వెలుతురు లేనప్పుడు వేలిముద్ర అన్‌లాక్‌ను ఉపయోగించండి"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ఫేస్ అన్‌లాక్"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ఫేస్ అన్‌లాక్‌తో సమస్య"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ఫేస్ మోడల్‌ను తొలగించడానికి నొక్కండి, ఆపై మీ ముఖాన్ని మళ్లీ జోడించండి"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"ఫేస్ అన్‌లాక్‌ను సెటప్ చేయండి"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"మీ ఫోన్‌ను చూడటం ద్వారా దాన్ని అన్‌లాక్ చేయండి"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ఫేస్ అన్‌లాక్‌ను ఉపయోగించడానికి, సెట్టింగ్‌లు &gt; గోప్యతలో "<b>"కెమెరా యాక్సెస్"</b>"ను ఆన్ చేయండి"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"అన్‌లాక్ చేయడానికి మరిన్ని మార్గాలను సెటప్ చేయండి"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"వేలిముద్రను జోడించడానికి ట్యాప్ చేయండి"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"వేలిముద్ర అన్‌లాక్"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి."</string>
@@ -1868,6 +1867,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2వ కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3వ కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"క్లోన్ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"ప్రైవేట్ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"అన్‌పిన్ చేయడానికి ముందు పిన్‌ కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"అన్‌పిన్ చేయడానికి ముందు అన్‌లాక్ ఆకృతి కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
@@ -2032,7 +2032,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"లో అప్‌డేట్ చేయాలా?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g>ని "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"లో అప్‌డేట్ చేయాలా?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> మరియు <xliff:g id="TYPE_1">%2$s</xliff:g>ని "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"లో అప్‌డేట్ చేయాలా?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"ఈ అంశాలను "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"లో అప్‌డేట్ చేయాలా: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> మరియు <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"ఈ ఐటెమ్‌లను "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"లో అప్‌డేట్ చేయండి: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> అలాగే <xliff:g id="TYPE_2">%3$s</xliff:g> అప్‌డేట్ చేయాలా?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"సేవ్ చేయండి"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"వద్దు, ధన్యవాదాలు"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ఇప్పుడు కాదు"</string>

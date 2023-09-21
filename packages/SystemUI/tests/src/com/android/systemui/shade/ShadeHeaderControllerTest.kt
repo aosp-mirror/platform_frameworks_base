@@ -130,7 +130,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     var viewVisibility = View.GONE
     var viewAlpha = 1f
 
-    private val systemIcons = LinearLayout(context)
+    private val systemIconsHoverContainer = LinearLayout(context)
     private lateinit var shadeHeaderController: ShadeHeaderController
     private lateinit var carrierIconSlots: List<String>
     private val configurationController = FakeConfigurationController()
@@ -150,7 +150,8 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
             .thenReturn(batteryMeterView)
 
         whenever<StatusIconContainer>(view.requireViewById(R.id.statusIcons)).thenReturn(statusIcons)
-        whenever<View>(view.requireViewById(R.id.shade_header_system_icons)).thenReturn(systemIcons)
+        whenever<View>(view.requireViewById(R.id.hover_system_icons_container))
+            .thenReturn(systemIconsHoverContainer)
 
         viewContext = Mockito.spy(context)
         whenever(view.context).thenReturn(viewContext)
@@ -457,12 +458,12 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLargeScreenActive_collapseActionRun_onSystemIconsClick() {
+    fun testLargeScreenActive_collapseActionRun_onSystemIconsHoverContainerClick() {
         shadeHeaderController.largeScreenActive = true
         var wasRun = false
         shadeHeaderController.shadeCollapseAction = Runnable { wasRun = true }
 
-        systemIcons.performClick()
+        systemIconsHoverContainer.performClick()
 
         assertThat(wasRun).isTrue()
     }

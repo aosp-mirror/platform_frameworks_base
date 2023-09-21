@@ -11,11 +11,9 @@ import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.SysuiStatusBarStateController
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
@@ -33,7 +31,6 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
 
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var lightBarController: LightBarController
-    @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var letterboxAppearanceCalculator: LetterboxAppearanceCalculator
     @Mock private lateinit var centralSurfaces: CentralSurfaces
 
@@ -52,7 +49,6 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
             SystemBarAttributesListener(
                 centralSurfaces,
                 letterboxAppearanceCalculator,
-                statusBarStateController,
                 lightBarController,
                 dumpManager)
     }
@@ -81,23 +77,6 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onSysBarAttrsChanged_forwardsAppearanceToStatusBarStateController() {
-        changeSysBarAttrs(TEST_APPEARANCE)
-
-        verify(statusBarStateController)
-            .setSystemBarAttributes(eq(TEST_APPEARANCE), anyInt(), anyInt(), any())
-    }
-
-    @Test
-    fun onSysBarAttrsChanged_forwardsLetterboxAppearanceToStatusBarStateCtrl() {
-        changeSysBarAttrs(TEST_APPEARANCE, TEST_LETTERBOX_DETAILS)
-
-        verify(statusBarStateController)
-            .setSystemBarAttributes(
-                eq(TEST_LETTERBOX_APPEARANCE.appearance), anyInt(), anyInt(), any())
-    }
-
-    @Test
     fun onSysBarAttrsChanged_forwardsAppearanceToLightBarController() {
         changeSysBarAttrs(TEST_APPEARANCE, TEST_APPEARANCE_REGIONS)
 
@@ -119,21 +98,9 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onStatusBarBoundsChanged_forwardsLetterboxAppearanceToStatusBarStateController() {
-        changeSysBarAttrs(TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, TEST_LETTERBOX_DETAILS)
-        reset(centralSurfaces, lightBarController, statusBarStateController)
-
-        sysBarAttrsListener.onStatusBarBoundsChanged()
-
-        verify(statusBarStateController)
-            .setSystemBarAttributes(
-                eq(TEST_LETTERBOX_APPEARANCE.appearance), anyInt(), anyInt(), any())
-    }
-
-    @Test
     fun onStatusBarBoundsChanged_forwardsLetterboxAppearanceToLightBarController() {
         changeSysBarAttrs(TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, TEST_LETTERBOX_DETAILS)
-        reset(centralSurfaces, lightBarController, statusBarStateController)
+        reset(centralSurfaces, lightBarController)
 
         sysBarAttrsListener.onStatusBarBoundsChanged()
 
@@ -148,7 +115,7 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
     @Test
     fun onStatusBarBoundsChanged_forwardsLetterboxAppearanceToCentralSurfaces() {
         changeSysBarAttrs(TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, TEST_LETTERBOX_DETAILS)
-        reset(centralSurfaces, lightBarController, statusBarStateController)
+        reset(centralSurfaces, lightBarController)
 
         sysBarAttrsListener.onStatusBarBoundsChanged()
 
@@ -158,11 +125,11 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
     @Test
     fun onStatusBarBoundsChanged_previousCallEmptyLetterbox_doesNothing() {
         changeSysBarAttrs(TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf())
-        reset(centralSurfaces, lightBarController, statusBarStateController)
+        reset(centralSurfaces, lightBarController)
 
         sysBarAttrsListener.onStatusBarBoundsChanged()
 
-        verifyZeroInteractions(centralSurfaces, lightBarController, statusBarStateController)
+        verifyZeroInteractions(centralSurfaces, lightBarController)
     }
 
     private fun changeSysBarAttrs(@Appearance appearance: Int) {

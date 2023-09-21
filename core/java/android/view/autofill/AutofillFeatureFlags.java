@@ -209,6 +209,17 @@ public class AutofillFeatureFlags {
         DEVICE_CONFIG_INCLUDE_ALL_VIEWS_IN_ASSIST_STRUCTURE =
             "include_all_views_in_assist_structure";
 
+    /**
+     * Whether to always include WebView in assist structure. WebView is a container view that
+     * providers "virtual" views. We want to always include such a container view since it can
+     * contain arbitrary views in it, some of which could be fillable.
+     *
+     * @hide
+     */
+    public static final String
+            DEVICE_CONFIG_ALWAYS_INCLUDE_WEBVIEW_IN_ASSIST_STRUCTURE =
+            "always_include_webview_in_assist_structure";
+
     // END AUTOFILL FOR ALL APPS FLAGS //
 
 
@@ -439,6 +450,13 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_AUTOFILL,
             DEVICE_CONFIG_INCLUDE_ALL_VIEWS_IN_ASSIST_STRUCTURE, false);
+    }
+
+    /** @hide */
+    public static boolean shouldAlwaysIncludeWebviewInAssistStructure() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_ALWAYS_INCLUDE_WEBVIEW_IN_ASSIST_STRUCTURE, true);
     }
 
 

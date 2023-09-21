@@ -30,6 +30,7 @@ int register_android_server_InputManager(JNIEnv* env);
 int register_android_server_LightsService(JNIEnv* env);
 int register_android_server_PowerManagerService(JNIEnv* env);
 int register_android_server_PowerStatsService(JNIEnv* env);
+int register_android_server_power_stats_CpuPowerStatsCollector(JNIEnv* env);
 int register_android_server_HintManagerService(JNIEnv* env);
 int register_android_server_storage_AppFuse(JNIEnv* env);
 int register_android_server_SerialService(JNIEnv* env);
@@ -66,6 +67,7 @@ int register_android_server_app_GameManagerService(JNIEnv* env);
 int register_com_android_server_wm_TaskFpsCallbackController(JNIEnv* env);
 int register_com_android_server_display_DisplayControl(JNIEnv* env);
 int register_com_android_server_SystemClockTime(JNIEnv* env);
+int register_android_server_display_smallAreaDetectionController(JNIEnv* env);
 };
 
 using namespace android;
@@ -85,6 +87,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_broadcastradio_Tuner(vm, env);
     register_android_server_PowerManagerService(env);
     register_android_server_PowerStatsService(env);
+    register_android_server_power_stats_CpuPowerStatsCollector(env);
     register_android_server_HintManagerService(env);
     register_android_server_SerialService(env);
     register_android_server_InputManager(env);
@@ -124,5 +127,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_com_android_server_wm_TaskFpsCallbackController(env);
     register_com_android_server_display_DisplayControl(env);
     register_com_android_server_SystemClockTime(env);
+    register_android_server_display_smallAreaDetectionController(env);
     return JNI_VERSION_1_4;
 }

@@ -26,8 +26,6 @@ import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
@@ -74,8 +72,6 @@ class FontScalingTileTest : SysuiTestCase() {
     private lateinit var backgroundDelayableExecutor: FakeExecutor
     private lateinit var fontScalingTile: FontScalingTile
 
-    val featureFlags = FakeFeatureFlags()
-
     @Captor private lateinit var argumentCaptor: ArgumentCaptor<Runnable>
 
     @Before
@@ -102,7 +98,6 @@ class FontScalingTileTest : SysuiTestCase() {
                 FakeSettings(),
                 FakeSettings(),
                 FakeSystemClock(),
-                featureFlags,
                 userTracker,
                 backgroundDelayableExecutor,
             )
@@ -117,18 +112,7 @@ class FontScalingTileTest : SysuiTestCase() {
     }
 
     @Test
-    fun isAvailable_whenFlagIsFalse_returnsFalse() {
-        featureFlags.set(Flags.ENABLE_FONT_SCALING_TILE, false)
-
-        val isAvailable = fontScalingTile.isAvailable()
-
-        assertThat(isAvailable).isFalse()
-    }
-
-    @Test
-    fun isAvailable_whenFlagIsTrue_returnsTrue() {
-        featureFlags.set(Flags.ENABLE_FONT_SCALING_TILE, true)
-
+    fun isAvailable_alwaysReturnsTrue() {
         val isAvailable = fontScalingTile.isAvailable()
 
         assertThat(isAvailable).isTrue()

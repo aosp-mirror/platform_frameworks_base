@@ -525,14 +525,14 @@ public abstract class VibrationEffect implements Parcelable {
     public abstract long getDuration();
 
     /**
-     * Checks if a given {@link Vibrator} can play this effect as intended.
+     * Checks if a vibrator with a given {@link VibratorInfo} can play this effect as intended.
      *
-     * <p>See @link Vibrator#areVibrationFeaturesSupported(VibrationEffect)} for more information
-     * about what counts as supported by a vibrator, and what counts as not.
+     * <p>See {@link VibratorInfo#areVibrationFeaturesSupported(VibrationEffect)} for more
+     * information about what counts as supported by a vibrator, and what counts as not.
      *
      * @hide
      */
-    public abstract boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator);
+    public abstract boolean areVibrationFeaturesSupported(@NonNull VibratorInfo vibratorInfo);
 
     /**
      * Returns true if this effect could represent a touch haptic feedback.
@@ -813,9 +813,9 @@ public abstract class VibrationEffect implements Parcelable {
 
         /** @hide */
         @Override
-        public boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator) {
+        public boolean areVibrationFeaturesSupported(@NonNull VibratorInfo vibratorInfo) {
             for (VibrationEffectSegment segment : mSegments) {
-                if (!segment.areVibrationFeaturesSupported(vibrator)) {
+                if (!segment.areVibrationFeaturesSupported(vibratorInfo)) {
                     return false;
                 }
             }

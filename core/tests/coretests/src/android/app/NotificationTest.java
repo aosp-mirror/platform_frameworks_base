@@ -19,6 +19,8 @@ package android.app;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_ON_READ;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_ON_REPLY;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_REMOTE_INPUT;
+import static android.app.Notification.DEFAULT_SOUND;
+import static android.app.Notification.DEFAULT_VIBRATE;
 import static android.app.Notification.EXTRA_ANSWER_INTENT;
 import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
 import static android.app.Notification.EXTRA_CALL_PERSON;
@@ -35,6 +37,9 @@ import static android.app.Notification.EXTRA_PICTURE;
 import static android.app.Notification.EXTRA_PICTURE_ICON;
 import static android.app.Notification.EXTRA_SUMMARY_TEXT;
 import static android.app.Notification.EXTRA_TITLE;
+import static android.app.Notification.GROUP_ALERT_CHILDREN;
+import static android.app.Notification.GROUP_ALERT_SUMMARY;
+import static android.app.Notification.GROUP_KEY_SILENT;
 import static android.app.Notification.MessagingStyle.Message.KEY_DATA_URI;
 import static android.app.Notification.MessagingStyle.Message.KEY_SENDER_PERSON;
 import static android.app.Notification.MessagingStyle.Message.KEY_TEXT;
@@ -508,6 +513,75 @@ public class NotificationTest {
         assertContrastIsWithinRange(result, background, 1.3, 1.5);
         assertThat(ContrastColorUtil.calculateLuminance(result))
                 .isGreaterThan(ContrastColorUtil.calculateLuminance(background));
+    }
+
+    @Test
+    public void testBuilder_setSilent_summaryBehavior_groupAlertChildren() {
+        Notification summaryNotif = new Notification.Builder(mContext, "channelId")
+                .setGroupSummary(true)
+                .setGroup("groupKey")
+                .setSilent(true)
+                .build();
+        assertEquals(GROUP_ALERT_CHILDREN, summaryNotif.getGroupAlertBehavior());
+    }
+
+    @Test
+    public void testBuilder_setSilent_childBehavior_groupAlertSummary() {
+        Notification childNotif = new Notification.Builder(mContext, "channelId")
+                .setGroupSummary(false)
+                .setGroup("groupKey")
+                .setSilent(true)
+                .build();
+        assertEquals(GROUP_ALERT_SUMMARY, childNotif.getGroupAlertBehavior());
+    }
+
+    @Test
+    public void testBuilder_setSilent_emptyGroupKey_groupKeySilent() {
+        Notification emptyGroupKeyNotif = new Notification.Builder(mContext, "channelId")
+                .setGroup("")
+                .setSilent(true)
+                .build();
+        assertEquals(GROUP_KEY_SILENT, emptyGroupKeyNotif.getGroup());
+    }
+
+    @Test
+    public void testBuilder_setSilent_vibrateNull() {
+        Notification silentNotif = new Notification.Builder(mContext, "channelId")
+                .setGroup("")
+                .setSilent(true)
+                .build();
+
+        assertNull(silentNotif.vibrate);
+    }
+
+    @Test
+    public void testBuilder_setSilent_soundNull() {
+        Notification silentNotif = new Notification.Builder(mContext, "channelId")
+                .setGroup("")
+                .setSilent(true)
+                .build();
+
+        assertNull(silentNotif.sound);
+    }
+
+    @Test
+    public void testBuilder_setSilent_noDefaultSound() {
+        Notification silentNotif = new Notification.Builder(mContext, "channelId")
+                .setGroup("")
+                .setSilent(true)
+                .build();
+
+        assertEquals(0, (silentNotif.defaults & DEFAULT_SOUND));
+    }
+
+    @Test
+    public void testBuilder_setSilent_noDefaultVibrate() {
+        Notification silentNotif = new Notification.Builder(mContext, "channelId")
+                .setGroup("")
+                .setSilent(true)
+                .build();
+
+        assertEquals(0, (silentNotif.defaults & DEFAULT_VIBRATE));
     }
 
     @Test
@@ -1154,6 +1228,52 @@ public class NotificationTest {
                 .setStyle(new Notification.BigPictureStyle().bigPicture(bitB));
 
         assertTrue(Notification.areStyledNotificationsVisiblyDifferent(nBigPic1, nBigPic2));
+    }
+
+    @Test
+    public void testBigPictureStyle_setExtras_pictureIconNull_noPictureIconKey() {
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture((Bitmap) null);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isFalse();
+    }
+
+    @Test
+    public void testBigPictureStyle_setExtras_pictureIconNull_noPictureKey() {
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture((Bitmap) null);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE)).isFalse();
+    }
+
+    @Test
+    public void testBigPictureStyle_setExtras_pictureIconTypeBitmap_noPictureIconKey() {
+        Bitmap bitmap = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture(bitmap);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isFalse();
+    }
+
+    @Test
+    public void testBigPictureStyle_setExtras_pictureIconTypeIcon_noPictureKey() {
+        Icon icon = Icon.createWithResource(mContext, R.drawable.btn_plus);
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture(icon);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE)).isFalse();
     }
 
     @Test

@@ -755,9 +755,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Override
     public boolean isPackageQuarantined(@NonNull String packageName,
             @UserIdInt int userId) {
-        final PackageStateInternal packageState = getPackageStateInternal(packageName);
-        return (packageState == null) ? false
-                : packageState.getUserStateOrDefault(userId).isQuarantined();
+        return snapshot().isPackageQuarantinedForUser(packageName, userId);
     }
 
     @NonNull

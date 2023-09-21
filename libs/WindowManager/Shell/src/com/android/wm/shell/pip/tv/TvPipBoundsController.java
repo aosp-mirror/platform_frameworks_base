@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.pip.tv;
 
-import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
+import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_NONE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

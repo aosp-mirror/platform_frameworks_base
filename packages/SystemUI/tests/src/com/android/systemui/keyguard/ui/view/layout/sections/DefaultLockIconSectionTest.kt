@@ -19,13 +19,18 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.graphics.Point
 import android.view.WindowManager
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.LockIconViewController
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -41,19 +46,46 @@ class DefaultLockIconSectionTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var authController: AuthController
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var windowManager: WindowManager
+    @Mock private lateinit var notificationPanelView: NotificationPanelView
+    @Mock private lateinit var featureFlags: FeatureFlags
+    @Mock private lateinit var lockIconViewController: LockIconViewController
     private lateinit var underTest: DefaultLockIconSection
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
         underTest =
-            DefaultLockIconSection(keyguardUpdateMonitor, authController, windowManager, context)
+            DefaultLockIconSection(
+                keyguardUpdateMonitor,
+                authController,
+                windowManager,
+                context,
+                notificationPanelView,
+                featureFlags,
+                lockIconViewController
+            )
     }
 
     @Test
-    fun apply() {
+    fun addViewsConditionally() {
+        whenever(featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)).thenReturn(true)
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.addViews(constraintLayout)
+        assertThat(constraintLayout.childCount).isGreaterThan(0)
+    }
+
+    @Test
+    fun addViewsConditionally_migrateFlagOff() {
+        whenever(featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)).thenReturn(false)
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.addViews(constraintLayout)
+        assertThat(constraintLayout.childCount).isEqualTo(0)
+    }
+
+    @Test
+    fun applyConstraints() {
         val cs = ConstraintSet()
-        underTest.apply(cs)
+        underTest.applyConstraints(cs)
 
         val constraint = cs.getConstraint(R.id.lock_icon_view)
 
@@ -64,7 +96,7 @@ class DefaultLockIconSectionTest : SysuiTestCase() {
     @Test
     fun testCenterLockIcon() {
         val cs = ConstraintSet()
-        underTest.centerLockIcon(Point(5, 6), 1F, 5, cs)
+        underTest.centerLockIcon(Point(5, 6), 1F, cs)
 
         val constraint = cs.getConstraint(R.id.lock_icon_view)
 

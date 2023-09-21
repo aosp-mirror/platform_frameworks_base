@@ -18,13 +18,17 @@ package com.android.systemui.statusbar.notification.dagger;
 
 import android.content.Context;
 
+import com.android.internal.jank.InteractionJankMonitor;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.shade.ShadeEventsModule;
-import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationListener;
+import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
@@ -50,6 +54,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
 import com.android.systemui.statusbar.notification.icon.ConversationIconManager;
 import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -69,11 +74,16 @@ import com.android.systemui.statusbar.notification.stack.NotificationSectionsMan
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModelModule;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 import java.util.concurrent.Executor;
 
@@ -104,6 +114,13 @@ public interface NotificationsModule {
     @Binds
     NotifGutsViewManager bindNotifGutsViewManager(NotificationGutsManager notificationGutsManager);
 
+    /** Binds {@link NotificationGutsManager} as a {@link CoreStartable}. */
+    @Binds
+    @IntoMap
+    @ClassKey(NotificationGutsManager.class)
+    CoreStartable bindsNotificationGutsManager(NotificationGutsManager notificationGutsManager);
+
+
     /** Provides an instance of {@link VisibilityLocationProvider} */
     @Binds
     VisibilityLocationProvider bindVisibilityLocationProvider(
@@ -119,7 +136,8 @@ public interface NotificationsModule {
             NotificationVisibilityProvider visibilityProvider,
             NotifPipeline notifPipeline,
             StatusBarStateController statusBarStateController,
-            ShadeExpansionStateManager shadeExpansionStateManager,
+            WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
+            JavaAdapter javaAdapter,
             NotificationLogger.ExpansionStateLogger expansionStateLogger,
             NotificationPanelLogger notificationPanelLogger) {
         return new NotificationLogger(
@@ -129,10 +147,17 @@ public interface NotificationsModule {
                 visibilityProvider,
                 notifPipeline,
                 statusBarStateController,
-                shadeExpansionStateManager,
+                windowRootViewVisibilityInteractor,
+                javaAdapter,
                 expansionStateLogger,
                 notificationPanelLogger);
     }
+
+    /** Binds {@link NotificationLogger} as a {@link CoreStartable}. */
+    @Binds
+    @IntoMap
+    @ClassKey(NotificationLogger.class)
+    CoreStartable bindsNotificationLogger(NotificationLogger notificationLogger);
 
     /** Provides an instance of {@link NotificationPanelLogger} */
     @SysUISingleton
@@ -142,15 +167,16 @@ public interface NotificationsModule {
     }
 
     /** Provides an instance of {@link GroupMembershipManager} */
-    @SysUISingleton
-    @Provides
-    static GroupMembershipManager provideGroupMembershipManager() {
-        return new GroupMembershipManagerImpl();
-    }
+    @Binds
+    GroupMembershipManager provideGroupMembershipManager(GroupMembershipManagerImpl impl);
 
     /** Provides an instance of {@link GroupExpansionManager} */
     @Binds
     GroupExpansionManager provideGroupExpansionManager(GroupExpansionManagerImpl impl);
+
+    /** Provides an instance of {@link NotificationActivityStarter}. */
+    @Binds
+    NotificationActivityStarter bindActivityStarter(StatusBarNotificationActivityStarter impl);
 
     /** Initializes the notification data pipeline (can be disabled via config). */
     @SysUISingleton
@@ -172,6 +198,21 @@ public interface NotificationsModule {
     static NotificationListContainer provideListContainer(
             NotificationStackScrollLayoutController nsslController) {
         return nsslController.getNotificationListContainer();
+    }
+
+    /** Provides notification launch animator. */
+    @Provides
+    @SysUISingleton
+    static NotificationLaunchAnimatorControllerProvider provideNotifLaunchAnimControllerProvider(
+            NotificationExpansionRepository notificationExpansionRepository,
+            NotificationListContainer notificationListContainer,
+            HeadsUpManagerPhone headsUpManager,
+            InteractionJankMonitor jankMonitor) {
+        return new NotificationLaunchAnimatorControllerProvider(
+                notificationExpansionRepository,
+                notificationListContainer,
+                headsUpManager,
+                jankMonitor);
     }
 
     /**

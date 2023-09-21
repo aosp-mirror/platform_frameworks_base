@@ -17,7 +17,6 @@
 package com.android.systemui.dreams.touch;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,16 +30,17 @@ import android.animation.ValueAnimator;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.testing.AndroidTestingRunner;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dreams.touch.scrim.ScrimController;
@@ -56,6 +56,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -63,8 +64,9 @@ import org.mockito.MockitoAnnotations;
 import java.util.Collections;
 import java.util.Optional;
 
+@RoboPilotTest
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     @Mock
     CentralSurfaces mCentralSurfaces;
@@ -106,6 +108,12 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
     @Mock
     LockPatternUtils mLockPatternUtils;
+
+    @Mock
+    Region mRegion;
+
+    @Captor
+    ArgumentCaptor<Rect> mRectCaptor;
 
     FakeUserTracker mUserTracker;
 
@@ -153,10 +161,10 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      */
     @Test
     public void testSessionStart() {
-        final Region region = Region.obtain();
-        mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, region);
+        mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, mRegion);
 
-        final Rect bounds = region.getBounds();
+        verify(mRegion).op(mRectCaptor.capture(), eq(Region.Op.UNION));
+        final Rect bounds = mRectCaptor.getValue();
 
         final Rect expected = new Rect();
 
@@ -286,7 +294,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     }
 
     /**
-     * Makes sure the expansion amount is proportional to (1 - scroll).
+     * Verifies that swiping up when the lock pattern is not secure does not consume the scroll
+     * gesture or expand.
      */
     @Test
     public void testSwipeUp_keyguardNotSecure_doesNotExpand() {
@@ -305,8 +314,10 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 0, SCREEN_HEIGHT_PX - distanceY, 0);
 
         reset(mScrimController);
+
+        // Scroll gesture is not consumed.
         assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
-                .isTrue();
+                .isFalse();
         // We should not expand since the keyguard is not secure
         verify(mScrimController, never()).expand(any());
     }

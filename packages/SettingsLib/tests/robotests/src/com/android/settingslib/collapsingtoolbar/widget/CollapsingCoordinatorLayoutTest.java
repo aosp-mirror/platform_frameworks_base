@@ -55,7 +55,8 @@ public class CollapsingCoordinatorLayoutTest {
     @Test
     public void onCreate_userAddedChildViewsBeMovedToContentFrame() {
         CollapsingCoordinatorLayout layout = mActivity.getCollapsingCoordinatorLayout();
-        View contentFrameView = layout.findViewById(R.id.content_frame);
+        View contentFrameView =
+                layout.findViewById(com.android.settingslib.widget.R.id.content_frame);
 
         TextView textView = contentFrameView.findViewById(R.id.text_hello_world);
 

@@ -22,6 +22,9 @@ import static android.content.pm.PackageManager.INSTALL_SCENARIO_DEFAULT;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.os.Process.INVALID_UID;
 
+import static com.android.server.art.model.DexoptResult.DexContainerFileDexoptResult;
+import static com.android.server.art.model.DexoptResult.PackageDexoptResult;
+import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.TAG;
 
@@ -29,12 +32,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.app.AppOpsManager;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.DataLoaderType;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
+import android.content.pm.parsing.PackageLite;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
@@ -43,6 +48,7 @@ import android.util.ArrayMap;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.art.model.DexoptResult;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -52,6 +58,8 @@ import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 final class InstallRequest {
@@ -69,11 +77,13 @@ final class InstallRequest {
     private int mParseFlags;
     private boolean mReplace;
 
-    @Nullable /* The original Package if it is being replaced, otherwise {@code null} */
-    private AndroidPackage mExistingPackage;
+    @Nullable /* The original package's name if it is being replaced, otherwise {@code null} */
+    private String mExistingPackageName;
     /** parsed package to be scanned */
     @Nullable
     private ParsedPackage mParsedPackage;
+    @Nullable
+    private ArchivedPackageParcel mArchivedPackage;
     private boolean mClearCodeCache;
     private boolean mSystem;
     @Nullable
@@ -93,6 +103,8 @@ final class InstallRequest {
     private int[] mNewUsers;
     @Nullable
     private AndroidPackage mPkg;
+    @Nullable
+    private PackageLite mPackageLite;
     private int mReturnCode;
     private int mInternalErrorCode;
     @Nullable
@@ -130,6 +142,18 @@ final class InstallRequest {
 
     private int mDexoptStatus;
 
+    @NonNull
+    private int[] mFirstTimeBroadcastUserIds = EMPTY_INT_ARRAY;
+    @NonNull
+    private int[] mFirstTimeBroadcastInstantUserIds = EMPTY_INT_ARRAY;
+    @NonNull
+    private int[] mUpdateBroadcastUserIds = EMPTY_INT_ARRAY;
+    @NonNull
+    private int[] mUpdateBroadcastInstantUserIds = EMPTY_INT_ARRAY;
+
+    @NonNull
+    private ArrayList<String> mWarnings = new ArrayList<>();
+
     // New install
     InstallRequest(InstallingSession params) {
         mUserId = params.getUser().getIdentifier();
@@ -142,6 +166,7 @@ final class InstallRequest {
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
                 params.mDataLoaderType, params.mPackageSource,
                 params.mApplicationEnabledSettingPersistent);
+        mPackageLite = params.mPackageLite;
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
         mSessionId = params.mSessionId;
@@ -174,6 +199,7 @@ final class InstallRequest {
         }
         mInstallArgs = null;
         mParsedPackage = parsedPackage;
+        mArchivedPackage = null;
         mParseFlags = parseFlags;
         mScanFlags = scanFlags;
         mScanResult = scanResult;
@@ -306,6 +332,11 @@ final class InstallRequest {
     }
 
     @Nullable
+    public PackageLite getPackageLite() {
+        return mPackageLite;
+    }
+
+    @Nullable
     public String getTraceMethod() {
         return mInstallArgs == null ? null : mInstallArgs.mTraceMethod;
     }
@@ -316,6 +347,10 @@ final class InstallRequest {
 
     public boolean isUpdate() {
         return mRemovedInfo != null && mRemovedInfo.mRemovedPackage != null;
+    }
+
+    public boolean isArchived() {
+        return PackageInstallerSession.isArchivedInstallation(getInstallFlags());
     }
 
     @Nullable
@@ -401,11 +436,6 @@ final class InstallRequest {
     }
 
     @Nullable
-    public AndroidPackage getExistingPackage() {
-        return mExistingPackage;
-    }
-
-    @Nullable
     public List<String> getAllowlistedRestrictedPermissions() {
         return mInstallArgs == null ? null : mInstallArgs.mAllowlistedRestrictedPermissions;
     }
@@ -429,6 +459,9 @@ final class InstallRequest {
         return mParsedPackage;
     }
 
+    @Nullable
+    public ArchivedPackageParcel getArchivedPackage() { return mArchivedPackage; }
+
     @ParsingPackageUtils.ParseFlags
     public int getParseFlags() {
         return mParseFlags;
@@ -441,10 +474,7 @@ final class InstallRequest {
 
     @Nullable
     public String getExistingPackageName() {
-        if (mExistingPackage != null) {
-            return mExistingPackage.getPackageName();
-        }
-        return null;
+        return mExistingPackageName;
     }
 
     @Nullable
@@ -615,6 +645,30 @@ final class InstallRequest {
         return mDexoptStatus;
     }
 
+    public boolean isAllNewUsers() {
+        return mOrigUsers == null || mOrigUsers.length == 0;
+    }
+    public int[] getFirstTimeBroadcastUserIds() {
+        return mFirstTimeBroadcastUserIds;
+    }
+
+    public int[] getFirstTimeBroadcastInstantUserIds() {
+        return mFirstTimeBroadcastInstantUserIds;
+    }
+
+    public int[] getUpdateBroadcastUserIds() {
+        return mUpdateBroadcastUserIds;
+    }
+
+    public int[] getUpdateBroadcastInstantUserIds() {
+        return mUpdateBroadcastInstantUserIds;
+    }
+
+    @NonNull
+    public ArrayList<String> getWarnings() {
+        return mWarnings;
+    }
+
     public void setScanFlags(int scanFlags) {
         mScanFlags = scanFlags;
     }
@@ -717,14 +771,17 @@ final class InstallRequest {
     }
 
     public void setPrepareResult(boolean replace, int scanFlags,
-            int parseFlags, AndroidPackage existingPackage,
-            ParsedPackage packageToScan, boolean clearCodeCache, boolean system,
+            int parseFlags, PackageState existingPackageState,
+            ParsedPackage packageToScan, ArchivedPackageParcel archivedPackage,
+            boolean clearCodeCache, boolean system,
             PackageSetting originalPs, PackageSetting disabledPs) {
         mReplace = replace;
         mScanFlags = scanFlags;
         mParseFlags = parseFlags;
-        mExistingPackage = existingPackage;
+        mExistingPackageName =
+                existingPackageState != null ? existingPackageState.getPackageName() : null;
         mParsedPackage = packageToScan;
+        mArchivedPackage = archivedPackage;
         mClearCodeCache = clearCodeCache;
         mSystem = system;
         mOriginalPs = originalPs;
@@ -755,6 +812,62 @@ final class InstallRequest {
         if (mRemovedInfo != null) {
             mRemovedInfo.mRemovedAppId = appId;
         }
+    }
+
+    /**
+     *  Determine the set of users who are adding this package for the first time vs. those who are
+     *  seeing an update.
+     */
+    public void populateBroadcastUsers() {
+        assertScanResultExists();
+        mFirstTimeBroadcastUserIds = EMPTY_INT_ARRAY;
+        mFirstTimeBroadcastInstantUserIds = EMPTY_INT_ARRAY;
+        mUpdateBroadcastUserIds = EMPTY_INT_ARRAY;
+        mUpdateBroadcastInstantUserIds = EMPTY_INT_ARRAY;
+
+        final boolean allNewUsers = isAllNewUsers();
+        if (allNewUsers) {
+            // App was not currently installed on any user
+            for (int newUser : mNewUsers) {
+                final boolean isInstantApp =
+                        mScanResult.mPkgSetting.getUserStateOrDefault(newUser).isInstantApp();
+                if (isInstantApp) {
+                    mFirstTimeBroadcastInstantUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastInstantUserIds, newUser);
+                } else {
+                    mFirstTimeBroadcastUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastUserIds, newUser);
+                }
+            }
+            return;
+        }
+        // App was already installed on some users, but is new to some other users
+        for (int newUser : mNewUsers) {
+            boolean isFirstTimeUser = !ArrayUtils.contains(mOrigUsers, newUser);
+            final boolean isInstantApp =
+                    mScanResult.mPkgSetting.getUserStateOrDefault(newUser).isInstantApp();
+            if (isFirstTimeUser) {
+                if (isInstantApp) {
+                    mFirstTimeBroadcastInstantUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastInstantUserIds, newUser);
+                } else {
+                    mFirstTimeBroadcastUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastUserIds, newUser);
+                }
+            } else {
+                if (isInstantApp) {
+                    mUpdateBroadcastInstantUserIds =
+                            ArrayUtils.appendInt(mUpdateBroadcastInstantUserIds, newUser);
+                } else {
+                    mUpdateBroadcastUserIds =
+                            ArrayUtils.appendInt(mUpdateBroadcastUserIds, newUser);
+                }
+            }
+        }
+    }
+
+    public void addWarning(@NonNull String warning) {
+        mWarnings.add(warning);
     }
 
     public void onPrepareStarted() {
@@ -806,22 +919,37 @@ final class InstallRequest {
     }
 
     public void onDexoptFinished(DexoptResult dexoptResult) {
-        if (mPackageMetrics == null) {
-            return;
-        }
-        mDexoptStatus = dexoptResult.getFinalStatus();
-        if (mDexoptStatus != DexoptResult.DEXOPT_PERFORMED) {
-            return;
-        }
-        long durationMillis = 0;
-        for (DexoptResult.PackageDexoptResult packageResult :
-                dexoptResult.getPackageDexoptResults()) {
-            for (DexoptResult.DexContainerFileDexoptResult fileResult :
-                    packageResult.getDexContainerFileDexoptResults()) {
-                durationMillis += fileResult.getDex2oatWallTimeMillis();
+        // Only report external profile warnings when installing from adb. The goal is to warn app
+        // developers if they have provided bad external profiles, so it's not beneficial to report
+        // those warnings in the normal app install workflow.
+        if (isInstallFromAdb()) {
+            var externalProfileErrors = new LinkedHashSet<String>();
+            for (PackageDexoptResult packageResult : dexoptResult.getPackageDexoptResults()) {
+                for (DexContainerFileDexoptResult fileResult :
+                        packageResult.getDexContainerFileDexoptResults()) {
+                    externalProfileErrors.addAll(fileResult.getExternalProfileErrors());
+                }
+            }
+            if (!externalProfileErrors.isEmpty()) {
+                addWarning("Error occurred during dexopt when processing external profiles:\n  "
+                        + String.join("\n  ", externalProfileErrors));
             }
         }
-        mPackageMetrics.onStepFinished(PackageMetrics.STEP_DEXOPT, durationMillis);
+
+        // Report dexopt metrics.
+        if (mPackageMetrics != null) {
+            mDexoptStatus = dexoptResult.getFinalStatus();
+            if (mDexoptStatus == DexoptResult.DEXOPT_PERFORMED) {
+                long durationMillis = 0;
+                for (PackageDexoptResult packageResult : dexoptResult.getPackageDexoptResults()) {
+                    for (DexContainerFileDexoptResult fileResult :
+                            packageResult.getDexContainerFileDexoptResults()) {
+                        durationMillis += fileResult.getDex2oatWallTimeMillis();
+                    }
+                }
+                mPackageMetrics.onStepFinished(PackageMetrics.STEP_DEXOPT, durationMillis);
+            }
+        }
     }
 
     public void onInstallCompleted() {
@@ -829,6 +957,18 @@ final class InstallRequest {
             if (mPackageMetrics != null) {
                 mPackageMetrics.onInstallSucceed();
             }
+        }
+    }
+
+    public void onFreezeStarted() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepStarted(PackageMetrics.STEP_FREEZE_INSTALL);
+        }
+    }
+
+    public void onFreezeCompleted() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepFinished(PackageMetrics.STEP_FREEZE_INSTALL);
         }
     }
 }

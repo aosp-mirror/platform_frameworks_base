@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.view.Display.TYPE_INTERNAL;
 import static android.view.InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE;
 import static android.view.InsetsFrameProvider.SOURCE_CONTAINER_BOUNDS;
@@ -267,6 +268,8 @@ public class DisplayPolicy {
     private final ArraySet<ActivityRecord> mRelaunchingSystemBarColorApps = new ArraySet<>();
 
     private boolean mIsFreeformWindowOverlappingWithNavBar;
+
+    private @InsetsType int mForciblyShownTypes;
 
     private boolean mIsImmersiveMode;
 
@@ -1201,8 +1204,8 @@ public class DisplayPolicy {
                 throw new IllegalArgumentException("IME insets must be provided by a window.");
             }
 
-            if (mNavigationBar != null && navigationBarPosition(displayFrames.mRotation)
-                    == NAV_BAR_BOTTOM) {
+            if (!ENABLE_HIDE_IME_CAPTION_BAR && mNavigationBar != null
+                    && navigationBarPosition(displayFrames.mRotation) == NAV_BAR_BOTTOM) {
                 // In gesture navigation, nav bar frame is larger than frame to calculate insets.
                 // IME should not provide frame which is smaller than the nav bar frame. Otherwise,
                 // nav bar might be overlapped with the content of the client when IME is shown.
@@ -1401,6 +1404,7 @@ public class DisplayPolicy {
         mAllowLockscreenWhenOn = false;
         mShowingDream = false;
         mIsFreeformWindowOverlappingWithNavBar = false;
+        mForciblyShownTypes = 0;
     }
 
     /**
@@ -1456,6 +1460,10 @@ public class DisplayPolicy {
                     mBottomGestureHost = win;
                 }
             }
+        }
+
+        if (win.mSession.mCanForceShowingInsets) {
+            mForciblyShownTypes |= win.mAttrs.forciblyShownTypes;
         }
 
         if (!affectsSystemUi) {
@@ -1639,6 +1647,10 @@ public class DisplayPolicy {
         mService.mPolicy.setAllowLockscreenWhenOn(getDisplayId(), mAllowLockscreenWhenOn);
     }
 
+    boolean areTypesForciblyShownTransiently(@InsetsType int types) {
+        return (mForciblyShownTypes & types) == types;
+    }
+
     /**
      * Applies the keyguard policy to a specific window.
      *
@@ -1665,18 +1677,6 @@ public class DisplayPolicy {
     }
 
     private boolean shouldBeHiddenByKeyguard(WindowState win, WindowState imeTarget) {
-        // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
-        // hidden because it's in the process of hiding, but it's still being shown on screen.
-        // In that case, we want to continue hiding the IME until the windows have completed
-        // drawing. This way, we know that the IME can be safely shown since the other windows are
-        // now shown.
-        final boolean hideIme = win.mIsImWindow
-                && (mDisplayContent.isAodShowing()
-                        || (mDisplayContent.isDefaultDisplay && !mWindowManagerDrawComplete));
-        if (hideIme) {
-            return true;
-        }
-
         if (!mDisplayContent.isDefaultDisplay || !isKeyguardShowing()) {
             return false;
         }

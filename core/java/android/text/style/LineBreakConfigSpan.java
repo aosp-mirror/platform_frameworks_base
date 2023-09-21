@@ -16,6 +16,9 @@
 
 package android.text.style;
 
+import static com.android.text.flags.Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.graphics.text.LineBreakConfig;
 
@@ -24,6 +27,7 @@ import java.util.Objects;
 /**
  * LineBreakSpan for changing line break style of the specific region of the text.
  */
+@FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
 public class LineBreakConfigSpan {
     private final LineBreakConfig mLineBreakConfig;
 
@@ -59,5 +63,23 @@ public class LineBreakConfigSpan {
     @Override
     public String toString() {
         return "LineBreakConfigSpan{mLineBreakConfig=" + mLineBreakConfig + '}';
+    }
+
+    private static final LineBreakConfig sNoHyphenationConfig = new LineBreakConfig.Builder()
+            .setHyphenation(LineBreakConfig.HYPHENATION_DISABLED)
+            .build();
+
+    /**
+     * A specialized {@link LineBreakConfigSpan} that used for preventing hyphenation.
+     */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    public static final class NoHyphenationSpan extends LineBreakConfigSpan {
+        /**
+         * Construct a new {@link NoHyphenationSpan}.
+         */
+        @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+        public NoHyphenationSpan() {
+            super(sNoHyphenationConfig);
+        }
     }
 }

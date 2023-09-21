@@ -19,6 +19,7 @@ package android.credentials;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.Hide;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -117,13 +118,59 @@ public final class CredentialManager {
     }
 
     /**
+     * Returns a list of candidate credentials returned from credential manager providers
+     *
+     * @param request the request specifying type(s) of credentials to get from the
+     *                credential providers
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor the callback will take place on this {@link Executor}
+     * @param callback the callback invoked when the request succeeds or fails
+     *
+     * @hide
+     */
+    @Hide
+    public void getCandidateCredentials(
+            @NonNull GetCredentialRequest request,
+            @NonNull String callingPackage,
+            @Nullable CancellationSignal cancellationSignal,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<GetCandidateCredentialsResponse,
+                    GetCandidateCredentialsException> callback
+    ) {
+        requireNonNull(request, "request must not be null");
+        requireNonNull(callingPackage, "callingPackage must not be null");
+        requireNonNull(executor, "executor must not be null");
+        requireNonNull(callback, "callback must not be null");
+
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            Log.w(TAG, "getCandidateCredentials already canceled");
+            return;
+        }
+
+        ICancellationSignal cancelRemote = null;
+        try {
+            cancelRemote =
+                    mService.getCandidateCredentials(
+                            request,
+                            new GetCandidateCredentialsTransport(executor, callback),
+                            mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        if (cancellationSignal != null && cancelRemote != null) {
+            cancellationSignal.setRemote(cancelRemote);
+        }
+    }
+
+    /**
      * Launches the necessary flows to retrieve an app credential from the user.
      *
      * <p>The execution can potentially launch UI flows to collect user consent to using a
      * credential, display a picker when multiple credentials exist, etc.
      * Callers (e.g. browsers) may optionally set origin in {@link GetCredentialRequest} for an
      * app different from their own, to be able to get credentials on behalf of that app. They would
-     * need additional permission {@link CREDENTIAL_MANAGER_SET_ORIGIN}
+     * need additional permission {@code CREDENTIAL_MANAGER_SET_ORIGIN}
      * to use this functionality
      *
      * @param context the context used to launch any UI needed; use an activity context to make sure
@@ -209,9 +256,9 @@ public final class CredentialManager {
      *
      * <p>This API doesn't invoke any UI. It only performs the preparation work so that you can
      * later launch the remaining get-credential operation (involves UIs) through the {@link
-     * #getCredential(PrepareGetCredentialResponse.PendingGetCredentialHandle, Context,
+     * #getCredential(Context, PrepareGetCredentialResponse.PendingGetCredentialHandle,
      * CancellationSignal, Executor, OutcomeReceiver)} API which incurs less latency compared to
-     * the {@link #getCredential(GetCredentialRequest, Context, CancellationSignal, Executor,
+     * the {@link #getCredential(Context, GetCredentialRequest, CancellationSignal, Executor,
      * OutcomeReceiver)} API that executes the whole operation in one call.
      *
      * @param request            the request specifying type(s) of credentials to get from the user
@@ -261,7 +308,7 @@ public final class CredentialManager {
      * storing the new credential, etc.
      * Callers (e.g. browsers) may optionally set origin in {@link CreateCredentialRequest} for an
      * app different from their own, to be able to get credentials on behalf of that app. They would
-     * need additional permission {@link CREDENTIAL_MANAGER_SET_ORIGIN}
+     * need additional permission {@code CREDENTIAL_MANAGER_SET_ORIGIN}
      * to use this functionality
      *
      * @param context the context used to launch any UI needed; use an activity context to make sure
@@ -637,6 +684,44 @@ public final class CredentialManager {
                 }
             } else {
                 Log.d(TAG, "Unexpected onError call before the show invocation");
+            }
+        }
+    }
+
+    private static class GetCandidateCredentialsTransport
+            extends IGetCandidateCredentialsCallback.Stub {
+
+        private final Executor mExecutor;
+        private final OutcomeReceiver<GetCandidateCredentialsResponse,
+                GetCandidateCredentialsException> mCallback;
+
+        private GetCandidateCredentialsTransport(
+                Executor executor,
+                OutcomeReceiver<GetCandidateCredentialsResponse,
+                        GetCandidateCredentialsException> callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResponse(GetCandidateCredentialsResponse response) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onResult(response));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void onError(String errorType, String message) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mCallback.onError(new GetCandidateCredentialsException(
+                                errorType, message)));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }

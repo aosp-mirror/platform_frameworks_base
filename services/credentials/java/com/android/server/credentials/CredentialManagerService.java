@@ -35,11 +35,13 @@ import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
+import android.credentials.GetCandidateCredentialsException;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
+import android.credentials.IGetCandidateCredentialsCallback;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.IPrepareGetCredentialCallback;
 import android.credentials.ISetEnabledProvidersCallback;
@@ -69,7 +71,6 @@ import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -96,6 +97,9 @@ public final class CredentialManagerService
             "Caller is missing WRITE_SECURE_SETTINGS permission";
     private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER =
             "enable_credential_manager";
+
+    private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API =
+            "enable_credential_description_api";
 
     private final Context mContext;
 
@@ -281,7 +285,7 @@ public final class CredentialManagerService
         }
     }
 
-    private static Set<String> getPrimaryProvidersForUserId(Context context, int userId) {
+    private static Set<ComponentName> getPrimaryProvidersForUserId(Context context, int userId) {
         final int resolvedUserId = ActivityManager.handleIncomingUser(
                 Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, false,
@@ -291,9 +295,22 @@ public final class CredentialManagerService
                 /* isMultipleMode= */ true);
         String[] serviceNames = resolver.readServiceNameList(resolvedUserId);
         if (serviceNames == null) {
-            return new HashSet<String>();
+            return new HashSet<ComponentName>();
         }
-        return new HashSet<String>(Arrays.asList(serviceNames));
+
+        Set<ComponentName> services = new HashSet<>();
+        for (String serviceName : serviceNames) {
+            ComponentName compName = ComponentName.unflattenFromString(serviceName);
+            if (compName == null) {
+                Slog.w(
+                        TAG,
+                        "Primary provider component name unflatten from string error: "
+                                + serviceName);
+                continue;
+            }
+            services.add(compName);
+        }
+        return services;
     }
 
     @GuardedBy("mLock")
@@ -309,7 +326,14 @@ public final class CredentialManagerService
     }
 
     public static boolean isCredentialDescriptionApiEnabled() {
-        return true;
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API,
+                    false);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     @SuppressWarnings("GuardedBy") // ErrorProne requires initiateProviderSessionForRequestLocked
@@ -448,6 +472,59 @@ public final class CredentialManagerService
     }
 
     final class CredentialManagerServiceStub extends ICredentialManager.Stub {
+        @Override
+        public ICancellationSignal getCandidateCredentials(
+                GetCredentialRequest request,
+                IGetCandidateCredentialsCallback callback,
+                final String callingPackage) {
+            Slog.i(TAG, "starting getCandidateCredentials with callingPackage: "
+                    + callingPackage);
+            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+
+            final int userId = UserHandle.getCallingUserId();
+            final int callingUid = Binder.getCallingUid();
+
+            // New request session, scoped for this request only.
+            final GetCandidateRequestSession session =
+                    new GetCandidateRequestSession(
+                            getContext(),
+                            mSessionManager,
+                            mLock,
+                            userId,
+                            callingUid,
+                            callback,
+                            request,
+                            constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
+                            getEnabledProvidersForUser(userId),
+                            CancellationSignal.fromTransport(cancelTransport)
+                    );
+            addSessionLocked(userId, session);
+
+            List<ProviderSession> providerSessions =
+                    initiateProviderSessions(
+                            session,
+                            request.getCredentialOptions().stream()
+                                    .map(CredentialOption::getType)
+                                    .collect(Collectors.toList()));
+
+            if (providerSessions.isEmpty()) {
+                try {
+                    callback.onError(
+                            GetCandidateCredentialsException.TYPE_NO_CREDENTIAL,
+                            "No credentials available on this device.");
+                } catch (RemoteException e) {
+                    Slog.i(
+                            TAG,
+                            "Issue invoking onError on IGetCredentialCallback "
+                                    + "callback: "
+                                    + e.getMessage());
+                }
+            }
+
+            invokeProviderSessions(providerSessions);
+            return cancelTransport;
+        }
+
         @Override
         public ICancellationSignal executeGetCredential(
                 GetCredentialRequest request,
@@ -702,7 +779,7 @@ public final class CredentialManagerService
 
         @Override
         public void setEnabledProviders(
-                List<String>  primaryProviders, List<String> providers, int userId,
+                List<String> primaryProviders, List<String> providers, int userId,
                 ISetEnabledProvidersCallback callback) {
             final int callingUid = Binder.getCallingUid();
             if (!hasWriteSecureSettingsPermission()) {
@@ -827,9 +904,9 @@ public final class CredentialManagerService
                     ApiName.GET_CREDENTIAL_PROVIDER_SERVICES,
                     ApiStatus.SUCCESS, callingUid);
             return CredentialProviderInfoFactory
-            .getCredentialProviderServices(
-                mContext, userId, providerFilter, getEnabledProvidersForUser(userId),
-                getPrimaryProvidersForUserId(mContext, userId));
+                    .getCredentialProviderServices(
+                            mContext, userId, providerFilter, getEnabledProvidersForUser(userId),
+                            getPrimaryProvidersForUserId(mContext, userId));
 
         }
 
@@ -859,13 +936,14 @@ public final class CredentialManagerService
 
         private Set<ComponentName> getEnabledProvidersForUser(int userId) {
             final int resolvedUserId = ActivityManager.handleIncomingUser(
-                Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, false, false,
-                "getEnabledProvidersForUser", null);
+                    Binder.getCallingPid(), Binder.getCallingUid(),
+                    userId, false, false,
+                    "getEnabledProvidersForUser", null);
 
             Set<ComponentName> enabledProviders = new HashSet<>();
             String directValue = Settings.Secure.getStringForUser(
-                mContext.getContentResolver(), Settings.Secure.CREDENTIAL_SERVICE, resolvedUserId);
+                    mContext.getContentResolver(), Settings.Secure.CREDENTIAL_SERVICE,
+                    resolvedUserId);
 
             if (!TextUtils.isEmpty(directValue)) {
                 String[] components = directValue.split(":");
@@ -942,7 +1020,7 @@ public final class CredentialManagerService
             Slog.i(TAG, "registerCredentialDescription with callingPackage: " + callingPackage);
 
             if (!isCredentialDescriptionApiEnabled()) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("Feature not supported");
             }
 
             enforceCallingPackage(callingPackage, Binder.getCallingUid());
@@ -962,7 +1040,7 @@ public final class CredentialManagerService
 
 
             if (!isCredentialDescriptionApiEnabled()) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("Feature not supported");
             }
 
             enforceCallingPackage(callingPackage, Binder.getCallingUid());

@@ -1999,7 +1999,7 @@ public class CarrierConfigManager {
             "lte_plus_threshold_bandwidth_khz_int";
 
     /**
-     * The combined channel bandwidth threshold (non-inclusive) in KHz required to display the
+     * The combined channel bandwidth threshold (inclusive) in KHz required to display the
      * NR advanced (i.e. 5G+) data icon. It is 0 by default, meaning minimum bandwidth check is
      * not enabled. Other factors like bands or frequency can also determine whether the NR
      * advanced data icon is shown or not.
@@ -3530,7 +3530,7 @@ public class CarrierConfigManager {
     /**
      * When a partial sms / mms message stay in raw table for too long without being completed,
      * we expire them and delete them from the raw table. This carrier config defines the
-     * expiration time.
+     * expiration time. The default value is milliseconds in 7 days.
      * @hide
      */
     public static final String KEY_UNDELIVERED_SMS_MESSAGE_EXPIRATION_TIME =
@@ -4607,12 +4607,12 @@ public class CarrierConfigManager {
      *
      * <p>Example:
      *
-     * <pre><code>
+     * <pre>{@code
      * <string-array name="carrier_service_name_array" num="2">
      *   <item value="Police"/>
      *   <item value="Ambulance"/>
      * </string-array>
-     * </code></pre>
+     * }</pre>
      */
     public static final String KEY_CARRIER_SERVICE_NAME_STRING_ARRAY = "carrier_service_name_array";
 
@@ -4626,18 +4626,18 @@ public class CarrierConfigManager {
      *
      * <ul>
      *   <li>The number of items in both the arrays are equal
-     *   <li>The item added in this key follows a specific format. Either it should be all numbers,
-     *       or "+" followed by all numbers.
+     *   <li>The item should contain dialable characters only which includes 0-9, -, *, #, (, ),
+     *       SPACE.
      * </ul>
      *
      * <p>Example:
      *
-     * <pre><code>
+     * <pre>{@code
      * <string-array name="carrier_service_number_array" num="2">
-     *   <item value="123"/>
-     *   <item value="+343"/>
+     *   <item value="*123"/>
+     *   <item value="+ (111) 111-111"/>
      * </string-array>
-     * </code></pre>
+     * }</pre>
      */
     public static final String KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY =
         "carrier_service_number_array";
@@ -9456,6 +9456,19 @@ public class CarrierConfigManager {
             "carrier_supported_satellite_services_per_provider_bundle";
 
     /**
+     * This config enables modem to scan satellite PLMNs specified as per
+     * {@link #KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE} and attach to same
+     * in case cellular networks are not enabled. This will need specific agreement between
+     * satellite provider and the carrier before enabling this flag.
+     *
+     * The default value is false.
+     *
+     * @hide
+     */
+    public static final String KEY_SATELLITE_ATTACH_SUPPORTED_BOOL =
+            "satellite_attach_supported_bool";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -9881,9 +9894,15 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_ONLY_DIALED_SIM_ECC_LIST_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WLAN_CLASS_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WWAN_CLASS_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_QUALIFIED_NETWORKS_SERVICE_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_QUALIFIED_NETWORKS_SERVICE_CLASS_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WWAN_CLASS_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WLAN_CLASS_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ESCAPED_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ENCODING_STRING, "");
@@ -10185,6 +10204,10 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_TTY_SUPPORTED_BOOL, true);
+        sDefaults.putBoolean(KEY_RTT_AUTO_UPGRADE_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_SUPPORTED_FOR_VT_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_UPGRADE_SUPPORTED_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_DOWNGRADE_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_TTY_HCO_VCO_WITH_RTT_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_UPGRADE_SUPPORTED_FOR_DOWNGRADED_VT_CALL_BOOL, true);
@@ -10206,7 +10229,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putInt(KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT, 0);
         sDefaults.putBoolean(KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL, false);
-        sDefaults.putBoolean(KEY_RATCHET_NR_ADVANCED_BANDWIDTH_IF_RRC_IDLE_BOOL, true);
+        sDefaults.putBoolean(KEY_RATCHET_NR_ADVANCED_BANDWIDTH_IF_RRC_IDLE_BOOL, false);
         sDefaults.putIntArray(KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
                 new int[]{CARRIER_NR_AVAILABILITY_NSA, CARRIER_NR_AVAILABILITY_SA});
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
@@ -10305,6 +10328,8 @@ public class CarrierConfigManager {
                 "NR_NSA_MMWAVE:145000,60000", "NR_SA:145000,60000", "NR_SA_MMWAVE:145000,60000"});
         sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPLINK_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
+        sDefaults.putLong(
+                KEY_UNDELIVERED_SMS_MESSAGE_EXPIRATION_TIME, (long) (60 * 60 * 1000) * 24 * 7);
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_OVER_UT_WARNING_BOOL, false);
@@ -10408,7 +10433,7 @@ public class CarrierConfigManager {
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
-        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 2000);
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 5000);
         sDefaults.putStringArray(KEY_MMI_TWO_DIGIT_NUMBER_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
@@ -10465,6 +10490,7 @@ public class CarrierConfigManager {
         sDefaults.putPersistableBundle(
                 KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE,
                 PersistableBundle.EMPTY);
+        sDefaults.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
@@ -10518,7 +10544,7 @@ public class CarrierConfigManager {
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "eHRPD", new int[]{10, 400, 600, 800, 1000});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
-                "TD_SCDMA", new int[]{1, 100, 500, 1000});
+                "TD_SCDMA", new int[]{1, 50, 100, 500, 1000});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "iDEN", new int[]{1, 2, 10, 50, 100});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
@@ -10536,7 +10562,7 @@ public class CarrierConfigManager {
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "EvDo_0", new int[]{300, 600, 1000, 1500, 2000});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
-                "1xRTT", new int[]{50, 60, 70, 80});
+                "1xRTT", new int[]{50, 60, 70, 80, 90});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "EDGE", new int[]{154, 169, 183, 192, 267});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(

@@ -661,12 +661,24 @@ final class LetterboxUiController {
     @ScreenOrientation
     int overrideOrientationIfNeeded(@ScreenOrientation int candidate) {
         if (shouldApplyUserFullscreenOverride()) {
+            Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
+                    + mActivityRecord + " is overridden to "
+                    + screenOrientationToString(SCREEN_ORIENTATION_USER)
+                    + " by user aspect ratio settings.");
             return SCREEN_ORIENTATION_USER;
         }
 
         // In some cases (e.g. Kids app) we need to map the candidate orientation to some other
         // orientation.
         candidate = mActivityRecord.mWmService.mapOrientationRequest(candidate);
+
+        if (shouldApplyUserMinAspectRatioOverride() && !isFixedOrientation(candidate)) {
+            Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
+                    + mActivityRecord + " is overridden to "
+                    + screenOrientationToString(SCREEN_ORIENTATION_PORTRAIT)
+                    + " by user aspect ratio settings.");
+            return SCREEN_ORIENTATION_PORTRAIT;
+        }
 
         if (FALSE.equals(mBooleanPropertyAllowOrientationOverride)) {
             return candidate;
@@ -969,8 +981,10 @@ final class LetterboxUiController {
             final Rect innerFrame = hasInheritedLetterboxBehavior()
                     ? mActivityRecord.getBounds() : w.getFrame();
             mLetterbox.layout(spaceToFill, innerFrame, mTmpPoint);
-            // We need to notify Shell that letterbox position has changed.
-            mActivityRecord.getTask().dispatchTaskInfoChangedIfNeeded(true /* force */);
+            if (mDoubleTapEvent) {
+                // We need to notify Shell that letterbox position has changed.
+                mActivityRecord.getTask().dispatchTaskInfoChangedIfNeeded(true /* force */);
+            }
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
@@ -1124,11 +1138,25 @@ final class LetterboxUiController {
         return computeAspectRatio(bounds);
     }
 
+    /**
+     * Whether we should enable users to resize the current app.
+     */
+    boolean shouldEnableUserAspectRatioSettings() {
+        // We use mBooleanPropertyAllowUserAspectRatioOverride to allow apps to opt-out which has
+        // effect only if explicitly false. If mBooleanPropertyAllowUserAspectRatioOverride is null,
+        // the current app doesn't opt-out so the first part of the predicate is true.
+        return !FALSE.equals(mBooleanPropertyAllowUserAspectRatioOverride)
+                && mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
+                && mActivityRecord.mDisplayContent != null
+                && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest();
+    }
+
+    /**
+     * Whether we should apply the user aspect ratio override to the min aspect ratio for the
+     * current app.
+     */
     boolean shouldApplyUserMinAspectRatioOverride() {
-        if (FALSE.equals(mBooleanPropertyAllowUserAspectRatioOverride)
-                || !mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
-                || mActivityRecord.mDisplayContent == null
-                || !mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()) {
+        if (!shouldEnableUserAspectRatioSettings()) {
             return false;
         }
 
@@ -1242,6 +1270,7 @@ final class LetterboxUiController {
                                 ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_LEFT
                                 : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__RIGHT_TO_CENTER;
             logLetterboxPositionChange(changeToLog);
+            mDoubleTapEvent = true;
         } else if (mLetterbox.getInnerFrame().right < x) {
             // Moving to the next stop on the right side of the app window: left > center > right.
             mLetterboxConfiguration.movePositionForHorizontalReachabilityToNextRightStop(
@@ -1252,8 +1281,8 @@ final class LetterboxUiController {
                                 ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_RIGHT
                                 : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__LEFT_TO_CENTER;
             logLetterboxPositionChange(changeToLog);
+            mDoubleTapEvent = true;
         }
-        mDoubleTapEvent = true;
         // TODO(197549949): Add animation for transition.
         mActivityRecord.recomputeConfiguration();
     }
@@ -1281,6 +1310,7 @@ final class LetterboxUiController {
                                 ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_TOP
                                 : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__BOTTOM_TO_CENTER;
             logLetterboxPositionChange(changeToLog);
+            mDoubleTapEvent = true;
         } else if (mLetterbox.getInnerFrame().bottom < y) {
             // Moving to the next stop on the bottom side of the app window: top > center > bottom.
             mLetterboxConfiguration.movePositionForVerticalReachabilityToNextBottomStop(
@@ -1291,8 +1321,8 @@ final class LetterboxUiController {
                                 ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_BOTTOM
                                 : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__TOP_TO_CENTER;
             logLetterboxPositionChange(changeToLog);
+            mDoubleTapEvent = true;
         }
-        mDoubleTapEvent = true;
         // TODO(197549949): Add animation for transition.
         mActivityRecord.recomputeConfiguration();
     }

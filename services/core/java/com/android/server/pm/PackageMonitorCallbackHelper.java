@@ -100,12 +100,15 @@ class PackageMonitorCallbackHelper {
 
     public void notifyPackageAddedForNewUsers(String packageName,
             @AppIdInt int appId, @NonNull int[] userIds, @NonNull int[] instantUserIds,
-            int dataLoaderType, SparseArray<int[]> broadcastAllowList) {
+            boolean isArchived, int dataLoaderType, SparseArray<int[]> broadcastAllowList) {
         Bundle extras = new Bundle(2);
         // Set to UID of the first user, EXTRA_UID is automatically updated in sendPackageBroadcast
         final int uid = UserHandle.getUid(
                 (ArrayUtils.isEmpty(userIds) ? instantUserIds[0] : userIds[0]), appId);
         extras.putInt(Intent.EXTRA_UID, uid);
+        if (isArchived) {
+            extras.putBoolean(Intent.EXTRA_ARCHIVAL, true);
+        }
         extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
         notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED, packageName, extras ,
                 userIds /* userIds */, instantUserIds, broadcastAllowList);

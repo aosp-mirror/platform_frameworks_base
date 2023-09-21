@@ -77,7 +77,7 @@ inline fun <I : Immutable<M>, M : I> MutableIntReferenceMap<I, M>.mutateOrPut(
 }
 
 operator fun <I : Immutable<M>, M : I> MutableIntReferenceMap<I, M>.minusAssign(key: Int) {
-    array.remove(key)
+    array.remove(key).also { array.gc() }
 }
 
 operator fun <I : Immutable<M>, M : I> MutableIntReferenceMap<I, M>.set(key: Int, value: M) {

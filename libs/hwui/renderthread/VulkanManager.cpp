@@ -25,6 +25,7 @@
 #include <android/sync.h>
 #include <gui/TraceUtils.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/gpu/ganesh/vk/GrVkBackendSurface.h>
 #include <ui/FatVector.h>
 #include <vk/GrVkExtensions.h>
 #include <vk/GrVkTypes.h>
@@ -384,25 +385,23 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
 }
 
 void VulkanManager::initialize() {
-    std::lock_guard _lock{mInitializeLock};
+    std::call_once(mInitFlag, [&] {
+        GET_PROC(EnumerateInstanceVersion);
+        uint32_t instanceVersion;
+        LOG_ALWAYS_FATAL_IF(mEnumerateInstanceVersion(&instanceVersion));
+        LOG_ALWAYS_FATAL_IF(instanceVersion < VK_MAKE_VERSION(1, 1, 0));
 
-    if (mDevice != VK_NULL_HANDLE) {
-        return;
-    }
+        this->setupDevice(mExtensions, mPhysicalDeviceFeatures2);
 
-    GET_PROC(EnumerateInstanceVersion);
-    uint32_t instanceVersion;
-    LOG_ALWAYS_FATAL_IF(mEnumerateInstanceVersion(&instanceVersion));
-    LOG_ALWAYS_FATAL_IF(instanceVersion < VK_MAKE_VERSION(1, 1, 0));
+        mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
+        mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 1, &mAHBUploadQueue);
 
-    this->setupDevice(mExtensions, mPhysicalDeviceFeatures2);
+        if (Properties::enablePartialUpdates && Properties::useBufferAge) {
+            mSwapBehavior = SwapBehavior::BufferAge;
+        }
 
-    mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
-    mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 1, &mAHBUploadQueue);
-
-    if (Properties::enablePartialUpdates && Properties::useBufferAge) {
-        mSwapBehavior = SwapBehavior::BufferAge;
-    }
+        mInitialized = true;
+    });
 }
 
 static void onGrContextReleased(void* context) {
@@ -516,7 +515,7 @@ Frame VulkanManager::dequeueNextBuffer(VulkanSurface* surface) {
                         // The following flush blocks the GPU immediately instead of waiting for
                         // other drawing ops. It seems dequeue_fence is not respected otherwise.
                         // TODO: remove the flush after finding why backendSemaphore is not working.
-                        skgpu::ganesh::FlushAndSubmit(bufferInfo->skSurface);
+                        skgpu::ganesh::FlushAndSubmit(bufferInfo->skSurface.get());
                     }
                 }
             }
@@ -601,7 +600,7 @@ nsecs_t VulkanManager::finishFrame(SkSurface* surface) {
                             surface, SkSurfaces::BackendHandleAccess::kFlushRead);
                 if (backendRenderTarget.isValid()) {
                     GrVkImageInfo info;
-                    if (backendRenderTarget.getVkImageInfo(&info)) {
+                    if (GrBackendRenderTargets::GetVkImageInfo(backendRenderTarget, &info)) {
                         image = info.fImage;
                     } else {
                         ALOGE("Frame boundary: backend is not vulkan");

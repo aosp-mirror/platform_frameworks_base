@@ -327,6 +327,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private SurfaceControl mOverlayLayer;
 
+    /**
+     * A SurfaceControl that contains input overlays used for cases where we need to receive input
+     * over the entire display.
+     */
+    private SurfaceControl mInputOverlayLayer;
+
     /** A surfaceControl specifically for accessibility overlays. */
     private SurfaceControl mA11yOverlayLayer;
 
@@ -736,9 +742,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Set of activities in foreground size compat mode. */
     private Set<ActivityRecord> mActiveSizeCompatActivities = new ArraySet<>();
-
-    // Used in updating the display size
-    private Point mTmpDisplaySize = new Point();
 
     // Used in updating override configurations
     private final Configuration mTempConfig = new Configuration();
@@ -1327,6 +1330,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             transaction.reparent(mOverlayLayer, mSurfaceControl);
         }
 
+        if (mInputOverlayLayer == null) {
+            mInputOverlayLayer = b.setName("Input Overlays").setParent(mSurfaceControl).build();
+        } else {
+            transaction.reparent(mInputOverlayLayer, mSurfaceControl);
+        }
+
         if (mA11yOverlayLayer == null) {
             mA11yOverlayLayer =
                     b.setName("Accessibility Overlays").setParent(mSurfaceControl).build();
@@ -1340,7 +1349,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 .show(mSurfaceControl)
                 .setLayer(mOverlayLayer, Integer.MAX_VALUE)
                 .show(mOverlayLayer)
-                .setLayer(mA11yOverlayLayer, Integer.MAX_VALUE - 1)
+                .setLayer(mInputOverlayLayer, Integer.MAX_VALUE - 1)
+                .show(mInputOverlayLayer)
+                .setLayer(mA11yOverlayLayer, Integer.MAX_VALUE - 2)
                 .show(mA11yOverlayLayer);
     }
 
@@ -3351,6 +3362,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // -> this DisplayContent.
             setRemoteInsetsController(null);
             mOverlayLayer.release();
+            mInputOverlayLayer.release();
             mA11yOverlayLayer.release();
             mWindowingLayer.release();
             mInputMonitor.onDisplayRemoved();
@@ -4782,25 +4794,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }, false /* traverseTopToBottom */);
     }
 
-    /**
-     * Starts the Keyguard exit animation on all windows that don't belong to an app token.
-     */
-    void startKeyguardExitOnNonAppWindows(boolean onWallpaper, boolean goingToShade,
-            boolean subtle) {
-        final WindowManagerPolicy policy = mWmService.mPolicy;
-        forAllWindows(w -> {
-            if (w.mActivityRecord == null && w.canBeHiddenByKeyguard()
-                    && w.wouldBeVisibleIfPolicyIgnored() && !w.isVisible()) {
-                w.startAnimation(policy.createHiddenByKeyguardExit(
-                        onWallpaper, goingToShade, subtle));
-            }
-        }, true /* traverseTopToBottom */);
-        for (int i = mShellRoots.size() - 1; i >= 0; --i) {
-            mShellRoots.valueAt(i).startAnimation(policy.createHiddenByKeyguardExit(
-                    onWallpaper, goingToShade, subtle));
-        }
-    }
-
     /** @return {@code true} if there is window to wait before enabling the screen. */
     boolean shouldWaitForSystemDecorWindowsOnBoot() {
         if (!isDefaultDisplay && !supportsSystemDecorations()) {
@@ -5704,6 +5697,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mOverlayLayer;
     }
 
+    SurfaceControl getInputOverlayLayer() {
+        return mInputOverlayLayer;
+    }
+
     SurfaceControl getA11yOverlayLayer() {
         return mA11yOverlayLayer;
     }
@@ -6043,8 +6040,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mOffTokenAcquirer.release(mDisplayId);
             }
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Content Recording: Display %d state is now (%d), so update recording?",
-                    mDisplayId, displayState);
+                    "Content Recording: Display %d state was (%d), is now (%d), so update "
+                            + "recording?",
+                    mDisplayId, lastDisplayState, displayState);
             if (lastDisplayState != displayState) {
                 // If state is on due to surface being added, then start recording.
                 // If state is off due to surface being removed, then stop recording.
@@ -6500,18 +6498,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * @return whether the physical display has a fixed orientation and cannot be rotated.
+     * @return whether the physical display orientation should change when its content rotates to
+     *   match the orientation of the content.
      */
-    boolean isDisplayOrientationFixed() {
-        return (mDisplayInfo.flags & Display.FLAG_ROTATES_WITH_CONTENT) == 0;
-    }
-
-    /**
-     * @return whether AOD is showing on this display
-     */
-    boolean isAodShowing() {
-        return mRootWindowContainer.mTaskSupervisor
-                .getKeyguardController().isAodShowing(mDisplayId);
+    boolean shouldRotateWithContent() {
+        return (mDisplayInfo.flags & Display.FLAG_ROTATES_WITH_CONTENT) != 0;
     }
 
     /**
@@ -6527,7 +6518,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     boolean isKeyguardOccluded() {
         return mRootWindowContainer.mTaskSupervisor
-                .getKeyguardController().isDisplayOccluded(mDisplayId);
+                .getKeyguardController().isKeyguardOccluded(mDisplayId);
     }
 
     /**
@@ -7060,6 +7051,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         new Transaction().reparent(sc, getSurfaceControl())
                 .reparent(mWindowingLayer, null)
                 .reparent(mOverlayLayer, null)
+                .reparent(mInputOverlayLayer, null)
                 .reparent(mA11yOverlayLayer, null)
                 .apply();
     }

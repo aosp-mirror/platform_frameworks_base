@@ -593,7 +593,7 @@ public abstract class Context {
     public static final int BIND_IMPORTANT_BACKGROUND = 0x00800000;
 
     /**
-     * @hide Flag for {@link #bindService}: allows application hosting service to manage whitelists
+     * @hide Flag for {@link #bindService}: allows application hosting service to manage allowlists
      * such as temporary allowing a {@code PendingIntent} to bypass Power Save mode.
      */
     public static final int BIND_ALLOW_WHITELIST_MANAGEMENT = 0x01000000;
@@ -4089,6 +4089,7 @@ public abstract class Context {
             VIBRATOR_MANAGER_SERVICE,
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
+            THREAD_NETWORK_SERVICE,
             CONNECTIVITY_SERVICE,
             PAC_PROXY_SERVICE,
             VCN_MANAGEMENT_SERVICE,
@@ -4761,6 +4762,20 @@ public abstract class Context {
      */
     @SystemApi
     public static final String TETHERING_SERVICE = "tethering";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.net.thread.ThreadNetworkManager}.
+     *
+     * <p>On devices without {@link PackageManager#FEATURE_THREAD_NETWORK} system feature
+     * the {@link #getSystemService(String)} will return {@code null}.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.thread.ThreadNetworkManager
+     * @hide
+     */
+    @SystemApi
+    public static final String THREAD_NETWORK_SERVICE = "thread_network";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

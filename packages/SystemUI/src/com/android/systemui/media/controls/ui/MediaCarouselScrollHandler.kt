@@ -26,11 +26,11 @@ import android.view.ViewOutlineProvider
 import androidx.core.view.GestureDetectorCompat
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
+import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
@@ -59,7 +59,6 @@ class MediaCarouselScrollHandler(
     private var translationChangedListener: () -> Unit,
     private var seekBarUpdateListener: (visibleToUser: Boolean) -> Unit,
     private val closeGuts: (immediate: Boolean) -> Unit,
-    private val falsingCollector: FalsingCollector,
     private val falsingManager: FalsingManager,
     private val logSmartspaceImpression: (Boolean) -> Unit,
     private val logger: MediaUiEventLogger
@@ -67,8 +66,10 @@ class MediaCarouselScrollHandler(
     /** Is the view in RTL */
     val isRtl: Boolean
         get() = scrollView.isLayoutRtl
+
     /** Do we need falsing protection? */
     var falsingProtectionNeeded: Boolean = false
+
     /** The width of the carousel */
     private var carouselWidth: Int = 0
 
@@ -80,6 +81,7 @@ class MediaCarouselScrollHandler(
 
     /** The content where the players are added */
     private var mediaContent: ViewGroup
+
     /** The gesture detector to detect touch gestures */
     private val gestureDetector: GestureDetectorCompat
 
@@ -140,15 +142,13 @@ class MediaCarouselScrollHandler(
             ) = onScroll(down!!, lastMotion, distanceX)
 
             override fun onDown(e: MotionEvent): Boolean {
-                if (falsingProtectionNeeded) {
-                    falsingCollector.onNotificationStartDismissing()
-                }
                 return false
             }
         }
 
     /** The touch listener for the scroll view */
-    private val touchListener =
+    @VisibleForTesting
+    val touchListener =
         object : Gefingerpoken {
             override fun onTouchEvent(motionEvent: MotionEvent?) = onTouch(motionEvent!!)
             override fun onInterceptTouchEvent(ev: MotionEvent?) = onInterceptTouch(ev!!)
@@ -263,9 +263,6 @@ class MediaCarouselScrollHandler(
 
     private fun onTouch(motionEvent: MotionEvent): Boolean {
         val isUp = motionEvent.action == MotionEvent.ACTION_UP
-        if (isUp && falsingProtectionNeeded) {
-            falsingCollector.onNotificationStopDismissing()
-        }
         if (gestureDetector.onTouchEvent(motionEvent)) {
             if (isUp) {
                 // If this is an up and we're flinging, we don't want to have this touch reach
@@ -284,15 +281,14 @@ class MediaCarouselScrollHandler(
         } else if (isUp || motionEvent.action == MotionEvent.ACTION_CANCEL) {
             // It's an up and the fling didn't take it above
             val relativePos = scrollView.relativeScrollX % playerWidthPlusPadding
-            val scrollXAmount: Int
-            if (relativePos > playerWidthPlusPadding / 2) {
-                scrollXAmount = playerWidthPlusPadding - relativePos
-            } else {
-                scrollXAmount = -1 * relativePos
-            }
+            val scrollXAmount: Int =
+                if (isRtl xor (relativePos > playerWidthPlusPadding / 2)) {
+                    playerWidthPlusPadding - relativePos
+                } else {
+                    -1 * relativePos
+                }
             if (scrollXAmount != 0) {
-                val dx = if (isRtl) -scrollXAmount else scrollXAmount
-                val newScrollX = scrollView.relativeScrollX + dx
+                val newScrollX = scrollView.relativeScrollX + scrollXAmount
                 // Delay the scrolling since scrollView calls springback which cancels
                 // the animation again..
                 mainExecutor.execute { scrollView.smoothScrollTo(newScrollX, scrollView.scrollY) }
@@ -482,8 +478,11 @@ class MediaCarouselScrollHandler(
         }
         val relativeLocation =
             visibleMediaIndex.toFloat() +
-                if (playerWidthPlusPadding > 0) scrollInAmount.toFloat() / playerWidthPlusPadding
-                else 0f
+                if (playerWidthPlusPadding > 0) {
+                    scrollInAmount.toFloat() / playerWidthPlusPadding
+                } else {
+                    0f
+                }
         // Fix the location, because PageIndicator does not handle RTL internally
         val location =
             if (isRtl) {

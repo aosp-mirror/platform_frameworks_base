@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import android.graphics.Color
 import com.android.systemui.statusbar.phone.StatusBarLocation
+import java.lang.IllegalArgumentException
 
 /**
  * A view model for a wifi icon in a specific location. This allows us to control parameters that
@@ -43,6 +44,8 @@ abstract class LocationBasedWifiViewModel(
                 StatusBarLocation.HOME -> HomeWifiViewModel(commonImpl)
                 StatusBarLocation.KEYGUARD -> KeyguardWifiViewModel(commonImpl)
                 StatusBarLocation.QS -> QsWifiViewModel(commonImpl)
+                StatusBarLocation.SHADE_CARRIER_GROUP ->
+                    throw IllegalArgumentException("invalid location for WifiViewModel: $location")
             }
     }
 }
@@ -62,5 +65,13 @@ class KeyguardWifiViewModel(
 
 /** A view model for the wifi icon shown in quick settings (when the shade is pulled down). */
 class QsWifiViewModel(
+    commonImpl: WifiViewModelCommon,
+) : WifiViewModelCommon, LocationBasedWifiViewModel(commonImpl)
+
+/**
+ * A view model for the wifi icon in the shade carrier group (visible when quick settings is fully
+ * expanded, and in large screen shade). Currently unused.
+ */
+class ShadeCarrierGroupWifiViewModel(
     commonImpl: WifiViewModelCommon,
 ) : WifiViewModelCommon, LocationBasedWifiViewModel(commonImpl)

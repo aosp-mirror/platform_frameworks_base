@@ -174,7 +174,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         mController = mock(ActivityStartController.class);
         BackgroundActivityStartController balController =
                 new BackgroundActivityStartController(mAtm, mSupervisor);
-        doReturn(balController).when(mController).getBackgroundActivityLaunchController();
+        doReturn(balController).when(mAtm.mTaskSupervisor).getBackgroundActivityLaunchController();
         mActivityMetricsLogger = mock(ActivityMetricsLogger.class);
         clearInvocations(mActivityMetricsLogger);
         mAppOpsManager = mAtm.getAppOpsManager();
@@ -1435,7 +1435,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityRecord top = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final KeyguardController keyguard = mSupervisor.getKeyguardController();
         doReturn(true).when(keyguard).isKeyguardLocked(anyInt());
-        doReturn(true).when(keyguard).isDisplayOccluded(anyInt());
+        doReturn(true).when(keyguard).isKeyguardOccluded(anyInt());
         registerTestTransitionPlayer();
         starter.setReason("testTransientLaunchWithKeyguard")
                 .setActivityOptions(ActivityOptions.makeBasic().setTransientLaunch().toBundle())
@@ -1662,9 +1662,10 @@ public class ActivityStarterTests extends WindowTestsBase {
 
     @Test
     public void testResultCanceledWhenNotAllowedStartingActivity() {
+        final Task task = new TaskBuilder(mSupervisor).build();
         final ActivityStarter starter = prepareStarter(0, false);
         final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
-        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setTask(task).build();
         targetRecord.resultTo = sourceRecord;
 
         // Abort the activity start and ensure the sourceRecord gets the result (RESULT_CANCELED).

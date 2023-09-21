@@ -954,9 +954,6 @@
     <!-- UI debug setting: enable freeform window support summary [CHAR LIMIT=150] -->
     <string name="enable_freeform_support_summary">Enable support for experimental freeform windows.</string>
 
-    <!-- UI debug setting: enable desktop mode [CHAR LIMIT=25] -->
-    <string name="desktop_mode">Desktop mode</string>
-
     <!-- Local (desktop) backup password menu title [CHAR LIMIT=25] -->
     <string name="local_backup_password_title">Desktop backup password</string>
     <!-- Summary text of the "local backup password" setting when the user has not supplied a password -->
@@ -1257,7 +1254,6 @@
     <!-- Summary to show how many devices are connected in wifi hotspot [CHAR LIMIT=NONE] -->
     <string name="wifi_tether_connected_summary">
         {count, plural,
-            =0    {0 device connected}
             =1    {1 device connected}
             other {# devices connected}
         }
@@ -1667,14 +1663,6 @@
     <string name="back_navigation_animation_summary">Enable system animations for predictive back.</string>
     <!-- Developer setting: enable animations when a back gesture is executed, full explanation[CHAR LIMIT=NONE] -->
     <string name="back_navigation_animation_dialog">This setting enables system animations for predictive gesture animation. It requires setting per-app "enableOnBackInvokedCallback" to true in the manifest file.</string>
-
-    <!-- [CHAR LIMIT=NONE] Messages shown when users press outside of udfps region during -->
-    <string-array name="udfps_accessibility_touch_hints">
-        <item>Move left</item>
-        <item>Move down</item>
-        <item>Move right</item>
-        <item>Move up</item>
-    </string-array>
 
     <!-- Formatting states for the scale of font size, in percent. Double "%" is required to represent the symbol "%". [CHAR LIMIT=20] -->
     <string name="font_scale_percentage"> <xliff:g id="percentage">%1$d</xliff:g> %%</string>

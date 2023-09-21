@@ -103,6 +103,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_ADD_USER,
             UserManager.DISALLOW_ADD_MANAGED_PROFILE,
             UserManager.DISALLOW_ADD_CLONE_PROFILE,
+            UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
             UserManager.ENSURE_VERIFY_APPS,
             UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
             UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
@@ -151,7 +152,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_ADD_WIFI_CONFIG,
             UserManager.DISALLOW_CELLULAR_2G,
             UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
-            UserManager.DISALLOW_CONFIG_DEFAULT_APPS
+            UserManager.DISALLOW_CONFIG_DEFAULT_APPS,
+            UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO
     });
 
     public static final Set<String> DEPRECATED_USER_RESTRICTIONS = Sets.newArraySet(
@@ -201,7 +203,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_WIFI_DIRECT,
             UserManager.DISALLOW_ADD_WIFI_CONFIG,
             UserManager.DISALLOW_CELLULAR_2G,
-            UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO
+            UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
+            UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO
     );
 
     /**
@@ -210,7 +213,8 @@ public class UserRestrictionsUtils {
     private static final Set<String> IMMUTABLE_BY_OWNERS = Sets.newArraySet(
             UserManager.DISALLOW_RECORD_AUDIO,
             UserManager.DISALLOW_WALLPAPER,
-            UserManager.DISALLOW_OEM_UNLOCK
+            UserManager.DISALLOW_OEM_UNLOCK,
+            UserManager.DISALLOW_ADD_PRIVATE_PROFILE
     );
 
     /**
@@ -243,7 +247,8 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_WIFI_DIRECT,
                     UserManager.DISALLOW_ADD_WIFI_CONFIG,
                     UserManager.DISALLOW_CELLULAR_2G,
-                    UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO
+                    UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
+                    UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO
     );
 
     /**

@@ -24,6 +24,8 @@ import com.android.internal.R;
 import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.connectivity.AccessPointControllerImpl;
@@ -31,6 +33,7 @@ import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.NetworkControllerImpl;
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
+import com.android.systemui.statusbar.policy.BatteryControllerLogger;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastController;
@@ -57,6 +60,8 @@ import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.SecurityControllerImpl;
+import com.android.systemui.statusbar.policy.SplitShadeStateController;
+import com.android.systemui.statusbar.policy.SplitShadeStateControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.WalletController;
@@ -107,6 +112,11 @@ public interface StatusBarPolicyModule {
     /** */
     @Binds
     KeyguardStateController provideKeyguardMonitor(KeyguardStateControllerImpl controllerImpl);
+
+    /** */
+    @Binds
+    SplitShadeStateController provideSplitShadeStateController(
+            SplitShadeStateControllerImpl splitShadeStateControllerImpl);
 
     /** */
     @Binds
@@ -201,5 +211,14 @@ public interface StatusBarPolicyModule {
     @SysUISingleton
     static DataSaverController provideDataSaverController(NetworkController networkController) {
         return networkController.getDataSaverController();
+    }
+
+    /** Provides a log bufffer for BatteryControllerImpl */
+    @Provides
+    @SysUISingleton
+    @BatteryControllerLog
+    //TODO(b/300147438): reduce the size of this log buffer
+    static LogBuffer provideBatteryControllerLog(LogBufferFactory factory) {
+        return factory.create(BatteryControllerLogger.TAG, 300);
     }
 }

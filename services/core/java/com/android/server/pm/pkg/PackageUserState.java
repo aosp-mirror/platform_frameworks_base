@@ -86,6 +86,13 @@ public interface PackageUserState {
     long getCeDataInode();
 
     /**
+     * Device encrypted /data partition inode.
+     *
+     * @hide
+     */
+    long getDeDataInode();
+
+    /**
      * Fully qualified class names of components explicitly disabled.
      *
      * @hide
@@ -242,4 +249,11 @@ public interface PackageUserState {
     @Nullable
     ArchiveState getArchiveState();
 
+    /**
+     * @return whether the data dir exists. True when the app is installed for the user, or when the
+     * app is uninstalled for the user with {@link PackageManager#DELETE_KEEP_DATA}.
+     *
+     * @hide
+     */
+    boolean dataExists();
 }

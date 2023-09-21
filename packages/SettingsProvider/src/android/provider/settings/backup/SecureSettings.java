@@ -165,12 +165,10 @@ public class SecureSettings {
         Settings.Secure.CHARGING_VIBRATION_ENABLED,
         Settings.Secure.ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
         Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
-        Settings.Secure.TRUST_AGENTS_EXTEND_UNLOCK,
         Settings.Secure.UI_NIGHT_MODE,
         Settings.Secure.UI_NIGHT_MODE_CUSTOM_TYPE,
         Settings.Secure.DARK_THEME_CUSTOM_START_TIME,
         Settings.Secure.DARK_THEME_CUSTOM_END_TIME,
-        Settings.Secure.LOCK_SCREEN_WHEN_TRUST_LOST,
         Settings.Secure.SKIP_DIRECTION,
         Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
         Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT,
@@ -217,6 +215,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
+        Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED,
         Settings.Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED,
@@ -242,6 +241,8 @@ public class SecureSettings {
         Settings.Secure.HEARING_AID_CALL_ROUTING,
         Settings.Secure.HEARING_AID_MEDIA_ROUTING,
         Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
-        Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED
+        Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
+        Settings.Secure.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED,
+        Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED
     };
 }

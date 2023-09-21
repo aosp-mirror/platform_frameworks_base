@@ -46,10 +46,9 @@ import android.view.accessibility.AccessibilityManager.TouchExplorationStateChan
 import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.settingslib.udfps.UdfpsOverlayParams
-import com.android.settingslib.udfps.UdfpsUtils
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.biometrics.ui.controller.UdfpsKeyguardViewController
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
@@ -60,7 +59,6 @@ import com.android.systemui.flags.Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
@@ -90,7 +88,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val windowManager: WindowManager,
         private val accessibilityManager: AccessibilityManager,
         private val statusBarStateController: StatusBarStateController,
-        private val shadeExpansionStateManager: ShadeExpansionStateManager,
         private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
         private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
         private val dialogManager: SystemUIDialogManager,
@@ -245,7 +242,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                         updateAccessibilityViewLocation(sensorBounds)
                     },
                     statusBarStateController,
-                    shadeExpansionStateManager,
+                    primaryBouncerInteractor,
                     dialogManager,
                     dumpManager
                 )
@@ -256,7 +253,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                     UdfpsKeyguardViewController(
                         view.addUdfpsView(R.layout.udfps_keyguard_view),
                         statusBarStateController,
-                        shadeExpansionStateManager,
+                        primaryBouncerInteractor,
                         dialogManager,
                         dumpManager,
                         alternateBouncerInteractor,
@@ -268,7 +265,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                             updateSensorLocation(sensorBounds)
                         },
                         statusBarStateController,
-                        shadeExpansionStateManager,
                         statusBarKeyguardViewManager,
                         keyguardUpdateMonitor,
                         dumpManager,
@@ -291,7 +287,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                 UdfpsBpViewController(
                     view.addUdfpsView(R.layout.udfps_bp_view),
                     statusBarStateController,
-                    shadeExpansionStateManager,
+                    primaryBouncerInteractor,
                     dialogManager,
                     dumpManager
                 )
@@ -301,7 +297,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                 UdfpsFpmEmptyViewController(
                     view.addUdfpsView(R.layout.udfps_fpm_empty_view),
                     statusBarStateController,
-                    shadeExpansionStateManager,
+                    primaryBouncerInteractor,
                     dialogManager,
                     dumpManager
                 )

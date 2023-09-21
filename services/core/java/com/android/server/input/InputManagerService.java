@@ -95,6 +95,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
@@ -381,6 +382,17 @@ public class InputManagerService extends IInputManager.Stub
     public static final int SW_CAMERA_LENS_COVER_BIT = 1 << SW_CAMERA_LENS_COVER;
     public static final int SW_MUTE_DEVICE_BIT = 1 << SW_MUTE_DEVICE;
 
+    // The following are layer numbers used for z-ordering the input overlay layers on the display.
+    // This is used for ordering layers inside {@code DisplayContent#getInputOverlayLayer()}.
+    //
+    // The layer where gesture monitors are added.
+    public static final int INPUT_OVERLAY_LAYER_GESTURE_MONITOR = 1;
+    // Place the handwriting layer above gesture monitors so that styluses cannot trigger
+    // system gestures (e.g. navigation bar, edge-back, etc) while there is an active
+    // handwriting session.
+    public static final int INPUT_OVERLAY_LAYER_HANDWRITING_SURFACE = 2;
+
+
     private final String mVelocityTrackerStrategy;
 
     /** Whether to use the dev/input/event or uevent subsystem for the audio jack. */
@@ -390,6 +402,8 @@ public class InputManagerService extends IInputManager.Stub
     @GuardedBy("mFocusEventDebugViewLock")
     @Nullable
     private FocusEventDebugView mFocusEventDebugView;
+    private boolean mShowKeyPresses = false;
+    private boolean mShowRotaryInput = false;
 
     /** Point of injection for test dependencies. */
     @VisibleForTesting
@@ -667,6 +681,12 @@ public class InputManagerService extends IInputManager.Stub
             return KEYCODE_UNKNOWN;
         }
         return mNative.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
+    }
+
+    @Override // Binder call
+    public KeyCharacterMap getKeyCharacterMap(@NonNull String layoutDescriptor) {
+        Objects.requireNonNull(layoutDescriptor, "layoutDescriptor must not be null");
+        return mKeyboardLayoutManager.getKeyCharacterMap(layoutDescriptor);
     }
 
     /**
@@ -2476,7 +2496,7 @@ public class InputManagerService extends IInputManager.Stub
     private int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
         synchronized (mFocusEventDebugViewLock) {
             if (mFocusEventDebugView != null) {
-                mFocusEventDebugView.reportEvent(event);
+                mFocusEventDebugView.reportKeyEvent(event);
             }
         }
         return mWindowManagerCallbacks.interceptKeyBeforeQueueing(event, policyFlags);
@@ -3396,14 +3416,45 @@ public class InputManagerService extends IInputManager.Stub
         mWindowManagerCallbacks.notifyPointerLocationChanged(enabled);
     }
 
-    void updateFocusEventDebugViewEnabled(boolean enabled) {
+    void updateShowKeyPresses(boolean enabled) {
+        if (mShowKeyPresses == enabled) {
+            return;
+        }
+
+        mShowKeyPresses = enabled;
+        updateFocusEventDebugViewEnabled();
+
+        synchronized (mFocusEventDebugViewLock) {
+            if (mFocusEventDebugView != null) {
+                mFocusEventDebugView.updateShowKeyPresses(enabled);
+            }
+        }
+    }
+
+    void updateShowRotaryInput(boolean enabled) {
+        if (mShowRotaryInput == enabled) {
+            return;
+        }
+
+        mShowRotaryInput = enabled;
+        updateFocusEventDebugViewEnabled();
+
+        synchronized (mFocusEventDebugViewLock) {
+            if (mFocusEventDebugView != null) {
+                mFocusEventDebugView.updateShowRotaryInput(enabled);
+            }
+        }
+    }
+
+    private void updateFocusEventDebugViewEnabled() {
+        boolean enabled = mShowKeyPresses || mShowRotaryInput;
         FocusEventDebugView view;
         synchronized (mFocusEventDebugViewLock) {
             if (enabled == (mFocusEventDebugView != null)) {
                 return;
             }
             if (enabled) {
-                mFocusEventDebugView = new FocusEventDebugView(mContext);
+                mFocusEventDebugView = new FocusEventDebugView(mContext, this);
                 view = mFocusEventDebugView;
             } else {
                 view = mFocusEventDebugView;

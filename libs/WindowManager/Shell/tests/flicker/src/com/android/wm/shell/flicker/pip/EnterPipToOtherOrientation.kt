@@ -32,8 +32,9 @@ import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions.Pip.ACTION_ENTER_PIP
 import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
-import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
-import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
+import com.android.wm.shell.flicker.pip.common.PipTransition
+import com.android.wm.shell.flicker.pip.common.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
+import com.android.wm.shell.flicker.pip.common.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder

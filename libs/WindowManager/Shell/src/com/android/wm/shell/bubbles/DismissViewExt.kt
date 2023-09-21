@@ -22,6 +22,7 @@ import com.android.wm.shell.common.bubbles.DismissView
 
 fun DismissView.setup() {
     setup(DismissView.Config(
+            dismissViewResId = R.id.dismiss_view,
             targetSizeResId = R.dimen.dismiss_circle_size,
             iconSizeResId = R.dimen.dismiss_target_x_size,
             bottomMarginResId = R.dimen.floating_dismiss_bottom_margin,

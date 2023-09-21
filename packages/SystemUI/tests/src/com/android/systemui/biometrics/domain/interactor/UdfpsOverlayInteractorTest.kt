@@ -20,9 +20,9 @@ import android.graphics.Rect
 import android.test.suitebuilder.annotation.SmallTest
 import android.view.MotionEvent
 import android.view.Surface
-import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.coroutines.collectLastValue
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.StandardTestDispatcher

@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"一旦设备被锁定，必须输入 PIN 码才能解锁"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"一旦设备被锁定，必须输入密码才能解锁"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"一旦设备被锁定，必须绘制图案才能解锁"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"更新会在设备处于未使用状态时安装"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"需要锁定设备以提高安全性。已有一段时间未使用 PIN 码了。"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"需要锁定设备以提高安全性。已有一段时间未使用密码了。"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"需要锁定设备以提高安全性。已有一段时间未使用图案了。"</string>

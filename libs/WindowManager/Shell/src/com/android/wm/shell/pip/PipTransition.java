@@ -49,7 +49,6 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.os.SystemProperties;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -65,6 +64,10 @@ import androidx.annotation.Nullable;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -89,6 +92,7 @@ public class PipTransition extends PipTransitionController {
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Optional<SplitScreenController> mSplitScreenOptional;
+    private final PipAnimationController mPipAnimationController;
     private @PipAnimationController.AnimationType int mEnterAnimationType = ANIM_TYPE_BOUNDS;
     private Transitions.TransitionFinishCallback mFinishCallback;
     private SurfaceControl.Transaction mFinishTransaction;
@@ -137,14 +141,22 @@ public class PipTransition extends PipTransitionController {
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreenController> splitScreenOptional) {
         super(shellInit, shellTaskOrganizer, transitions, pipBoundsState, pipMenuController,
-                pipBoundsAlgorithm, pipAnimationController);
+                pipBoundsAlgorithm);
         mContext = context;
         mPipTransitionState = pipTransitionState;
         mPipDisplayLayoutState = pipDisplayLayoutState;
+        mPipAnimationController = pipAnimationController;
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mSurfaceTransactionHelper = pipSurfaceTransactionHelper;
         mSplitScreenOptional = splitScreenOptional;
+    }
+
+    @Override
+    protected void onInit() {
+        if (!PipUtils.isPip2ExperimentEnabled()) {
+            mTransitions.addHandler(this);
+        }
     }
 
     @Override
@@ -902,17 +914,13 @@ public class PipTransition extends PipTransitionController {
                 // animation.
                 // TODO(b/272819817): cleanup the null-check and extra logging.
                 final boolean hasTopActivityInfo = taskInfo.topActivityInfo != null;
-                if (!hasTopActivityInfo) {
-                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                            "%s: TaskInfo.topActivityInfo is null", TAG);
-                }
-                if (SystemProperties.getBoolean(
-                        "persist.wm.debug.enable_pip_app_icon_overlay", true)
-                        && hasTopActivityInfo) {
+                if (hasTopActivityInfo) {
                     animator.setAppIconContentOverlay(
                             mContext, currentBounds, taskInfo.topActivityInfo,
                             mPipBoundsState.getLauncherState().getAppIconSizePx());
                 } else {
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "%s: TaskInfo.topActivityInfo is null", TAG);
                     animator.setColorContentOverlay(mContext);
                 }
             } else {
@@ -1051,7 +1059,21 @@ public class PipTransition extends PipTransitionController {
     private void resetPrevPip(@NonNull TransitionInfo.Change prevPipTaskChange,
             @NonNull SurfaceControl.Transaction startTransaction) {
         final SurfaceControl leash = prevPipTaskChange.getLeash();
-        startTransaction.remove(leash);
+        final Rect bounds = prevPipTaskChange.getEndAbsBounds();
+        final Point offset = prevPipTaskChange.getEndRelOffset();
+        bounds.offset(-offset.x, -offset.y);
+
+        startTransaction.setWindowCrop(leash, null);
+        startTransaction.setMatrix(leash, 1, 0, 0, 1);
+        startTransaction.setCornerRadius(leash, 0);
+        startTransaction.setPosition(leash, bounds.left, bounds.top);
+
+        if (mHasFadeOut && prevPipTaskChange.getTaskInfo().isVisible()) {
+            if (mPipAnimationController.getCurrentAnimator() != null) {
+                mPipAnimationController.getCurrentAnimator().cancel();
+            }
+            startTransaction.setAlpha(leash, 1);
+        }
 
         mHasFadeOut = false;
         mCurrentPipTaskToken = null;

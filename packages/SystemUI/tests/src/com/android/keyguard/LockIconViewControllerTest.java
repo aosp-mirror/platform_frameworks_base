@@ -17,11 +17,9 @@
 package com.android.keyguard;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
-
 import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
 import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
@@ -40,8 +38,8 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.settingslib.udfps.UdfpsOverlayParams;
 import com.android.systemui.biometrics.UdfpsController;
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.doze.util.BurnInHelperKt;
 
 import org.junit.Test;
@@ -51,6 +49,12 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        when(mLockIconView.isAttachedToWindow()).thenReturn(true);
+    }
 
     @Test
     public void testUpdateFingerprintLocationOnInit() {

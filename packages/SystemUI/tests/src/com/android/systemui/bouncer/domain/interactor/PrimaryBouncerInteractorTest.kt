@@ -115,7 +115,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testShow_isScrimmed() {
         underTest.show(true)
-        verify(repository).setKeyguardAuthenticated(null)
+        verify(repository).setKeyguardAuthenticatedBiometrics(null)
         verify(repository).setPrimaryStartingToHide(false)
         verify(repository).setPrimaryScrimmed(true)
         verify(repository).setPanelExpansion(EXPANSION_VISIBLE)
@@ -222,8 +222,8 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testNotifyKeyguardAuthenticated() {
-        underTest.notifyKeyguardAuthenticated(true)
-        verify(repository).setKeyguardAuthenticated(true)
+        underTest.notifyKeyguardAuthenticatedBiometrics(true)
+        verify(repository).setKeyguardAuthenticatedBiometrics(true)
     }
 
     @Test
@@ -241,7 +241,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testNotifyKeyguardAuthenticatedHandled() {
         underTest.notifyKeyguardAuthenticatedHandled()
-        verify(repository).setKeyguardAuthenticated(null)
+        verify(repository).setKeyguardAuthenticatedBiometrics(null)
     }
 
     @Test

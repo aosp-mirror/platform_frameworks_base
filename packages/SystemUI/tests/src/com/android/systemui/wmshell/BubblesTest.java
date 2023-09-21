@@ -96,6 +96,7 @@ import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.FakeWindowRootViewComponent;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
@@ -133,6 +134,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
+import com.android.wm.shell.bubbles.BubbleEducationController;
 import com.android.wm.shell.bubbles.BubbleEntry;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflow;
@@ -276,6 +278,8 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private BubbleLogger mBubbleLogger;
     @Mock
+    private BubbleEducationController mEducationController;
+    @Mock
     private TaskStackListenerImpl mTaskStackListener;
     @Mock
     private KeyguardStateController mKeyguardStateController;
@@ -330,13 +334,25 @@ public class BubblesTest extends SysuiTestCase {
         when(mNotificationShadeWindowView.getViewTreeObserver())
                 .thenReturn(mock(ViewTreeObserver.class));
 
-        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
-                mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
-                mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
-                mColorExtractor, mDumpManager, mKeyguardStateController,
-                mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
+        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
+                mContext,
+                new FakeWindowRootViewComponent.Factory(mNotificationShadeWindowView),
+                mWindowManager,
+                mActivityManager,
+                mDozeParameters,
+                mStatusBarStateController,
+                mConfigurationController,
+                mKeyguardViewMediator,
+                mKeyguardBypassController,
+                syncExecutor,
+                mColorExtractor,
+                mDumpManager,
+                mKeyguardStateController,
+                mScreenOffAnimationController,
+                mAuthController,
+                mShadeExpansionStateManager,
                 mShadeWindowLogger);
-        mNotificationShadeWindowController.setWindowRootView(mNotificationShadeWindowView);
+        mNotificationShadeWindowController.fetchWindowRootView();
         mNotificationShadeWindowController.attach();
 
         mAppBubbleIntent = new Intent(mContext, BubblesTestActivity.class);
@@ -356,7 +372,8 @@ public class BubblesTest extends SysuiTestCase {
 
         mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
         mPositioner.setMaxBubbles(5);
-        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, syncExecutor);
+        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, mEducationController,
+                syncExecutor);
 
         when(mUserManager.getProfiles(ActivityManager.getCurrentUser())).thenReturn(
                 Collections.singletonList(mock(UserInfo.class)));
@@ -407,6 +424,7 @@ public class BubblesTest extends SysuiTestCase {
                 syncExecutor,
                 mock(Handler.class),
                 mTaskViewTransitions,
+                mTransitions,
                 mock(SyncTransactionQueue.class),
                 mock(IWindowManager.class),
                 mBubbleProperties);
@@ -495,6 +513,11 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void instantiateController_registerConfigChangeListener() {
         verify(mShellController, times(1)).addConfigurationChangeListener(any());
+    }
+
+    @Test
+    public void instantiateController_registerTransitionObserver() {
+        verify(mTransitions).registerObserver(any());
     }
 
     @Test
@@ -1452,6 +1475,34 @@ public class BubblesTest extends SysuiTestCase {
                 mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
         Intent i = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         i.putExtra("reason", "gestureNav");
+        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
+        assertStackCollapsed();
+    }
+
+    @Test
+    public void testBroadcastReceiverCloseDialogs_reasonHomeKey() {
+        spyOn(mContext);
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleData.setExpanded(true);
+
+        verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
+        Intent i = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        i.putExtra("reason", "homekey");
+        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
+        assertStackCollapsed();
+    }
+
+    @Test
+    public void testBroadcastReceiverCloseDialogs_reasonRecentsKey() {
+        spyOn(mContext);
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleData.setExpanded(true);
+
+        verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
+        Intent i = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        i.putExtra("reason", "recentapps");
         mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
         assertStackCollapsed();
     }

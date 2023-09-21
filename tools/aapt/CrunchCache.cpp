@@ -5,6 +5,7 @@
 // This file defines functions laid out and documented in
 // CrunchCache.h
 
+#include <androidfw/PathUtils.h>
 #include <utils/Compat.h>
 #include <utils/Vector.h>
 #include <utils/String8.h>
@@ -44,7 +45,7 @@ size_t CrunchCache::crunch(CacheUpdater* cu, bool forceOverwrite)
         // This efficiently strips the source directory prefix from our path.
         // Also, String8 doesn't have a substring method so this is what we've
         // got to work with.
-        const char* rPathPtr = mSourceFiles.keyAt(0).string()+mSourcePath.length();
+        const char* rPathPtr = mSourceFiles.keyAt(0).c_str()+mSourcePath.length();
         // Strip leading slash if present
         int offset = 0;
         if (rPathPtr[0] == OS_PATH_SEPARATOR)
@@ -52,15 +53,15 @@ size_t CrunchCache::crunch(CacheUpdater* cu, bool forceOverwrite)
         relativePath = String8(rPathPtr + offset);
 
         if (forceOverwrite || needsUpdating(relativePath)) {
-            cu->processImage(mSourcePath.appendPathCopy(relativePath),
-                             mDestPath.appendPathCopy(relativePath));
+            cu->processImage(appendPathCopy(mSourcePath, relativePath),
+                             appendPathCopy(mDestPath, relativePath));
             numFilesUpdated++;
             // crunchFile(relativePath);
         }
         // Delete this file from the source files and (if it exists) from the
         // dest files.
         mSourceFiles.removeItemsAt(0);
-        mDestFiles.removeItem(mDestPath.appendPathCopy(relativePath));
+        mDestFiles.removeItem(appendPathCopy(mDestPath, relativePath));
     }
 
     // Iterate through what's left of destFiles and delete leftovers
@@ -99,7 +100,7 @@ bool CrunchCache::needsUpdating(const String8& relativePath) const
     // Retrieve modification dates for this file entry under the source and
     // cache directory trees. The vectors will return a modification date of 0
     // if the file doesn't exist.
-    time_t sourceDate = mSourceFiles.valueFor(mSourcePath.appendPathCopy(relativePath));
-    time_t destDate = mDestFiles.valueFor(mDestPath.appendPathCopy(relativePath));
+    time_t sourceDate = mSourceFiles.valueFor(appendPathCopy(mSourcePath, relativePath));
+    time_t destDate = mDestFiles.valueFor(appendPathCopy(mDestPath, relativePath));
     return sourceDate > destDate;
 }

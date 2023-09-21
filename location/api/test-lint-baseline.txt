@@ -1,0 +1,54 @@
+// Baseline format: 1.0
+GetterSetterNames: android.location.GnssClock#setBiasNanos(double):
+    Symmetric method for `hasBiasNanos` must be named `setHasBiasNanos`; was `setBiasNanos`
+GetterSetterNames: android.location.GnssClock#setBiasUncertaintyNanos(double):
+    Symmetric method for `hasBiasUncertaintyNanos` must be named `setHasBiasUncertaintyNanos`; was `setBiasUncertaintyNanos`
+GetterSetterNames: android.location.GnssClock#setDriftNanosPerSecond(double):
+    Symmetric method for `hasDriftNanosPerSecond` must be named `setHasDriftNanosPerSecond`; was `setDriftNanosPerSecond`
+GetterSetterNames: android.location.GnssClock#setDriftUncertaintyNanosPerSecond(double):
+    Symmetric method for `hasDriftUncertaintyNanosPerSecond` must be named `setHasDriftUncertaintyNanosPerSecond`; was `setDriftUncertaintyNanosPerSecond`
+GetterSetterNames: android.location.GnssClock#setElapsedRealtimeNanos(long):
+    Symmetric method for `hasElapsedRealtimeNanos` must be named `setHasElapsedRealtimeNanos`; was `setElapsedRealtimeNanos`
+GetterSetterNames: android.location.GnssClock#setElapsedRealtimeUncertaintyNanos(double):
+    Symmetric method for `hasElapsedRealtimeUncertaintyNanos` must be named `setHasElapsedRealtimeUncertaintyNanos`; was `setElapsedRealtimeUncertaintyNanos`
+GetterSetterNames: android.location.GnssClock#setFullBiasNanos(long):
+    Symmetric method for `hasFullBiasNanos` must be named `setHasFullBiasNanos`; was `setFullBiasNanos`
+GetterSetterNames: android.location.GnssClock#setLeapSecond(int):
+    Symmetric method for `hasLeapSecond` must be named `setHasLeapSecond`; was `setLeapSecond`
+GetterSetterNames: android.location.GnssClock#setReferenceCarrierFrequencyHzForIsb(double):
+    Symmetric method for `hasReferenceCarrierFrequencyHzForIsb` must be named `setHasReferenceCarrierFrequencyHzForIsb`; was `setReferenceCarrierFrequencyHzForIsb`
+GetterSetterNames: android.location.GnssClock#setReferenceCodeTypeForIsb(String):
+    Symmetric method for `hasReferenceCodeTypeForIsb` must be named `setHasReferenceCodeTypeForIsb`; was `setReferenceCodeTypeForIsb`
+GetterSetterNames: android.location.GnssClock#setReferenceConstellationTypeForIsb(int):
+    Symmetric method for `hasReferenceConstellationTypeForIsb` must be named `setHasReferenceConstellationTypeForIsb`; was `setReferenceConstellationTypeForIsb`
+GetterSetterNames: android.location.GnssClock#setTimeUncertaintyNanos(double):
+    Symmetric method for `hasTimeUncertaintyNanos` must be named `setHasTimeUncertaintyNanos`; was `setTimeUncertaintyNanos`
+GetterSetterNames: android.location.GnssMeasurement#setBasebandCn0DbHz(double):
+    Symmetric method for `hasBasebandCn0DbHz` must be named `setHasBasebandCn0DbHz`; was `setBasebandCn0DbHz`
+GetterSetterNames: android.location.GnssMeasurement#setCarrierFrequencyHz(float):
+    Symmetric method for `hasCarrierFrequencyHz` must be named `setHasCarrierFrequencyHz`; was `setCarrierFrequencyHz`
+GetterSetterNames: android.location.GnssMeasurement#setCodeType(String):
+    Symmetric method for `hasCodeType` must be named `setHasCodeType`; was `setCodeType`
+GetterSetterNames: android.location.GnssMeasurement#setCorrelationVectors(java.util.Collection<android.location.CorrelationVector>):
+    Symmetric method for `hasCorrelationVectors` must be named `setHasCorrelationVectors`; was `setCorrelationVectors`
+GetterSetterNames: android.location.GnssMeasurement#setFullInterSignalBiasNanos(double):
+    Symmetric method for `hasFullInterSignalBiasNanos` must be named `setHasFullInterSignalBiasNanos`; was `setFullInterSignalBiasNanos`
+GetterSetterNames: android.location.GnssMeasurement#setFullInterSignalBiasUncertaintyNanos(double):
+    Symmetric method for `hasFullInterSignalBiasUncertaintyNanos` must be named `setHasFullInterSignalBiasUncertaintyNanos`; was `setFullInterSignalBiasUncertaintyNanos`
+GetterSetterNames: android.location.GnssMeasurement#setSatelliteInterSignalBiasNanos(double):
+    Symmetric method for `hasSatelliteInterSignalBiasNanos` must be named `setHasSatelliteInterSignalBiasNanos`; was `setSatelliteInterSignalBiasNanos`
+GetterSetterNames: android.location.GnssMeasurement#setSatelliteInterSignalBiasUncertaintyNanos(double):
+    Symmetric method for `hasSatelliteInterSignalBiasUncertaintyNanos` must be named `setHasSatelliteInterSignalBiasUncertaintyNanos`; was `setSatelliteInterSignalBiasUncertaintyNanos`
+GetterSetterNames: android.location.GnssMeasurement#setSatellitePvt(android.location.SatellitePvt):
+    Symmetric method for `hasSatellitePvt` must be named `setHasSatellitePvt`; was `setSatellitePvt`
+GetterSetterNames: android.location.GnssMeasurement#setSnrInDb(double):
+    Symmetric method for `hasSnrInDb` must be named `setHasSnrInDb`; was `setSnrInDb`
+
+MissingNullability: android.location.GnssClock#set(android.location.GnssClock) parameter #0:
+    Missing nullability on parameter `clock` in method `set`
+MissingNullability: android.location.GnssMeasurement#set(android.location.GnssMeasurement) parameter #0:
+    Missing nullability on parameter `measurement` in method `set`
+MissingNullability: android.location.GnssNavigationMessage#set(android.location.GnssNavigationMessage) parameter #0:
+    Missing nullability on parameter `navigationMessage` in method `set`
+MissingNullability: android.location.GnssNavigationMessage#setData(byte[]) parameter #0:
+    Missing nullability on parameter `value` in method `setData`

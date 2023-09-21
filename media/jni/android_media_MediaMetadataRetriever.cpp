@@ -126,7 +126,7 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
     tmp = NULL;
 
     // Don't let somebody trick us in to reading some random block of memory
-    if (strncmp("mem://", pathStr.string(), 6) == 0) {
+    if (strncmp("mem://", pathStr.c_str(), 6) == 0) {
         jniThrowException(
                 env, "java/lang/IllegalArgumentException", "Invalid pathname");
         return;
@@ -149,7 +149,7 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
             env,
             retriever->setDataSource(
                 httpService,
-                pathStr.string(),
+                pathStr.c_str(),
                 headersVector.size() > 0 ? &headersVector : NULL),
 
             "java/lang/RuntimeException",

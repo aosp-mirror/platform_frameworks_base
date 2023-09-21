@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaContainerView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
@@ -90,6 +91,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
                 settings,
                 fakeHandler,
                 configurationController,
+                ResourcesSplitShadeStateController()
             )
         keyguardMediaController.attachSinglePaneContainer(mediaContainerView)
         keyguardMediaController.useSplitShade = false

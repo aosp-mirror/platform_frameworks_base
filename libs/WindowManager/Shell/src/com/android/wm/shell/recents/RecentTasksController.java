@@ -203,6 +203,17 @@ public class RecentTasksController implements TaskStackListenerCallback,
         }
     }
 
+    @Nullable
+    public SplitBounds getSplitBoundsForTaskId(int taskId) {
+        if (taskId == INVALID_TASK_ID) {
+            return null;
+        }
+
+        // We could do extra verification of requiring both taskIds of a pair and verifying that
+        // the same split bounds object is returned... but meh. Seems unnecessary.
+        return mTaskSplitBoundsMap.get(taskId);
+    }
+
     @Override
     public Context getContext() {
         return mContext;
@@ -329,7 +340,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 continue;
             }
 
-            if (DesktopModeStatus.isProto2Enabled() && mDesktopModeTaskRepository.isPresent()
+            if (DesktopModeStatus.isEnabled() && mDesktopModeTaskRepository.isPresent()
                     && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
                 // Freeform tasks will be added as a separate entry
                 freeformTasks.add(taskInfo);
@@ -415,6 +426,21 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 List<GroupedRecentTaskInfo> tasks =
                         RecentTasksController.this.getRecentTasks(maxNum, flags, userId);
                 executor.execute(() -> callback.accept(tasks));
+            });
+        }
+
+        @Override
+        public void addAnimationStateListener(Executor executor, Consumer<Boolean> listener) {
+            mMainExecutor.execute(() -> {
+                if (mTransitionHandler == null) {
+                    return;
+                }
+                mTransitionHandler.addTransitionStateListener(new RecentsTransitionStateListener() {
+                    @Override
+                    public void onAnimationStateChanged(boolean running) {
+                        executor.execute(() -> listener.accept(running));
+                    }
+                });
             });
         }
     }

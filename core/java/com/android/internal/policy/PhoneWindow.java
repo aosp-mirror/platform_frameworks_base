@@ -40,6 +40,9 @@ import android.annotation.UiContext;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.SearchManager;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -123,6 +126,7 @@ import com.android.internal.view.menu.MenuHelper;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.widget.DecorContentParent;
+import com.android.window.flags.Flags;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -161,6 +165,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private static final boolean DEBUG = false;
 
     private final static int DEFAULT_BACKGROUND_FADE_DURATION_MS = 300;
+
+    /**
+     * Makes navigation bar color transparent by default if the target SDK is
+     * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    private static final long NAV_BAR_COLOR_DEFAULT_TRANSPARENT = 232195501L;
 
     private static final int CUSTOM_TITLE_COMPATIBLE_FEATURES = DEFAULT_FEATURES |
             (1 << FEATURE_CUSTOM_TITLE) |
@@ -333,6 +345,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private long mBackgroundFadeDurationMillis = -1;
     private Boolean mSharedElementsUseOverlay;
 
+    private Boolean mAllowFloatingWindowsFillScreen;
+
     private boolean mIsStartingWindow;
     private int mTheme = -1;
 
@@ -361,6 +375,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mRenderShadowsInCompositor = Settings.Global.getInt(context.getContentResolver(),
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
         mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(context);
+        mAllowFloatingWindowsFillScreen = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowFloatingWindowsFillScreen);
     }
 
     /**
@@ -2422,7 +2438,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mIsFloating = a.getBoolean(R.styleable.Window_windowIsFloating, false);
         int flagsToUpdate = (FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR)
                 & (~getForcedWindowFlags());
-        if (mIsFloating) {
+        if (mIsFloating && !mAllowFloatingWindowsFillScreen) {
             setLayout(WRAP_CONTENT, WRAP_CONTENT);
             setFlags(0, flagsToUpdate);
         } else {
@@ -2521,6 +2537,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             mNavigationBarColor =
                     navBarColor == navBarDefaultColor
+                            && !(CompatChanges.isChangeEnabled(NAV_BAR_COLOR_DEFAULT_TRANSPARENT)
+                                    && Flags.navBarTransparentByDefault())
                             && !context.getResources().getBoolean(
                                     R.bool.config_navBarDefaultTransparent)
                     ? navBarCompatibleColor

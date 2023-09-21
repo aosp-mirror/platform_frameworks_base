@@ -39,6 +39,7 @@ import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_SYNC;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.isIndependent;
 
@@ -1190,6 +1191,7 @@ public class TransitionTests extends WindowTestsBase {
         final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
         makeWindowVisible(statusBar);
         mDisplayContent.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
+        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "navBar");
         final ActivityRecord app = createActivityRecord(mDisplayContent);
         final Transition transition = app.mTransitionController.createTransition(TRANSIT_OPEN);
         app.mTransitionController.requestStartTransition(transition, app.getTask(),
@@ -1199,7 +1201,7 @@ public class TransitionTests extends WindowTestsBase {
         final AsyncRotationController asyncRotationController =
                 mDisplayContent.getAsyncRotationController();
         assertNotNull(asyncRotationController);
-        assertShouldFreezeInsetsPosition(asyncRotationController, statusBar, true);
+        assertTrue(asyncRotationController.shouldFreezeInsetsPosition(statusBar));
         assertTrue(app.getTask().inTransition());
 
         player.start();
@@ -1219,9 +1221,18 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.mTransitionController.dispatchLegacyAppTransitionFinished(app);
         assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
 
+        // The bar was invisible so it is not handled by the controller. But if it becomes visible
+        // and drawn before the transition starts,
+        assertFalse(asyncRotationController.isTargetToken(navBar.mToken));
+        navBar.finishDrawing(null /* postDrawTransaction */, Integer.MAX_VALUE);
+        assertTrue(asyncRotationController.isTargetToken(navBar.mToken));
+        assertTrue(asyncRotationController.shouldFreezeInsetsPosition(navBar));
+
         player.startTransition();
         // Non-app windows should not be collected.
         assertFalse(mDisplayContent.mTransitionController.isCollecting(statusBar.mToken));
+        // Avoid DeviceStateController disturbing the test by triggering another rotation change.
+        doReturn(false).when(mDisplayContent).updateRotationUnchecked();
 
         onRotationTransactionReady(player, mWm.mTransactionFactory.get()).onTransactionCommitted();
         assertEquals(ROTATION_ANIMATION_SEAMLESS, player.mLastReady.getChange(
@@ -2388,6 +2399,37 @@ public class TransitionTests extends WindowTestsBase {
 
         // Now nothing should be collecting
         assertFalse(controller.isCollecting());
+    }
+
+    @Test
+    public void testNoSyncFlagIfOneTrack() {
+        final TransitionController controller = mAtm.getTransitionController();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+
+        mSyncEngine = createTestBLASTSyncEngine();
+        controller.setSyncEngine(mSyncEngine);
+
+        final Transition transitA = createTestTransition(TRANSIT_OPEN, controller);
+        final Transition transitB = createTestTransition(TRANSIT_OPEN, controller);
+        final Transition transitC = createTestTransition(TRANSIT_OPEN, controller);
+
+        controller.startCollectOrQueue(transitA, (deferred) -> {});
+        controller.startCollectOrQueue(transitB, (deferred) -> {});
+        controller.startCollectOrQueue(transitC, (deferred) -> {});
+
+        // Verify that, as-long as there is <= 1 track, we won't get a SYNC flag
+        transitA.start();
+        transitA.setAllReady();
+        mSyncEngine.tryFinishForTest(transitA.getSyncId());
+        assertTrue((player.mLastReady.getFlags() & FLAG_SYNC) == 0);
+        transitB.start();
+        transitB.setAllReady();
+        mSyncEngine.tryFinishForTest(transitB.getSyncId());
+        assertTrue((player.mLastReady.getFlags() & FLAG_SYNC) == 0);
+        transitC.start();
+        transitC.setAllReady();
+        mSyncEngine.tryFinishForTest(transitC.getSyncId());
+        assertTrue((player.mLastReady.getFlags() & FLAG_SYNC) == 0);
     }
 
     private static void makeTaskOrganized(Task... tasks) {

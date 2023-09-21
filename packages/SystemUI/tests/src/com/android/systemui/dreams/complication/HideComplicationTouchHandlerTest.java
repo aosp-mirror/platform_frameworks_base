@@ -23,13 +23,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
-import android.testing.AndroidTestingRunner;
 import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.concurrent.futures.CallbackToFutureAdapter;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.dreams.DreamOverlayStateController;
@@ -48,8 +49,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+@RoboPilotTest
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class HideComplicationTouchHandlerTest extends SysuiTestCase {
     private static final int RESTORE_TIMEOUT = 1000;
     private static final int HIDE_DELAY = 500;

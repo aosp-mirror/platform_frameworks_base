@@ -17,31 +17,43 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.credentialmanager">
+          package="com.android.credentialmanager">
 
     <uses-permission android:name="android.permission.LAUNCH_CREDENTIAL_SELECTOR"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
     <uses-permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS"/>
+    <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS" />
 
     <application
-      android:allowBackup="true"
-      android:dataExtractionRules="@xml/data_extraction_rules"
-      android:fullBackupContent="@xml/backup_rules"
-      android:icon="@mipmap/ic_launcher"
-      android:label="@string/app_name"
-      android:roundIcon="@mipmap/ic_launcher_round"
-      android:supportsRtl="true"
-      android:theme="@style/Theme.CredentialSelector">
-
-    <activity
-        android:name=".CredentialSelectorActivity"
-        android:exported="true"
-        android:permission="android.permission.LAUNCH_CREDENTIAL_SELECTOR"
-        android:launchMode="singleTop"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:excludeFromRecents="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
         android:theme="@style/Theme.CredentialSelector">
-    </activity>
-  </application>
+
+        <activity
+            android:name=".CredentialSelectorActivity"
+            android:exported="true"
+            android:permission="android.permission.LAUNCH_CREDENTIAL_SELECTOR"
+            android:launchMode="singleTop"
+            android:label="@string/app_name"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.CredentialSelector">
+        </activity>
+        <service
+            android:name=".autofill.CredentialAutofillService"
+            android:exported="false"
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE">
+            <meta-data
+                android:name="android.autofill"
+                android:resource="@xml/autofill_service_configuration"/>
+            <intent-filter>
+                <action android:name="android.service.autofill.AutofillService"/>
+            </intent-filter>
+        </service>
+    </application>
 
 </manifest>

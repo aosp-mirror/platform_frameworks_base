@@ -185,7 +185,7 @@ public final class DozeServiceHost implements DozeHost {
         return mDozingRequested;
     }
 
-    boolean isPulsing() {
+    public boolean isPulsing() {
         return mPulsing;
     }
 

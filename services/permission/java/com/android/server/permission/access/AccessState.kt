@@ -329,6 +329,18 @@ typealias MutableAppIdPermissionFlags =
 private typealias AppIdPermissionFlagsReference =
     MutableReference<AppIdPermissionFlags, MutableAppIdPermissionFlags>
 
+
+typealias DevicePermissionFlags =
+    IndexedReferenceMap<String, IndexedMap<String, Int>, MutableIndexedMap<String, Int>>
+typealias MutableDevicePermissionFlags =
+    MutableIndexedReferenceMap<String, IndexedMap<String, Int>, MutableIndexedMap<String, Int>>
+typealias AppIdDevicePermissionFlags =
+    IntReferenceMap<DevicePermissionFlags, MutableDevicePermissionFlags>
+typealias MutableAppIdDevicePermissionFlags =
+    MutableIntReferenceMap<DevicePermissionFlags, MutableDevicePermissionFlags>
+private typealias AppIdDevicePermissionFlagsReference =
+    MutableReference<AppIdDevicePermissionFlags, MutableAppIdDevicePermissionFlags>
+
 typealias AppIdAppOpModes =
     IntReferenceMap<IndexedMap<String, Int>, MutableIndexedMap<String, Int>>
 typealias MutableAppIdAppOpModes =
@@ -346,6 +358,7 @@ private typealias PackageAppOpModesReference =
 sealed class UserState(
     internal val packageVersionsReference: PackageVersionsReference,
     internal val appIdPermissionFlagsReference: AppIdPermissionFlagsReference,
+    internal val appIdDevicePermissionFlagsReference: AppIdDevicePermissionFlagsReference,
     internal val appIdAppOpModesReference: AppIdAppOpModesReference,
     internal val packageAppOpModesReference: PackageAppOpModesReference,
     defaultPermissionGrantFingerprint: String?,
@@ -356,6 +369,9 @@ sealed class UserState(
 
     val appIdPermissionFlags: AppIdPermissionFlags
         get() = appIdPermissionFlagsReference.get()
+
+    val appIdDevicePermissionFlags: AppIdDevicePermissionFlags
+        get() = appIdDevicePermissionFlagsReference.get()
 
     val appIdAppOpModes: AppIdAppOpModes
         get() = appIdAppOpModesReference.get()
@@ -375,6 +391,7 @@ sealed class UserState(
 class MutableUserState private constructor(
     packageVersionsReference: PackageVersionsReference,
     appIdPermissionFlagsReference: AppIdPermissionFlagsReference,
+    appIdDevicePermissionFlagsReference: AppIdDevicePermissionFlagsReference,
     appIdAppOpModesReference: AppIdAppOpModesReference,
     packageAppOpModesReference: PackageAppOpModesReference,
     defaultPermissionGrantFingerprint: String?,
@@ -382,6 +399,7 @@ class MutableUserState private constructor(
 ) : UserState(
     packageVersionsReference,
     appIdPermissionFlagsReference,
+    appIdDevicePermissionFlagsReference,
     appIdAppOpModesReference,
     packageAppOpModesReference,
     defaultPermissionGrantFingerprint,
@@ -390,6 +408,7 @@ class MutableUserState private constructor(
     constructor() : this(
         PackageVersionsReference(MutableIndexedMap<String, Int>()),
         AppIdPermissionFlagsReference(MutableAppIdPermissionFlags()),
+        AppIdDevicePermissionFlagsReference(MutableAppIdDevicePermissionFlags()),
         AppIdAppOpModesReference(MutableAppIdAppOpModes()),
         PackageAppOpModesReference(MutablePackageAppOpModes()),
         null,
@@ -399,6 +418,7 @@ class MutableUserState private constructor(
     internal constructor(userState: UserState) : this(
         userState.packageVersionsReference.toImmutable(),
         userState.appIdPermissionFlagsReference.toImmutable(),
+        userState.appIdDevicePermissionFlagsReference.toImmutable(),
         userState.appIdAppOpModesReference.toImmutable(),
         userState.packageAppOpModesReference.toImmutable(),
         userState.defaultPermissionGrantFingerprint,
@@ -409,6 +429,9 @@ class MutableUserState private constructor(
 
     fun mutateAppIdPermissionFlags(): MutableAppIdPermissionFlags =
         appIdPermissionFlagsReference.mutate()
+
+    fun mutateAppIdDevicePermissionFlags(): MutableAppIdDevicePermissionFlags =
+        appIdDevicePermissionFlagsReference.mutate()
 
     fun mutateAppIdAppOpModes(): MutableAppIdAppOpModes = appIdAppOpModesReference.mutate()
 

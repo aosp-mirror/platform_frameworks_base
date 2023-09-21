@@ -16,7 +16,6 @@
 package com.android.server;
 
 import static androidx.test.InstrumentationRegistry.getContext;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -42,7 +41,6 @@ import static com.android.server.DeviceIdleController.STATE_QUICK_DOZE_DELAY;
 import static com.android.server.DeviceIdleController.STATE_SENSING;
 import static com.android.server.DeviceIdleController.lightStateToString;
 import static com.android.server.DeviceIdleController.stateToString;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -2418,12 +2416,39 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
-    public void testModeManager_NoModeManagerLocalService_AddListenerNotCalled() {
+    public void testModeManager_NoModeManagerLocalService_AddQuickDozeListenerNotCalled() {
         mConstants.USE_MODE_MANAGER = true;
         doReturn(null)
                 .when(() -> LocalServices.getService(WearModeManagerInternal.class));
         cleanupDeviceIdleController();
         setupDeviceIdleController();
+        verify(mWearModeManagerInternal, never()).addActiveStateChangeListener(
+                eq(WearModeManagerInternal.QUICK_DOZE_REQUEST_IDENTIFIER), any(),
+                eq(mDeviceIdleController.mModeManagerQuickDozeRequestConsumer));
+    }
+
+    @Test
+    public void testModeManager_NoModeManagerLocalService_AddOffBodyListenerNotCalled() {
+        mConstants.USE_MODE_MANAGER = true;
+        doReturn(null)
+                .when(() -> LocalServices.getService(WearModeManagerInternal.class));
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+        verify(mWearModeManagerInternal, never()).addActiveStateChangeListener(
+                eq(WearModeManagerInternal.OFFBODY_STATE_ID), any(),
+                eq(mDeviceIdleController.mModeManagerOffBodyStateConsumer));
+    }
+
+    @Test
+    public void testModeManager_USEMODEMANAGERIsFalse_AddListenerNotCalled() {
+        mConstants.USE_MODE_MANAGER = false;
+        doReturn(new Object())
+                .when(() -> LocalServices.getService(WearModeManagerInternal.class));
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+        verify(mWearModeManagerInternal, never()).addActiveStateChangeListener(
+                eq(WearModeManagerInternal.OFFBODY_STATE_ID), any(),
+                eq(mDeviceIdleController.mModeManagerOffBodyStateConsumer));
         verify(mWearModeManagerInternal, never()).addActiveStateChangeListener(
                 eq(WearModeManagerInternal.QUICK_DOZE_REQUEST_IDENTIFIER), any(),
                 eq(mDeviceIdleController.mModeManagerQuickDozeRequestConsumer));
@@ -2466,6 +2491,102 @@ public class DeviceIdleControllerTest {
         // Mode manager quick doze request: false.
         // Quick doze should remain enabled because battery saver is on.
         mDeviceIdleController.mModeManagerQuickDozeRequestConsumer.accept(false);
+        assertTrue(mDeviceIdleController.isQuickDozeEnabled());
+    }
+
+    @Test
+    public void testModeManager_QuickDozeRequestedBatterySaverEnabledOnBody_QuickDozeEnabled() {
+        mConstants.USE_MODE_MANAGER = true;
+        PowerSaveState powerSaveState = new PowerSaveState.Builder().setBatterySaverEnabled(
+                true).build();
+        when(mPowerManagerInternal.getLowPowerState(anyInt()))
+                .thenReturn(powerSaveState);
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+
+        mDeviceIdleController.mModeManagerOffBodyStateConsumer.accept(false);
+        mDeviceIdleController.mModeManagerQuickDozeRequestConsumer.accept(true);
+
+        assertTrue(mDeviceIdleController.isQuickDozeEnabled());
+    }
+
+    @Test
+    public void testModeManager_QuickDozeRequestedBatterySaverEnabledOffBody_QuickDozeEnabled() {
+        mConstants.USE_MODE_MANAGER = true;
+        PowerSaveState powerSaveState = new PowerSaveState.Builder().setBatterySaverEnabled(
+                true).build();
+        when(mPowerManagerInternal.getLowPowerState(anyInt()))
+                .thenReturn(powerSaveState);
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+
+        mDeviceIdleController.mModeManagerOffBodyStateConsumer.accept(true);
+        mDeviceIdleController.mModeManagerQuickDozeRequestConsumer.accept(true);
+
+        assertTrue(mDeviceIdleController.isQuickDozeEnabled());
+    }
+
+    @Test
+    public void testModeManager_QuickDozeRequestedBatterySaverDisabledOnBody_QuickDozeEnabled() {
+        mConstants.USE_MODE_MANAGER = true;
+        PowerSaveState powerSaveState = new PowerSaveState.Builder().setBatterySaverEnabled(
+                false).build();
+        when(mPowerManagerInternal.getLowPowerState(anyInt()))
+                .thenReturn(powerSaveState);
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+
+        mDeviceIdleController.mModeManagerOffBodyStateConsumer.accept(false);
+        mDeviceIdleController.mModeManagerQuickDozeRequestConsumer.accept(true);
+
+        assertTrue(mDeviceIdleController.isQuickDozeEnabled());
+    }
+
+    @Test
+    public void testModeManager_QuickDozeRequestedBatterySaverDisabledOffBody_QuickDozeEnabled() {
+        mConstants.USE_MODE_MANAGER = true;
+        PowerSaveState powerSaveState = new PowerSaveState.Builder().setBatterySaverEnabled(
+                false).build();
+        when(mPowerManagerInternal.getLowPowerState(anyInt()))
+                .thenReturn(powerSaveState);
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+
+        mDeviceIdleController.mModeManagerOffBodyStateConsumer.accept(true);
+        mDeviceIdleController.mModeManagerQuickDozeRequestConsumer.accept(true);
+
+        assertTrue(mDeviceIdleController.isQuickDozeEnabled());
+    }
+
+    @Test
+    public void testModeManager_QuickDozeNotRequestedBatterySaverEnabledOnBody_QuickDozeEnabled() {
+        mConstants.USE_MODE_MANAGER = true;
+        PowerSaveState powerSaveState = new PowerSaveState.Builder().setBatterySaverEnabled(
+                true).build();
+        when(mPowerManagerInternal.getLowPowerState(anyInt()))
+                .thenReturn(powerSaveState);
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+
+        mDeviceIdleController.mModeManagerOffBodyStateConsumer.accept(false);
+        mDeviceIdleController.mModeManagerQuickDozeRequestConsumer.accept(false);
+
+        assertTrue(mDeviceIdleController.isQuickDozeEnabled());
+    }
+
+    @Test
+    public void testModeManager_QuickDozeNotRequestedBatterySaverEnabledOffBody_QuickDozeEnabled() {
+        mConstants.USE_MODE_MANAGER = true;
+        PowerSaveState powerSaveState = new PowerSaveState.Builder().setBatterySaverEnabled(
+                true).build();
+        when(mPowerManagerInternal.getLowPowerState(anyInt()))
+                .thenReturn(powerSaveState);
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+
+        mDeviceIdleController.mModeManagerOffBodyStateConsumer.accept(true);
+        mDeviceIdleController.mModeManagerQuickDozeRequestConsumer.accept(false);
+
         assertTrue(mDeviceIdleController.isQuickDozeEnabled());
     }
 

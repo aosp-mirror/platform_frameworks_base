@@ -54,7 +54,7 @@ class NotificationInterruptStateProviderWrapper(
         override val logReason = originalDecision.name
     }
 
-    override fun addSuppressor(suppressor: NotificationInterruptSuppressor) {
+    override fun addLegacySuppressor(suppressor: NotificationInterruptSuppressor) {
         wrapped.addSuppressor(suppressor)
     }
 

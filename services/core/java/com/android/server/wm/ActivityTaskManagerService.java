@@ -68,7 +68,6 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
-
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DREAM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -314,6 +313,8 @@ import java.util.Set;
 public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String GRAMMATICAL_GENDER_PROPERTY = "persist.sys.grammatical_gender";
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityTaskManagerService" : TAG_ATM;
+    private static final String ENABLE_PIP2_IMPLEMENTATION =
+            "persist.wm.debug.enable_pip2_implementation";
     static final String TAG_ROOT_TASK = TAG + POSTFIX_ROOT_TASK;
     static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
 
@@ -1842,8 +1843,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             RemoteCallback navigationObserver, BackAnimationAdapter adapter) {
         mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
                 "startBackNavigation()");
-
-        return mBackNavigationController.startBackNavigation(navigationObserver, adapter);
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return mBackNavigationController.startBackNavigation(navigationObserver, adapter);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     /**
@@ -2221,7 +2226,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             callerApp = getProcessController(appThread);
         }
         final BackgroundActivityStartController balController =
-                getActivityStartController().getBackgroundActivityLaunchController();
+                mTaskSupervisor.getBackgroundActivityLaunchController();
         if (balController.shouldAbortBackgroundActivityStart(
                 callingUid,
                 callingPid,
@@ -2606,9 +2611,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final int callingUid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            // When a task is locked, dismiss the root pinned task if it exists
-            mRootWindowContainer.removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
-
             getLockTaskController().startLockTaskMode(task, isSystemCaller, callingUid);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2651,9 +2653,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mAmInternal.enforceCallingPermission(Manifest.permission.UPDATE_LOCK_TASK_PACKAGES,
                     "updateLockTaskPackages()");
         }
-        synchronized (mGlobalLock) {
-            ProtoLog.w(WM_DEBUG_LOCKTASK, "Allowlisting %d:%s", userId, Arrays.toString(packages));
-            getLockTaskController().updateLockTaskPackages(userId, packages);
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                ProtoLog.w(WM_DEBUG_LOCKTASK, "Allowlisting %d:%s", userId,
+                        Arrays.toString(packages));
+                getLockTaskController().updateLockTaskPackages(userId, packages);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -3611,6 +3619,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    /**
+     * Prepare to enter PiP mode after {@link TransitionController#requestStartTransition}.
+     *
+     * @param r activity auto entering pip
+     * @return true if the activity is about to auto-enter pip or is already in pip mode.
+     */
+    boolean prepareAutoEnterPictureAndPictureMode(ActivityRecord r) {
+        // If the activity is already in picture in picture mode, then just return early
+        if (r.inPinnedWindowingMode()) {
+            return true;
+        }
+
+        if (r.canAutoEnterPip() && getTransitionController().getCollectingTransition() != null) {
+            // This will be used later to construct TransitionRequestInfo for Shell to resolve.
+            // It will also be passed into a direct moveActivityToPinnedRootTask() call via
+            // startTransition()
+            getTransitionController().getCollectingTransition().setPipActivity(r);
+            return true;
+        }
+        return false;
+    }
+
     boolean enterPictureInPictureMode(@NonNull ActivityRecord r,
             @NonNull PictureInPictureParams params, boolean fromClient) {
         return enterPictureInPictureMode(r, params, fromClient, false /* isAutoEnter */);
@@ -3657,6 +3687,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 if (r.getParent() == null) {
                     Slog.e(TAG, "Skip enterPictureInPictureMode, destroyed " + r);
+                    if (transition != null) {
+                        transition.abort();
+                    }
                     return;
                 }
                 EventLogTags.writeWmEnterPip(r.mUserId, System.identityHashCode(r),
@@ -4049,10 +4082,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** Pokes the task persister. */
     void notifyTaskPersisterLocked(Task task, boolean flush) {
         mRecentTasks.notifyTaskPersisterLocked(task, flush);
-    }
-
-    boolean isKeyguardLocked(int displayId) {
-        return mKeyguardController.isKeyguardLocked(displayId);
     }
 
     /**
@@ -4588,6 +4617,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private int increaseAssetConfigurationSeq() {
         mGlobalAssetsSeq = Math.max(++mGlobalAssetsSeq, 1);
         return mGlobalAssetsSeq;
+    }
+
+    /**
+     * Updates the {@link ApplicationInfo}s of the package activities th that are attached in the
+     * WM hierarchy.
+     */
+    public void updateActivityApplicationInfo(int userId,
+            ArrayMap<String, ApplicationInfo> applicationInfoByPackage) {
+        synchronized (mGlobalLock) {
+            if (mRootWindowContainer != null) {
+                mRootWindowContainer.updateActivityApplicationInfo(userId,
+                        applicationInfoByPackage);
+            }
+        }
     }
 
     /**
@@ -5615,6 +5658,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    void registerCompatScaleProvider(@CompatScaleProvider.CompatScaleModeOrderId int id,
+            @NonNull CompatScaleProvider provider) {
+        mCompatModePackages.registerCompatScaleProvider(id, provider);
+    }
+
+    void unregisterCompatScaleProvider(@CompatScaleProvider.CompatScaleModeOrderId int id) {
+        mCompatModePackages.unregisterCompatScaleProvider(id);
+    }
+
     /**
      * Returns {@code true} if the process represented by the pid passed as argument is
      * instrumented and the instrumentation source was granted with the permission also
@@ -6170,6 +6222,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onPackageReplaced(ApplicationInfo aInfo) {
             synchronized (mGlobalLock) {
+                // In case if setWindowManager hasn't been called yet when booting.
+                if (mRootWindowContainer == null) return;
                 mRootWindowContainer.updateActivityApplicationInfo(aInfo);
             }
         }
@@ -7156,5 +7210,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void unregisterTaskStackListener(ITaskStackListener listener) {
             ActivityTaskManagerService.this.unregisterTaskStackListener(listener);
         }
+    }
+
+    static boolean isPip2ExperimentEnabled() {
+        return SystemProperties.getBoolean(ENABLE_PIP2_IMPLEMENTATION, false);
     }
 }

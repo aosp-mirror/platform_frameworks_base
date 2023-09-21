@@ -33,7 +33,6 @@ import android.widget.Spinner
 import android.widget.Switch
 import androidx.annotation.LayoutRes
 import com.android.systemui.R
-import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.media.MediaProjectionAppSelectorActivity
 import com.android.systemui.media.MediaProjectionCaptureTarget
 import com.android.systemui.plugins.ActivityStarter
@@ -41,18 +40,17 @@ import com.android.systemui.settings.UserContextProvider
 
 /** Dialog to select screen recording options */
 class ScreenRecordPermissionDialog(
-    context: Context?,
+    context: Context,
     private val hostUserHandle: UserHandle,
     private val controller: RecordingController,
     private val activityStarter: ActivityStarter,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val userContextProvider: UserContextProvider,
     private val onStartRecordingClicked: Runnable?
 ) :
     BaseScreenSharePermissionDialog(
         context,
         createOptionList(),
-        null,
+        appName = null,
         R.drawable.ic_screenrecord,
         R.color.screenrecord_icon_color
     ) {
@@ -63,6 +61,7 @@ class ScreenRecordPermissionDialog(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setDialogTitle(R.string.screenrecord_permission_dialog_title)
+        setTitle(R.string.screenrecord_title)
         setStartButtonText(R.string.screenrecord_permission_dialog_continue)
         setStartButtonOnClickListener { v: View? ->
             onStartRecordingClicked?.run()
@@ -84,12 +83,7 @@ class ScreenRecordPermissionDialog(
                     MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
                     hostUserHandle
                 )
-
-                val animationController = dialogLaunchAnimator.createActivityLaunchController(v!!)
-                if (animationController == null) {
-                    dismiss()
-                }
-                activityStarter.startActivity(intent, /* dismissShade= */ true, animationController)
+                activityStarter.startActivity(intent, /* dismissShade= */ true)
             }
             dismiss()
         }

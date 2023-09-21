@@ -62,7 +62,7 @@ public class CreateUserDialogControllerTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mActivity = spy(ActivityController.of(new FragmentActivity()).get());
-        mActivity.setTheme(R.style.Theme_AppCompat_DayNight);
+        mActivity.setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight);
         mUnderTest = new TestCreateUserDialogController();
         mPhotoRestrictedByBase = false;
     }

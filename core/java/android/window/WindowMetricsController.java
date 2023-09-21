@@ -16,7 +16,7 @@
 
 package android.window;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 
@@ -80,7 +80,7 @@ public final class WindowMetricsController {
         final Rect bounds;
         final float density;
         final boolean isScreenRound;
-        final int windowingMode;
+        final int activityType;
         synchronized (ResourcesManager.getInstance()) {
             final Configuration config = mContext.getResources().getConfiguration();
             final WindowConfiguration winConfig = config.windowConfiguration;
@@ -90,11 +90,11 @@ public final class WindowMetricsController {
             // as DisplayMetrics#density
             density = config.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
             isScreenRound = config.isScreenRound();
-            windowingMode = winConfig.getWindowingMode();
+            activityType = winConfig.getActivityType();
         }
         final IBinder token = Context.getToken(mContext);
         final Supplier<WindowInsets> insetsSupplier = () -> getWindowInsetsFromServerForDisplay(
-                mContext.getDisplayId(), token, bounds, isScreenRound, windowingMode);
+                mContext.getDisplayId(), token, bounds, isScreenRound, activityType);
         return new WindowMetrics(new Rect(bounds), insetsSupplier, density);
     }
 
@@ -105,23 +105,22 @@ public final class WindowMetricsController {
      * @param token the token of Activity or WindowContext
      * @param bounds the window bounds to calculate insets for
      * @param isScreenRound if the display identified by displayId is round
-     * @param windowingMode the windowing mode of the window to calculate insets for
+     * @param activityType the activity type of the window to calculate insets for
      * @return WindowInsets calculated for the given window bounds, on the given display
      */
     private static WindowInsets getWindowInsetsFromServerForDisplay(int displayId, IBinder token,
-            Rect bounds, boolean isScreenRound, int windowingMode) {
+            Rect bounds, boolean isScreenRound, int activityType) {
         try {
             final InsetsState insetsState = new InsetsState();
-            final boolean alwaysConsumeSystemBars = WindowManagerGlobal.getWindowManagerService()
-                    .getWindowInsets(displayId, token, insetsState);
+            WindowManagerGlobal.getWindowManagerService().getWindowInsets(
+                    displayId, token, insetsState);
             final float overrideInvScale = CompatibilityInfo.getOverrideInvertedScale();
             if (overrideInvScale != 1f) {
                 insetsState.scale(overrideInvScale);
             }
             return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState */,
-                    isScreenRound, alwaysConsumeSystemBars, SOFT_INPUT_ADJUST_NOTHING,
-                    0 /* flags */, SYSTEM_UI_FLAG_VISIBLE,
-                    WindowManager.LayoutParams.INVALID_WINDOW_TYPE, windowingMode,
+                    isScreenRound, SOFT_INPUT_ADJUST_NOTHING, 0 /* flags */, SYSTEM_UI_FLAG_VISIBLE,
+                    WindowManager.LayoutParams.INVALID_WINDOW_TYPE, activityType,
                     null /* idSideMap */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -157,7 +156,7 @@ public final class WindowMetricsController {
                     currentDisplayInfo.displayId, null /* token */,
                     new Rect(0, 0, currentDisplayInfo.getNaturalWidth(),
                             currentDisplayInfo.getNaturalHeight()), isScreenRound,
-                    WINDOWING_MODE_FULLSCREEN);
+                    ACTIVITY_TYPE_UNDEFINED);
             // Set the hardware-provided insets.
             windowInsets = new WindowInsets.Builder(windowInsets).setRoundedCorners(
                             currentDisplayInfo.roundedCorners)

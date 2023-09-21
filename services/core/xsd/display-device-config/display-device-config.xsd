@@ -50,6 +50,13 @@
                             maxOccurs="1"/>
                 <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0"
                             maxOccurs="1"/>
+
+                <xs:element name="hdrBrightnessConfig" type="hdrBrightnessConfig"
+                            minOccurs="0" maxOccurs="1">
+                    <xs:annotation name="nullable"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
+
                 <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1"/>
                 <xs:element type="autoBrightness" name="autoBrightness" minOccurs="0"
                             maxOccurs="1"/>
@@ -65,6 +72,18 @@
                     <xs:annotation name="final"/>
                 </xs:element>
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowIncrease">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Ramp speed used to decrease the screen brightness when in idle mode.
+                     In framework brightness units per second. Must exist with
+                     screenBrightnessRampSlowIncreaseIdle-->
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowDecreaseIdle">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Ramp speed used to decrease the screen brightness when in idle mode.
+                     In framework brightness units per second. Must exist with
+                     screenBrightnessRampSlowDecreaseIdle-->
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowIncreaseIdle">
                     <xs:annotation name="final"/>
                 </xs:element>
                 <!-- Maximum time in milliseconds that a brightness increase animation
@@ -224,6 +243,31 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:all>
+    </xs:complexType>
+
+    <!-- brightness config for HDR content -->
+    <xs:complexType name="hdrBrightnessConfig">
+        <!-- lux level from light sensor to screen brightness recommended max value map. -->
+        <xs:element name="brightnessMap" type="nonNegativeFloatToFloatMap">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Debounce for brightness increase in millis -->
+        <xs:element name="brightnessIncreaseDebounceMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Debounce for brightness decrease in millis -->
+        <xs:element name="brightnessDecreaseDebounceMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Animation time for brightness increase in millis -->
+        <xs:element  name="brightnessIncreaseDurationMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Animation time for brightness decrease in millis -->
+        <xs:element name="brightnessDecreaseDurationMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
     </xs:complexType>
 
     <!-- Maps to PowerManager.THERMAL_STATUS_* values. -->
@@ -459,13 +503,23 @@
     <xs:complexType name="autoBrightness">
         <xs:attribute name="enabled" type="xs:boolean" use="optional" default="true"/>
         <xs:sequence>
-            <!-- Sets the debounce for autoBrightness brightening in millis-->
+            <!-- Sets the debounce for autoBrightness brightening in millis -->
             <xs:element name="brighteningLightDebounceMillis" type="xs:nonNegativeInteger"
                         minOccurs="0" maxOccurs="1">
                 <xs:annotation name="final"/>
             </xs:element>
-            <!-- Sets the debounce for autoBrightness darkening in millis-->
+            <!-- Sets the debounce for autoBrightness darkening in millis -->
             <xs:element name="darkeningLightDebounceMillis" type="xs:nonNegativeInteger"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- Sets the debounce for autoBrightness brightening in millis while in idle mode -->
+            <xs:element name="brighteningLightDebounceIdleMillis" type="xs:nonNegativeInteger"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- Sets the debounce for autoBrightness darkening in millis while in idle mode -->
+            <xs:element name="darkeningLightDebounceIdleMillis" type="xs:nonNegativeInteger"
                         minOccurs="0" maxOccurs="1">
                 <xs:annotation name="final"/>
             </xs:element>
@@ -577,6 +631,10 @@
     <xs:complexType name="blockingZoneConfig">
         <xs:element name="defaultRefreshRate" type="xs:nonNegativeInteger"
                     minOccurs="1" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element type ="xs:string" name="refreshRateThermalThrottlingId">
+            <xs:annotation name="nullable"/>
             <xs:annotation name="final"/>
         </xs:element>
         <xs:element name="blockingZoneThreshold" type="blockingZoneThreshold"

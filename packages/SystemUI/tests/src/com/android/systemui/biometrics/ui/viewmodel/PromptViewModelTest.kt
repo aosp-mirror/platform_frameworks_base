@@ -20,24 +20,32 @@ import android.hardware.biometrics.PromptInfo
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.AuthBiometricView
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
-import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.extractAuthenticatorTypes
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
+import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -69,8 +77,14 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var vibrator: VibratorHelper
 
+    private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val testScope = TestScope()
-    private val promptRepository = FakePromptRepository()
+
+    private lateinit var fingerprintRepository: FakeFingerprintPropertyRepository
+    private lateinit var promptRepository: FakePromptRepository
+    private lateinit var displayStateRepository: FakeDisplayStateRepository
+    private lateinit var displayRepository: FakeDisplayRepository
+    private lateinit var displayStateInteractor: DisplayStateInteractor
 
     private lateinit var selector: PromptSelectorInteractor
     private lateinit var viewModel: PromptViewModel
@@ -78,10 +92,24 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Before
     fun setup() {
-        selector = PromptSelectorInteractorImpl(promptRepository, lockPatternUtils)
+        fingerprintRepository = FakeFingerprintPropertyRepository()
+        promptRepository = FakePromptRepository()
+        displayStateRepository = FakeDisplayStateRepository()
+        displayRepository = FakeDisplayRepository()
+        displayStateInteractor =
+            DisplayStateInteractorImpl(
+                testScope.backgroundScope,
+                mContext,
+                fakeExecutor,
+                displayStateRepository,
+                displayRepository,
+            )
+        selector =
+            PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
 
-        viewModel = PromptViewModel(selector, vibrator, featureFlags)
+        viewModel =
+            PromptViewModel(displayStateInteractor, selector, vibrator, mContext, featureFlags)
         featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
     }
 
@@ -105,7 +133,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             }
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertThat(size).isEqualTo(expectedSize)
-            assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_AUTHENTICATING_ANIMATING_IN)
+            assertThat(legacyState).isEqualTo(BiometricState.STATE_IDLE)
 
             val startMessage = "here we go"
             viewModel.showAuthenticating(startMessage, isRetry = false)
@@ -115,7 +143,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             assertThat(authenticated?.isNotAuthenticated).isTrue()
             assertThat(size).isEqualTo(expectedSize)
             assertButtonsVisible(negative = expectedSize != PromptSize.SMALL)
-            assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_AUTHENTICATING)
+            assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATING)
         }
 
     @Test
@@ -193,7 +221,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(authenticating).isTrue()
         assertThat(authenticated?.isNotAuthenticated).isTrue()
         assertThat(size).isEqualTo(if (authWithSmallPrompt) PromptSize.SMALL else PromptSize.MEDIUM)
-        assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_AUTHENTICATING)
+        assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATING)
         assertButtonsVisible(negative = !authWithSmallPrompt)
 
         val delay = 1000L
@@ -213,9 +241,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(legacyState)
             .isEqualTo(
                 if (expectConfirmation) {
-                    AuthBiometricView.STATE_PENDING_CONFIRMATION
+                    BiometricState.STATE_PENDING_CONFIRMATION
                 } else {
-                    AuthBiometricView.STATE_AUTHENTICATED
+                    BiometricState.STATE_AUTHENTICATED
                 }
             )
         assertButtonsVisible(
@@ -284,7 +312,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(size).isEqualTo(PromptSize.MEDIUM)
         assertThat(message).isEqualTo(PromptMessage.Error(errorMessage))
         assertThat(messageVisible).isTrue()
-        assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_ERROR)
+        assertThat(legacyState).isEqualTo(BiometricState.STATE_ERROR)
 
         // temporary error should disappear after a delay
         errorJob.join()
@@ -295,12 +323,15 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertThat(messageVisible).isFalse()
         }
+        val clearIconError = !restart
         assertThat(legacyState)
             .isEqualTo(
                 if (restart) {
-                    AuthBiometricView.STATE_AUTHENTICATING
+                    BiometricState.STATE_AUTHENTICATING
+                } else if (clearIconError) {
+                    BiometricState.STATE_IDLE
                 } else {
-                    AuthBiometricView.STATE_HELP
+                    BiometricState.STATE_HELP
                 }
             )
 
@@ -475,7 +506,82 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         assertThat(authenticating).isFalse()
         assertThat(authenticated?.isAuthenticated).isTrue()
-        assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_AUTHENTICATED)
+        assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATED)
+        assertThat(canTryAgain).isFalse()
+    }
+
+    @Test
+    fun auto_confirm_authentication_when_finger_down() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+
+        // No icon button when face only, can't confirm before auth
+        if (!testCase.isFaceOnly) {
+            viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
+        }
+        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+
+        val authenticating by collectLastValue(viewModel.isAuthenticating)
+        val authenticated by collectLastValue(viewModel.isAuthenticated)
+        val message by collectLastValue(viewModel.message)
+        val size by collectLastValue(viewModel.size)
+        val legacyState by collectLastValue(viewModel.legacyState)
+        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+
+        assertThat(authenticating).isFalse()
+        assertThat(canTryAgain).isFalse()
+        assertThat(authenticated?.isAuthenticated).isTrue()
+
+        if (testCase.isFaceOnly && expectConfirmation) {
+            assertThat(legacyState).isEqualTo(BiometricState.STATE_PENDING_CONFIRMATION)
+
+            assertThat(size).isEqualTo(PromptSize.MEDIUM)
+            assertButtonsVisible(
+                cancel = true,
+                confirm = true,
+            )
+
+            viewModel.confirmAuthenticated()
+            assertThat(message).isEqualTo(PromptMessage.Empty)
+            assertButtonsVisible()
+        } else {
+            assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATED)
+        }
+    }
+
+    @Test
+    fun cannot_auto_confirm_authentication_when_finger_up() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+
+        // No icon button when face only, can't confirm before auth
+        if (!testCase.isFaceOnly) {
+            viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
+            viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_UP))
+        }
+        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+
+        val authenticating by collectLastValue(viewModel.isAuthenticating)
+        val authenticated by collectLastValue(viewModel.isAuthenticated)
+        val message by collectLastValue(viewModel.message)
+        val size by collectLastValue(viewModel.size)
+        val legacyState by collectLastValue(viewModel.legacyState)
+        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+
+        assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
+        if (expectConfirmation) {
+            assertThat(size).isEqualTo(PromptSize.MEDIUM)
+            assertButtonsVisible(
+                cancel = true,
+                confirm = true,
+            )
+
+            viewModel.confirmAuthenticated()
+            assertThat(message).isEqualTo(PromptMessage.Empty)
+            assertButtonsVisible()
+        }
+
+        assertThat(authenticating).isFalse()
+        assertThat(authenticated?.isAuthenticated).isTrue()
+        assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATED)
         assertThat(canTryAgain).isFalse()
     }
 
@@ -509,7 +615,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         viewModel.showHelp(helpMessage)
 
         assertThat(size).isEqualTo(PromptSize.MEDIUM)
-        assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_HELP)
+        assertThat(legacyState).isEqualTo(BiometricState.STATE_HELP)
         assertThat(message).isEqualTo(PromptMessage.Help(helpMessage))
         assertThat(messageVisible).isTrue()
 
@@ -537,9 +643,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         assertThat(size).isEqualTo(PromptSize.MEDIUM)
         if (confirmationRequired == true) {
-            assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_PENDING_CONFIRMATION)
+            assertThat(legacyState).isEqualTo(BiometricState.STATE_PENDING_CONFIRMATION)
         } else {
-            assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_AUTHENTICATED)
+            assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATED)
         }
         assertThat(message).isEqualTo(PromptMessage.Help(helpMessage))
         assertThat(messageVisible).isTrue()
@@ -658,6 +764,10 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         testScope.runTest { block() }
     }
+
+    /** Obtain a MotionEvent with the specified MotionEvent action constant */
+    private fun obtainMotionEvent(action: Int): MotionEvent =
+        MotionEvent.obtain(0, 0, action, 0f, 0f, 0)
 
     companion object {
         @JvmStatic

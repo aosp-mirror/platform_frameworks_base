@@ -86,8 +86,8 @@
     <uses-permission android:name="android.permission.TEST_GRANTED" />
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     <uses-permission android:name="com.google.android.googleapps.permission.ACCESS_GOOGLE_PASSWORD" />
-    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" />
-    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.ALL_SERVICES" />
+    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" android:maxSdkVersion="34"/>
+    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.ALL_SERVICES" android:maxSdkVersion="34"/>
 
     <uses-permission android:name="android.permission.MANAGE_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
@@ -1744,6 +1744,15 @@
                   android:screenOrientation="portrait"
                   android:exported="true"
                   android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.view.ViewGroupTestActivity"
+                  android:label="ViewGroup Test"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />

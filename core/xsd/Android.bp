@@ -19,4 +19,8 @@ xsd_config {
     srcs: ["vibrator/vibration/vibration.xsd"],
     api_dir: "vibrator/vibration/schema",
     package_name: "com.android.internal.vibrator.persistence",
+    root_elements: [
+        "vibration",
+        "vibration-select",
+    ],
 }

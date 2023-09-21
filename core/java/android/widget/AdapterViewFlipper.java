@@ -16,10 +16,7 @@
 
 package android.widget;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -48,7 +45,6 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
     private boolean mRunning = false;
     private boolean mStarted = false;
     private boolean mVisible = false;
-    private boolean mUserPresent = true;
     private boolean mAdvancedByHost = false;
 
     public AdapterViewFlipper(Context context) {
@@ -82,39 +78,9 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
         a.recycle();
     }
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                mUserPresent = false;
-                updateRunning();
-            } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
-                mUserPresent = true;
-                updateRunning(false);
-            }
-        }
-    };
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
-        // Listen for broadcasts related to user-presence
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(Intent.ACTION_USER_PRESENT);
-
-        // OK, this is gross but needed. This class is supported by the
-        // remote views machanism and as a part of that the remote views
-        // can be inflated by a context for another user without the app
-        // having interact users permission - just for loading resources.
-        // For exmaple, when adding widgets from a user profile to the
-        // home screen. Therefore, we register the receiver as the current
-        // user not the one the context is for.
-        getContext().registerReceiverAsUser(mReceiver, android.os.Process.myUserHandle(),
-                filter, null, getHandler());
-
 
         if (mAutoStart) {
             // Automatically start when requested
@@ -126,8 +92,6 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mVisible = false;
-
-        getContext().unregisterReceiver(mReceiver);
         updateRunning();
     }
 
@@ -235,8 +199,7 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
      *            true.
      */
     private void updateRunning(boolean flipNow) {
-        boolean running = !mAdvancedByHost && mVisible && mStarted && mUserPresent
-                && mAdapter != null;
+        boolean running = !mAdvancedByHost && mVisible && mStarted && mAdapter != null;
         if (running != mRunning) {
             if (running) {
                 showOnly(mWhichChild, flipNow);
@@ -248,7 +211,7 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
         }
         if (LOGD) {
             Log.d(TAG, "updateRunning() mVisible=" + mVisible + ", mStarted=" + mStarted
-                    + ", mUserPresent=" + mUserPresent + ", mRunning=" + mRunning);
+                    + ", mRunning=" + mRunning);
         }
     }
 

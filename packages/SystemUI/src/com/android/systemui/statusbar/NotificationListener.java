@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static com.android.systemui.statusbar.RemoteInputController.processForRemoteInput;
-
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
@@ -142,8 +140,6 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
         if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
         if (sbn != null && !onPluginNotificationPosted(sbn, rankingMap)) {
             mMainExecutor.execute(() -> {
-                processForRemoteInput(sbn.getNotification(), mContext);
-
                 for (NotificationHandler handler : mNotificationHandlers) {
                     handler.onNotificationPosted(sbn, rankingMap);
                 }

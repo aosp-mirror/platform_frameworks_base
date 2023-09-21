@@ -1307,9 +1307,9 @@ public abstract class WallpaperService extends Service {
                     visibleFrame.intersect(mInsetsState.getDisplayFrame());
                     WindowInsets windowInsets = mInsetsState.calculateInsets(visibleFrame,
                             null /* ignoringVisibilityState */, config.isScreenRound(),
-                            false /* alwaysConsumeSystemBars */, mLayout.softInputMode,
-                            mLayout.flags, SYSTEM_UI_FLAG_VISIBLE, mLayout.type,
-                            config.windowConfiguration.getWindowingMode(), null /* idSideMap */);
+                            mLayout.softInputMode, mLayout.flags, SYSTEM_UI_FLAG_VISIBLE,
+                            mLayout.type, config.windowConfiguration.getActivityType(),
+                            null /* idSideMap */);
 
                     if (!fixedSize) {
                         final Rect padding = mIWallpaperEngine.mDisplayPadding;
@@ -2556,7 +2556,7 @@ public abstract class WallpaperService extends Service {
         private void doDetachEngine() {
             // Some wallpapers will not trigger the rendering threads of the remaining engines even
             // if they are visible, so we need to toggle the state to get their attention.
-            if (!mEngine.mDestroyed) {
+            if (mEngine != null && !mEngine.mDestroyed) {
                 mEngine.detach();
                 synchronized (mActiveEngines) {
                     for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {

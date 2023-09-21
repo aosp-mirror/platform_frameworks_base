@@ -28,6 +28,7 @@ import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -85,6 +86,7 @@ class SceneInteractorTest : SysuiTestCase() {
                     fromScene = SceneKey.Lockscreen,
                     toScene = SceneKey.Shade,
                     progress = progress,
+                    isUserInputDriven = false,
                 )
             assertThat(reflectedTransitionState).isEqualTo(transitionState.value)
 
@@ -122,6 +124,7 @@ class SceneInteractorTest : SysuiTestCase() {
                     fromScene = underTest.desiredScene.value.key,
                     toScene = SceneKey.Shade,
                     progress = progress,
+                    isUserInputDriven = false,
                 )
             assertThat(transitionTo).isEqualTo(SceneKey.Shade)
 
@@ -133,6 +136,101 @@ class SceneInteractorTest : SysuiTestCase() {
 
             transitionState.value = ObservableTransitionState.Idle(SceneKey.Shade)
             assertThat(transitionTo).isNull()
+        }
+
+    @Test
+    fun transitioning_idle_false() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(SceneKey.Shade)
+                )
+            val transitioning by
+                collectLastValue(underTest.transitioning(SceneKey.Shade, SceneKey.Lockscreen))
+            underTest.setTransitionState(transitionState)
+
+            assertThat(transitioning).isFalse()
+        }
+
+    @Test
+    fun transitioning_wrongFromScene_false() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.Gone,
+                        toScene = SceneKey.Lockscreen,
+                        progress = flowOf(0.5f),
+                        isUserInputDriven = false,
+                    )
+                )
+            val transitioning by
+                collectLastValue(underTest.transitioning(SceneKey.Shade, SceneKey.Lockscreen))
+            underTest.setTransitionState(transitionState)
+
+            assertThat(transitioning).isFalse()
+        }
+
+    @Test
+    fun transitioning_wrongToScene_false() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.Shade,
+                        toScene = SceneKey.QuickSettings,
+                        progress = flowOf(0.5f),
+                        isUserInputDriven = false,
+                    )
+                )
+            underTest.setTransitionState(transitionState)
+
+            assertThat(underTest.transitioning(SceneKey.Shade, SceneKey.Lockscreen).value).isFalse()
+        }
+
+    @Test
+    fun transitioning_correctFromAndToScenes_true() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.Shade,
+                        toScene = SceneKey.Lockscreen,
+                        progress = flowOf(0.5f),
+                        isUserInputDriven = false,
+                    )
+                )
+            val transitioning by
+                collectLastValue(underTest.transitioning(SceneKey.Shade, SceneKey.Lockscreen))
+            underTest.setTransitionState(transitionState)
+
+            assertThat(transitioning).isTrue()
+        }
+
+    @Test
+    fun transitioning_updates() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(SceneKey.Shade)
+                )
+            val transitioning by
+                collectLastValue(underTest.transitioning(SceneKey.Shade, SceneKey.Lockscreen))
+            underTest.setTransitionState(transitionState)
+
+            assertThat(transitioning).isFalse()
+
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = SceneKey.Shade,
+                    toScene = SceneKey.Lockscreen,
+                    progress = flowOf(0.5f),
+                    isUserInputDriven = false,
+                )
+            assertThat(transitioning).isTrue()
+
+            transitionState.value = ObservableTransitionState.Idle(SceneKey.Lockscreen)
+            assertThat(transitioning).isFalse()
         }
 
     @Test
@@ -149,14 +247,9 @@ class SceneInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun remoteUserInput() =
+    fun userInput() =
         testScope.runTest {
-            val remoteUserInput by collectLastValue(underTest.remoteUserInput)
-            assertThat(remoteUserInput).isNull()
-
-            for (input in SceneTestUtils.REMOTE_INPUT_DOWN_GESTURE) {
-                underTest.onRemoteUserInput(input)
-                assertThat(remoteUserInput).isEqualTo(input)
-            }
+            underTest.onUserInput()
+            assertThat(utils.powerRepository.userTouchRegistered).isTrue()
         }
 }

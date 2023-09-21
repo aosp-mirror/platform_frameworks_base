@@ -29,55 +29,85 @@ PATH_PREFIX = "out/soong/.intermediates"
 PATH_SUFFIX = "android_common/lint"
 FIX_ZIP = "suggested-fixes.zip"
 
+
+class SoongModule:
+    """A Soong module to lint.
+
+    The constructor takes the name of the module (for example,
+    "framework-minus-apex"). find() must be called to extract the intermediate
+    module path from Soong's module-info.json
+    """
+    def __init__(self, name):
+        self._name = name
+
+    def find(self, module_info):
+        """Finds the module in the loaded module_info.json."""
+        if self._name not in module_info:
+            raise Exception(f"Module {self._name} not found!")
+
+        partial_path = module_info[self._name]["path"][0]
+        print(f"Found module {partial_path}/{self._name}.")
+        self._path = f"{PATH_PREFIX}/{partial_path}/{self._name}/{PATH_SUFFIX}"
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def lint_report(self):
+        return f"{self._path}/lint-report.txt"
+
+    @property
+    def suggested_fixes(self):
+        return f"{self._path}/{FIX_ZIP}"
+
+
 class SoongLintFix:
     """
-    This class creates a command line tool that will
-    apply lint fixes to the platform via the necessary
-    combination of soong and shell commands.
+    This class creates a command line tool that will apply lint fixes to the
+    platform via the necessary combination of soong and shell commands.
 
-    It breaks up these operations into a few "private" methods
-    that are intentionally exposed so experimental code can tweak behavior.
+    It breaks up these operations into a few "private" methods that are
+    intentionally exposed so experimental code can tweak behavior.
 
-    The entry point, `run`, will apply lint fixes using the
-    intermediate `suggested-fixes` directory that soong creates during its
-    invocation of lint.
+    The entry point, `run`, will apply lint fixes using the intermediate
+    `suggested-fixes` directory that soong creates during its invocation of
+    lint.
 
     Basic usage:
     ```
     from soong_lint_fix import SoongLintFix
 
-    SoongLintFix().run()
+    opts = SoongLintFixOptions()
+    opts.parse_args(sys.argv)
+    SoongLintFix(opts).run()
     ```
     """
-    def __init__(self):
-        self._parser = _setup_parser()
-        self._args = None
+    def __init__(self, opts):
+        self._opts = opts
         self._kwargs = None
-        self._path = None
-        self._target = None
+        self._modules = []
 
-
-    def run(self, additional_setup=None, custom_fix=None):
+    def run(self):
         """
         Run the script
         """
         self._setup()
-        self._find_module()
+        self._find_modules()
         self._lint()
 
-        if not self._args.no_fix:
+        if not self._opts.no_fix:
             self._fix()
 
-        if self._args.print:
+        if self._opts.print:
             self._print()
 
     def _setup(self):
-        self._args = self._parser.parse_args()
         env = os.environ.copy()
-        if self._args.check:
-            env["ANDROID_LINT_CHECK"] = self._args.check
-        if self._args.lint_module:
-            env["ANDROID_LINT_CHECK_EXTRA_MODULES"] = self._args.lint_module
+        if self._opts.check:
+            env["ANDROID_LINT_CHECK"] = self._opts.check
+        if self._opts.lint_module:
+            env["ANDROID_LINT_CHECK_EXTRA_MODULES"] = self._opts.lint_module
 
         self._kwargs = {
             "env": env,
@@ -87,8 +117,6 @@ class SoongLintFix:
 
         os.chdir(ANDROID_BUILD_TOP)
 
-
-    def _find_module(self):
         print("Refreshing soong modules...")
         try:
             os.mkdir(ANDROID_PRODUCT_OUT)
@@ -97,48 +125,61 @@ class SoongLintFix:
         subprocess.call(f"{SOONG_UI} --make-mode {PRODUCT_OUT}/module-info.json", **self._kwargs)
         print("done.")
 
+
+    def _find_modules(self):
         with open(f"{ANDROID_PRODUCT_OUT}/module-info.json") as f:
             module_info = json.load(f)
 
-        if self._args.module not in module_info:
-            sys.exit(f"Module {self._args.module} not found!")
-
-        module_path = module_info[self._args.module]["path"][0]
-        print(f"Found module {module_path}/{self._args.module}.")
-
-        self._path = f"{PATH_PREFIX}/{module_path}/{self._args.module}/{PATH_SUFFIX}"
-        self._target = f"{self._path}/lint-report.txt"
-
+        for module_name in self._opts.modules:
+            module = SoongModule(module_name)
+            module.find(module_info)
+            self._modules.append(module)
 
     def _lint(self):
         print("Cleaning up any old lint results...")
-        try:
-            os.remove(f"{self._target}")
-            os.remove(f"{self._path}/{FIX_ZIP}")
-        except FileNotFoundError:
-            pass
+        for module in self._modules:
+            try:
+                os.remove(f"{module.lint_report}")
+                os.remove(f"{module.suggested_fixes}")
+            except FileNotFoundError:
+                pass
         print("done.")
 
-        print(f"Generating {self._target}")
-        subprocess.call(f"{SOONG_UI} --make-mode {self._target}", **self._kwargs)
+        target = " ".join([ module.lint_report for module in self._modules ])
+        print(f"Generating {target}")
+        subprocess.call(f"{SOONG_UI} --make-mode {target}", **self._kwargs)
         print("done.")
-
 
     def _fix(self):
-        print("Copying suggested fixes to the tree...")
-        with zipfile.ZipFile(f"{self._path}/{FIX_ZIP}") as zip:
-            for name in zip.namelist():
-                if name.startswith("out") or not name.endswith(".java"):
-                    continue
-                with zip.open(name) as src, open(f"{ANDROID_BUILD_TOP}/{name}", "wb") as dst:
-                    shutil.copyfileobj(src, dst)
+        for module in self._modules:
+            print(f"Copying suggested fixes for {module.name} to the tree...")
+            with zipfile.ZipFile(f"{module.suggested_fixes}") as zip:
+                for name in zip.namelist():
+                    if name.startswith("out") or not name.endswith(".java"):
+                        continue
+                    with zip.open(name) as src, open(f"{ANDROID_BUILD_TOP}/{name}", "wb") as dst:
+                        shutil.copyfileobj(src, dst)
             print("done.")
 
-
     def _print(self):
-        print("### lint-report.txt ###", end="\n\n")
-        with open(self._target, "r") as f:
-            print(f.read())
+        for module in self._modules:
+            print(f"### lint-report.txt {module.name} ###", end="\n\n")
+            with open(module.lint_report, "r") as f:
+                print(f.read())
+
+
+class SoongLintFixOptions:
+    """Options for SoongLintFix"""
+
+    def __init__(self):
+        self.modules = []
+        self.check = None
+        self.lint_module = None
+        self.no_fix = False
+        self.print = False
+
+    def parse_args(self, args=None):
+        _setup_parser().parse_args(args, self)
 
 
 def _setup_parser():
@@ -151,7 +192,8 @@ def _setup_parser():
         **Gotcha**: You must have run `source build/envsetup.sh` and `lunch` first.
         """, formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument('module',
+    parser.add_argument('modules',
+                        nargs='+',
                         help='The soong build module to run '
                              '(e.g. framework-minus-apex or services.core.unboosted)')
 
@@ -170,4 +212,6 @@ def _setup_parser():
     return parser
 
 if __name__ == "__main__":
-    SoongLintFix().run()
+    opts = SoongLintFixOptions()
+    opts.parse_args(sys.argv)
+    SoongLintFix(opts).run()

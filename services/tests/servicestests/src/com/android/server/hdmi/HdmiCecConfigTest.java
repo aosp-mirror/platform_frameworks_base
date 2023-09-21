@@ -310,17 +310,17 @@ public final class HdmiCecConfigTest {
         HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getDefaultStringValue(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
-                .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM);
+                .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
     }
 
     @Test
     public void getDefaultStringValue_WithOverride() {
-        setBooleanResource(R.bool.config_cecPowerControlModeTvAndAudioSystem_default, false);
-        setBooleanResource(R.bool.config_cecPowerControlModeBroadcast_default, true);
+        setBooleanResource(R.bool.config_cecPowerControlModeBroadcast_default, false);
+        setBooleanResource(R.bool.config_cecPowerControlModeTvAndAudioSystem_default, true);
         HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getDefaultStringValue(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
-                .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
+                .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM);
     }
 
     @Test
@@ -334,7 +334,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getDefaultStringValue_NoDefault() {
-        setBooleanResource(R.bool.config_cecPowerControlModeTvAndAudioSystem_default, false);
+        setBooleanResource(R.bool.config_cecPowerControlModeBroadcast_default, false);
         assertThrows(RuntimeException.class,
                 () -> new HdmiCecConfig(mContext, mStorageAdapter));
     }

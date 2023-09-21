@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"လော့ခ်ဒေါင်းလုပ်ပြီးနောက် ပင်နံပါတ်လိုအပ်သည်"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"လော့ခ်ဒေါင်းလုပ်ပြီးနောက် စကားဝှက်လိုအပ်သည်"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"လော့ခ်ဒေါင်းလုပ်ပြီးနောက် ပုံဖော်ခြင်းလိုအပ်သည်"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"စက်သုံးနေခြင်း မရှိချိန်တွင် အပ်ဒိတ် ထည့်သွင်းပါမည်"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"ထပ်ဆောင်းလုံခြုံရေး လိုအပ်သည်။ ပင်နံပါတ်မသုံးသည်မှာ အနည်းငယ်ကြာပြီ။"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"ထပ်ဆောင်းလုံခြုံရေး လိုအပ်သည်။ စကားဝှက်မသုံးသည်မှာ အနည်းငယ်ကြာပြီ။"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"ထပ်ဆောင်းလုံခြုံရေး လိုအပ်သည်။ ပုံဖော်ခြင်းမသုံးသည်မှာ အနည်းငယ်ကြာပြီ။"</string>

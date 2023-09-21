@@ -52,6 +52,7 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -116,13 +117,15 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                     keyguardUpdateMonitor,
                 ),
                 fingerprintAuthRepository,
-                KeyguardInteractor(
-                    keyguardRepository,
-                    commandQueue = mock(),
-                    featureFlags,
-                    bouncerRepository,
-                    configurationRepository,
-                ),
+                KeyguardInteractorFactory.create(
+                        featureFlags = featureFlags,
+                        repository = keyguardRepository,
+                        bouncerRepository = bouncerRepository,
+                        configurationRepository = configurationRepository,
+                        sceneInteractor =
+                            mock { whenever(transitioningTo).thenReturn(MutableStateFlow(null)) },
+                    )
+                    .keyguardInteractor,
                 PrimaryBouncerInteractor(
                     bouncerRepository,
                     primaryBouncerView = mock(),
@@ -156,7 +159,6 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                     screenOffAnimationController = mock(),
                     statusBarStateController = mock(),
                 ),
-                FakeFeatureFlags().apply { set(Flags.FP_LISTEN_OCCLUDING_APPS, true) },
             )
     }
 

@@ -618,8 +618,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Biometrika yoki ekran qulfi"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Oʻzingizni taniting"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Davom etish uchun biometrik tasdiqlang"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Davom etish uchun barmoq izingizdan foydalaning"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Yuz tekshiruvi bilan davom eting"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Davom etish uchun biometrika yoki ekran qulfidan foydalaning"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrik sensor ishlamayapti"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentifikatsiya bekor qilindi"</string>
@@ -645,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Barmoq izi aniqlanmadi"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Barmoq izi aniqlanmadi"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Bu yuz notanish. Barmoq izi orqali urining."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Barmoq izi tekshirildi"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Yuzingiz aniqlandi"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Yuzingiz aniqlandi, tasdiqlash uchun bosing"</string>
@@ -670,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Xatolik yuz berdi. Qayta urining."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Barmoq izi belgisi"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Qurilma qulfini ochish"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Boshqa usulda oching"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Barmoq izi aniqlanmasa, masalan, barmoqlar hoʻl boʻlsa, Yuz bilan ochish funksiyasidan foydalaning"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Yuz tanilmasa, masalan, yorugʻlik kamligida Barmoq izi bilan ochish funksiyasidan foydalaning"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Yuz bilan ochish"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Yuz bilan ochishda muammo bor"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Yuz modelini oʻchirish uchun bosing va keyin yana yuzni qoʻshing"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Yuz bilan ochishni sozlash"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefoningizni yuz tekshiruvi yordamida qulfdan chiqaring"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Yuz bilan ochish uchun Sozlamalar va maxfiylik orqali "<b>"kameraga kirishga ruxsat bering"</b></string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Qulfdan chiqarishning boshqa usullarini sozlang"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Barmoq izi kiritish uchun bosing"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Barmoq izi bilan ochish"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Barmoq izi skaneridan foydalanish imkonsiz"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Xizmat koʻrsatish markaziga murojaat qiling."</string>
@@ -1868,6 +1867,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2-ishxona <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3-ishxona <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> nusxasini yaratish"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"Shaxsiy <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Yechishda PIN kod talab qilinsin"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Yechishdan oldin grafik kalit so‘ralsin"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Bo‘shatishdan oldin parol so‘ralsin"</string>
@@ -2032,7 +2032,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" xizmatida yangilansinmi?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g> "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" xizmatida yangilansinmi?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> va <xliff:g id="TYPE_1">%2$s</xliff:g> "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" xizmatida yangilansinmi?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" xizmatidagi <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> va <xliff:g id="TYPE_2">%3$s</xliff:g> yangilansinmi?"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" xizmatidagi <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> va <xliff:g id="TYPE_2">%3$s</xliff:g> yangilansinmi?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Saqlash"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Kerak emas"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Keyinroq"</string>

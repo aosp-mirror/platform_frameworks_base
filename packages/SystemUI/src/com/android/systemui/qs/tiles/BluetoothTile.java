@@ -151,10 +151,6 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         }
         state.dualTarget = true;
         state.value = enabled;
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
-        state.slash.isSlashed = !enabled;
         state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
         state.secondaryLabel = TextUtils.emptyIfNull(
                 getSecondaryLabel(enabled, connecting, connected, state.isTransient));
@@ -226,7 +222,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 listenToMetadata(device);
             } else {
                 stopListeningToStaleDeviceMetadata();
-                batteryLevel = device.getBatteryLevel();
+                batteryLevel = device.getMinBatteryLevelWithMemberDevices();
             }
 
             if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {

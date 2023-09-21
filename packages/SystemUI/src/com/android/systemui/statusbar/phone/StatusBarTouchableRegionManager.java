@@ -34,9 +34,8 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.ScreenDecorations;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -85,7 +84,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             ShadeExpansionStateManager shadeExpansionStateManager,
             Provider<SceneInteractor> sceneInteractor,
             Provider<JavaAdapter> javaAdapter,
-            FeatureFlags featureFlags,
+            SceneContainerFlags sceneContainerFlags,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController
     ) {
         mContext = context;
@@ -123,7 +122,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
-        if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+        if (sceneContainerFlags.isEnabled()) {
             javaAdapter.get().alwaysCollectFlow(
                     sceneInteractor.get().isVisible(),
                     this::onShadeExpansionFullyChanged);

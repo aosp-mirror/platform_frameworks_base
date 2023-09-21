@@ -46,10 +46,12 @@ class PatternBouncerViewModel(
 
     /** The number of columns in the dot grid. */
     val columnCount = 3
+
     /** The number of rows in the dot grid. */
     val rowCount = 3
 
     private val _selectedDots = MutableStateFlow<LinkedHashSet<PatternDotViewModel>>(linkedSetOf())
+
     /** The dots that were selected by the user, in the order of selection. */
     val selectedDots: StateFlow<List<PatternDotViewModel>> =
         _selectedDots
@@ -61,10 +63,12 @@ class PatternBouncerViewModel(
             )
 
     private val _currentDot = MutableStateFlow<PatternDotViewModel?>(null)
+
     /** The most-recently selected dot that the user selected. */
     val currentDot: StateFlow<PatternDotViewModel?> = _currentDot.asStateFlow()
 
     private val _dots = MutableStateFlow(defaultDots())
+
     /** All dots on the grid. */
     val dots: StateFlow<List<PatternDotViewModel>> = _dots.asStateFlow()
 
@@ -74,6 +78,11 @@ class PatternBouncerViewModel(
     /** Notifies that the UI has been shown to the user. */
     fun onShown() {
         interactor.resetMessage()
+    }
+
+    /** Notifies that the user has placed down a pointer, not necessarily dragging just yet. */
+    fun onDown() {
+        interactor.onDown()
     }
 
     /** Notifies that the user has started a drag gesture across the dot grid. */
@@ -120,15 +129,22 @@ class PatternBouncerViewModel(
                     buildList {
                         var dot = previousDot
                         while (dot != hitDot) {
-                            add(dot)
+                            // Move along the direction of the line connecting the previously
+                            // selected dot and current hit dot, and see if they were skipped over
+                            // but fall on that line.
+                            if (dot.isOnLineSegment(previousDot, hitDot)) {
+                                add(dot)
+                            }
                             dot =
                                 PatternDotViewModel(
                                     x =
-                                        if (hitDot.x > dot.x) dot.x + 1
-                                        else if (hitDot.x < dot.x) dot.x - 1 else dot.x,
+                                        if (hitDot.x > dot.x) {
+                                            dot.x + 1
+                                        } else if (hitDot.x < dot.x) dot.x - 1 else dot.x,
                                     y =
-                                        if (hitDot.y > dot.y) dot.y + 1
-                                        else if (hitDot.y < dot.y) dot.y - 1 else dot.y,
+                                        if (hitDot.y > dot.y) {
+                                            dot.y + 1
+                                        } else if (hitDot.y < dot.y) dot.y - 1 else dot.y,
                                 )
                         }
                     }
@@ -148,12 +164,20 @@ class PatternBouncerViewModel(
     /** Notifies that the user has ended the drag gesture across the dot grid. */
     fun onDragEnd() {
         val pattern = _selectedDots.value.map { it.toCoordinate() }
+
+        if (pattern.size == 1) {
+            // Single dot patterns are treated as erroneous/false taps:
+            interactor.onFalseUserInput()
+        }
+
         _dots.value = defaultDots()
         _currentDot.value = null
         _selectedDots.value = linkedSetOf()
 
         applicationScope.launch {
-            if (interactor.authenticate(pattern) != true) {
+            if (pattern.size < interactor.minPatternLength) {
+                interactor.showErrorMessage()
+            } else if (interactor.authenticate(pattern) != true) {
                 showFailureAnimation()
             }
         }
@@ -187,6 +211,34 @@ class PatternBouncerViewModel(
     companion object {
         private const val MIN_DOT_HIT_FACTOR = 0.2f
     }
+}
+
+/**
+ * Determines whether [this] dot is present on the line segment connecting [first] and [second]
+ * dots.
+ */
+private fun PatternDotViewModel.isOnLineSegment(
+    first: PatternDotViewModel,
+    second: PatternDotViewModel
+): Boolean {
+    val anotherPoint = this
+    // No need to consider any points outside the bounds of two end points
+    val isWithinBounds =
+        anotherPoint.x.isBetween(first.x, second.x) && anotherPoint.y.isBetween(first.y, second.y)
+    if (!isWithinBounds) {
+        return false
+    }
+
+    // Uses the 2 point line equation: (y-y1)/(x-x1) = (y2-y1)/(x2-x1)
+    // which can be rewritten as:      (y-y1)*(x2-x1) = (x-x1)*(y2-y1)
+    // This is true for any point on the line passing through these two points
+    return (anotherPoint.y - first.y) * (second.x - first.x) ==
+        (anotherPoint.x - first.x) * (second.y - first.y)
+}
+
+/** Is [this] Int between [a] and [b] */
+private fun Int.isBetween(a: Int, b: Int): Boolean {
+    return (this in a..b) || (this in b..a)
 }
 
 data class PatternDotViewModel(

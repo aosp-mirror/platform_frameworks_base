@@ -25,6 +25,7 @@ import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
+import com.android.wm.shell.flicker.pip.common.PipTransition
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith

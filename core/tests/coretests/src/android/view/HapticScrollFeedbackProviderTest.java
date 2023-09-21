@@ -19,8 +19,10 @@ package android.view;
 import static android.view.HapticFeedbackConstants.SCROLL_ITEM_FOCUS;
 import static android.view.HapticFeedbackConstants.SCROLL_LIMIT;
 import static android.view.HapticFeedbackConstants.SCROLL_TICK;
-
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
@@ -32,6 +34,7 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,22 +46,48 @@ public final class HapticScrollFeedbackProviderTest {
     private static final int INPUT_DEVICE_1 = 1;
     private static final int INPUT_DEVICE_2 = 2;
 
-    private static final int TICK_INTERVAL_PIXELS = 100;
-
     private TestView mView;
-    private long mCurrentTimeMillis = 1000; // arbitrary starting time value
+
+    @Mock ViewConfiguration mMockViewConfig;
 
     private HapticScrollFeedbackProvider mProvider;
 
     @Before
     public void setUp() {
+        mMockViewConfig = mock(ViewConfiguration.class);
+        setHapticScrollFeedbackEnabled(true);
+
         mView = new TestView(InstrumentationRegistry.getContext());
-        mProvider = new HapticScrollFeedbackProvider(mView, TICK_INTERVAL_PIXELS);
+        mProvider = new HapticScrollFeedbackProvider(mView, mMockViewConfig);
+    }
+
+    @Test
+    public void testNoFeedbackWhenFeedbackIsDisabled() {
+        setHapticScrollFeedbackEnabled(false);
+        // Call different types scroll feedback methods; non of them should produce feedback because
+        // feedback has been disabled.
+        mProvider.onSnapToItem(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL);
+        mProvider.onScrollLimit(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ true);
+        mProvider.onScrollLimit(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
+        mProvider.onScrollProgress(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 300);
+        mProvider.onScrollProgress(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ -300);
+
+        assertNoFeedback(mView);
     }
 
     @Test
     public void testSnapToItem() {
-        mProvider.onSnapToItem(createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL);
+        mProvider.onSnapToItem(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_ITEM_FOCUS);
     }
@@ -66,7 +95,8 @@ public final class HapticScrollFeedbackProviderTest {
     @Test
     public void testScrollLimit_start() {
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ true);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ true);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_LIMIT);
     }
@@ -74,79 +104,69 @@ public final class HapticScrollFeedbackProviderTest {
     @Test
     public void testScrollLimit_stop() {
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_LIMIT);
     }
 
     @Test
     public void testScrollProgress_zeroTickInterval() {
-        mProvider =
-                new HapticScrollFeedbackProvider(
-                        mView, /* rotaryEncoderAxisScrollTickIntervalPixels= */ 0);
+        setHapticScrollTickInterval(0);
 
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 10);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 30);
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 30);
-        mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 30);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 20);
 
         assertNoFeedback(mView);
     }
 
     @Test
     public void testScrollProgress_progressEqualsOrExceedsPositiveThreshold() {
-        mProvider =
-                new HapticScrollFeedbackProvider(
-                        mView, /* rotaryEncoderAxisScrollTickIntervalPixels= */ 100);
-
+        setHapticScrollTickInterval(100);
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 20);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 20);
 
         assertNoFeedback(mView);
 
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 80);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 80);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_TICK, 1);
 
-
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 80);
-        mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 40);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 120);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_TICK, 2);
     }
 
     @Test
     public void testScrollProgress_progressEqualsOrExceedsNegativeThreshold() {
-        mProvider =
-                new HapticScrollFeedbackProvider(
-                        mView, /* rotaryEncoderAxisScrollTickIntervalPixels= */ 100);
+        setHapticScrollTickInterval(100);
 
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(),
-                MotionEvent.AXIS_SCROLL,
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
                 /* deltaInPixels= */ -20);
 
         assertNoFeedback(mView);
 
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(),
-                MotionEvent.AXIS_SCROLL,
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
                 /* deltaInPixels= */ -80);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_TICK, 1);
 
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(),
-                MotionEvent.AXIS_SCROLL,
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
                 /* deltaInPixels= */ -70);
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(),
-                MotionEvent.AXIS_SCROLL,
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
                 /* deltaInPixels= */ -40);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_TICK, 2);
@@ -154,50 +174,50 @@ public final class HapticScrollFeedbackProviderTest {
 
     @Test
     public void testScrollProgress_positiveAndNegativeProgresses() {
-        mProvider =
-                new HapticScrollFeedbackProvider(
-                        mView, /* rotaryEncoderAxisScrollTickIntervalPixels= */ 100);
+        setHapticScrollTickInterval(100);
 
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 20);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 20);
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(),
-                MotionEvent.AXIS_SCROLL,
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
                 /* deltaInPixels= */ -90);
 
         assertNoFeedback(mView);
 
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 10);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 10);
 
         assertNoFeedback(mView);
 
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(),
-                MotionEvent.AXIS_SCROLL,
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
                 /* deltaInPixels= */ -50);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_TICK, 1);
 
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 40);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 40);
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 50);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 50);
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 60);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 60);
+
+
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_TICK, 2);
     }
 
     @Test
     public void testScrollProgress_singleProgressExceedsThreshold() {
-        mProvider =
-                new HapticScrollFeedbackProvider(
-                        mView, /* rotaryEncoderAxisScrollTickIntervalPixels= */ 100);
+        setHapticScrollTickInterval(100);
 
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(),
-                MotionEvent.AXIS_SCROLL,
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
                 /* deltaInPixels= */ 1000);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_TICK, 1);
@@ -206,9 +226,11 @@ public final class HapticScrollFeedbackProviderTest {
     @Test
     public void testScrollLimit_startAndEndLimit_playsOnlyOneFeedback() {
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ true);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ true);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_LIMIT);
     }
@@ -216,9 +238,11 @@ public final class HapticScrollFeedbackProviderTest {
     @Test
     public void testScrollLimit_doubleStartLimit_playsOnlyOneFeedback() {
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ true);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ true);
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ true);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ true);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_LIMIT);
     }
@@ -226,22 +250,46 @@ public final class HapticScrollFeedbackProviderTest {
     @Test
     public void testScrollLimit_doubleEndLimit_playsOnlyOneFeedback() {
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_LIMIT);
     }
 
     @Test
-    public void testScrollLimit_enabledWithProgress() {
+    public void testScrollLimit_notEnabledWithZeroProgress() {
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
 
         mProvider.onScrollProgress(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 80);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 0);
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ true);
+        mProvider.onScrollLimit(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
+
+        assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_LIMIT, 1);
+    }
+
+    @Test
+    public void testScrollLimit_enabledWithProgress() {
+        mProvider.onScrollLimit(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
+
+        mProvider.onScrollProgress(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 80);
+        mProvider.onScrollLimit(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_LIMIT, 2);
     }
@@ -249,11 +297,14 @@ public final class HapticScrollFeedbackProviderTest {
     @Test
     public void testScrollLimit_enabledWithSnap() {
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
 
-        mProvider.onSnapToItem(createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL);
+        mProvider.onSnapToItem(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL);
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
 
         assertFeedbackCount(mView, HapticFeedbackConstants.SCROLL_LIMIT, 2);
     }
@@ -261,11 +312,14 @@ public final class HapticScrollFeedbackProviderTest {
     @Test
     public void testScrollLimit_enabledWithDissimilarSnap() {
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
 
-        mProvider.onSnapToItem(createTouchMoveEvent(), MotionEvent.AXIS_X);
+        mProvider.onSnapToItem(
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_X);
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
 
         assertFeedbackCount(mView, HapticFeedbackConstants.SCROLL_LIMIT, 2);
     }
@@ -273,46 +327,40 @@ public final class HapticScrollFeedbackProviderTest {
     @Test
     public void testScrollLimit_enabledWithDissimilarProgress() {
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
 
         mProvider.onScrollProgress(
-                createTouchMoveEvent(), MotionEvent.AXIS_SCROLL, /* deltaInPixels= */ 80);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 80);
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* isStart= */ false);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_LIMIT, 2);
     }
 
-    @Test
-    public void testScrollLimit_enabledWithDissimilarLimit() {
-        mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
-
-        mProvider.onScrollLimit(createTouchMoveEvent(), MotionEvent.AXIS_SCROLL, false);
-        mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(), MotionEvent.AXIS_SCROLL, /* isStart= */ false);
-
-        assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_LIMIT, 3);
-    }
 
     @Test
     public void testScrollLimit_enabledWithMotionFromDifferentDeviceId() {
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(INPUT_DEVICE_1),
-                MotionEvent.AXIS_SCROLL,
+                INPUT_DEVICE_1, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
                 /* isStart= */ false);
 
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(INPUT_DEVICE_2),
+                INPUT_DEVICE_2,
+                InputDevice.SOURCE_ROTARY_ENCODER,
                 MotionEvent.AXIS_SCROLL,
                 /* isStart= */ false);
         mProvider.onScrollLimit(
-                createRotaryEncoderScrollEvent(INPUT_DEVICE_1),
+                INPUT_DEVICE_1,
+                InputDevice.SOURCE_ROTARY_ENCODER,
                 MotionEvent.AXIS_SCROLL,
                 /* isStart= */ false);
 
         assertOnlyFeedback(mView, HapticFeedbackConstants.SCROLL_LIMIT, 3);
     }
+
 
     private void assertNoFeedback(TestView view) {
         for (int feedback : new int[] {SCROLL_ITEM_FOCUS, SCROLL_LIMIT, SCROLL_TICK}) {
@@ -335,39 +383,14 @@ public final class HapticScrollFeedbackProviderTest {
         assertThat(count).isEqualTo(expectedCount);
     }
 
-    private MotionEvent createTouchMoveEvent() {
-        long downTime = mCurrentTimeMillis;
-        long eventTime = mCurrentTimeMillis + 2; // arbitrary increment from the down time.
-        ++mCurrentTimeMillis;
-        return MotionEvent.obtain(
-                downTime , eventTime, MotionEvent.ACTION_MOVE, /* x= */ 3, /* y= */ 5, 0);
+    private void setHapticScrollTickInterval(int interval) {
+        when(mMockViewConfig.getHapticScrollFeedbackTickInterval(anyInt(), anyInt(), anyInt()))
+                .thenReturn(interval);
     }
 
-    private MotionEvent createRotaryEncoderScrollEvent() {
-        return createRotaryEncoderScrollEvent(INPUT_DEVICE_1);
-    }
-
-    private MotionEvent createRotaryEncoderScrollEvent(int deviceId) {
-        MotionEvent.PointerProperties props = new MotionEvent.PointerProperties();
-        props.id = 0;
-
-        MotionEvent.PointerCoords coords = new MotionEvent.PointerCoords();
-        coords.setAxisValue(MotionEvent.AXIS_SCROLL, 20);
-
-        return MotionEvent.obtain(0 /* downTime */,
-                ++mCurrentTimeMillis,
-                MotionEvent.ACTION_SCROLL,
-                /* pointerCount= */ 1,
-                new MotionEvent.PointerProperties[] {props},
-                new MotionEvent.PointerCoords[] {coords},
-                /* metaState= */ 0,
-                /* buttonState= */ 0,
-                /* xPrecision= */ 0,
-                /* yPrecision= */ 0,
-                deviceId,
-                /* edgeFlags= */ 0,
-                InputDevice.SOURCE_ROTARY_ENCODER,
-                /* flags= */ 0);
+    private void setHapticScrollFeedbackEnabled(boolean enabled) {
+        when(mMockViewConfig.isHapticScrollFeedbackEnabled(anyInt(), anyInt(), anyInt()))
+                .thenReturn(enabled);
     }
 
     private static class TestView extends View  {

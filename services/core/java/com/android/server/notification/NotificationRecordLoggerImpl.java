@@ -77,7 +77,8 @@ class NotificationRecordLoggerImpl implements NotificationRecordLogger {
                 notificationReported.is_non_dismissible,
                 notificationReported.post_duration_millis,
                 notificationReported.fsi_state,
-                notificationReported.is_locked);
+                notificationReported.is_locked,
+                notificationReported.age_in_minutes);
     }
 
     @Override

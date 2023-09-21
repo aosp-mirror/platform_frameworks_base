@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         android:color="?android:attr/colorControlHighlight">
     <item>
@@ -23,4 +23,9 @@
             <solid android:color="?androidprv:attr/colorSurface" />
         </shape>
     </item>
-</ripple>
+    <item>
+        <shape>
+            <solid android:color="@color/notification_overlay_color" />
+        </shape>
+    </item>
+</layer-list>

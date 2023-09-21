@@ -18,9 +18,11 @@ package android.companion.virtual;
 
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
+import android.companion.virtual.IVirtualDeviceListener;
 import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceParams;
+import android.content.AttributionSource;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 
@@ -46,7 +48,7 @@ interface IVirtualDeviceManager {
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     IVirtualDevice createVirtualDevice(
-            in IBinder token, String packageName, int associationId,
+            in IBinder token, in AttributionSource attributionSource, int associationId,
             in VirtualDeviceParams params, in IVirtualDeviceActivityListener activityListener,
             in IVirtualDeviceSoundEffectListener soundEffectListener);
 
@@ -55,12 +57,27 @@ interface IVirtualDeviceManager {
      */
     List<VirtualDevice> getVirtualDevices();
 
-   /**
+    /**
+     * Returns the details of the virtual device with the given ID, if any.
+     */
+    VirtualDevice getVirtualDevice(int deviceId);
+
+    /**
+     * Registers a virtual device listener to receive notifications for virtual device events.
+     */
+    void registerVirtualDeviceListener(in IVirtualDeviceListener listener);
+
+    /**
+     * Unregisters a previously registered virtual device listener.
+     */
+    void unregisterVirtualDeviceListener(in IVirtualDeviceListener listener);
+
+    /**
      * Returns the ID of the device which owns the display with the given ID.
      */
     int getDeviceIdForDisplayId(int displayId);
 
-   /**
+    /**
      * Checks whether the passed {@code deviceId} is a valid virtual device ID or not.
      * {@link VirtualDeviceManager#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
      * device which is not a virtual device. {@code deviceId} must correspond to a virtual device

@@ -81,7 +81,7 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -136,8 +136,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @ClassRule
-    public static AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    @Rule
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
 
     private List<StatusBarWindowStateListener> mStatusBarWindowStateListeners = new ArrayList<>();
 

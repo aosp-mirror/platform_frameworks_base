@@ -321,7 +321,7 @@ constructor(
         // When switched to a secondary user, the sysUI is still running in the main user, we will
         // need to update the shortcut in the secondary user.
         if (user == getCurrentRunningUser()) {
-            updateNoteTaskAsUserInternal(user)
+            launchUpdateNoteTaskAsUser(user)
         } else {
             // TODO(b/278729185): Replace fire and forget service with a bounded service.
             val intent = NoteTaskControllerUpdateService.createIntent(context)
@@ -330,23 +330,25 @@ constructor(
     }
 
     @InternalNoteTaskApi
-    fun updateNoteTaskAsUserInternal(user: UserHandle) {
-        if (!userManager.isUserUnlocked(user)) {
-            debugLog { "updateNoteTaskAsUserInternal call but user locked: user=$user" }
-            return
-        }
+    fun launchUpdateNoteTaskAsUser(user: UserHandle) {
+        applicationScope.launch {
+            if (!userManager.isUserUnlocked(user)) {
+                debugLog { "updateNoteTaskAsUserInternal call but user locked: user=$user" }
+                return@launch
+            }
 
-        val packageName = roleManager.getDefaultRoleHolderAsUser(ROLE_NOTES, user)
-        val hasNotesRoleHolder = isEnabled && !packageName.isNullOrEmpty()
+            val packageName = roleManager.getDefaultRoleHolderAsUser(ROLE_NOTES, user)
+            val hasNotesRoleHolder = isEnabled && !packageName.isNullOrEmpty()
 
-        setNoteTaskShortcutEnabled(hasNotesRoleHolder, user)
+            setNoteTaskShortcutEnabled(hasNotesRoleHolder, user)
 
-        if (hasNotesRoleHolder) {
-            shortcutManager.enableShortcuts(listOf(SHORTCUT_ID))
-            val updatedShortcut = roleManager.createNoteShortcutInfoAsUser(context, user)
-            shortcutManager.updateShortcuts(listOf(updatedShortcut))
-        } else {
-            shortcutManager.disableShortcuts(listOf(SHORTCUT_ID))
+            if (hasNotesRoleHolder) {
+                shortcutManager.enableShortcuts(listOf(SHORTCUT_ID))
+                val updatedShortcut = roleManager.createNoteShortcutInfoAsUser(context, user)
+                shortcutManager.updateShortcuts(listOf(updatedShortcut))
+            } else {
+                shortcutManager.disableShortcuts(listOf(SHORTCUT_ID))
+            }
         }
     }
 

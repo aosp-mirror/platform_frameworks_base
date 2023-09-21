@@ -83,6 +83,16 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper {
         return "";
     }
 
+    /** Updates the keyguard view's constraints (single or split constraints).
+     *  Split constraints are only used for small landscape screens.
+     *  Only called when flag LANDSCAPE_ENABLE_LOCKSCREEN is enabled. */
+    public void updateConstraints(boolean useSplitBouncer) {
+        KeyguardInputView securityView = getSecurityView();
+        if (securityView != null) {
+            securityView.updateConstraints(useSplitBouncer);
+        }
+    }
+
     @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof LayoutParams;

@@ -39,6 +39,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -54,6 +55,7 @@ import java.util.Map;
  * Due to how the classes are structured, we have to test it in a somewhat roundabout way. We're
  * mocking out the contentProvider and are handcrafting very specific Bundles to answer the queries.
  */
+@Ignore("b/297724333")
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -233,6 +235,7 @@ public class NameValueCacheTest {
         mConfigsCacheGenerationStore.close();
     }
 
+    @Ignore("b/297724333")
     @Test
     public void testCaching_singleNamespace() throws Exception {
         HashMap<String, String> keyValues = new HashMap<>();
@@ -270,6 +273,7 @@ public class NameValueCacheTest {
         assertThat(cachedKeyValues2).containsExactlyEntriesIn(keyValues);
     }
 
+    @Ignore("b/297724333")
     @Test
     public void testCaching_multipleNamespaces() throws Exception {
         HashMap<String, String> keyValues = new HashMap<>();
@@ -309,6 +313,7 @@ public class NameValueCacheTest {
         assertThat(cachedKeyValues2).containsExactlyEntriesIn(keyValues2);
     }
 
+    @Ignore("b/297724333")
     @Test
     public void testCaching_emptyNamespace() throws Exception {
         Map<String, String> returnedValues = Settings.Config.getStrings(mMockContentResolver,
@@ -325,6 +330,7 @@ public class NameValueCacheTest {
         assertThat(cachedKeyValues).isEmpty();
     }
 
+    @Ignore("b/297724333")
     @Test
     public void testCaching_singleSetting() throws Exception {
         Settings.Secure.putString(mMockContentResolver, SETTING, "a");
@@ -355,6 +361,7 @@ public class NameValueCacheTest {
         assertThat(cachedValue2).isEqualTo("b");
     }
 
+    @Ignore("b/297724333")
     @Test
     public void testCaching_multipleSettings() throws Exception {
         Settings.Secure.putString(mMockContentResolver, SETTING, "a");
@@ -385,6 +392,7 @@ public class NameValueCacheTest {
         assertThat(cachedValue2).isEqualTo("b");
     }
 
+    @Ignore("b/297724333")
     @Test
     public void testCaching_unsetSetting() throws Exception {
         String returnedValue = Settings.Secure.getString(mMockContentResolver, SETTING);

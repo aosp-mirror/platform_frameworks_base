@@ -32,6 +32,8 @@ class FakePowerRepository(
     var lastWakeWhy: String? = null
     var lastWakeReason: Int? = null
 
+    var userTouchRegistered = false
+
     fun setInteractive(value: Boolean) {
         _isInteractive.value = value
     }
@@ -39,5 +41,9 @@ class FakePowerRepository(
     override fun wakeUp(why: String, @PowerManager.WakeReason wakeReason: Int) {
         lastWakeWhy = why
         lastWakeReason = wakeReason
+    }
+
+    override fun userTouch() {
+        userTouchRegistered = true
     }
 }

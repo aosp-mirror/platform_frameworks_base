@@ -22,9 +22,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
-import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.R.string.keyguard_enter_pin
 import com.android.systemui.R.string.kg_too_many_failed_attempts_countdown
+import com.android.systemui.R.string.kg_unlock_with_pin_or_fp
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.factory.BouncerMessageFactory
 import com.android.systemui.bouncer.data.repository.FakeBouncerMessageRepository
@@ -34,11 +33,11 @@ import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -49,14 +48,13 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)
 class BouncerMessageInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var securityModel: KeyguardSecurityModel
-    @Mock private lateinit var updateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
     @Mock private lateinit var countDownTimerUtil: CountDownTimerUtil
     private lateinit var countDownTimerCallback: KotlinArgumentCaptor<CountDownTimerCallback>
     private lateinit var underTest: BouncerMessageInteractor
@@ -73,10 +71,11 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
         userRepository.setUserInfos(listOf(PRIMARY_USER))
         testScope = TestScope()
         countDownTimerCallback = KotlinArgumentCaptor(CountDownTimerCallback::class.java)
+        biometricSettingsRepository = FakeBiometricSettingsRepository()
 
         allowTestableLooperAsMainThread()
         whenever(securityModel.getSecurityMode(PRIMARY_USER_ID)).thenReturn(PIN)
-        whenever(updateMonitor.isUnlockingWithFingerprintAllowed).thenReturn(false)
+        biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
     }
 
     suspend fun TestScope.init() {
@@ -86,7 +85,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
         underTest =
             BouncerMessageInteractor(
                 repository = repository,
-                factory = BouncerMessageFactory(updateMonitor, securityModel),
+                factory = BouncerMessageFactory(biometricSettingsRepository, securityModel),
                 userRepository = userRepository,
                 countDownTimerUtil = countDownTimerUtil,
                 featureFlags = featureFlags
@@ -151,7 +150,8 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
             underTest.setCustomMessage("not empty")
 
             val customMessage = repository.customMessage
-            assertThat(customMessage.value!!.message!!.messageResId).isEqualTo(keyguard_enter_pin)
+            assertThat(customMessage.value!!.message!!.messageResId)
+                .isEqualTo(kg_unlock_with_pin_or_fp)
             assertThat(customMessage.value!!.secondaryMessage!!.message).isEqualTo("not empty")
 
             underTest.setCustomMessage(null)
@@ -168,7 +168,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
             val faceAcquisitionMessage = repository.faceAcquisitionMessage
 
             assertThat(faceAcquisitionMessage.value!!.message!!.messageResId)
-                .isEqualTo(keyguard_enter_pin)
+                .isEqualTo(kg_unlock_with_pin_or_fp)
             assertThat(faceAcquisitionMessage.value!!.secondaryMessage!!.message)
                 .isEqualTo("not empty")
 
@@ -186,7 +186,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
             val fingerprintAcquisitionMessage = repository.fingerprintAcquisitionMessage
 
             assertThat(fingerprintAcquisitionMessage.value!!.message!!.messageResId)
-                .isEqualTo(keyguard_enter_pin)
+                .isEqualTo(kg_unlock_with_pin_or_fp)
             assertThat(fingerprintAcquisitionMessage.value!!.secondaryMessage!!.message)
                 .isEqualTo("not empty")
 
@@ -275,7 +275,8 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
             repository.setBiometricLockedOutMessage(null)
 
             // sets the default message if everything else is null
-            assertThat(bouncerMessage()!!.message!!.messageResId).isEqualTo(keyguard_enter_pin)
+            assertThat(bouncerMessage()!!.message!!.messageResId)
+                .isEqualTo(kg_unlock_with_pin_or_fp)
         }
 
     private fun message(value: String): BouncerMessageModel {

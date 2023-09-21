@@ -17,6 +17,7 @@
 package com.android.wm.shell.recents;
 
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
@@ -256,7 +257,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void testGetRecentTasks_hasActiveDesktopTasks_proto2Enabled_groupFreeformTasks() {
         StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
                 DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isProto2Enabled()).thenReturn(true);
+        when(DesktopModeStatus.isEnabled()).thenReturn(true);
 
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
@@ -296,7 +297,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void testGetRecentTasks_hasActiveDesktopTasks_proto2Disabled_doNotGroupFreeformTasks() {
         StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
                 DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isProto2Enabled()).thenReturn(false);
+        when(DesktopModeStatus.isEnabled()).thenReturn(false);
 
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
@@ -365,6 +366,37 @@ public class RecentTasksControllerTest extends ShellTestCase {
         mShellTaskOrganizer.onTaskInfoChanged(rt2MultiWIndow);
 
         verify(mRecentTasksController).notifyRecentTasksChanged();
+    }
+
+    @Test
+    public void getNullSplitBoundsNonSplitTask() {
+        SplitBounds sb = mRecentTasksController.getSplitBoundsForTaskId(3);
+        assertNull("splitBounds should be null for non-split task", sb);
+    }
+
+    @Test
+    public void getNullSplitBoundsInvalidTask() {
+        SplitBounds sb = mRecentTasksController.getSplitBoundsForTaskId(INVALID_TASK_ID);
+        assertNull("splitBounds should be null for invalid taskID", sb);
+    }
+
+    @Test
+    public void getSplitBoundsForSplitTask() {
+        SplitBounds pair1Bounds = mock(SplitBounds.class);
+        SplitBounds pair2Bounds = mock(SplitBounds.class);
+
+        mRecentTasksController.addSplitPair(1, 2, pair1Bounds);
+        mRecentTasksController.addSplitPair(4, 3, pair2Bounds);
+
+        SplitBounds splitBounds2 = mRecentTasksController.getSplitBoundsForTaskId(2);
+        SplitBounds splitBounds1 = mRecentTasksController.getSplitBoundsForTaskId(1);
+        assertEquals("Different splitBounds for same pair", splitBounds1, splitBounds2);
+        assertEquals(splitBounds1, pair1Bounds);
+
+        SplitBounds splitBounds3 = mRecentTasksController.getSplitBoundsForTaskId(3);
+        SplitBounds splitBounds4 = mRecentTasksController.getSplitBoundsForTaskId(4);
+        assertEquals("Different splitBounds for same pair", splitBounds3, splitBounds4);
+        assertEquals(splitBounds4, pair2Bounds);
     }
 
     /**

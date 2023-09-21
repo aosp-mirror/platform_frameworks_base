@@ -17,12 +17,9 @@
 package com.android.server.pm;
 
 import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
-
 import static com.google.common.truth.Truth.assertWithMessage;
-
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
-
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
@@ -99,7 +96,7 @@ public class PackageManagerServiceTest {
 
             public void sendPackageAddedForNewUsers(@NonNull Computer snapshot, String packageName,
                     boolean sendBootComplete, boolean includeStopped, int appId,
-                    int[] userIds, int[] instantUserIds, int dataLoaderType) {
+                    int[] userIds, int[] instantUserIds, boolean isArchived, int dataLoaderType) {
             }
 
             @Override
@@ -125,7 +122,7 @@ public class PackageManagerServiceTest {
         Assert.assertNull(pri.mBroadcastUsers);
 
         // populateUsers with nothing leaves nothing
-        pri.populateUsers(null, setting);
+        pri.populateBroadcastUsers(setting);
         Assert.assertNull(pri.mBroadcastUsers);
 
         // Create a real (non-null) PackageSetting and confirm that the removed
@@ -139,9 +136,10 @@ public class PackageManagerServiceTest {
                 .setSecondaryCpuAbiString("secondaryCpuAbiString")
                 .setCpuAbiOverrideString("cpuAbiOverrideString")
                 .build();
-        pri.populateUsers(new int[]{
+        pri.mRemovedUsers = new int[]{
                 1, 2, 3, 4, 5
-        }, setting);
+        };
+        pri.populateBroadcastUsers(setting);
         Assert.assertNotNull(pri.mBroadcastUsers);
         Assert.assertEquals(5, pri.mBroadcastUsers.length);
         Assert.assertNotNull(pri.mInstantUserIds);
@@ -151,9 +149,10 @@ public class PackageManagerServiceTest {
         pri.mBroadcastUsers = null;
         final int EXCLUDED_USER_ID = 4;
         setting.setInstantApp(true, EXCLUDED_USER_ID);
-        pri.populateUsers(new int[]{
+        pri.mRemovedUsers = new int[]{
                 1, 2, 3, EXCLUDED_USER_ID, 5
-        }, setting);
+        };
+        pri.populateBroadcastUsers(setting);
         Assert.assertNotNull(pri.mBroadcastUsers);
         Assert.assertEquals(4, pri.mBroadcastUsers.length);
         Assert.assertNotNull(pri.mInstantUserIds);

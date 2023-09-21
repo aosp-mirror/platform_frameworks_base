@@ -6,3 +6,17 @@ flag {
   description: "This flag controls removing expired notification bitmaps"
   bug: "290381858"
 }
+
+flag {
+  name: "polite_notifications"
+  namespace: "systemui"
+  description: "This flag controls the polite notification feature"
+  bug: "270456865"
+}
+
+flag {
+  name: "refactor_attention_helper"
+  namespace: "systemui"
+  description: "This flag controls the refactoring of NMS to NotificationAttentionHelper"
+  bug: "291907312"
+}

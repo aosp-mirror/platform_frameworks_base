@@ -412,6 +412,15 @@ public class TelecomManager {
             "android.telecom.extra.CALL_CREATED_TIME_MILLIS";
 
     /**
+     * Optional extra for incoming containing a long which specifies the time the
+     * call was answered by user. This value is in milliseconds.
+     * @hide
+     */
+    public static final String EXTRA_CALL_ANSWERED_TIME_MILLIS =
+            "android.telecom.extra.CALL_ANSWERED_TIME_MILLIS";
+
+
+    /**
      * Optional extra for incoming and outgoing calls containing a long which specifies the Epoch
      * time the call was created.
      * @hide

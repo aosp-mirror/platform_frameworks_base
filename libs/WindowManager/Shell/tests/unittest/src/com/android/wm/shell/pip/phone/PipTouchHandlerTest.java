@@ -18,7 +18,6 @@ package com.android.wm.shell.pip.phone;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -34,15 +33,15 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipKeepClearAlgorithmInterface;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.SizeSpecSource;
-import com.android.wm.shell.pip.PipBoundsAlgorithm;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
-import com.android.wm.shell.pip.PipKeepClearAlgorithmInterface;
-import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
-import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
@@ -173,17 +172,5 @@ public class PipTouchHandlerTest extends ShellTestCase {
 
         verify(mPipResizeGestureHandler, times(1))
                 .updateMaxSize(expectedMaxSize.getWidth(), expectedMaxSize.getHeight());
-    }
-
-    @Test
-    public void updateMovementBounds_withImeAdjustment_movesPip() {
-        mPipTouchHandler.setEnablePipKeepClearAlgorithm(false);
-        mFromImeAdjustment = true;
-        mPipTouchHandler.onImeVisibilityChanged(true /* imeVisible */, mImeHeight);
-
-        mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mPipBounds, mCurBounds,
-                mFromImeAdjustment, mFromShelfAdjustment, mDisplayRotation);
-
-        verify(mMotionHelper, times(1)).animateToOffset(any(), anyInt());
     }
 }

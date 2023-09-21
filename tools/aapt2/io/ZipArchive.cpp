@@ -75,6 +75,14 @@ bool ZipFile::WasCompressed() {
   return zip_entry_.method != kCompressStored;
 }
 
+bool ZipFile::GetModificationTime(struct tm* buf) const {
+  if (buf == nullptr) {
+    return false;
+  }
+  *buf = zip_entry_.GetModificationTime();
+  return true;
+}
+
 ZipFileCollectionIterator::ZipFileCollectionIterator(
     ZipFileCollection* collection)
     : current_(collection->files_.begin()), end_(collection->files_.end()) {}

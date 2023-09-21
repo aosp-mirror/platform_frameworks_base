@@ -35,6 +35,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
+import com.android.wm.shell.bubbles.BubbleEducationController;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.properties.ProdBubbleProperties;
@@ -54,7 +55,6 @@ import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
-import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -135,11 +135,18 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static BubbleEducationController provideBubbleEducationProvider(Context context) {
+        return new BubbleEducationController(context);
+    }
+
+    @WMSingleton
+    @Provides
     static BubbleData provideBubbleData(Context context,
             BubbleLogger logger,
             BubblePositioner positioner,
+            BubbleEducationController educationController,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new BubbleData(context, logger, positioner, mainExecutor);
+        return new BubbleData(context, logger, positioner, educationController, mainExecutor);
     }
 
     // Note: Handler needed for LauncherApps.register
@@ -167,6 +174,7 @@ public abstract class WMShellModule {
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
+            Transitions transitions,
             SyncTransactionQueue syncQueue,
             IWindowManager wmService) {
         return new BubbleController(context, shellInit, shellCommandHandler, shellController, data,
@@ -176,7 +184,8 @@ public abstract class WMShellModule {
                 statusBarService, windowManager, windowManagerShellWrapper, userManager,
                 launcherApps, logger, taskStackListener, organizer, positioner, displayController,
                 oneHandedOptional, dragAndDropController, mainExecutor, mainHandler, bgExecutor,
-                taskViewTransitions, syncQueue, wmService, ProdBubbleProperties.INSTANCE);
+                taskViewTransitions, transitions, syncQueue, wmService,
+                ProdBubbleProperties.INSTANCE);
     }
 
     //
@@ -195,9 +204,10 @@ public abstract class WMShellModule {
             ShellController shellController,
             SyncTransactionQueue syncQueue,
             Transitions transitions,
-            Optional<DesktopModeController> desktopModeController,
-            Optional<DesktopTasksController> desktopTasksController) {
-        if (DesktopModeStatus.isAnyEnabled()) {
+            Optional<DesktopTasksController> desktopTasksController,
+            RecentsTransitionHandler recentsTransitionHandler,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+        if (DesktopModeStatus.isEnabled()) {
             return new DesktopModeWindowDecorViewModel(
                     context,
                     mainHandler,
@@ -208,8 +218,9 @@ public abstract class WMShellModule {
                     shellController,
                     syncQueue,
                     transitions,
-                    desktopModeController,
-                    desktopTasksController);
+                    desktopTasksController,
+                    recentsTransitionHandler,
+                    rootTaskDisplayAreaOrganizer);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -349,13 +360,12 @@ public abstract class WMShellModule {
             @Nullable PipTransitionController pipTransitionController,
             Optional<RecentsTransitionHandler> recentsTransitionHandler,
             KeyguardTransitionHandler keyguardTransitionHandler,
-            Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
             Optional<UnfoldTransitionHandler> unfoldHandler,
             Transitions transitions) {
         return new DefaultMixedHandler(shellInit, transitions, splitScreenOptional,
                 pipTransitionController, recentsTransitionHandler,
-                keyguardTransitionHandler, desktopModeController, desktopTasksController,
+                keyguardTransitionHandler, desktopTasksController,
                 unfoldHandler);
     }
 
@@ -467,24 +477,6 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     @DynamicOverride
-    static DesktopModeController provideDesktopModeController(Context context,
-            ShellInit shellInit,
-            ShellController shellController,
-            ShellTaskOrganizer shellTaskOrganizer,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            Transitions transitions,
-            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
-            @ShellMainThread Handler mainHandler,
-            @ShellMainThread ShellExecutor mainExecutor
-    ) {
-        return new DesktopModeController(context, shellInit, shellController, shellTaskOrganizer,
-                rootTaskDisplayAreaOrganizer, transitions, desktopModeTaskRepository, mainHandler,
-                mainExecutor);
-    }
-
-    @WMSingleton
-    @Provides
-    @DynamicOverride
     static DesktopTasksController provideDesktopTasksController(
             Context context,
             ShellInit shellInit,
@@ -549,8 +541,7 @@ public abstract class WMShellModule {
     @ShellCreateTriggerOverride
     @Provides
     static Object provideIndependentShellComponentsToCreate(
-            DefaultMixedHandler defaultMixedHandler,
-            Optional<DesktopModeController> desktopModeController) {
+            DefaultMixedHandler defaultMixedHandler) {
         return new Object();
     }
 }

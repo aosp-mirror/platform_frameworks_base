@@ -15,6 +15,8 @@
  *
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
@@ -30,7 +32,15 @@ import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
+import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.ObservableTransitionState
+import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -52,23 +62,34 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var configurationRepository: FakeConfigurationRepository
+    private lateinit var shadeRepository: FakeShadeRepository
+    private lateinit var sceneInteractor: SceneInteractor
+    private lateinit var transitionState: MutableStateFlow<ObservableTransitionState>
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         featureFlags = FakeFeatureFlags().apply { set(FACE_AUTH_REFACTOR, true) }
         commandQueue = FakeCommandQueue()
-        testScope = TestScope()
-        repository = FakeKeyguardRepository()
+        val sceneTestUtils = SceneTestUtils(this)
+        testScope = sceneTestUtils.testScope
+        repository = sceneTestUtils.keyguardRepository
         bouncerRepository = FakeKeyguardBouncerRepository()
         configurationRepository = FakeConfigurationRepository()
+        shadeRepository = FakeShadeRepository()
+        sceneInteractor = sceneTestUtils.sceneInteractor()
+        transitionState = MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Gone))
+        sceneInteractor.setTransitionState(transitionState)
         underTest =
             KeyguardInteractor(
-                repository,
-                commandQueue,
-                featureFlags,
-                bouncerRepository,
-                configurationRepository,
+                repository = repository,
+                commandQueue = commandQueue,
+                featureFlags = featureFlags,
+                sceneContainerFlags = sceneTestUtils.sceneContainerFlags,
+                bouncerRepository = bouncerRepository,
+                configurationRepository = configurationRepository,
+                shadeRepository = shadeRepository,
+                sceneInteractorProvider = { sceneInteractor },
             )
     }
 
@@ -175,5 +196,30 @@ class KeyguardInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(secureCameraActive()).isFalse()
+        }
+
+    @Test
+    fun animationDozingTransitions() =
+        testScope.runTest {
+            val isAnimate by collectLastValue(underTest.animateDozingTransitions)
+
+            underTest.setAnimateDozingTransitions(true)
+            runCurrent()
+            assertThat(isAnimate).isTrue()
+
+            underTest.setAnimateDozingTransitions(false)
+            runCurrent()
+            assertThat(isAnimate).isFalse()
+
+            underTest.setAnimateDozingTransitions(true)
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = SceneKey.Gone,
+                    toScene = SceneKey.Lockscreen,
+                    progress = flowOf(0f),
+                    isUserInputDriven = false,
+                )
+            runCurrent()
+            assertThat(isAnimate).isFalse()
         }
 }

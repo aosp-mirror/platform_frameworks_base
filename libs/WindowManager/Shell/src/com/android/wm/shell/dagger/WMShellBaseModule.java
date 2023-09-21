@@ -20,9 +20,11 @@ import static com.android.wm.shell.onehanded.OneHandedController.SUPPORT_ONE_HAN
 
 import android.app.ActivityTaskManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.view.IWindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
@@ -57,11 +59,19 @@ import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.common.pip.PhonePipKeepClearAlgorithm;
+import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
 import com.android.wm.shell.desktopmode.DesktopMode;
-import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -98,12 +108,12 @@ import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
+import java.util.Optional;
+
 import dagger.BindsOptionalOf;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
-
-import java.util.Optional;
 
 /**
  * Provides basic dependencies from {@link com.android.wm.shell}, these dependencies are only
@@ -230,10 +240,12 @@ public abstract class WMShellBaseModule {
             DisplayImeController imeController, SyncTransactionQueue syncQueue,
             @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy,
             DockStateReader dockStateReader, CompatUIConfiguration compatUIConfiguration,
-            CompatUIShellCommandHandler compatUIShellCommandHandler) {
+            CompatUIShellCommandHandler compatUIShellCommandHandler,
+            AccessibilityManager accessibilityManager) {
         return new CompatUIController(context, shellInit, shellController, displayController,
                 displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy,
-                dockStateReader, compatUIConfiguration, compatUIShellCommandHandler);
+                dockStateReader, compatUIConfiguration, compatUIShellCommandHandler,
+                accessibilityManager);
     }
 
     @WMSingleton
@@ -329,6 +341,61 @@ public abstract class WMShellBaseModule {
 
     @BindsOptionalOf
     abstract ShellBackAnimationRegistry optionalBackAnimationRegistry();
+
+    //
+    // PiP (optional feature)
+    //
+
+    @WMSingleton
+    @Provides
+    static PipUiEventLogger providePipUiEventLogger(UiEventLogger uiEventLogger,
+            PackageManager packageManager) {
+        return new PipUiEventLogger(uiEventLogger, packageManager);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipMediaController providePipMediaController(Context context,
+            @ShellMainThread Handler mainHandler) {
+        return new PipMediaController(context, mainHandler);
+    }
+
+    @WMSingleton
+    @Provides
+    static SizeSpecSource provideSizeSpecSource(Context context,
+            PipDisplayLayoutState pipDisplayLayoutState) {
+        return new PhoneSizeSpecSource(context, pipDisplayLayoutState);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipBoundsState providePipBoundsState(Context context,
+            SizeSpecSource sizeSpecSource, PipDisplayLayoutState pipDisplayLayoutState) {
+        return new PipBoundsState(context, sizeSpecSource, pipDisplayLayoutState);
+    }
+
+
+    @WMSingleton
+    @Provides
+    static PipSnapAlgorithm providePipSnapAlgorithm() {
+        return new PipSnapAlgorithm();
+    }
+
+    @WMSingleton
+    @Provides
+    static PhonePipKeepClearAlgorithm providePhonePipKeepClearAlgorithm(Context context) {
+        return new PhonePipKeepClearAlgorithm(context);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipBoundsAlgorithm providesPipBoundsAlgorithm(Context context,
+            PipBoundsState pipBoundsState, PipSnapAlgorithm pipSnapAlgorithm,
+            PhonePipKeepClearAlgorithm pipKeepClearAlgorithm,
+            PipDisplayLayoutState pipDisplayLayoutState, SizeSpecSource sizeSpecSource) {
+        return new PipBoundsAlgorithm(context, pipBoundsState, pipSnapAlgorithm,
+                pipKeepClearAlgorithm, pipDisplayLayoutState, sizeSpecSource);
+    }
 
     //
     // Bubbles (optional feature)
@@ -732,30 +799,10 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<DesktopMode> provideDesktopMode(
-            Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController) {
-        if (DesktopModeStatus.isProto2Enabled()) {
-            return desktopTasksController.map(DesktopTasksController::asDesktopMode);
-        }
-        return desktopModeController.map(DesktopModeController::asDesktopMode);
+        return desktopTasksController.map(DesktopTasksController::asDesktopMode);
     }
 
-    @BindsOptionalOf
-    @DynamicOverride
-    abstract DesktopModeController optionalDesktopModeController();
-
-    @WMSingleton
-    @Provides
-    static Optional<DesktopModeController> provideDesktopModeController(
-            @DynamicOverride Optional<Lazy<DesktopModeController>> desktopModeController) {
-        // Use optional-of-lazy for the dependency that this provider relies on.
-        // Lazy ensures that this provider will not be the cause the dependency is created
-        // when it will not be returned due to the condition below.
-        if (DesktopModeStatus.isProto1Enabled()) {
-            return desktopModeController.map(Lazy::get);
-        }
-        return Optional.empty();
-    }
 
     @BindsOptionalOf
     @DynamicOverride
@@ -768,7 +815,7 @@ public abstract class WMShellBaseModule {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
-        if (DesktopModeStatus.isProto2Enabled()) {
+        if (DesktopModeStatus.isEnabled()) {
             return desktopTasksController.map(Lazy::get);
         }
         return Optional.empty();
@@ -785,7 +832,7 @@ public abstract class WMShellBaseModule {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
-        if (DesktopModeStatus.isAnyEnabled()) {
+        if (DesktopModeStatus.isEnabled()) {
             return desktopModeTaskRepository.map(Lazy::get);
         }
         return Optional.empty();

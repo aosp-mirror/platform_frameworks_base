@@ -326,24 +326,6 @@ public final class UserManagerTest {
         assertThat(hasUser(user2.id)).isTrue();
     }
 
-
-    @MediumTest
-    @Test
-    public void testGetFullUserCount() throws Exception {
-        assertThat(mUserManager.getFullUserCount()).isEqualTo(1);
-        UserInfo user1 = createUser("User 1", UserInfo.FLAG_FULL);
-        UserInfo user2 = createUser("User 2", UserInfo.FLAG_ADMIN);
-
-        assertThat(user1).isNotNull();
-        assertThat(user2).isNotNull();
-
-        assertThat(mUserManager.getFullUserCount()).isEqualTo(3);
-        removeUser(user1.id);
-        assertThat(mUserManager.getFullUserCount()).isEqualTo(2);
-        removeUser(user2.id);
-        assertThat(mUserManager.getFullUserCount()).isEqualTo(1);
-    }
-
     /**
      * Tests that UserManager knows how many users can be created.
      *
@@ -1174,6 +1156,24 @@ public final class UserManagerTest {
         }
     }
 
+    // Make sure the creation of a private profile fails if DISALLOW_ADD_PRIVATE_PROFILE is true.
+    @MediumTest
+    @Test
+    public void testCreateProfileForUser_disallowAddPrivateProfile() {
+        final int mainUserId = ActivityManager.getCurrentUser();
+        final UserHandle mainUserHandle = asHandle(mainUserId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                true, mainUserHandle);
+        try {
+            UserInfo privateProfileInfo = createProfileForUser("Private",
+                    UserManager.USER_TYPE_PROFILE_PRIVATE, mainUserId);
+            assertThat(privateProfileInfo).isNull();
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE, false,
+                    mainUserHandle);
+        }
+    }
+
     @MediumTest
     @Test
     public void testAddRestrictedProfile() throws Exception {
@@ -1563,6 +1563,25 @@ public final class UserManagerTest {
 
         UserInfo userInfo = mUserManager.getUserInfo(userInfo1.id);
         assertThat(userInfo.name).isEqualTo(newName);
+    }
+
+    @Test
+    public void testCannotCreateAdditionalMainUser() {
+        UserHandle mainUser = mUserManager.getMainUser();
+        assumeTrue("There is no main user", mainUser != null);
+
+        // Users with FLAG_MAIN can't be removed, so no point using the local createUser method.
+        UserInfo newMainUser = mUserManager.createUser("test", UserInfo.FLAG_MAIN);
+        assertThat(newMainUser).isNull();
+
+        List<UserInfo> users = mUserManager.getUsers();
+        int mainUserCount = 0;
+        for (UserInfo user : users) {
+            if (user.isMain()) {
+                mainUserCount++;
+            }
+        }
+        assertThat(mainUserCount).isEqualTo(1);
     }
 
     private boolean isPackageInstalledForUser(String packageName, int userId) {

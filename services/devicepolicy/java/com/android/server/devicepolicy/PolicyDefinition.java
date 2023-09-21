@@ -426,6 +426,7 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_USER, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_MANAGED_PROFILE, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_CLONE_PROFILE, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_PRIVATE_PROFILE, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.ENSURE_VERIFY_APPS, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_CELL_BROADCASTS, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS, /* flags= */ 0);

@@ -28,16 +28,20 @@
 #include "DamageAccumulator.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #endif
-#include <gui/TraceUtils.h>
-#include "utils/MathUtils.h"
-#include "utils/StringUtils.h"
-
 #include <SkPathOps.h>
+#include <gui/TraceUtils.h>
+#include <ui/FatVector.h>
+
 #include <algorithm>
 #include <atomic>
 #include <sstream>
 #include <string>
-#include <ui/FatVector.h>
+
+#ifdef __ANDROID__
+#include "include/gpu/ganesh/SkImageGanesh.h"
+#endif
+#include "utils/MathUtils.h"
+#include "utils/StringUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -107,6 +111,13 @@ void RenderNode::output(std::ostream& output, uint32_t level) {
     mDisplayList.output(output, level);
     output << std::string(level * 2, ' ') << "/RenderNode(" << getName() << " " << this << ")";
     output << std::endl;
+}
+
+void RenderNode::visit(std::function<void(const RenderNode&)> func) const {
+    func(*this);
+    if (mDisplayList) {
+        mDisplayList.visit(func);
+    }
 }
 
 int RenderNode::getUsageSize() {
@@ -363,13 +374,18 @@ std::optional<RenderNode::SnapshotResult> RenderNode::updateSnapshotIfRequired(
                mImageFilterClipBounds != clipBounds ||
                mTargetImageFilterLayerSurfaceGenerationId != layerSurfaceGenerationId) {
         // Otherwise create a new snapshot with the given filter and snapshot
-        mSnapshotResult.snapshot =
-                snapshot->makeWithFilter(context,
-                                         imageFilter,
-                                         subset,
-                                         clipBounds,
-                                         &mSnapshotResult.outSubset,
-                                         &mSnapshotResult.outOffset);
+#ifdef __ANDROID__
+        if (context) {
+            mSnapshotResult.snapshot = SkImages::MakeWithFilter(
+                    context, snapshot, imageFilter, subset, clipBounds, &mSnapshotResult.outSubset,
+                    &mSnapshotResult.outOffset);
+        } else
+#endif
+        {
+            mSnapshotResult.snapshot = SkImages::MakeWithFilter(
+                    snapshot, imageFilter, subset, clipBounds, &mSnapshotResult.outSubset,
+                    &mSnapshotResult.outOffset);
+        }
         mTargetImageFilter = sk_ref_sp(imageFilter);
         mImageFilterClipBounds = clipBounds;
         mTargetImageFilterLayerSurfaceGenerationId = layerSurfaceGenerationId;

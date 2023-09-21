@@ -227,6 +227,12 @@ public abstract class HotwordDetectionService extends Service
         public void stopDetection() {
             HotwordDetectionService.this.onStopDetection();
         }
+
+        @Override
+        public void registerRemoteStorageService(IDetectorSessionStorageService
+                detectorSessionStorageService) {
+            throw new UnsupportedOperationException("Hotword cannot access files from the disk.");
+        }
     };
 
     @Override

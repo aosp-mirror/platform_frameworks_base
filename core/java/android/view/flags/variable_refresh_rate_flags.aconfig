@@ -1,0 +1,15 @@
+package: "android.view.flags"
+
+flag {
+    name: "view_velocity_api"
+    namespace: "toolkit"
+    description: "Feature flag for view content velocity api"
+    bug: "293513816"
+}
+
+flag {
+    name: "toolkit_set_frame_rate"
+    namespace: "toolkit"
+    description: "Feature flag for toolkit to set frame rate"
+    bug: "293512962"
+}

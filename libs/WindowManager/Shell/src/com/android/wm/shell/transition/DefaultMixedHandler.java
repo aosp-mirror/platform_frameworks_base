@@ -19,10 +19,10 @@ package com.android.wm.shell.transition;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
-
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
@@ -43,7 +43,6 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.split.SplitScreenUtils;
-import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
@@ -71,7 +70,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     private RecentsTransitionHandler mRecentsHandler;
     private StageCoordinator mSplitHandler;
     private final KeyguardTransitionHandler mKeyguardHandler;
-    private DesktopModeController mDesktopModeController;
     private DesktopTasksController mDesktopTasksController;
     private UnfoldTransitionHandler mUnfoldHandler;
 
@@ -141,7 +139,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             @Nullable PipTransitionController pipTransitionController,
             Optional<RecentsTransitionHandler> recentsHandlerOptional,
             KeyguardTransitionHandler keyguardHandler,
-            Optional<DesktopModeController> desktopModeControllerOptional,
             Optional<DesktopTasksController> desktopTasksControllerOptional,
             Optional<UnfoldTransitionHandler> unfoldHandler) {
         mPlayer = player;
@@ -161,7 +158,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 if (mRecentsHandler != null) {
                     mRecentsHandler.addMixer(this);
                 }
-                mDesktopModeController = desktopModeControllerOptional.orElse(null);
                 mDesktopTasksController = desktopTasksControllerOptional.orElse(null);
                 mUnfoldHandler = unfoldHandler.orElse(null);
             }, this);
@@ -243,9 +239,14 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
 
     @Override
     public Transitions.TransitionHandler handleRecentsRequest(WindowContainerTransaction outWCT) {
-        if (mRecentsHandler != null && (mSplitHandler.isSplitScreenVisible()
-                || DesktopModeStatus.isActive(mPlayer.getContext()))) {
-            return this;
+        if (mRecentsHandler != null) {
+            if (mSplitHandler.isSplitScreenVisible()) {
+                return this;
+            } else if (mDesktopTasksController != null
+                    // Check on the default display. Recents/gesture nav is only available there
+                    && mDesktopTasksController.getVisibleTaskCount(DEFAULT_DISPLAY) > 0) {
+                return this;
+            }
         }
         return null;
     }
@@ -259,7 +260,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                     MixedTransition.TYPE_RECENTS_DURING_SPLIT, transition);
             mixed.mLeftoversHandler = mRecentsHandler;
             mActiveTransitions.add(mixed);
-        } else if (DesktopModeStatus.isActive(mPlayer.getContext())) {
+        } else if (DesktopModeStatus.isEnabled()) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a recents request while "
                     + "desktop mode is active, so treat it as Mixed.");
             final MixedTransition mixed = new MixedTransition(
@@ -666,12 +667,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         if (!consumed) {
             return false;
         }
-        //Sync desktop mode state (proto 1)
-        if (mDesktopModeController != null) {
-            mDesktopModeController.syncSurfaceState(info, finishTransaction);
-            return true;
-        }
-        //Sync desktop mode state (proto 2)
         if (mDesktopTasksController != null) {
             mDesktopTasksController.syncSurfaceState(info, finishTransaction);
             return true;

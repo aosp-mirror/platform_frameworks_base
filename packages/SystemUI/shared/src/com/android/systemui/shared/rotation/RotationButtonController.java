@@ -17,6 +17,7 @@
 package com.android.systemui.shared.rotation;
 
 import static android.content.pm.PackageManager.FEATURE_PC;
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
@@ -37,8 +38,11 @@ import android.content.IntentFilter;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
@@ -66,6 +70,7 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 
 import java.io.PrintWriter;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 /**
@@ -76,6 +81,8 @@ public class RotationButtonController {
     private static final String TAG = "RotationButtonController";
     private static final int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
     private static final int NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS = 20000;
+    private static final boolean OEM_DISALLOW_ROTATION_IN_SUW =
+            SystemProperties.getBoolean("ro.setupwizard.rotation_locked", false);
     private static final Interpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
 
     private static final int NUM_ACCEPTED_ROTATION_SUGGESTIONS_FOR_INTRODUCTION = 3;
@@ -116,6 +123,8 @@ public class RotationButtonController {
     private final int mIconCwStart0ResId;
     @DrawableRes
     private final int mIconCwStart90ResId;
+    /** Defaults to mainExecutor if not set via {@link #setBgExecutor(Executor)}. */
+    private Executor mBgExecutor;
 
     @DrawableRes
     private int mIconResId;
@@ -175,6 +184,8 @@ public class RotationButtonController {
         mAccessibilityManager = AccessibilityManager.getInstance(context);
         mTaskStackListener = new TaskStackListenerImpl();
         mWindowRotationProvider = windowRotationProvider;
+
+        mBgExecutor = context.getMainExecutor();
     }
 
     public void setRotationButton(RotationButton rotationButton,
@@ -188,6 +199,10 @@ public class RotationButtonController {
 
     public Context getContext() {
         return mContext;
+    }
+
+    public void setBgExecutor(Executor bgExecutor) {
+        mBgExecutor = bgExecutor;
     }
 
     /**
@@ -216,8 +231,11 @@ public class RotationButtonController {
 
         mListenersRegistered = true;
 
-        updateDockedState(mContext.registerReceiver(mDockedReceiver,
-                new IntentFilter(Intent.ACTION_DOCK_EVENT)));
+        mBgExecutor.execute(() -> {
+            final Intent intent = mContext.registerReceiver(mDockedReceiver,
+                    new IntentFilter(Intent.ACTION_DOCK_EVENT));
+            mContext.getMainExecutor().execute(() -> updateDockedState(intent));
+        });
 
         if (registerRotationWatcher) {
             try {
@@ -243,11 +261,13 @@ public class RotationButtonController {
 
         mListenersRegistered = false;
 
-        try {
-            mContext.unregisterReceiver(mDockedReceiver);
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Docked receiver already unregistered", e);
-        }
+        mBgExecutor.execute(() -> {
+            try {
+                mContext.unregisterReceiver(mDockedReceiver);
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Docked receiver already unregistered", e);
+            }
+        });
 
         if (mRotationWatcherRegistered) {
             try {
@@ -375,6 +395,12 @@ public class RotationButtonController {
     }
 
     public void onRotationProposal(int rotation, boolean isValid) {
+        boolean isUserSetupComplete = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0) != 0;
+        if (!isUserSetupComplete && OEM_DISALLOW_ROTATION_IN_SUW) {
+            return;
+        }
+
         int windowRotation = mWindowRotationProvider.get();
 
         if (!mRotationButton.acceptRotationProposal()) {
@@ -497,8 +523,7 @@ public class RotationButtonController {
     boolean canShowRotationButton() {
         return mIsNavigationBarShowing
             || mBehavior == WindowInsetsController.BEHAVIOR_DEFAULT
-            || isGesturalMode(mNavBarMode)
-            || mTaskBarVisible;
+            || isGesturalMode(mNavBarMode);
     }
 
     @DrawableRes

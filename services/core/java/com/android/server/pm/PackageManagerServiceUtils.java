@@ -403,7 +403,11 @@ public class PackageManagerServiceUtils {
      * <br />
      * {@link PackageManager#SIGNATURE_NO_MATCH}: if the two signature sets differ.
      */
-    public static int compareSignatures(Signature[] s1, Signature[] s2) {
+    public static int compareSignatures(SigningDetails sd1, SigningDetails sd2) {
+        return compareSignatureArrays(sd1.getSignatures(), sd2.getSignatures());
+    }
+
+    static int compareSignatureArrays(Signature[] s1, Signature[] s2) {
         if (s1 == null) {
             return s2 == null
                     ? PackageManager.SIGNATURE_NEITHER_SIGNED
@@ -445,10 +449,10 @@ public class PackageManagerServiceUtils {
      * set or if the signing details of the package are unknown.
      */
     public static boolean comparePackageSignatures(PackageSetting pkgSetting,
-            Signature[] signatures) {
+            SigningDetails otherSigningDetails) {
         final SigningDetails signingDetails = pkgSetting.getSigningDetails();
         return signingDetails == SigningDetails.UNKNOWN
-                || compareSignatures(signingDetails.getSignatures(), signatures)
+                || compareSignatures(signingDetails, otherSigningDetails)
                 == PackageManager.SIGNATURE_MATCH;
     }
 
@@ -543,6 +547,9 @@ public class PackageManagerServiceUtils {
 
     /** Returns true if standard APK Verity is enabled. */
     static boolean isApkVerityEnabled() {
+        if (android.security.Flags.deprecateFsvSig()) {
+            return false;
+        }
         return Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.R
                 || SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED)
                         == FSVERITY_ENABLED;
@@ -919,16 +926,22 @@ public class PackageManagerServiceUtils {
 
         final File packageFile = new File(packagePath);
         final long sizeBytes;
-        try {
-            sizeBytes = InstallLocationUtils.calculateInstalledSize(pkg, abiOverride);
-        } catch (IOException e) {
-            if (!packageFile.exists()) {
-                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI;
-            } else {
-                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
-            }
+        if (!PackageInstallerSession.isArchivedInstallation(flags)) {
+            try {
+                sizeBytes = InstallLocationUtils.calculateInstalledSize(pkg, abiOverride);
+            } catch (IOException e) {
+                if (!packageFile.exists()) {
+                    ret.recommendedInstallLocation =
+                            InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI;
+                } else {
+                    ret.recommendedInstallLocation =
+                            InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
+                }
 
-            return ret;
+                return ret;
+            }
+        } else {
+            sizeBytes = 0;
         }
 
         final PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(

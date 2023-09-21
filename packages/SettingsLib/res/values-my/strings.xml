@@ -107,8 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ဖိုင်လွဲပြောင်းခြင်း"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ထည့်သွင်းသော စက်"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"အင်တာနက်ချိတ်ဆက်ခြင်း"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"အဆက်အသွယ်၊ ခေါ်ဆိုမှုမှတ်တမ်း မျှဝေခြင်း"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"အဆက်အသွယ်နှင့် ခေါ်ဆိုမှုမှတ်တမ်း မျှဝေရန် သုံးသည်"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"အဆက်အသွယ်၊ ခေါ်ဆိုမှုမှတ်တမ်း သုံးခွင့်ပေးရန်"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"အချက်အလက်ကို ဖုန်းခေါ်ဆိုမှု ကြေညာချက်စသည်တို့တွင် သုံးမည်"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"အင်တာနက်ဆက်သွယ်မှု မျှဝေခြင်း"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"မိုဘိုင်းမက်ဆေ့ဂျ်များ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM အသုံးပြုခြင်း"</string>
@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"သတ်မှတ်တန်ဖိုး မည်သို့ပင်ရှိစေ ဝင်းဒိုးများ၏ လုပ်ဆောင်မှုအားလုံးကို အရွယ်အစားပြင်သည်။"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ပုံစံမျိုးစုံ ဝင်းဒိုးများ ဖွင့်ရန်"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ပုံစံမျိုးစုံဝင်းဒိုးများ စမ်းသပ်ခြင်းအတွက် ပံ့ပိုးမှုကို ဖွင့်သည်"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"ဒက်စ်တော့မုဒ်"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ဒက်စ်တော့ အရန်စကားဝှက်"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ဒက်စ်တော့ အရန်သိမ်းဆည်းခြင်းအားလုံးကို လောလောဆယ် ကာကွယ်မထားပါ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ဒက်စ်တော့ အပြည့်အဝ အရန်သိမ်းခြင်းအတွက် စကားဝှက်ကို ပြောင်းရန် သို့မဟုတ် ဖယ်ရှားရန် တို့ပါ။"</string>
@@ -685,12 +684,6 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"နောက်ခလုတ်၏ ရှေ့ပြေးလှုပ်ရှားသက်ဝင်ပုံ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"နောက်ခလုတ်ရှေ့ပြေးအတွက် စနစ်လှုပ်ရှားသက်ဝင်ပုံများကို ဖွင့်ပါသည်။"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ဤဆက်တင်သည် လက်ဟန် ရှေ့ပြေးလှုပ်ရှားသက်ဝင်ပုံအတွက် စနစ်လှုပ်ရှားသက်ဝင်ပုံများကို ဖွင့်ပါသည်။ အက်ပ်တစ်ခုစီ၏ ဆက်တင်အတွက် enableOnBackInvokedCallback ကို မန်နီးဖက်စ် (manifest) ဖိုင်၌ ဖွင့်ထားရန်လိုအပ်သည်။"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"ဘယ်သို့ရွှေ့ရန်"</item>
-    <item msgid="5425394847942513942">"အောက်သို့ရွှေ့ရန်"</item>
-    <item msgid="7728484337962740316">"ညာသို့ရွှေ့ရန်"</item>
-    <item msgid="324200556467459329">"အပေါ်သို့ရွှေ့ရန်"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"သတ်မှတ်မထားပါ"</string>
     <string name="neuter" msgid="2075249330106127310">"နပုလ္လိင်"</string>

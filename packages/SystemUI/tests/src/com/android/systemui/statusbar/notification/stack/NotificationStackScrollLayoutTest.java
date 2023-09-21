@@ -87,6 +87,7 @@ import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -317,26 +318,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         clearInvocations(mAmbientState);
         mStackScroller.setPanelFlinging(false);
         verify(mAmbientState).setFlinging(eq(false));
-        verify(mAmbientState).setStackEndHeight(anyFloat());
-        verify(mAmbientState).setStackHeight(anyFloat());
-    }
-
-    @Test
-    public void setUnlockHintRunning_updatesStackEndHeightOnlyOnFinish() {
-        final float expansionFraction = 0.5f;
-        mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);
-        mStackScroller.setUnlockHintRunning(true);
-
-        // Validate that when the animation is running, we update only the stackHeight
-        clearInvocations(mAmbientState);
-        mStackScroller.updateStackEndHeightAndStackHeight(expansionFraction);
-        verify(mAmbientState, never()).setStackEndHeight(anyFloat());
-        verify(mAmbientState).setStackHeight(anyFloat());
-
-        // Validate that when the animation ends the stackEndHeight is recalculated immediately
-        clearInvocations(mAmbientState);
-        mStackScroller.setUnlockHintRunning(false);
-        verify(mAmbientState).setUnlockHintRunning(eq(false));
         verify(mAmbientState).setStackEndHeight(anyFloat());
         verify(mAmbientState).setStackHeight(anyFloat());
     }
@@ -865,6 +846,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void testSplitShade_hasTopOverscroll() {
         mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
+        mStackScroller.passSplitShadeStateController(new ResourcesSplitShadeStateController());
         mStackScroller.updateSplitNotificationShade();
         mAmbientState.setExpansionFraction(1f);
 
@@ -880,6 +862,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void testNormalShade_hasNoTopOverscroll() {
         mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ false);
+        mStackScroller.passSplitShadeStateController(new ResourcesSplitShadeStateController());
         mStackScroller.updateSplitNotificationShade();
         mAmbientState.setExpansionFraction(1f);
 

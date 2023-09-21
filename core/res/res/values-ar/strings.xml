@@ -622,8 +622,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استخدام المقاييس الحيوية أو قفل الشاشة"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"إثبات هويتك"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"استخدام المقاييس الحيوية للمتابعة"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"استخدِم بصمة إصبعك للمتابعة"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"استخدِم وجهك للمتابعة"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"استخدام المقاييس الحيوية أو قفل الشاشة للمتابعة"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"معدّات المقاييس الحيوية غير متاحة."</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"تم إلغاء المصادقة."</string>
@@ -649,6 +647,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"لم يتمّ التعرّف على البصمة."</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"لم يتمّ التعرّف على بصمة الإصبع."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"يتعذّر التعرّف على الوجه. استخدِم بصمة الإصبع بدلاً من ذلك."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"تم مصادقة بصمة الإصبع"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"تمّت مصادقة الوجه"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"تمّت مصادقة الوجه، يُرجى الضغط على \"تأكيد\"."</string>
@@ -674,14 +673,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"حدث خطأ، يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"رمز بصمة الإصبع"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"فتح قفل الجهاز"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"تجربة طريقة أخرى لفتح القفل"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"استخدِم ميزة \"فتح الجهاز بالتعرف على الوجه\" عندما لا يتم التعرف على بصمة إصبعك، مثلاً عندما تكون أصابعك مبتلة."</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"استخدِم ميزة \"فتح الجهاز ببصمة الإصبع\" عندما لا يتم التعرف على وجهك، مثلاً عند عدم وجود ضوء كافٍ."</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"فتح الجهاز بالتعرف على الوجه"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"مشكلة متعلّقة بميزة \"فتح الجهاز بالتعرف على الوجه\""</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"انقر لحذف نموذج الوجه ثم أضِف نموذجًا لوجهك مرة أخرى."</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"إعداد ميزة \"فتح الجهاز بالتعرف على الوجه\""</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"يمكنك فتح قفل هاتفك بمجرّد النظر إلى الشاشة."</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏لاستخدام ميزة \"فتح الجهاز بالتعرف على الوجه\"، عليك منح إذن "<b>"الوصول إلى الكاميرا"</b>" في الإعدادات &gt; الخصوصية."</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"إعداد المزيد من الطرق لفتح قفل الجهاز"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"انقر لإضافة بصمة إصبع."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"فتح الجهاز ببصمة الإصبع"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"لا يمكن استخدام مستشعر بصمات الإصبع"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"يُرجى التواصل مع مقدِّم خدمات إصلاح."</string>
@@ -1601,7 +1600,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"انقر لإزالة القيد."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"استخدام مرتفع لبيانات الجوّال"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"استخدمت تطبيقاتك بيانات أكثر من المعتاد"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"استخدمَ تطبيق <xliff:g id="APP">%s</xliff:g> بيانات أكثر من المعتاد"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"استخدمَ تطبيق \"<xliff:g id="APP">%s</xliff:g>\" بيانات أكثر من المعتاد"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"شهادة الأمان"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"هذه الشهادة صالحة."</string>
     <string name="issued_to" msgid="5975877665505297662">"إصدار لـ:"</string>
@@ -1872,6 +1871,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"العمل الثاني <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"العمل الثالث <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"نسخة طبق الأصل عن \"<xliff:g id="LABEL">%1$s</xliff:g>\""</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"ملف شخصي خاص على <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"طلب إدخال رقم التعريف الشخصي قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"طلب إدخال النقش الخاص بإلغاء القفل قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"طلب إدخال كلمة المرور قبل إزالة التثبيت"</string>
@@ -2036,7 +2036,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"هل تريد التحديث في "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"؟"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"هل تريد تحديث <xliff:g id="TYPE">%1$s</xliff:g> في "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"؟"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"هل تريد تحديث <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"؟"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"هل تريد تحديث هذه العناصر في "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g>؟"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"هل تريد تعديل هذه العناصر في "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g>؟"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"حفظ"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"لا، شكرًا"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ليس الآن"</string>
@@ -2335,11 +2335,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"يسمح هذا الإذن للتطبيق المصاحب ببدء الخدمات التي تعمل في المقدّمة من الخلفية."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"الميكروفون متاح."</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"تم حظر الميكروفون."</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"استخدام الشاشتين"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ميزة \"استخدام الشاشتين\" مفعّلة"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‏ميزة Dual Screen مفعّلة"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"يستخدم \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" كلتا الشاشتين لعرض المحتوى."</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"الجهاز ساخن للغاية"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ميزة \"استخدام الشاشتين\" غير متاحة لأن هاتفك ساخن للغاية."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"‏ميزة Dual Screen غير متاحة لأنّ هاتفك ساخن للغاية."</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"‏ميزة Dual Screen غير متاحة"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"‏ميزة Dual Screen غير متاحة لأن ميزة \"توفير شحن البطارية\" مفعّلة. ويمكنك إيقاف هذا الإجراء من خلال \"الإعدادات\"."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"الانتقال إلى الإعدادات"</string>

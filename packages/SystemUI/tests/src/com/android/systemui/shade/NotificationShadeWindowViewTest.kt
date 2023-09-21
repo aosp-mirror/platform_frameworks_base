@@ -35,9 +35,11 @@ import com.android.systemui.bouncer.domain.interactor.CountDownTimerUtil
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
@@ -55,6 +57,8 @@ import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.DozeScrimController
+import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
@@ -88,6 +92,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var shadeController: ShadeController
     @Mock private lateinit var centralSurfaces: CentralSurfaces
+    @Mock private lateinit var dozeServiceHost: DozeServiceHost
+    @Mock private lateinit var dozeScrimController: DozeScrimController
     @Mock private lateinit var backActionInteractor: BackActionInteractor
     @Mock private lateinit var powerInteractor: PowerInteractor
     @Mock private lateinit var dockManager: DockManager
@@ -106,6 +112,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock private lateinit var ambientState: AmbientState
     @Mock private lateinit var shadeLogger: ShadeLogger
+    @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var pulsingGestureListener: PulsingGestureListener
     @Mock
     private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
@@ -157,6 +164,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
         featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
+        featureFlags.set(Flags.MIGRATE_NSSL, false)
         testScope = TestScope()
         controller =
             NotificationShadeWindowViewController(
@@ -173,6 +181,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 statusBarWindowStateController,
                 lockIconViewController,
                 centralSurfaces,
+                dozeServiceHost,
+                dozeScrimController,
                 backActionInteractor,
                 powerInteractor,
                 notificationShadeWindowController,
@@ -181,6 +191,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 notificationInsetsController,
                 ambientState,
                 shadeLogger,
+                dumpManager,
                 pulsingGestureListener,
                 mLockscreenHostedDreamGestureListener,
                 keyguardBouncerViewModel,
@@ -198,7 +209,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                     CountDownTimerUtil(),
                     featureFlags
                 ),
-                BouncerLogger(logcatLogBuffer("BouncerLog"))
+                BouncerLogger(logcatLogBuffer("BouncerLog")),
+                Mockito.mock(KeyEventInteractor::class.java),
             )
 
         controller.setupExpandedStatusBar()

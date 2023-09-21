@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL;
 import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
+import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 
 import android.content.res.ColorStateList;
 import android.os.AsyncTask;
@@ -205,6 +206,8 @@ public class KeyguardPatternViewController
         mLatencyTracker = latencyTracker;
         mFalsingCollector = falsingCollector;
         mEmergencyButtonController = emergencyButtonController;
+        view.setIsLockScreenLandscapeEnabled(
+                featureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE));
         mLockPatternView = mView.findViewById(R.id.lockPatternView);
         mPostureController = postureController;
     }
@@ -238,6 +241,12 @@ public class KeyguardPatternViewController
         }
         mView.onDevicePostureChanged(mPostureController.getDevicePosture());
         mPostureController.addCallback(mPostureCallback);
+        // if the user is currently locked out, enforce it.
+        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
+                KeyguardUpdateMonitor.getCurrentUser());
+        if (deadline != 0) {
+            handleAttemptLockout(deadline);
+        }
     }
 
     @Override
@@ -268,12 +277,6 @@ public class KeyguardPatternViewController
     @Override
     public void onResume(int reason) {
         super.onResume(reason);
-        // if the user is currently locked out, enforce it.
-        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
-                KeyguardUpdateMonitor.getCurrentUser());
-        if (deadline != 0) {
-            handleAttemptLockout(deadline);
-        }
     }
 
     @Override

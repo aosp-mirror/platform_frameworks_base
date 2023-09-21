@@ -22,10 +22,10 @@ import android.testing.AndroidTestingRunner
 import android.util.Size
 import android.view.Gravity
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_BOTTOM
-import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE
-import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT
-import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_TOP
+import com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_BOTTOM
+import com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_NONE
+import com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_RIGHT
+import com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_TOP
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse

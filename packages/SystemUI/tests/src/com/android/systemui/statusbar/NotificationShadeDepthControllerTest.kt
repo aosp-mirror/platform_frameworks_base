@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.WallpaperController
 import com.android.systemui.util.mockito.eq
@@ -114,8 +115,9 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
                 notificationShadeWindowController,
                 dozeParameters,
                 context,
+                    ResourcesSplitShadeStateController(),
                 dumpManager,
-                configurationController)
+                configurationController,)
         notificationShadeDepthController.shadeAnimation = shadeAnimation
         notificationShadeDepthController.brightnessMirrorSpring = brightnessSpring
         notificationShadeDepthController.root = root

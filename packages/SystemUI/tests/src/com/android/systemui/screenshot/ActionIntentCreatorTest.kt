@@ -20,12 +20,13 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.test.ext.truth.content.IntentSubject.assertThat
+import androidx.test.ext.truth.content.IntentSubject.assertThat as assertThatIntent
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
+import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Test
 import org.mockito.Mockito.`when` as whenever
@@ -39,23 +40,23 @@ class ActionIntentCreatorTest : SysuiTestCase() {
 
         val output = ActionIntentCreator.createShare(uri)
 
-        assertThat(output).hasAction(Intent.ACTION_CHOOSER)
-        assertThat(output)
+        assertThatIntent(output).hasAction(Intent.ACTION_CHOOSER)
+        assertThatIntent(output)
             .hasFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
                     Intent.FLAG_ACTIVITY_CLEAR_TASK or
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
 
-        assertThat(output).extras().parcelable<Intent>(Intent.EXTRA_INTENT).isNotNull()
+        assertThatIntent(output).extras().parcelable<Intent>(Intent.EXTRA_INTENT).isNotNull()
         val wrappedIntent = output.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
 
-        assertThat(wrappedIntent).hasAction(Intent.ACTION_SEND)
-        assertThat(wrappedIntent).hasData(uri)
-        assertThat(wrappedIntent).hasType("image/png")
-        assertThat(wrappedIntent).extras().doesNotContainKey(Intent.EXTRA_SUBJECT)
-        assertThat(wrappedIntent).extras().doesNotContainKey(Intent.EXTRA_TEXT)
-        assertThat(wrappedIntent).extras().parcelable<Uri>(Intent.EXTRA_STREAM).isEqualTo(uri)
+        assertThatIntent(wrappedIntent).hasAction(Intent.ACTION_SEND)
+        assertThatIntent(wrappedIntent).hasData(uri)
+        assertThatIntent(wrappedIntent).hasType("image/png")
+        assertThatIntent(wrappedIntent).extras().doesNotContainKey(Intent.EXTRA_SUBJECT)
+        assertThatIntent(wrappedIntent).extras().doesNotContainKey(Intent.EXTRA_TEXT)
+        assertThatIntent(wrappedIntent).extras().parcelable<Uri>(Intent.EXTRA_STREAM).isEqualTo(uri)
     }
 
     @Test
@@ -64,7 +65,7 @@ class ActionIntentCreatorTest : SysuiTestCase() {
 
         val output = ActionIntentCreator.createShare(uri)
 
-        assertThat(output.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java))
+        assertThatIntent(output.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java))
             .hasData(Uri.parse("content://fake"))
     }
 
@@ -75,8 +76,8 @@ class ActionIntentCreatorTest : SysuiTestCase() {
 
         val output = ActionIntentCreator.createShareWithSubject(uri, subject)
 
-        assertThat(output).hasAction(Intent.ACTION_CHOOSER)
-        assertThat(output)
+        assertThatIntent(output).hasAction(Intent.ACTION_CHOOSER)
+        assertThatIntent(output)
             .hasFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
                     Intent.FLAG_ACTIVITY_CLEAR_TASK or
@@ -84,12 +85,12 @@ class ActionIntentCreatorTest : SysuiTestCase() {
             )
 
         val wrappedIntent = output.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
-        assertThat(wrappedIntent).hasAction(Intent.ACTION_SEND)
-        assertThat(wrappedIntent).hasData(uri)
-        assertThat(wrappedIntent).hasType("image/png")
-        assertThat(wrappedIntent).extras().string(Intent.EXTRA_SUBJECT).isEqualTo(subject)
-        assertThat(wrappedIntent).extras().doesNotContainKey(Intent.EXTRA_TEXT)
-        assertThat(wrappedIntent).extras().parcelable<Uri>(Intent.EXTRA_STREAM).isEqualTo(uri)
+        assertThatIntent(wrappedIntent).hasAction(Intent.ACTION_SEND)
+        assertThatIntent(wrappedIntent).hasData(uri)
+        assertThatIntent(wrappedIntent).hasType("image/png")
+        assertThatIntent(wrappedIntent).extras().string(Intent.EXTRA_SUBJECT).isEqualTo(subject)
+        assertThatIntent(wrappedIntent).extras().doesNotContainKey(Intent.EXTRA_TEXT)
+        assertThatIntent(wrappedIntent).extras().parcelable<Uri>(Intent.EXTRA_STREAM).isEqualTo(uri)
     }
 
     @Test
@@ -99,8 +100,8 @@ class ActionIntentCreatorTest : SysuiTestCase() {
 
         val output = ActionIntentCreator.createShareWithText(uri, extraText)
 
-        assertThat(output).hasAction(Intent.ACTION_CHOOSER)
-        assertThat(output)
+        assertThatIntent(output).hasAction(Intent.ACTION_CHOOSER)
+        assertThatIntent(output)
             .hasFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
                     Intent.FLAG_ACTIVITY_CLEAR_TASK or
@@ -108,12 +109,12 @@ class ActionIntentCreatorTest : SysuiTestCase() {
             )
 
         val wrappedIntent = output.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
-        assertThat(wrappedIntent).hasAction(Intent.ACTION_SEND)
-        assertThat(wrappedIntent).hasData(uri)
-        assertThat(wrappedIntent).hasType("image/png")
-        assertThat(wrappedIntent).extras().doesNotContainKey(Intent.EXTRA_SUBJECT)
-        assertThat(wrappedIntent).extras().string(Intent.EXTRA_TEXT).isEqualTo(extraText)
-        assertThat(wrappedIntent).extras().parcelable<Uri>(Intent.EXTRA_STREAM).isEqualTo(uri)
+        assertThatIntent(wrappedIntent).hasAction(Intent.ACTION_SEND)
+        assertThatIntent(wrappedIntent).hasData(uri)
+        assertThatIntent(wrappedIntent).hasType("image/png")
+        assertThatIntent(wrappedIntent).extras().doesNotContainKey(Intent.EXTRA_SUBJECT)
+        assertThatIntent(wrappedIntent).extras().string(Intent.EXTRA_TEXT).isEqualTo(extraText)
+        assertThatIntent(wrappedIntent).extras().parcelable<Uri>(Intent.EXTRA_STREAM).isEqualTo(uri)
     }
 
     @Test
@@ -125,11 +126,12 @@ class ActionIntentCreatorTest : SysuiTestCase() {
 
         val output = ActionIntentCreator.createEdit(uri, context)
 
-        assertThat(output).hasAction(Intent.ACTION_EDIT)
-        assertThat(output).hasData(uri)
-        assertThat(output).hasType("image/png")
+        assertThatIntent(output).hasAction(Intent.ACTION_EDIT)
+        assertThatIntent(output).hasData(uri)
+        assertThatIntent(output).hasType("image/png")
         assertWithMessage("getComponent()").that(output.component).isNull()
-        assertThat(output)
+        assertThat(output.getStringExtra("edit_source")).isEqualTo("screenshot")
+        assertThatIntent(output)
             .hasFlags(
                 Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
@@ -146,7 +148,7 @@ class ActionIntentCreatorTest : SysuiTestCase() {
 
         val output = ActionIntentCreator.createEdit(uri, context)
 
-        assertThat(output).hasData(Uri.parse("content://fake"))
+        assertThatIntent(output).hasData(Uri.parse("content://fake"))
     }
 
     @Test
@@ -160,6 +162,6 @@ class ActionIntentCreatorTest : SysuiTestCase() {
 
         val output = ActionIntentCreator.createEdit(uri, context)
 
-        assertThat(output).hasComponent(component)
+        assertThatIntent(output).hasComponent(component)
     }
 }

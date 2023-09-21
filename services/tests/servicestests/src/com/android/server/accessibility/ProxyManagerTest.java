@@ -23,7 +23,14 @@ import static com.android.server.accessibility.ProxyAccessibilityServiceConnecti
 import static com.android.server.accessibility.ProxyManager.PROXY_COMPONENT_CLASS_NAME;
 import static com.android.server.accessibility.ProxyManager.PROXY_COMPONENT_PACKAGE_NAME;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -40,6 +47,9 @@ import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -47,6 +57,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 import android.view.inputmethod.EditorInfo;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
@@ -58,20 +70,12 @@ import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import androidx.test.InstrumentationRegistry;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -86,6 +90,9 @@ public class ProxyManagerTest {
     private static final int DISPLAY_2_ID = 1001;
     private static final int DEVICE_ID = 10;
     private static final int STREAMED_CALLING_UID = 9876;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock private Context mMockContext;
     @Mock private AccessibilitySecurityPolicy mMockSecurityPolicy;
@@ -215,6 +222,40 @@ public class ProxyManagerTest {
 
         verify(mMockProxySystemSupport).updateWindowsForAccessibilityCallbackLocked();
         verify(mMockProxySystemSupport).notifyClearAccessibilityCacheLocked();
+    }
+
+    /**
+     * Tests that the manager's AppsOnVirtualDeviceListener implementation propagates the running
+     * app changes to the proxy device.
+     */
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_PROXY_USE_APPS_ON_VIRTUAL_DEVICE_LISTENER)
+    public void testUpdateProxyOfRunningAppsChange_changedUidIsStreamedApp_propagatesChange() {
+        final VirtualDeviceManagerInternal localVdm =
+                Mockito.mock(VirtualDeviceManagerInternal.class);
+        when(localVdm.getDeviceIdsForUid(anyInt())).thenReturn(new ArraySet(Set.of(DEVICE_ID)));
+
+        mProxyManager.setLocalVirtualDeviceManager(localVdm);
+        registerProxy(DISPLAY_ID);
+        verify(localVdm).registerAppsOnVirtualDeviceListener(any());
+
+        final ArraySet<Integer> runningUids = new ArraySet(Set.of(STREAMED_CALLING_UID));
+
+        // Flush any existing messages. The messages after this come from onProxyChanged.
+        mMessageCapturingHandler.sendAllMessages();
+
+        // The virtual device has been updated with the streamed app's UID, so the proxy is
+        // updated.
+        mProxyManager.notifyProxyOfRunningAppsChange(runningUids);
+
+        verify(localVdm).getDeviceIdsForUid(STREAMED_CALLING_UID);
+        verify(mMockProxySystemSupport).getCurrentUserClientsLocked();
+        verify(mMockProxySystemSupport).getGlobalClientsLocked();
+        // Messages to notify IAccessibilityManagerClients should be posted.
+        assertThat(mMessageCapturingHandler.hasMessages()).isTrue();
+
+        mProxyManager.unregisterProxy(DISPLAY_ID);
+        verify(localVdm).unregisterAppsOnVirtualDeviceListener(any());
     }
 
     /**
