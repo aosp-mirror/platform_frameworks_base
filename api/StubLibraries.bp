@@ -29,6 +29,9 @@
 
 droidstubs {
     name: "api-stubs-docs-non-updatable",
+    srcs: [
+        ":framework-minus-apex-aconfig-srcjars",
+    ],
     defaults: [
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
