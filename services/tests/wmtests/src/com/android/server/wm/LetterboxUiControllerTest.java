@@ -32,6 +32,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
 import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
@@ -818,6 +819,9 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         assertEquals(mController.overrideOrientationIfNeeded(
                 /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_PORTRAIT);
+
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_LOCKED), SCREEN_ORIENTATION_PORTRAIT);
 
         // unchanged if orientation is specified
         assertEquals(mController.overrideOrientationIfNeeded(
