@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Lint as: python3
 """
 Test E2E CDM functions on mobly.
