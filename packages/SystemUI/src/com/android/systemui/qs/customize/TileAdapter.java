@@ -54,7 +54,6 @@ import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.dagger.QSThemedContext;
 import com.android.systemui.qs.external.CustomTile;
-import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
 
 import java.util.ArrayList;
@@ -297,7 +296,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         FrameLayout frame = (FrameLayout) inflater.inflate(R.layout.qs_customize_tile_frame, parent,
                 false);
-        View view = new CustomizeTileView(context, new QSIconViewImpl(context));
+        View view = new CustomizeTileView(context);
         frame.addView(view);
         return new Holder(frame);
     }

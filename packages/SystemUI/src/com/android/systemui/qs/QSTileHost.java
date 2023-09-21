@@ -39,7 +39,6 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.external.TileLifecycleManager;
@@ -511,18 +510,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             }
         }
         return null;
-    }
-
-    @Override
-    public QSTileView createTileView(Context themedContext, QSTile tile, boolean collapsedView) {
-        for (int i = 0; i < mQsFactories.size(); i++) {
-            QSTileView view = mQsFactories.get(i)
-                    .createTileView(themedContext, tile, collapsedView);
-            if (view != null) {
-                return view;
-            }
-        }
-        throw new RuntimeException("Default factory didn't create view for " + tile.getTileSpec());
     }
 
     /**

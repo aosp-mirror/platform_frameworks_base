@@ -50,7 +50,6 @@
     <item type="id" name="x_animator_tag_start_value"/>
     <item type="id" name="y_animator_tag_start_value"/>
     <item type="id" name="qs_icon_tag"/>
-    <item type="id" name="qs_slash_tag"/>
     <item type="id" name="scrim"/>
     <item type="id" name="scrim_alpha_start"/>
     <item type="id" name="scrim_alpha_end"/>

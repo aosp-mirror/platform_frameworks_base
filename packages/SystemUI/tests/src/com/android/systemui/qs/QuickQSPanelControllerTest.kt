@@ -18,15 +18,16 @@ package com.android.systemui.qs
 
 import android.content.res.Configuration
 import android.testing.AndroidTestingRunner
+import android.view.ContextThemeWrapper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
@@ -36,15 +37,14 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -58,7 +58,6 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var qsLogger: QSLogger
     @Mock private lateinit var tile: QSTile
     @Mock private lateinit var tileLayout: TileLayout
-    @Mock private lateinit var tileView: QSTileView
     @Captor private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
 
     private val uiEventLogger = UiEventLoggerFake()
@@ -76,7 +75,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         whenever(quickQSPanel.isAttachedToWindow).thenReturn(true)
         whenever(quickQSPanel.dumpableTag).thenReturn("")
         whenever(quickQSPanel.resources).thenReturn(mContext.resources)
-        whenever(qsHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
+        whenever(quickQSPanel.context)
+            .thenReturn(ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings))
 
         controller =
             TestQuickQSPanelController(
@@ -89,7 +89,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
-                dumpManager)
+                dumpManager
+            )
 
         controller.init()
     }
@@ -169,7 +170,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
             uiEventLogger,
             qsLogger,
             dumpManager,
-            ResourcesSplitShadeStateController()) {
+            ResourcesSplitShadeStateController()
+        ) {
 
         private var rotation = RotationUtils.ROTATION_NONE
 

@@ -23,7 +23,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.external.TileServiceRequestController
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository.Companion.POSITION_AT_END
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
@@ -174,14 +173,6 @@ constructor(
         } else {
             qsTileHost.userId
         }
-    }
-
-    override fun createTileView(
-        themedContext: Context?,
-        tile: QSTile?,
-        collapsedView: Boolean
-    ): QSTileView {
-        return qsTileHost.createTileView(themedContext, tile, collapsedView)
     }
 
     override fun createTile(tileSpec: String): QSTile? {

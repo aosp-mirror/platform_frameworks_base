@@ -32,16 +32,12 @@ sealed interface InternetTileModel {
     val iconId: Int?
     val icon: QSTile.Icon?
 
-    fun applyTo(state: QSTile.SignalState, context: Context) {
+    fun applyTo(state: QSTile.BooleanState, context: Context) {
         if (secondaryLabel != null) {
             state.secondaryLabel = secondaryLabel.loadText(context)
         } else {
             state.secondaryLabel = secondaryTitle
         }
-
-        // inout indicators are unused
-        state.activityIn = false
-        state.activityOut = false
 
         // To support both SignalDrawable and other icons, give priority to icons over IDs
         if (icon != null) {

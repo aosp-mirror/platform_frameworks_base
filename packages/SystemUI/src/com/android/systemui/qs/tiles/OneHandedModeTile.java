@@ -130,10 +130,6 @@ public class OneHandedModeTile extends QSTileImpl<BooleanState> {
         state.value = enabled;
         state.label = mContext.getString(R.string.quick_settings_onehanded_label);
         state.icon = mIcon;
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
-        state.slash.isSlashed = !state.value;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();
