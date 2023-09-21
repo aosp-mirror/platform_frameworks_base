@@ -1742,6 +1742,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private void testApplyTransaction_reorder_failsIfNotSystemOrganizer_common(
             @TaskFragmentOperation.OperationType int opType) {
         final Task task = createTask(mDisplayContent);
+        doNothing().when(task).sendTaskFragmentParentInfoChangedIfNeeded();
         // Create a non-embedded Activity at the bottom.
         final ActivityRecord bottomActivity = new ActivityBuilder(mAtm)
                 .setTask(task)
@@ -1934,7 +1935,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     /** Setups the mock Task as the parent of the given TaskFragment. */
     private static void setupMockParent(TaskFragment taskFragment, Task mockParent) {
         doReturn(mockParent).when(taskFragment).getTask();
-        doReturn(new TaskFragmentParentInfo(new Configuration(), DEFAULT_DISPLAY, true))
+        doReturn(new TaskFragmentParentInfo(new Configuration(), DEFAULT_DISPLAY, true, true))
                 .when(mockParent).getTaskFragmentParentInfo();
 
         // Task needs to be visible

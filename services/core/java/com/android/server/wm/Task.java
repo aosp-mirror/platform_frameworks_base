@@ -3643,7 +3643,7 @@ class Task extends TaskFragment {
      */
     TaskFragmentParentInfo getTaskFragmentParentInfo() {
         return new TaskFragmentParentInfo(getConfiguration(), getDisplayId(),
-                shouldBeVisible(null /* starting */));
+                shouldBeVisible(null /* starting */), hasNonFinishingDirectActivity());
     }
 
     @Override
@@ -6055,6 +6055,11 @@ class Task extends TaskFragment {
         if (child.asTask() != null) {
             // Non-root task position changed.
             mRootWindowContainer.invalidateTaskLayers();
+        }
+
+        if (child.asActivityRecord() != null) {
+            // Send for TaskFragmentParentInfo#hasDirectActivity change.
+            sendTaskFragmentParentInfoChangedIfNeeded();
         }
     }
 
