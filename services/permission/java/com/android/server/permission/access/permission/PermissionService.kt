@@ -1753,10 +1753,19 @@ class PermissionService(
     }
 
     override fun addOnPermissionsChangeListener(listener: IOnPermissionsChangeListener) {
+        context.enforceCallingOrSelfPermission(
+            Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS, "addOnPermissionsChangeListener"
+        )
+
         onPermissionsChangeListeners.addListener(listener)
     }
 
     override fun removeOnPermissionsChangeListener(listener: IOnPermissionsChangeListener) {
+        context.enforceCallingOrSelfPermission(
+            Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS,
+            "removeOnPermissionsChangeListener"
+        )
+
         onPermissionsChangeListeners.removeListener(listener)
     }
 
