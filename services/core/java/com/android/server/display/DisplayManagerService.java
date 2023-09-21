@@ -116,6 +116,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfigInterface;
 import android.provider.Settings;
+import android.sysprop.DisplayProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -485,6 +486,9 @@ public final class DisplayManagerService extends SystemService {
 
     private boolean mBootCompleted = false;
 
+    // If we would like to keep a particular eye on a package, we can set the package name.
+    private boolean mExtraDisplayEventLogging;
+
     private final BroadcastReceiver mIdleModeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -565,6 +569,8 @@ public final class DisplayManagerService extends SystemService {
         mOverlayProperties = SurfaceControl.getOverlaySupport();
         mSystemReady = false;
         mConfigParameterProvider = new DeviceConfigParameterProvider(DeviceConfigInterface.REAL);
+        final String name = DisplayProperties.debug_vri_package().orElse(null);
+        mExtraDisplayEventLogging = !TextUtils.isEmpty(name);
     }
 
     public void setupSchedulerPolicies() {
@@ -2874,9 +2880,10 @@ public final class DisplayManagerService extends SystemService {
     // Delivers display event notifications to callbacks.
     private void deliverDisplayEvent(int displayId, ArraySet<Integer> uids,
             @DisplayEvent int event) {
-        if (DEBUG) {
+        if (DEBUG || mExtraDisplayEventLogging) {
             Slog.d(TAG, "Delivering display event: displayId="
-                    + displayId + ", event=" + event);
+                    + displayId + ", event=" + event
+                    + (uids != null ? ", uids=" + uids : ""));
         }
 
         // Grab the lock and copy the callbacks.
