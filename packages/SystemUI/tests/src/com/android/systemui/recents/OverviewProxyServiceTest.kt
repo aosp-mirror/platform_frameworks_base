@@ -48,7 +48,6 @@ import com.android.systemui.shared.system.QuickStepContract.WAKEFULNESS_GOING_TO
 import com.android.systemui.shared.system.QuickStepContract.WAKEFULNESS_WAKING
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
-import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -94,7 +93,6 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var shellInterface: ShellInterface
     @Mock private lateinit var navBarController: NavigationBarController
-    @Mock private lateinit var centralSurfaces: CentralSurfaces
     @Mock private lateinit var shadeViewController: ShadeViewController
     @Mock private lateinit var screenPinningRequest: ScreenPinningRequest
     @Mock private lateinit var navModeController: NavigationModeController
@@ -135,7 +133,6 @@ class OverviewProxyServiceTest : SysuiTestCase() {
                 commandQueue,
                 shellInterface,
                 { navBarController },
-                { Optional.of(centralSurfaces) },
                 { shadeViewController },
                 screenPinningRequest,
                 navModeController,

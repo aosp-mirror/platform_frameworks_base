@@ -104,7 +104,6 @@ import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
@@ -145,7 +144,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final SceneContainerFlags mSceneContainerFlags;
     private final Executor mMainExecutor;
     private final ShellInterface mShellInterface;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final Lazy<ShadeViewController> mShadeViewControllerLazy;
     private SysUiState mSysUiState;
     private final Handler mHandler;
@@ -204,40 +202,38 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void onStatusBarTouchEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentity("onStatusBarTouchEvent", () -> {
                 // TODO move this logic to message queue
-                mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
-                    if (event.getActionMasked() == ACTION_DOWN) {
-                        mShadeViewControllerLazy.get().startExpandLatencyTracking();
+                if (event.getActionMasked() == ACTION_DOWN) {
+                    mShadeViewControllerLazy.get().startExpandLatencyTracking();
+                }
+                mHandler.post(() -> {
+                    int action = event.getActionMasked();
+                    if (action == ACTION_DOWN) {
+                        mInputFocusTransferStarted = true;
+                        mInputFocusTransferStartY = event.getY();
+                        mInputFocusTransferStartMillis = event.getEventTime();
+
+                        // If scene framework is enabled, set the scene container window to
+                        // visible and let the touch "slip" into that window.
+                        if (mSceneContainerFlags.isEnabled()) {
+                            mSceneInteractor.get().setVisible(true, "swipe down on launcher");
+                        } else {
+                            mShadeViewControllerLazy.get().startInputFocusTransfer();
+                        }
                     }
-                    mHandler.post(() -> {
-                        int action = event.getActionMasked();
-                        if (action == ACTION_DOWN) {
-                            mInputFocusTransferStarted = true;
-                            mInputFocusTransferStartY = event.getY();
-                            mInputFocusTransferStartMillis = event.getEventTime();
+                    if (action == ACTION_UP || action == ACTION_CANCEL) {
+                        mInputFocusTransferStarted = false;
 
-                            // If scene framework is enabled, set the scene container window to
-                            // visible and let the touch "slip" into that window.
-                            if (mSceneContainerFlags.isEnabled()) {
-                                mSceneInteractor.get().setVisible(true, "swipe down on launcher");
+                        if (!mSceneContainerFlags.isEnabled()) {
+                            float velocity = (event.getY() - mInputFocusTransferStartY)
+                                    / (event.getEventTime() - mInputFocusTransferStartMillis);
+                            if (action == ACTION_CANCEL) {
+                                mShadeViewControllerLazy.get().cancelInputFocusTransfer();
                             } else {
-                                centralSurfaces.onInputFocusTransfer(
-                                        mInputFocusTransferStarted, false /* cancel */,
-                                        0 /* velocity */);
+                                mShadeViewControllerLazy.get().finishInputFocusTransfer(velocity);
                             }
                         }
-                        if (action == ACTION_UP || action == ACTION_CANCEL) {
-                            mInputFocusTransferStarted = false;
-
-                            if (!mSceneContainerFlags.isEnabled()) {
-                                float velocity = (event.getY() - mInputFocusTransferStartY)
-                                        / (event.getEventTime() - mInputFocusTransferStartMillis);
-                                centralSurfaces.onInputFocusTransfer(mInputFocusTransferStarted,
-                                        action == ACTION_CANCEL,
-                                        velocity);
-                            }
-                        }
-                        event.recycle();
-                    });
+                    }
+                    event.recycle();
                 });
             });
         }
@@ -245,8 +241,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void onStatusBarTrackpadEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentityPostMain("onStatusBarTrackpadEvent", () ->
-                    mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces ->
-                            centralSurfaces.onStatusBarTrackpadEvent(event)));
+                    mShadeViewControllerLazy.get().handleExternalTouch(event));
         }
 
         @Override
@@ -568,7 +563,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             CommandQueue commandQueue,
             ShellInterface shellInterface,
             Lazy<NavigationBarController> navBarControllerLazy,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<ShadeViewController> shadeViewControllerLazy,
             ScreenPinningRequest screenPinningRequest,
             NavigationModeController navModeController,
@@ -596,7 +590,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mSceneContainerFlags = sceneContainerFlags;
         mMainExecutor = mainExecutor;
         mShellInterface = shellInterface;
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mShadeViewControllerLazy = shadeViewControllerLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
@@ -771,10 +764,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public void cleanupAfterDeath() {
         if (mInputFocusTransferStarted) {
             mHandler.post(() -> {
-                mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
-                    mInputFocusTransferStarted = false;
-                    centralSurfaces.onInputFocusTransfer(false, true /* cancel */, 0 /* velocity */);
-                });
+                mInputFocusTransferStarted = false;
+                mShadeViewControllerLazy.get().cancelInputFocusTransfer();
             });
         }
         startConnectionToCurrentUser();

@@ -2252,7 +2252,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     @Override
-    public void startWaitingForExpandGesture() {
+    public void startInputFocusTransfer() {
+        if (!mCommandQueue.panelsEnabled()) {
+            return;
+        }
         if (!isFullyCollapsed()) {
             return;
         }
@@ -2262,16 +2265,36 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     @Override
-    public void stopWaitingForExpandGesture(boolean cancel, final float velocity) {
+    public void cancelInputFocusTransfer() {
+        if (!mCommandQueue.panelsEnabled()) {
+            return;
+        }
         if (mExpectingSynthesizedDown) {
             mExpectingSynthesizedDown = false;
-            if (cancel) {
-                collapse(false /* delayed */, 1.0f /* speedUpFactor */);
-            } else {
-                // Window never will receive touch events that typically trigger haptic on open.
-                maybeVibrateOnOpening(false /* openingWithTouch */);
-                fling(velocity > 1f ? 1000f * velocity : 0  /* expand */);
-            }
+            collapse(false /* delayed */, 1.0f /* speedUpFactor */);
+            onTrackingStopped(false);
+        }
+    }
+
+    /**
+     * There are two scenarios behind this function call. First, input focus transfer has
+     * successfully happened and this view already received synthetic DOWN event.
+     * (mExpectingSynthesizedDown == false). Do nothing.
+     *
+     * Second, before input focus transfer finished, user may have lifted finger in previous window
+     * and this window never received synthetic DOWN event. (mExpectingSynthesizedDown == true). In
+     * this case, we use the velocity to trigger fling event.
+     */
+    @Override
+    public void finishInputFocusTransfer(final float velocity) {
+        if (!mCommandQueue.panelsEnabled()) {
+            return;
+        }
+        if (mExpectingSynthesizedDown) {
+            mExpectingSynthesizedDown = false;
+            // Window never will receive touch events that typically trigger haptic on open.
+            maybeVibrateOnOpening(false /* openingWithTouch */);
+            fling(velocity > 1f ? 1000f * velocity : 0  /* expand */);
             onTrackingStopped(false);
         }
     }

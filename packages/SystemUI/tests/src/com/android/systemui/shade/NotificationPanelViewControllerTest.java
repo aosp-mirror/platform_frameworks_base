@@ -961,8 +961,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void testQsExpansionChangedToDefaultWhenRotatingFromOrToSplitShade() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+
         // to make sure shade is in expanded state
-        mNotificationPanelViewController.startWaitingForExpandGesture();
+        mNotificationPanelViewController.startInputFocusTransfer();
 
         // switch to split shade from portrait (default state)
         enableSplitShade(/* enabled= */ true);
@@ -1235,15 +1237,47 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
-    public void shadeExpanded_whenWaitingForExpandGesture() {
-        mNotificationPanelViewController.startWaitingForExpandGesture();
+    public void shadeExpanded_whenUnlockedOffscreenAnimationRunning() {
+        when(mUnlockedScreenOffAnimationController.isAnimationPlaying()).thenReturn(true);
         assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
     }
 
     @Test
-    public void shadeExpanded_whenUnlockedOffscreenAnimationRunning() {
-        when(mUnlockedScreenOffAnimationController.isAnimationPlaying()).thenReturn(true);
+    public void shadeExpanded_whenInputFocusTransferStarted() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+
+        mNotificationPanelViewController.startInputFocusTransfer();
+
         assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void shadeNotExpanded_whenInputFocusTransferStartedButPanelsDisabled() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(false);
+
+        mNotificationPanelViewController.startInputFocusTransfer();
+
+        assertThat(mNotificationPanelViewController.isExpanded()).isFalse();
+    }
+
+    @Test
+    public void cancelInputFocusTransfer_shadeCollapsed() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+        mNotificationPanelViewController.startInputFocusTransfer();
+
+        mNotificationPanelViewController.cancelInputFocusTransfer();
+
+        assertThat(mNotificationPanelViewController.isExpanded()).isFalse();
+    }
+
+    @Test
+    public void finishInputFocusTransfer_shadeFlingingOpen() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+        mNotificationPanelViewController.startInputFocusTransfer();
+
+        mNotificationPanelViewController.finishInputFocusTransfer(/* velocity= */ 0f);
+
+        assertThat(mNotificationPanelViewController.isFlinging()).isTrue();
     }
 
     @Test
