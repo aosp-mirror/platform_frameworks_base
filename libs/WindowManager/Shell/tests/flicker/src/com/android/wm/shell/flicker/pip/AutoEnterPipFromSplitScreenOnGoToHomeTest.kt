@@ -135,7 +135,7 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
             if (flicker.scenario.isLandscapeOrSeascapeAtStart) {
                 flicker.assertWmVisibleRegion(pipApp) {
                     // first check against landscape bounds then against portrait bounds
-                    (coversAtMost(displayBounds).then() as RegionTraceSubject).coversAtMost(
+                    coversAtMost(displayBounds).then().coversAtMost(
                         portraitDisplayBounds
                     )
                 }
