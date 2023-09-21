@@ -317,9 +317,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private final Clock mClock;
     private final Injector mInjector;
 
-    //  Maximum time a ramp animation can take.
+    // Maximum time a ramp animation can take.
     private long mBrightnessRampIncreaseMaxTimeMillis;
     private long mBrightnessRampDecreaseMaxTimeMillis;
+
+    // Maximum time a ramp animation can take in idle mode.
+    private long mBrightnessRampIncreaseMaxTimeIdleMillis;
+    private long mBrightnessRampDecreaseMaxTimeIdleMillis;
 
     // The pending power request.
     // Initially null until the first call to requestPowerState.
@@ -585,6 +589,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private boolean mBootCompleted;
 
+    private final DisplayManagerFlags mFlags;
+
     /**
      * Creates the display power controller.
      */
@@ -750,6 +756,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mPendingAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
         mBootCompleted = bootCompleted;
+
+        mFlags = flags;
     }
 
     private void applyReduceBrightColorsSplineAdjustment() {
@@ -1057,11 +1065,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         loadNitsRange(mContext.getResources());
         setUpAutoBrightness(mContext.getResources(), mHandler);
         reloadReduceBrightColours();
-        if (mScreenBrightnessRampAnimator != null) {
-            mScreenBrightnessRampAnimator.setAnimationTimeLimits(
-                    mBrightnessRampIncreaseMaxTimeMillis,
-                    mBrightnessRampDecreaseMaxTimeMillis);
-        }
+        setAnimatorRampSpeeds(/* isIdleMode= */ false);
         mBrightnessRangeController.loadFromConfig(hbmMetadata, token, info, mDisplayDeviceConfig);
         mBrightnessThrottler.loadThermalBrightnessThrottlingDataFromDisplayDeviceConfig(
                 mDisplayDeviceConfig.getThermalBrightnessThrottlingDataMapByThrottlingId(),
@@ -1102,9 +1106,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mScreenBrightnessRampAnimator = mInjector.getDualRampAnimator(mPowerState,
                 DisplayPowerState.SCREEN_BRIGHTNESS_FLOAT,
                 DisplayPowerState.SCREEN_SDR_BRIGHTNESS_FLOAT);
-        mScreenBrightnessRampAnimator.setAnimationTimeLimits(
-                mBrightnessRampIncreaseMaxTimeMillis,
-                mBrightnessRampDecreaseMaxTimeMillis);
+        setAnimatorRampSpeeds(mAutomaticBrightnessController != null
+                && mAutomaticBrightnessController.isInIdleMode());
         mScreenBrightnessRampAnimator.setListener(mRampAnimatorListener);
 
         noteScreenState(mPowerState.getScreenState());
@@ -1323,6 +1326,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mDisplayDeviceConfig.getBrightnessRampDecreaseMaxMillis();
         mBrightnessRampIncreaseMaxTimeMillis =
                 mDisplayDeviceConfig.getBrightnessRampIncreaseMaxMillis();
+        mBrightnessRampDecreaseMaxTimeIdleMillis =
+                mDisplayDeviceConfig.getBrightnessRampDecreaseMaxIdleMillis();
+        mBrightnessRampIncreaseMaxTimeIdleMillis =
+                mDisplayDeviceConfig.getBrightnessRampIncreaseMaxIdleMillis();
     }
 
     private void loadNitsRange(Resources resources) {
@@ -1349,12 +1356,28 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             } else {
                 mAutomaticBrightnessController.switchToInteractiveScreenBrightnessMode();
             }
+            setAnimatorRampSpeeds(isIdle);
         }
 
         Message msg = mHandler.obtainMessage();
         msg.what = MSG_SET_DWBC_STRONG_MODE;
         msg.arg1 = isIdle ? 1 : 0;
         mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
+    }
+
+    private void setAnimatorRampSpeeds(boolean isIdle) {
+        if (mScreenBrightnessRampAnimator == null) {
+            return;
+        }
+        if (mFlags.isAdaptiveTone1Enabled() && isIdle) {
+            mScreenBrightnessRampAnimator.setAnimationTimeLimits(
+                    mBrightnessRampIncreaseMaxTimeIdleMillis,
+                    mBrightnessRampDecreaseMaxTimeIdleMillis);
+        } else {
+            mScreenBrightnessRampAnimator.setAnimationTimeLimits(
+                    mBrightnessRampIncreaseMaxTimeMillis,
+                    mBrightnessRampDecreaseMaxTimeMillis);
+        }
     }
 
     private final Animator.AnimatorListener mAnimatorListener = new Animator.AnimatorListener() {
