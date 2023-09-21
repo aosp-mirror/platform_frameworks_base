@@ -74,6 +74,21 @@ interface ShadeRepository {
      */
     @Deprecated("Use ShadeInteractor instead") val legacyQsTracking: StateFlow<Boolean>
 
+    /**
+     * NotificationPanelViewController.mPanelExpanded as a flow. This value is true whenever the
+     * expansion fraction is greater than zero or NPVC is about to accept an input transfer from the
+     * status bar, home screen, or trackpad.
+     */
+    @Deprecated("Use ShadeInteractor instead")
+    val legacyExpandedOrAwaitingInputTransfer: StateFlow<Boolean>
+
+    /**
+     * Sets whether the expansion fraction is greater than zero or NPVC is about to accept an input
+     * transfer from the status bar, home screen, or trackpad.
+     */
+    @Deprecated("Use ShadeInteractor instead")
+    fun setLegacyExpandedOrAwaitingInputTransfer(legacyExpandedOrAwaitingInputTransfer: Boolean)
+
     /** Sets whether the user is moving Quick Settings with a pointer */
     fun setLegacyQsTracking(legacyQsTracking: Boolean)
 
@@ -154,6 +169,18 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     private val _legacyQsTracking = MutableStateFlow(false)
     @Deprecated("Use ShadeInteractor instead")
     override val legacyQsTracking: StateFlow<Boolean> = _legacyQsTracking.asStateFlow()
+
+    private val _legacyExpandedOrAwaitingInputTransfer = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyExpandedOrAwaitingInputTransfer: StateFlow<Boolean> =
+        _legacyExpandedOrAwaitingInputTransfer.asStateFlow()
+
+    @Deprecated("Use ShadeInteractor instead")
+    override fun setLegacyExpandedOrAwaitingInputTransfer(
+        legacyExpandedOrAwaitingInputTransfer: Boolean
+    ) {
+        _legacyExpandedOrAwaitingInputTransfer.value = legacyExpandedOrAwaitingInputTransfer
+    }
 
     @Deprecated("Should only be called by NPVC and tests")
     override fun setLegacyQsTracking(legacyQsTracking: Boolean) {

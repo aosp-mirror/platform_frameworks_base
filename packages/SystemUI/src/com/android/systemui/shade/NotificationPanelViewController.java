@@ -2610,6 +2610,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         if (mPanelExpanded != isExpanded) {
             mPanelExpanded = isExpanded;
             updateSystemUiStateFlags();
+            mShadeRepository.setLegacyExpandedOrAwaitingInputTransfer(mPanelExpanded);
             mShadeExpansionStateManager.onShadeExpansionFullyChanged(isExpanded);
             if (!isExpanded) {
                 mQsController.closeQsCustomizer();

@@ -45,7 +45,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.isActive
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
@@ -78,7 +77,7 @@ constructor(
      * Whether split shade, the combined notifications and quick settings shade used for large
      * screens, is enabled.
      */
-    val splitShadeEnabled: Flow<Boolean> =
+    val isSplitShadeEnabled: Flow<Boolean> =
         sharedNotificationContainerInteractor.configurationBasedDimensions
             .map { dimens -> dimens.useSplitShade }
             .distinctUntilChanged()
@@ -93,7 +92,7 @@ constructor(
                     keyguardRepository.statusBarState,
                     repository.legacyShadeExpansion,
                     repository.qsExpansion,
-                    splitShadeEnabled
+                    isSplitShadeEnabled
                 ) {
                     lockscreenShadeExpansion,
                     statusBarState,
@@ -131,11 +130,27 @@ constructor(
             .stateIn(scope, SharingStarted.Eagerly, 0f)
 
     /** Whether either the shade or QS is expanding from a fully collapsed state. */
-    val isAnyExpanding =
+    val isAnyExpanding: Flow<Boolean> =
         anyExpansion
             .pairwise(1f)
             .map { (prev, curr) -> curr > 0f && curr < 1f && prev < 1f }
             .distinctUntilChanged()
+
+    /**
+     * Whether either the shade or QS is partially or fully expanded, i.e. not fully collapsed. At
+     * this time, this is not simply a matter of checking if either value in shadeExpansion and
+     * qsExpansion is greater than zero, because it includes the legacy concept of whether input
+     * transfer is about to occur. If the scene container flag is enabled, it just checks whether
+     * either expansion value is positive.
+     *
+     * TODO(b/300258424) remove all but the first sentence of this comment
+     */
+    val isAnyExpanded: Flow<Boolean> =
+        if (sceneContainerFlags.isEnabled()) {
+            anyExpansion.map { it > 0f }.distinctUntilChanged()
+        } else {
+            repository.legacyExpandedOrAwaitingInputTransfer
+        }
 
     /**
      * Whether the user is expanding or collapsing the shade with user input. This will be true even
@@ -147,6 +162,7 @@ constructor(
         } else {
             userInteractingFlow(repository.legacyShadeTracking, repository.legacyShadeExpansion)
         }
+
     /**
      * Whether the user is expanding or collapsing quick settings with user input. This will be true
      * even if the user's input gesture has ended but a transition they initiated is still
