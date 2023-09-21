@@ -48,7 +48,6 @@ class CredentialSelectorActivity : ComponentActivity() {
                         }
 
                         is CredentialSelectorUiState.Get -> {
-                            // TODO: b/301206470 - Implement get flow
                             setContent {
                                 MaterialTheme {
                                     WearApp()

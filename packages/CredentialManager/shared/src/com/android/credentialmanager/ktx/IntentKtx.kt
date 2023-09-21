@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui.ktx
+package com.android.credentialmanager.ktx
 
 import android.content.Intent
 import android.credentials.ui.CancelUiRequest
