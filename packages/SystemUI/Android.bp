@@ -203,6 +203,9 @@ android_library {
         "LowLightDreamLib",
         "motion_tool_lib",
     ],
+    libs: [
+        "keepanno-annotations",
+    ],
     manifest: "AndroidManifest.xml",
 
     javacflags: ["-Adagger.fastInit=enabled"],
@@ -466,6 +469,7 @@ android_library {
         "android.test.runner",
         "android.test.base",
         "android.test.mock",
+        "keepanno-annotations",
     ],
     kotlincflags: ["-Xjvm-default=all"],
     aaptflags: [
@@ -496,6 +500,9 @@ android_app {
     ],
     static_libs: [
         "SystemUI-tests-base",
+    ],
+    libs: [
+        "keepanno-annotations",
     ],
     aaptflags: [
         "--extra-packages",

@@ -1,8 +1,5 @@
 -keep class com.android.systemui.VendorServices
 
-# the `#inject` methods are accessed via reflection to work on ContentProviders
--keepclassmembers class * extends com.android.systemui.dagger.SysUIComponent { void inject(***); }
-
 # Needed to ensure callback field references are kept in their respective
 # owning classes when the downstream callback registrars only store weak refs.
 # TODO(b/264686688): Handle these cases with more targeted annotations.
