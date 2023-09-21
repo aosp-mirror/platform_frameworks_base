@@ -2943,6 +2943,17 @@ public class ApplicationPackageManager extends PackageManager {
         return isPackageSuspendedForUser(mContext.getOpPackageName(), getUserId());
     }
 
+    @Override
+    public boolean isPackageQuarantined(@NonNull String packageName) throws NameNotFoundException {
+        try {
+            return mPM.isPackageQuarantinedForUser(packageName, getUserId());
+        } catch (IllegalArgumentException ie) {
+            throw new NameNotFoundException(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     @Override
     public void setApplicationCategoryHint(String packageName, int categoryHint) {
