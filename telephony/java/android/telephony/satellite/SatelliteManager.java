@@ -724,6 +724,17 @@ public final class SatelliteManager {
      */
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_FAILED = 7;
     /**
+     * A transition state indicating that Telephony is waiting for satellite modem to connect to a
+     * satellite network before sending a datagram or polling for datagrams. If the satellite modem
+     * successfully connects to a satellite network, either
+     * {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_SENDING} or
+     * {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVING} will be sent. Otherwise,
+     * either {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_FAILED} or
+     * {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_FAILED} will be sent.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_WAITING_TO_CONNECT = 8;
+    /**
      * The datagram transfer state is unknown. This generic datagram transfer state should be used
      * only when the datagram transfer state cannot be mapped to other specific datagram transfer
      * states.
@@ -740,6 +751,7 @@ public final class SatelliteManager {
             SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_SUCCESS,
             SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_NONE,
             SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_FAILED,
+            SATELLITE_DATAGRAM_TRANSFER_STATE_WAITING_TO_CONNECT,
             SATELLITE_DATAGRAM_TRANSFER_STATE_UNKNOWN
     })
     @Retention(RetentionPolicy.SOURCE)
