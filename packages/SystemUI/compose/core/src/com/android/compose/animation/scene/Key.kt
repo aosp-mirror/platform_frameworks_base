@@ -16,6 +16,8 @@
 
 package com.android.compose.animation.scene
 
+import androidx.annotation.VisibleForTesting
+
 /**
  * A base class to create unique keys, associated to an [identity] that is used to check the
  * equality of two key instances.
@@ -41,6 +43,7 @@ class SceneKey(
     name: String,
     identity: Any = Object(),
 ) : Key(name, identity) {
+    @VisibleForTesting val testTag: String = "scene:$name"
 
     /** The unique [ElementKey] identifying this scene's root element. */
     val rootElementKey = ElementKey(name, identity)
@@ -61,7 +64,9 @@ class ElementKey(
      */
     val isBackground: Boolean = false,
 ) : Key(name, identity), ElementMatcher {
-    override fun matches(key: ElementKey): Boolean {
+    @VisibleForTesting val testTag: String = "element:$name"
+
+    override fun matches(key: ElementKey, scene: SceneKey): Boolean {
         return key == this
     }
 
@@ -73,7 +78,9 @@ class ElementKey(
         /** Matches any element whose [key identity][ElementKey.identity] matches [predicate]. */
         fun withIdentity(predicate: (Any) -> Boolean): ElementMatcher {
             return object : ElementMatcher {
-                override fun matches(key: ElementKey): Boolean = predicate(key.identity)
+                override fun matches(key: ElementKey, scene: SceneKey): Boolean {
+                    return predicate(key.identity)
+                }
             }
         }
     }

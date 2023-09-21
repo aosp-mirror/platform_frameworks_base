@@ -31,6 +31,7 @@ import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.PunchHole
 import com.android.compose.animation.scene.transformation.RangedPropertyTransformation
 import com.android.compose.animation.scene.transformation.ScaleSize
+import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.TransformationRange
 import com.android.compose.animation.scene.transformation.Translate
@@ -108,6 +109,10 @@ internal class TransitionBuilderImpl : TransitionBuilder {
         range = TransformationRange(start, end)
         builder()
         range = null
+    }
+
+    override fun sharedElement(matcher: ElementMatcher, enabled: Boolean) {
+        transformations.add(SharedElementTransformation(matcher, enabled))
     }
 
     override fun timestampRange(

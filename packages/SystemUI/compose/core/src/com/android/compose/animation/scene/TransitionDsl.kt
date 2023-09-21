@@ -116,6 +116,14 @@ interface TransitionBuilder : PropertyTransformationBuilder {
     )
 
     /**
+     * Configure the shared transition when [matcher] is shared between two scenes.
+     *
+     * @param enabled whether the matched element(s) should actually be shared in this transition.
+     *   Defaults to true.
+     */
+    fun sharedElement(matcher: ElementMatcher, enabled: Boolean = true)
+
+    /**
      * Punch a hole in the element(s) matching [matcher] that has the same bounds as [bounds] and
      * using the given [shape].
      *
@@ -184,12 +192,6 @@ interface PropertyTransformationBuilder {
      * Note: This currently only works if [anchor] is a shared element of this transition.
      */
     fun anchoredSize(matcher: ElementMatcher, anchor: ElementKey)
-}
-
-/** An interface to match one or more elements. */
-interface ElementMatcher {
-    /** Whether the element with key [key] matches this matcher. */
-    fun matches(key: ElementKey): Boolean
 }
 
 /** The edge of a [SceneTransitionLayout]. */

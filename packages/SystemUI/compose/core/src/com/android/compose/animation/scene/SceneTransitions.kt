@@ -29,6 +29,7 @@ import com.android.compose.animation.scene.transformation.ModifierTransformation
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.RangedPropertyTransformation
 import com.android.compose.animation.scene.transformation.ScaleSize
+import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.Translate
 import com.android.compose.ui.util.fastForEach
@@ -99,7 +100,8 @@ data class TransitionSpec(
     val transformations: List<Transformation>,
     val spec: AnimationSpec<Float>,
 ) {
-    private val cache = mutableMapOf<ElementKey, ElementTransformations>()
+    // TODO(b/302300957): Make sure this cache does not infinitely grow.
+    private val cache = mutableMapOf<ElementKey, MutableMap<SceneKey, ElementTransformations>>()
 
     internal fun reverse(): TransitionSpec {
         return copy(
@@ -109,12 +111,18 @@ data class TransitionSpec(
         )
     }
 
-    internal fun transformations(element: ElementKey): ElementTransformations {
-        return cache.getOrPut(element) { computeTransformations(element) }
+    internal fun transformations(element: ElementKey, scene: SceneKey): ElementTransformations {
+        return cache
+            .getOrPut(element) { mutableMapOf() }
+            .getOrPut(scene) { computeTransformations(element, scene) }
     }
 
     /** Filter [transformations] to compute the [ElementTransformations] of [element]. */
-    private fun computeTransformations(element: ElementKey): ElementTransformations {
+    private fun computeTransformations(
+        element: ElementKey,
+        scene: SceneKey,
+    ): ElementTransformations {
+        var shared: SharedElementTransformation? = null
         val modifier = mutableListOf<ModifierTransformation>()
         var offset: PropertyTransformation<Offset>? = null
         var size: PropertyTransformation<IntSize>? = null
@@ -128,16 +136,16 @@ data class TransitionSpec(
                 is Translate,
                 is EdgeTranslate,
                 is AnchoredTranslate -> {
-                    throwIfNotNull(offset, element, property = "offset")
+                    throwIfNotNull(offset, element, name = "offset")
                     offset = root as PropertyTransformation<Offset>
                 }
                 is ScaleSize,
                 is AnchoredSize -> {
-                    throwIfNotNull(size, element, property = "size")
+                    throwIfNotNull(size, element, name = "size")
                     size = root as PropertyTransformation<IntSize>
                 }
                 is Fade -> {
-                    throwIfNotNull(alpha, element, property = "alpha")
+                    throwIfNotNull(alpha, element, name = "alpha")
                     alpha = root as PropertyTransformation<Float>
                 }
                 is RangedPropertyTransformation -> onPropertyTransformation(root, current.delegate)
@@ -145,32 +153,37 @@ data class TransitionSpec(
         }
 
         transformations.fastForEach { transformation ->
-            if (!transformation.matcher.matches(element)) {
+            if (!transformation.matcher.matches(element, scene)) {
                 return@fastForEach
             }
 
             when (transformation) {
+                is SharedElementTransformation -> {
+                    throwIfNotNull(shared, element, name = "shared")
+                    shared = transformation
+                }
                 is ModifierTransformation -> modifier.add(transformation)
                 is PropertyTransformation<*> -> onPropertyTransformation(transformation)
             }
         }
 
-        return ElementTransformations(modifier, offset, size, alpha)
+        return ElementTransformations(shared, modifier, offset, size, alpha)
     }
 
     private fun throwIfNotNull(
-        previous: PropertyTransformation<*>?,
+        previous: Transformation?,
         element: ElementKey,
-        property: String,
+        name: String,
     ) {
         if (previous != null) {
-            error("$element has multiple transformations for its $property property")
+            error("$element has multiple $name transformations")
         }
     }
 }
 
 /** The transformations of an element during a transition. */
 internal class ElementTransformations(
+    val shared: SharedElementTransformation?,
     val modifier: List<ModifierTransformation>,
     val offset: PropertyTransformation<Offset>?,
     val size: PropertyTransformation<IntSize>?,

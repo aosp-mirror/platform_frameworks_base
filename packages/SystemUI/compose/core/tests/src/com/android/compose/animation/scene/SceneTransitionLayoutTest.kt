@@ -224,7 +224,7 @@ class SceneTransitionLayoutTest {
 
         // In scene A, the shared element SharedFoo() is at the top end of the layout and has a size
         // of 50.dp.
-        var sharedFoo = rule.onNodeWithTag(TestElements.Foo.name, useUnmergedTree = true)
+        var sharedFoo = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
         sharedFoo.assertWidthIsEqualTo(50.dp)
         sharedFoo.assertHeightIsEqualTo(50.dp)
         sharedFoo.assertPositionInRootIsEqualTo(
@@ -250,7 +250,7 @@ class SceneTransitionLayoutTest {
 
         // We need to use onAllNodesWithTag().onFirst() here given that shared elements are
         // composed and laid out in both scenes (but drawn only in one).
-        sharedFoo = rule.onAllNodesWithTag(TestElements.Foo.name).onFirst()
+        sharedFoo = rule.onAllNodesWithTag(TestElements.Foo.testTag).onFirst()
 
         // In scene B, foo is at the top start (x = 0, y = 0) of the layout and has a size of
         // 100.dp. We pause at the middle of the transition, so it should now be 75.dp given that we
@@ -284,7 +284,7 @@ class SceneTransitionLayoutTest {
         val expectedLeft = 0.dp
         val expectedSize = 100.dp + (150.dp - 100.dp) * interpolatedProgress
 
-        sharedFoo = rule.onAllNodesWithTag(TestElements.Foo.name).onFirst()
+        sharedFoo = rule.onAllNodesWithTag(TestElements.Foo.testTag).onFirst()
         assertThat((layoutState.transitionState as TransitionState.Transition).progress)
             .isEqualTo(interpolatedProgress)
         sharedFoo.assertWidthIsEqualTo(expectedSize)

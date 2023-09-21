@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.zIndex
 
@@ -45,7 +46,9 @@ internal class Scene(
 
     @Composable
     fun Content(modifier: Modifier = Modifier) {
-        Box(modifier.zIndex(zIndex).onPlaced { size = it.size }) { scope.content() }
+        Box(modifier.zIndex(zIndex).onPlaced { size = it.size }.testTag(key.testTag)) {
+            scope.content()
+        }
     }
 
     override fun toString(): String {

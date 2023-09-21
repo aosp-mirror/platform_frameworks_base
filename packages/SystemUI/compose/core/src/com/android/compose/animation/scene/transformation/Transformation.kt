@@ -45,6 +45,11 @@ sealed interface Transformation {
     fun reverse(): Transformation = this
 }
 
+internal class SharedElementTransformation(
+    override val matcher: ElementMatcher,
+    internal val enabled: Boolean,
+) : Transformation
+
 /** A transformation that is applied on the element during the whole transition. */
 internal interface ModifierTransformation : Transformation {
     /** Apply the transformation to [element]. */
