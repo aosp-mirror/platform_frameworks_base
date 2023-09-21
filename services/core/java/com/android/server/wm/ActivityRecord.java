@@ -9901,7 +9901,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             ProtoLog.i(WM_DEBUG_STATES, "Moving to %s Relaunching %s callers=%s" ,
                     (andResume ? "RESUMED" : "PAUSED"), this, Debug.getCallers(6));
             forceNewConfig = false;
-            startRelaunching();
             final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(token,
                     pendingResults, pendingNewIntents, configChangeFlags,
                     new MergedConfiguration(getProcessGlobalConfiguration(),
@@ -9918,11 +9917,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             transaction.addCallback(callbackItem);
             transaction.setLifecycleStateRequest(lifecycleItem);
             mAtmService.getLifecycleManager().scheduleTransaction(transaction);
+            startRelaunching();
             // Note: don't need to call pauseIfSleepingLocked() here, because the caller will only
             // request resume if this activity is currently resumed, which implies we aren't
             // sleeping.
         } catch (RemoteException e) {
-            ProtoLog.i(WM_DEBUG_STATES, "Relaunch failed %s", e);
+            Slog.w(TAG, "Failed to relaunch " + this + ": " + e);
         }
 
         if (andResume) {
