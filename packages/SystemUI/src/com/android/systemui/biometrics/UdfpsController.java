@@ -549,8 +549,12 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             Log.e(TAG, "ignoring the touch injected from outside of UdfpsView");
             return false;
         }
-        if (mOverlay == null) {
-            Log.w(TAG, "ignoring onTouch with null overlay");
+        if (mOverlay == null || mOverlay.getAnimationViewController() == null) {
+            Log.w(TAG, "ignoring onTouch with null overlay or animation view controller");
+            return false;
+        }
+        if (mOverlay.getAnimationViewController().shouldPauseAuth()) {
+            Log.w(TAG, "ignoring onTouch with shouldPauseAuth = true");
             return false;
         }
         if (!mOverlay.matchesRequestId(requestId)) {
