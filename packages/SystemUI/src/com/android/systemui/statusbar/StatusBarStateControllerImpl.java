@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
-
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_TO_AOD;
 
@@ -31,13 +29,7 @@ import android.text.format.DateFormat;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.view.Choreographer;
-import android.view.InsetsFlags;
 import android.view.View;
-import android.view.ViewDebug;
-import android.view.WindowInsets;
-import android.view.WindowInsets.Type.InsetsType;
-import android.view.WindowInsetsController.Appearance;
-import android.view.WindowInsetsController.Behavior;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
@@ -551,34 +543,6 @@ public class StatusBarStateControllerImpl implements
     @Override
     public boolean isKeyguardRequested() {
         return mKeyguardRequested;
-    }
-
-    @Override
-    public void setSystemBarAttributes(@Appearance int appearance, @Behavior int behavior,
-            @InsetsType int requestedVisibleTypes, String packageName) {
-        boolean isFullscreen = (requestedVisibleTypes & WindowInsets.Type.statusBars()) == 0
-                || (requestedVisibleTypes & WindowInsets.Type.navigationBars()) == 0;
-        if (mIsFullscreen != isFullscreen) {
-            mIsFullscreen = isFullscreen;
-            synchronized (mListeners) {
-                for (RankedListener rl : new ArrayList<>(mListeners)) {
-                    rl.mListener.onFullscreenStateChanged(isFullscreen);
-                }
-            }
-        }
-
-        // TODO (b/190543382): Finish the logging logic.
-        // This section can be removed if we don't need to print it on logcat.
-        if (DEBUG_IMMERSIVE_APPS) {
-            boolean dim = (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0;
-            String behaviorName = ViewDebug.flagsToString(InsetsFlags.class, "behavior", behavior);
-            String requestedVisibleTypesString = WindowInsets.Type.toString(requestedVisibleTypes);
-            if (requestedVisibleTypesString.isEmpty()) {
-                requestedVisibleTypesString = "none";
-            }
-            Log.d(TAG, packageName + " dim=" + dim + " behavior=" + behaviorName
-                    + " requested visible types: " + requestedVisibleTypesString);
-        }
     }
 
     @Override

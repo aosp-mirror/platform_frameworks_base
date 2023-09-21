@@ -563,8 +563,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final Executor mUiBgExecutor;
 
     protected boolean mDozing;
-    private boolean mIsFullscreen;
-
     boolean mCloseQsBeforeScreenOff;
 
     private final NotificationMediaManager mMediaManager;
@@ -1192,6 +1190,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mDemoModeController.addCallback(mDemoModeCallback);
         mJavaAdapter.alwaysCollectFlow(
                 mStatusBarModeRepository.isTransientShown(), this::onTransientShownChanged);
+        mJavaAdapter.alwaysCollectFlow(
+                mStatusBarModeRepository.isInFullscreenMode(),
+                this::onStatusBarFullscreenChanged);
 
         mCommandQueueCallbacks = mCommandQueueCallbacksLazy.get();
         mCommandQueue.addCallback(mCommandQueueCallbacks);
@@ -1733,6 +1734,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         maybeUpdateBarMode();
     }
 
+    private void onStatusBarFullscreenChanged(boolean isWindowShown) {
+        maybeUpdateBarMode();
+    }
+
     private void maybeUpdateBarMode() {
         final int barMode = barMode(isTransientShown(), mAppearance);
         if (updateBarMode(barMode)) {
@@ -1752,8 +1757,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     private @TransitionMode int barMode(boolean isTransient, int appearance) {
+        boolean isFullscreen = mStatusBarModeRepository.isInFullscreenMode().getValue();
         final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_STATUS_BARS;
-        if (mOngoingCallController.hasOngoingCall() && mIsFullscreen) {
+        if (mOngoingCallController.hasOngoingCall() && isFullscreen) {
+            // Force show the status bar if there's an ongoing call.
             return MODE_SEMI_TRANSPARENT;
         } else if (isTransient) {
             return MODE_SEMI_TRANSPARENT;
@@ -3348,12 +3355,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
                     updateReportRejectedTouchVisibility();
                     Trace.endSection();
-                }
-
-                @Override
-                public void onFullscreenStateChanged(boolean isFullscreen) {
-                    mIsFullscreen = isFullscreen;
-                    maybeUpdateBarMode();
                 }
             };
 

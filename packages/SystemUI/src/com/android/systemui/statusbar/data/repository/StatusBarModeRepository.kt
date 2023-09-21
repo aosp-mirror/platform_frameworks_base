@@ -17,14 +17,22 @@
 package com.android.systemui.statusbar.data.repository
 
 import android.view.WindowInsets
+import android.view.WindowInsetsController
+import com.android.internal.statusbar.LetterboxDetails
+import com.android.internal.view.AppearanceRegion
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.statusbar.CommandQueue
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * A repository for the current mode of the status bar on the homescreen (translucent, transparent,
@@ -44,6 +52,14 @@ interface StatusBarModeRepository {
      * internally. SysUI merely obeys the behavior sent to us.
      */
     val isTransientShown: StateFlow<Boolean>
+
+    /**
+     * True the focused window is fullscreen (aka immersive) and false otherwise.
+     *
+     * Typically, the only time the status bar window is hidden is when the focused window is
+     * fullscreen.
+     */
+    val isInFullscreenMode: StateFlow<Boolean>
 
     /**
      * Requests for the status bar to be shown transiently.
@@ -66,6 +82,7 @@ interface StatusBarModeRepository {
 class StatusBarModeRepositoryImpl
 @Inject
 constructor(
+    @Application scope: CoroutineScope,
     @DisplayId thisDisplayId: Int,
     private val commandQueue: CommandQueue,
 ) : StatusBarModeRepository, CoreStartable {
@@ -94,6 +111,23 @@ constructor(
             ): Boolean {
                 return displayId == thisDisplayId && (types and WindowInsets.Type.statusBars() != 0)
             }
+
+            override fun onSystemBarAttributesChanged(
+                displayId: Int,
+                @WindowInsetsController.Appearance appearance: Int,
+                appearanceRegions: Array<AppearanceRegion>,
+                navbarColorManagedByIme: Boolean,
+                @WindowInsetsController.Behavior behavior: Int,
+                @WindowInsets.Type.InsetsType requestedVisibleTypes: Int,
+                packageName: String,
+                letterboxDetails: Array<LetterboxDetails>,
+            ) {
+                if (displayId != thisDisplayId) return
+                _originalStatusBarAttributes.value =
+                    StatusBarAttributes(
+                        requestedVisibleTypes,
+                    )
+            }
         }
 
     override fun start() {
@@ -103,6 +137,17 @@ constructor(
     private val _isTransientShown = MutableStateFlow(false)
     override val isTransientShown: StateFlow<Boolean> = _isTransientShown.asStateFlow()
 
+    private val _originalStatusBarAttributes = MutableStateFlow<StatusBarAttributes?>(null)
+
+    override val isInFullscreenMode: StateFlow<Boolean> =
+        _originalStatusBarAttributes
+            .map { params ->
+                val requestedVisibleTypes = params?.requestedVisibleTypes ?: return@map false
+                // When the status bar is not requested visible, we assume we're in fullscreen mode.
+                requestedVisibleTypes and WindowInsets.Type.statusBars() == 0
+            }
+            .stateIn(scope, SharingStarted.Eagerly, false)
+
     override fun showTransient() {
         _isTransientShown.value = true
     }
@@ -110,4 +155,12 @@ constructor(
     override fun clearTransient() {
         _isTransientShown.value = false
     }
+
+    /**
+     * Internal class keeping track of the raw status bar attributes received from the callback.
+     * Should never be exposed.
+     */
+    private data class StatusBarAttributes(
+        @WindowInsets.Type.InsetsType val requestedVisibleTypes: Int,
+    )
 }

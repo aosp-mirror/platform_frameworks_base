@@ -32,10 +32,11 @@ import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepository
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -43,6 +44,8 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.time.SystemClock
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -52,6 +55,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class OngoingCallController @Inject constructor(
+    @Application private val scope: CoroutineScope,
     private val context: Context,
     private val notifCollection: CommonNotifCollection,
     private val systemClock: SystemClock,
@@ -62,7 +66,7 @@ class OngoingCallController @Inject constructor(
     private val dumpManager: DumpManager,
     private val statusBarWindowController: StatusBarWindowController,
     private val swipeStatusBarAwayGestureHandler: SwipeStatusBarAwayGestureHandler,
-    private val statusBarStateController: StatusBarStateController
+    private val statusBarModeRepository: StatusBarModeRepository,
 ) : CallbackController<OngoingCallListener>, Dumpable, CoreStartable {
     private var isFullscreen: Boolean = false
     /** Non-null if there's an active call notification. */
@@ -122,7 +126,13 @@ class OngoingCallController @Inject constructor(
     override fun start() {
         dumpManager.registerDumpable(this)
         notifCollection.addCollectionListener(notifListener)
-        statusBarStateController.addCallback(statusBarStateListener)
+        scope.launch {
+            statusBarModeRepository.isInFullscreenMode.collect {
+                isFullscreen = it
+                updateChipClickListener()
+                updateGestureListening()
+            }
+        }
     }
 
     /**
@@ -276,14 +286,6 @@ class OngoingCallController @Inject constructor(
         callNotificationInfo = callNotificationInfo?.copy(statusBarSwipedAway = true)
         statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(false)
         swipeStatusBarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
-    }
-
-    private val statusBarStateListener = object : StatusBarStateController.StateListener {
-        override fun onFullscreenStateChanged(isFullscreen: Boolean) {
-            this@OngoingCallController.isFullscreen = isFullscreen
-            updateChipClickListener()
-            updateGestureListening()
-        }
     }
 
     private data class CallNotificationInfo(
