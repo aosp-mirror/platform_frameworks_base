@@ -605,12 +605,28 @@ class ActivityLaunchAnimator(
                 object : Controller by delegate {
                     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
                         listener?.onLaunchAnimationStart()
+
+                        if (DEBUG_LAUNCH_ANIMATION) {
+                            Log.d(
+                                TAG,
+                                "Calling controller.onLaunchAnimationStart(isExpandingFullyAbove=" +
+                                    "$isExpandingFullyAbove) [controller=$delegate]"
+                            )
+                        }
                         delegate.onLaunchAnimationStart(isExpandingFullyAbove)
                     }
 
                     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
                         listener?.onLaunchAnimationEnd()
                         iCallback?.invoke()
+
+                        if (DEBUG_LAUNCH_ANIMATION) {
+                            Log.d(
+                                TAG,
+                                "Calling controller.onLaunchAnimationEnd(isExpandingFullyAbove=" +
+                                    "$isExpandingFullyAbove) [controller=$delegate]"
+                            )
+                        }
                         delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
                     }
 
