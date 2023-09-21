@@ -24,6 +24,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -34,6 +35,7 @@ import libcore.util.NativeAllocationRegistry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.ObjIntConsumer;
+
 /**
  * Handles display and layer captures for the system.
  *
@@ -43,6 +45,8 @@ public class ScreenCapture {
     private static final String TAG = "ScreenCapture";
     private static final int SCREENSHOT_WAIT_TIME_S = 4 * Build.HW_TIMEOUT_MULTIPLIER;
 
+    private static native int nativeCaptureDisplay(DisplayCaptureArgs captureArgs,
+            long captureListener);
     private static native int nativeCaptureLayers(LayerCaptureArgs captureArgs,
             long captureListener);
     private static native long nativeCreateScreenCaptureListener(
@@ -50,6 +54,37 @@ public class ScreenCapture {
     private static native void nativeWriteListenerToParcel(long nativeObject, Parcel out);
     private static native long nativeReadListenerFromParcel(Parcel in);
     private static native long getNativeListenerFinalizer();
+
+    /**
+     * @param captureArgs     Arguments about how to take the screenshot
+     * @param captureListener A listener to receive the screenshot callback
+     * @hide
+     */
+    public static int captureDisplay(@NonNull DisplayCaptureArgs captureArgs,
+            @NonNull ScreenCaptureListener captureListener) {
+        return nativeCaptureDisplay(captureArgs, captureListener.mNativeObject);
+    }
+
+    /**
+     * Captures all the surfaces in a display and returns a {@link ScreenshotHardwareBuffer} with
+     * the content.
+     *
+     * @hide
+     */
+    public static ScreenshotHardwareBuffer captureDisplay(
+            DisplayCaptureArgs captureArgs) {
+        SynchronousScreenCaptureListener syncScreenCapture = createSyncCaptureListener();
+        int status = captureDisplay(captureArgs, syncScreenCapture);
+        if (status != 0) {
+            return null;
+        }
+
+        try {
+            return syncScreenCapture.getBuffer();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     /**
      * Captures a layer and its children and returns a {@link HardwareBuffer} with the content.
@@ -484,6 +519,92 @@ public class ScreenCapture {
     }
 
     /**
+     * The arguments class used to make display capture requests.
+     *
+     * @hide
+     * @see #nativeCaptureDisplay(DisplayCaptureArgs, long)
+     */
+    public static class DisplayCaptureArgs extends CaptureArgs {
+        private final IBinder mDisplayToken;
+        private final int mWidth;
+        private final int mHeight;
+        private final boolean mUseIdentityTransform;
+
+        private DisplayCaptureArgs(Builder builder) {
+            super(builder);
+            mDisplayToken = builder.mDisplayToken;
+            mWidth = builder.mWidth;
+            mHeight = builder.mHeight;
+            mUseIdentityTransform = builder.mUseIdentityTransform;
+        }
+
+        /**
+         * The Builder class used to construct {@link DisplayCaptureArgs}
+         */
+        public static class Builder extends CaptureArgs.Builder<Builder> {
+            private IBinder mDisplayToken;
+            private int mWidth;
+            private int mHeight;
+            private boolean mUseIdentityTransform;
+
+            /**
+             * Construct a new {@link LayerCaptureArgs} with the set parameters. The builder
+             * remains valid.
+             */
+            public DisplayCaptureArgs build() {
+                if (mDisplayToken == null) {
+                    throw new IllegalStateException(
+                            "Can't take screenshot with null display token");
+                }
+                return new DisplayCaptureArgs(this);
+            }
+
+            public Builder(IBinder displayToken) {
+                setDisplayToken(displayToken);
+            }
+
+            /**
+             * The display to take the screenshot of.
+             */
+            public Builder setDisplayToken(IBinder displayToken) {
+                mDisplayToken = displayToken;
+                return this;
+            }
+
+            /**
+             * Set the desired size of the returned buffer. The raw screen  will be  scaled down to
+             * this size
+             *
+             * @param width  The desired width of the returned buffer. Caller may pass in 0 if no
+             *               scaling is desired.
+             * @param height The desired height of the returned buffer. Caller may pass in 0 if no
+             *               scaling is desired.
+             */
+            public Builder setSize(int width, int height) {
+                mWidth = width;
+                mHeight = height;
+                return this;
+            }
+
+            /**
+             * Replace the rotation transform of the display with the identity transformation while
+             * taking the screenshot. This ensures the screenshot is taken in the ROTATION_0
+             * orientation. Set this value to false if the screenshot should be taken in the
+             * current screen orientation.
+             */
+            public Builder setUseIdentityTransform(boolean useIdentityTransform) {
+                mUseIdentityTransform = useIdentityTransform;
+                return this;
+            }
+
+            @Override
+            Builder getThis() {
+                return this;
+            }
+        }
+    }
+
+    /**
      * The arguments class used to make layer capture requests.
      *
      * @hide
@@ -561,6 +682,7 @@ public class ScreenCapture {
 
     /**
      * The object used to receive the results when invoking screen capture requests via
+     * {@link #captureDisplay(DisplayCaptureArgs, ScreenCaptureListener)} or
      * {@link #captureLayers(LayerCaptureArgs, ScreenCaptureListener)}
      *
      * This listener can only be used for a single call to capture content call.
@@ -662,7 +784,8 @@ public class ScreenCapture {
 
     /**
      * Helper class to synchronously get the {@link ScreenshotHardwareBuffer} when calling
-     * {@link #captureLayers(LayerCaptureArgs, ScreenCaptureListener)}
+     * {@link #captureLayers(LayerCaptureArgs, ScreenCaptureListener)} or
+     * {@link #captureDisplay(DisplayCaptureArgs, ScreenCaptureListener)}
      */
     public abstract static class SynchronousScreenCaptureListener extends ScreenCaptureListener {
         SynchronousScreenCaptureListener(ObjIntConsumer<ScreenshotHardwareBuffer> consumer) {
