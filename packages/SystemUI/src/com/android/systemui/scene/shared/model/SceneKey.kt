@@ -16,7 +16,11 @@
 
 package com.android.systemui.scene.shared.model
 
-/** Keys of all known scenes. */
+/**
+ * Keys of all known scenes.
+ *
+ * PLEASE KEEP THE KEYS SORTED ALPHABETICALLY.
+ */
 sealed class SceneKey(
     private val loggingName: String,
 ) {
@@ -25,6 +29,9 @@ sealed class SceneKey(
      * pattern.
      */
     object Bouncer : SceneKey("bouncer")
+
+    /** The communal scene shows the glanceable hub when device is locked and docked. */
+    object Communal : SceneKey("communal")
 
     /**
      * "Gone" is not a real scene but rather the absence of scenes when we want to skip showing any
@@ -35,13 +42,13 @@ sealed class SceneKey(
     /** The lockscreen is the scene that shows when the device is locked. */
     object Lockscreen : SceneKey("lockscreen")
 
+    /** The quick settings scene shows the quick setting tiles. */
+    object QuickSettings : SceneKey("quick_settings")
+
     /**
      * The shade is the scene whose primary purpose is to show a scrollable list of notifications.
      */
     object Shade : SceneKey("shade")
-
-    /** The quick settings scene shows the quick setting tiles. */
-    object QuickSettings : SceneKey("quick_settings")
 
     override fun toString(): String {
         return loggingName

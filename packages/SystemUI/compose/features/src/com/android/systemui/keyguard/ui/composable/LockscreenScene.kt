@@ -68,11 +68,17 @@ constructor(
 
     override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
         viewModel.upDestinationSceneKey
-            .map { pageKey -> destinationScenes(up = pageKey) }
+            .map { pageKey ->
+                destinationScenes(up = pageKey, left = viewModel.leftDestinationSceneKey)
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = destinationScenes(up = viewModel.upDestinationSceneKey.value)
+                initialValue =
+                    destinationScenes(
+                        up = viewModel.upDestinationSceneKey.value,
+                        left = viewModel.leftDestinationSceneKey,
+                    )
             )
 
     @Composable
@@ -88,9 +94,11 @@ constructor(
 
     private fun destinationScenes(
         up: SceneKey?,
+        left: SceneKey?,
     ): Map<UserAction, SceneModel> {
         return buildMap {
             up?.let { this[UserAction.Swipe(Direction.UP)] = SceneModel(up) }
+            left?.let { this[UserAction.Swipe(Direction.LEFT)] = SceneModel(left) }
             this[UserAction.Swipe(Direction.DOWN)] = SceneModel(SceneKey.Shade)
         }
     }

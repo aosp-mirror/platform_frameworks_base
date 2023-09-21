@@ -31,6 +31,9 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.communal.data.repository.FakeCommunalRepository
+import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
@@ -94,7 +97,10 @@ class SceneTestUtils(
             )
         }
     }
-
+    val communalRepository: FakeCommunalRepository by lazy { FakeCommunalRepository() }
+    private val communalWidgetRepository: FakeCommunalWidgetRepository by lazy {
+        FakeCommunalWidgetRepository()
+    }
     val powerRepository: FakePowerRepository by lazy { FakePowerRepository() }
 
     private val context = test.context
@@ -168,6 +174,13 @@ class SceneTestUtils(
             configurationRepository = FakeConfigurationRepository(),
             shadeRepository = FakeShadeRepository(),
             sceneInteractorProvider = { sceneInteractor() },
+        )
+    }
+
+    fun communalInteractor(): CommunalInteractor {
+        return CommunalInteractor(
+            communalRepository = communalRepository,
+            widgetRepository = communalWidgetRepository,
         )
     }
 
