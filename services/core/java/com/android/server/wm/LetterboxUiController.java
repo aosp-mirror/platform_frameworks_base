@@ -33,6 +33,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTA
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
 import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
@@ -672,7 +673,8 @@ final class LetterboxUiController {
         // orientation.
         candidate = mActivityRecord.mWmService.mapOrientationRequest(candidate);
 
-        if (shouldApplyUserMinAspectRatioOverride() && !isFixedOrientation(candidate)) {
+        if (shouldApplyUserMinAspectRatioOverride() && (!isFixedOrientation(candidate)
+                || candidate == SCREEN_ORIENTATION_LOCKED)) {
             Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
                     + mActivityRecord + " is overridden to "
                     + screenOrientationToString(SCREEN_ORIENTATION_PORTRAIT)
