@@ -393,29 +393,27 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
     }
 
     public @NonNull PackageUserStateImpl setDisabledComponents(@Nullable ArraySet<String> value) {
-        if (value == null) {
-            return this;
-        }
         if (mDisabledComponentsWatched == null) {
             mDisabledComponentsWatched = new WatchedArraySet<>();
             mDisabledComponentsWatched.registerObserver(mSnapshot);
         }
         mDisabledComponentsWatched.clear();
-        mDisabledComponentsWatched.addAll(value);
+        if (value != null) {
+            mDisabledComponentsWatched.addAll(value);
+        }
         onChanged();
         return this;
     }
 
     public @NonNull PackageUserStateImpl setEnabledComponents(@Nullable ArraySet<String> value) {
-        if (value == null) {
-            return this;
-        }
         if (mEnabledComponentsWatched == null) {
             mEnabledComponentsWatched = new WatchedArraySet<>();
             mEnabledComponentsWatched.registerObserver(mSnapshot);
         }
         mEnabledComponentsWatched.clear();
-        mEnabledComponentsWatched.addAll(value);
+        if (value != null) {
+            mEnabledComponentsWatched.addAll(value);
+        }
         onChanged();
         return this;
     }

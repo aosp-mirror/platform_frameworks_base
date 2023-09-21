@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -561,6 +562,17 @@ final class DeletePackageHelper {
                 Slog.d(TAG, "Marking package:" + ps.getPackageName()
                         + " uninstalled for user:" + nextUserId);
             }
+
+            // Keep enabled and disabled components in case of DELETE_KEEP_DATA
+            ArraySet<String> enabledComponents = null;
+            ArraySet<String> disabledComponents = null;
+            if ((flags & PackageManager.DELETE_KEEP_DATA) != 0) {
+                enabledComponents = new ArraySet<String>(
+                        ps.readUserState(nextUserId).getEnabledComponents());
+                disabledComponents = new ArraySet<String>(
+                        ps.readUserState(nextUserId).getDisabledComponents());
+            }
+
             // Preserve ArchiveState if this is not a full uninstall
             ArchiveState archiveState =
                     (flags & DELETE_KEEP_DATA) == 0
@@ -580,8 +592,8 @@ final class DeletePackageHelper {
                     false /*instantApp*/,
                     false /*virtualPreload*/,
                     null /*lastDisableAppCaller*/,
-                    null /*enabledComponents*/,
-                    null /*disabledComponents*/,
+                    enabledComponents,
+                    disabledComponents,
                     PackageManager.INSTALL_REASON_UNKNOWN,
                     PackageManager.UNINSTALL_REASON_UNKNOWN,
                     null /*harmfulAppWarning*/,
