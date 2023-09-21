@@ -233,6 +233,9 @@ public final class NavBarHelper implements
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
+                Settings.Secure.getUriFor(Secure.SEARCH_LONG_PRESS_HOME_ENABLED),
+                false, mAssistContentObserver, UserHandle.USER_ALL);
+        mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
 
@@ -422,11 +425,17 @@ public final class NavBarHelper implements
     private void updateAssistantAvailability() {
         boolean assistantAvailableForUser = mAssistManagerLazy.get()
                 .getAssistInfoForUser(mUserTracker.getUserId()) != null;
-        boolean longPressDefault = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
+
+        boolean overrideLongPressHome = mAssistManagerLazy.get()
+                .shouldOverrideAssist(AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
+        boolean longPressDefault = mContext.getResources().getBoolean(overrideLongPressHome
+                ? com.android.internal.R.bool.config_searchLongPressHomeEnabledDefault
+                : com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
         mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,
-                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
+                overrideLongPressHome ? Secure.SEARCH_LONG_PRESS_HOME_ENABLED
+                        : Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
                 mUserTracker.getUserId()) != 0;
+
         boolean gestureDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistTouchGestureEnabledDefault);
         mAssistantTouchGestureEnabled = Settings.Secure.getIntForUser(mContentResolver,
@@ -455,6 +464,7 @@ public final class NavBarHelper implements
     @Override
     public void setAssistantOverridesRequested(int[] invocationTypes) {
         mAssistManagerLazy.get().setAssistantOverridesRequested(invocationTypes);
+        updateAssistantAvailability();
     }
 
     @Override

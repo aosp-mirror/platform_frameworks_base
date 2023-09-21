@@ -719,7 +719,9 @@ public class SoundDoseHelper {
     /*package*/ void initSafeMediaVolumeIndex() {
         for (int i = 0; i < mSafeMediaVolumeDevices.size(); ++i)  {
             int deviceType = mSafeMediaVolumeDevices.keyAt(i);
-            mSafeMediaVolumeDevices.put(deviceType, getSafeDeviceMediaVolumeIndex(deviceType));
+            if (mSafeMediaVolumeDevices.valueAt(i) == SAFE_MEDIA_VOLUME_UNINITIALIZED) {
+                mSafeMediaVolumeDevices.put(deviceType, getSafeDeviceMediaVolumeIndex(deviceType));
+            }
         }
     }
 
@@ -743,7 +745,7 @@ public class SoundDoseHelper {
     }
 
     /*package*/ boolean safeDevicesContains(int device) {
-        return mSafeMediaVolumeDevices.indexOfKey(device) >= 0;
+        return mSafeMediaVolumeDevices.get(device, SAFE_MEDIA_VOLUME_UNINITIALIZED) >= 0;
     }
 
     /*package*/ void invalidatPendingVolumeCommand() {
@@ -1014,6 +1016,7 @@ public class SoundDoseHelper {
             initCsd();
 
             synchronized (mSafeMediaVolumeStateLock) {
+                initSafeMediaVolumeIndex();
                 updateSafeMediaVolume_l(caller);
             }
         }
@@ -1065,11 +1068,18 @@ public class SoundDoseHelper {
     }
 
     private int getSafeDeviceMediaVolumeIndex(int deviceType) {
-        // legacy implementation uses mSafeMediaVolumeIndex for wired HS/HP
-        // instead of computing it from the volume curves
-        if ((deviceType == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE
-                || deviceType == AudioSystem.DEVICE_OUT_WIRED_HEADSET) && !mEnableCsd.get()) {
-            return mSafeMediaVolumeIndex;
+        if (!mEnableCsd.get()) {
+            // legacy hearing safety only for wired and USB HS/HP
+            if (deviceType == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE
+                    || deviceType == AudioSystem.DEVICE_OUT_WIRED_HEADSET) {
+                // legacy hearing safety uses mSafeMediaVolumeIndex for wired HS/HP
+                // instead of computing it from the volume curves
+                return mSafeMediaVolumeIndex;
+            }
+
+            if (deviceType != AudioSystem.DEVICE_OUT_USB_HEADSET) {
+                return SAFE_MEDIA_VOLUME_UNINITIALIZED;
+            }
         }
 
         // determine UI volume index corresponding to the wanted safe gain in dBFS
