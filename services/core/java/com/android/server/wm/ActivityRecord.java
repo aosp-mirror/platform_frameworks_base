@@ -580,7 +580,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     IBinder mRequestedLaunchingTaskFragmentToken;
 
     // Tracking splash screen status from previous activity
-    boolean mSplashScreenStyleSolidColor = false;
+    boolean mAllowIconSplashScreen = true;
 
     boolean mPauseSchedulePendingForPip = false;
 
@@ -2408,8 +2408,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @VisibleForTesting
     boolean addStartingWindow(String pkg, int resolvedTheme, ActivityRecord from, boolean newTask,
             boolean taskSwitch, boolean processRunning, boolean allowTaskSnapshot,
-            boolean activityCreated, boolean isSimple,
-            boolean activityAllDrawn) {
+            boolean activityCreated, boolean allowIcon, boolean activityAllDrawn) {
         // If the display is frozen, we won't do anything until the actual window is
         // displayed so there is no reason to put in the starting window.
         if (!okToDisplay()) {
@@ -2444,8 +2443,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final int typeParameter = StartingSurfaceController
                 .makeStartingWindowTypeParameter(newTask, taskSwitch, processRunning,
-                        allowTaskSnapshot, activityCreated, isSimple, useLegacy, activityAllDrawn,
-                        type, packageName, mUserId);
+                        allowTaskSnapshot, activityCreated, allowIcon, useLegacy,
+                        activityAllDrawn, type, packageName, mUserId);
 
         if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
             if (isActivityTypeHome()) {
@@ -6747,7 +6746,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void onFirstWindowDrawn(WindowState win) {
         firstWindowDrawn = true;
         // stop tracking
-        mSplashScreenStyleSolidColor = true;
+        mAllowIconSplashScreen = false;
 
         if (mStartingWindow != null) {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Finish starting %s"
@@ -6796,7 +6795,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void onStartingWindowDrawn() {
         boolean wasTaskVisible = false;
         if (task != null) {
-            mSplashScreenStyleSolidColor = true;
+            mAllowIconSplashScreen = false;
             wasTaskVisible = !setTaskHasBeenVisible();
         }
 
@@ -7321,19 +7320,32 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * @return true if a solid color splash screen must be used
-     *         false when an icon splash screen can be used, but the final decision for whether to
-     *               use an icon or solid color splash screen will be made by WmShell.
+     * Checks whether an icon splash screen can be used in the starting window based on the
+     * preference in the {@code options} and this activity's theme, giving higher priority to the
+     * {@code options}'s preference.
+     *
+     * When no preference is specified, a default behaviour is defined:
+     *  - if the activity is started from the home or shell app, an icon can be used
+     *  - if the activity is started from SystemUI, an icon should not be used
+     *  - if there is a launching activity, use its preference
+     *  - if none of the above is met, only use an icon when the activity is started for the first
+     *    time from a System app
+     *
+     * The returned value is sent to WmShell, which will make the final decision on what splash
+     * screen type will be used.
+     *
+     * @return true if an icon can be used in the splash screen
+     *         false when an icon should not be used in the splash screen
      */
-    private boolean shouldUseSolidColorSplashScreen(ActivityRecord sourceRecord,
+    private boolean canUseIconSplashScreen(ActivityRecord sourceRecord,
             boolean startActivity, ActivityOptions options, int resolvedTheme) {
         if (sourceRecord == null && !startActivity) {
-            // Use simple style if this activity is not top activity. This could happen when adding
-            // a splash screen window to the warm start activity which is re-create because top is
-            // finishing.
+            // Shouldn't use an icon if this activity is not top activity. This could happen when
+            // adding a splash screen window to the warm start activity which is re-create because
+            // top is finishing.
             final ActivityRecord above = task.getActivityAbove(this);
             if (above != null) {
-                return true;
+                return false;
             }
         }
 
@@ -7341,32 +7353,33 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int optionsStyle = options != null ? options.getSplashScreenStyle() :
                 SplashScreen.SPLASH_SCREEN_STYLE_UNDEFINED;
         if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR) {
-            return true;
+            return false;
         } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON
                     || isIconStylePreferred(resolvedTheme)) {
-            return false;
+            return true;
         }
 
         // Choose the default behavior when neither the ActivityRecord nor the activity theme have
         // specified a splash screen style.
 
         if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME || launchedFromUid == Process.SHELL_UID) {
-            return false;
-        } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
             return true;
+        } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
+            return false;
         } else {
-            // Need to check sourceRecord in case this activity is launched from a service.
+            // Need to check sourceRecord in case this activity is launched from a service or a
+            // trampoline activity.
             if (sourceRecord == null) {
                 sourceRecord = searchCandidateLaunchingActivity();
             }
 
             if (sourceRecord != null) {
-                return sourceRecord.mSplashScreenStyleSolidColor;
+                return sourceRecord.mAllowIconSplashScreen;
             }
 
             // Use an icon if the activity was launched from System for the first start.
-            // Otherwise, must use solid color splash screen.
-            return mLaunchSourceType != LAUNCH_SOURCE_TYPE_SYSTEM || !startActivity;
+            // Otherwise, can't use an icon splash screen.
+            return mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEM && startActivity;
         }
     }
 
@@ -7430,7 +7443,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int resolvedTheme = evaluateStartingWindowTheme(prev, packageName, theme,
                 splashScreenTheme);
 
-        mSplashScreenStyleSolidColor = shouldUseSolidColorSplashScreen(sourceRecord, startActivity,
+        mAllowIconSplashScreen = canUseIconSplashScreen(sourceRecord, startActivity,
                 startOptions, resolvedTheme);
 
         final boolean activityCreated =
@@ -7442,7 +7455,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final boolean scheduled = addStartingWindow(packageName, resolvedTheme,
                 prev, newTask || newSingleActivity, taskSwitch, processRunning,
-                allowTaskSnapshot(), activityCreated, mSplashScreenStyleSolidColor, allDrawn);
+                allowTaskSnapshot(), activityCreated, mAllowIconSplashScreen, allDrawn);
         if (DEBUG_STARTING_WINDOW_VERBOSE && scheduled) {
             Slog.d(TAG, "Scheduled starting window for " + this);
         }
