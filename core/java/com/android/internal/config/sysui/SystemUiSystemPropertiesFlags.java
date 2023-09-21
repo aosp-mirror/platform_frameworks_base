@@ -80,6 +80,10 @@ public class SystemUiSystemPropertiesFlags {
 
         public static final Flag PROPAGATE_CHANNEL_UPDATES_TO_CONVERSATIONS = releasedFlag(
                 "persist.sysui.notification.propagate_channel_updates_to_conversations");
+
+        /** b/301242692: Visit extra URIs used in notifications to prevent security issues. */
+        public static final Flag VISIT_RISKY_URIS = devFlag(
+                "persist.sysui.notification.visit_risky_uris");
     }
 
     //// == End of flags.  Everything below this line is the implementation. == ////
