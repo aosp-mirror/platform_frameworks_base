@@ -309,8 +309,14 @@ public class AssistManager {
         }
 
         int invocationType = args.getInt(INVOCATION_TYPE_KEY);
-        return mAssistOverrideInvocationTypes != null && Arrays.stream(
-                mAssistOverrideInvocationTypes).anyMatch(override -> override == invocationType);
+        return shouldOverrideAssist(invocationType);
+    }
+
+    /** @return true if the invocation type should be handled by OverviewProxy instead of SysUI. */
+    public boolean shouldOverrideAssist(int invocationType) {
+        return mAssistOverrideInvocationTypes != null
+                && Arrays.stream(mAssistOverrideInvocationTypes).anyMatch(
+                        override -> override == invocationType);
     }
 
     /**
