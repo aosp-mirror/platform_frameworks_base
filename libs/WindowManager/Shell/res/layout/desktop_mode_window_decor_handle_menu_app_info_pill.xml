@@ -15,6 +15,7 @@
   ~ limitations under the License.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="@dimen/desktop_mode_handle_menu_width"
     android:layout_height="@dimen/desktop_mode_handle_menu_app_info_pill_height"
@@ -35,7 +36,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="Gmail"
-        android:textColor="@color/desktop_mode_caption_menu_text_color"
+        android:textColor="?androidprv:attr/materialColorOnSurface"
         android:textSize="14sp"
         android:textFontWeight="500"
         android:lineHeight="20dp"
@@ -52,6 +53,6 @@
         android:contentDescription="@string/collapse_menu_text"
         android:src="@drawable/ic_baseline_expand_more_24"
         android:rotation="180"
-        android:tint="@color/desktop_mode_caption_menu_buttons_color_inactive"
+        android:tint="?androidprv:attr/materialColorOnSurface"
         android:background="?android:selectableItemBackgroundBorderless"/>
 </LinearLayout>

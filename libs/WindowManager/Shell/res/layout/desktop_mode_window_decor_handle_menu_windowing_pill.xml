@@ -15,6 +15,7 @@
   ~ limitations under the License.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="@dimen/desktop_mode_handle_menu_width"
     android:layout_height="@dimen/desktop_mode_handle_menu_windowing_pill_height"
     android:orientation="horizontal"
@@ -26,7 +27,7 @@
         android:layout_marginEnd="4dp"
         android:contentDescription="@string/fullscreen_text"
         android:src="@drawable/desktop_mode_ic_handle_menu_fullscreen"
-        android:tint="@color/desktop_mode_caption_menu_buttons_color_inactive"
+        android:tint="?androidprv:attr/materialColorOnSurface"
         android:layout_weight="1"
         style="@style/DesktopModeHandleMenuWindowingButton"/>
 
@@ -36,7 +37,7 @@
         android:layout_marginEnd="4dp"
         android:contentDescription="@string/split_screen_text"
         android:src="@drawable/desktop_mode_ic_handle_menu_splitscreen"
-        android:tint="@color/desktop_mode_caption_menu_buttons_color_inactive"
+        android:tint="?androidprv:attr/materialColorOnSurface"
         android:layout_weight="1"
         style="@style/DesktopModeHandleMenuWindowingButton"/>
 
@@ -46,7 +47,7 @@
         android:layout_marginEnd="4dp"
         android:contentDescription="@string/float_button_text"
         android:src="@drawable/desktop_mode_ic_handle_menu_floating"
-        android:tint="@color/desktop_mode_caption_menu_buttons_color_inactive"
+        android:tint="?androidprv:attr/materialColorOnSurface"
         android:layout_weight="1"
         style="@style/DesktopModeHandleMenuWindowingButton"/>
 
@@ -55,7 +56,7 @@
         android:layout_marginStart="4dp"
         android:contentDescription="@string/desktop_text"
         android:src="@drawable/desktop_mode_ic_handle_menu_desktop"
-        android:tint="@color/desktop_mode_caption_menu_buttons_color_active"
+        android:tint="?androidprv:attr/materialColorOnSurface"
         android:layout_weight="1"
         style="@style/DesktopModeHandleMenuWindowingButton"/>
 

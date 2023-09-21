@@ -14,7 +14,8 @@
      limitations under the License.
 -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <!-- Theme used for the activity that shows when the system forced an app to be resizable -->
     <style name="ForcedResizableTheme" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:windowBackground">@drawable/forced_resizable_background</item>
@@ -37,7 +38,7 @@
         <item name="android:padding">16dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textFontWeight">500</item>
-        <item name="android:textColor">@color/desktop_mode_caption_menu_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:drawablePadding">16dp</item>
         <item name="android:background">?android:selectableItemBackground</item>
     </style>
