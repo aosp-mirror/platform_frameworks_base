@@ -129,6 +129,9 @@ class NotificationsQSContainerController @Inject constructor(
 
         mView.setStackScroller(notificationStackScrollLayoutController.getView())
         mView.setMigratingNSSL(featureFlags.isEnabled(Flags.MIGRATE_NSSL))
+        if (featureFlags.isEnabled(Flags.QS_CONTAINER_GRAPH_OPTIMIZER)){
+            mView.enableGraphOptimization()
+        }
     }
 
     public override fun onViewAttached() {

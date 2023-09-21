@@ -100,7 +100,11 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         fakeSystemClock = FakeSystemClock()
         delayableExecutor = FakeExecutor(fakeSystemClock)
-        featureFlags = FakeFeatureFlags().apply { set(Flags.MIGRATE_NSSL, true) }
+        featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.MIGRATE_NSSL, true)
+                set(Flags.QS_CONTAINER_GRAPH_OPTIMIZER, true)
+            }
         mContext.ensureTestableResources()
         whenever(view.context).thenReturn(mContext)
         whenever(view.resources).thenReturn(mContext.resources)
