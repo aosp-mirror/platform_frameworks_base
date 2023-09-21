@@ -19,6 +19,7 @@ package com.android.wm.shell.common.split;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
+
 import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_30_70;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_70_30;
@@ -35,6 +36,8 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.view.Display;
 import android.view.DisplayInfo;
+
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
@@ -203,6 +206,21 @@ public class DividerSnapAlgorithm {
         }
     }
 
+    /**
+     * Gets the SnapTarget corresponding to the given {@link SnapPosition}, or null if no such
+     * SnapTarget exists.
+     */
+    @Nullable
+    public SnapTarget findSnapTarget(@SnapPosition int snapPosition) {
+        for (SnapTarget t : mTargets) {
+            if (t.snapPosition == snapPosition) {
+                return t;
+            }
+        }
+
+        return null;
+    }
+
     public float calculateDismissingFraction(int position) {
         if (position < mFirstSplitTarget.position) {
             return 1f - (float) (position - getStartInset())
@@ -356,9 +374,9 @@ public class DividerSnapAlgorithm {
      * Adds a target at {@param position} but only if the area with size of {@param smallerSize}
      * meets the minimal size requirement.
      */
-    private void maybeAddTarget(int position, int smallerSize, @SnapPosition int snapTo) {
+    private void maybeAddTarget(int position, int smallerSize, @SnapPosition int snapPosition) {
         if (smallerSize >= mMinimalSizeResizableTask) {
-            mTargets.add(new SnapTarget(position, position, snapTo));
+            mTargets.add(new SnapTarget(position, position, snapPosition));
         }
     }
 
@@ -419,6 +437,13 @@ public class DividerSnapAlgorithm {
     }
 
     /**
+     * Finds the {@link SnapPosition} nearest to the given position.
+     */
+    public int calculateNearestSnapPosition(int currentPosition) {
+        return snap(currentPosition, /* hardDismiss */ true).snapPosition;
+    }
+
+    /**
      * Cycles through all non-dismiss targets with a stepping of {@param increment}. It moves left
      * if {@param increment} is negative and moves right otherwise.
      */
@@ -454,7 +479,7 @@ public class DividerSnapAlgorithm {
         /**
          * An int describing the placement of the divider in this snap target.
          */
-        public final @SnapPosition int snapTo;
+        public final @SnapPosition int snapPosition;
 
         public boolean isMiddleTarget;
 
@@ -464,15 +489,15 @@ public class DividerSnapAlgorithm {
          */
         private final float distanceMultiplier;
 
-        public SnapTarget(int position, int taskPosition, @SnapPosition int snapTo) {
-            this(position, taskPosition, snapTo, 1f);
+        public SnapTarget(int position, int taskPosition, @SnapPosition int snapPosition) {
+            this(position, taskPosition, snapPosition, 1f);
         }
 
-        public SnapTarget(int position, int taskPosition, @SnapPosition int snapTo,
+        public SnapTarget(int position, int taskPosition, @SnapPosition int snapPosition,
                 float distanceMultiplier) {
             this.position = position;
             this.taskPosition = taskPosition;
-            this.snapTo = snapTo;
+            this.snapPosition = snapPosition;
             this.distanceMultiplier = distanceMultiplier;
         }
     }
