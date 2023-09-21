@@ -33,7 +33,6 @@ import android.widget.Spinner
 import android.widget.Switch
 import androidx.annotation.LayoutRes
 import com.android.systemui.R
-import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.media.MediaProjectionAppSelectorActivity
 import com.android.systemui.media.MediaProjectionCaptureTarget
 import com.android.systemui.plugins.ActivityStarter
@@ -45,7 +44,6 @@ class ScreenRecordPermissionDialog(
     private val hostUserHandle: UserHandle,
     private val controller: RecordingController,
     private val activityStarter: ActivityStarter,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val userContextProvider: UserContextProvider,
     private val onStartRecordingClicked: Runnable?
 ) :
@@ -85,12 +83,7 @@ class ScreenRecordPermissionDialog(
                     MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
                     hostUserHandle
                 )
-
-                val animationController = dialogLaunchAnimator.createActivityLaunchController(v!!)
-                if (animationController == null) {
-                    dismiss()
-                }
-                activityStarter.startActivity(intent, /* dismissShade= */ true, animationController)
+                activityStarter.startActivity(intent, /* dismissShade= */ true)
             }
             dismiss()
         }
