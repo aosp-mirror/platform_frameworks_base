@@ -148,7 +148,7 @@ open class ClockRegistry(
             override fun onPluginAttached(
                 manager: PluginLifecycleManager<ClockProviderPlugin>
             ): Boolean {
-                manager.isDebug = true
+                manager.isDebug = !keepAllLoaded
 
                 if (keepAllLoaded) {
                     // Always load new plugins if requested
@@ -511,6 +511,12 @@ open class ClockRegistry(
     fun verifyLoadedProviders() {
         val shouldSchedule = isVerifying.compareAndSet(false, true)
         if (!shouldSchedule) {
+            logger.tryLog(
+                TAG,
+                LogLevel.VERBOSE,
+                {},
+                { "verifyLoadedProviders: shouldSchedule=false" }
+            )
             return
         }
 
@@ -670,6 +676,7 @@ open class ClockRegistry(
                     { str1 = clockId },
                     { "Clock $str1 not loaded; using default" }
                 )
+                verifyLoadedProviders()
             } else {
                 logger.tryLog(
                     TAG,
