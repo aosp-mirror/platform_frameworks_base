@@ -310,18 +310,25 @@ final class PackageMetrics {
         if (!SecurityLog.isLoggingEnabled()) {
             return;
         }
-        final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
-        if (ps == null) {
-            return;
-        }
-        final String packageName = ps.getPackageName();
-        final long versionCode = ps.getVersionCode();
-        if (!mInstallRequest.isInstallReplace()) {
-            SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_INSTALLED, packageName, versionCode,
-                    userId);
-        } else {
-            SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_UPDATED, packageName, versionCode,
-                    userId);
+        // TODO: Remove temp try-catch to avoid IllegalStateException. The reason is because
+        //  the scan result is null for installExistingPackageAsUser(). Because it's installing
+        //  a package that's already existing, there's no scanning or parsing involved
+        try {
+            final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
+            if (ps == null) {
+                return;
+            }
+            final String packageName = ps.getPackageName();
+            final long versionCode = ps.getVersionCode();
+            if (!mInstallRequest.isInstallReplace()) {
+                SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_INSTALLED, packageName, versionCode,
+                        userId);
+            } else {
+                SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_UPDATED, packageName, versionCode,
+                        userId);
+            }
+        } catch (IllegalStateException | NullPointerException e) {
+            // no-op
         }
     }
 
