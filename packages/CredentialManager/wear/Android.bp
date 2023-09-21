@@ -32,6 +32,7 @@ android_app {
         "androidx.compose.material_material-icons-extended",
         "androidx.compose.runtime_runtime",
         "androidx.compose.ui_ui",
+        "androidx.compose.ui_ui-tooling",
         "androidx.core_core-ktx",
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.lifecycle_lifecycle-livedata",

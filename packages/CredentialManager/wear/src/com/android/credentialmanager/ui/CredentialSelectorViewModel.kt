@@ -23,6 +23,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.credentialmanager.ui.ktx.appLabel
 import com.android.credentialmanager.ui.ktx.requestInfo
+import com.android.credentialmanager.ui.mapper.toGet
+import com.android.credentialmanager.ui.model.PasskeyUiModel
+import com.android.credentialmanager.ui.model.PasswordUiModel
 import com.android.credentialmanager.ui.model.Request
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,8 +65,8 @@ class CredentialSelectorViewModel(
                         _uiState.value = CredentialSelectorUiState.Create
                     }
 
-                    Request.Get -> {
-                        _uiState.value = CredentialSelectorUiState.Get
+                    is Request.Get -> {
+                        _uiState.value = request.toGet()
                     }
                 }
             }
@@ -103,9 +106,15 @@ class CredentialSelectorViewModel(
 }
 
 sealed class CredentialSelectorUiState {
-    object Idle : CredentialSelectorUiState()
-    object Get : CredentialSelectorUiState()
-    object Create : CredentialSelectorUiState()
+    data object Idle : CredentialSelectorUiState()
+    sealed class Get : CredentialSelectorUiState() {
+        data class SingleProviderSinglePasskey(val passkeyUiModel: PasskeyUiModel) : Get()
+        data class SingleProviderSinglePassword(val passwordUiModel: PasswordUiModel) : Get()
+
+        // TODO: b/301206470 add the remaining states
+    }
+
+    data object Create : CredentialSelectorUiState()
     data class Cancel(val appName: String) : CredentialSelectorUiState()
-    object Finish : CredentialSelectorUiState()
+    data object Finish : CredentialSelectorUiState()
 }

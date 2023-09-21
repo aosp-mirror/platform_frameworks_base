@@ -47,7 +47,7 @@ class CredentialSelectorActivity : ComponentActivity() {
                             // to the user.
                         }
 
-                        CredentialSelectorUiState.Get -> {
+                        is CredentialSelectorUiState.Get -> {
                             // TODO: b/301206470 - Implement get flow
                             setContent {
                                 MaterialTheme {

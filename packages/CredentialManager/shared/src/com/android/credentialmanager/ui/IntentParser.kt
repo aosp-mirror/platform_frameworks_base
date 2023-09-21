@@ -17,11 +17,15 @@
 package com.android.credentialmanager.ui
 
 import android.content.Intent
+import android.credentials.ui.GetCredentialProviderData
 import android.credentials.ui.RequestInfo
 import com.android.credentialmanager.ui.ktx.cancelUiRequest
+import com.android.credentialmanager.ui.ktx.getCredentialProviderDataList
 import com.android.credentialmanager.ui.ktx.requestInfo
 import com.android.credentialmanager.ui.mapper.toCancel
 import com.android.credentialmanager.ui.model.Request
+import com.google.common.collect.ImmutableList
+import com.google.common.collect.ImmutableMap
 
 fun Intent.parse(): Request {
     cancelUiRequest?.let {
@@ -32,9 +36,23 @@ fun Intent.parse(): Request {
         RequestInfo.TYPE_CREATE -> {
             Request.Create
         }
+
         RequestInfo.TYPE_GET -> {
-            Request.Get
+            Request.Get(
+                providers = ImmutableMap.copyOf(
+                    getCredentialProviderDataList.associateBy { it.providerFlattenedComponentName }
+                ),
+                entries = ImmutableList.copyOf(
+                    getCredentialProviderDataList.map { providerData ->
+                        check(providerData is GetCredentialProviderData) {
+                            "Invalid provider data type for GetCredentialRequest"
+                        }
+                        providerData
+                    }.flatMap { it.credentialEntries }
+                )
+            )
         }
+
         else -> {
             throw IllegalStateException("Unrecognized request type: ${requestInfo?.type}")
         }

@@ -16,24 +16,7 @@
 
 package com.android.credentialmanager.ui.model
 
-import android.credentials.ui.Entry
-import android.credentials.ui.ProviderData
-import com.google.common.collect.ImmutableList
-import com.google.common.collect.ImmutableMap
-
-/**
- * Represents the request made by the CredentialManager API.
- */
-sealed class Request {
-    data class Cancel(
-        val showCancellationUi: Boolean,
-        val appPackageName: String?
-    ) : Request()
-
-    data class Get(
-        val providers: ImmutableMap<String, ProviderData>,
-        val entries: ImmutableList<Entry>,
-    ) : Request()
-
-    data object Create : Request()
-}
+data class PasskeyUiModel(
+    val name: String,
+    val email: String,
+)
