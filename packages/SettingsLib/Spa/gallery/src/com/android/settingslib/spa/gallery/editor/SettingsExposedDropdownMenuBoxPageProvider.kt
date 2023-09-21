@@ -19,7 +19,7 @@ package com.android.settingslib.spa.gallery.editor
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,13 +45,13 @@ object SettingsExposedDropdownMenuBoxPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        var selectedItem by remember { mutableStateOf("item1") }
+        var selectedItem by remember { mutableIntStateOf(-1) }
         val options = listOf("item1", "item2", "item3")
         RegularScaffold(title = TITLE) {
             SettingsExposedDropdownMenuBox(
                 label = exposedDropdownMenuBoxLabel,
                 options = options,
-                selectedOptionText = selectedItem,
+                selectedOptionIndex = selectedItem,
                 enabled = true,
                 onselectedOptionTextChange = { selectedItem = it })
         }

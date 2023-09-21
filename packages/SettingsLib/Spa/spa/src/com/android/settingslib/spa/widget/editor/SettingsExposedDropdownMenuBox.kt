@@ -41,9 +41,9 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 fun SettingsExposedDropdownMenuBox(
     label: String,
     options: List<String>,
-    selectedOptionText: String,
+    selectedOptionIndex: Int,
     enabled: Boolean,
-    onselectedOptionTextChange: (String) -> Unit,
+    onselectedOptionTextChange: (Int) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(
@@ -58,8 +58,8 @@ fun SettingsExposedDropdownMenuBox(
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth(),
-            value = selectedOptionText,
-            onValueChange = onselectedOptionTextChange,
+            value = options.getOrElse(selectedOptionIndex) { "" },
+            onValueChange = { },
             label = { Text(text = label) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
@@ -81,7 +81,7 @@ fun SettingsExposedDropdownMenuBox(
                     DropdownMenuItem(
                         text = { Text(option) },
                         onClick = {
-                            onselectedOptionTextChange(option)
+                            onselectedOptionTextChange(options.indexOf(option))
                             expanded = false
                         },
                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
@@ -103,7 +103,7 @@ private fun SettingsExposedDropdownMenuBoxsPreview() {
         SettingsExposedDropdownMenuBox(
             label = "ExposedDropdownMenuBoxLabel",
             options = options,
-            selectedOptionText = item1,
+            selectedOptionIndex = 0,
             enabled = true,
             onselectedOptionTextChange = {})
     }

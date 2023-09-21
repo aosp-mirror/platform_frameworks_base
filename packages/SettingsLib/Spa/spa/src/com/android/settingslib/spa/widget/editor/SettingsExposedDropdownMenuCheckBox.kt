@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,7 +55,7 @@ fun SettingsExposedDropdownMenuCheckBox(
     enabled: Boolean,
     onSelectedOptionStateChange: () -> Unit,
 ) {
-    var dropDownWidth by remember { mutableStateOf(0) }
+    var dropDownWidth by remember { mutableIntStateOf(0) }
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -104,7 +105,7 @@ fun SettingsExposedDropdownMenuCheckBox(
                                 )
                             }
                             onSelectedOptionStateChange()
-                    }) {
+                        }) {
                         Row(
                             modifier = Modifier
                                 .fillMaxHeight()
