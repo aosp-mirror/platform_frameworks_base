@@ -17,12 +17,19 @@
 package com.android.server.autofill;
 
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FIELD_CLASSIFICATION_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FIELD_CLASSIFICATION_EVENT_REPORTED__STATUS__STATUS_CANCELLED;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FIELD_CLASSIFICATION_EVENT_REPORTED__STATUS__STATUS_FAIL;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FIELD_CLASSIFICATION_EVENT_REPORTED__STATUS__STATUS_SUCCESS;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FIELD_CLASSIFICATION_EVENT_REPORTED__STATUS__STATUS_UNKNOWN;
 import static com.android.server.autofill.Helper.sVerbose;
 
+import android.annotation.IntDef;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Optional;
 
 /**
@@ -34,6 +41,29 @@ public final class FieldClassificationEventLogger {
 
     private FieldClassificationEventLogger() {
         mEventInternal = Optional.empty();
+    }
+
+    public static final int STATUS_SUCCESS =
+            AUTOFILL_FIELD_CLASSIFICATION_EVENT_REPORTED__STATUS__STATUS_SUCCESS;
+    public static final int STATUS_UNKNOWN =
+            AUTOFILL_FIELD_CLASSIFICATION_EVENT_REPORTED__STATUS__STATUS_UNKNOWN;
+    public static final int STATUS_FAIL =
+            AUTOFILL_FIELD_CLASSIFICATION_EVENT_REPORTED__STATUS__STATUS_FAIL;
+    public static final int STATUS_CANCELLED =
+            AUTOFILL_FIELD_CLASSIFICATION_EVENT_REPORTED__STATUS__STATUS_CANCELLED;
+
+    /**
+     * Status of the FieldClassification IPC request. These are wrappers around
+     * {@link com.android.os.AtomsProto.AutofillFieldClassificationEventReported.FieldClassificationRequestStatus}.
+     */
+    @IntDef(prefix = {"STATUS"}, value = {
+            STATUS_UNKNOWN,
+            STATUS_SUCCESS,
+            STATUS_FAIL,
+            STATUS_CANCELLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FieldClassificationStatus {
     }
 
     /**
@@ -112,7 +142,7 @@ public final class FieldClassificationEventLogger {
     /**
      * Set status as long as mEventInternal presents.
      */
-    public void maybeSetRequestStatus(int status) {
+    public void maybeSetRequestStatus(@FieldClassificationStatus int status) {
         mEventInternal.ifPresent(event -> {
             event.mStatus = status;
         });
@@ -140,7 +170,14 @@ public final class FieldClassificationEventLogger {
         if (sVerbose) {
             Slog.v(TAG, "Log AutofillFieldClassificationEventReported:"
                     + " mLatencyClassificationRequestMillis="
-                    + event.mLatencyClassificationRequestMillis);
+                    + event.mLatencyClassificationRequestMillis
+                    + " mCountClassifications=" + event.mCountClassifications
+                    + " mSessionId=" + event.mSessionId
+                    + " mRequestId=" + event.mRequestId
+                    + " mNextFillRequestId=" + event.mNextFillRequestId
+                    + " mAppPackageUid=" + event.mAppPackageUid
+                    + " mStatus=" + event.mStatus
+                    + " mIsSessionGc=" + event.mIsSessionGc);
         }
         FrameworkStatsLog.write(
                 AUTOFILL_FIELD_CLASSIFICATION_EVENT_REPORTED,

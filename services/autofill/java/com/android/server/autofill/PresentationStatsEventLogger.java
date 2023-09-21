@@ -211,15 +211,25 @@ public final class PresentationStatsEventLogger {
     public static final int DETECTION_PREFER_PCC =
             AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_PCC;
     private final int mSessionId;
+
+    /**
+     * For app_package_uid.
+     */
+    private final int mCallingAppUid;
     private Optional<PresentationStatsEventInternal> mEventInternal;
 
-    private PresentationStatsEventLogger(int sessionId) {
+    private PresentationStatsEventLogger(int sessionId, int callingAppUid) {
         mSessionId = sessionId;
+        mCallingAppUid = callingAppUid;
         mEventInternal = Optional.empty();
     }
 
-    public static PresentationStatsEventLogger forSessionId(int sessionId) {
-        return new PresentationStatsEventLogger(sessionId);
+    /**
+     * Create PresentationStatsEventLogger, populated with sessionId and the callingAppUid
+     */
+    public static PresentationStatsEventLogger createPresentationLog(
+            int sessionId, int callingAppUid) {
+        return new PresentationStatsEventLogger(sessionId, callingAppUid);
     }
 
     public void startNewEvent() {
@@ -517,15 +527,6 @@ public final class PresentationStatsEventLogger {
         });
     }
 
-    /**
-     * Set app_package_uid as long as mEventInternal presents.
-     */
-    public void maybeSetAppPackageUid(int uid) {
-        mEventInternal.ifPresent(event -> {
-            event.mAppPackageUid = uid;
-        });
-    }
-
     public void logAndEndEvent() {
         if (!mEventInternal.isPresent()) {
             Slog.w(TAG, "Shouldn't be logging AutofillPresentationEventReported again for same "
@@ -564,7 +565,9 @@ public final class PresentationStatsEventLogger {
                     + " mAvailablePccCount=" + event.mAvailablePccCount
                     + " mAvailablePccOnlyCount=" + event.mAvailablePccOnlyCount
                     + " mSelectedDatasetPickedReason=" + event.mSelectedDatasetPickedReason
-                    + " mDetectionPreference=" + event.mDetectionPreference);
+                    + " mDetectionPreference=" + event.mDetectionPreference
+                    + " mFieldClassificationRequestId=" + event.mFieldClassificationRequestId
+                    + " mAppPackageUid=" + mCallingAppUid);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -603,7 +606,7 @@ public final class PresentationStatsEventLogger {
                 event.mSelectedDatasetPickedReason,
                 event.mDetectionPreference,
                 event.mFieldClassificationRequestId,
-                event.mAppPackageUid);
+                mCallingAppUid);
         mEventInternal = Optional.empty();
     }
 
@@ -637,7 +640,6 @@ public final class PresentationStatsEventLogger {
         @DatasetPickedReason int mSelectedDatasetPickedReason = PICK_REASON_UNKNOWN;
         @DetectionPreference int mDetectionPreference = DETECTION_PREFER_UNKNOWN;
         int mFieldClassificationRequestId = -1;
-        int mAppPackageUid = -1;
 
         PresentationStatsEventInternal() {}
     }
