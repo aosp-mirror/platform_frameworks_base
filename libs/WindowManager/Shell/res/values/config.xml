@@ -136,4 +136,9 @@
 
     <!-- Whether DragAndDrop capability is enabled -->
     <bool name="config_enableShellDragDrop">true</bool>
+
+    <!-- Whether this device allows to use the appIcon as a fallback icon for the splash screen
+        window. If false, the splash screen will be a solid color splash screen whenever the
+        app has not provided a windowSplashScreenAnimatedIcon. -->
+    <bool name="config_canUseAppIconForSplashScreen">true</bool>
 </resources>
