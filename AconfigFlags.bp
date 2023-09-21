@@ -31,6 +31,7 @@ aconfig_srcjars = [
     ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
     ":sdk_sandbox_flags_lib{.generated_srcjars}",
     ":android.permission.flags-aconfig-java{.generated_srcjars}",
+    ":hwui_flags_java_lib{.generated_srcjars}",
 ]
 
 filegroup {
@@ -267,5 +268,12 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.permission.flags-aconfig-java",
     aconfig_declarations: "android.permission.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Graphics
+java_aconfig_library {
+    name: "hwui_flags_java_lib",
+    aconfig_declarations: "hwui_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

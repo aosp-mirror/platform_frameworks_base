@@ -6,3 +6,17 @@ flag {
   description: "API to enable apps to restrict the amount of HDR headroom that is used"
   bug: "234181960"
 }
+
+flag {
+  name: "hdr_10bit_plus"
+  namespace: "core_graphics"
+  description: "Use 10101010 and FP16 formats for HDR-UI when available"
+  bug: "284159488"
+}
+
+flag {
+  name: "gainmap_animations"
+  namespace: "core_graphics"
+  description: "APIs to help enable animations involving gainmaps"
+  bug: "296482289"
+}
