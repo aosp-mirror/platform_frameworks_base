@@ -37,6 +37,7 @@ android_app {
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.lifecycle_lifecycle-livedata",
         "androidx.lifecycle_lifecycle-runtime-ktx",
+        "androidx.lifecycle_lifecycle-runtime-compose",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
         "androidx.wear.compose_compose-foundation",
         "androidx.wear.compose_compose-material",

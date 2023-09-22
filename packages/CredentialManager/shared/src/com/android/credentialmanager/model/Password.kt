@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui.screens
+package com.android.credentialmanager.model
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.wear.compose.material.Text
+import android.credentials.ui.Entry
+import androidx.credentials.provider.PasswordCredentialEntry
 
-@Composable
-fun MainScreen(
-    modifier: Modifier = Modifier
-) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Text("This is a placeholder for the main screen.")
-    }
-}
+data class Password(
+    val providerId: String,
+    val entry: Entry,
+    val passwordCredentialEntry: PasswordCredentialEntry,
+)

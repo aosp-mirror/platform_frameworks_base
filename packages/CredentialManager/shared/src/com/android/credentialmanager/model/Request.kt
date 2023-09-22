@@ -16,8 +16,9 @@
 
 package com.android.credentialmanager.model
 
-import android.credentials.ui.Entry
 import android.credentials.ui.ProviderData
+import android.os.IBinder
+import android.os.ResultReceiver
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 
@@ -25,15 +26,33 @@ import com.google.common.collect.ImmutableMap
  * Represents the request made by the CredentialManager API.
  */
 sealed class Request {
+
+    /**
+     * Request to close the app without displaying a message to the user and without reporting
+     * anything back to the Credential Manager service.
+     */
+    data object Close : Request()
+
+    /**
+     * Request to close the app, displaying a message to the user.
+     */
     data class Cancel(
         val showCancellationUi: Boolean,
-        val appPackageName: String?
+        val appName: String
     ) : Request()
 
+    /**
+     * Request to start the get credentials flow.
+     */
     data class Get(
+        val token: IBinder?,
+        val resultReceiver: ResultReceiver?,
         val providers: ImmutableMap<String, ProviderData>,
-        val entries: ImmutableList<Entry>,
+        val passwordEntries: ImmutableList<Password>,
     ) : Request()
 
+    /**
+     * Request to start the create credentials flow.
+     */
     data object Create : Request()
 }

@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui
+package com.android.credentialmanager
 
-sealed class Screen(
-    val route: String,
-) {
-    data object Loading : Screen("loading")
-
-    data object SinglePasswordScreen : Screen("singlePasswordScreen")
-}
+const val IS_AUTO_SELECTED_KEY = "IS_AUTO_SELECTED"

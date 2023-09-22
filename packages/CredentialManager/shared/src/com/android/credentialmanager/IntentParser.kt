@@ -17,14 +17,25 @@
 package com.android.credentialmanager
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.credentials.ui.RequestInfo
 import com.android.credentialmanager.ktx.requestInfo
 import com.android.credentialmanager.mapper.toGet
 import com.android.credentialmanager.mapper.toRequestCancel
+import com.android.credentialmanager.mapper.toRequestClose
 import com.android.credentialmanager.model.Request
 
-fun Intent.parse(): Request {
-    this.toRequestCancel()?.let { return it }
+fun Intent.parse(
+    packageManager: PackageManager,
+    previousIntent: Intent? = null,
+): Request {
+    this.toRequestClose(packageManager, previousIntent)?.let { closeRequest ->
+        return closeRequest
+    }
+
+    this.toRequestCancel(packageManager)?.let { cancelRequest ->
+        return cancelRequest
+    }
 
     return when (requestInfo?.type) {
         RequestInfo.TYPE_CREATE -> {
