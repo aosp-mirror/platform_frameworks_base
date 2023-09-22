@@ -18,6 +18,9 @@ package com.android.credentialmanager.ui.ktx
 
 import android.content.Intent
 import android.credentials.ui.CancelUiRequest
+import android.credentials.ui.CreateCredentialProviderData
+import android.credentials.ui.GetCredentialProviderData
+import android.credentials.ui.ProviderData
 import android.credentials.ui.RequestInfo
 
 val Intent.cancelUiRequest: CancelUiRequest?
@@ -31,3 +34,15 @@ val Intent.requestInfo: RequestInfo?
         RequestInfo.EXTRA_REQUEST_INFO,
         RequestInfo::class.java
     )
+
+val Intent.getCredentialProviderDataList: List<ProviderData>
+    get() = this.extras?.getParcelableArrayList(
+        ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
+        GetCredentialProviderData::class.java
+    ) ?: emptyList()
+
+val Intent.createCredentialProviderDataList: List<ProviderData>
+    get() = this.extras?.getParcelableArrayList(
+        ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
+        CreateCredentialProviderData::class.java
+    ) ?: emptyList()
