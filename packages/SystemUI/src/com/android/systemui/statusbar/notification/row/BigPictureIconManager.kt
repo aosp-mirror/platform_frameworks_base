@@ -120,12 +120,6 @@ constructor(
             return Runnable {}
         }
 
-        if (displayedState.iconSameAs(icon)) {
-            // We're already handling this icon, nothing to do here.
-            log("skipping updateIcon for consumer:$drawableConsumer with icon:$icon")
-            return Runnable {}
-        }
-
         this.drawableConsumer = drawableConsumer
         this.displayedState = Empty(icon)
         this.lastLoadingJob?.cancel()
@@ -256,15 +250,6 @@ constructor(
         data class PlaceHolder(override val icon: Icon, val drawableSize: Size) :
             DrawableState(icon)
         data class FullImage(override val icon: Icon, val drawableSize: Size) : DrawableState(icon)
-
-        fun iconSameAs(other: Icon?): Boolean {
-            val displayedIcon = icon
-            return when {
-                displayedIcon == null && other == null -> true
-                displayedIcon != null && other != null -> displayedIcon.sameAs(other)
-                else -> false
-            }
-        }
     }
 }
 
