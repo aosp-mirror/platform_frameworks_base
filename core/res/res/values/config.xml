@@ -1803,6 +1803,9 @@
     <array name="config_screenThresholdLevels">
     </array>
 
+    <!-- Allow normal brightness controller feature. -->
+    <bool name="config_allowNormalBrightnessControllerFeature">false</bool>
+
     <!-- Array of hysteresis constraint values for brightening, represented as tenths of a
          percent. The length of this array is assumed to be one greater than
          config_screenThresholdLevels. The brightening threshold is calculated as

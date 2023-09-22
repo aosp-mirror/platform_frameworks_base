@@ -16,10 +16,12 @@
 
 package com.android.server.display;
 
+import android.content.res.Resources;
 import android.hardware.display.BrightnessInfo;
 import android.os.IBinder;
 import android.provider.DeviceConfigInterface;
 
+import com.android.internal.R;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 
 import java.io.PrintWriter;
@@ -33,20 +35,24 @@ class BrightnessRangeController {
 
     private final Runnable mModeChangeCallback;
     private final boolean mUseNbmController;
+    private Resources mResources;
 
 
     BrightnessRangeController(HighBrightnessModeController hbmController,
-            Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig) {
+            Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig,
+            Resources resources) {
         this(hbmController, modeChangeCallback, displayDeviceConfig,
-                new DeviceConfigParameterProvider(DeviceConfigInterface.REAL));
+                new DeviceConfigParameterProvider(DeviceConfigInterface.REAL), resources);
     }
 
     BrightnessRangeController(HighBrightnessModeController hbmController,
             Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig,
-            DeviceConfigParameterProvider configParameterProvider) {
+            DeviceConfigParameterProvider configParameterProvider, Resources resources) {
         mHbmController = hbmController;
         mModeChangeCallback = modeChangeCallback;
-        mUseNbmController = configParameterProvider.isNormalBrightnessControllerFeatureEnabled();
+        mResources = resources;
+        mUseNbmController = configParameterProvider.isNormalBrightnessControllerFeatureEnabled() ||
+            resources.getBoolean(R.bool.config_allowNormalBrightnessControllerFeature);
         mNormalBrightnessModeController.resetNbmData(displayDeviceConfig.getLuxThrottlingData());
     }
 
