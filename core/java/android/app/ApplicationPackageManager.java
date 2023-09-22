@@ -2954,6 +2954,17 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    @Override
+    public boolean isPackageStopped(@NonNull String packageName) throws NameNotFoundException {
+        try {
+            return mPM.isPackageStoppedForUser(packageName, getUserId());
+        } catch (IllegalArgumentException ie) {
+            throw new NameNotFoundException(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     @Override
     public void setApplicationCategoryHint(String packageName, int categoryHint) {

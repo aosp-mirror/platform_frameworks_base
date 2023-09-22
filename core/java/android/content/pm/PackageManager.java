@@ -9877,6 +9877,18 @@ public abstract class PackageManager {
     }
 
     /**
+     * Query if an app is currently stopped.
+     *
+     * @return {@code true} if the given package is stopped, {@code false} otherwise
+     * @throws NameNotFoundException if the package could not be found.
+     * @see ApplicationInfo#FLAG_STOPPED
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_STAY_STOPPED)
+    public boolean isPackageStopped(@NonNull String packageName) throws NameNotFoundException {
+        throw new UnsupportedOperationException("isPackageStopped not implemented");
+    }
+
+    /**
      * Query if an app is currently quarantined.
      *
      * @return {@code true} if the given package is quarantined, {@code false} otherwise
@@ -9887,7 +9899,6 @@ public abstract class PackageManager {
     public boolean isPackageQuarantined(@NonNull String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException("isPackageQuarantined not implemented");
     }
-
     /**
      * Provide a hint of what the {@link ApplicationInfo#category} value should
      * be for the given package.

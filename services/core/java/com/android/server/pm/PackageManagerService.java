@@ -4501,6 +4501,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             boolean stopped, @UserIdInt int userId) {
         if (!mUserManager.exists(userId)) return;
         final int callingUid = Binder.getCallingUid();
+        boolean wasStopped = false;
         if (snapshot.getInstantAppPackageName(callingUid) == null) {
             final int permission = mContext.checkCallingOrSelfPermission(
                     Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE);
@@ -4522,6 +4523,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     ? null : packageState.getUserStateOrDefault(userId);
             if (packageState != null && packageUserState.isStopped() != stopped) {
                 boolean wasNotLaunched = packageUserState.isNotLaunched();
+                wasStopped = packageUserState.isStopped();
                 commitPackageStateMutation(null, packageName, state -> {
                     PackageUserStateWrite userState = state.userState(userId);
                     userState.setStopped(stopped);
@@ -4553,6 +4555,24 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     ah.setHibernatingGlobally(packageName, false);
                 }
             });
+            // Send UNSTOPPED broadcast if necessary
+            if (wasStopped && Flags.stayStopped()) {
+                final PackageManagerInternal pmi =
+                        mInjector.getLocalService(PackageManagerInternal.class);
+                final int [] userIds = resolveUserIds(userId);
+                final SparseArray<int[]> broadcastAllowList =
+                        snapshotComputer().getVisibilityAllowLists(packageName, userIds);
+                final Bundle extras = new Bundle();
+                extras.putInt(Intent.EXTRA_UID, pmi.getPackageUid(packageName, 0, userId));
+                extras.putInt(Intent.EXTRA_USER_HANDLE, userId);
+                mHandler.post(() -> {
+                    mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_UNSTOPPED,
+                            packageName, extras,
+                            Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
+                            userIds, null, broadcastAllowList, null,
+                            null);
+                });
+            }
         }
     }
 
@@ -6928,6 +6948,25 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public ParceledListSlice<PackageInstaller.SessionInfo> getHistoricalSessions(int userId) {
             return mInstallerService.getHistoricalSessions(userId);
+        }
+
+        @Override
+        public void sendPackageRestartedBroadcast(@NonNull String packageName,
+                int uid, @Intent.Flags int flags) {
+            final int userId = UserHandle.getUserId(uid);
+            final int [] userIds = resolveUserIds(userId);
+            final SparseArray<int[]> broadcastAllowList =
+                    snapshotComputer().getVisibilityAllowLists(packageName, userIds);
+            final Bundle extras = new Bundle();
+            extras.putInt(Intent.EXTRA_UID, uid);
+            extras.putInt(Intent.EXTRA_USER_HANDLE, userId);
+            mHandler.post(() -> {
+                mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_RESTARTED,
+                        packageName, extras,
+                        flags, null, null,
+                        userIds, null, broadcastAllowList, null,
+                        null);
+            });
         }
     }
 
