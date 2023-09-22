@@ -172,6 +172,9 @@ class DeviceControlsTileTest : SysuiTestCase() {
     @Test
     fun testNotAvailableControls() {
         featureEnabled = false
+
+        // Destroy previous tile
+        tile.destroy()
         tile = createTile()
 
         assertThat(tile.isAvailable).isFalse()
