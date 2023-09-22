@@ -315,7 +315,8 @@ public class PackageArchiverTest {
     }
 
     @Test
-    public void unarchiveApp_notArchived() {
+    public void unarchiveApp_notArchived_missingArchiveState() {
+        mUserState.setInstalled(false);
         Exception e = assertThrows(
                 ParcelableException.class,
                 () -> mArchiveManager.requestUnarchive(PACKAGE, CALLER_PACKAGE,
@@ -326,8 +327,21 @@ public class PackageArchiverTest {
     }
 
     @Test
-    public void unarchiveApp_noInstallerFound() {
+    public void unarchiveApp_notArchived_stillInstalled() {
         mUserState.setArchiveState(createArchiveState());
+        Exception e = assertThrows(
+                ParcelableException.class,
+                () -> mArchiveManager.requestUnarchive(PACKAGE, CALLER_PACKAGE,
+                        UserHandle.CURRENT));
+        assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
+        assertThat(e.getCause()).hasMessageThat().isEqualTo(
+                String.format("Package %s is not currently archived.", PACKAGE));
+    }
+
+
+    @Test
+    public void unarchiveApp_noInstallerFound() {
+        mUserState.setArchiveState(createArchiveState()).setInstalled(false);
         InstallSource otherInstallSource =
                 InstallSource.create(
                         CALLER_PACKAGE,
