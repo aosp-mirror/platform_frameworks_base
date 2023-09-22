@@ -334,6 +334,7 @@ public class SharedConnectivityManager {
         if (mServiceConnection != null) {
             mContext.unbindService(mServiceConnection);
             mServiceConnection = null;
+            mService = null;
         }
     }
 
