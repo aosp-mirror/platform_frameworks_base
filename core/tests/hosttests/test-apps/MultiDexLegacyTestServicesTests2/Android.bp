@@ -24,5 +24,5 @@ android_test {
     libs: ["android-support-multidex"],
     static_libs: ["androidx.test.rules"],
 
-    sdk_version: "16",
+    sdk_version: "19",
 }
