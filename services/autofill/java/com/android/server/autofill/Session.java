@@ -53,8 +53,8 @@ import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_
 import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_SERVED_FROM_CACHED_RESPONSE;
 import static com.android.server.autofill.FillResponseEventLogger.AVAILABLE_COUNT_WHEN_FILL_REQUEST_FAILED_OR_TIMEOUT;
 import static com.android.server.autofill.FillResponseEventLogger.DETECTION_PREFER_AUTOFILL_PROVIDER;
-import static com.android.server.autofill.FillResponseEventLogger.DETECTION_PREFER_UNKNOWN;
 import static com.android.server.autofill.FillResponseEventLogger.DETECTION_PREFER_PCC;
+import static com.android.server.autofill.FillResponseEventLogger.DETECTION_PREFER_UNKNOWN;
 import static com.android.server.autofill.FillResponseEventLogger.HAVE_SAVE_TRIGGER_ID;
 import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_FAILURE;
 import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_SESSION_DESTROYED;
@@ -228,6 +228,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private static final String PCC_HINTS_DELIMITER = ",";
     public static final String EXTRA_KEY_DETECTIONS = "detections";
+    private static final int DEFAULT__FILL_REQUEST_ID_SNAPSHOT = -2;
+    private static final int DEFAULT__FIELD_CLASSIFICATION_REQUEST_ID_SNAPSHOT = -2;
 
     final Object mLock;
 
@@ -410,6 +412,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     private long mUiShownTime;
+
+    /**
+     * Tracks the value of the fill request id at the time of issuing request for field
+     * classification.
+     */
+    @GuardedBy("mLock")
+    private int mFillRequestIdSnapshot = DEFAULT__FILL_REQUEST_ID_SNAPSHOT;
+
+    /**
+     * Tracks the value of the field classification id at the time of issuing request for fill
+     * request.
+     */
+    @GuardedBy("mLock")
+    private int mFieldClassificationIdSnapshot = DEFAULT__FIELD_CLASSIFICATION_REQUEST_ID_SNAPSHOT;
 
     @GuardedBy("mLock")
     private final LocalLog mUiLatencyHistory;
@@ -660,6 +676,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (mPendingFillRequest == null) {
                 return;
             }
+            mFieldClassificationIdSnapshot = sIdCounterForPcc.get();
 
             if (mWaitForInlineRequest) {
                 if (mPendingInlineSuggestionsRequest == null) {
@@ -1215,6 +1232,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + ", flags=" + flags);
         }
         mPresentationStatsEventLogger.maybeSetRequestId(requestId);
+        mPresentationStatsEventLogger.maybeSetFieldClassificationRequestId(
+                mFieldClassificationIdSnapshot);
         mFillRequestEventLogger.maybeSetRequestId(requestId);
         mFillRequestEventLogger.maybeSetAutofillServiceUid(getAutofillServiceUid());
         if (mSessionFlags.mInlineSupportedByService) {
@@ -1284,6 +1303,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private void requestAssistStructureForPccLocked(int flags) {
         if (!mClassificationState.shouldTriggerRequest()) return;
+        mFillRequestIdSnapshot = sIdCounter.get();
         mClassificationState.updatePendingRequest();
         // Get request id
         int requestId;
@@ -1368,7 +1388,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mStartTime = SystemClock.elapsedRealtime();
         mLatencyBaseTime = mStartTime;
         mRequestCount = 0;
-        mPresentationStatsEventLogger = PresentationStatsEventLogger.forSessionId(sessionId);
+        mPresentationStatsEventLogger = PresentationStatsEventLogger.createPresentationLog(
+                sessionId, uid);
         mFillRequestEventLogger = FillRequestEventLogger.forSessionId(sessionId);
         mFillResponseEventLogger = FillResponseEventLogger.forSessionId(sessionId);
         mSessionCommittedEventLogger = SessionCommittedEventLogger.forSessionId(sessionId);
@@ -4206,6 +4227,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (viewState.getResponse() != null) {
                     FillResponse response = viewState.getResponse();
                     mPresentationStatsEventLogger.maybeSetRequestId(response.getRequestId());
+                    mPresentationStatsEventLogger.maybeSetFieldClassificationRequestId(
+                            mFieldClassificationIdSnapshot);
                     mPresentationStatsEventLogger.maybeSetAvailableCount(
                             response.getDatasets(), mCurrentViewId);
                 }
@@ -4375,6 +4398,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     public void onFillReady(@NonNull FillResponse response, @NonNull AutofillId filledId,
             @Nullable AutofillValue value, int flags) {
         synchronized (mLock) {
+            mPresentationStatsEventLogger.maybeSetFieldClassificationRequestId(
+                    mFieldClassificationIdSnapshot);
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onFillReady() rejected - session: "
                         + id + " destroyed");
@@ -5266,6 +5291,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         List<Dataset> datasetList = newResponse.getDatasets();
 
+        mPresentationStatsEventLogger.maybeSetFieldClassificationRequestId(sIdCounterForPcc.get());
         mPresentationStatsEventLogger.maybeSetAvailableCount(datasetList, mCurrentViewId);
         mFillResponseEventLogger.maybeSetDatasetsCountAfterPotentialPccFiltering(datasetList);
 
@@ -6308,7 +6334,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return serviceInfo == null ? Process.INVALID_UID : serviceInfo.applicationInfo.uid;
     }
 
-    // FieldClassificationServiceCallbacks
+    // FieldClassificationServiceCallbacks start
     public void onClassificationRequestSuccess(@Nullable FieldClassificationResponse response) {
         mClassificationState.updateResponseReceived(response);
     }
@@ -6329,6 +6355,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             // forceRemoveFromServiceLocked();
         }
     }
-    // DetectionServiceCallbacks end
+
+    @Override
+    public void logFieldClassificationEvent(
+            long startTime, FieldClassificationResponse response,
+            @FieldClassificationEventLogger.FieldClassificationStatus int status) {
+        final FieldClassificationEventLogger logger = FieldClassificationEventLogger.createLogger();
+        logger.startNewLogForRequest();
+        logger.maybeSetLatencyMillis(
+                SystemClock.elapsedRealtime() - startTime);
+        logger.maybeSetAppPackageUid(uid);
+        logger.maybeSetNextFillRequestId(mFillRequestIdSnapshot + 1);
+        logger.maybeSetRequestId(sIdCounterForPcc.get());
+        logger.maybeSetSessionId(id);
+        int count = -1;
+        if (response != null) {
+            count = response.getClassifications().size();
+        }
+        logger.maybeSetRequestStatus(status);
+        logger.maybeSetCountClassifications(count);
+        logger.logAndEndEvent();
+        mFillRequestIdSnapshot = DEFAULT__FILL_REQUEST_ID_SNAPSHOT;
+    }
+    // FieldClassificationServiceCallbacks end
 
 }
