@@ -863,14 +863,10 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Premjesti dolje"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Premjesti ulijevo"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Premjesti udesno"</string>
-    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
-    <skip />
-    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
-    <skip />
-    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
-    <skip />
-    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
-    <skip />
+    <string name="accessibility_control_increase_window_width" msgid="6992249470832493283">"Povećaj širinu povećala"</string>
+    <string name="accessibility_control_decrease_window_width" msgid="5740401560105929681">"Smanji širinu povećala"</string>
+    <string name="accessibility_control_increase_window_height" msgid="2200966116612324260">"Povećaj visinu povećala"</string>
+    <string name="accessibility_control_decrease_window_height" msgid="2054479949445332761">"Smanji visinu povećala"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Prebacivanje povećavanja"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Povećajte cijeli zaslon"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Povećaj dio zaslona"</string>

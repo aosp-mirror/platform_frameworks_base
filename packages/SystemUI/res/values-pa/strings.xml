@@ -863,14 +863,10 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"ਹੇਠਾਂ ਲਿਜਾਓ"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ਖੱਬੇ ਲਿਜਾਓ"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"ਸੱਜੇ ਲਿਜਾਓ"</string>
-    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
-    <skip />
-    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
-    <skip />
-    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
-    <skip />
-    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
-    <skip />
+    <string name="accessibility_control_increase_window_width" msgid="6992249470832493283">"ਵੱਡਦਰਸ਼ੀ ਵਿੰਡੋ ਦੀ ਚੌੜਾਈ ਵਧਾਓ"</string>
+    <string name="accessibility_control_decrease_window_width" msgid="5740401560105929681">"ਵੱਡਦਰਸ਼ੀ ਵਿੰਡੋ ਦੀ ਚੌੜਾਈ ਘਟਾਓ"</string>
+    <string name="accessibility_control_increase_window_height" msgid="2200966116612324260">"ਵੱਡਦਰਸ਼ੀ ਵਿੰਡੋ ਦੀ ਉਚਾਈ ਵਧਾਓ"</string>
+    <string name="accessibility_control_decrease_window_height" msgid="2054479949445332761">"ਵੱਡਦਰਸ਼ੀ ਵਿੰਡੋ ਦੀ ਉਚਾਈ ਘਟਾਓ"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ਵੱਡਦਰਸ਼ੀਕਰਨ ਸਵਿੱਚ"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਵੱਡਦਰਸ਼ੀ ਕਰੋ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ਸਕ੍ਰੀਨ ਦੇ ਹਿੱਸੇ ਨੂੰ ਵੱਡਾ ਕਰੋ"</string>
