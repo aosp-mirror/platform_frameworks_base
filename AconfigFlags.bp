@@ -13,6 +13,7 @@
 // limitations under the License.
 
 aconfig_srcjars = [
+    ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
     ":android.os.flags-aconfig-java{.generated_srcjars}",
     ":android.security.flags-aconfig-java{.generated_srcjars}",
     ":com.android.hardware.camera2-aconfig-java{.generated_srcjars}",
@@ -127,5 +128,18 @@ java_aconfig_library {
     aconfig_declarations: "android.security.flags-aconfig",
     host_supported: true,
     test: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Biometrics
+aconfig_declarations {
+    name: "android.hardware.biometrics.flags-aconfig",
+    package: "android.hardware.biometrics",
+    srcs: ["core/java/android/hardware/biometrics/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.hardware.biometrics.flags-aconfig-java",
+    aconfig_declarations: "android.hardware.biometrics.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
