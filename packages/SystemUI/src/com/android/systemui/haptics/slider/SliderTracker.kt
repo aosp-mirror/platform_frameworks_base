@@ -27,7 +27,8 @@ import kotlinx.coroutines.launch
  * The tracker maintains a state machine operated by slider events coming from a
  * [SliderEventProducer]. An action is executed in each state via a [SliderListener].
  *
- * @param[scope] [CoroutineScope] to launch the collection of [SliderEvent].
+ * @property[scope] [CoroutineScope] to launch the collection of [SliderEvent] and state machine
+ *   logic.
  * @property[sliderListener] [SliderListener] to execute actions on a given [SliderState].
  * @property[eventProducer] Producer of [SliderEvent] to iterate over a state machine.
  */

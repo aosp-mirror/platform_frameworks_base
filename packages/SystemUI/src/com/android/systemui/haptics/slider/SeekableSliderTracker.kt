@@ -36,8 +36,8 @@ import kotlinx.coroutines.launch
  *
  * @param[sliderStateListener] Listener of the slider state.
  * @param[sliderEventProducer] Producer of slider events arising from the slider.
- * @property[scope] [CoroutineScope] where the collection of slider events and the launch of timer
- *   jobs occur.
+ * @param[mainDispatcher] [CoroutineDispatcher] used to launch coroutines for the collection of
+ *   slider events and the launch of timer jobs.
  * @property[config] Configuration parameters of the slider tracker.
  */
 class SeekableSliderTracker(
