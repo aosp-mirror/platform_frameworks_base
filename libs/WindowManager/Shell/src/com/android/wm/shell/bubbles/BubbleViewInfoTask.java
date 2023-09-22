@@ -155,14 +155,14 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         Bitmap rawBadgeBitmap;
 
         // Only populated when showing in taskbar
-        BubbleBarExpandedView bubbleBarExpandedView;
+        @Nullable BubbleBarExpandedView bubbleBarExpandedView;
 
         // These are only populated when not showing in taskbar
-        BadgedImageView imageView;
-        BubbleExpandedView expandedView;
+        @Nullable BadgedImageView imageView;
+        @Nullable BubbleExpandedView expandedView;
         int dotColor;
         Path dotPath;
-        Bubble.FlyoutMessage flyoutMessage;
+        @Nullable Bubble.FlyoutMessage flyoutMessage;
         Bitmap bubbleBitmap;
         Bitmap badgeBitmap;
 
