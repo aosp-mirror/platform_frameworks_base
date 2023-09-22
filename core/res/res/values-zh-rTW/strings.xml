@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"這個具有特殊權限的系統應用程式隨時可以使用系統攝影機拍照及錄影。此外，你也必須將 android.permission.CAMERA 權限授予這個應用程式"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"允許應用程式或服務接收相機裝置開啟或關閉的相關回呼。"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"當任何相機裝置在開啟 (由應用程式) 或關閉時，這個應用程式就能接收回呼。"</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"允許應用程式或服務以無使用者介面系統使用者權限存取相機。"</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"這個應用程式可運用無使用者介面系統使用者權限存取相機。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"控制震動"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允許應用程式控制震動。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"允許應用程式存取震動功能狀態。"</string>

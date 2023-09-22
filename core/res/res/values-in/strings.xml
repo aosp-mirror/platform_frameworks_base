@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Aplikasi sistem atau yang diberi hak istimewa ini dapat mengambil gambar dan merekam video menggunakan kamera sistem kapan saja. Mewajibkan aplikasi untuk memiliki izin android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Izinkan aplikasi atau layanan untuk menerima callback tentang perangkat kamera yang sedang dibuka atau ditutup."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Aplikasi ini dapat menerima callback saat perangkat kamera dibuka (oleh aplikasi) atau ditutup."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Izinkan aplikasi atau layanan mengakses kamera sebagai Pengguna Sistem Headless."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Aplikasi ini dapat mengakses kamera sebagai Pengguna Sistem Headless."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrol getaran"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Mengizinkan aplikasi untuk mengendalikan vibrator."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Mengizinkan aplikasi untuk mengakses status vibrator."</string>

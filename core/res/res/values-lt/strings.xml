@@ -503,6 +503,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ši privilegijuota arba sistemos programa gali daryti nuotraukas ir įrašyti vaizdo įrašus naudodama sistemos fotoaparatą bet kuriuo metu. Programai taip pat būtinas leidimas „android.permission.CAMERA“"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Leisti programai ar paslaugai sulaukti atgalinio skambinimo, kai atidaromas ar uždaromas fotoaparatas."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ši programa gali sulaukti atgalinio skambinimo, kai atidaromas ar uždaromas (kurios nors programos) koks nors fotoaparatas."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Leisti programai ar paslaugai pasiekti vaizdo kamerą kaip sistemos be grafinės naudotojo sąsajos naudotojui."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Ši programa gali pasiekti vaizdo kamerą kaip sistemos be grafinės naudotojo sąsajos naudotojas."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"valdyti vibraciją"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Leidžiama programai valdyti vibravimą."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Programai leidžiama pasiekti vibratoriaus būseną."</string>

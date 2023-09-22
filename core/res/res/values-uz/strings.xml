@@ -501,6 +501,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Bu imtiyozli yoki tizim ilovasi istalgan vaqtda tizim kamerasi orqali surat va videolar olishi mumkin. Ilovada android.permission.CAMERA ruxsati ham yoqilgan boʻlishi talab qilinadi"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Ilova yoki xizmatga kamera qurilmalari ochilayotgani yoki yopilayotgani haqida qayta chaqiruvlar qabul qilishi uchun ruxsat berish."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Bu ilova har qanday kamera qurilmasi ochilayotganda (istalgan ilova tarafidan) yoki yopilayotganda qayta chaqiruvlar qabul qilishi mumkin."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"tebranishni boshqarish"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ilova tebranishli signallarni boshqarishi mumkin."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ilovaga tebranish holatini aniqlash ruxsatini beradi."</string>
