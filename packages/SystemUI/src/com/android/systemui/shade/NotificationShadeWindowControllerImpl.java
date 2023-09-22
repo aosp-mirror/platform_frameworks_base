@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONT
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPTIMIZE_MEASURE;
 
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.app.IActivityManager;
 import android.content.Context;
@@ -48,7 +49,6 @@ import android.view.WindowManagerGlobal;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
@@ -58,7 +58,9 @@ import com.android.systemui.dump.DumpsysTableLogger;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.res.R;
 import com.android.systemui.scene.ui.view.WindowRootViewComponent;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -70,6 +72,8 @@ import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.lang.ref.Reference;
@@ -108,6 +112,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final KeyguardBypassController mKeyguardBypassController;
     private final Executor mBackgroundExecutor;
     private final AuthController mAuthController;
+    private final Lazy<ShadeInteractor> mShadeInteractorLazy;
     private ViewGroup mWindowRootView;
     private LayoutParams mLp;
     private boolean mHasTopUi;
@@ -151,6 +156,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             ScreenOffAnimationController screenOffAnimationController,
             AuthController authController,
             ShadeExpansionStateManager shadeExpansionStateManager,
+            Lazy<ShadeInteractor> shadeInteractorLazy,
             ShadeWindowLogger logger) {
         mContext = context;
         mWindowRootViewComponentFactory = windowRootViewComponentFactory;
@@ -171,12 +177,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mLastKeyguardRotationAllowed = mKeyguardStateController.isKeyguardScreenRotationAllowed();
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);
+        mShadeInteractorLazy = shadeInteractorLazy;
         ((SysuiStatusBarStateController) statusBarStateController)
                 .addCallback(mStateListener,
                         SysuiStatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
         configurationController.addCallback(this);
         shadeExpansionStateManager.addQsExpansionListener(this::onQsExpansionChanged);
-        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
         float desiredPreferredRefreshRate = context.getResources()
                 .getInteger(R.integer.config_keyguardRefreshRate);
@@ -224,9 +230,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @VisibleForTesting
-    void onShadeExpansionFullyChanged(Boolean isExpanded) {
-        if (mCurrentState.panelExpanded != isExpanded) {
-            mCurrentState.panelExpanded = isExpanded;
+    void onShadeOrQsExpanded(Boolean isExpanded) {
+        if (mCurrentState.shadeOrQsExpanded != isExpanded) {
+            mCurrentState.shadeOrQsExpanded = isExpanded;
             apply(mCurrentState);
         }
     }
@@ -289,6 +295,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     public void fetchWindowRootView() {
         WindowRootViewComponent component = mWindowRootViewComponentFactory.create();
         mWindowRootView = component.getWindowRootView();
+        collectFlow(
+                mWindowRootView,
+                mShadeInteractorLazy.get().isAnyExpanded(),
+                this::onShadeOrQsExpanded
+        );
     }
 
     @Override
@@ -384,7 +395,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     private void applyFocusableFlag(NotificationShadeWindowState state) {
-        boolean panelFocusable = state.notificationShadeFocusable && state.panelExpanded;
+        boolean panelFocusable = state.notificationShadeFocusable && state.shadeOrQsExpanded;
         if (state.bouncerShowing && (state.keyguardOccluded || state.keyguardNeedsInput)
                 || ENABLE_REMOTE_INPUT && state.remoteInputActive
                 // Make the panel focusable if we're doing the screen off animation, since the light
@@ -408,7 +419,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     private void applyForceShowNavigationFlag(NotificationShadeWindowState state) {
-        if (state.panelExpanded || state.bouncerShowing
+        if (state.shadeOrQsExpanded || state.bouncerShowing
                 || ENABLE_REMOTE_INPUT && state.remoteInputActive) {
             mLpChanged.forciblyShownTypes |= WindowInsets.Type.navigationBars();
         } else {
@@ -544,7 +555,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 state.keyguardOccluded,
                 state.keyguardNeedsInput,
                 state.panelVisible,
-                state.panelExpanded,
+                state.shadeOrQsExpanded,
                 state.notificationShadeFocusable,
                 state.bouncerShowing,
                 state.keyguardFadingAway,
@@ -582,7 +593,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                     mCurrentState.keyguardGoingAway,
                     mCurrentState.bouncerShowing,
                     mCurrentState.dozing,
-                    mCurrentState.panelExpanded,
+                    mCurrentState.shadeOrQsExpanded,
                     mCurrentState.dreaming);
         }
     }
@@ -833,7 +844,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
      */
     @Override
     public boolean getPanelExpanded() {
-        return mCurrentState.panelExpanded;
+        return mCurrentState.shadeOrQsExpanded;
     }
 
     @Override
