@@ -606,6 +606,9 @@ constructor(
                 }
                     ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
             }
+        } else if (isRtl && mediaContent.childCount > 0) {
+            // In RTL, Scroll to the first player as it is the rightmost player in media carousel.
+            mediaCarouselScrollHandler.scrollToPlayer(destIndex = 0)
         }
         // Check postcondition: mediaContent should have the same number of children as there
         // are
