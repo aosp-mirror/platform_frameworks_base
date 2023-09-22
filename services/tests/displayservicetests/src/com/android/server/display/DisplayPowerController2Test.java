@@ -1622,9 +1622,9 @@ public final class DisplayPowerController2Test {
         BrightnessRangeController getBrightnessRangeController(
                 HighBrightnessModeController hbmController, Runnable modeChangeCallback,
                 DisplayDeviceConfig displayDeviceConfig, Handler handler,
-                DisplayManagerFlags flags) {
+                DisplayManagerFlags flags, IBinder displayToken, DisplayDeviceInfo info) {
             return new BrightnessRangeController(hbmController, modeChangeCallback,
-                    displayDeviceConfig, mHdrClamper, mFlags);
+                    displayDeviceConfig, mHdrClamper, mFlags, displayToken, info);
         }
 
         @Override

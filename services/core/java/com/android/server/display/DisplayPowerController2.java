@@ -541,7 +541,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mBrightnessThrottler = createBrightnessThrottlerLocked();
 
         mBrightnessRangeController = mInjector.getBrightnessRangeController(hbmController,
-                modeChangeCallback, mDisplayDeviceConfig, mHandler, flags);
+                modeChangeCallback, mDisplayDeviceConfig, mHandler, flags,
+                mDisplayDevice.getDisplayTokenLocked(),
+                mDisplayDevice.getDisplayDeviceInfoLocked());
 
         mDisplayBrightnessController =
                 new DisplayBrightnessController(context, null,
@@ -1847,15 +1849,12 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     private HighBrightnessModeController createHbmControllerLocked(
             HighBrightnessModeMetadata hbmMetadata, Runnable modeChangeCallback) {
-        final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
-        final DisplayDeviceConfig ddConfig = device.getDisplayDeviceConfig();
-        final IBinder displayToken =
-                mLogicalDisplay.getPrimaryDisplayDeviceLocked().getDisplayTokenLocked();
-        final String displayUniqueId =
-                mLogicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId();
+        final DisplayDeviceConfig ddConfig = mDisplayDevice.getDisplayDeviceConfig();
+        final IBinder displayToken = mDisplayDevice.getDisplayTokenLocked();
+        final String displayUniqueId = mDisplayDevice.getUniqueId();
         final DisplayDeviceConfig.HighBrightnessModeData hbmData =
                 ddConfig != null ? ddConfig.getHighBrightnessModeData() : null;
-        final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+        final DisplayDeviceInfo info = mDisplayDevice.getDisplayDeviceInfoLocked();
         return mInjector.getHighBrightnessModeController(mHandler, info.width, info.height,
                 displayToken, displayUniqueId, PowerManager.BRIGHTNESS_MIN,
                 PowerManager.BRIGHTNESS_MAX, hbmData, (sdrBrightness, maxDesiredHdrSdrRatio) ->
@@ -3002,9 +3001,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         BrightnessRangeController getBrightnessRangeController(
                 HighBrightnessModeController hbmController, Runnable modeChangeCallback,
                 DisplayDeviceConfig displayDeviceConfig, Handler handler,
-                DisplayManagerFlags flags) {
+                DisplayManagerFlags flags, IBinder displayToken, DisplayDeviceInfo info) {
             return new BrightnessRangeController(hbmController,
-                    modeChangeCallback, displayDeviceConfig, handler, flags);
+                    modeChangeCallback, displayDeviceConfig, handler, flags, displayToken, info);
         }
 
         DisplayWhiteBalanceController getDisplayWhiteBalanceController(Handler handler,
