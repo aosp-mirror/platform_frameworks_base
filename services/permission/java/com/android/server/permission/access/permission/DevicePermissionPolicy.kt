@@ -16,6 +16,7 @@
 
 package com.android.server.permission.access.permission
 
+import android.permission.PermissionManager
 import android.util.Slog
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
@@ -164,9 +165,18 @@ class DevicePermissionPolicy : SchemePolicy() {
         deviceId: String,
         userId: Int,
         permissionName: String
-    ): Int =
-        state.userStates[userId]?.appIdDevicePermissionFlags?.get(appId)?.get(deviceId)
-            ?.getWithDefault(permissionName, 0) ?: 0
+    ): Int {
+        val flags = state.userStates[userId]?.appIdDevicePermissionFlags?.get(appId)?.get(deviceId)
+                ?.getWithDefault(permissionName, 0) ?: 0
+        if (PermissionManager.DEBUG_DEVICE_PERMISSIONS) {
+            Slog.i(
+                LOG_TAG, "getPermissionFlags: appId=$appId, userId=$userId," +
+                    " deviceId=$deviceId, permissionName=$permissionName," +
+                    " flags=${PermissionFlags.toString(flags)}"
+            )
+        }
+        return flags
+    }
 
     fun MutateStateScope.setPermissionFlags(
         appId: Int,
@@ -201,6 +211,13 @@ class DevicePermissionPolicy : SchemePolicy() {
             newState.mutateUserState(userId)!!.mutateAppIdDevicePermissionFlags()
         val devicePermissionFlags = appIdDevicePermissionFlags.mutateOrPut(appId) {
             MutableIndexedReferenceMap()
+        }
+        if (PermissionManager.DEBUG_DEVICE_PERMISSIONS) {
+            Slog.i(
+                LOG_TAG, "setPermissionFlags(): appId=$appId, userId=$userId," +
+                    " deviceId=$deviceId, permissionName=$permissionName," +
+                    " newFlags=${PermissionFlags.toString(newFlags)}"
+            )
         }
         val permissionFlags = devicePermissionFlags.mutateOrPut(deviceId) { MutableIndexedMap() }
         permissionFlags.putWithDefault(permissionName, newFlags, 0)
