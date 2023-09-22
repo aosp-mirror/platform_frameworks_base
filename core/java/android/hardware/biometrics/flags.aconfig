@@ -1,0 +1,9 @@
+package: "android.hardware.biometrics"
+
+flag {
+  name: "add_key_agreement_crypto_object"
+  namespace: "biometrics"
+  description: "Feature flag for adding KeyAgreement api to CryptoObject."
+  bug: "282058146"
+}
+
