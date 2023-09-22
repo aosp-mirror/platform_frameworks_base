@@ -84,6 +84,7 @@ cc_library_shared {
     static_libs: [
         "libnativehelper_lazy",
         "libziparchive_for_incfs",
+        "libguiflags",
     ],
 
     export_include_dirs: [
