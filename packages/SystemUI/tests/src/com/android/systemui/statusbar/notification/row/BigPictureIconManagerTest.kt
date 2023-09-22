@@ -70,7 +70,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
     }
     private val unsupportedIcon by lazy {
         Icon.createWithBitmap(
-            BitmapFactory.decodeResource(context.resources, R.drawable.dessert_zombiegingerbread)
+            BitmapFactory.decodeResource(context.resources, R.drawable.dessert_donutburger)
         )
     }
     private val invalidIcon by lazy { Icon.createWithContentUri(Uri.parse("this.is/broken")) }
@@ -100,7 +100,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
         }
 
     @Test
-    fun onIconUpdated_notSupportedType_fullImageLoaded() =
+    fun onIconUpdated_unsupportedType_fullImageLoaded() =
         testScope.runTest {
             // WHEN update with an unsupported icon
             iconManager.updateIcon(mockConsumer, unsupportedIcon).run()
@@ -109,6 +109,16 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             verify(mockConsumer).setImageDrawable(drawableCaptor.capture())
             assertIsFullImage(drawableCaptor.value)
             assertSize(drawableCaptor.value)
+        }
+
+    @Test
+    fun onIconUpdated_withNull_drawableIsNull() =
+        testScope.runTest {
+            // WHEN update with null
+            iconManager.updateIcon(mockConsumer, null).run()
+
+            // THEN consumer is updated with null
+            verify(mockConsumer).setImageDrawable(null)
         }
 
     @Test
@@ -145,6 +155,43 @@ class BigPictureIconManagerTest : SysuiTestCase() {
 
             // WHEN a new icon is set
             iconManager.updateIcon(mockConsumer, unsupportedIcon).run()
+
+            // THEN consumer is updated with the new image
+            verify(mockConsumer).setImageDrawable(drawableCaptor.capture())
+            assertIsFullImage(drawableCaptor.value)
+            assertSize(drawableCaptor.value)
+        }
+
+    @Test
+    fun onIconUpdated_iconAlreadySetForTheSameIcon_loadsIconAgain() =
+        testScope.runTest {
+            // GIVEN an icon is set
+            iconManager.updateIcon(mockConsumer, supportedIcon).run()
+            // AND the view is shown
+            iconManager.onViewShown(true)
+            runCurrent()
+            reset(mockConsumer)
+            // WHEN the icon is set again
+            iconManager.updateIcon(mockConsumer, supportedIcon).run()
+
+            // THEN consumer is updated with the new image
+            verify(mockConsumer).setImageDrawable(drawableCaptor.capture())
+            assertIsFullImage(drawableCaptor.value)
+            assertSize(drawableCaptor.value)
+        }
+
+    @Test
+    fun onIconUpdated_iconAlreadySetForUnsupportedIcon_loadsNewIcon() =
+        testScope.runTest {
+            // GIVEN an unsupported icon is set
+            iconManager.updateIcon(mockConsumer, unsupportedIcon).run()
+            // AND the view is shown
+            iconManager.onViewShown(true)
+            runCurrent()
+            reset(mockConsumer)
+
+            // WHEN a new icon is set
+            iconManager.updateIcon(mockConsumer, supportedIcon).run()
 
             // THEN consumer is updated with the new image
             verify(mockConsumer).setImageDrawable(drawableCaptor.capture())
@@ -249,12 +296,10 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             verifyZeroInteractions(mockConsumer)
         }
 
-    // nice to have tests
-
     @Test
-    fun onViewShown_fullImageLoaded_nothingHappens() =
+    fun onViewShown_unsupportedIconLoaded_nothingHappens() =
         testScope.runTest {
-            // GIVEN full image is showing
+            // GIVEN full image is showing for an unsupported icon
             iconManager.updateIcon(mockConsumer, unsupportedIcon).run()
             reset(mockConsumer)
 
@@ -267,10 +312,45 @@ class BigPictureIconManagerTest : SysuiTestCase() {
         }
 
     @Test
+    fun onViewShown_nullSetForIcon_nothingHappens() =
+        testScope.runTest {
+            // GIVEN null is set for the icon
+            iconManager.updateIcon(mockConsumer, null).run()
+            reset(mockConsumer)
+
+            // WHEN the view is shown
+            iconManager.onViewShown(true)
+            runCurrent()
+
+            // THEN nothing happens
+            verifyZeroInteractions(mockConsumer)
+        }
+
+    @Test
+    fun onViewHidden_unsupportedIconLoadedAndViewIsShown_nothingHappens() =
+        testScope.runTest {
+            // GIVEN full image is showing for an unsupported icon
+            iconManager.updateIcon(mockConsumer, unsupportedIcon).run()
+            // AND the view is shown
+            iconManager.onViewShown(true)
+            runCurrent()
+            reset(mockConsumer)
+
+            // WHEN the view goes off the screen
+            iconManager.onViewShown(false)
+            // AND we wait a bit
+            advanceTimeBy(FREE_IMAGE_DELAY_MS)
+            runCurrent()
+
+            // THEN nothing happens
+            verifyZeroInteractions(mockConsumer)
+        }
+
+    @Test
     fun onViewHidden_placeholderShowing_nothingHappens() =
         testScope.runTest {
             // GIVEN placeholder image is showing
-            iconManager.updateIcon(mockConsumer, unsupportedIcon).run()
+            iconManager.updateIcon(mockConsumer, supportedIcon).run()
             reset(mockConsumer)
 
             // WHEN the view is hidden
@@ -296,6 +376,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             iconManager.onViewShown(true)
             runCurrent()
 
+            // THEN nothing happens
             verifyZeroInteractions(mockConsumer)
         }
 
@@ -303,7 +384,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
     fun onViewHidden_alreadyHidden_nothingHappens() =
         testScope.runTest {
             // GIVEN placeholder image is showing and the view is hidden
-            iconManager.updateIcon(mockConsumer, unsupportedIcon).run()
+            iconManager.updateIcon(mockConsumer, supportedIcon).run()
             iconManager.onViewShown(false)
             advanceTimeBy(FREE_IMAGE_DELAY_MS)
             runCurrent()

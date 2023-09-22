@@ -89,6 +89,7 @@ constructor(
             this.lastLoadingJob?.cancel()
             this.lastLoadingJob =
                 when {
+                    skipLazyLoading(state.icon) -> null
                     state is Empty && shown -> state.icon?.let(::startLoadingJob)
                     state is PlaceHolder && shown -> startLoadingJob(state.icon)
                     state is FullImage && !shown ->
@@ -119,12 +120,6 @@ constructor(
             return Runnable {}
         }
 
-        if (displayedState.iconSameAs(icon)) {
-            // We're already handling this icon, nothing to do here.
-            log("skipping updateIcon for consumer:$drawableConsumer with icon:$icon")
-            return Runnable {}
-        }
-
         this.drawableConsumer = drawableConsumer
         this.displayedState = Empty(icon)
         this.lastLoadingJob?.cancel()
@@ -144,7 +139,7 @@ constructor(
     private fun loadImageOrPlaceHolderSync(icon: Icon?): Drawable? {
         icon ?: return null
 
-        if (viewShown) {
+        if (viewShown || skipLazyLoading(icon)) {
             return loadImageSync(icon)
         }
 
@@ -228,6 +223,19 @@ constructor(
             }
         )
 
+    /**
+     * We don't support lazy-loading or set placeholders for bitmap and data based icons, because
+     * they gonna stay in memory anyways.
+     */
+    private fun skipLazyLoading(icon: Icon?): Boolean =
+        when (icon?.type) {
+            Icon.TYPE_BITMAP,
+            Icon.TYPE_ADAPTIVE_BITMAP,
+            Icon.TYPE_DATA,
+            null -> true
+            else -> false
+        }
+
     private fun log(msg: String) {
         if (DEBUG) {
             Log.d(TAG, "$msg state=${getDebugString()}")
@@ -242,15 +250,6 @@ constructor(
         data class PlaceHolder(override val icon: Icon, val drawableSize: Size) :
             DrawableState(icon)
         data class FullImage(override val icon: Icon, val drawableSize: Size) : DrawableState(icon)
-
-        fun iconSameAs(other: Icon?): Boolean {
-            val displayedIcon = icon
-            return when {
-                displayedIcon == null && other == null -> true
-                displayedIcon != null && other != null -> displayedIcon.sameAs(other)
-                else -> false
-            }
-        }
     }
 }
 
