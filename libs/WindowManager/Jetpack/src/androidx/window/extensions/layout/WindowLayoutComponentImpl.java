@@ -24,6 +24,7 @@ import static androidx.window.util.ExtensionHelper.rotateRectToDisplayRotation;
 import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.app.Activity;
+import android.app.ActivityThread;
 import android.app.Application;
 import android.app.WindowConfiguration;
 import android.content.ComponentCallbacks;
@@ -33,6 +34,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
@@ -59,7 +61,7 @@ import java.util.Set;
  * Please refer to {@link androidx.window.sidecar.SampleSidecarImpl} instead.
  */
 public class WindowLayoutComponentImpl implements WindowLayoutComponent {
-    private static final String TAG = "SampleExtension";
+    private static final String TAG = WindowLayoutComponentImpl.class.getSimpleName();
 
     private final Object mLock = new Object();
 
@@ -80,6 +82,9 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     @GuardedBy("mLock")
     private final Map<java.util.function.Consumer<WindowLayoutInfo>, Consumer<WindowLayoutInfo>>
             mJavaToExtConsumers = new ArrayMap<>();
+
+    private final RawConfigurationChangedListener mRawConfigurationChangedListener =
+            new RawConfigurationChangedListener();
 
     public WindowLayoutComponentImpl(@NonNull Context context,
             @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer) {
@@ -109,6 +114,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         final Consumer<WindowLayoutInfo> extConsumer = consumer::accept;
         synchronized (mLock) {
             mJavaToExtConsumers.put(consumer, extConsumer);
+            updateListenerRegistrations();
         }
         addWindowLayoutInfoListener(activity, extConsumer);
     }
@@ -162,6 +168,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         final Consumer<WindowLayoutInfo> extConsumer;
         synchronized (mLock) {
             extConsumer = mJavaToExtConsumers.remove(consumer);
+            updateListenerRegistrations();
         }
         if (extConsumer != null) {
             removeWindowLayoutInfoListener(extConsumer);
@@ -188,6 +195,17 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 break;
             }
             mWindowLayoutChangeListeners.values().remove(consumer);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void updateListenerRegistrations() {
+        ActivityThread currentThread = ActivityThread.currentActivityThread();
+        if (mJavaToExtConsumers.isEmpty()) {
+            currentThread.removeConfigurationChangedListener(mRawConfigurationChangedListener);
+        } else {
+            currentThread.addConfigurationChangedListener(Runnable::run,
+                    mRawConfigurationChangedListener);
         }
     }
 
@@ -336,25 +354,28 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 continue;
             }
             if (featureRect.left != 0 && featureRect.top != 0) {
-                throw new IllegalArgumentException("Bounding rectangle must start at the top or "
+                Log.wtf(TAG, "Bounding rectangle must start at the top or "
                         + "left of the window. BaseFeatureRect: " + baseFeature.getRect()
                         + ", FeatureRect: " + featureRect
                         + ", WindowConfiguration: " + windowConfiguration);
+                continue;
 
             }
             if (featureRect.left == 0
                     && featureRect.width() != windowConfiguration.getBounds().width()) {
-                throw new IllegalArgumentException("Horizontal FoldingFeature must have full width."
+                Log.wtf(TAG, "Horizontal FoldingFeature must have full width."
                         + " BaseFeatureRect: " + baseFeature.getRect()
                         + ", FeatureRect: " + featureRect
                         + ", WindowConfiguration: " + windowConfiguration);
+                continue;
             }
             if (featureRect.top == 0
                     && featureRect.height() != windowConfiguration.getBounds().height()) {
-                throw new IllegalArgumentException("Vertical FoldingFeature must have full height."
+                Log.wtf(TAG, "Vertical FoldingFeature must have full height."
                         + " BaseFeatureRect: " + baseFeature.getRect()
                         + ", FeatureRect: " + featureRect
                         + ", WindowConfiguration: " + windowConfiguration);
+                continue;
             }
             features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
         }
@@ -403,6 +424,16 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             super.onActivityConfigurationChanged(activity);
             synchronized (mLock) {
                 onDisplayFeaturesChangedIfListening(activity.getActivityToken());
+            }
+        }
+    }
+
+    private final class RawConfigurationChangedListener implements
+            java.util.function.Consumer<IBinder> {
+        @Override
+        public void accept(IBinder activityToken) {
+            synchronized (mLock) {
+                onDisplayFeaturesChangedIfListening(activityToken);
             }
         }
     }
