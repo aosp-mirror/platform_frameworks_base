@@ -128,7 +128,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
-import com.android.wm.shell.common.split.SplitScreenConstants.SnapPosition;
+import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.common.split.SplitWindowManager;
@@ -633,7 +633,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     /** Starts 2 tasks in one transition. */
     void startTasks(int taskId1, @Nullable Bundle options1, int taskId2, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, @SnapPosition int snapPosition,
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (taskId2 == INVALID_TASK_ID) {
@@ -661,7 +661,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Start an intent and a task to a split pair in one transition. */
     void startIntentAndTask(PendingIntent pendingIntent, Intent fillInIntent,
             @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, @SnapPosition int snapPosition,
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (taskId == INVALID_TASK_ID) {
@@ -683,7 +683,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Starts a shortcut and a task to a split pair in one transition. */
     void startShortcutAndTask(ShortcutInfo shortcutInfo, @Nullable Bundle options1,
             int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
-            @SnapPosition int snapPosition, @Nullable RemoteTransition remoteTransition,
+            @PersistentSnapPosition int snapPosition, @Nullable RemoteTransition remoteTransition,
             InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (taskId == INVALID_TASK_ID) {
@@ -710,7 +710,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
      *                   {@link SplitscreenEventLogger#logEnter(float, int, int, int, int, boolean)}
      */
     private void startWithTask(WindowContainerTransaction wct, int mainTaskId,
-            @Nullable Bundle mainOptions, @SnapPosition int snapPosition,
+            @Nullable Bundle mainOptions, @PersistentSnapPosition int snapPosition,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         if (!mMainStage.isActive()) {
             // Build a request WCT that will launch both apps such that task 0 is on the main stage
@@ -742,7 +742,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
             PendingIntent pendingIntent2, Intent fillInIntent2,
             @Nullable ShortcutInfo shortcutInfo2, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, @SnapPosition int snapPosition,
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (pendingIntent2 == null) {
@@ -792,7 +792,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Starts a pair of tasks using legacy transition. */
     void startTasksWithLegacyTransition(int taskId1, @Nullable Bundle options1,
             int taskId2, @Nullable Bundle options2, @SplitPosition int splitPosition,
-            @SnapPosition int snapPosition, RemoteAnimationAdapter adapter, InstanceId instanceId) {
+            @PersistentSnapPosition int snapPosition, RemoteAnimationAdapter adapter,
+            InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
         if (taskId2 == INVALID_TASK_ID) {
@@ -822,7 +823,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
             @Nullable PendingIntent pendingIntent2, Intent fillInIntent2,
             @Nullable ShortcutInfo shortcutInfo2, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, @SnapPosition int snapPosition,
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
             RemoteAnimationAdapter adapter, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
@@ -847,7 +848,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent, Intent fillInIntent,
             @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, @SnapPosition int snapPosition,
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
             RemoteAnimationAdapter adapter, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
@@ -868,7 +869,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Starts a pair of shortcut and task using legacy transition. */
     void startShortcutAndTaskWithLegacyTransition(ShortcutInfo shortcutInfo,
             @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, @SnapPosition int snapPosition,
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
             RemoteAnimationAdapter adapter, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
@@ -930,7 +931,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void startWithLegacyTransition(WindowContainerTransaction wct,
             @Nullable PendingIntent mainPendingIntent, @Nullable Intent mainFillInIntent,
             @Nullable ShortcutInfo mainShortcutInfo, @Nullable Bundle mainOptions,
-            @SplitPosition int sidePosition, @SnapPosition int snapPosition,
+            @SplitPosition int sidePosition, @PersistentSnapPosition int snapPosition,
             RemoteAnimationAdapter adapter, InstanceId instanceId) {
         startWithLegacyTransition(wct, INVALID_TASK_ID, mainPendingIntent, mainFillInIntent,
                 mainShortcutInfo, mainOptions, sidePosition, snapPosition, adapter, instanceId);
@@ -938,7 +939,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void startWithLegacyTransition(WindowContainerTransaction wct, int mainTaskId,
             @Nullable Bundle mainOptions, @SplitPosition int sidePosition,
-            @SnapPosition int snapPosition, RemoteAnimationAdapter adapter,
+            @PersistentSnapPosition int snapPosition, RemoteAnimationAdapter adapter,
             InstanceId instanceId) {
         startWithLegacyTransition(wct, mainTaskId, null /* mainPendingIntent */,
                 null /* mainFillInIntent */, null /* mainShortcutInfo */, mainOptions, sidePosition,
@@ -953,7 +954,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void startWithLegacyTransition(WindowContainerTransaction wct, int mainTaskId,
             @Nullable PendingIntent mainPendingIntent, @Nullable Intent mainFillInIntent,
             @Nullable ShortcutInfo mainShortcutInfo, @Nullable Bundle options,
-            @SplitPosition int sidePosition, @SnapPosition int snapPosition,
+            @SplitPosition int sidePosition, @PersistentSnapPosition int snapPosition,
             RemoteAnimationAdapter adapter, InstanceId instanceId) {
         if (!isSplitScreenVisible()) {
             exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RECREATE_SPLIT);
