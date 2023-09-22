@@ -17,6 +17,7 @@
 package androidx.window.extensions.layout;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+
 import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_FLAT;
 import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
 import static androidx.window.util.ExtensionHelper.isZero;
@@ -24,7 +25,7 @@ import static androidx.window.util.ExtensionHelper.rotateRectToDisplayRotation;
 import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.app.Activity;
-import android.app.ActivityClient;
+import android.app.ActivityThread;
 import android.app.Application;
 import android.app.WindowConfiguration;
 import android.content.ComponentCallbacks;
@@ -34,8 +35,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
-import android.view.WindowManager;
-import android.window.TaskFragmentOrganizer;
+import android.util.Log;
 
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -63,7 +62,7 @@ import java.util.Set;
  * Please refer to {@link androidx.window.sidecar.SampleSidecarImpl} instead.
  */
 public class WindowLayoutComponentImpl implements WindowLayoutComponent {
-    private static final String TAG = "SampleExtension";
+    private static final String TAG = WindowLayoutComponentImpl.class.getSimpleName();
 
     private final Object mLock = new Object();
 
@@ -85,16 +84,15 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private final Map<java.util.function.Consumer<WindowLayoutInfo>, Consumer<WindowLayoutInfo>>
             mJavaToExtConsumers = new ArrayMap<>();
 
-    private final TaskFragmentOrganizer mTaskFragmentOrganizer;
+    private final RawConfigurationChangedListener mRawConfigurationChangedListener =
+            new RawConfigurationChangedListener();
 
     public WindowLayoutComponentImpl(@NonNull Context context,
-            @NonNull TaskFragmentOrganizer taskFragmentOrganizer,
             @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer) {
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
         mFoldingFeatureProducer = foldingFeatureProducer;
         mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
-        mTaskFragmentOrganizer = taskFragmentOrganizer;
     }
 
     /**
@@ -109,6 +107,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         final Consumer<WindowLayoutInfo> extConsumer = consumer::accept;
         synchronized (mLock) {
             mJavaToExtConsumers.put(consumer, extConsumer);
+            updateListenerRegistrations();
         }
         addWindowLayoutInfoListener(activity, extConsumer);
     }
@@ -162,6 +161,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         final Consumer<WindowLayoutInfo> extConsumer;
         synchronized (mLock) {
             extConsumer = mJavaToExtConsumers.remove(consumer);
+            updateListenerRegistrations();
         }
         if (extConsumer != null) {
             removeWindowLayoutInfoListener(extConsumer);
@@ -188,6 +188,17 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 break;
             }
             mWindowLayoutChangeListeners.values().remove(consumer);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void updateListenerRegistrations() {
+        ActivityThread currentThread = ActivityThread.currentActivityThread();
+        if (mJavaToExtConsumers.isEmpty()) {
+            currentThread.removeConfigurationChangedListener(mRawConfigurationChangedListener);
+        } else {
+            currentThread.addConfigurationChangedListener(Runnable::run,
+                    mRawConfigurationChangedListener);
         }
     }
 
@@ -336,25 +347,28 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 continue;
             }
             if (featureRect.left != 0 && featureRect.top != 0) {
-                throw new IllegalArgumentException("Bounding rectangle must start at the top or "
+                Log.wtf(TAG, "Bounding rectangle must start at the top or "
                         + "left of the window. BaseFeatureRect: " + baseFeature.getRect()
                         + ", FeatureRect: " + featureRect
                         + ", WindowConfiguration: " + windowConfiguration);
+                continue;
 
             }
             if (featureRect.left == 0
                     && featureRect.width() != windowConfiguration.getBounds().width()) {
-                throw new IllegalArgumentException("Horizontal FoldingFeature must have full width."
+                Log.wtf(TAG, "Horizontal FoldingFeature must have full width."
                         + " BaseFeatureRect: " + baseFeature.getRect()
                         + ", FeatureRect: " + featureRect
                         + ", WindowConfiguration: " + windowConfiguration);
+                continue;
             }
             if (featureRect.top == 0
                     && featureRect.height() != windowConfiguration.getBounds().height()) {
-                throw new IllegalArgumentException("Vertical FoldingFeature must have full height."
+                Log.wtf(TAG, "Vertical FoldingFeature must have full height."
                         + " BaseFeatureRect: " + baseFeature.getRect()
                         + ", FeatureRect: " + featureRect
                         + ", WindowConfiguration: " + windowConfiguration);
+                continue;
             }
             features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
         }
@@ -374,38 +388,11 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             // Display features are not supported on secondary displays.
             return false;
         }
-        final int windowingMode;
-        IBinder activityToken = context.getActivityToken();
-        if (activityToken != null) {
-            final Configuration taskConfig = ActivityClient.getInstance().getTaskConfiguration(
-                    activityToken);
-            if (taskConfig == null) {
-                // If we cannot determine the task configuration for any reason, it is likely that
-                // we won't be able to determine its position correctly as well. DisplayFeatures'
-                // bounds in this case can't be computed correctly, so we should skip.
-                return false;
-            }
-            final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
-            final WindowManager windowManager = Objects.requireNonNull(
-                    context.getSystemService(WindowManager.class));
-            final Rect maxBounds = windowManager.getMaximumWindowMetrics().getBounds();
-            boolean isTaskExpanded = maxBounds.equals(taskBounds);
-            /*
-             * We need to proxy being in full screen because when a user enters PiP and exits PiP
-             * the task windowingMode will report multi-window/pinned until the transition is
-             * finished in WM Shell.
-             * maxBounds == taskWindowBounds is a proxy check to verify the window is full screen
-             */
-            return isTaskExpanded;
-        } else {
-            // TODO(b/242674941): use task windowing mode for window context that associates with
-            //  activity.
-            windowingMode = context.getResources().getConfiguration().windowConfiguration
-                    .getWindowingMode();
-        }
-        // It is recommended not to report any display features in multi-window mode, since it
-        // won't be possible to synchronize the display feature positions with window movement.
-        return !WindowConfiguration.inMultiWindowMode(windowingMode);
+
+        // We do not report folding features for Activities in PiP because the bounds are
+        // not updated fast enough and the window is too small for the UI to adapt.
+        return context.getResources().getConfiguration().windowConfiguration
+                .getWindowingMode() != WindowConfiguration.WINDOWING_MODE_PINNED;
     }
 
     @GuardedBy("mLock")
@@ -430,6 +417,16 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             super.onActivityConfigurationChanged(activity);
             synchronized (mLock) {
                 onDisplayFeaturesChangedIfListening(activity.getActivityToken());
+            }
+        }
+    }
+
+    private final class RawConfigurationChangedListener implements
+            java.util.function.Consumer<IBinder> {
+        @Override
+        public void accept(IBinder activityToken) {
+            synchronized (mLock) {
+                onDisplayFeaturesChangedIfListening(activityToken);
             }
         }
     }

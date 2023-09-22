@@ -266,6 +266,7 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * This manages the execution of the main thread in an
@@ -383,6 +384,11 @@ public final class ActivityThread extends ClientTransactionHandler
     @GuardedBy("mAppThread")
     private int mLastProcessState = PROCESS_STATE_UNKNOWN;
     final ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
+
+    @NonNull
+    private final ConfigurationChangedListenerController mConfigurationChangedListenerController =
+            new ConfigurationChangedListenerController();
+
     private int mLastSessionId;
     // Holds the value of the last reported device ID value from the server for the top activity.
     int mLastReportedDeviceId;
@@ -3609,6 +3615,21 @@ public final class ActivityThread extends ClientTransactionHandler
         return mConfigurationController.getConfiguration();
     }
 
+    /**
+     * @hide
+     */
+    public void addConfigurationChangedListener(Executor executor,
+            Consumer<IBinder> consumer) {
+        mConfigurationChangedListenerController.addListener(executor, consumer);
+    }
+
+    /**
+     * @hide
+     */
+    public void removeConfigurationChangedListener(Consumer<IBinder> consumer) {
+        mConfigurationChangedListenerController.removeListener(consumer);
+    }
+
     @Override
     public void updatePendingConfiguration(Configuration config) {
         final Configuration updatedConfig =
@@ -6252,6 +6273,8 @@ public final class ActivityThread extends ClientTransactionHandler
                                 " did not call through to super.onConfigurationChanged()");
             }
         }
+        mConfigurationChangedListenerController
+                .dispatchOnConfigurationChanged(activity.getActivityToken());
 
         return configToReport;
     }
