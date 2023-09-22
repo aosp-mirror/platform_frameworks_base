@@ -5,7 +5,8 @@ import android.hardware.face.FaceSensorPropertiesInternal
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.shared.model.WakeSleepReason
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.dagger.FaceAuthLog
 import com.google.errorprone.annotations.CompileTimeConstant
@@ -29,6 +30,18 @@ class FaceAuthenticationLogger
 constructor(
     @FaceAuthLog private val logBuffer: LogBuffer,
 ) {
+
+    fun ignoredWakeupReason(lastWakeReason: WakeSleepReason) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            { str1 = "$lastWakeReason" },
+            {
+                "Ignoring off/aod/dozing -> Lockscreen transition " +
+                    "because the last wake up reason is not allow-listed: $str1"
+            }
+        )
+    }
     fun ignoredFaceAuthTrigger(uiEvent: FaceAuthUiEvent?, ignoredReason: String) {
         logBuffer.log(
             TAG,
@@ -175,12 +188,12 @@ constructor(
         logBuffer.log(TAG, DEBUG, "Triggering face auth because alternate bouncer is visible")
     }
 
-    fun lockscreenBecameVisible(transitionStep: TransitionStep?) {
+    fun lockscreenBecameVisible(wake: WakefulnessModel?) {
         logBuffer.log(
             TAG,
             DEBUG,
-            { str1 = "$transitionStep" },
-            { "Triggering face auth because lockscreen became visible due to transition: $str1" }
+            { str1 = "${wake?.lastWakeReason}" },
+            { "Triggering face auth because lockscreen became visible due to wake reason: $str1" }
         )
     }
 
