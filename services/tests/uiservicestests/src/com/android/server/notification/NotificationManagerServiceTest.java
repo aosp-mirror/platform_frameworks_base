@@ -84,6 +84,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ENABLE_ATTENTION_HELPER_REFACTOR;
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.FSI_FORCE_DEMOTE;
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
@@ -272,6 +273,7 @@ import com.google.common.collect.ImmutableList;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -279,6 +281,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -372,6 +375,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private DevicePolicyManagerInternal mDevicePolicyManager;
     @Mock
     private PowerManager mPowerManager;
+    @Mock
+    private LightsManager mLightsManager;
     private final ArrayList<WakeLock> mAcquiredWakeLocks = new ArrayList<>();
     private final TestPostNotificationTrackerFactory mPostNotificationTrackerFactory =
             new TestPostNotificationTrackerFactory();
@@ -503,9 +508,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         setDpmAppOppsExemptFromDismissal(false);
 
-        mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
-                mNotificationInstanceIdSequence);
-
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
@@ -527,8 +529,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     Object[] args = invocation.getArguments();
                     return (int) args[1] == mUid;
                 });
-        final LightsManager mockLightsManager = mock(LightsManager.class);
-        when(mockLightsManager.getLight(anyInt())).thenReturn(mock(LogicalLight.class));
+        when(mLightsManager.getLight(anyInt())).thenReturn(mock(LogicalLight.class));
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
         when(mUgmInternal.newUriPermissionOwner(anyString())).thenReturn(mPermOwner);
@@ -601,6 +602,15 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     return wl;
                 });
 
+        // TODO (b/291907312): remove feature flag
+        mTestFlagResolver.setFlagOverride(ENABLE_ATTENTION_HELPER_REFACTOR, false);
+        initNMS();
+    }
+
+    private void initNMS() throws Exception {
+        mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
+                mNotificationInstanceIdSequence);
+
         // apps allowed as convos
         mService.setStringArrayResourceValue(PKG_O);
 
@@ -617,7 +627,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mWorkerHandler = spy(mService.new WorkerHandler(mTestableLooper.getLooper()));
         mService.init(mWorkerHandler, mRankingHandler, mPackageManager, mPackageManagerClient,
-                mockLightsManager, mListeners, mAssistants, mConditionProviders, mCompanionMgr,
+                mLightsManager, mListeners, mAssistants, mConditionProviders, mCompanionMgr,
                 mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager, mGroupHelper, mAm, mAtm,
                 mAppUsageStats, mDevicePolicyManager, mUgm, mUgmInternal,
                 mAppOpsManager, mUm, mHistoryManager, mStatsManager,
@@ -628,11 +638,17 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
+        Mockito.reset(mHistoryManager);
         verify(mHistoryManager, never()).onBootPhaseAppsCanStart();
         mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START, mMainLooper);
         verify(mHistoryManager).onBootPhaseAppsCanStart();
 
-        mService.setAudioManager(mAudioManager);
+        // TODO b/291907312: remove feature flag
+        if (mTestFlagResolver.isEnabled(ENABLE_ATTENTION_HELPER_REFACTOR)) {
+            mService.mAttentionHelper.setAudioManager(mAudioManager);
+        } else {
+            mService.setAudioManager(mAudioManager);
+        }
 
         mStrongAuthTracker = mService.new StrongAuthTrackerFake(mContext);
         mService.setStrongAuthTracker(mStrongAuthTracker);
@@ -1650,6 +1666,23 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(tag, call.r.getSbn().getTag());
         assertEquals(1, call.getInstanceId());  // Fake instance IDs are assigned in order
         assertThat(call.postDurationMillisLogged).isGreaterThan(0);
+    }
+
+    @Test
+    public void testEnqueueNotificationWithTag_WritesExpectedLogs_NAHRefactor() throws Exception {
+        // TODO b/291907312: remove feature flag
+        mTestFlagResolver.setFlagOverride(ENABLE_ATTENTION_HELPER_REFACTOR, true);
+        // Cleanup NMS before re-initializing
+        if (mService != null) {
+            try {
+                mService.onDestroy();
+            } catch (IllegalStateException | IllegalArgumentException e) {
+                // can throw if a broadcast receiver was never registered
+            }
+        }
+        initNMS();
+
+        testEnqueueNotificationWithTag_WritesExpectedLogs();
     }
 
     @Test
@@ -9012,6 +9045,24 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Check audio is stopped
         verify(mockPlayer).stopAsync();
+    }
+
+    @Test
+    public void testOnBubbleMetadataChangedToSuppressNotification_soundStopped_NAHRefactor()
+        throws Exception {
+        // TODO b/291907312: remove feature flag
+        mTestFlagResolver.setFlagOverride(ENABLE_ATTENTION_HELPER_REFACTOR, true);
+        // Cleanup NMS before re-initializing
+        if (mService != null) {
+            try {
+                mService.onDestroy();
+            } catch (IllegalStateException | IllegalArgumentException e) {
+                // can throw if a broadcast receiver was never registered
+            }
+        }
+        initNMS();
+
+        testOnBubbleMetadataChangedToSuppressNotification_soundStopped();
     }
 
     @Test
