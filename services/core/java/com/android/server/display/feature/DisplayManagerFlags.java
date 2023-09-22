@@ -39,6 +39,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_NBM_CONTROLLER,
             Flags::enableNbmController);
 
+    private final FlagState mHdrClamperFlagState = new FlagState(
+            Flags.FLAG_ENABLE_HDR_CLAMPER,
+            Flags::enableHdrClamper);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -47,6 +51,10 @@ public class DisplayManagerFlags {
     /** Returns whether hdr clamper is enabled on not*/
     public boolean isNbmControllerEnabled() {
         return mNbmControllerFlagState.isEnabled();
+    }
+
+    public boolean isHdrClamperEnabled() {
+        return mHdrClamperFlagState.isEnabled();
     }
 
     private static class FlagState {

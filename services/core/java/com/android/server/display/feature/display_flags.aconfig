@@ -14,6 +14,14 @@ flag {
     name: "enable_nbm_controller"
     namespace: "display_manager"
     description: "Feature flag for Normal Brightness Mode Controller"
-    bug: "277877297"
+    bug: "299527549"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_hdr_clamper"
+    namespace: "display_manager"
+    description: "Feature flag for HDR Clamper"
+    bug: "295100043"
     is_fixed_read_only: true
 }

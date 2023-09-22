@@ -1256,9 +1256,35 @@ public final class DisplayPowerController2Test {
     }
 
     @Test
-    public void testRampRateForHdrContent() {
+    public void testRampRateForHdrContent_HdrClamperOff() {
+        float hdrBrightness = 0.8f;
         float clampedBrightness = 0.6f;
-        float transitionRate = 35.5f;
+        float transitionRate = 1.5f;
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(.2f);
+        when(mHolder.displayPowerState.getSdrScreenBrightness()).thenReturn(.1f);
+        when(mHolder.hbmController.getHighBrightnessMode()).thenReturn(
+                BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR);
+        when(mHolder.hbmController.getHdrBrightnessValue()).thenReturn(hdrBrightness);
+        when(mHolder.hdrClamper.getMaxBrightness()).thenReturn(clampedBrightness);
+        when(mHolder.hdrClamper.getTransitionRate()).thenReturn(transitionRate);
+
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.animator, atLeastOnce()).animateTo(eq(hdrBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE), eq(false));
+    }
+
+    @Test
+    public void testRampRateForHdrContent_HdrClamperOn() {
+        float clampedBrightness = 0.6f;
+        float transitionRate = 1.5f;
+        DisplayManagerFlags flags = mock(DisplayManagerFlags.class);
+        when(flags.isHdrClamperEnabled()).thenReturn(true);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID, /* isEnabled= */ true, flags);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
@@ -1361,6 +1387,12 @@ public final class DisplayPowerController2Test {
 
     private DisplayPowerControllerHolder createDisplayPowerController(int displayId,
             String uniqueId, boolean isEnabled) {
+        return createDisplayPowerController(displayId, uniqueId, isEnabled,
+                mock(DisplayManagerFlags.class));
+    }
+
+    private DisplayPowerControllerHolder createDisplayPowerController(int displayId,
+            String uniqueId, boolean isEnabled, DisplayManagerFlags flags) {
         final DisplayPowerState displayPowerState = mock(DisplayPowerState.class);
         final DualRampAnimator<DisplayPowerState> animator = mock(DualRampAnimator.class);
         final AutomaticBrightnessController automaticBrightnessController =
@@ -1373,7 +1405,6 @@ public final class DisplayPowerController2Test {
                 mock(ScreenOffBrightnessSensorController.class);
         final HighBrightnessModeController hbmController = mock(HighBrightnessModeController.class);
         final HdrClamper hdrClamper = mock(HdrClamper.class);
-        final DisplayManagerFlags flags = mock(DisplayManagerFlags.class);
 
         when(hbmController.getCurrentBrightnessMax()).thenReturn(PowerManager.BRIGHTNESS_MAX);
 
