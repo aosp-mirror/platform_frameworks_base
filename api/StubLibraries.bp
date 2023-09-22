@@ -575,6 +575,170 @@ java_genrule {
     },
 }
 
+//
+// Java API defaults and libraries for single tree build
+//
+
+java_defaults {
+    name: "stub-annotation-defaults",
+    libs: [
+        "stub-annotations",
+    ],
+    static_libs: [
+        // stub annotations do not contribute to the API surfaces but are statically
+        // linked in the stubs for API surfaces (see frameworks/base/StubLibraries.bp).
+        // This is because annotation processors insist on loading the classes for any
+        // annotations found, thus should exist inside android.jar.
+        "private-stub-annotations-jar",
+    ],
+}
+
+// Listing of API domains contribution and dependencies per API surfaces
+java_defaults {
+    name: "android_test_stubs_current_contributions",
+    api_surface: "test",
+    api_contributions: [
+        "test-api-stubs-docs-non-updatable.api.contribution",
+        "framework-virtualization.stubs.source.test.api.contribution",
+    ],
+}
+
+java_defaults {
+    name: "android_test_frameworks_core_stubs_current_contributions",
+    api_surface: "test",
+    api_contributions: [
+        "test-api-stubs-docs-non-updatable.api.contribution",
+    ],
+}
+
+java_defaults {
+    name: "android_module_lib_stubs_current_contributions",
+    api_surface: "module-lib",
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+        "module-lib-api-stubs-docs-non-updatable.api.contribution",
+        "art.module.public.api.stubs.source.api.contribution",
+        "art.module.public.api.stubs.source.system.api.contribution",
+        "art.module.public.api.stubs.source.module_lib.api.contribution",
+        "i18n.module.public.api.stubs.source.api.contribution",
+        "i18n.module.public.api.stubs.source.system.api.contribution",
+        "i18n.module.public.api.stubs.source.module_lib.api.contribution",
+    ],
+}
+
+// Java API library definitions per API surface
+java_api_library {
+    name: "android_stubs_current.from-text",
+    api_surface: "public",
+    defaults: [
+        // This module is dynamically created at frameworks/base/api/api.go
+        // instead of being written out, in order to minimize edits in the codebase
+        // when there is a change in the list of modules.
+        // that contributes to an api surface.
+        "android_stubs_current_contributions",
+        "stub-annotation-defaults",
+    ],
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+    ],
+    visibility: ["//visibility:public"],
+}
+
+java_api_library {
+    name: "android_system_stubs_current.from-text",
+    api_surface: "system",
+    defaults: [
+        "android_stubs_current_contributions",
+        "android_system_stubs_current_contributions",
+        "stub-annotation-defaults",
+    ],
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+    ],
+    visibility: ["//visibility:public"],
+}
+
+java_api_library {
+    name: "android_test_stubs_current.from-text",
+    api_surface: "test",
+    defaults: [
+        "android_stubs_current_contributions",
+        "android_system_stubs_current_contributions",
+        "android_test_stubs_current_contributions",
+        "stub-annotation-defaults",
+    ],
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+    ],
+    visibility: ["//visibility:public"],
+}
+
+java_api_library {
+    name: "android_test_frameworks_core_stubs_current.from-text",
+    api_surface: "test",
+    defaults: [
+        "android_stubs_current_contributions",
+        "android_system_stubs_current_contributions",
+        "android_test_frameworks_core_stubs_current_contributions",
+        "stub-annotation-defaults",
+    ],
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+    ],
+}
+
+java_api_library {
+    name: "android_module_lib_stubs_current_full.from-text",
+    api_surface: "module-lib",
+    defaults: [
+        "android_stubs_current_contributions",
+        "android_system_stubs_current_contributions",
+        "android_module_lib_stubs_current_contributions_full",
+    ],
+    libs: [
+        "stub-annotations",
+    ],
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+        "module-lib-api-stubs-docs-non-updatable.api.contribution",
+    ],
+    visibility: ["//visibility:public"],
+}
+
+java_api_library {
+    name: "android_module_lib_stubs_current.from-text",
+    api_surface: "module-lib",
+    defaults: [
+        "android_module_lib_stubs_current_contributions",
+    ],
+    libs: [
+        "android_module_lib_stubs_current_full.from-text",
+        "stub-annotations",
+    ],
+    visibility: ["//visibility:public"],
+}
+
+java_api_library {
+    name: "android_system_server_stubs_current.from-text",
+    api_surface: "system-server",
+    api_contributions: [
+        "services-non-updatable-stubs.api.contribution",
+    ],
+    libs: [
+        "android_module_lib_stubs_current.from-text",
+        "stub-annotations",
+    ],
+    static_libs: [
+        "android_module_lib_stubs_current.from-text",
+    ],
+    visibility: ["//visibility:public"],
+}
+
 ////////////////////////////////////////////////////////////////////////
 // api-versions.xml generation, for public and system. This API database
 // also contains the android.test.* APIs.
