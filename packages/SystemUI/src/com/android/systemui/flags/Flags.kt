@@ -392,7 +392,8 @@ object Flags {
     val PLUG_IN_STATUS_BAR_CHIP = releasedFlag("plug_in_status_bar_chip")
 
     // TODO(b/292533677): Tracking Bug
-    val WIFI_TRACKER_LIB_FOR_WIFI_ICON = releasedFlag("wifi_tracker_lib_for_wifi_icon")
+    val WIFI_TRACKER_LIB_FOR_WIFI_ICON =
+        unreleasedFlag("wifi_tracker_lib_for_wifi_icon", teamfood = true)
 
     // TODO(b/293863612): Tracking Bug
     @JvmField val INCOMPATIBLE_CHARGING_BATTERY_ICON =
