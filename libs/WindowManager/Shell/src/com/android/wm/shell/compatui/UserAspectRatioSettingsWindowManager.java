@@ -37,7 +37,9 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Window manager for the user aspect ratio settings button which allows users to go to
@@ -54,6 +56,12 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
     private final Function<Integer, Integer> mDisappearTimeSupplier;
 
     private final ShellExecutor mShellExecutor;
+
+    @NonNull
+    private final Supplier<Boolean> mUserAspectRatioButtonShownChecker;
+
+    @NonNull
+    private final Consumer<Boolean> mUserAspectRatioButtonStateConsumer;
 
     @VisibleForTesting
     @NonNull
@@ -72,9 +80,13 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
             @NonNull DisplayLayout displayLayout, @NonNull CompatUIHintsState compatUIHintsState,
             @NonNull BiConsumer<TaskInfo, ShellTaskOrganizer.TaskListener> onButtonClicked,
             @NonNull ShellExecutor shellExecutor,
-            @NonNull Function<Integer, Integer> disappearTimeSupplier) {
+            @NonNull Function<Integer, Integer> disappearTimeSupplier,
+            @NonNull Supplier<Boolean> userAspectRatioButtonStateChecker,
+            @NonNull Consumer<Boolean> userAspectRatioButtonShownConsumer) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mShellExecutor = shellExecutor;
+        mUserAspectRatioButtonShownChecker = userAspectRatioButtonStateChecker;
+        mUserAspectRatioButtonStateConsumer = userAspectRatioButtonShownConsumer;
         mHasUserAspectRatioSettingsButton = getHasUserAspectRatioSettingsButton(taskInfo);
         mCompatUIHintsState = compatUIHintsState;
         mOnButtonClicked = onButtonClicked;
@@ -185,6 +197,7 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
             return;
         }
         mLayout.setUserAspectRatioButtonVisibility(true);
+        mUserAspectRatioButtonStateConsumer.accept(true);
         // Only show by default for the first time.
         if (!mCompatUIHintsState.mHasShownUserAspectRatioSettingsButtonHint) {
             mLayout.setUserAspectRatioSettingsHintVisibility(/* show= */ true);
@@ -210,7 +223,8 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
     private boolean getHasUserAspectRatioSettingsButton(@NonNull TaskInfo taskInfo) {
         return taskInfo.topActivityEligibleForUserAspectRatioButton
                 && (taskInfo.topActivityBoundsLetterboxed
-                    || taskInfo.isUserFullscreenOverrideEnabled);
+                    || taskInfo.isUserFullscreenOverrideEnabled)
+                && !mUserAspectRatioButtonShownChecker.get();
     }
 
     private long getDisappearTimeMs() {
