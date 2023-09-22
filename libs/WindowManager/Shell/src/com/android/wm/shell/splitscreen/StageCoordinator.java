@@ -1554,6 +1554,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Nullable ActivityManager.RunningTaskInfo taskInfo, @SplitPosition int startPosition,
             boolean resizeAnim) {
         onSplitScreenEnter();
+        // Preemptively reset the reparenting behavior if we know that we are entering, as starting
+        // split tasks with activity trampolines can inadvertently trigger the task to be
+        // reparented out of the split root mid-launch
+        wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                false /* setReparentLeafTaskIfRelaunch */);
         if (isSplitActive()) {
             prepareBringSplit(wct, taskInfo, startPosition, resizeAnim);
         } else {
