@@ -250,10 +250,6 @@ object Flags {
     // TODO(b/277961132): Tracking bug.
     @JvmField val REVAMPED_BOUNCER_MESSAGES = unreleasedFlag("revamped_bouncer_messages")
 
-    /** Whether to delay showing bouncer UI when face auth or active unlock are enrolled. */
-    // TODO(b/279794160): Tracking bug.
-    @JvmField val DELAY_BOUNCER = releasedFlag("delay_bouncer")
-
     /** Keyguard Migration */
 
     /**

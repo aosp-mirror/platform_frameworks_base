@@ -34,8 +34,6 @@ import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.bouncer.ui.BouncerViewDelegate
 import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.plugins.ActivityStarter
@@ -76,7 +74,6 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     private lateinit var underTest: PrimaryBouncerInteractor
     private lateinit var resources: TestableResources
     private lateinit var trustRepository: FakeTrustRepository
-    private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var testScope: TestScope
 
     @Before
@@ -89,7 +86,6 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         testScope = TestScope()
         mainHandler = FakeHandler(android.os.Looper.getMainLooper())
         trustRepository = FakeTrustRepository()
-        featureFlags = FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) }
         underTest =
             PrimaryBouncerInteractor(
                 repository,
@@ -103,7 +99,6 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
                 context,
                 keyguardUpdateMonitor,
                 trustRepository,
-                featureFlags,
                 testScope.backgroundScope,
             )
         whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
