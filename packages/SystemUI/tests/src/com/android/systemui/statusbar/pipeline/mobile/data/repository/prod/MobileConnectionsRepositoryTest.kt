@@ -37,6 +37,8 @@ import android.telephony.TelephonyManager
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.telephony.PhoneConstants
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.R
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
@@ -104,6 +106,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var logger: MobileInputLogger
     @Mock private lateinit var summaryLogger: TableLogBuffer
     @Mock private lateinit var logBufferFactory: TableLogBufferFactory
+    @Mock private lateinit var updateMonitor: KeyguardUpdateMonitor
 
     private val mobileMappings = FakeMobileMappingsProxy()
     private val subscriptionManagerProxy = FakeSubscriptionManagerProxy()
@@ -214,6 +217,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 airplaneModeRepository,
                 wifiRepository,
                 fullConnectionFactory,
+                updateMonitor,
             )
 
         testScope.runCurrent()
@@ -1048,6 +1052,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     airplaneModeRepository,
                     wifiRepository,
                     fullConnectionFactory,
+                    updateMonitor
                 )
 
             val latest by collectLastValue(underTest.defaultDataSubRatConfig)
@@ -1103,7 +1108,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun carrierConfig_initialValueIsFetched() =
         testScope.runTest {
-
             // Value starts out false
             assertThat(underTest.defaultDataSubRatConfig.value.showAtLeast3G).isFalse()
 
@@ -1149,6 +1153,26 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 .onActiveDataSubscriptionIdChanged(SUB_1_ID)
 
             assertThat(latest).isEqualTo(null)
+        }
+
+    @Test
+    fun anySimSecure_propagatesStateFromKeyguardUpdateMonitor() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isAnySimSecure)
+            assertThat(latest).isFalse()
+
+            val updateMonitorCallback = argumentCaptor<KeyguardUpdateMonitorCallback>()
+            verify(updateMonitor).registerCallback(updateMonitorCallback.capture())
+
+            whenever(updateMonitor.isSimPinSecure).thenReturn(true)
+            updateMonitorCallback.value.onSimStateChanged(0, 0, 0)
+
+            assertThat(latest).isTrue()
+
+            whenever(updateMonitor.isSimPinSecure).thenReturn(false)
+            updateMonitorCallback.value.onSimStateChanged(0, 0, 0)
+
+            assertThat(latest).isFalse()
         }
 
     private fun TestScope.getDefaultNetworkCallback(): ConnectivityManager.NetworkCallback {
