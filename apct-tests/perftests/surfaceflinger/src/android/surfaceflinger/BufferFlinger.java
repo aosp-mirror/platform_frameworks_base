@@ -16,6 +16,10 @@
 
 package android.surfaceflinger;
 
+import static android.view.SurfaceControl.BUFFER_TRANSFORM_IDENTITY;
+import static android.view.SurfaceControl.BUFFER_TRANSFORM_ROTATE_270;
+import static android.view.SurfaceControl.BUFFER_TRANSFORM_ROTATE_90;
+
 import android.annotation.ColorInt;
 import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
@@ -33,9 +37,11 @@ import java.util.concurrent.ArrayBlockingQueue;
  * @hide
  */
 public class BufferFlinger {
+    private final int mTransformHint;
     ArrayBlockingQueue<GraphicBuffer> mBufferQ;
 
-    public BufferFlinger(int numOfBuffers, @ColorInt int color) {
+    public BufferFlinger(int numOfBuffers, @ColorInt int color, int bufferTransformHint) {
+        mTransformHint = bufferTransformHint;
         mBufferQ = new ArrayBlockingQueue<>(numOfBuffers);
 
         while (numOfBuffers > 0) {
@@ -56,12 +62,18 @@ public class BufferFlinger {
     public void addBuffer(SurfaceControl.Transaction t, SurfaceControl surfaceControl) {
         try {
             final GraphicBuffer buffer = mBufferQ.take();
-            t.setBuffer(surfaceControl,
+            int transform = BUFFER_TRANSFORM_IDENTITY;
+            if (mTransformHint == BUFFER_TRANSFORM_ROTATE_90) {
+                transform = BUFFER_TRANSFORM_ROTATE_270;
+            } else if (mTransformHint == BUFFER_TRANSFORM_ROTATE_270) {
+                transform = BUFFER_TRANSFORM_ROTATE_90;
+            }
+            t.setBufferTransform(surfaceControl, transform);
+            t.setBuffer(
+                    surfaceControl,
                     HardwareBuffer.createFromGraphicBuffer(buffer),
                     null,
-                    (SyncFence fence) -> {
-                        releaseCallback(fence, buffer);
-                    });
+                    (SyncFence fence) -> releaseCallback(fence, buffer));
         } catch (InterruptedException ignore) {
         }
     }
