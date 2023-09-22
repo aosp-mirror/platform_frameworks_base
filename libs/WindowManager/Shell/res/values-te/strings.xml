@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ఎగువ కుడివైపునకు జరుపు"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"దిగువ ఎడమవైపునకు తరలించు"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"దిగవు కుడివైపునకు జరుపు"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> విస్తరించండి"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>‌ను కుదించండి"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> సెట్టింగ్‌లు"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"బబుల్‌ను విస్మరించు"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"సంభాషణను బబుల్ చేయవద్దు"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"అర్థమైంది"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ఇటీవలి బబుల్స్ ఏవీ లేవు"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ఇటీవలి బబుల్స్ మరియు తీసివేసిన బబుల్స్ ఇక్కడ కనిపిస్తాయి"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"బబుల్స్‌ను ఉపయోగించి చాట్ చేయండి"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"కొత్త సంభాషణలు మీ స్క్రీన్ కింద మూలన చిహ్నాలుగా కనిపిస్తాయి. ట్యాప్ చేసి వాటిని విస్తరించండి లేదా లాగి విస్మరించండి."</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"బబుల్స్‌ను ఎప్పుడైనా కంట్రోల్ చేయండి"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"ఏ యాప్‌లు, సంభాషణలను బబుల్ చేయాలో మేనేజ్ చేయడానికి ఇక్కడ ట్యాప్ చేయండి"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"బబుల్"</string>
