@@ -73,7 +73,7 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
         mComponentName = componentName;
         mPluginFactory = pluginFactory;
         mPlugin = plugin;
-        mTag = TAG + mComponentName.toShortString()
+        mTag = TAG + "[" + mComponentName.getShortClassName() + "]"
                 + '@' + Integer.toHexString(hashCode());
 
         if (mPlugin != null) {
