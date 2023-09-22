@@ -20,6 +20,8 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.service.quicksettings.Tile
 import com.android.settingslib.graph.SignalDrawable
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.Text.Companion.loadText
 import com.android.systemui.plugins.qs.QSTile
@@ -31,6 +33,8 @@ sealed interface InternetTileModel {
     val secondaryLabel: Text?
     val iconId: Int?
     val icon: QSTile.Icon?
+    val stateDescription: ContentDescription?
+    val contentDescription: ContentDescription?
 
     fun applyTo(state: QSTile.BooleanState, context: Context) {
         if (secondaryLabel != null) {
@@ -38,6 +42,9 @@ sealed interface InternetTileModel {
         } else {
             state.secondaryLabel = secondaryTitle
         }
+
+        state.stateDescription = stateDescription.loadContentDescription(context)
+        state.contentDescription = contentDescription.loadContentDescription(context)
 
         // To support both SignalDrawable and other icons, give priority to icons over IDs
         if (icon != null) {
@@ -59,6 +66,8 @@ sealed interface InternetTileModel {
         override val secondaryLabel: Text? = null,
         override val iconId: Int? = null,
         override val icon: QSTile.Icon? = null,
+        override val stateDescription: ContentDescription? = null,
+        override val contentDescription: ContentDescription? = null,
     ) : InternetTileModel
 
     data class Inactive(
@@ -66,6 +75,8 @@ sealed interface InternetTileModel {
         override val secondaryLabel: Text? = null,
         override val iconId: Int? = null,
         override val icon: QSTile.Icon? = null,
+        override val stateDescription: ContentDescription? = null,
+        override val contentDescription: ContentDescription? = null,
     ) : InternetTileModel
 }
 
