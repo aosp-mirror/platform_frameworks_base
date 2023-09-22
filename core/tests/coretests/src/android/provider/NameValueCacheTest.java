@@ -55,7 +55,6 @@ import java.util.Map;
  * Due to how the classes are structured, we have to test it in a somewhat roundabout way. We're
  * mocking out the contentProvider and are handcrafting very specific Bundles to answer the queries.
  */
-@Ignore("b/297724333")
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -229,6 +228,8 @@ public class NameValueCacheTest {
 
     @After
     public void cleanUp() throws IOException {
+        Settings.Config.clearProviderForTest();
+        Settings.Secure.clearProviderForTest();
         mConfigsStorage.clear();
         mSettingsStorage.clear();
         mSettingsCacheGenerationStore.close();
