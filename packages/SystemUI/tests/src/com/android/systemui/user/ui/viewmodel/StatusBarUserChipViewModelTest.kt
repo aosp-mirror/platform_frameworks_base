@@ -267,6 +267,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                     refreshUsersScheduler = refreshUsersScheduler,
                     guestUserInteractor = guestUserInteractor,
                     uiEventLogger = uiEventLogger,
+                    userRestrictionChecker = mock(),
                 )
         )
     }

@@ -45,6 +45,7 @@ import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -176,6 +177,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                         refreshUsersScheduler = refreshUsersScheduler,
                         guestUserInteractor = guestUserInteractor,
                         uiEventLogger = uiEventLogger,
+                        userRestrictionChecker = mock(),
                     ),
                 guestUserInteractor = guestUserInteractor,
             )

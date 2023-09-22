@@ -50,6 +50,7 @@ import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
 import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.utils.UserRestrictionChecker
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.test.TestScope
 import org.mockito.Mockito.mock
@@ -137,6 +138,7 @@ object KeyguardDismissInteractorFactory {
                 refreshUsersScheduler = mock(RefreshUsersScheduler::class.java),
                 guestUserInteractor = mock(GuestUserInteractor::class.java),
                 uiEventLogger = mock(UiEventLogger::class.java),
+                userRestrictionChecker = mock(UserRestrictionChecker::class.java),
             )
         return WithDependencies(
             trustRepository = trustRepository,

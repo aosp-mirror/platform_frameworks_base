@@ -37,7 +37,6 @@ import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.UserIcons
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
-import com.android.systemui.res.R
 import com.android.systemui.SystemUISecondaryUserService
 import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -50,6 +49,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
+import com.android.systemui.res.R
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.CreateUserActivity
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
@@ -62,6 +62,7 @@ import com.android.systemui.user.shared.model.UserModel
 import com.android.systemui.user.utils.MultiUserActionsEvent
 import com.android.systemui.user.utils.MultiUserActionsEventHelper
 import com.android.systemui.util.kotlin.pairwise
+import com.android.systemui.utils.UserRestrictionChecker
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -103,6 +104,7 @@ constructor(
     private val refreshUsersScheduler: RefreshUsersScheduler,
     private val guestUserInteractor: GuestUserInteractor,
     private val uiEventLogger: UiEventLogger,
+    private val userRestrictionChecker: UserRestrictionChecker,
 ) {
     /**
      * Defines interface for classes that can be notified when the state of users on the device is
@@ -593,6 +595,7 @@ constructor(
                 ) &&
                     // If the user is auto-created is must not be currently resetting.
                     !(isGuestUserAutoCreated && isGuestUserResetting),
+            userRestrictionChecker = userRestrictionChecker,
         )
     }
 
