@@ -4568,6 +4568,10 @@ class PackageManagerShellCommand extends ShellCommand {
                 PackageManager.MATCH_DISABLED_COMPONENTS
                         | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS
                         | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS, 0);
+        if (ai == null) {
+            Slog.e(TAG, "Failed to get ApplicationInfo for package name(" + pii.packageName + ").");
+            return null;
+        }
         AssetManager am = new AssetManager();
         am.addAssetPath(ai.publicSourceDir);
         res = new Resources(am, null, null);
