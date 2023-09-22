@@ -194,6 +194,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
 
         String indent = prefix + "  ";
 
+        pw.println(indent + "mShouldPerformActiveScan=" + mShouldPerformActiveScan);
         pw.println(indent + "mPreferredFeatures=" + mPreferredFeatures);
         pw.println(indent + "mPackageOrder=" + mPackageOrder);
         pw.println(indent + "mAllowedPackages=" + mAllowedPackages);
