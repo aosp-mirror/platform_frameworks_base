@@ -40,8 +40,6 @@ public interface RankingConfig {
             int uid);
     void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
             boolean fromTargetApp, int callingUid, boolean isSystemOrSystemUi);
-    ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
-            int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty);
     boolean createNotificationChannel(String pkg, int uid, NotificationChannel channel,
             boolean fromTargetApp, boolean hasDndAccess, int callingUid,
             boolean isSystemOrSystemUi);
