@@ -192,6 +192,12 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
         }
     }
 
+    @VisibleForTesting
+    boolean isShowingButton() {
+        return (mUserAspectRatioButtonShownChecker.get()
+                && !isHideDelayReached(mNextButtonHideTimeMs));
+    }
+
     private void showUserAspectRatioButton() {
         if (mLayout == null) {
             return;
@@ -224,7 +230,7 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
         return taskInfo.topActivityEligibleForUserAspectRatioButton
                 && (taskInfo.topActivityBoundsLetterboxed
                     || taskInfo.isUserFullscreenOverrideEnabled)
-                && !mUserAspectRatioButtonShownChecker.get();
+                && (!mUserAspectRatioButtonShownChecker.get() || isShowingButton());
     }
 
     private long getDisappearTimeMs() {
