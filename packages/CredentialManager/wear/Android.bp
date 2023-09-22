@@ -21,6 +21,7 @@ android_app {
     },
 
     static_libs: [
+        "CredentialManagerShared",
         "Horologist",
         "PlatformComposeCore",
         "androidx.activity_activity-compose",

@@ -16,28 +16,73 @@
 
 package com.android.credentialmanager.ui
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.navigation.NavHostController
+import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import kotlinx.coroutines.launch
 
 class CredentialSelectorActivity : ComponentActivity() {
 
-    lateinit var navController: NavHostController
+    private val viewModel: CredentialSelectorViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setTheme(android.R.style.Theme_DeviceDefault)
 
-        setContent {
-            navController = rememberSwipeDismissableNavController()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { uiState ->
+                    when (uiState) {
+                        CredentialSelectorUiState.Idle -> {
+                            // Don't display anything, assuming that there should be minimal latency
+                            // to parse the Credential Manager intent and define the state of the
+                            // app. If latency is big, then a "loading" screen should be displayed
+                            // to the user.
+                        }
 
-            MaterialTheme {
-                WearApp(navController = navController)
+                        CredentialSelectorUiState.Get -> {
+                            // TODO: b/301206470 - Implement get flow
+                            setContent {
+                                MaterialTheme {
+                                    WearApp()
+                                }
+                            }
+                        }
+
+                        CredentialSelectorUiState.Create -> {
+                            // TODO: b/301206624 - Implement create flow
+                            finish()
+                        }
+
+                        is CredentialSelectorUiState.Cancel -> {
+                            // TODO: b/300422310 - Implement cancel with message flow
+                            finish()
+                        }
+
+                        CredentialSelectorUiState.Finish -> {
+                            finish()
+                        }
+                    }
+                }
             }
         }
+
+        viewModel.onNewIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        val previousIntent = getIntent()
+        setIntent(intent)
+
+        viewModel.onNewIntent(intent, previousIntent)
     }
 }
