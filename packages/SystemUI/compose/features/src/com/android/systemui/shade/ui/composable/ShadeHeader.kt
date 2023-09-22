@@ -39,7 +39,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
@@ -166,11 +168,18 @@ fun SceneScope.ExpandedShadeHeader(
                 modifier =
                     Modifier.align(Alignment.CenterVertically)
                         // use graphicsLayer instead of Modifier.scale to anchor transform to
-                        // top left corner
+                        // the (start, top) corner
                         .graphicsLayer(
                             scaleX = 2.57f,
                             scaleY = 2.57f,
-                            transformOrigin = TransformOrigin(0f, 0.5f)
+                            transformOrigin =
+                                TransformOrigin(
+                                    when (LocalLayoutDirection.current) {
+                                        LayoutDirection.Ltr -> 0f
+                                        LayoutDirection.Rtl -> 1f
+                                    },
+                                    0.5f
+                                )
                         ),
             )
             Spacer(modifier = Modifier.weight(1f))
