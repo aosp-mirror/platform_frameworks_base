@@ -21,6 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.shared.CommunalAppWidgetInfo
 import com.android.systemui.coroutines.collectLastValue
@@ -44,6 +45,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
     private lateinit var testScope: TestScope
 
+    private lateinit var communalRepository: FakeCommunalRepository
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
     private lateinit var interactor: CommunalInteractor
 
@@ -52,12 +54,13 @@ class CommunalInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         testScope = TestScope()
+        communalRepository = FakeCommunalRepository()
         widgetRepository = FakeCommunalWidgetRepository()
-        interactor = CommunalInteractor(widgetRepository)
+        interactor = CommunalInteractor(communalRepository, widgetRepository)
     }
 
     @Test
-    fun testAppWidgetInfoFlow() =
+    fun appWidgetInfoFlow() =
         testScope.runTest {
             val lastAppWidgetInfo = collectLastValue(interactor.appWidgetInfo)
             runCurrent()
@@ -66,5 +69,23 @@ class CommunalInteractorTest : SysuiTestCase() {
             widgetRepository.setStopwatchAppWidgetInfo(stopwatchAppWidgetInfo)
             runCurrent()
             assertThat(lastAppWidgetInfo()).isEqualTo(stopwatchAppWidgetInfo)
+        }
+
+    @Test
+    fun communalEnabled() =
+        testScope.runTest {
+            communalRepository.setIsCommunalEnabled(true)
+
+            val interactor = CommunalInteractor(communalRepository, widgetRepository)
+            assertThat(interactor.isCommunalEnabled).isTrue()
+        }
+
+    @Test
+    fun communalDisabled() =
+        testScope.runTest {
+            communalRepository.setIsCommunalEnabled(false)
+
+            val interactor = CommunalInteractor(communalRepository, widgetRepository)
+            assertThat(interactor.isCommunalEnabled).isFalse()
         }
 }

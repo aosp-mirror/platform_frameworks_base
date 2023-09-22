@@ -5,6 +5,7 @@ import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransit
 import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToBouncerTransition
+import com.android.systemui.scene.ui.composable.transitions.lockscreenToCommunalTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToGoneTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToShadeTransition
@@ -13,7 +14,7 @@ import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettings
 /**
  * Comprehensive definition of all transitions between scenes in [SceneContainer].
  *
- * Transitions are automatically reversible, so define only one transition per scene pair. By
+ * Transitions are automatically reversible, so define only one transition per scene pair. By\
  * convention, use the more common transition direction when defining the pair order, e.g.
  * Lockscreen to Bouncer rather than Bouncer to Lockscreen.
  *
@@ -27,6 +28,7 @@ val SceneContainerTransitions = transitions {
     from(Gone, to = Shade) { goneToShadeTransition() }
     from(Gone, to = QuickSettings) { goneToQuickSettingsTransition() }
     from(Lockscreen, to = Bouncer) { lockscreenToBouncerTransition() }
+    from(Lockscreen, to = Communal) { lockscreenToCommunalTransition() }
     from(Lockscreen, to = Shade) { lockscreenToShadeTransition() }
     from(Lockscreen, to = QuickSettings) { lockscreenToQuickSettingsTransition() }
     from(Lockscreen, to = Gone) { lockscreenToGoneTransition() }

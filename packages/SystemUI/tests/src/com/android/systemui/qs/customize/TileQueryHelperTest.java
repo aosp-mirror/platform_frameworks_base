@@ -34,7 +34,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -53,7 +52,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.InstanceId;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.settings.UserTracker;
@@ -390,11 +388,6 @@ public class TileQueryHelperTest extends SysuiTestCase {
         @Override
         public boolean isTileReady() {
             return mListening && mRefreshed;
-        }
-
-        @Override
-        public QSIconView createTileView(Context context) {
-            return null;
         }
 
         @Override

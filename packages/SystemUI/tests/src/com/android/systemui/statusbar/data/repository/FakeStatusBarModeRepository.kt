@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeStatusBarModeRepository : StatusBarModeRepository {
     override val isTransientShown = MutableStateFlow(false)
+    override val isInFullscreenMode = MutableStateFlow(false)
 
     override fun showTransient() {
         isTransientShown.value = true

@@ -57,15 +57,14 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -77,8 +76,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
     private static final String TAG = "ScreenPinningRequest";
 
     private final Context mContext;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
-
+    private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
     private final AccessibilityManager mAccessibilityService;
     private final WindowManager mWindowManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -101,12 +99,12 @@ public class ScreenPinningRequest implements View.OnClickListener,
     @Inject
     public ScreenPinningRequest(
             Context context,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navigationModeController,
+            Lazy<NavigationBarController> navigationBarControllerLazy,
             BroadcastDispatcher broadcastDispatcher,
             UserTracker userTracker) {
         mContext = context;
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mNavigationBarControllerLazy = navigationBarControllerLazy;
         mAccessibilityService = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mWindowManager = (WindowManager)
@@ -289,15 +287,14 @@ public class ScreenPinningRequest implements View.OnClickListener,
                         .setVisibility(View.INVISIBLE);
             }
 
-            final Optional<CentralSurfaces> centralSurfacesOptional =
-                    mCentralSurfacesOptionalLazy.get();
-            boolean recentsVisible =
-                    centralSurfacesOptional.map(CentralSurfaces::isOverviewEnabled).orElse(false);
+            int displayId = mContext.getDisplayId();
+            boolean overviewEnabled =
+                    mNavigationBarControllerLazy.get().isOverviewEnabled(displayId);
             boolean touchExplorationEnabled = mAccessibilityService.isTouchExplorationEnabled();
             int descriptionStringResId;
             if (QuickStepContract.isGesturalMode(mNavBarMode)) {
                 descriptionStringResId = R.string.screen_pinning_description_gestural;
-            } else if (recentsVisible) {
+            } else if (overviewEnabled) {
                 mLayout.findViewById(R.id.screen_pinning_recents_group).setVisibility(VISIBLE);
                 mLayout.findViewById(R.id.screen_pinning_home_bg_light).setVisibility(INVISIBLE);
                 mLayout.findViewById(R.id.screen_pinning_home_bg).setVisibility(INVISIBLE);
@@ -314,7 +311,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
             }
 
             NavigationBarView navigationBarView =
-                    centralSurfacesOptional.map(CentralSurfaces::getNavigationBarView).orElse(null);
+                    mNavigationBarControllerLazy.get().getNavigationBarView(displayId);
             if (navigationBarView != null) {
                 ((ImageView) mLayout.findViewById(R.id.screen_pinning_back_icon))
                         .setImageDrawable(navigationBarView.getBackDrawable());

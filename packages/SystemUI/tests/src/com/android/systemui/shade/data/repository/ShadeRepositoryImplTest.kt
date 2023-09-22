@@ -169,6 +169,15 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun updateLegacyExpandedOrAwaitingInputTransfer() =
+        testScope.runTest {
+            assertThat(underTest.legacyExpandedOrAwaitingInputTransfer.value).isEqualTo(false)
+
+            underTest.setLegacyExpandedOrAwaitingInputTransfer(true)
+            assertThat(underTest.legacyExpandedOrAwaitingInputTransfer.value).isEqualTo(true)
+        }
+
+    @Test
     fun updateUdfpsTransitionToFullShadeProgress() =
         testScope.runTest {
             assertThat(underTest.udfpsTransitionToFullShadeProgress.value).isEqualTo(0f)

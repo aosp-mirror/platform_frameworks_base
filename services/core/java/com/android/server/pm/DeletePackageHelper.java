@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 import static android.content.pm.PackageManager.DELETE_SUCCEEDED;
 import static android.content.pm.PackageManager.MATCH_KNOWN_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
@@ -52,6 +53,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -119,8 +121,6 @@ final class DeletePackageHelper {
      */
     public int deletePackageX(String packageName, long versionCode, int userId, int deleteFlags,
             boolean removedBySystem) {
-        final boolean isArchived = false; // TODO(b/278553670) Pass true during archival.
-
         final PackageRemovedInfo info = new PackageRemovedInfo(mPm);
         final boolean res;
 
@@ -250,6 +250,7 @@ final class DeletePackageHelper {
 
         if (res) {
             final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
+            final boolean isArchived = (deleteFlags & PackageManager.DELETE_ARCHIVE) != 0;
             info.sendPackageRemovedBroadcasts(killApp, removedBySystem, isArchived);
             info.sendSystemPackageUpdatedBroadcasts();
             PackageMetrics.onUninstallSucceeded(info, deleteFlags, removeUser);
@@ -561,6 +562,17 @@ final class DeletePackageHelper {
                 Slog.d(TAG, "Marking package:" + ps.getPackageName()
                         + " uninstalled for user:" + nextUserId);
             }
+
+            // Keep enabled and disabled components in case of DELETE_KEEP_DATA
+            ArraySet<String> enabledComponents = null;
+            ArraySet<String> disabledComponents = null;
+            if ((flags & PackageManager.DELETE_KEEP_DATA) != 0) {
+                enabledComponents = new ArraySet<String>(
+                        ps.readUserState(nextUserId).getEnabledComponents());
+                disabledComponents = new ArraySet<String>(
+                        ps.readUserState(nextUserId).getDisabledComponents());
+            }
+
             // Preserve ArchiveState if this is not a full uninstall
             ArchiveState archiveState =
                     (flags & DELETE_KEEP_DATA) == 0
@@ -580,8 +592,8 @@ final class DeletePackageHelper {
                     false /*instantApp*/,
                     false /*virtualPreload*/,
                     null /*lastDisableAppCaller*/,
-                    null /*enabledComponents*/,
-                    null /*disabledComponents*/,
+                    enabledComponents,
+                    disabledComponents,
                     PackageManager.INSTALL_REASON_UNKNOWN,
                     PackageManager.UNINSTALL_REASON_UNKNOWN,
                     null /*harmfulAppWarning*/,

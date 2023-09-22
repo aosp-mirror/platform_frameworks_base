@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.row
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import android.widget.TextView
 import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.ImageFloatingTextView
 import com.android.internal.widget.MessagingLayout
@@ -36,8 +35,6 @@ class PrecomputedTextViewFactory @Inject constructor() : NotifRemoteViewsFactory
         attrs: AttributeSet
     ): View? {
         return when (name) {
-            TextView::class.java.name,
-            TextView::class.java.simpleName -> PrecomputedTextView(context, attrs)
             ImageFloatingTextView::class.java.name ->
                 PrecomputedImageFloatingTextView(context, attrs)
             MessagingLayout::class.java.name ->

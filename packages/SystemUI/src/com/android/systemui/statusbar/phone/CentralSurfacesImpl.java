@@ -87,7 +87,6 @@ import android.util.MathUtils;
 import android.view.Display;
 import android.view.IRemoteAnimationRunner;
 import android.view.IWindowManager;
-import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.WindowInsets;
@@ -563,8 +562,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final Executor mUiBgExecutor;
 
     protected boolean mDozing;
-    private boolean mIsFullscreen;
-
     boolean mCloseQsBeforeScreenOff;
 
     private final NotificationMediaManager mMediaManager;
@@ -1192,6 +1189,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mDemoModeController.addCallback(mDemoModeCallback);
         mJavaAdapter.alwaysCollectFlow(
                 mStatusBarModeRepository.isTransientShown(), this::onTransientShownChanged);
+        mJavaAdapter.alwaysCollectFlow(
+                mStatusBarModeRepository.isInFullscreenMode(),
+                this::onStatusBarFullscreenChanged);
 
         mCommandQueueCallbacks = mCommandQueueCallbacksLazy.get();
         mCommandQueue.addCallback(mCommandQueueCallbacks);
@@ -1691,27 +1691,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mHeadsUpManager.releaseAllImmediately();
     }
 
-    /**
-     * Called when another window is about to transfer it's input focus.
-     */
-    @Override
-    public void onInputFocusTransfer(boolean start, boolean cancel, float velocity) {
-        if (!mCommandQueue.panelsEnabled()) {
-            return;
-        }
-
-        if (start) {
-            mShadeSurface.startWaitingForExpandGesture();
-        } else {
-            mShadeSurface.stopWaitingForExpandGesture(cancel, velocity);
-        }
-    }
-
-    @Override
-    public void onStatusBarTrackpadEvent(MotionEvent event) {
-        mShadeSurface.handleExternalTouch(event);
-    }
-
     private void onExpandedInvisible() {
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         if (!mNotificationActivityStarterLazy.get().isCollapsingToShowActivityOverLockscreen()) {
@@ -1730,6 +1709,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (transientShown) {
             mNoAnimationOnNextBarModeChange = true;
         }
+        maybeUpdateBarMode();
+    }
+
+    private void onStatusBarFullscreenChanged(boolean isWindowShown) {
         maybeUpdateBarMode();
     }
 
@@ -1752,8 +1735,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     private @TransitionMode int barMode(boolean isTransient, int appearance) {
+        boolean isFullscreen = mStatusBarModeRepository.isInFullscreenMode().getValue();
         final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_STATUS_BARS;
-        if (mOngoingCallController.hasOngoingCall() && mIsFullscreen) {
+        if (mOngoingCallController.hasOngoingCall() && isFullscreen) {
+            // Force show the status bar if there's an ongoing call.
             return MODE_SEMI_TRANSPARENT;
         } else if (isTransient) {
             return MODE_SEMI_TRANSPARENT;
@@ -2174,10 +2159,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             //  * When phone is unlocked: we still don't want to execute hiding of the keyguard
             //    as the animation could prepare 'fake AOD' interface (without actually
             //    transitioning to keyguard state) and this might reset the view states
+            // Log for b/290627350
+            Log.d(TAG, "!shouldBeKeyguard mStatusBarStateController.isKeyguardRequested() "
+                    + mStatusBarStateController.isKeyguardRequested() + " keyguardForDozing "
+                    + keyguardForDozing + " wakeAndUnlocking " + wakeAndUnlocking
+                    + " isWakingAndOccluded " + isWakingAndOccluded);
             if (!mScreenOffAnimationController.isKeyguardHideDelayed()
                     // If we're animating occluded, there's an activity launching over the keyguard
                     // UI. Wait to hide it until after the animation concludes.
                     && !mKeyguardViewMediator.isOccludeAnimationPlaying()) {
+                Log.d(TAG, "hideKeyguardImpl " + forceStateChange);
                 return hideKeyguardImpl(forceStateChange);
             }
         }
@@ -2530,11 +2521,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public NavigationBarView getNavigationBarView() {
         return mNavigationBarController.getNavigationBarView(mDisplayId);
-    }
-
-    @Override
-    public boolean isOverviewEnabled() {
-        return mNavigationBarController.isOverviewEnabled(mDisplayId);
     }
 
     /**
@@ -3342,12 +3328,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
                     updateReportRejectedTouchVisibility();
                     Trace.endSection();
-                }
-
-                @Override
-                public void onFullscreenStateChanged(boolean isFullscreen) {
-                    mIsFullscreen = isFullscreen;
-                    maybeUpdateBarMode();
                 }
             };
 

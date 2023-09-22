@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.widget.editor
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,13 +41,13 @@ class SettingsExposedDropdownMenuBoxTest {
     @Test
     fun exposedDropdownMenuBoxs_displayed() {
         composeTestRule.setContent {
-            var selectedItem by remember { mutableStateOf("item1") }
+            var selectedItem by remember { mutableStateOf(0) }
             SettingsExposedDropdownMenuBox(
                 label = exposedDropdownMenuBoxLabel,
                 options = options,
-                selectedOptionText = selectedItem,
+                selectedOptionIndex = selectedItem,
                 enabled = true,
-                onselectedOptionTextChange = {selectedItem = it})
+                onselectedOptionTextChange = { selectedItem = it })
         }
         composeTestRule.onNodeWithText(exposedDropdownMenuBoxLabel, substring = true)
             .assertIsDisplayed()
@@ -55,13 +56,13 @@ class SettingsExposedDropdownMenuBoxTest {
     @Test
     fun exposedDropdownMenuBoxs_expanded() {
         composeTestRule.setContent {
-            var selectedItem by remember { mutableStateOf("item1") }
+            var selectedItem by remember { mutableIntStateOf(0) }
             SettingsExposedDropdownMenuBox(
                 label = exposedDropdownMenuBoxLabel,
                 options = options,
-                selectedOptionText = selectedItem,
+                selectedOptionIndex = selectedItem,
                 enabled = true,
-                onselectedOptionTextChange = {selectedItem = it})
+                onselectedOptionTextChange = { selectedItem = it })
         }
         composeTestRule.onNodeWithText(item2, substring = true)
             .assertDoesNotExist()
@@ -74,13 +75,13 @@ class SettingsExposedDropdownMenuBoxTest {
     @Test
     fun exposedDropdownMenuBoxs_valueChanged() {
         composeTestRule.setContent {
-            var selectedItem by remember { mutableStateOf("item1") }
+            var selectedItem by remember { mutableIntStateOf(0) }
             SettingsExposedDropdownMenuBox(
                 label = exposedDropdownMenuBoxLabel,
                 options = options,
-                selectedOptionText = selectedItem,
+                selectedOptionIndex = selectedItem,
                 enabled = true,
-                onselectedOptionTextChange = {selectedItem = it})
+                onselectedOptionTextChange = { selectedItem = it })
         }
         composeTestRule.onNodeWithText(item2, substring = true)
             .assertDoesNotExist()

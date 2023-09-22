@@ -39,7 +39,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun getKeyguardMessageArea(): AuthKeyguardMessageArea? = null
     override fun isLaunchingActivityOverLockscreen() = false
     override fun onKeyguardViewManagerStatesUpdated() {}
-    override fun onInputFocusTransfer(start: Boolean, cancel: Boolean, velocity: Float) {}
     override fun getCommandQueuePanelsEnabled() = false
     override fun showWirelessChargingAnimation(batteryLevel: Int) {}
     override fun checkBarModes() {}
@@ -68,7 +67,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
         cancelAction: Runnable?,
     ) {}
     override fun getNavigationBarView(): NavigationBarView? = null
-    override fun isOverviewEnabled() = false
     override fun setBouncerShowing(bouncerShowing: Boolean) {}
     override fun isScreenFullyOff() = false
     override fun getEmergencyActionIntent(): Intent? = null

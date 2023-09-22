@@ -26,7 +26,10 @@ import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
@@ -167,10 +170,9 @@ class HandleMenu {
             desktopBtn.setOnClickListener(mOnClickListener);
             // The button corresponding to the windowing mode that the task is currently in uses a
             // different color than the others.
-            final ColorStateList activeColorStateList = ColorStateList.valueOf(
-                    mContext.getColor(R.color.desktop_mode_caption_menu_buttons_color_active));
-            final ColorStateList inActiveColorStateList = ColorStateList.valueOf(
-                    mContext.getColor(R.color.desktop_mode_caption_menu_buttons_color_inactive));
+            final int[] iconColors = getWindowingIconColor();
+            final ColorStateList inActiveColorStateList = ColorStateList.valueOf(iconColors[0]);
+            final ColorStateList activeColorStateList = ColorStateList.valueOf(iconColors[1]);
             fullscreenBtn.setImageTintList(
                     mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                             ? activeColorStateList : inActiveColorStateList);
@@ -194,6 +196,23 @@ class HandleMenu {
         }
         final Button selectBtn = moreActionsPillView.findViewById(R.id.select_button);
         selectBtn.setOnClickListener(mOnClickListener);
+    }
+
+    /**
+     * Returns array of windowing icon color based on current UI theme. First element of the
+     * array is for inactive icons and the second is for active icons.
+     */
+    private int[] getWindowingIconColor() {
+        final int mode = mContext.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK;
+        final boolean isNightMode = (mode == Configuration.UI_MODE_NIGHT_YES);
+        final TypedArray typedArray = mContext.obtainStyledAttributes(new int[]{
+                com.android.internal.R.attr.materialColorOnSurface,
+                com.android.internal.R.attr.materialColorPrimary});
+        final int inActiveColor = typedArray.getColor(0, isNightMode ? Color.WHITE : Color.BLACK);
+        final int activeColor = typedArray.getColor(1, isNightMode ? Color.WHITE : Color.BLACK);
+        typedArray.recycle();
+        return new int[] {inActiveColor, activeColor};
     }
 
     /**

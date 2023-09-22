@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -194,13 +195,16 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         rootView = null; // Clear it just in case we use it accidentally
 
         final int oldDensityDpi = mWindowDecorConfig.densityDpi;
+        final int oldNightMode = mWindowDecorConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
         mWindowDecorConfig = params.mWindowDecorConfig != null ? params.mWindowDecorConfig
                 : mTaskInfo.getConfiguration();
         final int newDensityDpi = mWindowDecorConfig.densityDpi;
+        final int newNightMode =  mWindowDecorConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
         if (oldDensityDpi != newDensityDpi
                 || mDisplay == null
                 || mDisplay.getDisplayId() != mTaskInfo.displayId
-                || oldLayoutResId != mLayoutResId) {
+                || oldLayoutResId != mLayoutResId
+                || oldNightMode != newNightMode) {
             releaseViews();
 
             if (!obtainDisplayOrRegisterListener()) {
@@ -208,6 +212,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 return;
             }
             mDecorWindowContext = mContext.createConfigurationContext(mWindowDecorConfig);
+            mDecorWindowContext.setTheme(mContext.getThemeResId());
             if (params.mLayoutResId != 0) {
                 outResult.mRootView = (T) LayoutInflater.from(mDecorWindowContext)
                         .inflate(params.mLayoutResId, null);
@@ -337,7 +342,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
     }
 
-    int getCaptionHeightId() {
+    int getCaptionHeightId(@WindowingMode int windowingMode) {
         return Resources.ID_NULL;
     }
 
@@ -459,7 +464,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * Adds caption inset source to a WCT
      */
     public void addCaptionInset(WindowContainerTransaction wct) {
-        final int captionHeightId = getCaptionHeightId();
+        final int captionHeightId = getCaptionHeightId(mTaskInfo.getWindowingMode());
         if (!ViewRootImpl.CAPTION_ON_SHELL || captionHeightId == Resources.ID_NULL) {
             return;
         }

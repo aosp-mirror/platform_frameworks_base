@@ -119,6 +119,20 @@ java_library {
     ],
 }
 
+java_library {
+    name: "wm-shell-flicker-platinum-tests",
+    platform_apis: true,
+    optimize: {
+        enabled: false,
+    },
+    srcs: [
+        ":WMShellFlickerServicePlatinumTests-src",
+    ],
+    static_libs: [
+        "wm-shell-flicker-utils",
+    ],
+}
+
 java_defaults {
     name: "WMShellFlickerTestsDefault",
     manifest: "manifests/AndroidManifest.xml",

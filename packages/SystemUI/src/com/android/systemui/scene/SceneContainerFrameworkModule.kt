@@ -33,6 +33,7 @@ import dagger.multibindings.IntoMap
     includes =
         [
             BouncerSceneModule::class,
+            CommunalSceneModule::class,
             EmptySceneModule::class,
             GoneSceneModule::class,
             LockscreenSceneModule::class,
@@ -65,6 +66,7 @@ interface SceneContainerFrameworkModule {
                 sceneKeys =
                     listOf(
                         SceneKey.Gone,
+                        SceneKey.Communal,
                         SceneKey.Lockscreen,
                         SceneKey.Bouncer,
                         SceneKey.Shade,
