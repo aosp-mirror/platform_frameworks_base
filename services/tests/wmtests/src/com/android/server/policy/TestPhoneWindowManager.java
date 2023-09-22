@@ -77,6 +77,7 @@ import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.service.dreams.DreamManagerInternal;
 import android.telecom.TelecomManager;
 import android.util.FeatureFlagUtils;
@@ -138,6 +139,7 @@ class TestPhoneWindowManager {
     @Mock private TelecomManager mTelecomManager;
     @Mock private NotificationManager mNotificationManager;
     @Mock private Vibrator mVibrator;
+    @Mock private VibratorInfo mVibratorInfo;
     @Mock private PowerManager mPowerManager;
     @Mock private WindowManagerPolicy.WindowManagerFuncs mWindowManagerFuncsImpl;
     @Mock private InputMethodManagerInternal mInputMethodManagerInternal;
@@ -246,6 +248,7 @@ class TestPhoneWindowManager {
         doReturn(mTelecomManager).when(mPhoneWindowManager).getTelecommService();
         doNothing().when(mNotificationManager).silenceNotificationSound();
         doReturn(mNotificationManager).when(mPhoneWindowManager).getNotificationService();
+        doReturn(mVibratorInfo).when(mVibrator).getInfo();
         doReturn(mVibrator).when(mContext).getSystemService(eq(Context.VIBRATOR_SERVICE));
 
         final PowerManager.WakeLock wakeLock = mock(PowerManager.WakeLock.class);
