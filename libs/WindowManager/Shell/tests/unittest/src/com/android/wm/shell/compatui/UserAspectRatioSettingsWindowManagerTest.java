@@ -36,6 +36,7 @@ import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 import android.util.Pair;
 import android.view.DisplayInfo;
 import android.view.InsetsSource;
@@ -66,6 +67,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 /**
  * Tests for {@link UserAspectRatioSettingsWindowManager}.
@@ -74,12 +76,15 @@ import java.util.function.BiConsumer;
  *  atest WMShellUnitTests:UserAspectRatioSettingsWindowManagerTest
  */
 @RunWith(AndroidTestingRunner.class)
+@RunWithLooper
 @SmallTest
 public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
 
     private static final int TASK_ID = 1;
 
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
+    @Mock
+    private Supplier<Boolean> mUserAspectRatioButtonShownChecker;
     @Mock
     private BiConsumer<TaskInfo, ShellTaskOrganizer.TaskListener>
             mOnUserAspectRatioSettingsButtonClicked;
@@ -106,11 +111,12 @@ public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
                 false, /* topActivityBoundsLetterboxed */ true);
         mWindowManager = new UserAspectRatioSettingsWindowManager(mContext, mTaskInfo,
                 mSyncTransactionQueue, mTaskListener, new DisplayLayout(), new CompatUIHintsState(),
-                mOnUserAspectRatioSettingsButtonClicked, mExecutor, flags -> 0, () -> false,
-                s -> {});
+                mOnUserAspectRatioSettingsButtonClicked, mExecutor, flags -> 0,
+                mUserAspectRatioButtonShownChecker, s -> {});
         spyOn(mWindowManager);
         doReturn(mLayout).when(mWindowManager).inflateLayout();
         doReturn(mViewHost).when(mWindowManager).createSurfaceViewHost();
+        doReturn(false).when(mUserAspectRatioButtonShownChecker).get();
     }
 
     @Test
@@ -291,6 +297,39 @@ public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
 
         verify(mWindowManager, never()).createLayout(anyBoolean());
         verify(mLayout).setVisibility(View.VISIBLE);
+    }
+
+    @Test
+    public void testLayoutHasUserAspectRatioSettingsButton() {
+        clearInvocations(mWindowManager);
+        spyOn(mWindowManager);
+        TaskInfo taskInfo = createTaskInfo(/* eligibleForUserAspectRatioButton= */
+                true, /* topActivityBoundsLetterboxed */ true);
+
+        // User aspect ratio settings button has not yet been shown.
+        doReturn(false).when(mUserAspectRatioButtonShownChecker).get();
+
+        // Check the layout has the user aspect ratio settings button.
+        mWindowManager.updateCompatInfo(taskInfo, mTaskListener, /* canShow= */ true);
+        assertTrue(mWindowManager.mHasUserAspectRatioSettingsButton);
+
+        // User aspect ratio settings button has been shown and is still visible.
+        spyOn(mWindowManager);
+        doReturn(true).when(mWindowManager).isShowingButton();
+        doReturn(true).when(mUserAspectRatioButtonShownChecker).get();
+
+        // Check the layout still has the user aspect ratio settings button.
+        mWindowManager.updateCompatInfo(taskInfo, mTaskListener, /* canShow= */ true);
+        assertTrue(mWindowManager.mHasUserAspectRatioSettingsButton);
+
+        // User aspect ratio settings button has been shown and has timed out so is no longer
+        // visible.
+        doReturn(false).when(mWindowManager).isShowingButton();
+        doReturn(true).when(mUserAspectRatioButtonShownChecker).get();
+
+        // Check the layout no longer has the user aspect ratio button.
+        mWindowManager.updateCompatInfo(taskInfo, mTaskListener, /* canShow= */ true);
+        assertFalse(mWindowManager.mHasUserAspectRatioSettingsButton);
     }
 
     @Test
