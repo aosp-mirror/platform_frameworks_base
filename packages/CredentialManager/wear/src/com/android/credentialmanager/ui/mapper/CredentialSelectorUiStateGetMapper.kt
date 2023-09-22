@@ -4,9 +4,9 @@ import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
 import com.android.credentialmanager.ui.CredentialSelectorUiState
-import com.android.credentialmanager.ui.factory.fromSlice
+import com.android.credentialmanager.factory.fromSlice
 import com.android.credentialmanager.ui.model.PasswordUiModel
-import com.android.credentialmanager.ui.model.Request
+import com.android.credentialmanager.model.Request
 
 fun Request.Get.toGet(): CredentialSelectorUiState.Get {
     if (this.providers.isEmpty()) {

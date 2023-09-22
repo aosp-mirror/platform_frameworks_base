@@ -14,26 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui.model
+package com.android.credentialmanager.mapper
 
-import android.credentials.ui.Entry
-import android.credentials.ui.ProviderData
-import com.google.common.collect.ImmutableList
-import com.google.common.collect.ImmutableMap
+import android.content.Intent
+import com.android.credentialmanager.ktx.cancelUiRequest
+import com.android.credentialmanager.model.Request
 
-/**
- * Represents the request made by the CredentialManager API.
- */
-sealed class Request {
-    data class Cancel(
-        val showCancellationUi: Boolean,
-        val appPackageName: String?
-    ) : Request()
-
-    data class Get(
-        val providers: ImmutableMap<String, ProviderData>,
-        val entries: ImmutableList<Entry>,
-    ) : Request()
-
-    data object Create : Request()
-}
+fun Intent.toRequestCancel(): Request.Cancel? =
+    this.cancelUiRequest?.let { cancelUiRequest ->
+        Request.Cancel(
+            showCancellationUi = cancelUiRequest.shouldShowCancellationUi(),
+            appPackageName = cancelUiRequest.appPackageName
+        )
+    }

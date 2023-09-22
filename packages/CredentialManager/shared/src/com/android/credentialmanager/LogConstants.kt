@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui.mapper
+package com.android.credentialmanager
 
-import android.credentials.ui.CancelUiRequest
-import com.android.credentialmanager.ui.model.Request
-
-fun CancelUiRequest.toCancel() = Request.Cancel(
-    showCancellationUi = this.shouldShowCancellationUi(),
-    appPackageName = this.appPackageName
-)
+const val TAG = "CredentialSelector"

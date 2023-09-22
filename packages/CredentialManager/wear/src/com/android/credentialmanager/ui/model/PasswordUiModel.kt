@@ -16,4 +16,4 @@
 
 package com.android.credentialmanager.ui.model
 
-data class PasswordUiModel(val name: String)
+data class PasswordUiModel(val email: String)

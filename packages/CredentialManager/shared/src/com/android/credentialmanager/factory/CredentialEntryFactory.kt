@@ -1,4 +1,4 @@
-package com.android.credentialmanager.ui.factory
+package com.android.credentialmanager.factory
 
 import android.app.slice.Slice
 import android.credentials.Credential

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui.ktx
+package com.android.credentialmanager.ktx
 
 import android.content.pm.PackageManager
 import android.text.TextUtils
 import android.util.Log
-import com.android.credentialmanager.ui.TAG
+import com.android.credentialmanager.TAG
 
 fun PackageManager.appLabel(appPackageName: String): String? =
     try {
