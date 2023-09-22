@@ -4830,7 +4830,7 @@
     <string translatable="false" name="config_deviceSpecificInputMethodManagerService"></string>
 
     <!-- Component name of media projection permission dialog -->
-    <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
+    <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.mediaprojection.MediaProjectionPermissionActivity</string>
 
     <!-- Corner radius of system dialogs -->
     <dimen name="config_dialogCornerRadius">28dp</dimen>
