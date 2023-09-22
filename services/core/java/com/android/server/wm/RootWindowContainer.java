@@ -2730,13 +2730,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         synchronized (mService.mGlobalLock) {
             final DisplayContent displayContent = getDisplayContent(displayId);
             if (displayContent != null) {
-                displayContent.onDisplayChanged();
+                displayContent.requestDisplayUpdate(() -> clearDisplayInfoCaches(displayId));
+            } else {
+                clearDisplayInfoCaches(displayId);
             }
-            // Drop any cached DisplayInfos associated with this display id - the values are now
-            // out of date given this display changed event.
-            mWmService.mPossibleDisplayInfoMapper.removePossibleDisplayInfos(displayId);
-            updateDisplayImePolicyCache();
         }
+    }
+
+    private void clearDisplayInfoCaches(int displayId) {
+        // Drop any cached DisplayInfos associated with this display id - the values are now
+        // out of date given this display changed event.
+        mWmService.mPossibleDisplayInfoMapper.removePossibleDisplayInfos(displayId);
+        updateDisplayImePolicyCache();
     }
 
     void updateDisplayImePolicyCache() {

@@ -17,6 +17,8 @@
 package com.android.server.display;
 
 import static com.android.server.display.DisplayDeviceInfo.TOUCH_NONE;
+import static com.android.server.wm.utils.DisplayInfoOverrides.WM_OVERRIDE_FIELDS;
+import static com.android.server.wm.utils.DisplayInfoOverrides.copyDisplayInfoFields;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,6 +35,7 @@ import android.view.SurfaceControl;
 
 import com.android.server.display.layout.Layout;
 import com.android.server.display.mode.DisplayModeDirector;
+import com.android.server.wm.utils.DisplayInfoOverrides;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
@@ -252,24 +255,8 @@ final class LogicalDisplay {
     public DisplayInfo getDisplayInfoLocked() {
         if (mInfo.get() == null) {
             DisplayInfo info = new DisplayInfo();
-            info.copyFrom(mBaseDisplayInfo);
-            if (mOverrideDisplayInfo != null) {
-                info.appWidth = mOverrideDisplayInfo.appWidth;
-                info.appHeight = mOverrideDisplayInfo.appHeight;
-                info.smallestNominalAppWidth = mOverrideDisplayInfo.smallestNominalAppWidth;
-                info.smallestNominalAppHeight = mOverrideDisplayInfo.smallestNominalAppHeight;
-                info.largestNominalAppWidth = mOverrideDisplayInfo.largestNominalAppWidth;
-                info.largestNominalAppHeight = mOverrideDisplayInfo.largestNominalAppHeight;
-                info.logicalWidth = mOverrideDisplayInfo.logicalWidth;
-                info.logicalHeight = mOverrideDisplayInfo.logicalHeight;
-                info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
-                info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
-                info.rotation = mOverrideDisplayInfo.rotation;
-                info.displayCutout = mOverrideDisplayInfo.displayCutout;
-                info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
-                info.roundedCorners = mOverrideDisplayInfo.roundedCorners;
-                info.displayShape = mOverrideDisplayInfo.displayShape;
-            }
+            copyDisplayInfoFields(info, mBaseDisplayInfo, mOverrideDisplayInfo,
+                    WM_OVERRIDE_FIELDS);
             mInfo.set(info);
         }
         return mInfo.get();

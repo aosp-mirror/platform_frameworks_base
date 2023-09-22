@@ -159,6 +159,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Tests for the {@link DisplayContent} class.
@@ -2272,7 +2276,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 0 /* userId */);
         dc.mCurrentUniqueDisplayId = mDisplayInfo.uniqueId + "-test";
         // Trigger display changed.
-        dc.onDisplayChanged();
+        updateDisplay(dc);
         // Ensure overridden size and denisty match the most up-to-date values in settings for the
         // display.
         verifySizes(dc, forcedWidth, forcedHeight, forcedDensity);
@@ -2837,7 +2841,7 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     private DisplayContent createDisplayNoUpdateDisplayInfo() {
         final DisplayContent displayContent = createNewDisplay();
-        doNothing().when(displayContent).updateDisplayInfo();
+        doNothing().when(displayContent).updateDisplayInfo(any());
         return displayContent;
     }
 
@@ -2865,6 +2869,16 @@ public class DisplayContentTests extends WindowTestsBase {
         final ArrayList<WindowState> result = new ArrayList<>(list);
         Collections.reverse(result);
         return result;
+    }
+
+    private void updateDisplay(DisplayContent displayContent) {
+        CompletableFuture<Object> future = new CompletableFuture<>();
+        displayContent.requestDisplayUpdate(() -> future.complete(new Object()));
+        try {
+            future.get(15, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void tapOnDisplay(final DisplayContent dc) {

@@ -6261,9 +6261,11 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.doStartFreezingDisplay");
-        doStartFreezingDisplay(exitAnim, enterAnim, displayContent, overrideOriginalRotation);
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        displayContent.requestDisplayUpdate(() -> {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.doStartFreezingDisplay");
+            doStartFreezingDisplay(exitAnim, enterAnim, displayContent, overrideOriginalRotation);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        });
     }
 
     private void doStartFreezingDisplay(int exitAnim, int enterAnim, DisplayContent displayContent,
@@ -6299,7 +6301,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mExitAnimId = exitAnim;
         mEnterAnimId = enterAnim;
 
-        displayContent.updateDisplayInfo();
         final int originalRotation = overrideOriginalRotation != ROTATION_UNDEFINED
                 ? overrideOriginalRotation
                 : displayContent.getDisplayInfo().rotation;
