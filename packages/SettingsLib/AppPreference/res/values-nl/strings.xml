@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="install_type_instant" msgid="7217305006127216917">"Instant-app"</string>
+    <string name="install_type_instant" msgid="7217305006127216917">"Instant app"</string>
 </resources>
