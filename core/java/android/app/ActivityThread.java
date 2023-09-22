@@ -36,6 +36,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
 import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
@@ -3663,10 +3664,9 @@ public final class ActivityThread extends ClientTransactionHandler
             int resultCode, Intent data) {
         if (DEBUG_RESULTS) Slog.v(TAG, "sendActivityResult: id=" + id
                 + " req=" + requestCode + " res=" + resultCode + " data=" + data);
-        ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
+        final ArrayList<ResultInfo> list = new ArrayList<>();
         list.add(new ResultInfo(id, requestCode, resultCode, data));
-        final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread,
-                activityToken);
+        final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread);
         clientTransaction.addCallback(ActivityResultItem.obtain(activityToken, list));
         try {
             mAppThread.scheduleTransaction(clientTransaction);
@@ -4441,7 +4441,7 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void schedulePauseWithUserLeavingHint(ActivityClientRecord r) {
-        final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
+        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
         transaction.setLifecycleStateRequest(PauseActivityItem.obtain(r.token,
                 r.activity.isFinishing(), /* userLeaving */ true, r.activity.mConfigChangeFlags,
                 /* dontReport */ false, /* autoEnteringPip */ false));
@@ -4449,7 +4449,7 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void scheduleResume(ActivityClientRecord r) {
-        final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
+        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
         transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(r.token,
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false));
         executeTransaction(transaction);
@@ -6041,7 +6041,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final ActivityLifecycleItem lifecycleRequest =
                 TransactionExecutorHelper.getLifecycleRequestForCurrentState(r);
         // Schedule the transaction.
-        final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
+        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
         transaction.addCallback(activityRelaunchItem);
         transaction.setLifecycleStateRequest(lifecycleRequest);
         executeTransaction(transaction);

@@ -919,7 +919,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
                 // Create activity launch transaction.
                 final ClientTransaction clientTransaction = ClientTransaction.obtain(
-                        proc.getThread(), r.token);
+                        proc.getThread());
 
                 final boolean isTransitionForward = r.isTransitionForward();
                 final IBinder fragmentToken = r.getTaskFragment().getFragmentToken();

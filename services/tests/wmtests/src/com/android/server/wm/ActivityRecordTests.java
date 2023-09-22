@@ -489,7 +489,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         ensureActivityConfiguration(activity);
 
         verify(mAtm.getLifecycleManager(), never())
-                .scheduleTransaction(any(), any(), isA(ActivityConfigurationChangeItem.class));
+                .scheduleTransaction(any(), isA(ActivityConfigurationChangeItem.class));
     }
 
     @Test
@@ -519,7 +519,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityConfigurationChangeItem expected =
                 ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
         verify(mAtm.getLifecycleManager()).scheduleTransaction(
-                eq(activity.app.getThread()), eq(activity.token), eq(expected));
+                eq(activity.app.getThread()), eq(expected));
     }
 
     @Test
@@ -599,7 +599,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityConfigurationChangeItem expected =
                 ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
         verify(mAtm.getLifecycleManager()).scheduleTransaction(eq(activity.app.getThread()),
-                eq(activity.token), eq(expected));
+                eq(expected));
 
         verify(displayRotation).onSetRequestedOrientation();
     }
@@ -817,7 +817,7 @@ public class ActivityRecordTests extends WindowTestsBase {
             final ActivityConfigurationChangeItem expected =
                     ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
             verify(mAtm.getLifecycleManager()).scheduleTransaction(
-                    eq(activity.app.getThread()), eq(activity.token), eq(expected));
+                    eq(activity.app.getThread()), eq(expected));
         } finally {
             stack.getDisplayArea().removeChild(stack);
         }
@@ -1787,9 +1787,10 @@ public class ActivityRecordTests extends WindowTestsBase {
             final ActivityRecord activity = createActivityWithTask();
             final WindowProcessController wpc = activity.app;
             setup.accept(activity);
+            clearInvocations(mAtm.getLifecycleManager());
             activity.getTask().removeImmediately("test");
             try {
-                verify(mAtm.getLifecycleManager()).scheduleTransaction(any(), eq(activity.token),
+                verify(mAtm.getLifecycleManager()).scheduleTransaction(any(),
                         isA(DestroyActivityItem.class));
             } catch (RemoteException ignored) {
             }

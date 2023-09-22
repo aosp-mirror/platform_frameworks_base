@@ -53,8 +53,6 @@ public class WindowContextInfoChangeItemTest {
     @Mock
     private ClientTransactionHandler mHandler;
     @Mock
-    private IBinder mToken;
-    @Mock
     private PendingTransactionActions mPendingActions;
     @Mock
     private IBinder mClientToken;
@@ -72,7 +70,7 @@ public class WindowContextInfoChangeItemTest {
     public void testExecute() {
         final WindowContextInfoChangeItem item = WindowContextInfoChangeItem
                 .obtain(mClientToken, mConfiguration, DEFAULT_DISPLAY);
-        item.execute(mHandler, mToken, mPendingActions);
+        item.execute(mHandler, mPendingActions);
 
         verify(mHandler).handleWindowContextInfoChanged(mClientToken,
                 new WindowContextInfo(mConfiguration, DEFAULT_DISPLAY));
@@ -84,7 +82,7 @@ public class WindowContextInfoChangeItemTest {
 
         final WindowContextInfoChangeItem item = WindowContextInfoChangeItem
                 .obtain(mClientToken, mConfiguration, DEFAULT_DISPLAY);
-        final Context context = item.getContextToUpdate(mHandler, mToken);
+        final Context context = item.getContextToUpdate(mHandler);
 
         assertEquals(mWindowContext, context);
     }

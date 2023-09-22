@@ -45,8 +45,6 @@ public class WindowContextWindowRemovalItemTest {
     @Mock
     private ClientTransactionHandler mHandler;
     @Mock
-    private IBinder mToken;
-    @Mock
     private PendingTransactionActions mPendingActions;
     @Mock
     private IBinder mClientToken;
@@ -60,7 +58,7 @@ public class WindowContextWindowRemovalItemTest {
     public void testExecute() {
         final WindowContextWindowRemovalItem item = WindowContextWindowRemovalItem.obtain(
                 mClientToken);
-        item.execute(mHandler, mToken, mPendingActions);
+        item.execute(mHandler, mPendingActions);
 
         verify(mHandler).handleWindowContextWindowRemoval(mClientToken);
     }

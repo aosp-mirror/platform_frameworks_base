@@ -74,7 +74,7 @@ public class TransactionExecutor {
      * Then the client will cycle to the final lifecycle state if provided. Otherwise, it will
      * either remain in the initial state, or last state needed by a callback.
      */
-    public void execute(ClientTransaction transaction) {
+    public void execute(@NonNull ClientTransaction transaction) {
         if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Start resolving transaction");
 
         final IBinder token = transaction.getActivityToken();
@@ -109,16 +109,13 @@ public class TransactionExecutor {
 
     /** Cycle through all states requested by callbacks and execute them at proper times. */
     @VisibleForTesting
-    public void executeCallbacks(ClientTransaction transaction) {
+    public void executeCallbacks(@NonNull ClientTransaction transaction) {
         final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
         if (callbacks == null || callbacks.isEmpty()) {
             // No callbacks to execute, return early.
             return;
         }
         if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callbacks in transaction");
-
-        final IBinder token = transaction.getActivityToken();
-        ActivityClientRecord r = mTransactionHandler.getActivityClient(token);
 
         // In case when post-execution state of the last callback matches the final state requested
         // for the activity in this transaction, we won't do the last transition here and do it when
@@ -135,6 +132,9 @@ public class TransactionExecutor {
         final int size = callbacks.size();
         for (int i = 0; i < size; ++i) {
             final ClientTransactionItem item = callbacks.get(i);
+            final IBinder token = item.getActivityToken();
+            ActivityClientRecord r = mTransactionHandler.getActivityClient(token);
+
             if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callback: " + item);
             final int postExecutionState = item.getPostExecutionState();
 
@@ -150,13 +150,13 @@ public class TransactionExecutor {
             final boolean isSyncWindowConfigUpdateFlagEnabled = !Process.isIsolated()
                     && syncWindowConfigUpdateFlag();
             final Context configUpdatedContext = isSyncWindowConfigUpdateFlagEnabled
-                    ? item.getContextToUpdate(mTransactionHandler, token)
+                    ? item.getContextToUpdate(mTransactionHandler)
                     : null;
             final Configuration preExecutedConfig = configUpdatedContext != null
                     ? new Configuration(configUpdatedContext.getResources().getConfiguration())
                     : null;
 
-            item.execute(mTransactionHandler, token, mPendingActions);
+            item.execute(mTransactionHandler, mPendingActions);
 
             if (configUpdatedContext != null) {
                 final Configuration postExecutedConfig = configUpdatedContext.getResources()
@@ -169,7 +169,7 @@ public class TransactionExecutor {
                 }
             }
 
-            item.postExecute(mTransactionHandler, token, mPendingActions);
+            item.postExecute(mTransactionHandler, mPendingActions);
             if (r == null) {
                 // Launch activity request will create an activity record.
                 r = mTransactionHandler.getActivityClient(token);
@@ -195,14 +195,14 @@ public class TransactionExecutor {
     }
 
     /** Transition to the final state if requested by the transaction. */
-    private void executeLifecycleState(ClientTransaction transaction) {
+    private void executeLifecycleState(@NonNull ClientTransaction transaction) {
         final ActivityLifecycleItem lifecycleItem = transaction.getLifecycleStateRequest();
         if (lifecycleItem == null) {
             // No lifecycle request, return early.
             return;
         }
 
-        final IBinder token = transaction.getActivityToken();
+        final IBinder token = lifecycleItem.getActivityToken();
         final ActivityClientRecord r = mTransactionHandler.getActivityClient(token);
         if (DEBUG_RESOLVER) {
             Slog.d(TAG, tId(transaction) + "Resolving lifecycle state: "
@@ -219,8 +219,8 @@ public class TransactionExecutor {
         cycleToPath(r, lifecycleItem.getTargetState(), true /* excludeLastState */, transaction);
 
         // Execute the final transition with proper parameters.
-        lifecycleItem.execute(mTransactionHandler, token, mPendingActions);
-        lifecycleItem.postExecute(mTransactionHandler, token, mPendingActions);
+        lifecycleItem.execute(mTransactionHandler, mPendingActions);
+        lifecycleItem.postExecute(mTransactionHandler, mPendingActions);
     }
 
     /** Transition the client between states. */

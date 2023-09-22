@@ -41,15 +41,14 @@ public class WindowContextInfoChangeItem extends ClientTransactionItem {
     private WindowContextInfo mInfo;
 
     @Override
-    public void execute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
+    public void execute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         client.handleWindowContextInfoChanged(mClientToken, mInfo);
     }
 
     @Nullable
     @Override
-    public Context getContextToUpdate(@NonNull ClientTransactionHandler client,
-            @Nullable IBinder token) {
+    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
         return client.getWindowContext(mClientToken);
     }
 
