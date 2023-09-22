@@ -106,6 +106,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
@@ -201,7 +202,8 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED = 9;
 
     private final Object mLock = new Object();
-    Handler mHandler;
+    private Handler mHandler;
+    private Handler mIoHandler;
     AppOpsManager mAppOps;
     UserManager mUserManager;
     PackageManager mPackageManager;
@@ -233,7 +235,7 @@ public class UsageStatsService extends SystemService implements
     private final SparseArray<LinkedList<Event>> mReportedEvents = new SparseArray<>();
     final SparseArray<ArraySet<String>> mUsageReporters = new SparseArray();
     final SparseArray<ActivityData> mVisibleActivities = new SparseArray();
-    @GuardedBy("mLock")
+    @GuardedBy("mLaunchTimeAlarmQueues") // Don't hold the main lock
     private final SparseArray<LaunchTimeAlarmQueue> mLaunchTimeAlarmQueues = new SparseArray<>();
     @GuardedBy("mUsageEventListeners") // Don't hold the main lock when calling out
     private final ArraySet<UsageStatsManagerInternal.UsageEventListener> mUsageEventListeners =
@@ -279,6 +281,38 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    private final Handler.Callback mIoHandlerCallback = (msg) -> {
+        switch (msg.what) {
+            case MSG_UID_STATE_CHANGED: {
+                final int uid = msg.arg1;
+                final int procState = msg.arg2;
+
+                final int newCounter = (procState <= ActivityManager.PROCESS_STATE_TOP) ? 0 : 1;
+                synchronized (mUidToKernelCounter) {
+                    final int oldCounter = mUidToKernelCounter.get(uid, 0);
+                    if (newCounter != oldCounter) {
+                        mUidToKernelCounter.put(uid, newCounter);
+                        try {
+                            FileUtils.stringToFile(KERNEL_COUNTER_FILE, uid + " " + newCounter);
+                        } catch (IOException e) {
+                            Slog.w(TAG, "Failed to update counter set: " + e);
+                        }
+                    }
+                }
+                return true;
+            }
+            case MSG_HANDLE_LAUNCH_TIME_ON_USER_UNLOCK: {
+                final int userId = msg.arg1;
+                Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                        "usageStatsHandleEstimatedLaunchTimesOnUser(" + userId + ")");
+                handleEstimatedLaunchTimesOnUserUnlock(userId);
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                return true;
+            }
+        }
+        return false;
+    };
+
     private final Injector mInjector;
 
     public UsageStatsService(Context context) {
@@ -298,7 +332,9 @@ public class UsageStatsService extends SystemService implements
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
         mPackageManager = getContext().getPackageManager();
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mHandler = new H(BackgroundThread.get().getLooper());
+
+        mHandler = new H(UsageStatsHandlerThread.get().getLooper());
+        mIoHandler = new Handler(IoThread.get().getLooper(), mIoHandlerCallback);
 
         mAppStandby = mInjector.getAppStandbyController(getContext());
         mResponseStatsTracker = new BroadcastResponseStatsTracker(mAppStandby, getContext());
@@ -424,6 +460,9 @@ public class UsageStatsService extends SystemService implements
             }
             mUserUnlockedStates.remove(userId);
             mUserState.put(userId, null); // release the service (mainly for GC)
+        }
+
+        synchronized (mLaunchTimeAlarmQueues) {
             LaunchTimeAlarmQueue alarmQueue = mLaunchTimeAlarmQueues.get(userId);
             if (alarmQueue != null) {
                 alarmQueue.removeAllAlarms();
@@ -476,11 +515,13 @@ public class UsageStatsService extends SystemService implements
             }
             reportEvent(unlockEvent, userId);
 
-            mHandler.obtainMessage(MSG_HANDLE_LAUNCH_TIME_ON_USER_UNLOCK, userId, 0).sendToTarget();
+            mIoHandler.obtainMessage(MSG_HANDLE_LAUNCH_TIME_ON_USER_UNLOCK,
+                    userId, 0).sendToTarget();
 
             // Remove all the stats stored in memory and in system DE.
             mReportedEvents.remove(userId);
             deleteRecursively(new File(Environment.getDataSystemDeDirectory(userId), "usagestats"));
+
             // Force a flush to disk for the current user to ensure important events are persisted.
             // Note: there is a very very small chance that the system crashes between deleting
             // the stats above from DE and persisting them to CE here in which case we will lose
@@ -599,7 +640,7 @@ public class UsageStatsService extends SystemService implements
     private final IUidObserver mUidObserver = new UidObserver() {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
-            mHandler.obtainMessage(MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
+            mIoHandler.obtainMessage(MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
         }
 
         @Override
@@ -671,16 +712,18 @@ public class UsageStatsService extends SystemService implements
                 callingPid, callingUid) == PackageManager.PERMISSION_GRANTED);
     }
 
-    private static void deleteRecursively(File f) {
-        File[] files = f.listFiles();
-        if (files != null) {
-            for (File subFile : files) {
-                deleteRecursively(subFile);
+    private static void deleteRecursively(final File path) {
+        if (path.isDirectory()) {
+            final File[] files = path.listFiles();
+            if (files != null) {
+                for (File subFile : files) {
+                    deleteRecursively(subFile);
+                }
             }
         }
 
-        if (f.exists() && !f.delete()) {
-            Slog.e(TAG, "Failed to delete " + f);
+        if (path.exists() && !path.delete()) {
+            Slog.e(TAG, "Failed to delete " + path);
         }
     }
 
@@ -1241,6 +1284,9 @@ public class UsageStatsService extends SystemService implements
             Slog.i(TAG, "Removing user " + userId + " and all data.");
             mUserState.remove(userId);
             mAppTimeLimit.onUserRemoved(userId);
+        }
+
+        synchronized (mLaunchTimeAlarmQueues) {
             final LaunchTimeAlarmQueue alarmQueue = mLaunchTimeAlarmQueues.get(userId);
             if (alarmQueue != null) {
                 alarmQueue.removeAllAlarms();
@@ -1271,6 +1317,13 @@ public class UsageStatsService extends SystemService implements
             }
         }
 
+        synchronized (mLaunchTimeAlarmQueues) {
+            final LaunchTimeAlarmQueue alarmQueue = mLaunchTimeAlarmQueues.get(userId);
+            if (alarmQueue != null) {
+                alarmQueue.removeAlarmForKey(packageName);
+            }
+        }
+
         final int tokenRemoved;
         synchronized (mLock) {
             final long timeRemoved = System.currentTimeMillis();
@@ -1279,10 +1332,7 @@ public class UsageStatsService extends SystemService implements
                 // when the user service is initialized and package manager is queried.
                 return;
             }
-            final LaunchTimeAlarmQueue alarmQueue = mLaunchTimeAlarmQueues.get(userId);
-            if (alarmQueue != null) {
-                alarmQueue.removeAlarmForKey(packageName);
-            }
+
             final UserUsageStatsService userService = mUserState.get(userId);
             if (userService == null) {
                 return;
@@ -1492,60 +1542,63 @@ public class UsageStatsService extends SystemService implements
             estimatedLaunchTime = calculateEstimatedPackageLaunchTime(userId, packageName);
             mAppStandby.setEstimatedLaunchTime(packageName, userId, estimatedLaunchTime);
 
-            synchronized (mLock) {
-                LaunchTimeAlarmQueue alarmQueue = mLaunchTimeAlarmQueues.get(userId);
-                if (alarmQueue == null) {
-                    alarmQueue = new LaunchTimeAlarmQueue(
-                            userId, getContext(), BackgroundThread.get().getLooper());
-                    mLaunchTimeAlarmQueues.put(userId, alarmQueue);
-                }
-                alarmQueue.addAlarm(packageName,
-                        SystemClock.elapsedRealtime() + (estimatedLaunchTime - now));
-            }
+            getOrCreateLaunchTimeAlarmQueue(userId).addAlarm(packageName,
+                    SystemClock.elapsedRealtime() + (estimatedLaunchTime - now));
         }
         return estimatedLaunchTime;
     }
 
+    private LaunchTimeAlarmQueue getOrCreateLaunchTimeAlarmQueue(int userId) {
+        synchronized (mLaunchTimeAlarmQueues) {
+            LaunchTimeAlarmQueue alarmQueue = mLaunchTimeAlarmQueues.get(userId);
+            if (alarmQueue == null) {
+                alarmQueue = new LaunchTimeAlarmQueue(
+                    userId, getContext(), BackgroundThread.get().getLooper());
+                mLaunchTimeAlarmQueues.put(userId, alarmQueue);
+            }
+
+            return alarmQueue;
+        }
+    }
+
     @CurrentTimeMillisLong
     private long calculateEstimatedPackageLaunchTime(int userId, String packageName) {
-        synchronized (mLock) {
-            final long endTime = System.currentTimeMillis();
-            final long beginTime = endTime - ONE_WEEK;
-            final long unknownTime = endTime + UNKNOWN_LAUNCH_TIME_DELAY_MS;
-            final UsageEvents events = queryEarliestEventsForPackage(
-                    userId, beginTime, endTime, packageName, Event.ACTIVITY_RESUMED);
-            if (events == null) {
-                if (DEBUG) {
-                    Slog.d(TAG, "No events for " + userId + ":" + packageName);
-                }
-                return unknownTime;
+        final long endTime = System.currentTimeMillis();
+        final long beginTime = endTime - ONE_WEEK;
+        final long unknownTime = endTime + UNKNOWN_LAUNCH_TIME_DELAY_MS;
+        final UsageEvents events = queryEarliestEventsForPackage(
+                userId, beginTime, endTime, packageName, Event.ACTIVITY_RESUMED);
+        if (events == null) {
+            if (DEBUG) {
+                Slog.d(TAG, "No events for " + userId + ":" + packageName);
             }
-            final UsageEvents.Event event = new UsageEvents.Event();
-            final boolean hasMoreThan24HoursOfHistory;
-            if (events.getNextEvent(event)) {
-                hasMoreThan24HoursOfHistory = endTime - event.getTimeStamp() > ONE_DAY;
-                if (DEBUG) {
-                    Slog.d(TAG, userId + ":" + packageName + " history > 24 hours="
-                            + hasMoreThan24HoursOfHistory);
-                }
-            } else {
-                if (DEBUG) {
-                    Slog.d(TAG, userId + ":" + packageName + " has no events");
-                }
-                return unknownTime;
-            }
-            do {
-                if (event.getEventType() == Event.ACTIVITY_RESUMED) {
-                    final long timestamp = event.getTimeStamp();
-                    final long nextLaunch =
-                            calculateNextLaunchTime(hasMoreThan24HoursOfHistory, timestamp);
-                    if (nextLaunch > endTime) {
-                        return nextLaunch;
-                    }
-                }
-            } while (events.getNextEvent(event));
             return unknownTime;
         }
+        final UsageEvents.Event event = new UsageEvents.Event();
+        final boolean hasMoreThan24HoursOfHistory;
+        if (events.getNextEvent(event)) {
+            hasMoreThan24HoursOfHistory = endTime - event.getTimeStamp() > ONE_DAY;
+            if (DEBUG) {
+                Slog.d(TAG, userId + ":" + packageName + " history > 24 hours="
+                        + hasMoreThan24HoursOfHistory);
+            }
+        } else {
+            if (DEBUG) {
+                Slog.d(TAG, userId + ":" + packageName + " has no events");
+            }
+            return unknownTime;
+        }
+        do {
+            if (event.getEventType() == Event.ACTIVITY_RESUMED) {
+                final long timestamp = event.getTimeStamp();
+                final long nextLaunch =
+                        calculateNextLaunchTime(hasMoreThan24HoursOfHistory, timestamp);
+                if (nextLaunch > endTime) {
+                    return nextLaunch;
+                }
+            }
+        } while (events.getNextEvent(event));
+        return unknownTime;
     }
 
     @CurrentTimeMillisLong
@@ -1566,61 +1619,54 @@ public class UsageStatsService extends SystemService implements
     }
 
     private void handleEstimatedLaunchTimesOnUserUnlock(int userId) {
-        synchronized (mLock) {
-            final long nowElapsed = SystemClock.elapsedRealtime();
-            final long now = System.currentTimeMillis();
-            final long beginTime = now - ONE_WEEK;
-            final UsageEvents events = queryEarliestAppEvents(
-                    userId, beginTime, now, Event.ACTIVITY_RESUMED);
-            if (events == null) {
-                return;
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        final long now = System.currentTimeMillis();
+        final long beginTime = now - ONE_WEEK;
+        final UsageEvents events = queryEarliestAppEvents(
+                userId, beginTime, now, Event.ACTIVITY_RESUMED);
+        if (events == null) {
+            return;
+        }
+        final ArrayMap<String, Boolean> hasMoreThan24HoursOfHistory = new ArrayMap<>();
+        final UsageEvents.Event event = new UsageEvents.Event();
+        boolean changedTimes = false;
+        final LaunchTimeAlarmQueue alarmQueue = getOrCreateLaunchTimeAlarmQueue(userId);
+        for (boolean unprocessedEvent = events.getNextEvent(event); unprocessedEvent;
+                unprocessedEvent = events.getNextEvent(event)) {
+            final String packageName = event.getPackageName();
+            if (!hasMoreThan24HoursOfHistory.containsKey(packageName)) {
+                boolean hasHistory = now - event.getTimeStamp() > ONE_DAY;
+                if (DEBUG) {
+                    Slog.d(TAG,
+                            userId + ":" + packageName + " history > 24 hours=" + hasHistory);
+                }
+                hasMoreThan24HoursOfHistory.put(packageName, hasHistory);
             }
-            final ArrayMap<String, Boolean> hasMoreThan24HoursOfHistory = new ArrayMap<>();
-            final UsageEvents.Event event = new UsageEvents.Event();
-            LaunchTimeAlarmQueue alarmQueue = mLaunchTimeAlarmQueues.get(userId);
-            if (alarmQueue == null) {
-                alarmQueue = new LaunchTimeAlarmQueue(
-                        userId, getContext(), BackgroundThread.get().getLooper());
-                mLaunchTimeAlarmQueues.put(userId, alarmQueue);
-            }
-            boolean changedTimes = false;
-            for (boolean unprocessedEvent = events.getNextEvent(event); unprocessedEvent;
-                    unprocessedEvent = events.getNextEvent(event)) {
-                final String packageName = event.getPackageName();
-                if (!hasMoreThan24HoursOfHistory.containsKey(packageName)) {
-                    boolean hasHistory = now - event.getTimeStamp() > ONE_DAY;
+            if (event.getEventType() == Event.ACTIVITY_RESUMED) {
+                long estimatedLaunchTime =
+                        mAppStandby.getEstimatedLaunchTime(packageName, userId);
+                if (estimatedLaunchTime < now || estimatedLaunchTime == Long.MAX_VALUE) {
+                    //noinspection ConstantConditions
+                    estimatedLaunchTime = calculateNextLaunchTime(
+                            hasMoreThan24HoursOfHistory.get(packageName), event.getTimeStamp());
+                    mAppStandby.setEstimatedLaunchTime(
+                            packageName, userId, estimatedLaunchTime);
+                }
+                if (estimatedLaunchTime < now + ONE_WEEK) {
+                    // Before a user is unlocked, we don't know when the app will be launched,
+                    // so we give callers the UNKNOWN time. Now that we have a better estimate,
+                    // we should notify them of the change.
                     if (DEBUG) {
-                        Slog.d(TAG,
-                                userId + ":" + packageName + " history > 24 hours=" + hasHistory);
+                        Slog.d(TAG, "User " + userId + " unlock resulting in"
+                                + " estimated launch time change for " + packageName);
                     }
-                    hasMoreThan24HoursOfHistory.put(packageName, hasHistory);
+                    changedTimes |= stageChangedEstimatedLaunchTime(userId, packageName);
                 }
-                if (event.getEventType() == Event.ACTIVITY_RESUMED) {
-                    long estimatedLaunchTime =
-                            mAppStandby.getEstimatedLaunchTime(packageName, userId);
-                    if (estimatedLaunchTime < now || estimatedLaunchTime == Long.MAX_VALUE) {
-                        //noinspection ConstantConditions
-                        estimatedLaunchTime = calculateNextLaunchTime(
-                                hasMoreThan24HoursOfHistory.get(packageName), event.getTimeStamp());
-                        mAppStandby.setEstimatedLaunchTime(
-                                packageName, userId, estimatedLaunchTime);
-                    }
-                    if (estimatedLaunchTime < now + ONE_WEEK) {
-                        // Before a user is unlocked, we don't know when the app will be launched,
-                        // so we give callers the UNKNOWN time. Now that we have a better estimate,
-                        // we should notify them of the change.
-                        if (DEBUG) {
-                            Slog.d(TAG, "User " + userId + " unlock resulting in"
-                                    + " estimated launch time change for " + packageName);
-                        }
-                        changedTimes |= stageChangedEstimatedLaunchTime(userId, packageName);
-                    }
-                    alarmQueue.addAlarm(packageName, nowElapsed + (estimatedLaunchTime - now));
-                }
+                alarmQueue.addAlarm(packageName, nowElapsed + (estimatedLaunchTime - now));
             }
-            if (changedTimes) {
-                mHandler.sendEmptyMessage(MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED);
-            }
+        }
+        if (changedTimes) {
+            mHandler.sendEmptyMessage(MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED);
         }
     }
 
@@ -1989,37 +2035,11 @@ public class UsageStatsService extends SystemService implements
                 case MSG_PACKAGE_REMOVED:
                     onPackageRemoved(msg.arg1, (String) msg.obj);
                     break;
-                case MSG_UID_STATE_CHANGED: {
-                    final int uid = msg.arg1;
-                    final int procState = msg.arg2;
-
-                    final int newCounter = (procState <= ActivityManager.PROCESS_STATE_TOP) ? 0 : 1;
-                    synchronized (mUidToKernelCounter) {
-                        final int oldCounter = mUidToKernelCounter.get(uid, 0);
-                        if (newCounter != oldCounter) {
-                            mUidToKernelCounter.put(uid, newCounter);
-                            try {
-                                FileUtils.stringToFile(KERNEL_COUNTER_FILE, uid + " " + newCounter);
-                            } catch (IOException e) {
-                                Slog.w(TAG, "Failed to update counter set: " + e);
-                            }
-                        }
-                    }
-                    break;
-                }
                 case MSG_ON_START:
                     synchronized (mLock) {
                         loadGlobalComponentUsageLocked();
                     }
                     break;
-                case MSG_HANDLE_LAUNCH_TIME_ON_USER_UNLOCK: {
-                    final int userId = msg.arg1;
-                    Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
-                            "usageStatsHandleEstimatedLaunchTimesOnUser(" + userId + ")");
-                    handleEstimatedLaunchTimesOnUserUnlock(userId);
-                    Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-                }
-                break;
                 case MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED: {
                     removeMessages(MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED);
 
