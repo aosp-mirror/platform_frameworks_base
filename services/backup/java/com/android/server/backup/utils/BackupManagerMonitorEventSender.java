@@ -222,4 +222,21 @@ public class BackupManagerMonitorEventSender {
         extras.putBoolean(key, value);
         return extras;
     }
+
+    /**
+     * Adds given key-value pair in the bundle and returns the bundle. If bundle was null it will
+     * be created.
+     *
+     * @param extras - bundle where to add key-value to, if null a new bundle will be created.
+     * @param key - key.
+     * @param value - value.
+     * @return extras if it was not null and new bundle otherwise.
+     */
+    public static Bundle putMonitoringExtra(Bundle extras, String key, int value) {
+        if (extras == null) {
+            extras = new Bundle();
+        }
+        extras.putInt(key, value);
+        return extras;
+    }
 }
