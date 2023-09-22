@@ -3231,7 +3231,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         + "mPendingLock=" + mPendingLock + "."
                         + "One of these being false means we re-locked the device during unlock. "
                         + "Do not proceed to finish keyguard exit and unlock.");
+                doKeyguardLocked(null);
                 finishSurfaceBehindRemoteAnimation(true /* showKeyguard */);
+                // Ensure WM is notified that we made a decision to show
+                setShowingLocked(true /* showing */, true /* force */);
+
                 return;
             }
 
