@@ -24,7 +24,6 @@
 #include <com_android_graphics_libgui_flags.h>
 #include <cutils/atomic.h>
 #include <gui/BufferQueue.h>
-#include <gui/Flags.h>
 #include <gui/Surface.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
@@ -53,6 +52,7 @@ struct fields_t {
     jfieldID  producer;
     jfieldID  frameAvailableListener;
     jmethodID postEvent;
+    jmethodID postOnSetFrameRateEvent;
 };
 static fields_t fields;
 
@@ -196,8 +196,20 @@ class JNISurfaceTextureContextListener : public JNISurfaceTextureContextCommon,
 public:
     JNISurfaceTextureContextListener(JNIEnv* env, jobject weakThiz, jclass clazz)
           : JNISurfaceTextureContextCommon(env, weakThiz, clazz) {}
+
     void onFrameAvailable(const BufferItem& item) override {
         JNISurfaceTextureContextCommon::onFrameAvailable(item);
+    }
+
+    void onSetFrameRate(float frameRate, int8_t compatibility,
+                        int8_t changeFrameRateStrategy) override {
+        JNIEnv* env = getJNIEnv();
+        if (env != NULL) {
+            env->CallStaticVoidMethod(mClazz, fields.postOnSetFrameRateEvent, mWeakThiz, frameRate,
+                                      compatibility, changeFrameRateStrategy);
+        } else {
+            ALOGW("onSetFrameRate event will not posted");
+        }
     }
 };
 
@@ -234,6 +246,13 @@ static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
             "(Ljava/lang/ref/WeakReference;)V");
     if (fields.postEvent == NULL) {
         ALOGE("can't find android/graphics/SurfaceTexture.postEventFromNative");
+    }
+
+    fields.postOnSetFrameRateEvent =
+            env->GetStaticMethodID(clazz, "postOnSetFrameRateEventFromNative",
+                                   "(Ljava/lang/ref/WeakReference;FII)V");
+    if (fields.postOnSetFrameRateEvent == NULL) {
+        ALOGE("can't find android/graphics/SurfaceTexture.postOnSetFrameRateEventFromNative");
     }
 }
 

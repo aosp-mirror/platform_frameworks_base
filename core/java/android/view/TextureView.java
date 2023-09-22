@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -30,8 +31,10 @@ import android.graphics.SurfaceTexture;
 import android.graphics.TextureLayer;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.flags.Flags;
 
 /**
  * <p>A TextureView can be used to display a content stream, such as that
@@ -193,6 +196,9 @@ public class TextureView extends View {
 
     private Canvas mCanvas;
     private int mSaveCount;
+
+    @FloatRange(from = 0.0) float mFrameRate;
+    @Surface.FrameRateCompatibility int mFrameRateCompatibility;
 
     private final Object[] mNativeWindowLock = new Object[0];
     // Set by native code, do not write!
@@ -465,6 +471,16 @@ public class TextureView extends View {
             mLayer.setSurfaceTexture(mSurface);
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
             mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
+            if (Flags.toolkitSetFrameRate()) {
+                mSurface.setOnSetFrameRateListener(
+                        (surfaceTexture, frameRate, compatibility, strategy) -> {
+                            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                                Trace.instant(Trace.TRACE_TAG_VIEW, "setFrameRate: " + frameRate);
+                            }
+                            mFrameRate = frameRate;
+                            mFrameRateCompatibility = compatibility;
+                        }, mAttachInfo.mHandler);
+            }
 
             if (mListener != null && createNewSurface) {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
