@@ -918,10 +918,10 @@ const SkM44& CanvasContext::getPixelSnapMatrix() const {
 }
 
 void CanvasContext::prepareAndDraw(RenderNode* node) {
-    ATRACE_CALL();
+    int64_t vsyncId = mRenderThread.timeLord().lastVsyncId();
+    ATRACE_FORMAT("%s %" PRId64, __func__, vsyncId);
 
     nsecs_t vsync = mRenderThread.timeLord().computeFrameTimeNanos();
-    int64_t vsyncId = mRenderThread.timeLord().lastVsyncId();
     int64_t frameDeadline = mRenderThread.timeLord().lastFrameDeadline();
     int64_t frameInterval = mRenderThread.timeLord().frameIntervalNanos();
     int64_t frameInfo[UI_THREAD_FRAME_INFO_SIZE];
