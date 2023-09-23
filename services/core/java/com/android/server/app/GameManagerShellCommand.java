@@ -241,8 +241,10 @@ public class GameManagerShellCommand extends ShellCommand {
                 case "--fps":
                     if (fpsStr == null) {
                         fpsStr = getNextArgRequired();
-                        if (fpsStr != null && GameManagerService.getFpsInt(fpsStr) == -1) {
-                            pw.println("Invalid frame rate '" + fpsStr + "'");
+                        try {
+                            Integer.parseInt(fpsStr);
+                        } catch (NumberFormatException e) {
+                            pw.println("Invalid frame rate: '" + fpsStr + "'");
                             return -1;
                         }
                     } else {
@@ -375,8 +377,8 @@ public class GameManagerShellCommand extends ShellCommand {
         pw.println("      --downscale [0.3|0.35|0.4|0.45|0.5|0.55|0.6|0.65");
         pw.println("                  |0.7|0.75|0.8|0.85|0.9|disable]: Set app to run at the");
         pw.println("                                                   specified scaling ratio.");
-        pw.println("      --fps [30|45|60|90|120|disable]: Set app to run at the specified fps,");
-        pw.println("                                       if supported.");
+        pw.println("      --fps: Integer value to set app to run at the specified fps,");
+        pw.println("             if supported. 0 to disable.");
         pw.println("  reset [--mode [2|3|performance|battery] --user <USER_ID>] <PACKAGE_NAME>");
         pw.println("      Resets the game mode of the app to device configuration.");
         pw.println("      This should only be used to reset any override to non custom game mode");

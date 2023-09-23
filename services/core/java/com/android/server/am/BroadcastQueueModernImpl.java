@@ -59,7 +59,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.BundleMerger;
 import android.os.Handler;
@@ -1075,16 +1074,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 queue.lastProcessState = app.mState.getCurProcState();
                 if (receiver instanceof BroadcastFilter) {
                     notifyScheduleRegisteredReceiver(app, r, (BroadcastFilter) receiver);
-                    // STOPSHIP(b/298884211):  Remove this logging
-                    if (Intent.ACTION_BATTERY_CHANGED.equals(receiverIntent.getAction())) {
-                        int level = receiverIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-                        if (level < 0) {
-                            Slog.wtf(TAG, "Dispatching unexpected broadcast: " + receiverIntent
-                                    + " to " + receiver
-                                    + "; callingUid: " + r.callingUid
-                                    + ", callingPid: " + r.callingPid);
-                        }
-                    }
                     thread.scheduleRegisteredReceiver(
                         ((BroadcastFilter) receiver).receiverList.receiver,
                         receiverIntent, r.resultCode, r.resultData, r.resultExtras,

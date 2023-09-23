@@ -486,6 +486,13 @@ public class UserBackupManagerService {
             File baseStateDir,
             File dataDir,
             TransportManager transportManager) {
+        // check if we are past the retention period for BMM Events,
+        // if so delete expired events and do not print them to dumpsys
+        BackupManagerMonitorDumpsysUtils backupManagerMonitorDumpsysUtils =
+                new BackupManagerMonitorDumpsysUtils();
+        if (backupManagerMonitorDumpsysUtils.deleteExpiredBMMEvents() && DEBUG){
+            Slog.d(TAG, "BMM Events recorded for dumpsys have expired");
+        }
         return new UserBackupManagerService(
                 userId,
                 context,
@@ -653,6 +660,13 @@ public class UserBackupManagerService {
         // Now that we know about valid backup participants, parse any leftover journal files into
         // the pending backup set
         mBackupHandler.postDelayed(this::parseLeftoverJournals, INITIALIZATION_DELAY_MILLIS);
+
+        // check if we are past the retention period for BMM Events,
+        // if so delete expired events and do not print them to dumpsys
+        BackupManagerMonitorDumpsysUtils backupManagerMonitorDumpsysUtils =
+                new BackupManagerMonitorDumpsysUtils();
+        mBackupHandler.postDelayed(backupManagerMonitorDumpsysUtils::deleteExpiredBMMEvents,
+                INITIALIZATION_DELAY_MILLIS);
 
         mBackupPreferences = new UserBackupPreferences(mContext, mBaseStateDir);
 
@@ -4177,7 +4191,19 @@ public class UserBackupManagerService {
     private void dumpBMMEvents(PrintWriter pw) {
         BackupManagerMonitorDumpsysUtils bm =
                 new BackupManagerMonitorDumpsysUtils();
+        if (bm.deleteExpiredBMMEvents()) {
+            pw.println("BACKUP MANAGER MONITOR EVENTS HAVE EXPIRED");
+            return;
+        }
         File events = bm.getBMMEventsFile();
+        if (events.length() == 0){
+            // We have not recorded BMMEvents yet.
+            pw.println("NO BACKUP MANAGER MONITOR EVENTS");
+            return;
+        } else if (bm.isFileLargerThanSizeLimit(events)){
+            pw.println("BACKUP MANAGER MONITOR EVENTS FILE OVER SIZE LIMIT - "
+                    + "future events will not be recorded");
+        }
         pw.println("START OF BACKUP MANAGER MONITOR EVENTS");
         try (BufferedReader reader = new BufferedReader(new FileReader(events))) {
             String line;

@@ -3629,6 +3629,7 @@
   <java-symbol type="layout" name="autofill_dataset_picker_fullscreen"/>
   <java-symbol type="layout" name="autofill_dataset_picker_header_footer"/>
   <java-symbol type="layout" name="autofill_fill_dialog"/>
+  <java-symbol type="id" name="autofill_save_icon"/>
   <java-symbol type="id" name="autofill" />
   <java-symbol type="id" name="autofill_dataset_footer"/>
   <java-symbol type="id" name="autofill_dataset_header"/>
@@ -3685,6 +3686,10 @@
   <java-symbol type="dimen" name="autofill_save_custom_subtitle_max_height"/>
   <java-symbol type="integer" name="autofill_max_visible_datasets" />
   <java-symbol type="dimen" name="autofill_dialog_max_width" />
+  <java-symbol type="dimen" name="autofill_dialog_offset"/>
+  <java-symbol type="dimen" name="autofill_save_outer_margin"/>
+
+  <java-symbol type="bool" name="autofill_dialog_horizontal_space_included"/>
 
   <java-symbol type="style" name="Theme.DeviceDefault.Autofill" />
   <java-symbol type="style" name="Theme.DeviceDefault.Light.Autofill" />
