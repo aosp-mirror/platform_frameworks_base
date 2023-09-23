@@ -111,9 +111,11 @@ package com.android.server.display.config {
     method public com.android.server.display.config.RefreshRateConfigs getRefreshRate();
     method @NonNull public final java.math.BigDecimal getScreenBrightnessDefault();
     method @NonNull public final com.android.server.display.config.NitsMap getScreenBrightnessMap();
+    method public final java.math.BigInteger getScreenBrightnessRampDecreaseMaxIdleMillis();
     method public final java.math.BigInteger getScreenBrightnessRampDecreaseMaxMillis();
     method public final java.math.BigDecimal getScreenBrightnessRampFastDecrease();
     method public final java.math.BigDecimal getScreenBrightnessRampFastIncrease();
+    method public final java.math.BigInteger getScreenBrightnessRampIncreaseMaxIdleMillis();
     method public final java.math.BigInteger getScreenBrightnessRampIncreaseMaxMillis();
     method public final java.math.BigDecimal getScreenBrightnessRampSlowDecrease();
     method public final java.math.BigDecimal getScreenBrightnessRampSlowDecreaseIdle();
@@ -141,9 +143,11 @@ package com.android.server.display.config {
     method public void setRefreshRate(com.android.server.display.config.RefreshRateConfigs);
     method public final void setScreenBrightnessDefault(@NonNull java.math.BigDecimal);
     method public final void setScreenBrightnessMap(@NonNull com.android.server.display.config.NitsMap);
+    method public final void setScreenBrightnessRampDecreaseMaxIdleMillis(java.math.BigInteger);
     method public final void setScreenBrightnessRampDecreaseMaxMillis(java.math.BigInteger);
     method public final void setScreenBrightnessRampFastDecrease(java.math.BigDecimal);
     method public final void setScreenBrightnessRampFastIncrease(java.math.BigDecimal);
+    method public final void setScreenBrightnessRampIncreaseMaxIdleMillis(java.math.BigInteger);
     method public final void setScreenBrightnessRampIncreaseMaxMillis(java.math.BigInteger);
     method public final void setScreenBrightnessRampSlowDecrease(java.math.BigDecimal);
     method public final void setScreenBrightnessRampSlowDecreaseIdle(java.math.BigDecimal);
