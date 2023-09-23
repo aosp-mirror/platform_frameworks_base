@@ -2047,12 +2047,6 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
       "at": "com\/android\/server\/wm\/TransitionController.java"
     },
-    "-262984451": {
-      "message": "Relaunch failed %s",
-      "level": "INFO",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-251259736": {
       "message": "No longer freezing: %s",
       "level": "VERBOSE",

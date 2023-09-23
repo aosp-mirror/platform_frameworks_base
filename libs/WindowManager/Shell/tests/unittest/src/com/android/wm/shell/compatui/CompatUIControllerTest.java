@@ -61,6 +61,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import dagger.Lazy;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -523,13 +524,175 @@ public class CompatUIControllerTest extends ShellTestCase {
                 .createLayout(anyBoolean());
     }
 
+    @Test
+    public void testUpdateActiveTaskInfo_newTask_visibleAndFocused_updated() {
+        // Simulate user aspect ratio button being shown for previous task
+        mController.setHasShownUserAspectRatioSettingsButton(true);
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Create new task
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ true);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo);
+
+        // Check topActivityTaskId is updated to the taskId of the new task and
+        // hasShownUserAspectRatioSettingsButton has been reset to false
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertFalse(mController.hasShownUserAspectRatioSettingsButton());
+    }
+
+    @Test
+    public void testUpdateActiveTaskInfo_newTask_notVisibleOrFocused_notUpdated() {
+        // Create new task
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ true);
+
+        // Simulate task being shown
+        mController.updateActiveTaskInfo(taskInfo);
+
+        // Check topActivityTaskId is updated to the taskId of the new task and
+        // hasShownUserAspectRatioSettingsButton has been reset to false
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertFalse(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Simulate user aspect ratio button being shown
+        mController.setHasShownUserAspectRatioSettingsButton(true);
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        final int newTaskId = TASK_ID + 1;
+
+        // Create visible but NOT focused task
+        final TaskInfo taskInfo1 = createTaskInfo(DISPLAY_ID, newTaskId,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ false);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo1);
+
+        // Check topActivityTaskId is NOT updated and hasShownUserAspectRatioSettingsButton
+        // remains true
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Create focused but NOT visible task
+        final TaskInfo taskInfo2 = createTaskInfo(DISPLAY_ID, newTaskId,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ false,
+                /* isFocused */ true);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo2);
+
+        // Check topActivityTaskId is NOT updated and hasShownUserAspectRatioSettingsButton
+        // remains true
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Create NOT focused but NOT visible task
+        final TaskInfo taskInfo3 = createTaskInfo(DISPLAY_ID, newTaskId,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ false,
+                /* isFocused */ false);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo3);
+
+        // Check topActivityTaskId is NOT updated and hasShownUserAspectRatioSettingsButton
+        // remains true
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+    }
+
+    @Test
+    public void testUpdateActiveTaskInfo_sameTask_notUpdated() {
+        // Create new task
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ true);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo);
+
+        // Check topActivityTaskId is updated to the taskId of the new task and
+        // hasShownUserAspectRatioSettingsButton has been reset to false
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertFalse(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Simulate user aspect ratio button being shown
+        mController.setHasShownUserAspectRatioSettingsButton(true);
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Simulate same task being re-shown
+        mController.updateActiveTaskInfo(taskInfo);
+
+        // Check topActivityTaskId is NOT updated and hasShownUserAspectRatioSettingsButton
+        // remains true
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+    }
+
+    @Test
+    public void testUpdateActiveTaskInfo_transparentTask_notUpdated() {
+        // Create new task
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ true);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo);
+
+        // Check topActivityTaskId is updated to the taskId of the new task and
+        // hasShownUserAspectRatioSettingsButton has been reset to false
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertFalse(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Simulate user aspect ratio button being shown
+        mController.setHasShownUserAspectRatioSettingsButton(true);
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        final int newTaskId = TASK_ID + 1;
+
+        // Create transparent task
+        final TaskInfo taskInfo1 = createTaskInfo(DISPLAY_ID, newTaskId,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ true, /* isTopActivityTransparent */ true);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo1);
+
+        // Check topActivityTaskId is NOT updated and hasShownUserAspectRatioSettingsButton
+        // remains true
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+    }
+
     private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,
             @CameraCompatControlState int cameraCompatControlState) {
+        return createTaskInfo(displayId, taskId, hasSizeCompat, cameraCompatControlState,
+                /* isVisible */ false, /* isFocused */ false,
+                /* isTopActivityTransparent */ false);
+    }
+
+    private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,
+            @CameraCompatControlState int cameraCompatControlState, boolean isVisible,
+            boolean isFocused) {
+        return createTaskInfo(displayId, taskId, hasSizeCompat, cameraCompatControlState,
+                isVisible, isFocused, /* isTopActivityTransparent */ false);
+    }
+
+    private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,
+            @CameraCompatControlState int cameraCompatControlState, boolean isVisible,
+            boolean isFocused, boolean isTopActivityTransparent) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
         taskInfo.displayId = displayId;
         taskInfo.topActivityInSizeCompat = hasSizeCompat;
         taskInfo.cameraCompatControlState = cameraCompatControlState;
+        taskInfo.isVisible = isVisible;
+        taskInfo.isFocused = isFocused;
+        taskInfo.isTopActivityTransparent = isTopActivityTransparent;
         return taskInfo;
     }
 }
