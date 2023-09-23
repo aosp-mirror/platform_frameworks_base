@@ -51,6 +51,21 @@ public class SettingsStateTest extends AndroidTestCase {
     private static final String SYSTEM_PACKAGE = "android";
     private static final String SETTING_NAME = "test_setting";
 
+    private static final String FLAG_NAME_1 = "namespace123/flag456";
+    private static final String FLAG_NAME_1_STAGED = "staged/namespace123*flag456";
+    private static final String FLAG_NAME_2 = "not_staged/flag101";
+
+    private static final String INVALID_STAGED_FLAG_1 = "stagednamespace*flagName";
+    private static final String INVALID_STAGED_FLAG_2 = "staged/";
+    private static final String INVALID_STAGED_FLAG_3 = "staged/namespace*";
+    private static final String INVALID_STAGED_FLAG_4 = "staged/*flagName";
+
+    private static final String VALID_STAGED_FLAG_1 = "staged/namespace*flagName";
+    private static final String VALID_STAGED_FLAG_1_TRANSFORMED = "namespace/flagName";
+
+    private static final String VALUE1 = "5";
+    private static final String VALUE2 = "6";
+
     private final Object mLock = new Object();
 
     private File mSettingsFile;
@@ -452,6 +467,70 @@ public class SettingsStateTest extends AndroidTestCase {
             } catch (IllegalArgumentException ex) {
                 assertTrue(ex.getMessage().contains("The max length allowed for the string is "));
             }
+        }
+    }
+
+    public void testApplyStagedConfigValues() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            settingsState.insertSettingLocked(
+                    FLAG_NAME_1_STAGED, VALUE1, null, false, TEST_PACKAGE);
+            settingsState.insertSettingLocked(FLAG_NAME_2, VALUE2, null, false, TEST_PACKAGE);
+            settingsState.persistSyncLocked();
+
+            assertEquals(VALUE1, settingsState.getSettingLocked(FLAG_NAME_1_STAGED).getValue());
+            assertEquals(VALUE2, settingsState.getSettingLocked(FLAG_NAME_2).getValue());
+        }
+
+        settingsState = new SettingsState(getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            assertEquals(VALUE1, settingsState.getSettingLocked(FLAG_NAME_1).getValue());
+            assertEquals(VALUE2, settingsState.getSettingLocked(FLAG_NAME_2).getValue());
+
+            assertEquals(null, settingsState.getSettingLocked(FLAG_NAME_1_STAGED).getValue());
+        }
+    }
+
+    public void testStagingTransformation() {
+        assertEquals(INVALID_STAGED_FLAG_1,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_1));
+        assertEquals(INVALID_STAGED_FLAG_2,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_2));
+        assertEquals(INVALID_STAGED_FLAG_3,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_3));
+        assertEquals(INVALID_STAGED_FLAG_4,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_4));
+
+        assertEquals(VALID_STAGED_FLAG_1_TRANSFORMED,
+                SettingsState.createRealFlagName(VALID_STAGED_FLAG_1));
+    }
+
+    public void testInvalidStagedFlagsUnaffectedByReboot() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            settingsState.insertSettingLocked(INVALID_STAGED_FLAG_1,
+                    VALUE2, null, false, TEST_PACKAGE);
+            settingsState.persistSyncLocked();
+            assertEquals(VALUE2, settingsState.getSettingLocked(INVALID_STAGED_FLAG_1).getValue());
+        }
+
+        settingsState = new SettingsState(getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            assertEquals(VALUE2, settingsState.getSettingLocked(INVALID_STAGED_FLAG_1).getValue());
         }
     }
 }
