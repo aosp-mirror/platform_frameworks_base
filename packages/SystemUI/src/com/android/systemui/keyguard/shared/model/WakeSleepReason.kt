@@ -21,18 +21,37 @@ import android.os.PowerManager
 /** The reason we're waking up or going to sleep, such as pressing the power button. */
 enum class WakeSleepReason(
     val isTouch: Boolean,
+    @PowerManager.WakeReason val powerManagerWakeReason: Int,
 ) {
     /** The physical power button was pressed to wake up or sleep the device. */
-    POWER_BUTTON(isTouch = false),
+    POWER_BUTTON(isTouch = false, PowerManager.WAKE_REASON_POWER_BUTTON),
 
     /** The user has tapped or double tapped to wake the screen. */
-    TAP(isTouch = true),
+    TAP(isTouch = true, PowerManager.WAKE_REASON_TAP),
 
     /** The user performed some sort of gesture to wake the screen. */
-    GESTURE(isTouch = true),
+    GESTURE(isTouch = true, PowerManager.WAKE_REASON_GESTURE),
+
+    /** Waking up because a wake key other than power was pressed. */
+    KEY(isTouch = false, PowerManager.WAKE_REASON_WAKE_KEY),
+
+    /** Waking up because a wake motion was performed */
+    MOTION(isTouch = false, PowerManager.WAKE_REASON_WAKE_MOTION),
+
+    /** Waking due to the lid being opened. */
+    LID(isTouch = false, PowerManager.WAKE_REASON_LID),
+
+    /** Waking the device due to unfolding of a foldable device. */
+    UNFOLD(isTouch = false, PowerManager.WAKE_REASON_UNFOLD_DEVICE),
+
+    /** Waking up due to a user performed lift gesture. */
+    LIFT(isTouch = false, PowerManager.WAKE_REASON_LIFT),
+
+    /** Waking up due to a user interacting with a biometric. */
+    BIOMETRIC(isTouch = false, PowerManager.WAKE_REASON_BIOMETRIC),
 
     /** Something else happened to wake up or sleep the device. */
-    OTHER(isTouch = false);
+    OTHER(isTouch = false, PowerManager.WAKE_REASON_UNKNOWN);
 
     companion object {
         fun fromPowerManagerWakeReason(reason: Int): WakeSleepReason {
@@ -40,6 +59,12 @@ enum class WakeSleepReason(
                 PowerManager.WAKE_REASON_POWER_BUTTON -> POWER_BUTTON
                 PowerManager.WAKE_REASON_TAP -> TAP
                 PowerManager.WAKE_REASON_GESTURE -> GESTURE
+                PowerManager.WAKE_REASON_WAKE_KEY -> KEY
+                PowerManager.WAKE_REASON_WAKE_MOTION -> MOTION
+                PowerManager.WAKE_REASON_LID -> LID
+                PowerManager.WAKE_REASON_UNFOLD_DEVICE -> UNFOLD
+                PowerManager.WAKE_REASON_LIFT -> LIFT
+                PowerManager.WAKE_REASON_BIOMETRIC -> BIOMETRIC
                 else -> OTHER
             }
         }

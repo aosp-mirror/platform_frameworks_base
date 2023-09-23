@@ -30,8 +30,6 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
@@ -99,7 +97,6 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 context,
                 mKeyguardUpdateMonitor,
                 FakeTrustRepository(),
-                FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) },
                 testScope.backgroundScope,
             )
         mAlternateBouncerInteractor =

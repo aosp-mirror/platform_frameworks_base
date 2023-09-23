@@ -29,7 +29,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.biometrics.AuthBiometricFingerprintIconController;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthDialog;

@@ -32,7 +32,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.ComponentActivity
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController

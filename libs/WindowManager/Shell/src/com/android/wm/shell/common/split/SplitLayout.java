@@ -23,6 +23,7 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
+
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE;
 import static com.android.wm.shell.animation.Interpolators.DIM_INTERPOLATOR;
@@ -66,6 +67,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.InteractionJankMonitorUtils;
+import com.android.wm.shell.common.split.SplitScreenConstants.SnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 
 import java.io.PrintWriter;
@@ -115,7 +117,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     @VisibleForTesting DividerSnapAlgorithm mDividerSnapAlgorithm;
     private WindowContainerToken mWinToken1;
     private WindowContainerToken mWinToken2;
-    private int mDividePosition;
+    private int mDividerPosition;
     private boolean mInitialized = false;
     private boolean mFreezeDividerWindow = false;
     private int mOrientation;
@@ -267,7 +269,14 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     int getDividePosition() {
-        return mDividePosition;
+        return mDividerPosition;
+    }
+
+    /**
+     * Finds the {@link SnapPosition} nearest to the current divider position.
+     */
+    public int calculateCurrentSnapPosition() {
+        return mDividerSnapAlgorithm.calculateNearestSnapPosition(mDividerPosition);
     }
 
     /**
@@ -344,16 +353,16 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     private void initDividerPosition(Rect oldBounds) {
-        final float snapRatio = (float) mDividePosition
+        final float snapRatio = (float) mDividerPosition
                 / (float) (isLandscape(oldBounds) ? oldBounds.width() : oldBounds.height());
         // Estimate position by previous ratio.
         final float length =
                 (float) (isLandscape() ? mRootBounds.width() : mRootBounds.height());
         final int estimatePosition = (int) (length * snapRatio);
         // Init divider position by estimated position using current bounds snap algorithm.
-        mDividePosition = mDividerSnapAlgorithm.calculateNonDismissingSnapTarget(
+        mDividerPosition = mDividerSnapAlgorithm.calculateNonDismissingSnapTarget(
                 estimatePosition).position;
-        updateBounds(mDividePosition);
+        updateBounds(mDividerPosition);
     }
 
     private void updateBounds(int position) {
@@ -467,27 +476,29 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     void setDividePosition(int position, boolean applyLayoutChange) {
-        mDividePosition = position;
-        updateBounds(mDividePosition);
+        mDividerPosition = position;
+        updateBounds(mDividerPosition);
         if (applyLayoutChange) {
             mSplitLayoutHandler.onLayoutSizeChanged(this);
         }
     }
 
     /** Updates divide position and split bounds base on the ratio within root bounds. */
-    public void setDivideRatio(float ratio) {
-        final int position = isLandscape()
-                ? mRootBounds.left + (int) (mRootBounds.width() * ratio)
-                : mRootBounds.top + (int) (mRootBounds.height() * ratio);
-        final DividerSnapAlgorithm.SnapTarget snapTarget =
-                mDividerSnapAlgorithm.calculateNonDismissingSnapTarget(position);
+    public void setDivideRatio(@SnapPosition int snapPosition) {
+        final DividerSnapAlgorithm.SnapTarget snapTarget = mDividerSnapAlgorithm.findSnapTarget(
+                snapPosition);
+
+        if (snapTarget == null) {
+            throw new IllegalArgumentException("No SnapTarget for position " + snapPosition);
+        }
+
         setDividePosition(snapTarget.position, false /* applyLayoutChange */);
     }
 
     /** Resets divider position. */
     public void resetDividerPosition() {
-        mDividePosition = mDividerSnapAlgorithm.getMiddleTarget().position;
-        updateBounds(mDividePosition);
+        mDividerPosition = mDividerSnapAlgorithm.getMiddleTarget().position;
+        updateBounds(mDividerPosition);
         mWinToken1 = null;
         mWinToken2 = null;
         mWinBounds1.setEmpty();
@@ -510,7 +521,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      * target indicates dismissing split.
      */
     public void snapToTarget(int currentPosition, DividerSnapAlgorithm.SnapTarget snapTarget) {
-        switch (snapTarget.snapTo) {
+        switch (snapTarget.snapPosition) {
             case SNAP_TO_START_AND_DISMISS:
                 flingDividePosition(currentPosition, snapTarget.position, FLING_RESIZE_DURATION,
                         () -> mSplitLayoutHandler.onSnappedToDismiss(false /* bottomOrRight */,
@@ -668,8 +679,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                mDividePosition = dividerPos;
-                updateBounds(mDividePosition);
+                mDividerPosition = dividerPos;
+                updateBounds(mDividerPosition);
                 finishCallback.accept(insets);
                 InteractionJankMonitorUtils.endTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
             }

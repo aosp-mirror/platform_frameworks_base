@@ -91,13 +91,14 @@ public class OneTimePermissionUserManager {
         mHandler = context.getMainThreadHandler();
     }
 
-    void startPackageOneTimeSession(@NonNull String packageName, long timeoutMillis,
+    void startPackageOneTimeSession(@NonNull String packageName, int deviceId, long timeoutMillis,
             long revokeAfterKilledDelayMillis) {
         int uid;
         try {
             uid = mContext.getPackageManager().getPackageUid(packageName, 0);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(LOG_TAG, "Unknown package name " + packageName, e);
+            Log.e(LOG_TAG,
+                    "Unknown package name " + packageName + ", device ID " + deviceId, e);
             return;
         }
 
@@ -107,7 +108,7 @@ public class OneTimePermissionUserManager {
                 listener.updateSessionParameters(timeoutMillis, revokeAfterKilledDelayMillis);
                 return;
             }
-            listener = new PackageInactivityListener(uid, packageName, timeoutMillis,
+            listener = new PackageInactivityListener(uid, packageName, deviceId, timeoutMillis,
                     revokeAfterKilledDelayMillis);
             mListeners.put(uid, listener);
         }
@@ -159,6 +160,7 @@ public class OneTimePermissionUserManager {
 
         private final int mUid;
         private final @NonNull String mPackageName;
+        private final int mDeviceId;
         private long mTimeout;
         private long mRevokeAfterKilledDelay;
 
@@ -191,14 +193,15 @@ public class OneTimePermissionUserManager {
             }
         };
 
-        private PackageInactivityListener(int uid, @NonNull String packageName, long timeout,
-                long revokeAfterkilledDelay) {
+        private PackageInactivityListener(int uid, @NonNull String packageName, int deviceId,
+                long timeout, long revokeAfterkilledDelay) {
             Log.i(LOG_TAG,
                     "Start tracking " + packageName + ". uid=" + uid + " timeout=" + timeout
                             + " killedDelay=" + revokeAfterkilledDelay);
 
             mUid = uid;
             mPackageName = packageName;
+            mDeviceId = deviceId;
             mTimeout = timeout;
             mRevokeAfterKilledDelay = revokeAfterkilledDelay == -1
                     ? DeviceConfig.getLong(
@@ -232,7 +235,8 @@ public class OneTimePermissionUserManager {
                                 PROPERTY_KILLED_DELAY_CONFIG_KEY, DEFAULT_KILLED_DELAY_MILLIS)
                                 : revokeAfterKilledDelayMillis);
                 Log.v(LOG_TAG,
-                        "Updated params for " + mPackageName + ". timeout=" + mTimeout
+                        "Updated params for " + mPackageName + ", device ID " + mDeviceId
+                                + ". timeout=" + mTimeout
                                 + " killedDelay=" + mRevokeAfterKilledDelay);
                 updateUidState();
             }
@@ -260,7 +264,7 @@ public class OneTimePermissionUserManager {
 
         private void updateUidState(int state) {
             Log.v(LOG_TAG, "Updating state for " + mPackageName + " (" + mUid + ")."
-                    + " state=" + state);
+                    + " device ID=" + mDeviceId + ", state=" + state);
             synchronized (mInnerLock) {
                 // Remove any pending inactivity callback
                 mHandler.removeCallbacksAndMessages(mToken);
@@ -283,7 +287,7 @@ public class OneTimePermissionUserManager {
                         if (DEBUG) {
                             Log.d(LOG_TAG, "No longer gone after delayed revocation. "
                                     + "Rechecking for " + mPackageName + " (" + mUid
-                                    + ").");
+                                    + "). device ID " + mDeviceId);
                         }
                         updateUidState(currentState);
                     }, mToken, mRevokeAfterKilledDelay);
@@ -292,7 +296,7 @@ public class OneTimePermissionUserManager {
                     if (mTimerStart == TIMER_INACTIVE) {
                         if (DEBUG) {
                             Log.d(LOG_TAG, "Start the timer for "
-                                    + mPackageName + " (" + mUid + ").");
+                                    + mPackageName + " (" + mUid + "). device ID " + mDeviceId);
                         }
                         mTimerStart = System.currentTimeMillis();
                         setAlarmLocked();
@@ -329,7 +333,8 @@ public class OneTimePermissionUserManager {
             }
 
             if (DEBUG) {
-                Log.d(LOG_TAG, "Scheduling alarm for " + mPackageName + " (" + mUid + ").");
+                Log.d(LOG_TAG, "Scheduling alarm for " + mPackageName + " (" + mUid + ")."
+                        + " device ID " + mDeviceId);
             }
             long revokeTime = mTimerStart + mTimeout;
             if (revokeTime > System.currentTimeMillis()) {
@@ -349,7 +354,8 @@ public class OneTimePermissionUserManager {
         private void cancelAlarmLocked() {
             if (mIsAlarmSet) {
                 if (DEBUG) {
-                    Log.d(LOG_TAG, "Canceling alarm for " + mPackageName + " (" + mUid + ").");
+                    Log.d(LOG_TAG, "Canceling alarm for " + mPackageName + " (" + mUid + ")."
+                            + " device ID " + mDeviceId);
                 }
                 mAlarmManager.cancel(this);
                 mIsAlarmSet = false;
@@ -366,17 +372,17 @@ public class OneTimePermissionUserManager {
             }
             if (DEBUG) {
                 Log.d(LOG_TAG, "onPackageInactiveLocked stack trace for "
-                        + mPackageName + " (" + mUid + ").", new RuntimeException());
+                        + mPackageName + " (" + mUid + "). device ID " + mDeviceId,
+                        new RuntimeException());
             }
             mIsFinished = true;
             cancelAlarmLocked();
             mHandler.post(
                     () -> {
                         Log.i(LOG_TAG, "One time session expired for "
-                                + mPackageName + " (" + mUid + ").");
-
+                                + mPackageName + " (" + mUid + "). deviceID " + mDeviceId);
                         mPermissionControllerManager.notifyOneTimePermissionSessionTimeout(
-                                mPackageName);
+                                mPackageName, mDeviceId);
                     });
             try {
                 mIActivityManager.unregisterUidObserver(mObserver);
@@ -391,7 +397,8 @@ public class OneTimePermissionUserManager {
         @Override
         public void onAlarm() {
             if (DEBUG) {
-                Log.d(LOG_TAG, "Alarm received for " + mPackageName + " (" + mUid + ").");
+                Log.d(LOG_TAG, "Alarm received for " + mPackageName + " (" + mUid + ")."
+                        + " device ID " + mDeviceId);
             }
             synchronized (mInnerLock) {
                 if (!mIsAlarmSet) {

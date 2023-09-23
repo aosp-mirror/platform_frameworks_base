@@ -1456,8 +1456,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             }
 
             try {
-                final ClientTransaction transaction =
-                        ClientTransaction.obtain(next.app.getThread(), next.token);
+                final ClientTransaction transaction = ClientTransaction.obtain(
+                        next.app.getThread());
                 // Deliver all pending results.
                 ArrayList<ResultInfo> a = next.results;
                 if (a != null) {
@@ -1741,7 +1741,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     prev.shortComponentName, "userLeaving=" + userLeaving, reason);
 
             mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
-                    prev.token, PauseActivityItem.obtain(prev.token, prev.finishing, userLeaving,
+                    PauseActivityItem.obtain(prev.token, prev.finishing, userLeaving,
                             prev.configChangeFlags, pauseImmediately, autoEnteringPip));
         } catch (Exception e) {
             // Ignore exception, if process died other code will cleanup.

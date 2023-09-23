@@ -25,7 +25,7 @@ import android.view.ViewGroup
 import android.view.WindowManagerPolicyConstants.EXTRA_FROM_BRIGHTNESS_KEY
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.activity.SingleActivityFactory
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper

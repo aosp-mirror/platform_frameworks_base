@@ -580,7 +580,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     + mOverlay.getRequestId());
             return false;
         }
-        if (mLockscreenShadeTransitionController.getQSDragProgress() != 0f
+
+        if ((mLockscreenShadeTransitionController.getQSDragProgress() != 0f
+                && !mAlternateBouncerInteractor.isVisibleState())
                 || mPrimaryBouncerInteractor.isInTransit()) {
             return false;
         }

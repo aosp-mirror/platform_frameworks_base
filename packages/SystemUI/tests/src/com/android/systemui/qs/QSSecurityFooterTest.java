@@ -53,7 +53,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.animation.Expandable;

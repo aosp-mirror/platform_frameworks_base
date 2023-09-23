@@ -65,7 +65,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;

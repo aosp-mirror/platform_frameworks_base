@@ -23,7 +23,7 @@ import android.content.res.Resources;
 
 import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.settingslib.dream.DreamBackend;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.complication.dagger.RegisteredComplicationsModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;

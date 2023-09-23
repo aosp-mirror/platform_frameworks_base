@@ -28,7 +28,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog

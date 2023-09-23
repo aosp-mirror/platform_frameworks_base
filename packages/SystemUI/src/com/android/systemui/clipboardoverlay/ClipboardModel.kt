@@ -24,7 +24,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.util.Size
 import android.view.textclassifier.TextLinks
-import com.android.systemui.R
+import com.android.systemui.res.R
 import java.io.IOException
 
 data class ClipboardModel(

@@ -158,11 +158,7 @@ static struct thread_dispatch_offsets_t
 // ****************************************************************************
 // ****************************************************************************
 
-static constexpr int32_t PROXY_WARN_INTERVAL = 5000;
 static constexpr uint32_t GC_INTERVAL = 1000;
-
-static std::atomic<uint32_t> gNumProxies(0);
-static std::atomic<uint32_t> gProxiesWarned(0);
 
 // Number of GlobalRefs held by JavaBBinders.
 static std::atomic<uint32_t> gNumLocalRefsCreated(0);
@@ -776,19 +772,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
         return NULL;
     }
     BinderProxyNativeData* actualNativeData = getBPNativeData(env, object);
-    if (actualNativeData == nativeData) {
-        // Created a new Proxy
-        uint32_t numProxies = gNumProxies.fetch_add(1, std::memory_order_relaxed);
-        uint32_t numLastWarned = gProxiesWarned.load(std::memory_order_relaxed);
-        if (numProxies >= numLastWarned + PROXY_WARN_INTERVAL) {
-            // Multiple threads can get here, make sure only one of them gets to
-            // update the warn counter.
-            if (gProxiesWarned.compare_exchange_strong(numLastWarned,
-                        numLastWarned + PROXY_WARN_INTERVAL, std::memory_order_relaxed)) {
-                ALOGW("Unexpectedly many live BinderProxies: %d\n", numProxies);
-            }
-        }
-    } else {
+    if (actualNativeData != nativeData) {
         delete nativeData;
     }
 
@@ -1143,7 +1127,7 @@ jint android_os_Debug_getLocalObjectCount(JNIEnv* env, jobject clazz)
 
 jint android_os_Debug_getProxyObjectCount(JNIEnv* env, jobject clazz)
 {
-    return gNumProxies.load();
+    return BpBinder::getBinderProxyCount();
 }
 
 jint android_os_Debug_getDeathObjectCount(JNIEnv* env, jobject clazz)
@@ -1428,7 +1412,6 @@ static void BinderProxy_destroy(void* rawNativeData)
             nativeData->mObject.get(), nativeData->mOrgue.get());
     delete nativeData;
     IPCThreadState::self()->flushCommands();
-    --gNumProxies;
 }
 
 JNIEXPORT jlong JNICALL android_os_BinderProxy_getNativeFinalizer(JNIEnv*, jclass) {

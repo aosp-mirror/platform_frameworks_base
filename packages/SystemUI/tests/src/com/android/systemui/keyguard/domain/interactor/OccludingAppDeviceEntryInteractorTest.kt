@@ -100,11 +100,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
         keyguardRepository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
         configurationRepository = FakeConfigurationRepository()
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.FACE_AUTH_REFACTOR, false)
-                set(Flags.DELAY_BOUNCER, false)
-            }
+        featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
         trustRepository = FakeTrustRepository()
         powerRepository = FakePowerRepository()
         underTest =
@@ -138,7 +134,6 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                     context,
                     keyguardUpdateMonitor,
                     trustRepository,
-                    featureFlags,
                     testScope.backgroundScope,
                 ),
                 AlternateBouncerInteractor(

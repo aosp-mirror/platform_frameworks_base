@@ -26,7 +26,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView

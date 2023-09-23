@@ -20,7 +20,7 @@ package com.android.systemui.biometrics.ui.viewmodel
 import android.annotation.RawRes
 import android.content.res.Configuration
 import android.view.Surface
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType

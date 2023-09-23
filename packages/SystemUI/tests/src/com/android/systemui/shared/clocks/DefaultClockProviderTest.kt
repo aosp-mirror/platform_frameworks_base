@@ -24,7 +24,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.customization.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.ClockSettings
 import com.android.systemui.shared.clocks.DefaultClockController.Companion.DOZE_COLOR

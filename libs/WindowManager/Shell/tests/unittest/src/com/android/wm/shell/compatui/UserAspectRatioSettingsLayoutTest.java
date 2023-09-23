@@ -93,7 +93,8 @@ public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
         mWindowManager = new UserAspectRatioSettingsWindowManager(mContext, mTaskInfo,
                 mSyncTransactionQueue, mTaskListener, new DisplayLayout(),
                 new CompatUIController.CompatUIHintsState(),
-                mOnUserAspectRatioSettingsButtonClicked, new TestShellExecutor(), flags -> 0);
+                mOnUserAspectRatioSettingsButtonClicked, new TestShellExecutor(), flags -> 0,
+                () -> false, s -> {});
 
         mLayout = (UserAspectRatioSettingsLayout) LayoutInflater.from(mContext).inflate(
                 R.layout.user_aspect_ratio_settings_layout, null);

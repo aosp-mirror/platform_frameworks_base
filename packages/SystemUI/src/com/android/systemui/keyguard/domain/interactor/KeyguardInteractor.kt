@@ -23,7 +23,7 @@ import android.app.StatusBarManager
 import android.graphics.Point
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow

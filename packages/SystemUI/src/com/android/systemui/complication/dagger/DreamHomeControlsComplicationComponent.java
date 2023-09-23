@@ -25,7 +25,7 @@ import android.view.LayoutInflater;
 import android.widget.ImageView;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.complication.DreamHomeControlsComplication;
 import com.android.systemui.shared.shadow.DoubleShadowIconDrawable;
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper;

@@ -22,8 +22,8 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.hardware.camera2.CameraManager
 import android.util.PathParser
+import com.android.systemui.res.R
 import java.util.concurrent.Executor
-
 import kotlin.math.roundToInt
 
 /**

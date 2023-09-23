@@ -19,7 +19,7 @@ package com.android.systemui.dump
 import android.content.Context
 import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import java.io.PrintWriter
 import javax.inject.Inject

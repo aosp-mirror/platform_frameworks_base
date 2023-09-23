@@ -45,7 +45,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.media.BluetoothMediaDevice;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.qrcode.QrCodeGenerator;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.phone.SystemUIDialog;

@@ -46,7 +46,7 @@ import android.widget.ImageView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.util.Collections;
 

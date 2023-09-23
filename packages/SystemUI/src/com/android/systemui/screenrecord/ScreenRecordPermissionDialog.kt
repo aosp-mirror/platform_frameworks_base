@@ -32,7 +32,7 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Switch
 import androidx.annotation.LayoutRes
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.media.MediaProjectionAppSelectorActivity
 import com.android.systemui.media.MediaProjectionCaptureTarget
 import com.android.systemui.plugins.ActivityStarter

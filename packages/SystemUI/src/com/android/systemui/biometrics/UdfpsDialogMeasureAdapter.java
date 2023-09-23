@@ -35,7 +35,7 @@ import android.view.WindowMetrics;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Adapter that remeasures an auth dialog view to ensure that it matches the location of a physical

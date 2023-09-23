@@ -34,7 +34,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.user.UserSwitcherPopupMenu

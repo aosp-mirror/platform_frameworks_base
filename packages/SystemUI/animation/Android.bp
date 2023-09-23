@@ -24,6 +24,7 @@ package {
 android_library {
 
     name: "SystemUIAnimationLib",
+    use_resource_processor: true,
 
     srcs: [
         "src/**/*.java",
@@ -52,6 +53,7 @@ android_library {
 
 android_library {
     name: "SystemUIShaderLib",
+    use_resource_processor: true,
 
     srcs: [
         "src/com/android/systemui/surfaceeffects/**/*.java",

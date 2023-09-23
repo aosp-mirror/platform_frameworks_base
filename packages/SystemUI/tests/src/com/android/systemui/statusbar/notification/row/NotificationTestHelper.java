@@ -88,7 +88,7 @@ import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
-import com.android.systemui.tests.R;
+import com.android.systemui.res.R;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.systemui.wmshell.BubblesTestActivity;
 
@@ -495,7 +495,7 @@ public class NotificationTestHelper {
         Notification publicVersion = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setCustomContentView(new RemoteViews(mContext.getPackageName(),
-                        R.layout.custom_view_dark))
+                        com.android.systemui.tests.R.layout.custom_view_dark))
                 .build();
         Notification.Builder notificationBuilder = new Notification.Builder(mContext, "channelId")
                 .setSmallIcon(R.drawable.ic_person)

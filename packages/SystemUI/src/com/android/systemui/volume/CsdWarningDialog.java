@@ -35,7 +35,7 @@ import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.messages.nano.SystemMessageProto;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.NotificationChannels;

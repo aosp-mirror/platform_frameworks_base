@@ -75,7 +75,7 @@ import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.settingslib.wifi.dpp.WifiDppIntentHelper;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;

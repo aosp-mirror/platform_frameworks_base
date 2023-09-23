@@ -38,7 +38,7 @@ import com.android.app.animation.Interpolators;
 import com.android.app.animation.InterpolatorsAndroidX;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;

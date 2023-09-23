@@ -22,7 +22,7 @@ import androidx.core.content.res.ResourcesCompat;
 
 import com.android.app.animation.Interpolators;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.plugins.ClockController;

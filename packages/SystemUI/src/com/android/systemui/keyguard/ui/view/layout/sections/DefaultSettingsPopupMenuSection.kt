@@ -28,7 +28,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import androidx.core.view.isVisible
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.view.LaunchableLinearLayout
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags

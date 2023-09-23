@@ -41,6 +41,10 @@
          measured in dips per second. Setting this to -1dp disables rotary encoder fling.  -->
     <dimen name="config_viewMaxRotaryEncoderFlingVelocity">8000dp</dimen>
 
+    <!-- Whether the View-based scroll haptic feedback implementation is enabled for
+         {@link InputDevice#SOURCE_ROTARY_ENCODER}s. -->
+    <bool name="config_viewBasedRotaryEncoderHapticsEnabled">true</bool>
+
     <!-- Number of notifications to keep in the notification service historical archive.
          Reduced intentionally for watches to retain minimal memory footprint -->
     <integer name="config_notificationServiceArchiveSize">1</integer>

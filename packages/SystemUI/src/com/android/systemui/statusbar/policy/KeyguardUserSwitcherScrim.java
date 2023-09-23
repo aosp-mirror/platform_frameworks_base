@@ -28,7 +28,7 @@ import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Gradient background for the user switcher on Keyguard.

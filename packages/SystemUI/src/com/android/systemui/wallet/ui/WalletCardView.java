@@ -25,7 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /** Customized card view of the wallet card carousel. */
 public class WalletCardView extends CardView {

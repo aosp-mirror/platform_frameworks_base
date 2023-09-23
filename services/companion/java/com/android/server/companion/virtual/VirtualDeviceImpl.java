@@ -37,6 +37,7 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
+import android.app.compat.CompatChanges;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
@@ -51,6 +52,8 @@ import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorEvent;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
@@ -75,6 +78,7 @@ import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.hardware.input.VirtualTouchEvent;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Looper;
@@ -115,11 +119,32 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     private static final String TAG = "VirtualDeviceImpl";
 
+    /**
+     * Virtual displays created by a {@link VirtualDeviceManager.VirtualDevice} are more consistent
+     * with virtual displays created via {@link DisplayManager} and allow for the creation of
+     * private, auto-mirror, and fixed orientation displays since
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}.
+     *
+     * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_PUBLIC
+     * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+     * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
+     * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long MAKE_VIRTUAL_DISPLAY_FLAGS_CONSISTENT_WITH_DISPLAY_MANAGER =
+            294837146L;
+
     private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS =
             DisplayManager.VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
+
+    private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS_PRE_VIC =
+            DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
+                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT
+                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 
     private static final String PERSISTENT_ID_PREFIX_CDM_ASSOCIATION = "companion:";
 
@@ -129,6 +154,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private static final long PENDING_TRAMPOLINE_TIMEOUT_MS = 5000;
 
     private final Object mVirtualDeviceLock = new Object();
+
+    private final int mBaseVirtualDisplayFlags;
 
     private final Context mContext;
     private final AssociationInfo mAssociationInfo;
@@ -311,6 +338,16 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             ? mParams.getBlockedActivities()
                             : mParams.getAllowedActivities();
         }
+
+        int flags = DEFAULT_VIRTUAL_DISPLAY_FLAGS;
+        if (!CompatChanges.isChangeEnabled(
+                MAKE_VIRTUAL_DISPLAY_FLAGS_CONSISTENT_WITH_DISPLAY_MANAGER, mOwnerUid)) {
+            flags |= DEFAULT_VIRTUAL_DISPLAY_FLAGS_PRE_VIC;
+        }
+        if (mParams.getLockState() == VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED) {
+            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
+        }
+        mBaseVirtualDisplayFlags = flags;
     }
 
     @VisibleForTesting
@@ -323,11 +360,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
      * device.
      */
     int getBaseVirtualDisplayFlags() {
-        int flags = DEFAULT_VIRTUAL_DISPLAY_FLAGS;
-        if (mParams.getLockState() == VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED) {
-            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
-        }
-        return flags;
+        return mBaseVirtualDisplayFlags;
     }
 
     /** Returns the camera access controller of this device. */

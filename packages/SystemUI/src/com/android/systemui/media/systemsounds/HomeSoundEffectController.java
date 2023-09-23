@@ -26,7 +26,7 @@ import android.media.AudioManager;
 import android.util.Slog;
 
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;

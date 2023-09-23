@@ -417,59 +417,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
-    public enum FrameRate {
-        FPS_DEFAULT(0),
-        FPS_30(30),
-        FPS_36(36),
-        FPS_40(40),
-        FPS_45(45),
-        FPS_48(48),
-        FPS_60(60),
-        FPS_72(72),
-        FPS_90(90),
-        FPS_120(120),
-        FPS_144(144),
-        FPS_INVALID(-1);
-
-        public final int fps;
-
-        FrameRate(int fps) {
-            this.fps = fps;
-        }
-    }
-
-    // Turn the raw string to the corresponding fps int.
-    // Return 0 when disabling, -1 for invalid fps.
-    static int getFpsInt(String raw) {
-        // TODO(b/243448953): make sure this translates to proper values based on current display
-        switch (raw) {
-            case "30":
-                return FrameRate.FPS_30.fps;
-            case "36":
-                return FrameRate.FPS_36.fps;
-            case "40":
-                return FrameRate.FPS_40.fps;
-            case "45":
-                return FrameRate.FPS_45.fps;
-            case "48":
-                return FrameRate.FPS_48.fps;
-            case "60":
-                return FrameRate.FPS_60.fps;
-            case "72":
-                return FrameRate.FPS_72.fps;
-            case "90":
-                return FrameRate.FPS_90.fps;
-            case "120":
-                return FrameRate.FPS_120.fps;
-            case "144":
-                return FrameRate.FPS_144.fps;
-            case "disable":
-            case "":
-                return FrameRate.FPS_DEFAULT.fps;
-        }
-        return FrameRate.FPS_INVALID.fps;
-    }
-
     /**
      * Called by games to communicate the current state to the platform.
      *
@@ -717,7 +664,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
 
             public synchronized int getFps() {
-                return GameManagerService.getFpsInt(mFps);
+                try {
+                    final int fpsInt = Integer.parseInt(mFps);
+                    return fpsInt;
+                } catch (NumberFormatException e) {
+                    return 0;
+                }
             }
 
             synchronized String getFpsStr() {
@@ -757,7 +709,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
 
             android.app.GameModeConfiguration toPublicGameModeConfig() {
-                int fpsOverride = getFpsInt(mFps);
+                int fpsOverride;
+                try {
+                    fpsOverride = Integer.parseInt(mFps);
+                } catch (NumberFormatException e) {
+                    fpsOverride = 0;
+                }
                 // TODO(b/243448953): match to proper value in case of display change?
                 fpsOverride = fpsOverride > 0 ? fpsOverride
                         : android.app.GameModeConfiguration.FPS_OVERRIDE_NONE;

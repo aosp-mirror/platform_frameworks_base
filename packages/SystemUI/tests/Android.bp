@@ -20,6 +20,7 @@ package {
 
 android_test {
     name: "SystemUITests",
+    use_resource_processor: true,
 
     dxflags: ["--multi-dex"],
     platform_apis: true,

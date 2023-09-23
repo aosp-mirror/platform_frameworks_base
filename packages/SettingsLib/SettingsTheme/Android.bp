@@ -9,6 +9,7 @@ package {
 
 android_library {
     name: "SettingsLibSettingsTheme",
+    use_resource_processor: true,
     resource_dirs: ["res"],
     static_libs: ["androidx.preference_preference"],
     sdk_version: "system_current",

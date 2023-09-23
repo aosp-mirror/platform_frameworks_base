@@ -26,7 +26,7 @@ import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.airbnb.lottie.LottieAnimationView
 import com.android.settingslib.widget.LottieColorUtils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState
 import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_AUTHENTICATED
 import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_AUTHENTICATING

@@ -941,27 +941,15 @@ public class AudioManager {
     }
 
     /**
-     * Sends a simulated key event for a media button.
-     * To simulate a key press, you must first send a KeyEvent built with a
-     * {@link KeyEvent#ACTION_DOWN} action, then another event with the {@link KeyEvent#ACTION_UP}
-     * action.
+     * Sends a simulated key event for a media button. To simulate a key press, you must first send
+     * a KeyEvent built with a {@link KeyEvent#ACTION_DOWN} action, then another event with the
+     * {@link KeyEvent#ACTION_UP} action.
+     *
      * <p>The key event will be sent to the current media key event consumer which registered with
      * {@link AudioManager#registerMediaButtonEventReceiver(PendingIntent)}.
-     * @param keyEvent a {@link KeyEvent} instance whose key code is one of
-     *     {@link KeyEvent#KEYCODE_MUTE},
-     *     {@link KeyEvent#KEYCODE_HEADSETHOOK},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PLAY},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PAUSE},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PLAY_PAUSE},
-     *     {@link KeyEvent#KEYCODE_MEDIA_STOP},
-     *     {@link KeyEvent#KEYCODE_MEDIA_NEXT},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PREVIOUS},
-     *     {@link KeyEvent#KEYCODE_MEDIA_REWIND},
-     *     {@link KeyEvent#KEYCODE_MEDIA_RECORD},
-     *     {@link KeyEvent#KEYCODE_MEDIA_FAST_FORWARD},
-     *     {@link KeyEvent#KEYCODE_MEDIA_CLOSE},
-     *     {@link KeyEvent#KEYCODE_MEDIA_EJECT},
-     *     or {@link KeyEvent#KEYCODE_MEDIA_AUDIO_TRACK}.
+     *
+     * @param keyEvent a media session {@link KeyEvent}, as defined by {@link
+     *     KeyEvent#isMediaSessionKey}.
      */
     public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
         MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());

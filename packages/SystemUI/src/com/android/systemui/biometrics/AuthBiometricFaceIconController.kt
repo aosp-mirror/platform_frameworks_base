@@ -19,7 +19,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.Log
 import com.airbnb.lottie.LottieAnimationView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState
 
 private const val TAG = "AuthBiometricFaceIconController"

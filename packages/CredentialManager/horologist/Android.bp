@@ -16,6 +16,7 @@ android_library {
         "androidx.compose.foundation_foundation",
         "androidx.compose.runtime_runtime",
         "androidx.compose.ui_ui",
+        "androidx.compose.ui_ui-tooling",
         "androidx.navigation_navigation-compose",
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.lifecycle_lifecycle-runtime-ktx",

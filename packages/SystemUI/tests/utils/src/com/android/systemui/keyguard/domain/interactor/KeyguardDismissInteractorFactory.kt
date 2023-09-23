@@ -72,7 +72,6 @@ object KeyguardDismissInteractorFactory {
         keyguardUpdateMonitor: KeyguardUpdateMonitor = mock(KeyguardUpdateMonitor::class.java),
         featureFlags: FakeFeatureFlagsClassic =
             FakeFeatureFlagsClassic().apply {
-                set(Flags.DELAY_BOUNCER, true)
                 set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, true)
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
             },
@@ -92,7 +91,6 @@ object KeyguardDismissInteractorFactory {
                 context,
                 keyguardUpdateMonitor,
                 trustRepository,
-                featureFlags,
                 testScope.backgroundScope,
             )
         val alternateBouncerInteractor =

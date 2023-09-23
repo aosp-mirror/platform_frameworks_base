@@ -23,7 +23,6 @@ import android.app.ClientTransactionHandler;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.os.IBinder;
 import android.os.Parcel;
 
 import java.util.Objects;
@@ -38,21 +37,20 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
     private int mDeviceId;
 
     @Override
-    public void preExecute(@NonNull ClientTransactionHandler client, @Nullable IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
         CompatibilityInfo.applyOverrideScaleIfNeeded(mConfiguration);
         client.updatePendingConfiguration(mConfiguration);
     }
 
     @Override
-    public void execute(@NonNull ClientTransactionHandler client, @Nullable IBinder token,
+    public void execute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         client.handleConfigurationChanged(mConfiguration, mDeviceId);
     }
 
     @Nullable
     @Override
-    public Context getContextToUpdate(@NonNull ClientTransactionHandler client,
-            @Nullable IBinder token) {
+    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
         return ActivityThread.currentApplication();
     }
 

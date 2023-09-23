@@ -20,7 +20,7 @@ import com.android.internal.logging.InstanceId
 import com.android.internal.logging.InstanceIdSequence
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.ui.MediaHierarchyManager

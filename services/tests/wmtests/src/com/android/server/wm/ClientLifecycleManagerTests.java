@@ -23,7 +23,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import android.app.IApplicationThread;
 import android.app.servertransaction.ClientTransaction;
-import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -40,8 +39,7 @@ public class ClientLifecycleManagerTests {
 
     @Test
     public void testScheduleAndRecycleBinderClientTransaction() throws Exception {
-        ClientTransaction item = spy(ClientTransaction.obtain(mock(IApplicationThread.class),
-                new Binder()));
+        ClientTransaction item = spy(ClientTransaction.obtain(mock(IApplicationThread.class)));
 
         ClientLifecycleManager clientLifecycleManager = new ClientLifecycleManager();
         clientLifecycleManager.scheduleTransaction(item);
@@ -51,8 +49,7 @@ public class ClientLifecycleManagerTests {
 
     @Test
     public void testScheduleNoRecycleNonBinderClientTransaction() throws Exception {
-        ClientTransaction item = spy(ClientTransaction.obtain(mock(IApplicationThread.Stub.class),
-                new Binder()));
+        ClientTransaction item = spy(ClientTransaction.obtain(mock(IApplicationThread.Stub.class)));
 
         ClientLifecycleManager clientLifecycleManager = new ClientLifecycleManager();
         clientLifecycleManager.scheduleTransaction(item);

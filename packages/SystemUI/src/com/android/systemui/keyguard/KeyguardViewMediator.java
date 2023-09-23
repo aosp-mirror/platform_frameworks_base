@@ -128,7 +128,7 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.LaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -3243,7 +3243,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         + "mPendingLock=" + mPendingLock + "."
                         + "One of these being false means we re-locked the device during unlock. "
                         + "Do not proceed to finish keyguard exit and unlock.");
+                doKeyguardLocked(null);
                 finishSurfaceBehindRemoteAnimation(true /* showKeyguard */);
+                // Ensure WM is notified that we made a decision to show
+                setShowingLocked(true /* showing */, true /* force */);
+
                 return;
             }
 

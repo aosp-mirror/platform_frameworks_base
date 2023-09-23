@@ -39,7 +39,7 @@ import androidx.annotation.CallSuper;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.widget.LockscreenCredential;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.util.ArrayList;
 import java.util.List;

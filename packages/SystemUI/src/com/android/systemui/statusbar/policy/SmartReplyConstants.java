@@ -26,7 +26,7 @@ import android.util.KeyValueListParser;
 import android.util.Log;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.DeviceConfigProxy;

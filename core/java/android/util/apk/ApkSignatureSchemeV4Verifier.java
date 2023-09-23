@@ -27,9 +27,14 @@ import android.os.incremental.V4Signature;
 import android.util.ArrayMap;
 import android.util.Pair;
 
+import com.android.internal.security.VerityUtils;
+
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.DigestException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -60,7 +65,7 @@ public class ApkSignatureSchemeV4Verifier {
      * certificates associated with each signer.
      */
     public static VerifiedSigner extractCertificates(String apkFile)
-            throws SignatureNotFoundException, SecurityException {
+            throws SignatureNotFoundException, SignatureException, SecurityException {
         Pair<V4Signature.HashingInfo, V4Signature.SigningInfos> pair = extractSignature(apkFile);
         return verify(apkFile, pair.first, pair.second, APK_SIGNATURE_SCHEME_DEFAULT);
     }
@@ -69,15 +74,37 @@ public class ApkSignatureSchemeV4Verifier {
      * Extracts APK Signature Scheme v4 signature of the provided APK.
      */
     public static Pair<V4Signature.HashingInfo, V4Signature.SigningInfos> extractSignature(
-            String apkFile) throws SignatureNotFoundException {
-        final File apk = new File(apkFile);
-        final byte[] signatureBytes = IncrementalManager.unsafeGetFileSignature(
-                apk.getAbsolutePath());
-        if (signatureBytes == null || signatureBytes.length == 0) {
-            throw new SignatureNotFoundException("Failed to obtain signature bytes from IncFS.");
-        }
+            String apkFile) throws SignatureNotFoundException, SignatureException {
         try {
-            final V4Signature signature = V4Signature.readFrom(signatureBytes);
+            final File apk = new File(apkFile);
+            boolean needsConsistencyCheck;
+
+            // 1. Try IncFS first. IncFS verifies the file according to the integrity metadata
+            // (including the root hash of Merkle tree) it keeps track of with signature check. No
+            // further consistentcy check is needed.
+            byte[] signatureBytes = IncrementalManager.unsafeGetFileSignature(
+                    apk.getAbsolutePath());
+            V4Signature signature;
+            if (signatureBytes != null && signatureBytes.length > 0) {
+                needsConsistencyCheck = false;
+                signature = V4Signature.readFrom(signatureBytes);
+            } else if (android.security.Flags.extendVbChainToUpdatedApk()) {
+                // 2. Try fs-verity next. fs-verity checks against the Merkle tree, but the
+                // v4 signature file (including a raw root hash) is managed separately. We need to
+                // ensure the signed data from the file is consistent with the actual file.
+                needsConsistencyCheck = true;
+
+                final File idsig = new File(apk.getAbsolutePath() + V4Signature.EXT);
+                try (var fis = new FileInputStream(idsig.getAbsolutePath())) {
+                    signature = V4Signature.readFrom(fis);
+                } catch (IOException e) {
+                    throw new SignatureNotFoundException(
+                            "Failed to obtain signature bytes from .idsig");
+                }
+            } else {
+                throw new SignatureNotFoundException(
+                        "Failed to obtain signature bytes from IncFS.");
+            }
             if (!signature.isVersionSupported()) {
                 throw new SecurityException(
                         "v4 signature version " + signature.version + " is not supported");
@@ -86,9 +113,26 @@ public class ApkSignatureSchemeV4Verifier {
                     signature.hashingInfo);
             final V4Signature.SigningInfos signingInfos = V4Signature.SigningInfos.fromByteArray(
                     signature.signingInfos);
+
+            if (needsConsistencyCheck) {
+                final byte[] actualDigest = VerityUtils.getFsverityDigest(apk.getAbsolutePath());
+                if (actualDigest == null) {
+                    throw new SecurityException("The APK does not have fs-verity");
+                }
+                final byte[] computedDigest =
+                        VerityUtils.generateFsVerityDigest(apk.length(), hashingInfo);
+                if (!Arrays.equals(computedDigest, actualDigest)) {
+                    throw new SignatureException("Actual digest does not match the v4 signature");
+                }
+            }
+
             return Pair.create(hashingInfo, signingInfos);
+        } catch (EOFException e) {
+            throw new SignatureException("V4 signature is invalid.", e);
         } catch (IOException e) {
             throw new SignatureNotFoundException("Failed to read V4 signature.", e);
+        } catch (DigestException | NoSuchAlgorithmException e) {
+            throw new SecurityException("Failed to calculate the digest", e);
         }
     }
 
@@ -107,7 +151,7 @@ public class ApkSignatureSchemeV4Verifier {
                 signingInfo);
         final Pair<Certificate, byte[]> result = verifySigner(signingInfo, signedData);
 
-        // Populate digests enforced by IncFS driver.
+        // Populate digests enforced by IncFS driver and fs-verity.
         Map<Integer, byte[]> contentDigests = new ArrayMap<>();
         contentDigests.put(convertToContentDigestType(hashingInfo.hashAlgorithm),
                 hashingInfo.rawRootHash);
@@ -217,7 +261,7 @@ public class ApkSignatureSchemeV4Verifier {
         public final byte[] apkDigest;
 
         // Algorithm -> digest map of signed digests in the signature.
-        // These are continuously enforced by the IncFS driver.
+        // These are continuously enforced by the IncFS driver and fs-verity.
         public final Map<Integer, byte[]> contentDigests;
 
         public VerifiedSigner(Certificate[] certs, byte[] apkDigest,

@@ -48,7 +48,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.BouncerPanelExpansionCalculator;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;

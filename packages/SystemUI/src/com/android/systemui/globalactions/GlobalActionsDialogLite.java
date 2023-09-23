@@ -546,8 +546,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
      */
     @VisibleForTesting
     protected int getMaxShownPowerItems() {
-        return mResources.getInteger(com.android.systemui.R.integer.power_menu_lite_max_columns)
-                * mResources.getInteger(com.android.systemui.R.integer.power_menu_lite_max_rows);
+        return mResources.getInteger(com.android.systemui.res.R.integer.power_menu_lite_max_columns)
+                * mResources.getInteger(com.android.systemui.res.R.integer.power_menu_lite_max_rows);
     }
 
     /**
@@ -698,7 +698,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         ActionsDialogLite dialog = new ActionsDialogLite(
                 mContext,
-                com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActionsLite,
+                com.android.systemui.res.R.style.Theme_SystemUI_Dialog_GlobalActionsLite,
                 mAdapter,
                 mOverflowAdapter,
                 mSysuiColorExtractor,
@@ -776,7 +776,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     @VisibleForTesting
     protected final class PowerOptionsAction extends SinglePressAction {
         private PowerOptionsAction() {
-            super(com.android.systemui.R.drawable.ic_settings_power,
+            super(com.android.systemui.res.R.drawable.ic_settings_power,
                     R.string.global_action_power_options);
         }
 
@@ -884,17 +884,17 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
     protected int getEmergencyTextColor(Context context) {
         return context.getResources().getColor(
-                com.android.systemui.R.color.global_actions_lite_text);
+                com.android.systemui.res.R.color.global_actions_lite_text);
     }
 
     protected int getEmergencyIconColor(Context context) {
         return context.getResources().getColor(
-                com.android.systemui.R.color.global_actions_lite_emergency_icon);
+                com.android.systemui.res.R.color.global_actions_lite_emergency_icon);
     }
 
     protected int getEmergencyBackgroundColor(Context context) {
         return context.getResources().getColor(
-                com.android.systemui.R.color.global_actions_lite_emergency_background);
+                com.android.systemui.res.R.color.global_actions_lite_emergency_background);
     }
 
     private class EmergencyAffordanceAction extends EmergencyAction {
@@ -912,7 +912,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     @VisibleForTesting
     class EmergencyDialerAction extends EmergencyAction {
         private EmergencyDialerAction() {
-            super(com.android.systemui.R.drawable.ic_emergency_star,
+            super(com.android.systemui.res.R.drawable.ic_emergency_star,
                     R.string.global_action_emergency);
         }
 
@@ -1482,7 +1482,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 Log.w(TAG, "No power options action found at position: " + position);
                 return null;
             }
-            int viewLayoutResource = com.android.systemui.R.layout.global_actions_power_item;
+            int viewLayoutResource = com.android.systemui.res.R.layout.global_actions_power_item;
             View view = convertView != null ? convertView
                     : LayoutInflater.from(mContext).inflate(viewLayoutResource, parent, false);
             view.setOnClickListener(v -> onClickItem(position));
@@ -1564,7 +1564,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 Log.w(TAG, "No overflow action found at position: " + position);
                 return null;
             }
-            int viewLayoutResource = com.android.systemui.R.layout.controls_more_item;
+            int viewLayoutResource = com.android.systemui.res.R.layout.controls_more_item;
             View view = convertView != null ? convertView
                     : LayoutInflater.from(mContext).inflate(viewLayoutResource, parent, false);
             TextView textView = (TextView) view;
@@ -1778,7 +1778,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     }
 
     protected int getGridItemLayoutResource() {
-        return com.android.systemui.R.layout.global_actions_grid_item_lite;
+        return com.android.systemui.res.R.layout.global_actions_grid_item_lite;
     }
 
     private enum ToggleState {
@@ -1870,7 +1870,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 LayoutInflater inflater) {
             willCreate();
 
-            View v = inflater.inflate(com.android.systemui.R.layout.global_actions_grid_item_v2,
+            View v = inflater.inflate(com.android.systemui.res.R.layout.global_actions_grid_item_v2,
                     parent, false /* attach */);
             ViewGroup.LayoutParams p = v.getLayoutParams();
             p.width = WRAP_CONTENT;
@@ -2327,7 +2327,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             getWindow().setTitle(getContext().getString(
-                    com.android.systemui.R.string.accessibility_quick_settings_power_menu));
+                    com.android.systemui.res.R.string.accessibility_quick_settings_power_menu));
             initializeLayout();
             mWindowDimAmount = getWindow().getAttributes().dimAmount;
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
@@ -2379,14 +2379,14 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             GlobalActionsPopupMenu popup = new GlobalActionsPopupMenu(
                     new ContextThemeWrapper(
                             mContext,
-                            com.android.systemui.R.style.Control_ListPopupWindow
+                            com.android.systemui.res.R.style.Control_ListPopupWindow
                     ), false /* isDropDownMode */);
             popup.setOnItemClickListener(
                     (parent, view, position, id) -> mOverflowAdapter.onClickItem(position));
             popup.setOnItemLongClickListener(
                     (parent, view, position, id) -> mOverflowAdapter.onLongClickItem(position));
             View overflowButton =
-                    findViewById(com.android.systemui.R.id.global_actions_overflow_button);
+                    findViewById(com.android.systemui.res.R.id.global_actions_overflow_button);
             popup.setAnchorView(overflowButton);
             popup.setAdapter(mOverflowAdapter);
             return popup;
@@ -2403,14 +2403,14 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         }
 
         protected int getLayoutResource() {
-            return com.android.systemui.R.layout.global_actions_grid_lite;
+            return com.android.systemui.res.R.layout.global_actions_grid_lite;
         }
 
         protected void initializeLayout() {
             setContentView(getLayoutResource());
             fixNavBarClipping();
 
-            mGlobalActionsLayout = findViewById(com.android.systemui.R.id.global_actions_view);
+            mGlobalActionsLayout = findViewById(com.android.systemui.res.R.id.global_actions_view);
             mGlobalActionsLayout.setListViewAccessibilityDelegate(new View.AccessibilityDelegate() {
                 @Override
                 public boolean dispatchPopulateAccessibilityEvent(
@@ -2422,14 +2422,14 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             });
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
-            mContainer = findViewById(com.android.systemui.R.id.global_actions_container);
+            mContainer = findViewById(com.android.systemui.res.R.id.global_actions_container);
             mContainer.setOnTouchListener((v, event) -> {
                 mGestureDetector.onTouchEvent(event);
                 return v.onTouchEvent(event);
             });
 
             View overflowButton = findViewById(
-                    com.android.systemui.R.id.global_actions_overflow_button);
+                    com.android.systemui.res.R.id.global_actions_overflow_button);
             if (overflowButton != null) {
                 if (mOverflowAdapter.getCount() > 0) {
                     overflowButton.setOnClickListener((view) -> showPowerOverflowMenu());
@@ -2442,7 +2442,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                     LinearLayout.LayoutParams params =
                             (LinearLayout.LayoutParams) mGlobalActionsLayout.getLayoutParams();
                     params.setMarginEnd(mContext.getResources().getDimensionPixelSize(
-                            com.android.systemui.R.dimen.global_actions_side_margin));
+                            com.android.systemui.res.R.dimen.global_actions_side_margin));
                     mGlobalActionsLayout.setLayoutParams(params);
                 }
             }
@@ -2473,7 +2473,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         private void showSmartLockDisabledMessage() {
             // Since power menu is the top window, make a Toast-like view that will show up
             View message = LayoutInflater.from(mContext)
-                    .inflate(com.android.systemui.R.layout.global_actions_toast, mContainer, false);
+                    .inflate(com.android.systemui.res.R.layout.global_actions_toast, mContainer, false);
 
             // Set up animation
             AccessibilityManager mAccessibilityManager =

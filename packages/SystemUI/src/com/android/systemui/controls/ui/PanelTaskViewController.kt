@@ -28,7 +28,7 @@ import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Trace
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.util.boundsOnScreen
 import com.android.wm.shell.taskview.TaskView
 import java.util.concurrent.Executor

@@ -9877,6 +9877,18 @@ public abstract class PackageManager {
     }
 
     /**
+     * Query if an app is currently quarantined.
+     *
+     * @return {@code true} if the given package is quarantined, {@code false} otherwise
+     * @throws NameNotFoundException if the package could not be found.
+     *
+     * @hide
+     */
+    public boolean isPackageQuarantined(@NonNull String packageName) throws NameNotFoundException {
+        throw new UnsupportedOperationException("isPackageQuarantined not implemented");
+    }
+
+    /**
      * Provide a hint of what the {@link ApplicationInfo#category} value should
      * be for the given package.
      * <p>

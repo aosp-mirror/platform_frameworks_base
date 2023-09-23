@@ -20,7 +20,7 @@ package com.android.systemui.controls.panels
 import android.content.SharedPreferences
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker

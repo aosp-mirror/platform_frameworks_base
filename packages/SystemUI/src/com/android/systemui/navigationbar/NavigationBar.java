@@ -112,7 +112,7 @@ import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.DisplayId;

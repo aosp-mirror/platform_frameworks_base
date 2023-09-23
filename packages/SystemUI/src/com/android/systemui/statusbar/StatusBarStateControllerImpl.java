@@ -43,7 +43,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;

@@ -284,9 +284,7 @@ public class TransactionParcelTests {
         StopActivityItem lifecycleRequest = StopActivityItem.obtain(mActivityToken,
                 78 /* configChanges */);
 
-        Binder activityToken = new Binder();
-
-        ClientTransaction transaction = ClientTransaction.obtain(null, activityToken);
+        ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
         transaction.addCallback(callback1);
         transaction.addCallback(callback2);
         transaction.setLifecycleStateRequest(lifecycleRequest);
@@ -307,9 +305,7 @@ public class TransactionParcelTests {
         ActivityConfigurationChangeItem callback2 = ActivityConfigurationChangeItem.obtain(
                 mActivityToken, config());
 
-        Binder activityToken = new Binder();
-
-        ClientTransaction transaction = ClientTransaction.obtain(null, activityToken);
+        ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
         transaction.addCallback(callback1);
         transaction.addCallback(callback2);
 
@@ -328,9 +324,7 @@ public class TransactionParcelTests {
         StopActivityItem lifecycleRequest = StopActivityItem.obtain(mActivityToken,
                 78 /* configChanges */);
 
-        Binder activityToken = new Binder();
-
-        ClientTransaction transaction = ClientTransaction.obtain(null, activityToken);
+        ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
         transaction.setLifecycleStateRequest(lifecycleRequest);
 
         writeAndPrepareForReading(transaction);

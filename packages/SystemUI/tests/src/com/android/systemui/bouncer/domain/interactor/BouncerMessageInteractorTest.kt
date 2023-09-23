@@ -22,8 +22,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
-import com.android.systemui.R.string.kg_too_many_failed_attempts_countdown
-import com.android.systemui.R.string.kg_unlock_with_pin_or_fp
+import com.android.systemui.res.R.string.kg_too_many_failed_attempts_countdown
+import com.android.systemui.res.R.string.kg_unlock_with_pin_or_fp
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.factory.BouncerMessageFactory
 import com.android.systemui.bouncer.data.repository.FakeBouncerMessageRepository

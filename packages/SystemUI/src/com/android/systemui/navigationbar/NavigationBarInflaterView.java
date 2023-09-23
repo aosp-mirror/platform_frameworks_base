@@ -36,7 +36,7 @@ import android.widget.Space;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.navigationbar.buttons.ReverseLinearLayout;

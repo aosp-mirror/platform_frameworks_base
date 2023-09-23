@@ -30,7 +30,7 @@ import android.view.View
 import android.view.WindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.ActivityLaunchAnimator.PendingIntentStarter
 import com.android.systemui.animation.DelegateLaunchAnimatorController

@@ -37,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.systemui.res.R;
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
 import com.android.internal.logging.MetricsLogger;

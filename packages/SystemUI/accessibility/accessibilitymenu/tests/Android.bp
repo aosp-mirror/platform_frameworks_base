@@ -20,6 +20,7 @@ package {
 
 android_test {
     name: "AccessibilityMenuServiceTests",
+    use_resource_processor: true,
     certificate: "platform",
     libs: [
         "android.test.runner",

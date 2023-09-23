@@ -31,35 +31,35 @@
         android:orientation="horizontal"
         android:clickable="true"
         android:focusable="true"
-        android:paddingStart="8dp">
+        android:paddingStart="16dp">
 
         <ImageView
             android:id="@+id/application_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_margin="4dp"
             android:layout_gravity="center_vertical"
             android:contentDescription="@string/app_icon_text" />
 
         <TextView
             android:id="@+id/application_name"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="20dp"
             android:minWidth="80dp"
             android:textColor="@color/desktop_mode_caption_app_name_dark"
+            android:textAppearance="@android:style/TextAppearance.Material.Title"
             android:textSize="14sp"
             android:textFontWeight="500"
-            android:gravity="center_vertical"
+            android:lineHeight="20dp"
+            android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             tools:text="Gmail"/>
 
         <ImageButton
             android:id="@+id/expand_menu_button"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="4dp"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
             android:contentDescription="@string/expand_menu_text"
             android:src="@drawable/ic_baseline_expand_more_24"
             android:tint="@color/desktop_mode_caption_expand_button_dark"

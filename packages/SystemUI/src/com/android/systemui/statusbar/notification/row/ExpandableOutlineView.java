@@ -28,7 +28,7 @@ import android.util.IndentingPrintWriter;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.ViewRefactorFlag;
 import com.android.systemui.statusbar.notification.RoundableState;

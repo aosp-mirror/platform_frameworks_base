@@ -29,7 +29,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 

@@ -33,7 +33,6 @@ import android.media.projection.IMediaProjectionManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.provider.DeviceConfig;
 import android.view.ContentRecordingSession;
 import android.view.ContentRecordingSession.RecordContent;
 import android.view.Display;
@@ -46,11 +45,6 @@ import com.android.internal.protolog.common.ProtoLog;
  * Manages content recording for a particular {@link DisplayContent}.
  */
 final class ContentRecorder implements WindowContainerListener {
-
-    /**
-     * The key for accessing the device config that controls if task recording is supported.
-     */
-    @VisibleForTesting static final String KEY_RECORD_TASK_FEATURE = "record_task_content";
 
     /**
      * The display content this class is handling recording for.
@@ -411,14 +405,6 @@ final class ContentRecorder implements WindowContainerListener {
                 // TODO(206461622) Migrate to using the RootDisplayArea
                 return dc;
             case RECORD_CONTENT_TASK:
-                if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                        KEY_RECORD_TASK_FEATURE, false)) {
-                    handleStartRecordingFailed();
-                    ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                            "Content Recording: Unable to record task since feature is disabled %d",
-                            mDisplayContent.getDisplayId());
-                    return null;
-                }
                 // Given the WindowToken of the region to record, retrieve the associated
                 // SurfaceControl.
                 if (tokenToRecord == null) {

@@ -25,7 +25,7 @@ import android.view.View;
 import android.widget.ListPopupWindow;
 import android.widget.ListView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.plugins.FalsingManager;
 
 /**

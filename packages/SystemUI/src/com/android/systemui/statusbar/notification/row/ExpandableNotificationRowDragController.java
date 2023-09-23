@@ -48,7 +48,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.app.animation.Interpolators;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;

@@ -31,7 +31,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.android.internal.widget.ConversationLayout;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * A class managing hybrid groups that include {@link HybridNotificationView} and the notification

@@ -14,8 +14,14 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<vector android:height="24dp" android:tint="#000000"
-    android:viewportHeight="24" android:viewportWidth="24"
-    android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="@android:color/black" android:pathData="M16.59,8.59L12,13.17 7.41,8.59 6,10l6,6 6,-6z"/>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?android:attr/textColorSecondary">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M5.41,7.59L4,9l8,8 8,-8 -1.41,-1.41L12,14.17"/>
 </vector>
+

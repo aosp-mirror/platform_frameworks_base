@@ -114,7 +114,7 @@ import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.LaunchAnimator;
 import com.android.systemui.biometrics.AuthController;

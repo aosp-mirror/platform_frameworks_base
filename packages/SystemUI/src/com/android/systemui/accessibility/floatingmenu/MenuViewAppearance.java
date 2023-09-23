@@ -35,7 +35,7 @@ import android.view.WindowMetrics;
 import androidx.annotation.DimenRes;
 
 import com.android.systemui.Flags;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

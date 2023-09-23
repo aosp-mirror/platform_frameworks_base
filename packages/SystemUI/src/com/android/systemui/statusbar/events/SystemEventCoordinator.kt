@@ -20,7 +20,7 @@ import android.annotation.IntRange
 import android.content.Context
 import android.provider.DeviceConfig
 import android.provider.DeviceConfig.NAMESPACE_PRIVACY
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor

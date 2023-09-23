@@ -44,7 +44,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.qs.QSEditEvent;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.TileLayout;

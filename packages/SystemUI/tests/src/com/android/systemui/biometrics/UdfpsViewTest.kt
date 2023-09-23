@@ -25,7 +25,7 @@ import android.view.LayoutInflater
 import android.view.Surface
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
@@ -67,7 +67,7 @@ class UdfpsViewTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        context.setTheme(R.style.Theme_AppCompat)
+        context.setTheme(androidx.appcompat.R.style.Theme_AppCompat)
         view = LayoutInflater.from(context).inflate(R.layout.udfps_view, null) as UdfpsView
         view.animationViewController = animationViewController
         val sensorBounds = SensorLocationInternal("", SENSOR_X, SENSOR_Y, SENSOR_RADIUS).rect

@@ -33,7 +33,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.app.animation.Interpolators;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Visually discloses that contextual data was provided to an assistant.

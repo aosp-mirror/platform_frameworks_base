@@ -34,7 +34,7 @@ import android.testing.TestableLooper
 import android.view.IWindowManager
 import android.view.View
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.view.LaunchableFrameLayout

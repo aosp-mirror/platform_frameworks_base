@@ -24,7 +24,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.util.Locale;
 

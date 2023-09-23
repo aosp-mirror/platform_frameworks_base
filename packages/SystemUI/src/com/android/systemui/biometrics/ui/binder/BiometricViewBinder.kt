@@ -38,7 +38,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.AuthBiometricFaceIconController
 import com.android.systemui.biometrics.AuthBiometricFingerprintAndFaceIconController
 import com.android.systemui.biometrics.AuthBiometricFingerprintIconController

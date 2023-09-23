@@ -54,7 +54,7 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.Dumpable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable

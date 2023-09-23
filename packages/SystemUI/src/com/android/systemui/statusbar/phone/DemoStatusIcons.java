@@ -28,7 +28,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;

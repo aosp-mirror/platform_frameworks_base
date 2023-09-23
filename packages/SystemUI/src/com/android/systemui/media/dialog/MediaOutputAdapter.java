@@ -41,7 +41,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.media.LocalMediaManager.MediaDeviceState;
 import com.android.settingslib.media.MediaDevice;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

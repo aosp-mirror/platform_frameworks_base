@@ -44,17 +44,12 @@
         <option name="hidden-api-checks" value="false"/>
 
         <!-- Listener related args for collecting the traces and waiting for the device to stabilize. -->
-        <option name="device-listeners" value="android.device.collectors.ProcLoadListener,android.device.collectors.PerfettoListener,android.device.collectors.SimpleperfListener" />
-
-        <!-- Guarantee that user defined RunListeners will be running before any of the default listeners defined in this runner. -->
-        <option name="instrumentation-arg" key="newRunListenerMode" value="true" />
+        <option name="device-listeners" value="android.device.collectors.ProcLoadListener,android.device.collectors.SimpleperfListener" />
 
         <option name="instrumentation-arg" key="profiling-iterations" value="525" />
-        <!-- PerfettoListener related arguments -->
-        <option name="instrumentation-arg" key="perfetto_config_text_proto" value="true" />
-        <option name="instrumentation-arg" key="perfetto_config_file" value="trace_config.textproto" />
 
         <!-- SimpleperfListener related arguments -->
+        <option name="instrumentation-arg" key="record" value="false"/>
         <option name="instrumentation-arg" key="report" value="true" />
         <option name="instrumentation-arg" key="arguments" value="-g" />
         <option name="instrumentation-arg" key="events_to_record" value="instructions,cpu-cycles,raw-l3d-cache-refill,sched:sched_waking" />
@@ -70,13 +65,11 @@
         <option name="instrumentation-arg" key="proc-loadavg-threshold" value="3" />
         <option name="instrumentation-arg" key="proc-loadavg-timeout" value="120000" />
         <option name="instrumentation-arg" key="proc-loadavg-interval" value="10000" />
-
     </test>
 
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
         <option name="directory-keys" value="/data/local/tmp/SurfaceFlingerPerfTests" />
         <!-- Needed for pulling the collected trace config on to the host -->
-        <option name="pull-pattern-keys" value="perfetto_file_path" />
         <option name="pull-pattern-keys" value="simpleperf_file_path" />
     </metrics_collector>
 

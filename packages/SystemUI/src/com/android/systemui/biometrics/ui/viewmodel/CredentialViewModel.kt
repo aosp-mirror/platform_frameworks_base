@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.text.InputType
 import com.android.internal.widget.LockPatternView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.domain.interactor.CredentialStatus
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor

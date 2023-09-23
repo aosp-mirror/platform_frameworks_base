@@ -151,8 +151,11 @@ object SplitScreenUtils {
             }
             snapshots[0].click()
         } else {
+            val rotationCheckEnabled = tapl.getExpectedRotationCheckEnabled()
+            tapl.setExpectedRotationCheckEnabled(false) // disable rotation check to enter overview
             val home = tapl.workspace
                 .switchToOverview()
+            tapl.setExpectedRotationCheckEnabled(rotationCheckEnabled) // restore rotation checks
             ChangeDisplayOrientationRule.setRotation(rotation)
             home.currentTask
                 .tapMenu()

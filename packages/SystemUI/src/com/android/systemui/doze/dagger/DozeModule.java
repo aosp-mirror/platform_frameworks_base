@@ -20,7 +20,7 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.os.Handler;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.doze.DozeAuthRemover;

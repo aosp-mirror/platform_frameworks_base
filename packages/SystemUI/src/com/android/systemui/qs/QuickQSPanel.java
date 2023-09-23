@@ -25,7 +25,7 @@ import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.plugins.qs.QSTile;
 
 /**

@@ -25,7 +25,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
-import com.android.systemui.R
+import com.android.systemui.res.R
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

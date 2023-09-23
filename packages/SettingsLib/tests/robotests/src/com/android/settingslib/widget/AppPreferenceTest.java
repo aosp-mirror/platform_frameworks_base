@@ -23,6 +23,8 @@ import android.view.View;
 
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.app.R;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +58,7 @@ public class AppPreferenceTest {
 
     @Test
     public void foobar_testName() {
-        float iconSize = mContext.getResources().getDimension(R.dimen.secondary_app_icon_size);
+        float iconSize = mContext.getResources().getDimension(com.android.settingslib.widget.theme.R.dimen.secondary_app_icon_size);
         assertThat(Float.floatToIntBits(iconSize)).isEqualTo(Float.floatToIntBits(32));
     }
 }

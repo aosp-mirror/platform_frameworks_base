@@ -73,7 +73,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.TrustGrantFlags;
 import com.android.settingslib.fuelgauge.BatteryStatus;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;

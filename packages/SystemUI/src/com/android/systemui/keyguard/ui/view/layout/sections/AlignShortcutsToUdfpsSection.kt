@@ -25,7 +25,7 @@ import androidx.constraintlayout.widget.ConstraintSet.LEFT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags

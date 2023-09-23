@@ -19,7 +19,7 @@ package com.android.systemui.classifier;
 import android.content.res.Resources;
 import android.view.ViewConfiguration;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.scene.shared.flag.SceneContainerFlags;

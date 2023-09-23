@@ -121,7 +121,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.InitController;
 import com.android.systemui.Prefs;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
@@ -2049,7 +2049,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
 
         mPowerButtonReveal = new PowerButtonReveal(mContext.getResources().getDimensionPixelSize(
-                com.android.systemui.R.dimen.physical_power_button_center_screen_location_y));
+                com.android.systemui.res.R.dimen.physical_power_button_center_screen_location_y));
     }
 
     private void logStateToEventlog() {

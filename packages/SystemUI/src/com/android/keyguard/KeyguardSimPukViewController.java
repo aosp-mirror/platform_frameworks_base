@@ -36,7 +36,7 @@ import android.widget.ImageView;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 
@@ -139,25 +139,25 @@ public class KeyguardSimPukViewController
             if (mState == ENTER_PUK) {
                 if (checkPuk()) {
                     mState = ENTER_PIN;
-                    msg = com.android.systemui.R.string.kg_puk_enter_pin_hint;
+                    msg = com.android.systemui.res.R.string.kg_puk_enter_pin_hint;
                 } else {
-                    msg = com.android.systemui.R.string.kg_invalid_sim_puk_hint;
+                    msg = com.android.systemui.res.R.string.kg_invalid_sim_puk_hint;
                 }
             } else if (mState == ENTER_PIN) {
                 if (checkPin()) {
                     mState = CONFIRM_PIN;
-                    msg = com.android.systemui.R.string.kg_enter_confirm_pin_hint;
+                    msg = com.android.systemui.res.R.string.kg_enter_confirm_pin_hint;
                 } else {
-                    msg = com.android.systemui.R.string.kg_invalid_sim_pin_hint;
+                    msg = com.android.systemui.res.R.string.kg_invalid_sim_pin_hint;
                 }
             } else if (mState == CONFIRM_PIN) {
                 if (confirmPin()) {
                     mState = DONE;
-                    msg = com.android.systemui.R.string.keyguard_sim_unlock_progress_dialog_message;
+                    msg = com.android.systemui.res.R.string.keyguard_sim_unlock_progress_dialog_message;
                     updateSim();
                 } else {
                     mState = ENTER_PIN; // try again?
-                    msg = com.android.systemui.R.string.kg_invalid_confirm_pin_hint;
+                    msg = com.android.systemui.res.R.string.kg_invalid_confirm_pin_hint;
                 }
             }
             mView.resetPasswordText(true /* animate */, true /* announce */);

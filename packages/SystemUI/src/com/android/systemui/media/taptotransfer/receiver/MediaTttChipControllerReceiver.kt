@@ -35,7 +35,7 @@ import android.view.accessibility.AccessibilityManager
 import android.view.View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
 import android.view.View.ACCESSIBILITY_LIVE_REGION_NONE
 import com.android.internal.widget.CachingIconView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.app.animation.Interpolators
 import com.android.internal.logging.InstanceId
 import com.android.systemui.common.shared.model.ContentDescription

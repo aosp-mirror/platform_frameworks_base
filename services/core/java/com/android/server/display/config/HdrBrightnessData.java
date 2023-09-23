@@ -18,6 +18,8 @@ package com.android.server.display.config;
 
 import android.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +54,8 @@ public class HdrBrightnessData {
      */
     public final long mBrightnessDecreaseDurationMillis;
 
-    private HdrBrightnessData(Map<Float, Float> maxBrightnessLimits,
+    @VisibleForTesting
+    public HdrBrightnessData(Map<Float, Float> maxBrightnessLimits,
             long brightnessIncreaseDebounceMillis, long brightnessIncreaseDurationMillis,
             long brightnessDecreaseDebounceMillis, long brightnessDecreaseDurationMillis) {
         mMaxBrightnessLimits = maxBrightnessLimits;

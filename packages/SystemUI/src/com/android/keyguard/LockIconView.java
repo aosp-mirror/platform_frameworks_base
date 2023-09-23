@@ -37,7 +37,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.io.PrintWriter;
 

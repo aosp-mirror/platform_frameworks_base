@@ -31,7 +31,7 @@ import org.junit.runner.RunWith
 class DismissSplitScreenByDividerGesturalNavPortrait :
     DismissSplitScreenByDivider(Rotation.ROTATION_0) {
 
-    // TODO(b/300260196): Not detecting this scenario right now
+    // TODO(b/300260196): Not detecting SPLIT_SCREEN_EXIT right now
     @ExpectedScenarios(["ENTIRE_TRACE"])
     @Test
     override fun dismissSplitScreenByDivider() = super.dismissSplitScreenByDivider()

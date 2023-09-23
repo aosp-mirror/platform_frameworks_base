@@ -26,6 +26,7 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
@@ -266,14 +267,12 @@ public class TransactionExecutorHelper {
     }
 
     /** Dump transaction to string. */
-    static String transactionToString(ClientTransaction transaction,
-            ClientTransactionHandler transactionHandler) {
+    static String transactionToString(@NonNull ClientTransaction transaction,
+            @NonNull ClientTransactionHandler transactionHandler) {
         final StringWriter stringWriter = new StringWriter();
         final PrintWriter pw = new PrintWriter(stringWriter);
         final String prefix = tId(transaction);
-        transaction.dump(prefix, pw);
-        pw.append(prefix + "Target activity: ")
-                .println(getActivityName(transaction.getActivityToken(), transactionHandler));
+        transaction.dump(prefix, pw, transactionHandler);
         return stringWriter.toString();
     }
 

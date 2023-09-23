@@ -23,7 +23,7 @@ import android.view.ViewGroup;
 
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 

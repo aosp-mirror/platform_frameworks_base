@@ -25,7 +25,7 @@ import android.view.ViewGroup;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.HardwareBgDrawable;
 import com.android.systemui.MultiListLayout;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.Locale;

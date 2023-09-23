@@ -24,7 +24,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.media.controls.ui.MediaHost;

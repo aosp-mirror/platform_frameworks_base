@@ -33,7 +33,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.android.keyguard.AlphaOptimizedLinearLayout;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.notification.stack.AnimationFilter;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;

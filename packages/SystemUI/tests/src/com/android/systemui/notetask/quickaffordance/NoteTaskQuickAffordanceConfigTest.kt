@@ -28,7 +28,7 @@ import android.os.UserManager
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.dx.mockito.inline.extended.ExtendedMockito
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon

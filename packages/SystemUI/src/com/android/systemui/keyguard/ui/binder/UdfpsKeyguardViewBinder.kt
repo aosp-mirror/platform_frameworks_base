@@ -23,7 +23,7 @@ import android.widget.FrameLayout
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.UdfpsKeyguardView
 import com.android.systemui.biometrics.ui.binder.UdfpsKeyguardInternalViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.BackgroundViewModel

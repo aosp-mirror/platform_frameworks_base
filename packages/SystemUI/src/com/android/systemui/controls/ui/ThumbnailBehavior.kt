@@ -26,7 +26,7 @@ import android.service.controls.templates.TemperatureControlTemplate
 import android.service.controls.templates.ThumbnailTemplate
 import android.util.TypedValue
 
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MAX_LEVEL
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MIN_LEVEL
 

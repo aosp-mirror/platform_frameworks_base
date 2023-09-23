@@ -176,6 +176,18 @@ public class CompatUIController implements OnDisplaysChangedListener,
     // be shown.
     private boolean mKeyguardShowing;
 
+    /**
+     * The id of the task for the application we're currently attempting to show the user aspect
+     * ratio settings button for, or have most recently shown the button for.
+     */
+    private int mTopActivityTaskId;
+
+    /**
+     * Whether the user aspect ratio settings button has been shown for the current application
+     * associated with the task id stored in {@link CompatUIController#mTopActivityTaskId}.
+     */
+    private boolean mHasShownUserAspectRatioSettingsButton = false;
+
     public CompatUIController(@NonNull Context context,
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
@@ -230,6 +242,11 @@ public class CompatUIController implements OnDisplaysChangedListener,
         if (taskInfo != null && !taskInfo.topActivityInSizeCompat) {
             mSetOfTaskIdsShowingRestartDialog.remove(taskInfo.taskId);
         }
+
+        if (taskInfo != null && taskListener != null) {
+            updateActiveTaskInfo(taskInfo);
+        }
+
         if (taskInfo.configuration == null || taskListener == null) {
             // Null token means the current foreground activity is not in compatibility mode.
             removeLayouts(taskInfo.taskId);
@@ -320,6 +337,46 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mKeyguardShowing = visible;
         // Hide the compat UIs when keyguard is showing.
         forAllLayouts(layout -> layout.updateVisibility(showOnDisplay(layout.getDisplayId())));
+    }
+
+    /**
+     * Invoked when a new task is created or the info of an existing task has changed. Updates the
+     * shown status of the user aspect ratio settings button and the task id it relates to.
+     */
+    void updateActiveTaskInfo(@NonNull TaskInfo taskInfo) {
+        // If the activity belongs to the task we are currently tracking, don't update any variables
+        // as they are still relevant. Else, if the activity is visible and focused (the one the
+        // user can see and is using), the user aspect ratio button can potentially be displayed so
+        // start tracking the buttons visibility for this task.
+        if (mTopActivityTaskId != taskInfo.taskId && !taskInfo.isTopActivityTransparent
+                && taskInfo.isVisible && taskInfo.isFocused) {
+            mTopActivityTaskId = taskInfo.taskId;
+            setHasShownUserAspectRatioSettingsButton(false);
+        }
+    }
+
+    /**
+     * Informs the system that the user aspect ratio button has been displayed for the application
+     * associated with the task id in {@link CompatUIController#mTopActivityTaskId}.
+     */
+    void setHasShownUserAspectRatioSettingsButton(boolean state) {
+        mHasShownUserAspectRatioSettingsButton = state;
+    }
+
+    /**
+     * Returns whether the user aspect ratio settings button has been show for the application
+     * associated with the task id in {@link CompatUIController#mTopActivityTaskId}.
+     */
+    boolean hasShownUserAspectRatioSettingsButton() {
+        return mHasShownUserAspectRatioSettingsButton;
+    }
+
+    /**
+     * Returns the task id of the application we are currently attempting to show, of have most
+     * recently shown, the user aspect ratio settings button for.
+     */
+    int getTopActivityTaskId() {
+        return mTopActivityTaskId;
     }
 
     private boolean showOnDisplay(int displayId) {
@@ -572,7 +629,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         return new UserAspectRatioSettingsWindowManager(context, taskInfo, mSyncQueue,
                 taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
                 mCompatUIHintsState, this::launchUserAspectRatioSettings, mMainExecutor,
-                mDisappearTimeSupplier);
+                mDisappearTimeSupplier, this::hasShownUserAspectRatioSettingsButton,
+                this::setHasShownUserAspectRatioSettingsButton);
     }
 
     private void launchUserAspectRatioSettings(

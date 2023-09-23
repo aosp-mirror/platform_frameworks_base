@@ -22,7 +22,7 @@ import android.provider.Settings
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.accessibility.fontscaling.FontScalingDialog
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator

@@ -1117,6 +1117,14 @@ public class SubscriptionManager {
     public static final String SATELLITE_ATTACH_ENABLED_FOR_CARRIER =
             SimInfo.COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER;
 
+    /**
+     * TelephonyProvider column name to identify eSIM profile of a non-terrestrial network.
+     * By default, it's disabled.
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String IS_NTN = SimInfo.COLUMN_IS_NTN;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"USAGE_SETTING_"},

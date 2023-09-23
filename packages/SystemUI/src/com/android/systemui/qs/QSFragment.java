@@ -47,7 +47,7 @@ import androidx.lifecycle.LifecycleRegistry;
 import com.android.app.animation.Interpolators;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dump.DumpManager;

@@ -220,33 +220,21 @@ import java.util.List;
         return -1;
     }
 
-
     /**
-     * Send a simulated key event for a media button to be received by the current client.
-     * To simulate a key press, you must first send a KeyEvent built with
-     * a {@link KeyEvent#ACTION_DOWN} action, then another event with the {@link KeyEvent#ACTION_UP}
-     * action.
-     * <p>The key event will be sent to the registered receiver
-     * (see {@link AudioManager#registerMediaButtonEventReceiver(PendingIntent)}) whose associated
-     * {@link RemoteControlClient}'s metadata and playback state is published (there may be
-     * none under some circumstances).
-     * @param keyEvent a {@link KeyEvent} instance whose key code is one of
-     *     {@link KeyEvent#KEYCODE_MUTE},
-     *     {@link KeyEvent#KEYCODE_HEADSETHOOK},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PLAY},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PAUSE},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PLAY_PAUSE},
-     *     {@link KeyEvent#KEYCODE_MEDIA_STOP},
-     *     {@link KeyEvent#KEYCODE_MEDIA_NEXT},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PREVIOUS},
-     *     {@link KeyEvent#KEYCODE_MEDIA_REWIND},
-     *     {@link KeyEvent#KEYCODE_MEDIA_RECORD},
-     *     {@link KeyEvent#KEYCODE_MEDIA_FAST_FORWARD},
-     *     {@link KeyEvent#KEYCODE_MEDIA_CLOSE},
-     *     {@link KeyEvent#KEYCODE_MEDIA_EJECT},
-     *     or {@link KeyEvent#KEYCODE_MEDIA_AUDIO_TRACK}.
+     * Send a simulated key event for a media button to be received by the current client. To
+     * simulate a key press, you must first send a KeyEvent built with a {@link
+     * KeyEvent#ACTION_DOWN} action, then another event with the {@link KeyEvent#ACTION_UP} action.
+     *
+     * <p>The key event will be sent to the registered receiver (see {@link
+     * AudioManager#registerMediaButtonEventReceiver(PendingIntent)}) whose associated {@link
+     * RemoteControlClient}'s metadata and playback state is published (there may be none under some
+     * circumstances).
+     *
+     * @param keyEvent a media session {@link KeyEvent}, as defined by {@link
+     *     KeyEvent#isMediaSessionKey}.
      * @return true if the event was successfully sent, false otherwise.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException If the provided {@link KeyEvent} is not a media session key,
+     *     as defined by {@link KeyEvent#isMediaSessionKey}.
      */
     public boolean sendMediaKeyEvent(KeyEvent keyEvent) throws IllegalArgumentException {
         if (!KeyEvent.isMediaSessionKey(keyEvent.getKeyCode())) {

@@ -41,7 +41,7 @@ import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ImageMessageConsumer;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;

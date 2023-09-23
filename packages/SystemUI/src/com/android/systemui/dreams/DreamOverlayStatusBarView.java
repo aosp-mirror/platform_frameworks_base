@@ -26,7 +26,7 @@ import android.view.ViewGroup;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.shadow.DoubleShadowIconDrawable;
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper.ShadowInfo;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;

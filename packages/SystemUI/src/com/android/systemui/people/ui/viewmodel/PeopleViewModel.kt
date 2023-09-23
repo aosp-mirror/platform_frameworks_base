@@ -23,7 +23,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.people.PeopleSpaceUtils
 import com.android.systemui.people.PeopleTileViewHelper

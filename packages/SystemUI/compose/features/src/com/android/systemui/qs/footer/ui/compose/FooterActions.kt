@@ -69,7 +69,7 @@ import com.android.compose.animation.Expandable
 import com.android.compose.modifiers.background
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.colorAttr
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon

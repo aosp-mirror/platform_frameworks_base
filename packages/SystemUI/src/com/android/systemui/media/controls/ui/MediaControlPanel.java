@@ -81,7 +81,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.widget.CachingIconView;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.ActivityIntentHelper;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
 import com.android.systemui.bluetooth.BroadcastDialogController;

@@ -31,7 +31,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ContentRecorder.KEY_RECORD_TASK_FEATURE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -51,25 +50,21 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
-import android.provider.DeviceConfig;
 import android.view.ContentRecordingSession;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.SurfaceControl;
 
-import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.ContentRecorder.MediaProjectionManagerWrapper;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.concurrent.CountDownLatch;
 
 /**
  * Tests for the {@link ContentRecorder} class.
@@ -93,9 +88,6 @@ public class ContentRecorderTests extends WindowTestsBase {
     private ContentRecorder mContentRecorder;
     @Mock private MediaProjectionManagerWrapper mMediaProjectionManagerWrapper;
     private SurfaceControl mRecordedSurface;
-    // Handle feature flag.
-    private ConfigListener mConfigListener;
-    private CountDownLatch mLatch;
 
     @Before public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -133,21 +125,9 @@ public class ContentRecorderTests extends WindowTestsBase {
         mWaitingDisplaySession.setVirtualDisplayId(displayId);
         mWaitingDisplaySession.setWaitingForConsent(true);
 
-        mConfigListener = new ConfigListener();
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                mContext.getMainExecutor(), mConfigListener);
-        mLatch = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER, KEY_RECORD_TASK_FEATURE,
-                "true", true);
-
         // Skip unnecessary operations of relayout.
         spyOn(mWm.mWindowPlacerLocked);
         doNothing().when(mWm.mWindowPlacerLocked).performSurfacePlacement(anyBoolean());
-    }
-
-    @After
-    public void teardown() {
-        DeviceConfig.removeOnPropertiesChangedListener(mConfigListener);
     }
 
     @Test
@@ -181,24 +161,6 @@ public class ContentRecorderTests extends WindowTestsBase {
         mContentRecorder.setContentRecordingSession(mDisplaySession);
         mContentRecorder.updateRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
-    }
-
-    @Test
-    public void testUpdateRecording_task_featureDisabled() {
-        mLatch = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER, KEY_RECORD_TASK_FEATURE,
-                "false", false);
-        mContentRecorder.setContentRecordingSession(mTaskSession);
-        mContentRecorder.updateRecording();
-        assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
-    }
-
-    @Test
-    public void testUpdateRecording_task_featureEnabled() {
-        // Feature already enabled; don't need to again.
-        mContentRecorder.setContentRecordingSession(mTaskSession);
-        mContentRecorder.updateRecording();
-        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
     }
 
     @Test
@@ -702,14 +664,5 @@ public class ContentRecorderTests extends WindowTestsBase {
         doReturn(surfaceSize).when(mWm.mDisplayManagerInternal).getDisplaySurfaceDefaultSize(
                 anyInt());
         return mirroredSurface;
-    }
-
-    private class ConfigListener implements DeviceConfig.OnPropertiesChangedListener {
-        @Override
-        public void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
-            if (mLatch != null && properties.getKeyset().contains(KEY_RECORD_TASK_FEATURE)) {
-                mLatch.countDown();
-            }
-        }
     }
 }

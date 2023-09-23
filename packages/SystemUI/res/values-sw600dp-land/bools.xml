@@ -19,4 +19,7 @@
     <!-- Only use small clock on lockscreen.
      False here because large clock is allowed on large devices in landscape -->
     <bool name="force_small_clock_on_lockscreen">false</bool>
+
+    <!--  True when small screen (<sw600dp) is landscape. -->
+    <bool name="is_small_screen_landscape">false</bool>
 </resources>

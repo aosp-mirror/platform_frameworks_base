@@ -18,4 +18,14 @@
   <!-- The name of this application. Credential Manager is a service that centralizes and provides
   access to a user's credentials used to sign in to various apps. [CHAR LIMIT=80] -->
   <string name="app_name">Credential Manager</string>
+  <!-- Title of a screen prompting if the user would like to use their saved passkey.
+  [CHAR LIMIT=80] -->
+  <string name="use_passkey_title">Use passkey?</string>
+  <!-- Title of a screen prompting if the user would like to use their saved password.
+  [CHAR LIMIT=80] -->
+  <string name="use_password_title">Use password?</string>
+  <!-- Content description for the cancel button of a screen. [CHAR LIMIT=NONE] -->
+  <string name="dialog_cancel_button_cd">Cancel</string>
+  <!-- Content description for the OK button of a screen. [CHAR LIMIT=NONE] -->
+  <string name="dialog_ok_button_cd">OK</string>
 </resources>

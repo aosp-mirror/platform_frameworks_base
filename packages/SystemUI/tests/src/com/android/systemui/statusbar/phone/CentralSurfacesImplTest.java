@@ -85,7 +85,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.InitController;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;

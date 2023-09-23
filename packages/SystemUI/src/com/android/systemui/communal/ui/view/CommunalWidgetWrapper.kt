@@ -20,7 +20,7 @@ package com.android.systemui.communal.ui.view
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.LinearLayout
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 /** Wraps around a widget rendered in communal mode. */
 class CommunalWidgetWrapper(context: Context, attrs: AttributeSet? = null) :

@@ -31,7 +31,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Lightweight activity for editing text clipboard contents

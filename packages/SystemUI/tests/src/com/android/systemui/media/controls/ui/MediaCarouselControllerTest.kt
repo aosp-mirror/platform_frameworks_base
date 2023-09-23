@@ -31,7 +31,7 @@ import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.TestScopeProvider
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager

@@ -330,7 +330,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
                 ArgumentCaptor.forClass(ConfigurationChangeItem.class);
         verify(clientManager).scheduleTransaction(eq(thread), captor.capture());
         final ClientTransactionHandler client = mock(ClientTransactionHandler.class);
-        captor.getValue().preExecute(client, null /* token */);
+        captor.getValue().preExecute(client);
         final ArgumentCaptor<Configuration> configCaptor =
                 ArgumentCaptor.forClass(Configuration.class);
         verify(client).updatePendingConfiguration(configCaptor.capture());

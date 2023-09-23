@@ -74,7 +74,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -1571,6 +1571,53 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // THEN the touch is NOT processed
         verify(mFingerprintManager, never()).onPointerDown(anyLong(), anyInt(), anyInt(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(),
+                anyBoolean());
+    }
+
+
+    @Test
+    public void onTouch_withNewTouchDetection_qsDrag_processesTouchWhenAlternateBouncerVisible()
+            throws RemoteException {
+        final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
+                0L);
+        final TouchProcessorResult processorResultMove =
+                new TouchProcessorResult.ProcessedTouch(InteractionEvent.DOWN,
+                        1 /* pointerId */, touchData);
+
+        // Enable new touch detection.
+        when(mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)).thenReturn(true);
+
+        // Configure UdfpsController to use FingerprintManager as opposed to AlternateTouchProvider.
+        initUdfpsController(mOpticalProps, false /* hasAlternateTouchProvider */);
+
+        // Configure UdfpsView to accept the ACTION_MOVE event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+
+        // GIVEN that the alternate bouncer is showing and a11y touch exploration NOT enabled
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+
+        // GIVEN swipe down for QS
+        when(mPrimaryBouncerInteractor.isInTransit()).thenReturn(false);
+        when(mLockscreenShadeTransitionController.getQSDragProgress()).thenReturn(1f);
+
+        // WHEN ACTION_MOVE is received and touch is within sensor
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultMove);
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        mBiometricExecutor.runAllReady();
+        moveEvent.recycle();
+
+        // THEN the touch is still processed
+        verify(mFingerprintManager).onPointerDown(anyLong(), anyInt(), anyInt(),
                 anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(),
                 anyBoolean());
     }

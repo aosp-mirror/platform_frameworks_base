@@ -22,7 +22,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel

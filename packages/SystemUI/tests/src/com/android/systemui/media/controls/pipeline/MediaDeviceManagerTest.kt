@@ -34,7 +34,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.MediaTestUtils

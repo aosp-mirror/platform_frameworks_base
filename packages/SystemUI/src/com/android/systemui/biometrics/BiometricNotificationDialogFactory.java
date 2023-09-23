@@ -27,7 +27,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 

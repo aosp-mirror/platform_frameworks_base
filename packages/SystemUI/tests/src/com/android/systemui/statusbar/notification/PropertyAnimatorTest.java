@@ -33,7 +33,7 @@ import android.view.View;
 import android.view.animation.Interpolator;
 
 import com.android.app.animation.Interpolators;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.stack.AnimationFilter;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;

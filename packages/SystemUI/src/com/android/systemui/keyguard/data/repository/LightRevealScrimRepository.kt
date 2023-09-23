@@ -22,7 +22,7 @@ import android.content.Context
 import android.graphics.Point
 import androidx.core.animation.Animator
 import androidx.core.animation.ValueAnimator
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource

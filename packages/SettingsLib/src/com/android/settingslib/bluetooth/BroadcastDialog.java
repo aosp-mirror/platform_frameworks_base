@@ -47,7 +47,7 @@ public class BroadcastDialog extends AlertDialog {
         final Window window = getWindow();
         window.setContentView(layout);
         window.setWindowAnimations(
-                com.android.settingslib.widget.R.style.Theme_AlertDialog_SettingsLib);
+                com.android.settingslib.widget.theme.R.style.Theme_AlertDialog_SettingsLib);
 
         TextView title = layout.findViewById(R.id.dialog_title);
         TextView subTitle = layout.findViewById(R.id.dialog_subtitle);

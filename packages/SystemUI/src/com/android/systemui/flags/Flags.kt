@@ -17,7 +17,7 @@ package com.android.systemui.flags
 
 import android.provider.DeviceConfig
 import com.android.internal.annotations.Keep
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.flags.FlagsFactory.releasedFlag
 import com.android.systemui.flags.FlagsFactory.resourceBooleanFlag
 import com.android.systemui.flags.FlagsFactory.sysPropBooleanFlag
@@ -250,10 +250,6 @@ object Flags {
     // TODO(b/277961132): Tracking bug.
     @JvmField val REVAMPED_BOUNCER_MESSAGES = unreleasedFlag("revamped_bouncer_messages")
 
-    /** Whether to delay showing bouncer UI when face auth or active unlock are enrolled. */
-    // TODO(b/279794160): Tracking bug.
-    @JvmField val DELAY_BOUNCER = releasedFlag("delay_bouncer")
-
     /** Keyguard Migration */
 
     /**
@@ -396,7 +392,8 @@ object Flags {
     val PLUG_IN_STATUS_BAR_CHIP = releasedFlag("plug_in_status_bar_chip")
 
     // TODO(b/292533677): Tracking Bug
-    val WIFI_TRACKER_LIB_FOR_WIFI_ICON = releasedFlag("wifi_tracker_lib_for_wifi_icon")
+    val WIFI_TRACKER_LIB_FOR_WIFI_ICON =
+        unreleasedFlag("wifi_tracker_lib_for_wifi_icon", teamfood = true)
 
     // TODO(b/293863612): Tracking Bug
     @JvmField val INCOMPATIBLE_CHARGING_BATTERY_ICON =
@@ -757,7 +754,7 @@ object Flags {
         unreleasedFlag("enable_new_privacy_dialog", teamfood = true)
 
     // TODO(b/289573946): Tracking Bug
-    @JvmField val PRECOMPUTED_TEXT = unreleasedFlag("precomputed_text")
+    @JvmField val PRECOMPUTED_TEXT = unreleasedFlag("precomputed_text", teamfood = true)
 
     // 2900 - CentralSurfaces-related flags
 
@@ -795,7 +792,8 @@ object Flags {
 
     // TODO(b/287205379): Tracking bug
     @JvmField
-    val QS_CONTAINER_GRAPH_OPTIMIZER = unreleasedFlag( "qs_container_graph_optimizer")
+    val QS_CONTAINER_GRAPH_OPTIMIZER = unreleasedFlag( "qs_container_graph_optimizer",
+            teamfood = true)
 
     /** Enable showing a dialog when clicking on Quick Settings bluetooth tile. */
     @JvmField

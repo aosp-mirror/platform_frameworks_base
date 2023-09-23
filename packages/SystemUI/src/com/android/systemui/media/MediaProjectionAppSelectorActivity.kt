@@ -46,7 +46,7 @@ import com.android.internal.app.chooser.TargetInfo
 import com.android.internal.widget.RecyclerView
 import com.android.internal.widget.RecyclerViewAccessibilityDelegate
 import com.android.internal.widget.ResolverDrawerLayout
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorComponent
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorController
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler

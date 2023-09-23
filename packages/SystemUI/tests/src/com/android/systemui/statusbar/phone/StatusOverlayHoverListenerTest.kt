@@ -31,7 +31,7 @@ import android.view.ViewGroupOverlay
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange
 import com.android.systemui.statusbar.policy.FakeConfigurationController

@@ -27,7 +27,7 @@ import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile
 import com.google.common.truth.Truth.assertThat

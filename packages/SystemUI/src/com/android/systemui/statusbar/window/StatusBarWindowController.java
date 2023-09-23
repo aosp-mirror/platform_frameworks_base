@@ -47,7 +47,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import com.android.internal.policy.SystemBarUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.dagger.SysUISingleton;

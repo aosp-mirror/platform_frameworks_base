@@ -5,7 +5,7 @@ import android.testing.TestableLooper
 import android.view.LayoutInflater
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.R
+import com.android.systemui.res.R
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test

@@ -30,7 +30,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardInputViewController.Factory;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.util.ViewController;
 

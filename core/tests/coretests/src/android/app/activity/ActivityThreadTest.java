@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.ActivityThread.ActivityClientRecord;
@@ -226,7 +226,7 @@ public class ActivityThreadTest {
         CompatibilityInfo.setOverrideInvertedScale(scale);
         try {
             // Send process level config change.
-            ClientTransaction transaction = newTransaction(activityThread, null);
+            ClientTransaction transaction = newTransaction(activityThread);
             transaction.addCallback(ConfigurationChangeItem.obtain(
                     new Configuration(newConfig), DEVICE_ID_INVALID));
             appThread.scheduleTransaction(transaction);
@@ -243,7 +243,7 @@ public class ActivityThreadTest {
             // Send activity level config change.
             newConfig.seq++;
             newConfig.smallestScreenWidthDp++;
-            transaction = newTransaction(activityThread, activity.getActivityToken());
+            transaction = newTransaction(activityThread);
             transaction.addCallback(ActivityConfigurationChangeItem.obtain(
                     activity.getActivityToken(), new Configuration(newConfig)));
             appThread.scheduleTransaction(transaction);
@@ -444,12 +444,12 @@ public class ActivityThreadTest {
         activity.mConfigLatch = new CountDownLatch(1);
         activity.mTestLatch = new CountDownLatch(1);
 
-        ClientTransaction transaction = newTransaction(activityThread, null);
+        ClientTransaction transaction = newTransaction(activityThread);
         transaction.addCallback(ConfigurationChangeItem.obtain(
                 processConfigLandscape, DEVICE_ID_INVALID));
         appThread.scheduleTransaction(transaction);
 
-        transaction = newTransaction(activityThread, activity.getActivityToken());
+        transaction = newTransaction(activityThread);
         transaction.addCallback(ActivityConfigurationChangeItem.obtain(
                 activity.getActivityToken(), activityConfigLandscape));
         transaction.addCallback(ConfigurationChangeItem.obtain(
@@ -829,7 +829,8 @@ public class ActivityThreadTest {
         return thread.getActivityClient(token);
     }
 
-    private static ClientTransaction newRelaunchResumeTransaction(Activity activity) {
+    @NonNull
+    private static ClientTransaction newRelaunchResumeTransaction(@NonNull Activity activity) {
         final Configuration currentConfig = activity.getResources().getConfiguration();
         final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(
                 activity.getActivityToken(), null, null, 0,
@@ -846,7 +847,8 @@ public class ActivityThreadTest {
         return transaction;
     }
 
-    private static ClientTransaction newResumeTransaction(Activity activity) {
+    @NonNull
+    private static ClientTransaction newResumeTransaction(@NonNull Activity activity) {
         final ResumeActivityItem resumeStateRequest =
                 ResumeActivityItem.obtain(activity.getActivityToken(), true /* isForward */,
                         false /* shouldSendCompatFakeFocus */);
@@ -857,7 +859,8 @@ public class ActivityThreadTest {
         return transaction;
     }
 
-    private static ClientTransaction newStopTransaction(Activity activity) {
+    @NonNull
+    private static ClientTransaction newStopTransaction(@NonNull Activity activity) {
         final StopActivityItem stopStateRequest = StopActivityItem.obtain(
                 activity.getActivityToken(), 0 /* configChanges */);
 
@@ -867,8 +870,9 @@ public class ActivityThreadTest {
         return transaction;
     }
 
-    private static ClientTransaction newActivityConfigTransaction(Activity activity,
-            Configuration config) {
+    @NonNull
+    private static ClientTransaction newActivityConfigTransaction(@NonNull Activity activity,
+            @NonNull Configuration config) {
         final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(
                 activity.getActivityToken(), config);
 
@@ -878,8 +882,9 @@ public class ActivityThreadTest {
         return transaction;
     }
 
-    private static ClientTransaction newNewIntentTransaction(Activity activity,
-            List<ReferrerIntent> intents, boolean resume) {
+    @NonNull
+    private static ClientTransaction newNewIntentTransaction(@NonNull Activity activity,
+            @NonNull List<ReferrerIntent> intents, boolean resume) {
         final NewIntentItem item = NewIntentItem.obtain(activity.getActivityToken(), intents,
                 resume);
 
@@ -889,13 +894,14 @@ public class ActivityThreadTest {
         return transaction;
     }
 
-    private static ClientTransaction newTransaction(Activity activity) {
-        return newTransaction(activity.getActivityThread(), activity.getActivityToken());
+    @NonNull
+    private static ClientTransaction newTransaction(@NonNull Activity activity) {
+        return newTransaction(activity.getActivityThread());
     }
 
-    private static ClientTransaction newTransaction(ActivityThread activityThread,
-            @Nullable IBinder activityToken) {
-        return ClientTransaction.obtain(activityThread.getApplicationThread(), activityToken);
+    @NonNull
+    private static ClientTransaction newTransaction(@NonNull ActivityThread activityThread) {
+        return ClientTransaction.obtain(activityThread.getApplicationThread());
     }
 
     // Test activity

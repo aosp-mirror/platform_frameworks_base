@@ -22,7 +22,7 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewStub
 import androidx.constraintlayout.motion.widget.MotionLayout
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.biometrics.AuthRippleView

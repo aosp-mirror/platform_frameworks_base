@@ -24,7 +24,7 @@ import android.service.quickaccesswallet.GetWalletCardsResponse
 import android.service.quickaccesswallet.QuickAccessWalletClient
 import android.service.quickaccesswallet.WalletCard
 import android.util.Log
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow

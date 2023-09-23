@@ -27,7 +27,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor

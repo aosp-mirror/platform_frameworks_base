@@ -48,7 +48,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.InstanceIdSequenceFake
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager

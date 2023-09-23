@@ -30,7 +30,7 @@ import android.testing.TestableLooper
 import android.view.SurfaceControlViewHost
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator

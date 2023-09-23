@@ -17,7 +17,7 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor

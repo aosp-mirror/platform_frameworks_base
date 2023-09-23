@@ -6420,6 +6420,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (!restarting && hasVisibleActivities) {
                     deferWindowLayout();
                     try {
+                        final Task topTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
+                        if (topTask != null
+                                && topTask.topRunningActivity(true /* focusableOnly */) == null) {
+                            topTask.adjustFocusToNextFocusableTask("handleAppDied");
+                        }
                         if (!mRootWindowContainer.resumeFocusedTasksTopActivities()) {
                             // If there was nothing to resume, and we are not already restarting
                             // this process, but there is a visible activity that is hosted by the

@@ -44,7 +44,7 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
     private boolean mShouldSendCompatFakeFocus;
 
     @Override
-    public void preExecute(@NonNull ClientTransactionHandler client, @NonNull IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
         if (mUpdateProcState) {
             client.updateProcessState(mProcState, false);
         }
@@ -60,7 +60,7 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
     }
 
     @Override
-    public void postExecute(@NonNull ClientTransactionHandler client, IBinder token,
+    public void postExecute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         // TODO(lifecycler): Use interface callback instead of actual implementation.
         ActivityClient.getInstance().activityResumed(getActivityToken(),

@@ -340,8 +340,9 @@ public class BackupManagerMonitorEventSenderTest {
     @Test
     public void putMonitoringExtraLong_bundleExists_fillsBundleCorrectly() throws Exception {
         Bundle bundle = new Bundle();
+        long value = 123;
 
-        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(bundle, "key", 123);
+        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(bundle, "key", value);
 
         assertThat(result).isEqualTo(bundle);
         assertThat(result.size()).isEqualTo(1);
@@ -350,7 +351,8 @@ public class BackupManagerMonitorEventSenderTest {
 
     @Test
     public void putMonitoringExtraLong_bundleDoesNotExist_fillsBundleCorrectly() throws Exception {
-        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(null, "key", 123);
+        long value = 123;
+        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(null, "key", value);
 
         assertThat(result).isNotNull();
         assertThat(result.size()).isEqualTo(1);
@@ -376,5 +378,26 @@ public class BackupManagerMonitorEventSenderTest {
         assertThat(result).isNotNull();
         assertThat(result.size()).isEqualTo(1);
         assertThat(result.getBoolean("key")).isTrue();
+    }
+
+    @Test
+    public void putMonitoringExtraInt_bundleExists_fillsBundleCorrectly() throws Exception {
+        Bundle bundle = new Bundle();
+
+        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(bundle, "key", 1);
+
+        assertThat(result).isEqualTo(bundle);
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.getInt("key")).isEqualTo(1);
+    }
+
+    @Test
+    public void putMonitoringExtraInt_bundleDoesNotExist_fillsBundleCorrectly()
+            throws Exception {
+        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(null, "key", 1);
+
+        assertThat(result).isNotNull();
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.getInt("key")).isEqualTo(1);
     }
 }

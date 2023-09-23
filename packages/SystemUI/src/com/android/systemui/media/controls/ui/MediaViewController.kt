@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.res.Configuration
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder

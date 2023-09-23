@@ -29,7 +29,7 @@ import androidx.recyclerview.widget.RecyclerView.Adapter;
 
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ViewHolder;
 
 import java.lang.annotation.Retention;

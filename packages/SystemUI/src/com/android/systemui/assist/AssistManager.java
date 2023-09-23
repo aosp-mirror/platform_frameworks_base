@@ -29,7 +29,7 @@ import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.assist.ui.DefaultUiController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;

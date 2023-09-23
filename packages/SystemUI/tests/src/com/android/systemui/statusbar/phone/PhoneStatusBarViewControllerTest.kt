@@ -27,7 +27,7 @@ import android.view.ViewTreeObserver.OnPreDrawListener
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags

@@ -20,7 +20,7 @@ import android.content.res.ColorStateList
 import android.view.View
 import android.view.WindowManager
 import com.android.settingslib.Utils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 /**
