@@ -1683,6 +1683,18 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
     }
 
+    @Override
+    public void onTransactionCommitTimeout() {
+        if (mCleanupTransaction == null) return;
+        for (int i = mTargetDisplays.size() - 1; i >= 0; --i) {
+            final DisplayContent dc = mTargetDisplays.get(i);
+            final AsyncRotationController asyncRotationController = dc.getAsyncRotationController();
+            if (asyncRotationController != null && containsChangeFor(dc, mTargets)) {
+                asyncRotationController.onTransactionCommitTimeout(mCleanupTransaction);
+            }
+        }
+    }
+
     /**
      * Collect tasks which moved-to-top as part of this transition. This also updates the
      * controller's latest-reported when relevant.

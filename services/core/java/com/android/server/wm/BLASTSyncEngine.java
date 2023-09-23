@@ -95,6 +95,7 @@ class BLASTSyncEngine {
 
     interface TransactionReadyListener {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
+        default void onTransactionCommitTimeout() {}
     }
 
     /**
@@ -249,6 +250,7 @@ class BLASTSyncEngine {
                            " commit callback. Application ANR likely to follow.");
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     synchronized (mWm.mGlobalLock) {
+                        mListener.onTransactionCommitTimeout();
                         onCommitted(merged.mNativeObject != 0
                                 ? merged : mWm.mTransactionFactory.get());
                     }
