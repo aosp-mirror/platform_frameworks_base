@@ -12164,7 +12164,8 @@ public class BatteryStatsImpl extends BatteryStats {
         if (DEBUG_ENERGY) {
             Slog.d(TAG, "Updating mobile radio stats with " + activityInfo);
         }
-        ModemActivityInfo deltaInfo = mLastModemActivityInfo == null ? activityInfo
+        ModemActivityInfo deltaInfo = mLastModemActivityInfo == null
+                ? (activityInfo == null ? null : activityInfo.getDelta(activityInfo))
                 : mLastModemActivityInfo.getDelta(activityInfo);
         mLastModemActivityInfo = activityInfo;
 

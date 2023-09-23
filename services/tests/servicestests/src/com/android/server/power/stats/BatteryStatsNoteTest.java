@@ -1458,6 +1458,148 @@ public class BatteryStatsNoteTest extends TestCase {
     }
 
     @SmallTest
+    public void testGetPerStateActiveRadioDurationMs_initialModemActivity() {
+        final MockClock clock = new MockClock(); // holds realtime and uptime in ms
+        final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
+        bi.setPowerProfile(mock(PowerProfile.class));
+
+        final int ratCount = RADIO_ACCESS_TECHNOLOGY_COUNT;
+        final int frequencyCount = ServiceState.FREQUENCY_RANGE_MMWAVE + 1;
+        final int txLevelCount = CellSignalStrength.getNumSignalStrengthLevels();
+
+        List<ActivityStatsTechSpecificInfo> specificInfoList = new ArrayList();
+
+        final long[][][] expectedDurationsMs = new long[ratCount][frequencyCount][txLevelCount];
+        final long[][] expectedRxDurationsMs = new long[ratCount][frequencyCount];
+        final long[][][] expectedTxDurationsMs = new long[ratCount][frequencyCount][txLevelCount];
+        for (int rat = 0; rat < ratCount; rat++) {
+            for (int freq = 0; freq < frequencyCount; freq++) {
+                if (rat == RADIO_ACCESS_TECHNOLOGY_NR
+                        || freq == ServiceState.FREQUENCY_RANGE_UNKNOWN) {
+                    // Only the NR RAT should have per frequency data.
+                    expectedRxDurationsMs[rat][freq] = 0;
+                } else {
+                    expectedRxDurationsMs[rat][freq] = POWER_DATA_UNAVAILABLE;
+                }
+                for (int txLvl = 0; txLvl < txLevelCount; txLvl++) {
+                    if (rat == RADIO_ACCESS_TECHNOLOGY_NR
+                            || freq == ServiceState.FREQUENCY_RANGE_UNKNOWN) {
+                        // Only the NR RAT should have per frequency data.
+                        expectedTxDurationsMs[rat][freq][txLvl] = 0;
+                    } else {
+                        expectedTxDurationsMs[rat][freq][txLvl] = POWER_DATA_UNAVAILABLE;
+                    }
+                }
+            }
+        }
+
+        // The first modem activity pulled from modem with activity stats for each RATs.
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.UNKNOWN,
+                ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 101));
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.GERAN,
+                ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 202));
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.UTRAN,
+                ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 303));
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.EUTRAN,
+                ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[]{3, 9, 133, 48, 218}, 404));
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.CDMA2000,
+                ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 505));
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.IWLAN,
+                ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 606));
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.NGRAN,
+                ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 707));
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.NGRAN,
+                ServiceState.FREQUENCY_RANGE_LOW, new int[txLevelCount], 808));
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.NGRAN,
+                ServiceState.FREQUENCY_RANGE_MID, new int[txLevelCount], 909));
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.NGRAN,
+                ServiceState.FREQUENCY_RANGE_HIGH, new int[txLevelCount], 1010));
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.NGRAN,
+                ServiceState.FREQUENCY_RANGE_MMWAVE, new int[txLevelCount], 1111));
+
+
+        final ActivityStatsTechSpecificInfo[] specificInfos = specificInfoList.toArray(
+                new ActivityStatsTechSpecificInfo[specificInfoList.size()]);
+        final ModemActivityInfo mai = new ModemActivityInfo(0L, 2002L, 3003L, specificInfos);
+        final ModemAndBatteryState state = new ModemAndBatteryState(bi, mai, specificInfos);
+
+
+        IntConsumer incrementTime = inc -> {
+            state.currentTimeMs += inc;
+            clock.realtime = clock.uptime = state.currentTimeMs;
+
+            final int currRat = state.currentRat;
+            final int currRant = state.currentRadioAccessNetworkType;
+            final int currFreqRange =
+                    currRat == RADIO_ACCESS_TECHNOLOGY_NR ? state.currentFrequencyRange : 0;
+            int currSignalStrength = state.currentSignalStrengths.get(currRat);
+
+            if (state.modemActive) {
+                // Don't count the duration if the modem is not active
+                expectedDurationsMs[currRat][currFreqRange][currSignalStrength] += inc;
+            }
+
+            // Evaluate the HAL provided time in states.
+            final ActivityStatsTechSpecificInfo info = state.getSpecificInfo(currRant,
+                    currFreqRange);
+            switch (state.modemState) {
+                case SLEEP:
+                    long sleepMs = state.modemActivityInfo.getSleepTimeMillis();
+                    state.modemActivityInfo.setSleepTimeMillis(sleepMs + inc);
+                    break;
+                case IDLE:
+                    long idleMs = state.modemActivityInfo.getIdleTimeMillis();
+                    state.modemActivityInfo.setIdleTimeMillis(idleMs + inc);
+                    break;
+                case RECEIVING:
+                    long rxMs = info.getReceiveTimeMillis();
+                    info.setReceiveTimeMillis(rxMs + inc);
+                    expectedRxDurationsMs[currRat][currFreqRange] += inc;
+                    break;
+                case TRANSMITTING:
+                    int[] txMs = info.getTransmitTimeMillis().clone();
+                    txMs[currSignalStrength] += inc;
+                    info.setTransmitTimeMillis(txMs);
+                    expectedTxDurationsMs[currRat][currFreqRange][currSignalStrength] += inc;
+                    break;
+            }
+        };
+
+        // On battery, but the modem is not active
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, state.currentTimeMs * 1000,
+                state.currentTimeMs * 1000);
+        bi.setOnBatteryInternal(true);
+        state.noteModemControllerActivity();
+        // Ensure the first modem activity should not be counted up.
+        checkPerStateActiveRadioDurations(expectedDurationsMs, expectedRxDurationsMs,
+                expectedTxDurationsMs, bi, state.currentTimeMs);
+        // Start counting.
+        state.setRatType(TelephonyManager.NETWORK_TYPE_NR, BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR,
+                AccessNetworkConstants.AccessNetworkType.NGRAN);
+        // Frequency changed to low.
+        state.setFrequencyRange(ServiceState.FREQUENCY_RANGE_LOW);
+        incrementTime.accept(300);
+        state.setModemState(ModemState.RECEIVING);
+        incrementTime.accept(500);
+        state.setModemState(ModemState.TRANSMITTING);
+        incrementTime.accept(600);
+        state.noteModemControllerActivity();
+        checkPerStateActiveRadioDurations(expectedDurationsMs, expectedRxDurationsMs,
+                expectedTxDurationsMs, bi, state.currentTimeMs);
+    }
+
+    @SmallTest
     public void testGetPerStateActiveRadioDurationMs_withModemActivity() {
         final MockClock clock = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
