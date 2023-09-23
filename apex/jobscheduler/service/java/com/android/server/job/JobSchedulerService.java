@@ -1762,8 +1762,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                 sEnqueuedJwiHighWaterMarkLogger.logSampleWithUid(uId, jobStatus.getWorkCount());
             }
 
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
-                    uId, null, jobStatus.getBatteryName(),
+            final int sourceUid = uId;
+            FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
+                    jobStatus.isProxyJob()
+                            ? new int[]{sourceUid, jobStatus.getUid()} : new int[]{sourceUid},
+                    // Given that the source tag is set by the calling app, it should be connected
+                    // to the calling app in the attribution for a proxied job.
+                    jobStatus.isProxyJob()
+                            ? new String[]{null, jobStatus.getSourceTag()}
+                            : new String[]{jobStatus.getSourceTag()},
+                    jobStatus.getBatteryName(),
                     FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__SCHEDULED,
                     JobProtoEnums.INTERNAL_STOP_REASON_UNKNOWN, jobStatus.getStandbyBucket(),
                     jobStatus.getLoggingJobId(),
@@ -2191,8 +2199,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                 cancelled, reason, internalReasonCode, debugReason);
         // If the job was running, the JobServiceContext should log with state FINISHED.
         if (!wasRunning) {
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
-                    cancelled.getSourceUid(), null, cancelled.getBatteryName(),
+            final int sourceUid = cancelled.getSourceUid();
+            FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
+                    cancelled.isProxyJob()
+                            ? new int[]{sourceUid, cancelled.getUid()} : new int[]{sourceUid},
+                    // Given that the source tag is set by the calling app, it should be connected
+                    // to the calling app in the attribution for a proxied job.
+                    cancelled.isProxyJob()
+                            ? new String[]{null, cancelled.getSourceTag()}
+                            : new String[]{cancelled.getSourceTag()},
+                    cancelled.getBatteryName(),
                     FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__CANCELLED,
                     internalReasonCode, cancelled.getStandbyBucket(),
                     cancelled.getLoggingJobId(),

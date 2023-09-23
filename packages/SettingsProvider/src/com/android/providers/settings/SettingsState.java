@@ -137,6 +137,13 @@ final class SettingsState {
     private static final String ATTR_VALUE_BASE64 = "valueBase64";
     private static final String ATTR_DEFAULT_VALUE_BASE64 = "defaultValueBase64";
 
+    /**
+     * In the config table, there are special flags of the form {@code staged/namespace*flagName}.
+     * On boot, when the XML file is initially parsed, these transform into
+     * {@code namespace/flagName}, and the special staged flags are deleted.
+     */
+    private static final String CONFIG_STAGED_PREFIX = "staged/";
+
     // This was used in version 120 and before.
     private static final String NULL_VALUE_OLD_STYLE = "null";
 
@@ -1191,6 +1198,42 @@ final class SettingsState {
         }
     }
 
+    /**
+     * Transforms a staged flag name to its real flag name.
+     *
+     * Staged flags take the form {@code staged/namespace*flagName}. If
+     * {@code stagedFlagName} takes the proper form, returns
+     * {@code namespace/flagName}. Otherwise, returns {@code stagedFlagName}
+     * unmodified, and logs an error message.
+     *
+     */
+    @VisibleForTesting
+    public static String createRealFlagName(String stagedFlagName) {
+        int slashIndex = stagedFlagName.indexOf("/");
+        if (slashIndex == -1 || slashIndex == stagedFlagName.length() - 1
+                || slashIndex == 0) {
+            Slog.w(LOG_TAG, "invalid staged flag, not applying: " + stagedFlagName);
+            return stagedFlagName;
+        }
+
+        String namespaceAndFlag =
+                stagedFlagName.substring(slashIndex + 1);
+
+        int starIndex = namespaceAndFlag.indexOf("*");
+        if (starIndex == -1 || starIndex == namespaceAndFlag.length() - 1
+                || starIndex == 0) {
+            Slog.w(LOG_TAG, "invalid staged flag, not applying: " + stagedFlagName);
+            return stagedFlagName;
+        }
+
+        String namespace =
+                namespaceAndFlag.substring(0, starIndex);
+        String flagName =
+                namespaceAndFlag.substring(starIndex + 1);
+
+        return namespace + "/" + flagName;
+    }
+
     @GuardedBy("mLock")
     private void parseSettingsLocked(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
@@ -1199,6 +1242,7 @@ final class SettingsState {
 
         final int outerDepth = parser.getDepth();
         int type;
+        HashSet<String> flagsWithStagedValueApplied = new HashSet<String>();
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                 && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
             if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -1221,6 +1265,18 @@ final class SettingsState {
                     fromSystem = parser.getAttributeBoolean(null, ATTR_DEFAULT_SYS_SET, false);
                     tag = getValueAttribute(parser, ATTR_TAG, ATTR_TAG_BASE64);
                 }
+
+                if (isConfigSettingsKey(mKey)) {
+                    if (flagsWithStagedValueApplied.contains(name)) {
+                        continue;
+                    }
+
+                    if (name.startsWith(CONFIG_STAGED_PREFIX)) {
+                        name = createRealFlagName(name);
+                        flagsWithStagedValueApplied.add(name);
+                    }
+                }
+
                 mSettings.put(name, new Setting(name, value, defaultValue, packageName, tag,
                         fromSystem, id, isPreservedInRestore));
 
@@ -1228,6 +1284,16 @@ final class SettingsState {
                     Slog.i(LOG_TAG, "[RESTORED] " + name + "=" + value);
                 }
             }
+        }
+
+        if (isConfigSettingsKey(mKey) && !flagsWithStagedValueApplied.isEmpty()) {
+            // On boot, the config table XML file includes special staged flags. On the initial
+            // boot XML -> HashMap parse, these staged flags get transformed into real flags.
+            // After this, the HashMap contains no special staged flags (only the transformed
+            // real flags), but the XML still does. We then have no need for the special staged
+            // flags in the XML, so we overwrite the XML with the latest contents of the
+            // HashMap.
+            writeStateAsyncLocked();
         }
     }
 

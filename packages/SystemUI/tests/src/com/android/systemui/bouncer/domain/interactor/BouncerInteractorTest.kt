@@ -353,6 +353,34 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
         }
 
+    @Test
+    fun hide_whenOnBouncerScene_hidesBouncerAndGoesToLockscreenScene() =
+        testScope.runTest {
+            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "")
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val bouncerSceneKey = currentScene?.key
+            assertThat(bouncerSceneKey).isEqualTo(SceneKey.Bouncer)
+
+            underTest.hide("")
+
+            assertThat(currentScene?.key).isEqualTo(SceneKey.Lockscreen)
+        }
+
+    @Test
+    fun hide_whenNotOnBouncerScene_doesNothing() =
+        testScope.runTest {
+            sceneInteractor.changeScene(SceneModel(SceneKey.Shade), "")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Shade), "")
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val notBouncerSceneKey = currentScene?.key
+            assertThat(notBouncerSceneKey).isNotEqualTo(SceneKey.Bouncer)
+
+            underTest.hide("")
+
+            assertThat(currentScene?.key).isEqualTo(notBouncerSceneKey)
+        }
+
     private fun assertTryAgainMessage(
         message: String?,
         time: Int,

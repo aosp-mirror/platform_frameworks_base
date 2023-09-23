@@ -417,7 +417,9 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
         if (mBeamer == null) {
             return;
         }
-        mBeamer.forget(token);
+        dispatch(() -> {
+            mBeamer.forget(token);
+        });
     }
 
     @Override

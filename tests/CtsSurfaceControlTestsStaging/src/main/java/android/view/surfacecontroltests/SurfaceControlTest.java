@@ -23,10 +23,13 @@ import android.hardware.display.DisplayManager;
 import android.os.SystemProperties;
 import android.support.test.uiautomator.UiDevice;
 import android.view.Surface;
+import android.view.SurfaceControl;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
+
+import com.android.compatibility.common.util.DisplayUtil;
 
 import org.junit.After;
 import org.junit.Before;
@@ -59,19 +62,15 @@ public class SurfaceControlTest {
         uiDevice.executeShellCommand("wm dismiss-keyguard");
 
         InstrumentationRegistry.getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
-                Manifest.permission.LOG_COMPAT_CHANGE,
-                Manifest.permission.READ_COMPAT_CHANGE_CONFIG,
                 Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE,
-                Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS,
-                Manifest.permission.MANAGE_GAME_MODE);
+                Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS);
 
         // Prevent DisplayManager from limiting the allowed refresh rate range based on
         // non-app policies (e.g. low battery, user settings, etc).
         mDisplayManager = activity.getSystemService(DisplayManager.class);
         mDisplayManager.setShouldAlwaysRespectAppRequestedMode(true);
 
-        mInitialRefreshRateSwitchingType =
-                toSwitchingType(mDisplayManager.getMatchContentFrameRateUserPreference());
+        mInitialRefreshRateSwitchingType = DisplayUtil.getRefreshRateSwitchingType(mDisplayManager);
         mDisplayManager.setRefreshRateSwitchingType(
                 DisplayManager.SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS);
     }
@@ -118,16 +117,18 @@ public class SurfaceControlTest {
         activity.testSurfaceControlFrameRateCategory(Surface.FRAME_RATE_CATEGORY_DEFAULT);
     }
 
-    private int toSwitchingType(int matchContentFrameRateUserPreference) {
-        switch (matchContentFrameRateUserPreference) {
-            case DisplayManager.MATCH_CONTENT_FRAMERATE_NEVER:
-                return DisplayManager.SWITCHING_TYPE_NONE;
-            case DisplayManager.MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY:
-                return DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS;
-            case DisplayManager.MATCH_CONTENT_FRAMERATE_ALWAYS:
-                return DisplayManager.SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS;
-            default:
-                return -1;
-        }
+    @Test
+    public void testSurfaceControlFrameRateSelectionStrategySelf() throws InterruptedException {
+        GraphicsActivity activity = mActivityRule.getActivity();
+        activity.testSurfaceControlFrameRateSelectionStrategy(
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_SELF);
+    }
+
+    @Test
+    public void testSurfaceControlFrameRateSelectionStrategyOverrideChildren()
+            throws InterruptedException {
+        GraphicsActivity activity = mActivityRule.getActivity();
+        activity.testSurfaceControlFrameRateSelectionStrategy(
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     }
 }

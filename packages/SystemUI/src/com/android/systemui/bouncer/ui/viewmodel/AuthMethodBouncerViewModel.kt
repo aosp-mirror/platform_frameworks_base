@@ -16,6 +16,7 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,6 +29,7 @@ sealed class AuthMethodBouncerViewModel(
      * being able to attempt to unlock the device.
      */
     val isInputEnabled: StateFlow<Boolean>,
+    private val interactor: BouncerInteractor,
 ) {
 
     private val _animateFailure = MutableStateFlow(false)
@@ -37,12 +39,30 @@ sealed class AuthMethodBouncerViewModel(
      */
     val animateFailure: StateFlow<Boolean> = _animateFailure.asStateFlow()
 
+    /** Whether the input method editor (for example, the software keyboard) is visible. */
+    private var isImeVisible: Boolean = false
+
     /**
      * Notifies that the failure animation has been shown. This should be called to consume a `true`
      * value in [animateFailure].
      */
     fun onFailureAnimationShown() {
         _animateFailure.value = false
+    }
+
+    /**
+     * Notifies that the input method editor (for example, the software keyboard) has been shown or
+     * hidden.
+     */
+    fun onImeVisibilityChanged(isVisible: Boolean) {
+        if (isImeVisible && !isVisible) {
+            // The IME has gone from visible to invisible, dismiss the bouncer.
+            interactor.hide(
+                loggingReason = "IME hidden",
+            )
+        }
+
+        isImeVisible = isVisible
     }
 
     /** Ask the UI to show the failure animation. */

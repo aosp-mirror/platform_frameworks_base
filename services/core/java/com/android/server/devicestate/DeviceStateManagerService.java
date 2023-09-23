@@ -37,7 +37,8 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.TaskStackListener;
+import android.app.ActivityManagerInternal;
+import android.app.IProcessObserver;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateManager;
@@ -184,7 +185,30 @@ public final class DeviceStateManagerService extends SystemService {
     private final SystemPropertySetter mSystemPropertySetter;
 
     @VisibleForTesting
-    TaskStackListener mOverrideRequestTaskStackListener = new OverrideRequestTaskStackListener();
+    final IProcessObserver mProcessObserver = new IProcessObserver.Stub() {
+        @Override
+        public void onForegroundActivitiesChanged(int pid, int uid, boolean fg) {
+            synchronized (mLock) {
+                if (!shouldCancelOverrideRequestWhenRequesterNotOnTop()) {
+                    return;
+                }
+
+                OverrideRequest request = mActiveOverride.get();
+                if (pid != request.getPid() || uid != request.getUid()) {
+                    return;
+                }
+                if (!fg) {
+                    mOverrideRequestController.cancelRequest(request);
+                }
+            }
+        }
+
+        @Override
+        public void onProcessDied(int pid, int uid) {}
+
+        @Override
+        public void onForegroundServicesChanged(int pid, int uid, int serviceTypes) {}
+    };
     @VisibleForTesting
     ActivityTaskManagerInternal.ScreenObserver mOverrideRequestScreenObserver =
             new OverrideRequestScreenObserver();
@@ -239,8 +263,9 @@ public final class DeviceStateManagerService extends SystemService {
             mFoldedDeviceStates = readFoldedStates();
         }
 
-        mActivityTaskManagerInternal.registerTaskStackListener(mOverrideRequestTaskStackListener);
         mActivityTaskManagerInternal.registerScreenObserver(mOverrideRequestScreenObserver);
+        LocalServices.getService(ActivityManagerInternal.class).registerProcessObserver(
+                mProcessObserver);
     }
 
     @VisibleForTesting
@@ -1286,23 +1311,6 @@ public final class DeviceStateManagerService extends SystemService {
         int identifier = mActiveOverride.get().getRequestedState();
         DeviceState deviceState = mDeviceStates.get(identifier);
         return deviceState.hasFlag(DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP);
-    }
-
-    private class OverrideRequestTaskStackListener extends TaskStackListener {
-        @Override
-        public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo)
-                throws RemoteException {
-            synchronized (mLock) {
-                if (!shouldCancelOverrideRequestWhenRequesterNotOnTop()) {
-                    return;
-                }
-
-                OverrideRequest request = mActiveOverride.get();
-                if (!isTopApp(request.getPid())) {
-                    mOverrideRequestController.cancelRequest(request);
-                }
-            }
-        }
     }
 
     private class OverrideRequestScreenObserver implements

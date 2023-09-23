@@ -42,6 +42,7 @@ class PatternBouncerViewModel(
 ) :
     AuthMethodBouncerViewModel(
         isInputEnabled = isInputEnabled,
+        interactor = interactor,
     ) {
 
     /** The number of columns in the dot grid. */

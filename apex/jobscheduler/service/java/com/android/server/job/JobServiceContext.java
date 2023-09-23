@@ -470,8 +470,15 @@ public final class JobServiceContext implements ServiceConnection {
                 return false;
             }
             mJobPackageTracker.noteActive(job);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
-                    job.getSourceUid(), null, job.getBatteryName(),
+            final int sourceUid = job.getSourceUid();
+            FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
+                    job.isProxyJob() ? new int[]{sourceUid, job.getUid()} : new int[]{sourceUid},
+                    // Given that the source tag is set by the calling app, it should be connected
+                    // to the calling app in the attribution for a proxied job.
+                    job.isProxyJob()
+                            ? new String[]{null, job.getSourceTag()}
+                            : new String[]{job.getSourceTag()},
+                    job.getBatteryName(),
                     FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED,
                     JobProtoEnums.INTERNAL_STOP_REASON_UNKNOWN,
                     job.getStandbyBucket(),
@@ -1531,8 +1538,16 @@ public final class JobServiceContext implements ServiceConnection {
         }
         mJobPackageTracker.noteInactive(completedJob,
                 loggingInternalStopReason, loggingDebugReason);
-        FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
-                completedJob.getSourceUid(), null, completedJob.getBatteryName(),
+        final int sourceUid = completedJob.getSourceUid();
+        FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
+                completedJob.isProxyJob()
+                        ? new int[]{sourceUid, completedJob.getUid()} : new int[]{sourceUid},
+                // Given that the source tag is set by the calling app, it should be connected
+                // to the calling app in the attribution for a proxied job.
+                completedJob.isProxyJob()
+                        ? new String[]{null, completedJob.getSourceTag()}
+                        : new String[]{completedJob.getSourceTag()},
+                completedJob.getBatteryName(),
                 FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED,
                 loggingInternalStopReason, completedJob.getStandbyBucket(),
                 completedJob.getLoggingJobId(),

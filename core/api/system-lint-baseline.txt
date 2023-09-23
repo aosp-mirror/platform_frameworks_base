@@ -251,6 +251,18 @@ UnflaggedApi: android.net.wifi.sharedconnectivity.app.NetworkProviderInfo#isBatt
     New API must be flagged with @FlaggedApi: method android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.isBatteryCharging()
 UnflaggedApi: android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder#setBatteryCharging(boolean):
     New API must be flagged with @FlaggedApi: method android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder.setBatteryCharging(boolean)
+UnflaggedApi: android.nfc.cardemulation.AidGroup#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.AidGroup.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.nfc.cardemulation.AidGroup#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.AidGroup.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.nfc.cardemulation.ApduServiceInfo#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.ApduServiceInfo.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.nfc.cardemulation.ApduServiceInfo#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.ApduServiceInfo.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.nfc.cardemulation.NfcFServiceInfo#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.NfcFServiceInfo.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.nfc.cardemulation.NfcFServiceInfo#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.NfcFServiceInfo.PARCELABLE_WRITE_RETURN_VALUE
 UnflaggedApi: android.os.BugreportParams#BUGREPORT_MODE_ONBOARDING:
     New API must be flagged with @FlaggedApi: field android.os.BugreportParams.BUGREPORT_MODE_ONBOARDING
 UnflaggedApi: android.provider.Settings#ACTION_APP_PERMISSIONS_SETTINGS:
