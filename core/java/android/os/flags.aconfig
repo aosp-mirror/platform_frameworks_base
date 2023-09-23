@@ -16,7 +16,7 @@ flag {
 
 flag {
     name: "allow_private_profile"
-    namespace: "private_profile"
+    namespace: "profile_experiences"
     description: "Guards a new Private Profile type in UserManager - everything from its setup to config to deletion."
     bug: "299069460"
 }
