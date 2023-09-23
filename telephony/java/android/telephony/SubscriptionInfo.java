@@ -259,7 +259,7 @@ public class SubscriptionInfo implements Parcelable {
     /**
      * Whether this subscription is used for communicating with non-terrestrial networks.
      */
-    private final boolean mIsNtn;
+    private final boolean mIsOnlyNonTerrestrialNetwork;
 
     /**
      * @hide
@@ -385,7 +385,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mAreUiccApplicationsEnabled = areUiccApplicationsEnabled;
         this.mPortIndex = portIndex;
         this.mUsageSetting = usageSetting;
-        this.mIsNtn = false;
+        this.mIsOnlyNonTerrestrialNetwork = false;
     }
 
     /**
@@ -424,7 +424,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mAreUiccApplicationsEnabled = builder.mAreUiccApplicationsEnabled;
         this.mPortIndex = builder.mPortIndex;
         this.mUsageSetting = builder.mUsageSetting;
-        this.mIsNtn = builder.mIsNtn;
+        this.mIsOnlyNonTerrestrialNetwork = builder.mIsOnlyNonTerrestrialNetwork;
     }
 
     /**
@@ -878,8 +878,8 @@ public class SubscriptionInfo implements Parcelable {
      * otherwise.
      */
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    public boolean isNtn() {
-        return mIsNtn;
+    public boolean isOnlyNonTerrestrialNetwork() {
+        return mIsOnlyNonTerrestrialNetwork;
     }
 
     @NonNull
@@ -918,7 +918,7 @@ public class SubscriptionInfo implements Parcelable {
                             UiccAccessRule.CREATOR))
                     .setUiccApplicationsEnabled(source.readBoolean())
                     .setUsageSetting(source.readInt())
-                    .setNtn(source.readBoolean())
+                    .setOnlyNonTerrestrialNetwork(source.readBoolean())
                     .build();
         }
 
@@ -960,7 +960,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeTypedArray(mCarrierConfigAccessRules, flags);
         dest.writeBoolean(mAreUiccApplicationsEnabled);
         dest.writeInt(mUsageSetting);
-        dest.writeBoolean(mIsNtn);
+        dest.writeBoolean(mIsOnlyNonTerrestrialNetwork);
     }
 
     @Override
@@ -1023,7 +1023,7 @@ public class SubscriptionInfo implements Parcelable {
                 + " mType=" + SubscriptionManager.subscriptionTypeToString(mType)
                 + " areUiccApplicationsEnabled=" + mAreUiccApplicationsEnabled
                 + " usageSetting=" + SubscriptionManager.usageSettingToString(mUsageSetting)
-                + " ntn=" + mIsNtn
+                + " isOnlyNonTerrestrialNetwork=" + mIsOnlyNonTerrestrialNetwork
                 + "]";
     }
 
@@ -1049,7 +1049,7 @@ public class SubscriptionInfo implements Parcelable {
                 that.mNativeAccessRules) && Arrays.equals(mCarrierConfigAccessRules,
                 that.mCarrierConfigAccessRules) && Objects.equals(mGroupUuid, that.mGroupUuid)
                 && mCountryIso.equals(that.mCountryIso) && mGroupOwner.equals(that.mGroupOwner)
-                && mIsNtn == that.mIsNtn;
+                && mIsOnlyNonTerrestrialNetwork == that.mIsOnlyNonTerrestrialNetwork;
     }
 
     @Override
@@ -1058,7 +1058,7 @@ public class SubscriptionInfo implements Parcelable {
                 mDisplayNameSource, mIconTint, mNumber, mDataRoaming, mMcc, mMnc, mIsEmbedded,
                 mCardString, mIsOpportunistic, mGroupUuid, mCountryIso, mCarrierId, mProfileClass,
                 mType, mGroupOwner, mAreUiccApplicationsEnabled, mPortIndex, mUsageSetting, mCardId,
-                mIsGroupDisabled, mIsNtn);
+                mIsGroupDisabled, mIsOnlyNonTerrestrialNetwork);
         result = 31 * result + Arrays.hashCode(mEhplmns);
         result = 31 * result + Arrays.hashCode(mHplmns);
         result = 31 * result + Arrays.hashCode(mNativeAccessRules);
@@ -1260,7 +1260,7 @@ public class SubscriptionInfo implements Parcelable {
         /**
          * {@code true} if it is a non-terrestrial network subscription, {@code false} otherwise.
          */
-        private boolean mIsNtn = false;
+        private boolean mIsOnlyNonTerrestrialNetwork = false;
 
         /**
          * Default constructor.
@@ -1304,7 +1304,7 @@ public class SubscriptionInfo implements Parcelable {
             mAreUiccApplicationsEnabled = info.mAreUiccApplicationsEnabled;
             mPortIndex = info.mPortIndex;
             mUsageSetting = info.mUsageSetting;
-            mIsNtn = info.mIsNtn;
+            mIsOnlyNonTerrestrialNetwork = info.mIsOnlyNonTerrestrialNetwork;
         }
 
         /**
@@ -1692,12 +1692,13 @@ public class SubscriptionInfo implements Parcelable {
         /**
          * Set whether the subscription is exclusively used for non-terrestrial networks or not.
          *
-         * @param isNtn {@code true} if the subscription is for NTN, {@code false} otherwise.
+         * @param isOnlyNonTerrestrialNetwork {@code true} if the subscription is for NTN,
+         * {@code false} otherwise.
          * @return The builder.
          */
         @NonNull
-        public Builder setNtn(boolean isNtn) {
-            mIsNtn = isNtn;
+        public Builder setOnlyNonTerrestrialNetwork(boolean isOnlyNonTerrestrialNetwork) {
+            mIsOnlyNonTerrestrialNetwork = isOnlyNonTerrestrialNetwork;
             return this;
         }
 
