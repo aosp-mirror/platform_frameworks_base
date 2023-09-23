@@ -20,7 +20,7 @@ import android.content.res.Resources
 import android.util.Log
 import android.view.View.GONE
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.pipeline.MediaDataManager

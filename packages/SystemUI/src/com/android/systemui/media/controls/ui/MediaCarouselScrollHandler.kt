@@ -29,7 +29,7 @@ import androidx.dynamicanimation.animation.SpringForce
 import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.FalsingManager

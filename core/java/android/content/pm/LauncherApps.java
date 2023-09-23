@@ -75,7 +75,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.function.pooled.PooledLambda;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1424,8 +1423,8 @@ public class LauncherApps {
         }
         try {
             return mContext.getContentResolver().openFileDescriptor(Uri.parse(uri), "r");
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "Icon file not found: " + uri);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to open icon file: " + uri, e);
             return null;
         }
     }

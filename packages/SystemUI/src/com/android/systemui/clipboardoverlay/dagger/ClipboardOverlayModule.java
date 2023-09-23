@@ -25,7 +25,7 @@ import android.hardware.display.DisplayManager;
 import android.view.Display;
 import android.view.LayoutInflater;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.clipboardoverlay.ClipboardOverlayView;
 import com.android.systemui.settings.DisplayTracker;
 

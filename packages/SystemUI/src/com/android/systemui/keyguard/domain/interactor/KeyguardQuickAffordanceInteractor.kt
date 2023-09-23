@@ -23,7 +23,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton

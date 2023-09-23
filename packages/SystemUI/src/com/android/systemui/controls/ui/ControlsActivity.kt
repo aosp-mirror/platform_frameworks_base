@@ -31,7 +31,7 @@ import android.view.WindowInsets
 import android.view.WindowInsets.Type
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.management.ControlsAnimations
 import com.android.systemui.controls.settings.ControlsSettingsDialogManager

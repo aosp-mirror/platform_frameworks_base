@@ -33,7 +33,7 @@ import androidx.annotation.Nullable;
 
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * {@code FrameLayout} used to show and manipulate a {@link ToggleSeekBar}.

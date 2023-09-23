@@ -34,7 +34,7 @@ import android.view.WindowInsets.Type
 import android.view.WindowManager
 import android.widget.ImageView
 import com.android.internal.policy.ScreenDecorationsUtils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController

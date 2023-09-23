@@ -27,7 +27,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.scene.shared.model.Scene

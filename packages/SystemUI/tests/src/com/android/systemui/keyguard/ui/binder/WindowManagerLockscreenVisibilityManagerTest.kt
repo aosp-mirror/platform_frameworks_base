@@ -67,6 +67,7 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
         underTest.setLockscreenShown(true)
         underTest.setAodVisible(true)
 
+        verify(activityTaskManagerService).setLockScreenShown(true, false)
         verify(activityTaskManagerService).setLockScreenShown(true, true)
         verifyNoMoreInteractions(activityTaskManagerService)
     }
@@ -76,6 +77,7 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
         underTest.setLockscreenShown(true)
         underTest.setAodVisible(true)
 
+        verify(activityTaskManagerService).setLockScreenShown(true, false)
         verify(activityTaskManagerService).setLockScreenShown(true, true)
         verifyNoMoreInteractions(activityTaskManagerService)
 
@@ -95,6 +97,14 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
 
         underTest.setSurfaceBehindVisibility(true)
 
+        verifyNoMoreInteractions(activityTaskManagerService)
+    }
+
+    @Test
+    fun testAodVisible_noLockscreenShownCallYet_defaultsToShowLockscreen() {
+        underTest.setAodVisible(false)
+
+        verify(activityTaskManagerService).setLockScreenShown(true, false)
         verifyNoMoreInteractions(activityTaskManagerService)
     }
 }

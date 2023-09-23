@@ -32,6 +32,7 @@ android_test {
         "apct-perftests-utils",
         "collector-device-lib",
         "platform-test-annotations",
+        "cts-wm-util",
     ],
     test_suites: ["device-tests"],
     data: [":perfetto_artifacts"],

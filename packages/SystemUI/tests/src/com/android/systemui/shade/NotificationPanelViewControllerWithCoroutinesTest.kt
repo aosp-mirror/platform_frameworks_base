@@ -25,7 +25,7 @@ import android.view.ViewStub
 import androidx.test.filters.SmallTest
 import com.android.internal.util.CollectionUtils
 import com.android.keyguard.KeyguardClockSwitch.LARGE
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD

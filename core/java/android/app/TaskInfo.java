@@ -255,6 +255,12 @@ public class TaskInfo {
     public boolean isUserFullscreenOverrideEnabled;
 
     /**
+     * Whether the top activity fillsParent() is false
+     * @hide
+     */
+    public boolean isTopActivityTransparent;
+
+    /**
      * Hint about the letterbox state of the top activity.
      * @hide
      */
@@ -551,7 +557,8 @@ public class TaskInfo {
                 && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId)
                 && parentTaskId == that.parentTaskId
                 && Objects.equals(topActivity, that.topActivity)
-                && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled;
+                && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled
+                && isTopActivityTransparent == that.isTopActivityTransparent;
     }
 
     /**
@@ -583,7 +590,9 @@ public class TaskInfo {
                     == that.configuration.getLayoutDirection())
                 && (!hasCompatUI() || configuration.uiMode == that.configuration.uiMode)
                 && (!hasCompatUI() || isVisible == that.isVisible)
-                && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled;
+                && isFocused == that.isFocused
+                && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled
+                && isTopActivityTransparent == that.isTopActivityTransparent;
     }
 
     /**
@@ -640,6 +649,7 @@ public class TaskInfo {
         topActivityLetterboxWidth = source.readInt();
         topActivityLetterboxHeight = source.readInt();
         isUserFullscreenOverrideEnabled = source.readBoolean();
+        isTopActivityTransparent = source.readBoolean();
     }
 
     /**
@@ -697,6 +707,7 @@ public class TaskInfo {
         dest.writeInt(topActivityLetterboxWidth);
         dest.writeInt(topActivityLetterboxHeight);
         dest.writeBoolean(isUserFullscreenOverrideEnabled);
+        dest.writeBoolean(isTopActivityTransparent);
     }
 
     @Override
@@ -744,6 +755,7 @@ public class TaskInfo {
                 + " topActivityLetterboxWidth=" + topActivityLetterboxWidth
                 + " topActivityLetterboxHeight=" + topActivityLetterboxHeight
                 + " isUserFullscreenOverrideEnabled=" + isUserFullscreenOverrideEnabled
+                + " isTopActivityTransparent=" + isTopActivityTransparent
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " cameraCompatControlState="

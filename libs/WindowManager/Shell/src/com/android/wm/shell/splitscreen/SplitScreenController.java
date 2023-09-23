@@ -85,6 +85,7 @@ import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.common.split.SplitScreenConstants.SnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -600,8 +601,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     void startShortcutAndTaskWithLegacyTransition(ShortcutInfo shortcutInfo,
             @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
-            InstanceId instanceId) {
+            @SplitPosition int splitPosition, @SnapPosition int snapPosition,
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
         if (options1 == null) options1 = new Bundle();
         final ActivityOptions activityOptions = ActivityOptions.fromBundle(options1);
 
@@ -625,13 +626,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         mStageCoordinator.startShortcutAndTaskWithLegacyTransition(shortcutInfo,
-                activityOptions.toBundle(), taskId, options2, splitPosition, splitRatio, adapter,
+                activityOptions.toBundle(), taskId, options2, splitPosition, snapPosition, adapter,
                 instanceId);
     }
 
     void startShortcutAndTask(ShortcutInfo shortcutInfo, @Nullable Bundle options1,
             int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
-            float splitRatio, @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+            @SnapPosition int snapPosition, @Nullable RemoteTransition remoteTransition,
+            InstanceId instanceId) {
         if (options1 == null) options1 = new Bundle();
         final ActivityOptions activityOptions = ActivityOptions.fromBundle(options1);
         final String packageName1 = shortcutInfo.getPackage();
@@ -658,7 +660,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             }
         }
         mStageCoordinator.startShortcutAndTask(shortcutInfo, activityOptions.toBundle(), taskId,
-                options2, splitPosition, splitRatio, remoteTransition, instanceId);
+                options2, splitPosition, snapPosition, remoteTransition, instanceId);
     }
 
     /**
@@ -673,8 +675,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     private void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent, int userId1,
             @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
-            InstanceId instanceId) {
+            @SplitPosition int splitPosition, @SnapPosition int snapPosition,
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
         Intent fillInIntent = null;
         final String packageName1 = SplitScreenUtils.getPackageName(pendingIntent);
         final String packageName2 = SplitScreenUtils.getPackageName(taskId, mTaskOrganizer);
@@ -695,12 +697,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             }
         }
         mStageCoordinator.startIntentAndTaskWithLegacyTransition(pendingIntent, fillInIntent,
-                options1, taskId, options2, splitPosition, splitRatio, adapter, instanceId);
+                options1, taskId, options2, splitPosition, snapPosition, adapter, instanceId);
     }
 
     private void startIntentAndTask(PendingIntent pendingIntent, int userId1,
             @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, float splitRatio,
+            @SplitPosition int splitPosition, @SnapPosition int snapPosition,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         Intent fillInIntent = null;
         final String packageName1 = SplitScreenUtils.getPackageName(pendingIntent);
@@ -727,14 +729,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             }
         }
         mStageCoordinator.startIntentAndTask(pendingIntent, fillInIntent, options1, taskId,
-                options2, splitPosition, splitRatio, remoteTransition, instanceId);
+                options2, splitPosition, snapPosition, remoteTransition, instanceId);
     }
 
     private void startIntentsWithLegacyTransition(PendingIntent pendingIntent1, int userId1,
             @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
             PendingIntent pendingIntent2, int userId2, @Nullable ShortcutInfo shortcutInfo2,
-            @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
-            RemoteAnimationAdapter adapter, InstanceId instanceId) {
+            @Nullable Bundle options2, @SplitPosition int splitPosition,
+            @SnapPosition int snapPosition, RemoteAnimationAdapter adapter, InstanceId instanceId) {
         Intent fillInIntent1 = null;
         Intent fillInIntent2 = null;
         final String packageName1 = SplitScreenUtils.getPackageName(pendingIntent1);
@@ -758,14 +760,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
         mStageCoordinator.startIntentsWithLegacyTransition(pendingIntent1, fillInIntent1,
                 shortcutInfo1, options1, pendingIntent2, fillInIntent2, shortcutInfo2, options2,
-                splitPosition, splitRatio, adapter, instanceId);
+                splitPosition, snapPosition, adapter, instanceId);
     }
 
     private void startIntents(PendingIntent pendingIntent1, int userId1,
             @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
             PendingIntent pendingIntent2, int userId2, @Nullable ShortcutInfo shortcutInfo2,
-            @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
-            @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+            @Nullable Bundle options2, @SplitPosition int splitPosition,
+            @SnapPosition int snapPosition, @Nullable RemoteTransition remoteTransition,
+            InstanceId instanceId) {
         Intent fillInIntent1 = null;
         Intent fillInIntent2 = null;
         final String packageName1 = SplitScreenUtils.getPackageName(pendingIntent1);
@@ -800,7 +803,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
         mStageCoordinator.startIntents(pendingIntent1, fillInIntent1, shortcutInfo1,
                 activityOptions1.toBundle(), pendingIntent2, fillInIntent2, shortcutInfo2,
-                activityOptions2.toBundle(), splitPosition, splitRatio, remoteTransition,
+                activityOptions2.toBundle(), splitPosition, snapPosition, remoteTransition,
                 instanceId);
     }
 
@@ -1222,78 +1225,82 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         @Override
         public void startTasksWithLegacyTransition(int taskId1, @Nullable Bundle options1,
                 int taskId2, @Nullable Bundle options2, @SplitPosition int splitPosition,
-                float splitRatio, RemoteAnimationAdapter adapter, InstanceId instanceId) {
+                @SnapPosition int snapPosition, RemoteAnimationAdapter adapter,
+                InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startTasks",
                     (controller) -> controller.mStageCoordinator.startTasksWithLegacyTransition(
-                            taskId1, options1, taskId2, options2, splitPosition,
-                            splitRatio, adapter, instanceId));
+                            taskId1, options1, taskId2, options2, splitPosition, snapPosition,
+                            adapter, instanceId));
         }
 
         @Override
         public void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent, int userId1,
-                Bundle options1, int taskId, Bundle options2, int splitPosition, float splitRatio,
-                RemoteAnimationAdapter adapter, InstanceId instanceId) {
+                Bundle options1, int taskId, Bundle options2, int splitPosition,
+                @SnapPosition int snapPosition, RemoteAnimationAdapter adapter,
+                InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController,
                     "startIntentAndTaskWithLegacyTransition", (controller) ->
                             controller.startIntentAndTaskWithLegacyTransition(pendingIntent,
-                                    userId1, options1, taskId, options2, splitPosition, splitRatio,
-                                    adapter, instanceId));
+                                    userId1, options1, taskId, options2, splitPosition,
+                                    snapPosition, adapter, instanceId));
         }
 
         @Override
         public void startShortcutAndTaskWithLegacyTransition(ShortcutInfo shortcutInfo,
                 @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
-                @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
-                InstanceId instanceId) {
+                @SplitPosition int splitPosition, @SnapPosition int snapPosition,
+                RemoteAnimationAdapter adapter, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController,
                     "startShortcutAndTaskWithLegacyTransition", (controller) ->
                             controller.startShortcutAndTaskWithLegacyTransition(
                                     shortcutInfo, options1, taskId, options2, splitPosition,
-                                    splitRatio, adapter, instanceId));
+                                    snapPosition, adapter, instanceId));
         }
 
         @Override
         public void startTasks(int taskId1, @Nullable Bundle options1, int taskId2,
-                @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
-                @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+                @Nullable Bundle options2, @SplitPosition int splitPosition,
+                @SnapPosition int snapPosition, @Nullable RemoteTransition remoteTransition,
+                InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startTasks",
                     (controller) -> controller.mStageCoordinator.startTasks(taskId1, options1,
-                            taskId2, options2, splitPosition, splitRatio, remoteTransition,
+                            taskId2, options2, splitPosition, snapPosition, remoteTransition,
                             instanceId));
         }
 
         @Override
         public void startIntentAndTask(PendingIntent pendingIntent, int userId1,
                 @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
-                @SplitPosition int splitPosition, float splitRatio,
+                @SplitPosition int splitPosition, @SnapPosition int snapPosition,
                 @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startIntentAndTask",
                     (controller) -> controller.startIntentAndTask(pendingIntent, userId1, options1,
-                            taskId, options2, splitPosition, splitRatio, remoteTransition,
+                            taskId, options2, splitPosition, snapPosition, remoteTransition,
                             instanceId));
         }
 
         @Override
         public void startShortcutAndTask(ShortcutInfo shortcutInfo, @Nullable Bundle options1,
                 int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
-                float splitRatio, @Nullable RemoteTransition remoteTransition,
+                @SnapPosition int snapPosition, @Nullable RemoteTransition remoteTransition,
                 InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startShortcutAndTask",
                     (controller) -> controller.startShortcutAndTask(shortcutInfo, options1, taskId,
-                            options2, splitPosition, splitRatio, remoteTransition, instanceId));
+                            options2, splitPosition, snapPosition, remoteTransition, instanceId));
         }
 
         @Override
         public void startIntentsWithLegacyTransition(PendingIntent pendingIntent1, int userId1,
                 @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
                 PendingIntent pendingIntent2, int userId2, @Nullable ShortcutInfo shortcutInfo2,
-                @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
-                RemoteAnimationAdapter adapter, InstanceId instanceId) {
+                @Nullable Bundle options2, @SplitPosition int splitPosition,
+                @SnapPosition int snapPosition, RemoteAnimationAdapter adapter,
+                InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startIntentsWithLegacyTransition",
                     (controller) ->
                         controller.startIntentsWithLegacyTransition(pendingIntent1, userId1,
                                 shortcutInfo1, options1, pendingIntent2, userId2, shortcutInfo2,
-                                options2, splitPosition, splitRatio, adapter, instanceId)
+                                options2, splitPosition, snapPosition, adapter, instanceId)
                     );
         }
 
@@ -1301,13 +1308,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         public void startIntents(PendingIntent pendingIntent1, int userId1,
                 @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
                 PendingIntent pendingIntent2, int userId2, @Nullable ShortcutInfo shortcutInfo2,
-                @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
-                @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+                @Nullable Bundle options2, @SplitPosition int splitPosition,
+                @SnapPosition int snapPosition, @Nullable RemoteTransition remoteTransition,
+                InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startIntents",
                     (controller) ->
                             controller.startIntents(pendingIntent1, userId1, shortcutInfo1,
                                     options1, pendingIntent2, userId2, shortcutInfo2, options2,
-                                    splitPosition, splitRatio, remoteTransition, instanceId)
+                                    splitPosition, snapPosition, remoteTransition, instanceId)
             );
         }
 

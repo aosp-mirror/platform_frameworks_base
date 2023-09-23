@@ -19,7 +19,7 @@ package com.android.systemui.media.dialog;
 import androidx.annotation.IntDef;
 
 import com.android.settingslib.media.MediaDevice;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

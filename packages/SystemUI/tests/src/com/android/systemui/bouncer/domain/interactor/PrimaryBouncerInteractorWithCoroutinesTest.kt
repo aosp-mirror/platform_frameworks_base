@@ -27,8 +27,6 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -77,7 +75,6 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
                 context,
                 keyguardUpdateMonitor,
                 Mockito.mock(TrustRepository::class.java),
-                FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) },
                 TestScope().backgroundScope,
             )
     }

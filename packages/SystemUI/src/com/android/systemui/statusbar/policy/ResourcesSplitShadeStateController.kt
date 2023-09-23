@@ -16,7 +16,7 @@
 package com.android.systemui.statusbar.policy
 
 import android.content.res.Resources
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 /**
  * Fake SplitShadeStateController

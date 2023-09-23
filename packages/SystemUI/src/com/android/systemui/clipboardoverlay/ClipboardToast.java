@@ -19,7 +19,7 @@ package com.android.systemui.clipboardoverlay;
 import android.content.Context;
 import android.widget.Toast;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import javax.inject.Inject;
 

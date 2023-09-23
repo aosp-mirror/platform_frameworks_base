@@ -30,6 +30,8 @@ import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
+
 /**
  * A callback message to a client that can be scheduled and executed.
  * Examples of these might be activity configuration change, multi-window mode change, activity
@@ -56,8 +58,7 @@ public abstract class ClientTransactionItem implements BaseClientRequest, Parcel
      * it is updating; otherwise, returns {@code null}.
      */
     @Nullable
-    public Context getContextToUpdate(@NonNull ClientTransactionHandler client,
-            @NonNull IBinder token) {
+    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
         return null;
     }
 
@@ -69,6 +70,12 @@ public abstract class ClientTransactionItem implements BaseClientRequest, Parcel
     @Nullable
     public IBinder getActivityToken() {
         return null;
+    }
+
+    /** Dumps this transaction item. */
+    void dump(@NonNull String prefix, @NonNull PrintWriter pw,
+            @NonNull ClientTransactionHandler transactionHandler) {
+        pw.append(prefix).println(this);
     }
 
     // Parcelable

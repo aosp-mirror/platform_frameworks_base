@@ -39,7 +39,7 @@ import android.widget.TextView;
 
 import androidx.annotation.ColorRes;
 import androidx.preference.PreferenceViewHolder;
-import androidx.preference.R;
+import com.android.settingslib.widget.preference.banner.R;
 
 import com.android.settingslib.testutils.OverpoweredReflectionHelper;
 
@@ -65,7 +65,7 @@ public class BannerMessagePreferenceTest {
     private final View.OnClickListener mClickListener = v -> mClickListenerCalled = true;
     private final int mMinimumTargetSize =
             RuntimeEnvironment.application.getResources()
-                    .getDimensionPixelSize(R.dimen.settingslib_preferred_minimum_touch_target);
+                    .getDimensionPixelSize(com.android.settingslib.widget.theme.R.dimen.settingslib_preferred_minimum_touch_target);
 
     private static final int TEST_STRING_RES_ID =
             R.string.accessibility_banner_message_dismiss;

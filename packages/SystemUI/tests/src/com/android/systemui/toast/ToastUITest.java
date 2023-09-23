@@ -62,7 +62,7 @@ import android.widget.Toast;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.IntPair;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.PluginManager;
@@ -364,7 +364,7 @@ public class ToastUITest extends SysuiTestCase {
 
         // THEN the view can have unlimited lines
         assertThat(((TextView) mToastUI.mToast.getView()
-                .findViewById(com.android.systemui.R.id.text))
+                .findViewById(com.android.systemui.res.R.id.text))
                 .getMaxLines()).isEqualTo(Integer.MAX_VALUE);
     }
 
@@ -383,7 +383,7 @@ public class ToastUITest extends SysuiTestCase {
 
         // THEN the view is limited to 2 lines
         assertThat(((TextView) mToastUI.mToast.getView()
-                .findViewById(com.android.systemui.R.id.text))
+                .findViewById(com.android.systemui.res.R.id.text))
                 .getMaxLines()).isEqualTo(2);
     }
 

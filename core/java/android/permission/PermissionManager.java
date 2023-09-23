@@ -214,6 +214,12 @@ public final class PermissionManager {
     public static final boolean DEBUG_TRACE_PERMISSION_UPDATES = false;
 
     /**
+     * Additional debug log for virtual device permissions.
+     * @hide
+     */
+    public static final boolean DEBUG_DEVICE_PERMISSIONS = false;
+
+    /**
      * Intent extra: List of PermissionGroupUsages
      * <p>
      * Type: {@code List<PermissionGroupUsage>}
@@ -1392,8 +1398,8 @@ public final class PermissionManager {
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToResetTimer,
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToKeepSessionAlive) {
         try {
-            mPermissionManager.startOneTimePermissionSession(packageName, mContext.getUserId(),
-                    timeoutMillis, revokeAfterKilledDelayMillis);
+            mPermissionManager.startOneTimePermissionSession(packageName, mContext.getDeviceId(),
+                    mContext.getUserId(), timeoutMillis, revokeAfterKilledDelayMillis);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

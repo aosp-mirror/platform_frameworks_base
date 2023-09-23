@@ -126,10 +126,10 @@ public class RestrictedSwitchPreference extends SwitchPreference {
             switchSummary = isChecked()
                     ? getUpdatableEnterpriseString(
                             getContext(), ENABLED_BY_ADMIN_SWITCH_SUMMARY,
-                            com.android.settingslib.widget.R.string.enabled_by_admin)
+                            com.android.settingslib.widget.restricted.R.string.enabled_by_admin)
                     : getUpdatableEnterpriseString(
                             getContext(), DISABLED_BY_ADMIN_SWITCH_SUMMARY,
-                            com.android.settingslib.widget.R.string.disabled_by_admin);
+                            com.android.settingslib.widget.restricted.R.string.disabled_by_admin);
         } else {
             switchSummary = mRestrictedSwitchSummary;
         }

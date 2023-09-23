@@ -47,9 +47,17 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
     public @interface HapticScrollFeedbackAxis {}
 
     private static final int TICK_INTERVAL_NO_TICK = 0;
+    private static final boolean INITIAL_END_OF_LIST_HAPTICS_ENABLED = false;
 
     private final View mView;
     private final ViewConfiguration mViewConfig;
+    /**
+     * Flag to disable the logic in this class if the View-based scroll haptics implementation is
+     * enabled. If {@code false}, this class will continue to run despite the View's scroll
+     * haptics implementation being enabled. This value should be set to {@code true} when this
+     * class is directly used by the View class.
+     */
+    private final boolean mDisabledIfViewPlaysScrollHaptics;
 
 
     // Info about the cause of the latest scroll event.
@@ -63,18 +71,21 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
     /** The tick interval corresponding to the current InputDevice/source/axis. */
     private int mTickIntervalPixels = TICK_INTERVAL_NO_TICK;
     private int mTotalScrollPixels = 0;
-    private boolean mCanPlayLimitFeedback = true;
+    private boolean mCanPlayLimitFeedback = INITIAL_END_OF_LIST_HAPTICS_ENABLED;
     private boolean mHapticScrollFeedbackEnabled = false;
 
     public HapticScrollFeedbackProvider(@NonNull View view) {
-        this(view, ViewConfiguration.get(view.getContext()));
+        this(view, ViewConfiguration.get(view.getContext()),
+                /* disabledIfViewPlaysScrollHaptics= */ true);
     }
 
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public HapticScrollFeedbackProvider(View view, ViewConfiguration viewConfig) {
+    public HapticScrollFeedbackProvider(
+            View view, ViewConfiguration viewConfig, boolean disabledIfViewPlaysScrollHaptics) {
         mView = view;
         mViewConfig = viewConfig;
+        mDisabledIfViewPlaysScrollHaptics = disabledIfViewPlaysScrollHaptics;
     }
 
     @Override
@@ -136,13 +147,19 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
 
     private void maybeUpdateCurrentConfig(int deviceId, int source, int axis) {
         if (mAxis != axis || mSource != source || mDeviceId != deviceId) {
+            if (mDisabledIfViewPlaysScrollHaptics
+                    && (source == InputDevice.SOURCE_ROTARY_ENCODER)
+                    && mViewConfig.isViewBasedRotaryEncoderHapticScrollFeedbackEnabled()) {
+                mHapticScrollFeedbackEnabled = false;
+                return;
+            }
             mSource = source;
             mAxis = axis;
             mDeviceId = deviceId;
 
             mHapticScrollFeedbackEnabled =
                     mViewConfig.isHapticScrollFeedbackEnabled(deviceId, axis, source);
-            mCanPlayLimitFeedback = true;
+            mCanPlayLimitFeedback = INITIAL_END_OF_LIST_HAPTICS_ENABLED;
             mTotalScrollPixels = 0;
             updateTickIntervals(deviceId, source, axis);
         }

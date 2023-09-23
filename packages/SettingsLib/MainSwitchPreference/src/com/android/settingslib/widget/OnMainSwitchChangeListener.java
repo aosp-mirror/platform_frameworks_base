@@ -18,6 +18,8 @@ package com.android.settingslib.widget;
 
 import android.widget.Switch;
 
+import com.android.settingslib.widget.mainswitch.R;
+
 /**
  * Called when the checked state of the Switch has changed.
  */

@@ -513,6 +513,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 List<String> apkFiles =
                         filesList
                                 .map(path -> path.toAbsolutePath().toString())
+                                .filter(str -> str.endsWith(".apk"))
                                 .collect(Collectors.toList());
                 sourceStampVerificationResult = SourceStampVerifier.verify(apkFiles);
             } catch (IOException e) {

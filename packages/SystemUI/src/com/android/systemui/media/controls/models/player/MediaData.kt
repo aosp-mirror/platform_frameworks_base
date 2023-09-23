@@ -21,7 +21,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.session.MediaSession
 import com.android.internal.logging.InstanceId
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 /** State of a media view. */
 data class MediaData(

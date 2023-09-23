@@ -30,6 +30,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.settingslib.widget.entityheader.R;
+
 /**
  * This class is used to initialize view which was inflated
  * from {@link R.xml.app_entities_header.xml}.

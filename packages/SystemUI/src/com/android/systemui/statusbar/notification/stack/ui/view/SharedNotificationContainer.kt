@@ -28,7 +28,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.VERTICAL
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 /**
  * Container for the stack scroller, so that the bounds can be externally specified, such as from

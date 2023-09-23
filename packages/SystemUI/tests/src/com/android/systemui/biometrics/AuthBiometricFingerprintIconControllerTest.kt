@@ -25,7 +25,7 @@ import android.view.ViewGroup.LayoutParams
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState
 import com.google.common.truth.Truth.assertThat

@@ -51,7 +51,7 @@ public class RefreshCallbackItem extends ActivityTransactionItem {
             @NonNull ActivityClientRecord r, @NonNull PendingTransactionActions pendingActions) {}
 
     @Override
-    public void postExecute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
+    public void postExecute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         final ActivityClientRecord r = getActivityClientRecord(client);
         client.reportRefresh(r);

@@ -24,6 +24,7 @@ import android.window.IWindowContainerToken
 import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50
 import com.android.wm.shell.util.GroupedRecentTaskInfo
 import com.android.wm.shell.util.GroupedRecentTaskInfo.CREATOR
 import com.android.wm.shell.util.GroupedRecentTaskInfo.TYPE_FREEFORM
@@ -123,6 +124,7 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
         assertThat(recentTaskInfoParcel.taskInfo2).isNotNull()
         assertThat(recentTaskInfoParcel.taskInfo2!!.taskId).isEqualTo(2)
         assertThat(recentTaskInfoParcel.splitBounds).isNotNull()
+        assertThat(recentTaskInfoParcel.splitBounds!!.snapPosition).isEqualTo(SNAP_TO_50_50)
     }
 
     @Test
@@ -156,7 +158,7 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
     private fun splitTasksGroupInfo(): GroupedRecentTaskInfo {
         val task1 = createTaskInfo(id = 1)
         val task2 = createTaskInfo(id = 2)
-        val splitBounds = SplitBounds(Rect(), Rect(), 1, 2)
+        val splitBounds = SplitBounds(Rect(), Rect(), 1, 2, SNAP_TO_50_50)
         return GroupedRecentTaskInfo.forSplitTasks(task1, task2, splitBounds)
     }
 

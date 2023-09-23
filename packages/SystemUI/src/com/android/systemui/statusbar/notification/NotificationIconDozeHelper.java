@@ -24,7 +24,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 public class NotificationIconDozeHelper extends NotificationDozeHelper {
 

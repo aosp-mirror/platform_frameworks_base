@@ -56,7 +56,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
     }
 
     @Override
-    public void postExecute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
+    public void postExecute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         if (mDontReport) {
             return;

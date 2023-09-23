@@ -213,12 +213,11 @@ public interface StatusBarPolicyModule {
         return networkController.getDataSaverController();
     }
 
-    /** Provides a log bufffer for BatteryControllerImpl */
+    /** Provides a log buffer for BatteryControllerImpl */
     @Provides
     @SysUISingleton
     @BatteryControllerLog
-    //TODO(b/300147438): reduce the size of this log buffer
     static LogBuffer provideBatteryControllerLog(LogBufferFactory factory) {
-        return factory.create(BatteryControllerLogger.TAG, 300);
+        return factory.create(BatteryControllerLogger.TAG, 30);
     }
 }

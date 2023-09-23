@@ -571,8 +571,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
         verify(mActivity.mLetterboxUiController, times(refreshRequested ? 1 : 0))
                 .setIsRefreshAfterRotationRequested(true);
 
-        final ClientTransaction transaction = ClientTransaction.obtain(
-                mActivity.app.getThread(), mActivity.token);
+        final ClientTransaction transaction = ClientTransaction.obtain(mActivity.app.getThread());
         transaction.addCallback(RefreshCallbackItem.obtain(mActivity.token,
                 cycleThroughStop ? ON_STOP : ON_PAUSE));
         transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(mActivity.token,

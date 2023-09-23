@@ -1,7 +1,7 @@
 package com.android.systemui.dreams.complication.dagger
 
 import android.content.res.Resources
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Main
 import dagger.Module
 import dagger.Provides

@@ -84,7 +84,7 @@ import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
@@ -309,7 +309,7 @@ public class KeyguardIndicationController {
         mFaceAcquiredMessageDeferral = faceHelpMessageDeferral;
         mCoExFaceAcquisitionMsgIdsToShow = new HashSet<>();
         int[] msgIds = context.getResources().getIntArray(
-                com.android.systemui.R.array.config_face_help_msgs_when_fingerprint_enrolled);
+                com.android.systemui.res.R.array.config_face_help_msgs_when_fingerprint_enrolled);
         for (int msgId : msgIds) {
             mCoExFaceAcquisitionMsgIdsToShow.add(msgId);
         }
@@ -704,7 +704,7 @@ public class KeyguardIndicationController {
                             .setTextColor(Utils.getColorAttr(
                                     mContext, com.android.internal.R.attr.textColorOnAccent))
                             .setBackground(mContext.getDrawable(
-                                    com.android.systemui.R.drawable.logout_button_background))
+                                    com.android.systemui.res.R.drawable.logout_button_background))
                             .setClickListener((view) -> {
                                 if (mFalsingManager.isFalseTap(LOW_PENALTY)) {
                                     return;

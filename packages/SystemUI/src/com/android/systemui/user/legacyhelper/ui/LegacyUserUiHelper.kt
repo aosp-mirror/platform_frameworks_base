@@ -20,7 +20,7 @@ package com.android.systemui.user.legacyhelper.ui
 import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.user.data.source.UserRecord
 
 /**

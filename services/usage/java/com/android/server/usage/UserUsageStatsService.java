@@ -1306,7 +1306,7 @@ class UserUsageStatsService {
         }
     }
 
-    private static String eventToString(int eventType) {
+    static String eventToString(int eventType) {
         switch (eventType) {
             case Event.NONE:
                 return "NONE";

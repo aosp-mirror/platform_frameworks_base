@@ -27,6 +27,8 @@ import androidx.preference.TwoStatePreference;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.android.settingslib.widget.mainswitch.R;
+
 /**
  * MainSwitchPreference is a Preference with a customized Switch.
  * This component is used as the main switch of the page

@@ -39,7 +39,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.utils.BuildCompatUtils;
-
+import com.android.settingslib.widget.preference.banner.R;
 /**
  * Banner message is a banner displaying important information (permission request, page error etc),
  * and provide actions for user to address. It requires a user action to be dismissed.

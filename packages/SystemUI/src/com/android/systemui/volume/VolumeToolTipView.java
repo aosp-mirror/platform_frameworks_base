@@ -28,7 +28,7 @@ import android.widget.LinearLayout;
 
 import androidx.core.content.ContextCompat;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.recents.TriangleShape;
 
 /**

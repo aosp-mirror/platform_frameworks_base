@@ -39,7 +39,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
 import androidx.viewpager2.widget.ViewPager2
 import com.android.systemui.Prefs
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.controls.TooltipManager
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo

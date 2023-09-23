@@ -35,7 +35,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -148,7 +148,7 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         when(mView.getResources()).thenReturn(mResources);
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin))
                 .thenReturn(100);
-        when(mResources.getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin))
+        when(mResources.getDimensionPixelSize(com.android.systemui.customization.R.dimen.keyguard_large_clock_top_margin))
                 .thenReturn(-200);
         when(mResources.getInteger(R.integer.keyguard_date_weather_view_invisibility))
                 .thenReturn(INVISIBLE);

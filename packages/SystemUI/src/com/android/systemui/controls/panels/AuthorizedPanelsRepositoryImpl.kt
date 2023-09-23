@@ -19,7 +19,7 @@ package com.android.systemui.controls.panels
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl

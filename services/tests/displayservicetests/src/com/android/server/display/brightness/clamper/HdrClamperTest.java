@@ -24,6 +24,7 @@ import android.os.PowerManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
 
@@ -33,6 +34,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.Map;
 
 @SmallTest
 public class HdrClamperTest {
@@ -108,10 +111,13 @@ public class HdrClamperTest {
     }
 
     private void configureClamper() {
-        mHdrClamper.getConfiguration().mMaxBrightnessLimits.put(500f, 0.6f);
-        mHdrClamper.getConfiguration().mIncreaseConfig.mDebounceTimeMillis = 1000;
-        mHdrClamper.getConfiguration().mIncreaseConfig.mTransitionTimeMillis = 1500;
-        mHdrClamper.getConfiguration().mDecreaseConfig.mDebounceTimeMillis = 2000;
-        mHdrClamper.getConfiguration().mDecreaseConfig.mTransitionTimeMillis = 2500;
+        HdrBrightnessData data = new HdrBrightnessData(
+                Map.of(500f, 0.6f),
+                /* brightnessIncreaseDebounceMillis= */ 1000,
+                /* brightnessIncreaseDurationMillis= */ 1500,
+                /* brightnessDecreaseDebounceMillis= */ 2000,
+                /* brightnessDecreaseDurationMillis= */2500
+        );
+        mHdrClamper.resetHdrConfig(data);
     }
 }

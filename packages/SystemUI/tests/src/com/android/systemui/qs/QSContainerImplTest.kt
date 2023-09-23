@@ -5,7 +5,7 @@ import android.testing.TestableLooper
 import android.view.View
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.customize.QSCustomizer
 import com.android.systemui.util.mockito.eq

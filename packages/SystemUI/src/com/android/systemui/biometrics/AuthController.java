@@ -627,7 +627,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             int xFpLocation = mCachedDisplayInfo.getNaturalWidth() / 2;
             try {
                 xFpLocation = mContext.getResources().getDimensionPixelSize(
-                        com.android.systemui.R.dimen
+                        com.android.systemui.res.R.dimen
                                 .physical_fingerprint_sensor_center_screen_location_x);
             } catch (Resources.NotFoundException e) {
             }
@@ -635,7 +635,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             return new Point(
                     (int) (xFpLocation * mScaleFactor),
                     (int) (mContext.getResources().getDimensionPixelSize(
-                            com.android.systemui.R.dimen
+                            com.android.systemui.res.R.dimen
                                     .physical_fingerprint_sensor_center_screen_location_y)
                             * mScaleFactor)
             );
@@ -815,7 +815,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
         int[] faceAuthLocation = context.getResources().getIntArray(
-                com.android.systemui.R.array.config_face_auth_props);
+                com.android.systemui.res.R.array.config_face_auth_props);
         if (faceAuthLocation == null || faceAuthLocation.length < 2) {
             mFaceSensorLocationDefault = null;
         } else {

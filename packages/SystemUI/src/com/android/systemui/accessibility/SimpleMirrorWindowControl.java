@@ -28,7 +28,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * A basic control to move the mirror window.

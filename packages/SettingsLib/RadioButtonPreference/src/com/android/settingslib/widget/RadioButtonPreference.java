@@ -25,6 +25,8 @@ import android.widget.ImageView;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.radio.R;
+
 /**
  * DEPRECATED. Please use SelectorWithWidgetPreference instead.
  *

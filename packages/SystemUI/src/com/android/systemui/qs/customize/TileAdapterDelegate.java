@@ -23,7 +23,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.util.List;
 

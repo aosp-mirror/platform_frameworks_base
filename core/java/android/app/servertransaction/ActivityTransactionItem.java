@@ -16,6 +16,8 @@
 
 package android.app.servertransaction;
 
+import static android.app.servertransaction.TransactionExecutorHelper.getActivityName;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
 import android.annotation.CallSuper;
@@ -28,6 +30,7 @@ import android.os.Parcel;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
 import java.util.Objects;
 
 /**
@@ -49,14 +52,14 @@ public abstract class ActivityTransactionItem extends ClientTransactionItem {
     ActivityTransactionItem() {}
 
     @Override
-    public final void execute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
+    public final void execute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         final ActivityClientRecord r = getActivityClientRecord(client);
         execute(client, r, pendingActions);
     }
 
     /**
-     * Like {@link #execute(ClientTransactionHandler, IBinder, PendingTransactionActions)},
+     * Like {@link #execute(ClientTransactionHandler, PendingTransactionActions)},
      * but take non-null {@link ActivityClientRecord} as a parameter.
      */
     @VisibleForTesting(visibility = PACKAGE)
@@ -109,6 +112,14 @@ public abstract class ActivityTransactionItem extends ClientTransactionItem {
     @Override
     public void recycle() {
         mActivityToken = null;
+    }
+
+    @Override
+    void dump(@NonNull String prefix, @NonNull PrintWriter pw,
+            @NonNull ClientTransactionHandler transactionHandler) {
+        super.dump(prefix, pw, transactionHandler);
+        pw.append(prefix).append("Target activity: ")
+                .println(getActivityName(mActivityToken, transactionHandler));
     }
 
     // Subclass must override and call super.equals to compare the mActivityToken.

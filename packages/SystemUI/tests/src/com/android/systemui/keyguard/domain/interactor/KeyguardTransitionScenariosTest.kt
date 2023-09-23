@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -39,11 +40,12 @@ import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.domain.model.ShadeModel
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -56,6 +58,7 @@ import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
@@ -66,6 +69,7 @@ import org.mockito.MockitoAnnotations
  * Class for testing user journeys through the interactors. They will all be activated during setup,
  * to ensure the expected transitions are still triggered.
  */
+@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardTransitionScenariosTest : SysuiTestCase() {
@@ -74,7 +78,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var commandQueue: FakeCommandQueue
-    private lateinit var shadeRepository: ShadeRepository
+    private lateinit var shadeRepository: FakeShadeRepository
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
     private lateinit var transitionInteractor: KeyguardTransitionInteractor
     private lateinit var featureFlags: FakeFeatureFlags
@@ -1209,6 +1213,58 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
             assertThat(info.to).isEqualTo(KeyguardState.OCCLUDED)
             assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun lockscreenToPrimaryBouncerDragging() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to LOCKSCREEN
+            runTransition(KeyguardState.AOD, KeyguardState.LOCKSCREEN)
+            runCurrent()
+
+            // GIVEN the keyguard is showing locked
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            keyguardRepository.setKeyguardUnlocked(false)
+            runCurrent()
+            shadeRepository.setShadeModel(
+                ShadeModel(
+                    expansionAmount = .9f,
+                    isUserDragging = true,
+                )
+            )
+            runCurrent()
+
+            // THEN a transition from LOCKSCREEN => PRIMARY_BOUNCER should occur
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.to).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(info.animator).isNull() // dragging should be manually animated
+
+            // WHEN the user stops dragging and shade is back to expanded
+            clearInvocations(transitionRepository)
+            runTransition(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER)
+            shadeRepository.setShadeModel(
+                ShadeModel(
+                    expansionAmount = 1f,
+                    isUserDragging = false,
+                )
+            )
+            runCurrent()
+
+            // THEN a transition from PRIMARY_BOUNCER => LOCKSCREEN should occur
+            val info2 =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            assertThat(info2.from).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(info2.to).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info2.animator).isNotNull()
 
             coroutineContext.cancelChildren()
         }

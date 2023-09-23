@@ -138,6 +138,7 @@ import android.os.incremental.IncrementalFileStorages;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.PerUidReadTimeouts;
 import android.os.incremental.StorageHealthCheckParams;
+import android.os.incremental.V4Signature;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
@@ -802,6 +803,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // entries like "lost+found".
             if (file.isDirectory()) return false;
             if (file.getName().endsWith(REMOVE_MARKER_EXTENSION)) return false;
+            if (file.getName().endsWith(V4Signature.EXT)) return false;
             if (isAppMetadata(file)) return false;
             if (DexMetadataHelper.isDexMetadataFile(file)) return false;
             if (VerityUtils.isFsveritySignatureFile(file)) return false;
@@ -1499,6 +1501,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private List<File> getAddedApksLocked() {
         String[] names = getNamesLocked();
         return filterFiles(stageDir, names, sAddedApkFilter);
+    }
+
+    @GuardedBy("mLock")
+    private void enableFsVerityToAddedApksWithIdsig() throws PackageManagerException {
+        try {
+            List<File> files = getAddedApksLocked();
+            for (var file : files) {
+                if (new File(file.getPath() + V4Signature.EXT).exists()) {
+                    VerityUtils.setUpFsverity(file.getPath());
+                }
+            }
+        } catch (IOException e) {
+            throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
+                    "Failed to enable fs-verity to verify with idsig: " + e);
+        }
     }
 
     @GuardedBy("mLock")
@@ -3294,6 +3311,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        // Needs to happen before the first v4 signature verification, which happens in
+        // getAddedApkLitesLocked.
+        if (android.security.Flags.extendVbChainToUpdatedApk()) {
+            if (!isIncrementalInstallation()) {
+                enableFsVerityToAddedApksWithIdsig();
+            }
+        }
+
         final List<ApkLite> addedFiles = getAddedApkLitesLocked();
         if (addedFiles.isEmpty()
                 && (removeSplitList.size() == 0 || getStagedAppMetadataFile() != null)) {
@@ -3656,6 +3681,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
+    private void maybeStageV4SignatureLocked(File origFile, File targetFile)
+            throws PackageManagerException {
+        final File originalSignature = new File(origFile.getPath() + V4Signature.EXT);
+        if (originalSignature.exists()) {
+            final File stagedSignature = new File(targetFile.getPath() + V4Signature.EXT);
+            stageFileLocked(originalSignature, stagedSignature);
+        }
+    }
+
+    @GuardedBy("mLock")
     private void maybeStageDexMetadataLocked(File origFile, File targetFile)
             throws PackageManagerException {
         final File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(origFile);
@@ -3782,6 +3817,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Stage APK's fs-verity signature if present.
         maybeStageFsveritySignatureLocked(origFile, targetFile,
                 isFsVerityRequiredForApk(origFile, targetFile));
+        // Stage APK's v4 signature if present.
+        if (android.security.Flags.extendVbChainToUpdatedApk()) {
+            maybeStageV4SignatureLocked(origFile, targetFile);
+        }
         // Stage dex metadata (.dm) and corresponding fs-verity signature if present.
         maybeStageDexMetadataLocked(origFile, targetFile);
         // Stage checksums (.digests) if present.
@@ -3799,10 +3838,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
+    private void maybeInheritV4SignatureLocked(File origFile) {
+        // Inherit the v4 signature file if present.
+        final File v4SignatureFile = new File(origFile.getPath() + V4Signature.EXT);
+        if (v4SignatureFile.exists()) {
+            mResolvedInheritedFiles.add(v4SignatureFile);
+        }
+    }
+
+    @GuardedBy("mLock")
     private void inheritFileLocked(File origFile) {
         mResolvedInheritedFiles.add(origFile);
 
         maybeInheritFsveritySignatureLocked(origFile);
+        if (android.security.Flags.extendVbChainToUpdatedApk()) {
+            maybeInheritV4SignatureLocked(origFile);
+        }
 
         // Inherit the dex metadata if present.
         final File dexMetadataFile =

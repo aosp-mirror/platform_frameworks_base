@@ -27,7 +27,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.dream.lowlight.util.TruncatedInterpolator
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutParams
 import com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM

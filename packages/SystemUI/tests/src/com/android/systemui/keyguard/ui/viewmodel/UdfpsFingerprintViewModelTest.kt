@@ -69,7 +69,7 @@ class UdfpsFingerprintViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        overrideResource(com.android.systemui.R.dimen.lock_icon_padding, defaultPadding)
+        overrideResource(com.android.systemui.res.R.dimen.lock_icon_padding, defaultPadding)
         testScope = TestScope()
         configRepository = FakeConfigurationRepository()
         keyguardRepository = FakeKeyguardRepository()

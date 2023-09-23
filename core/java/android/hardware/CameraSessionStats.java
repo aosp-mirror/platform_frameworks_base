@@ -64,6 +64,7 @@ public class CameraSessionStats implements Parcelable {
     private ArrayList<CameraStreamStats> mStreamStats;
     private String mUserTag;
     private int mVideoStabilizationMode;
+    private boolean mUsedUltraWide;
     private int mSessionIndex;
     private CameraExtensionSessionStats mCameraExtensionSessionStats;
 
@@ -82,6 +83,7 @@ public class CameraSessionStats implements Parcelable {
         mDeviceError = false;
         mStreamStats = new ArrayList<CameraStreamStats>();
         mVideoStabilizationMode = -1;
+        mUsedUltraWide = false;
         mSessionIndex = 0;
         mCameraExtensionSessionStats = new CameraExtensionSessionStats();
     }
@@ -102,6 +104,8 @@ public class CameraSessionStats implements Parcelable {
         mSessionType = sessionType;
         mInternalReconfigure = internalReconfigure;
         mStreamStats = new ArrayList<CameraStreamStats>();
+        mVideoStabilizationMode = -1;
+        mUsedUltraWide = false;
         mSessionIndex = sessionIdx;
         mCameraExtensionSessionStats = new CameraExtensionSessionStats();
     }
@@ -147,6 +151,7 @@ public class CameraSessionStats implements Parcelable {
         dest.writeTypedList(mStreamStats);
         dest.writeString(mUserTag);
         dest.writeInt(mVideoStabilizationMode);
+        dest.writeBoolean(mUsedUltraWide);
         dest.writeInt(mSessionIndex);
         mCameraExtensionSessionStats.writeToParcel(dest, 0);
     }
@@ -173,6 +178,9 @@ public class CameraSessionStats implements Parcelable {
 
         mUserTag = in.readString();
         mVideoStabilizationMode = in.readInt();
+
+        mUsedUltraWide = in.readBoolean();
+
         mSessionIndex = in.readInt();
         mCameraExtensionSessionStats = CameraExtensionSessionStats.CREATOR.createFromParcel(in);
     }
@@ -243,6 +251,10 @@ public class CameraSessionStats implements Parcelable {
 
     public int getVideoStabilizationMode() {
         return mVideoStabilizationMode;
+    }
+
+    public boolean getUsedUltraWide() {
+        return mUsedUltraWide;
     }
 
     public int getSessionIndex() {

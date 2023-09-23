@@ -23,6 +23,7 @@ package {
 
 android_test {
     name: "SettingsLibTests",
+    use_resource_processor: true,
     defaults: [
         "SettingsLibDefaults",
         "framework-wifi-test-defaults",

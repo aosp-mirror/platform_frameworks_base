@@ -25,7 +25,7 @@ import android.view.View;
 import androidx.annotation.CallSuper;
 
 import com.android.internal.widget.LockscreenCredential;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Base class for PIN and password unlock screens.

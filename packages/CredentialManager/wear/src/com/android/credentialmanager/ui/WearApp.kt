@@ -19,8 +19,8 @@
 package com.android.credentialmanager.ui
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
+import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavHostState
 import com.android.credentialmanager.ui.screens.MainScreen
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
@@ -28,9 +28,8 @@ import com.google.android.horologist.compose.navscaffold.WearNavScaffold
 import com.google.android.horologist.compose.navscaffold.composable
 
 @Composable
-fun WearApp(
-    navController: NavHostController
-) {
+fun WearApp() {
+    val navController = rememberSwipeDismissableNavController()
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
     val navHostState =
         rememberSwipeDismissableNavHostState(swipeToDismissBoxState = swipeToDismissBoxState)

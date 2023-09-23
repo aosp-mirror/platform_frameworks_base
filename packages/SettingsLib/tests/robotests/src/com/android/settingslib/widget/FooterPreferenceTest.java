@@ -28,7 +28,7 @@ import android.widget.TextView;
 
 import androidx.preference.PreferenceViewHolder;
 
-import com.android.settingslib.R;
+import com.android.settingslib.widget.preference.footer.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -96,7 +96,7 @@ public class FooterPreferenceTest {
     public void onBindViewHolder_whenTitleIsNull_shouldNotRaiseNpe() {
         PreferenceViewHolder viewHolder = spy(PreferenceViewHolder.createInstanceForTests(
                 LayoutInflater.from(mContext)
-                        .inflate(com.android.settingslib.widget.R.layout.preference_footer, null)));
+                        .inflate(R.layout.preference_footer, null)));
         when(viewHolder.findViewById(androidx.core.R.id.title)).thenReturn(null);
 
         Throwable actualThrowable = null;

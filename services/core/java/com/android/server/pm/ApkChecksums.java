@@ -655,7 +655,7 @@ public class ApkChecksums {
             }
         } catch (SignatureNotFoundException e) {
             // Nothing
-        } catch (SecurityException e) {
+        } catch (SignatureException | SecurityException e) {
             Slog.e(TAG, "V4 signature error", e);
         }
         return null;

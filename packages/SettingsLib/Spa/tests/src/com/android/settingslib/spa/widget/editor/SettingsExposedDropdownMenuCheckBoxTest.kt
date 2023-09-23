@@ -39,7 +39,7 @@ class SettingsExposedDropdownMenuCheckBoxTest {
     private val item2 = "item2"
     private val item3 = "item3"
     private val options = listOf(item1, item2, item3)
-    private val selectedOptionsState1 = mutableStateListOf(item1, item2)
+    private val selectedOptionsState1 = mutableStateListOf(0, 1)
     private val exposedDropdownMenuCheckBoxLabel = "ExposedDropdownMenuCheckBoxLabel"
 
     @Test

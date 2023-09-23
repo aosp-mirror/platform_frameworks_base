@@ -43,7 +43,7 @@ public class TopResumedActivityChangeItem extends ActivityTransactionItem {
     }
 
     @Override
-    public void postExecute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
+    public void postExecute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         if (mOnTop) {
             return;

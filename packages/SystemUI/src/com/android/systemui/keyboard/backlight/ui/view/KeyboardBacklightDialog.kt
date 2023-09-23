@@ -38,7 +38,7 @@ import android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
 import androidx.annotation.IdRes
 import androidx.core.view.setPadding
 import com.android.settingslib.Utils
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 class KeyboardBacklightDialog(
     context: Context,

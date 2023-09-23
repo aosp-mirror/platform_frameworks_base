@@ -59,7 +59,7 @@ public class ShutdownUi {
         ScrimDrawable background = new ScrimDrawable();
 
         final Dialog d = new Dialog(mContext,
-                com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
+                com.android.systemui.res.R.style.Theme_SystemUI_Dialog_GlobalActions);
 
         d.setOnShowListener(dialog -> {
             if (mBlurUtils.supportsBlursOnWindows()) {
@@ -69,7 +69,7 @@ public class ShutdownUi {
                         (int) mBlurUtils.blurRadiusOfRatio(1), backgroundAlpha == 255);
             } else {
                 float backgroundAlpha = mContext.getResources().getFloat(
-                        com.android.systemui.R.dimen.shutdown_scrim_behind_alpha);
+                        com.android.systemui.res.R.dimen.shutdown_scrim_behind_alpha);
                 background.setAlpha((int) (backgroundAlpha * 255));
             }
         });
@@ -96,7 +96,7 @@ public class ShutdownUi {
                         | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         window.setBackgroundDrawable(background);
-        window.setWindowAnimations(com.android.systemui.R.style.Animation_ShutdownUi);
+        window.setWindowAnimations(com.android.systemui.res.R.style.Animation_ShutdownUi);
 
         d.setContentView(getShutdownDialogContent(isReboot));
         d.setCancelable(false);
@@ -104,10 +104,10 @@ public class ShutdownUi {
         int color;
         if (mBlurUtils.supportsBlursOnWindows()) {
             color = Utils.getColorAttrDefaultColor(mContext,
-                    com.android.systemui.R.attr.wallpaperTextColor);
+                    com.android.systemui.res.R.attr.wallpaperTextColor);
         } else {
             color = mContext.getResources().getColor(
-                    com.android.systemui.R.color.global_actions_shutdown_ui_text);
+                    com.android.systemui.res.R.color.global_actions_shutdown_ui_text);
         }
 
         ProgressBar bar = d.findViewById(R.id.progress);

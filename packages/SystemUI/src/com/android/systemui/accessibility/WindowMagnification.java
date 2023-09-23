@@ -102,7 +102,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         protected WindowMagnificationController createInstance(Display display) {
             final Context windowContext = mContext.createWindowContext(display,
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
-            windowContext.setTheme(com.android.systemui.R.style.Theme_SystemUI);
+            windowContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
             return new WindowMagnificationController(
                     windowContext,
                     mHandler,
@@ -141,7 +141,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         protected MagnificationSettingsController createInstance(Display display) {
             final Context windowContext = mContext.createWindowContext(display,
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
-            windowContext.setTheme(com.android.systemui.R.style.Theme_SystemUI);
+            windowContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
             return new MagnificationSettingsController(
                     windowContext,
                     new SfVsyncFrameCallbackProvider(),

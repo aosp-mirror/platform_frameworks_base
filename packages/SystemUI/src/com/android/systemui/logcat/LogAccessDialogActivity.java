@@ -43,7 +43,7 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ILogAccessDialogCallback;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 
 /**

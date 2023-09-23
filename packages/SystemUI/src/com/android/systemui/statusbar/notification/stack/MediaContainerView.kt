@@ -22,7 +22,7 @@ import android.graphics.Canvas
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.row.ExpandableView
 
 /**

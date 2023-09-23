@@ -46,7 +46,7 @@ public class StopActivityItem extends ActivityLifecycleItem {
     }
 
     @Override
-    public void postExecute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
+    public void postExecute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         client.reportStop(pendingActions);
     }

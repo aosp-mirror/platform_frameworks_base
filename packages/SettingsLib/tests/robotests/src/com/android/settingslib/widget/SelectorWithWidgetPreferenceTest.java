@@ -28,6 +28,8 @@ import android.view.View;
 
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.selector.R;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

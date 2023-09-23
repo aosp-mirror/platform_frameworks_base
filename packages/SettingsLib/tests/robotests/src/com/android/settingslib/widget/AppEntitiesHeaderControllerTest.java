@@ -24,6 +24,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.settingslib.widget.entityheader.R;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -69,18 +71,18 @@ public class AppEntitiesHeaderControllerTest {
 
     @Test
     public void setHeaderTitleRes_setTextRes_shouldSetToTitleView() {
-        mController.setHeaderTitleRes(R.string.expand_button_title).apply();
+        mController.setHeaderTitleRes(androidx.preference.R.string.expand_button_title).apply();
         final TextView view = mAppEntitiesHeaderView.findViewById(R.id.header_title);
 
-        assertThat(view.getText()).isEqualTo(mContext.getText(R.string.expand_button_title));
+        assertThat(view.getText()).isEqualTo(mContext.getText(androidx.preference.R.string.expand_button_title));
     }
 
     @Test
     public void setHeaderDetailsRes_setTextRes_shouldSetToDetailsView() {
-        mController.setHeaderDetailsRes(R.string.expand_button_title).apply();
+        mController.setHeaderDetailsRes(androidx.preference.R.string.expand_button_title).apply();
         final TextView view = mAppEntitiesHeaderView.findViewById(R.id.header_details);
 
-        assertThat(view.getText()).isEqualTo(mContext.getText(R.string.expand_button_title));
+        assertThat(view.getText()).isEqualTo(mContext.getText(androidx.preference.R.string.expand_button_title));
     }
 
     @Test
@@ -93,7 +95,7 @@ public class AppEntitiesHeaderControllerTest {
 
     @Test
     public void setHeaderDetails_detailsTextAndResBothSet_shouldSetTextToDetailsView() {
-        mController.setHeaderDetailsRes(R.string.expand_button_title);
+        mController.setHeaderDetailsRes(androidx.preference.R.string.expand_button_title);
         mController.setHeaderDetails(TITLE).apply();
         final TextView view = mAppEntitiesHeaderView.findViewById(R.id.header_details);
 
@@ -206,7 +208,7 @@ public class AppEntitiesHeaderControllerTest {
 
     @Test
     public void apply_noAppEntitySet_shouldOnlyShowTitleAndEmptyView() {
-        mController.setHeaderTitleRes(R.string.expand_button_title)
+        mController.setHeaderTitleRes(androidx.preference.R.string.expand_button_title)
                 .setAppEntity(0, mAppEntityInfo)
                 .setAppEntity(1, mAppEntityInfo)
                 .setAppEntity(2, mAppEntityInfo).apply();

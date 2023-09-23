@@ -34,7 +34,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Text
@@ -120,7 +120,7 @@ class UserInteractorTest : SysuiTestCase() {
         whenever(manager.getUserIcon(anyInt())).thenReturn(ICON)
         whenever(manager.canAddMoreUsers(any())).thenReturn(true)
 
-        overrideResource(R.drawable.ic_account_circle, GUEST_ICON)
+        overrideResource(com.android.settingslib.R.drawable.ic_account_circle, GUEST_ICON)
         overrideResource(R.dimen.max_avatar_size, 10)
         overrideResource(
             com.android.internal.R.string.config_supervisedUserCreationPackage,

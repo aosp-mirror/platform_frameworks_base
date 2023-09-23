@@ -18,7 +18,7 @@ package com.android.systemui.theme;
 
 import android.content.res.Resources;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
 

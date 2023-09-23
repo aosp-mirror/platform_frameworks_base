@@ -22,7 +22,7 @@ import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardAmbientIndicationViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached

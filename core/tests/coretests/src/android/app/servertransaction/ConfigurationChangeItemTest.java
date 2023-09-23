@@ -24,7 +24,6 @@ import android.app.ActivityThread;
 import android.app.ClientTransactionHandler;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -49,8 +48,6 @@ public class ConfigurationChangeItemTest {
 
     @Mock
     private ClientTransactionHandler mHandler;
-    @Mock
-    private IBinder mToken;
     // Can't mock final class.
     private final Configuration mConfiguration = new Configuration();
 
@@ -63,7 +60,7 @@ public class ConfigurationChangeItemTest {
     public void testGetContextToUpdate() {
         final ConfigurationChangeItem item = ConfigurationChangeItem
                 .obtain(mConfiguration, DEVICE_ID_DEFAULT);
-        final Context context = item.getContextToUpdate(mHandler, mToken);
+        final Context context = item.getContextToUpdate(mHandler);
 
         assertEquals(ActivityThread.currentApplication(), context);
     }

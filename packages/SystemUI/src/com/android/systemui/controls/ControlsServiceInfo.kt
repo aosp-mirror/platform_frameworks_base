@@ -32,7 +32,7 @@ import android.service.controls.ControlsProviderService
 import android.util.IconDrawableFactory
 import androidx.annotation.WorkerThread
 import com.android.settingslib.applications.DefaultAppInfo
-import com.android.systemui.R
+import com.android.systemui.res.R
 import java.util.Objects
 
 open class ControlsServiceInfo(

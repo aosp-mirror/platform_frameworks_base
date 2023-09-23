@@ -27,7 +27,7 @@ import android.content.Context;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;

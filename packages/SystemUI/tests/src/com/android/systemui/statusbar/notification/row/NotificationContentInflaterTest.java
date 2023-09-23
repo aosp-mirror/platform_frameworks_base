@@ -115,7 +115,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mBuilder = new Notification.Builder(mContext).setSmallIcon(
-                R.drawable.ic_person)
+                com.android.systemui.res.R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text")
                 .setStyle(new Notification.BigTextStyle().bigText("big text"));
@@ -191,7 +191,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     public void testInflationThrowsErrorDoesntCallUpdated() throws Exception {
         mRow.getPrivateLayout().removeAllViews();
         mRow.getEntry().getSbn().getNotification().contentView
-                = new RemoteViews(mContext.getPackageName(), R.layout.status_bar);
+                = new RemoteViews(mContext.getPackageName(), com.android.systemui.res.R.layout.status_bar);
         inflateAndWait(true /* expectingException */, mNotificationInflater, FLAG_CONTENT_VIEW_ALL,
                 mRow);
         assertTrue(mRow.getPrivateLayout().getChildCount() == 0);

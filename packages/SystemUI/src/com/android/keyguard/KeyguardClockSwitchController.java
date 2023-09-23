@@ -37,7 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
@@ -527,7 +527,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (!mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
             NotificationIconContainer nic = (NotificationIconContainer)
                     mView.findViewById(
-                            com.android.systemui.R.id.left_aligned_notification_icon_container);
+                            com.android.systemui.res.R.id.left_aligned_notification_icon_container);
             mNotificationIconAreaController.setupAodIcons(nic);
         }
     }

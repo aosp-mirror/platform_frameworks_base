@@ -65,7 +65,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.ExpandHelper;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -154,6 +154,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         assertFalse(Flags.NSSL_DEBUG_REMOVE_ANIMATION.getDefault());
         mFeatureFlags.set(Flags.NSSL_DEBUG_LINES, false);
         mFeatureFlags.set(Flags.NSSL_DEBUG_REMOVE_ANIMATION, false);
+        mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
 
         // Register the feature flags we use
         // TODO: Ideally we wouldn't need to set these unless a test actually reads them,

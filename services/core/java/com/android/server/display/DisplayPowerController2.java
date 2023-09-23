@@ -1547,7 +1547,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                             SCREEN_ANIMATION_RATE_MINIMUM);
                 } else if (customTransitionRate > 0) {
                     animateScreenBrightness(animateValue, sdrAnimateValue,
-                            customTransitionRate);
+                            customTransitionRate, /* ignoreAnimationLimits = */true);
                 } else {
                     boolean isIncreasing = animateValue > currentBrightness;
                     final float rampSpeed;
@@ -2017,11 +2017,17 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     }
 
     private void animateScreenBrightness(float target, float sdrTarget, float rate) {
+        animateScreenBrightness(target, sdrTarget, rate, /* ignoreAnimationLimits = */false);
+    }
+
+    private void animateScreenBrightness(float target, float sdrTarget, float rate,
+            boolean ignoreAnimationLimits) {
         if (DEBUG) {
             Slog.d(mTag, "Animating brightness: target=" + target + ", sdrTarget=" + sdrTarget
                     + ", rate=" + rate);
         }
-        if (mScreenBrightnessRampAnimator.animateTo(target, sdrTarget, rate)) {
+        if (mScreenBrightnessRampAnimator.animateTo(target, sdrTarget, rate,
+                ignoreAnimationLimits)) {
             Trace.traceCounter(Trace.TRACE_TAG_POWER, "TargetScreenBrightness", (int) target);
 
             String propertyKey = "debug.tracing.screen_brightness";

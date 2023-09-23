@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.phone
 import android.testing.TestableLooper
 import android.view.View
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT
 import com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT

@@ -26,7 +26,7 @@ import android.widget.LinearLayout;
 
 import androidx.core.widget.NestedScrollView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.qs.touch.OverScroll;
 import com.android.systemui.qs.touch.SwipeDetector;
 

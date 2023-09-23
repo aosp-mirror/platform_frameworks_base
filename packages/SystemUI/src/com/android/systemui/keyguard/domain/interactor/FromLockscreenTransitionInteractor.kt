@@ -265,7 +265,11 @@ constructor(
                                 !isKeyguardUnlocked &&
                                 statusBarState == KEYGUARD
                         ) {
-                            transitionId = startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                            transitionId =
+                                startTransitionTo(
+                                    toState = KeyguardState.PRIMARY_BOUNCER,
+                                    animator = null, // transition will be manually controlled
+                                )
                         }
                     }
                 }

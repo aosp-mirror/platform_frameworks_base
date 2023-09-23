@@ -43,7 +43,7 @@ import android.widget.TextView;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange;

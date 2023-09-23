@@ -51,7 +51,7 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Window;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;

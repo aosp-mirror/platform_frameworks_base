@@ -323,49 +323,49 @@ interface ISub {
      */
      UserHandle getSubscriptionUserHandle(int subId);
 
-     /**
-      * Check if subscription and user are associated with each other.
-      *
-      * @param subscriptionId the subId of the subscription
-      * @param userHandle user handle of the user
-      * @return {@code true} if subscription is associated with user
-      * {code true} if there are no subscriptions on device
-      * else {@code false} if subscription is not associated with user.
-      *
-      * @throws IllegalArgumentException if subscription is invalid.
-      * @throws SecurityException if the caller doesn't have permissions required.
-      * @throws IllegalStateException if subscription service is not available.
-      *
-      * @hide
-      */
-      boolean isSubscriptionAssociatedWithUser(int subscriptionId, in UserHandle userHandle);
+    /**
+     * Check if subscription and user are associated with each other.
+     *
+     * @param subscriptionId the subId of the subscription
+     * @param userHandle user handle of the user
+     * @return {@code true} if subscription is associated with user
+     * {code true} if there are no subscriptions on device
+     * else {@code false} if subscription is not associated with user.
+     *
+     * @throws IllegalArgumentException if subscription is invalid.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @throws IllegalStateException if subscription service is not available.
+     *
+     * @hide
+     */
+    boolean isSubscriptionAssociatedWithUser(int subscriptionId, in UserHandle userHandle);
 
-      /**
-       * Get list of subscriptions associated with user.
-       *
-       * @param userHandle user handle of the user
-       * @return list of subscriptionInfo associated with the user.
-       *
-       * @throws SecurityException if the caller doesn't have permissions required.
-       * @throws IllegalStateException if subscription service is not available.
-       *
-       * @hide
-       */
-       List<SubscriptionInfo> getSubscriptionInfoListAssociatedWithUser(in UserHandle userHandle);
+    /**
+     * Get list of subscriptions associated with user.
+     *
+     * @param userHandle user handle of the user
+     * @return list of subscriptionInfo associated with the user.
+     *
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @throws IllegalStateException if subscription service is not available.
+     *
+     * @hide
+     */
+    List<SubscriptionInfo> getSubscriptionInfoListAssociatedWithUser(in UserHandle userHandle);
 
-      /**
-       * Called during setup wizard restore flow to attempt to restore the backed up sim-specific
-       * configs to device for all existing SIMs in the subscription database
-       * {@link Telephony.SimInfo}. Internally, it will store the backup data in an internal file.
-       * This file will persist on device for device's lifetime and will be used later on when a SIM
-       * is inserted to restore that specific SIM's settings. End result is subscription database is
-       * modified to match any backed up configs for the appropriate inserted SIMs.
-       *
-       * <p>
-       * The {@link Uri} {@link #SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI} is notified if any
-       * {@link Telephony.SimInfo} entry is updated as the result of this method call.
-       *
-       * @param data with the sim specific configs to be backed up.
-       */
-       void restoreAllSimSpecificSettingsFromBackup(in byte[] data);
+    /**
+     * Called during setup wizard restore flow to attempt to restore the backed up sim-specific
+     * configs to device for all existing SIMs in the subscription database
+     * {@link Telephony.SimInfo}. Internally, it will store the backup data in an internal file.
+     * This file will persist on device for device's lifetime and will be used later on when a SIM
+     * is inserted to restore that specific SIM's settings. End result is subscription database is
+     * modified to match any backed up configs for the appropriate inserted SIMs.
+     *
+     * <p>
+     * The {@link Uri} {@link #SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI} is notified if any
+     * {@link Telephony.SimInfo} entry is updated as the result of this method call.
+     *
+     * @param data with the sim specific configs to be backed up.
+     */
+    void restoreAllSimSpecificSettingsFromBackup(in byte[] data);
 }

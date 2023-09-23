@@ -227,7 +227,7 @@ final class DisplayRotationCompatPolicy {
                     "Refreshing activity for camera compatibility treatment, "
                             + "activityRecord=%s", activity);
             final ClientTransaction transaction = ClientTransaction.obtain(
-                    activity.app.getThread(), activity.token);
+                    activity.app.getThread());
             transaction.addCallback(RefreshCallbackItem.obtain(activity.token,
                             cycleThroughStop ? ON_STOP : ON_PAUSE));
             transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(activity.token,

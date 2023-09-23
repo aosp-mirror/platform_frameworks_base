@@ -27,7 +27,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import com.android.internal.statusbar.StatusBarIcon
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.InflationException

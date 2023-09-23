@@ -58,6 +58,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.ArchiveState.ArchiveActivityInfo;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 
 import java.io.ByteArrayOutputStream;
@@ -99,6 +100,11 @@ public class PackageArchiver {
     PackageArchiver(Context context, PackageManagerService mPm) {
         this.mContext = context;
         this.mPm = mPm;
+    }
+
+    /** Returns whether a package is archived for a user. */
+    public static boolean isArchived(PackageUserState userState) {
+        return userState.getArchiveState() != null && !userState.isInstalled();
     }
 
     void requestArchive(
@@ -354,8 +360,7 @@ public class PackageArchiver {
     private void verifyArchived(PackageStateInternal ps, int userId)
             throws PackageManager.NameNotFoundException {
         PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
-        // TODO(b/288142708) Check for isInstalled false here too.
-        if (userState.getArchiveState() == null) {
+        if (!isArchived(userState)) {
             throw new PackageManager.NameNotFoundException(
                     TextUtils.formatSimple("Package %s is not currently archived.",
                             ps.getPackageName()));

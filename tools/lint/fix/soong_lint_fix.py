@@ -213,5 +213,5 @@ def _setup_parser():
 
 if __name__ == "__main__":
     opts = SoongLintFixOptions()
-    opts.parse_args(sys.argv)
+    opts.parse_args()
     SoongLintFix(opts).run()

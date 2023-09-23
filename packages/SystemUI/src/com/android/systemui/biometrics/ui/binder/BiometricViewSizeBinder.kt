@@ -30,7 +30,7 @@ import androidx.core.animation.addListener
 import androidx.core.view.doOnLayout
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.ui.BiometricPromptLayout

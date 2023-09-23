@@ -32,7 +32,7 @@ import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
