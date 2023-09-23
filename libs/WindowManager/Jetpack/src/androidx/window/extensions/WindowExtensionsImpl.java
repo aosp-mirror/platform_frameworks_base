@@ -19,7 +19,6 @@ package androidx.window.extensions;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.content.Context;
-import android.window.TaskFragmentOrganizer;
 
 import androidx.annotation.NonNull;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
@@ -81,13 +80,7 @@ public class WindowExtensionsImpl implements WindowExtensions {
                     Context context = getApplication();
                     DeviceStateManagerFoldingFeatureProducer producer =
                             getFoldingFeatureProducer();
-                    // TODO(b/263263909) Use the organizer to tell if an Activity is embededed.
-                    // Need to improve our Dependency Injection and centralize the logic.
-                    TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(command -> {
-                        throw new RuntimeException("Not allowed!");
-                    });
-                    mWindowLayoutComponent = new WindowLayoutComponentImpl(context, organizer,
-                            producer);
+                    mWindowLayoutComponent = new WindowLayoutComponentImpl(context, producer);
                 }
             }
         }

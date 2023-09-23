@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "../Properties.h"
+#include "RenderThread.h"
 #include "thread/CommonPool.h"
 
 using namespace std::chrono_literals;
@@ -32,76 +33,42 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-namespace {
+#define BIND_APH_METHOD(name)                                         \
+    name = (decltype(name))dlsym(handle_, "APerformanceHint_" #name); \
+    LOG_ALWAYS_FATAL_IF(name == nullptr, "Failed to find required symbol APerformanceHint_" #name)
 
-typedef APerformanceHintManager* (*APH_getManager)();
-typedef APerformanceHintSession* (*APH_createSession)(APerformanceHintManager*, const int32_t*,
-                                                      size_t, int64_t);
-typedef void (*APH_closeSession)(APerformanceHintSession* session);
-typedef void (*APH_updateTargetWorkDuration)(APerformanceHintSession*, int64_t);
-typedef void (*APH_reportActualWorkDuration)(APerformanceHintSession*, int64_t);
-typedef void (*APH_sendHint)(APerformanceHintSession* session, int32_t);
-
-bool gAPerformanceHintBindingInitialized = false;
-APH_getManager gAPH_getManagerFn = nullptr;
-APH_createSession gAPH_createSessionFn = nullptr;
-APH_closeSession gAPH_closeSessionFn = nullptr;
-APH_updateTargetWorkDuration gAPH_updateTargetWorkDurationFn = nullptr;
-APH_reportActualWorkDuration gAPH_reportActualWorkDurationFn = nullptr;
-APH_sendHint gAPH_sendHintFn = nullptr;
-
-void ensureAPerformanceHintBindingInitialized() {
-    if (gAPerformanceHintBindingInitialized) return;
+void HintSessionWrapper::HintSessionBinding::init() {
+    if (mInitialized) return;
 
     void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
     LOG_ALWAYS_FATAL_IF(handle_ == nullptr, "Failed to dlopen libandroid.so!");
 
-    gAPH_getManagerFn = (APH_getManager)dlsym(handle_, "APerformanceHint_getManager");
-    LOG_ALWAYS_FATAL_IF(gAPH_getManagerFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_getManager!");
+    BIND_APH_METHOD(getManager);
+    BIND_APH_METHOD(createSession);
+    BIND_APH_METHOD(closeSession);
+    BIND_APH_METHOD(updateTargetWorkDuration);
+    BIND_APH_METHOD(reportActualWorkDuration);
+    BIND_APH_METHOD(sendHint);
 
-    gAPH_createSessionFn = (APH_createSession)dlsym(handle_, "APerformanceHint_createSession");
-    LOG_ALWAYS_FATAL_IF(gAPH_createSessionFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_createSession!");
-
-    gAPH_closeSessionFn = (APH_closeSession)dlsym(handle_, "APerformanceHint_closeSession");
-    LOG_ALWAYS_FATAL_IF(gAPH_closeSessionFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_closeSession!");
-
-    gAPH_updateTargetWorkDurationFn = (APH_updateTargetWorkDuration)dlsym(
-            handle_, "APerformanceHint_updateTargetWorkDuration");
-    LOG_ALWAYS_FATAL_IF(
-            gAPH_updateTargetWorkDurationFn == nullptr,
-            "Failed to find required symbol APerformanceHint_updateTargetWorkDuration!");
-
-    gAPH_reportActualWorkDurationFn = (APH_reportActualWorkDuration)dlsym(
-            handle_, "APerformanceHint_reportActualWorkDuration");
-    LOG_ALWAYS_FATAL_IF(
-            gAPH_reportActualWorkDurationFn == nullptr,
-            "Failed to find required symbol APerformanceHint_reportActualWorkDuration!");
-
-    gAPH_sendHintFn = (APH_sendHint)dlsym(handle_, "APerformanceHint_sendHint");
-    LOG_ALWAYS_FATAL_IF(gAPH_sendHintFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_sendHint!");
-
-    gAPerformanceHintBindingInitialized = true;
+    mInitialized = true;
 }
 
-}  // namespace
-
 HintSessionWrapper::HintSessionWrapper(pid_t uiThreadId, pid_t renderThreadId)
-        : mUiThreadId(uiThreadId), mRenderThreadId(renderThreadId) {}
+        : mUiThreadId(uiThreadId)
+        , mRenderThreadId(renderThreadId)
+        , mBinding(std::make_shared<HintSessionBinding>()) {}
 
 HintSessionWrapper::~HintSessionWrapper() {
     destroy();
 }
 
 void HintSessionWrapper::destroy() {
-    if (mHintSessionFuture.valid()) {
-        mHintSession = mHintSessionFuture.get();
+    if (mHintSessionFuture.has_value()) {
+        mHintSession = mHintSessionFuture->get();
+        mHintSessionFuture = std::nullopt;
     }
     if (mHintSession) {
-        gAPH_closeSessionFn(mHintSession);
+        mBinding->closeSession(mHintSession);
         mSessionValid = true;
         mHintSession = nullptr;
     }
@@ -109,12 +76,12 @@ void HintSessionWrapper::destroy() {
 
 bool HintSessionWrapper::init() {
     if (mHintSession != nullptr) return true;
-
     // If we're waiting for the session
-    if (mHintSessionFuture.valid()) {
+    if (mHintSessionFuture.has_value()) {
         // If the session is here
-        if (mHintSessionFuture.wait_for(0s) == std::future_status::ready) {
-            mHintSession = mHintSessionFuture.get();
+        if (mHintSessionFuture->wait_for(0s) == std::future_status::ready) {
+            mHintSession = mHintSessionFuture->get();
+            mHintSessionFuture = std::nullopt;
             if (mHintSession != nullptr) {
                 mSessionValid = true;
                 return true;
@@ -133,9 +100,9 @@ bool HintSessionWrapper::init() {
     // Assume that if we return before the end, it broke
     mSessionValid = false;
 
-    ensureAPerformanceHintBindingInitialized();
+    mBinding->init();
 
-    APerformanceHintManager* manager = gAPH_getManagerFn();
+    APerformanceHintManager* manager = mBinding->getManager();
     if (!manager) return false;
 
     std::vector<pid_t> tids = CommonPool::getThreadIds();
@@ -145,8 +112,9 @@ bool HintSessionWrapper::init() {
     // Use a placeholder target value to initialize,
     // this will always be replaced elsewhere before it gets used
     int64_t defaultTargetDurationNanos = 16666667;
-    mHintSessionFuture = CommonPool::async([=, tids = std::move(tids)] {
-        return gAPH_createSessionFn(manager, tids.data(), tids.size(), defaultTargetDurationNanos);
+    mHintSessionFuture = CommonPool::async([=, this, tids = std::move(tids)] {
+        return mBinding->createSession(manager, tids.data(), tids.size(),
+                                       defaultTargetDurationNanos);
     });
     return false;
 }
@@ -158,7 +126,7 @@ void HintSessionWrapper::updateTargetWorkDuration(long targetWorkDurationNanos) 
         targetWorkDurationNanos > kSanityCheckLowerBound &&
         targetWorkDurationNanos < kSanityCheckUpperBound) {
         mLastTargetWorkDuration = targetWorkDurationNanos;
-        gAPH_updateTargetWorkDurationFn(mHintSession, targetWorkDurationNanos);
+        mBinding->updateTargetWorkDuration(mHintSession, targetWorkDurationNanos);
     }
     mLastFrameNotification = systemTime();
 }
@@ -168,8 +136,9 @@ void HintSessionWrapper::reportActualWorkDuration(long actualDurationNanos) {
     mResetsSinceLastReport = 0;
     if (actualDurationNanos > kSanityCheckLowerBound &&
         actualDurationNanos < kSanityCheckUpperBound) {
-        gAPH_reportActualWorkDurationFn(mHintSession, actualDurationNanos);
+        mBinding->reportActualWorkDuration(mHintSession, actualDurationNanos);
     }
+    mLastFrameNotification = systemTime();
 }
 
 void HintSessionWrapper::sendLoadResetHint() {
@@ -179,14 +148,36 @@ void HintSessionWrapper::sendLoadResetHint() {
     if (now - mLastFrameNotification > kResetHintTimeout &&
         mResetsSinceLastReport <= kMaxResetsSinceLastReport) {
         ++mResetsSinceLastReport;
-        gAPH_sendHintFn(mHintSession, static_cast<int>(SessionHint::CPU_LOAD_RESET));
+        mBinding->sendHint(mHintSession, static_cast<int32_t>(SessionHint::CPU_LOAD_RESET));
     }
     mLastFrameNotification = now;
 }
 
 void HintSessionWrapper::sendLoadIncreaseHint() {
     if (!init()) return;
-    gAPH_sendHintFn(mHintSession, static_cast<int>(SessionHint::CPU_LOAD_UP));
+    mBinding->sendHint(mHintSession, static_cast<int32_t>(SessionHint::CPU_LOAD_UP));
+    mLastFrameNotification = systemTime();
+}
+
+bool HintSessionWrapper::alive() {
+    return mHintSession != nullptr;
+}
+
+nsecs_t HintSessionWrapper::getLastUpdate() {
+    return mLastFrameNotification;
+}
+
+// Requires passing in its shared_ptr since it shouldn't own a shared_ptr to itself
+void HintSessionWrapper::delayedDestroy(RenderThread& rt, nsecs_t delay,
+                                        std::shared_ptr<HintSessionWrapper> wrapperPtr) {
+    nsecs_t lastUpdate = wrapperPtr->getLastUpdate();
+    rt.queue().postDelayed(delay, [lastUpdate = lastUpdate, wrapper = wrapperPtr]() mutable {
+        if (wrapper->getLastUpdate() == lastUpdate) {
+            wrapper->destroy();
+        }
+        // Ensure the shared_ptr is killed at the end of the method
+        wrapper = nullptr;
+    });
 }
 
 } /* namespace renderthread */

@@ -28,7 +28,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertThrows;
 
-import android.app.ActivityManager;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateRequest;
 import android.hardware.devicestate.IDeviceStateManagerCallback;
@@ -582,10 +581,10 @@ public final class DeviceStateManagerServiceTest {
                 // When the app is foreground, the state should not change
                 () -> {
                     int pid = Binder.getCallingPid();
-                    when(mWindowProcessController.getPid()).thenReturn(pid);
+                    int uid = Binder.getCallingUid();
                     try {
-                        mService.mOverrideRequestTaskStackListener.onTaskMovedToFront(
-                                new ActivityManager.RunningTaskInfo());
+                        mService.mProcessObserver.onForegroundActivitiesChanged(pid, uid,
+                                true /* foregroundActivities */);
                     } catch (RemoteException e) {
                         throw new RuntimeException(e);
                     }
@@ -594,8 +593,11 @@ public final class DeviceStateManagerServiceTest {
                 () -> {
                     when(mWindowProcessController.getPid()).thenReturn(FAKE_PROCESS_ID);
                     try {
-                        mService.mOverrideRequestTaskStackListener.onTaskMovedToFront(
-                                new ActivityManager.RunningTaskInfo());
+                        int pid = Binder.getCallingPid();
+                        int uid = Binder.getCallingUid();
+                        mService.mProcessObserver.onForegroundActivitiesChanged(pid, uid,
+                                false /* foregroundActivities */);
+
                     } catch (RemoteException e) {
                         throw new RuntimeException(e);
                     }

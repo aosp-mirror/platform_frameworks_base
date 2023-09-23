@@ -19,6 +19,7 @@
 #include <android/performance_hint.h>
 
 #include <future>
+#include <optional>
 
 #include "utils/TimeUtils.h"
 
@@ -27,8 +28,12 @@ namespace uirenderer {
 
 namespace renderthread {
 
+class RenderThread;
+
 class HintSessionWrapper {
 public:
+    friend class HintSessionWrapperTests;
+
     HintSessionWrapper(pid_t uiThreadId, pid_t renderThreadId);
     ~HintSessionWrapper();
 
@@ -38,10 +43,15 @@ public:
     void sendLoadIncreaseHint();
     bool init();
     void destroy();
+    bool alive();
+    nsecs_t getLastUpdate();
+    void delayedDestroy(renderthread::RenderThread& rt, nsecs_t delay,
+                        std::shared_ptr<HintSessionWrapper> wrapperPtr);
 
 private:
     APerformanceHintSession* mHintSession = nullptr;
-    std::future<APerformanceHintSession*> mHintSessionFuture;
+    // This needs to work concurrently for testing
+    std::optional<std::shared_future<APerformanceHintSession*>> mHintSessionFuture;
 
     int mResetsSinceLastReport = 0;
     nsecs_t mLastFrameNotification = 0;
@@ -55,6 +65,28 @@ private:
     static constexpr nsecs_t kResetHintTimeout = 100_ms;
     static constexpr int64_t kSanityCheckLowerBound = 100_us;
     static constexpr int64_t kSanityCheckUpperBound = 10_s;
+
+    // Allows easier stub when testing
+    class HintSessionBinding {
+    public:
+        virtual ~HintSessionBinding() = default;
+        virtual void init();
+        APerformanceHintManager* (*getManager)();
+        APerformanceHintSession* (*createSession)(APerformanceHintManager* manager,
+                                                  const int32_t* tids, size_t tidCount,
+                                                  int64_t defaultTarget) = nullptr;
+        void (*closeSession)(APerformanceHintSession* session) = nullptr;
+        void (*updateTargetWorkDuration)(APerformanceHintSession* session,
+                                         int64_t targetDuration) = nullptr;
+        void (*reportActualWorkDuration)(APerformanceHintSession* session,
+                                         int64_t actualDuration) = nullptr;
+        void (*sendHint)(APerformanceHintSession* session, int32_t hintId) = nullptr;
+
+    private:
+        bool mInitialized = false;
+    };
+
+    std::shared_ptr<HintSessionBinding> mBinding;
 };
 
 } /* namespace renderthread */

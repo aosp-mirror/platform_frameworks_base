@@ -717,6 +717,7 @@ cc_test {
         "tests/unit/EglManagerTests.cpp",
         "tests/unit/FatVectorTests.cpp",
         "tests/unit/GraphicsStatsServiceTests.cpp",
+        "tests/unit/HintSessionWrapperTests.cpp",
         "tests/unit/JankTrackerTests.cpp",
         "tests/unit/FrameMetricsReporterTests.cpp",
         "tests/unit/LayerUpdateQueueTests.cpp",
