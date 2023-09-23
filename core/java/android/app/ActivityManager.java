@@ -5192,11 +5192,21 @@ public class ActivityManager {
      * @hide
      */
     public static void broadcastStickyIntent(Intent intent, int appOp, Bundle options, int userId) {
+        broadcastStickyIntent(intent, null, appOp, options, userId);
+    }
+
+    /**
+     * Convenience for sending a sticky broadcast.  For internal use only.
+     *
+     * @hide
+     */
+    public static void broadcastStickyIntent(Intent intent, String[] excludedPackages,
+            int appOp, Bundle options, int userId) {
         try {
             getService().broadcastIntentWithFeature(
                     null, null, intent, null, null, Activity.RESULT_OK, null, null,
                     null /*requiredPermissions*/, null /*excludedPermissions*/,
-                    null /*excludedPackages*/, appOp, options, false, true, userId);
+                    excludedPackages, appOp, options, false, true, userId);
         } catch (RemoteException ex) {
         }
     }
