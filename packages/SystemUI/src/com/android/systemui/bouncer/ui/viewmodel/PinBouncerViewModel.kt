@@ -37,6 +37,7 @@ class PinBouncerViewModel(
 ) :
     AuthMethodBouncerViewModel(
         isInputEnabled = isInputEnabled,
+        interactor = interactor,
     ) {
 
     val pinShapes = PinShapeAdapter(applicationContext)

@@ -157,6 +157,29 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun onAuthenticateKeyPressed_whenEmpty() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val message by collectLastValue(bouncerViewModel.message)
+            val password by collectLastValue(underTest.password)
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Password
+            )
+            utils.authenticationRepository.setUnlocked(false)
+            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            underTest.onShown()
+            // Enter nothing.
+
+            underTest.onAuthenticateKeyPressed()
+
+            assertThat(password).isEqualTo("")
+            assertThat(message?.text).isEqualTo(ENTER_YOUR_PASSWORD)
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+        }
+
+    @Test
     fun onAuthenticateKeyPressed_correctAfterWrong() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.desiredScene)
