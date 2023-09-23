@@ -123,7 +123,7 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
         , mProfiler(mJankTracker.frames(), thread.timeLord().frameIntervalNanos())
         , mContentDrawBounds(0, 0, 0, 0)
         , mRenderPipeline(std::move(renderPipeline))
-        , mHintSessionWrapper(uiThreadId, renderThreadId) {
+        , mHintSessionWrapper(std::make_shared<HintSessionWrapper>(uiThreadId, renderThreadId)) {
     mRenderThread.cacheManager().registerCanvasContext(this);
     rootRenderNode->makeRoot();
     mRenderNodes.emplace_back(rootRenderNode);
@@ -160,6 +160,7 @@ void CanvasContext::destroy() {
     destroyHardwareResources();
     mAnimationContext->destroy();
     mRenderThread.cacheManager().onContextStopped(this);
+    mHintSessionWrapper->delayedDestroy(mRenderThread, 2_s, mHintSessionWrapper);
 }
 
 static void setBufferCount(ANativeWindow* window) {
@@ -739,7 +740,7 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
     int64_t frameDeadline = mCurrentFrameInfo->get(FrameInfoIndex::FrameDeadline);
     int64_t dequeueBufferDuration = mCurrentFrameInfo->get(FrameInfoIndex::DequeueBufferDuration);
 
-    mHintSessionWrapper.updateTargetWorkDuration(frameDeadline - intendedVsync);
+    mHintSessionWrapper->updateTargetWorkDuration(frameDeadline - intendedVsync);
 
     if (didDraw) {
         int64_t frameStartTime = mCurrentFrameInfo->get(FrameInfoIndex::FrameStartTime);
@@ -747,7 +748,7 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
         int64_t actualDuration = frameDuration -
                                  (std::min(syncDelayDuration, mLastDequeueBufferDuration)) -
                                  dequeueBufferDuration - idleDuration;
-        mHintSessionWrapper.reportActualWorkDuration(actualDuration);
+        mHintSessionWrapper->reportActualWorkDuration(actualDuration);
     }
 
     mLastDequeueBufferDuration = dequeueBufferDuration;
@@ -1081,11 +1082,11 @@ void CanvasContext::prepareSurfaceControlForWebview() {
 }
 
 void CanvasContext::sendLoadResetHint() {
-    mHintSessionWrapper.sendLoadResetHint();
+    mHintSessionWrapper->sendLoadResetHint();
 }
 
 void CanvasContext::sendLoadIncreaseHint() {
-    mHintSessionWrapper.sendLoadIncreaseHint();
+    mHintSessionWrapper->sendLoadIncreaseHint();
 }
 
 void CanvasContext::setSyncDelayDuration(nsecs_t duration) {
@@ -1093,7 +1094,7 @@ void CanvasContext::setSyncDelayDuration(nsecs_t duration) {
 }
 
 void CanvasContext::startHintSession() {
-    mHintSessionWrapper.init();
+    mHintSessionWrapper->init();
 }
 
 bool CanvasContext::shouldDither() {

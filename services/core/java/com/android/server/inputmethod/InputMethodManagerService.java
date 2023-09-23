@@ -3387,6 +3387,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         // Changing to a different IME.
+        IInputMethodInvoker curMethod = getCurMethodLocked();
+        if (curMethod != null) {
+            curMethod.removeStylusHandwritingWindow();
+        }
         final long ident = Binder.clearCallingIdentity();
         try {
             // Set a subtype to this input method.

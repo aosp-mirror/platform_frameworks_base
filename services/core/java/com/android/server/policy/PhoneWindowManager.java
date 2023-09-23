@@ -3740,15 +3740,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private int handleTransitionForKeyguardLw(boolean startKeyguardExitAnimation,
             boolean notifyOccluded) {
+        int redoLayout = 0;
         if (notifyOccluded) {
-            final int redoLayout = applyKeyguardOcclusionChange();
-            if (redoLayout != 0) return redoLayout;
+            redoLayout = applyKeyguardOcclusionChange();
         }
         if (startKeyguardExitAnimation) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
             startKeyguardExitAnimation(SystemClock.uptimeMillis());
         }
-        return 0;
+        return redoLayout;
     }
 
     // There are several different flavors of "assistant" that can be launched from
