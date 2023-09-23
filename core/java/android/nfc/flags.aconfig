@@ -1,0 +1,8 @@
+package: "android.nfc"
+
+flag {
+    name: "enable_nfc_mainline"
+    namespace: "nfc"
+    description: "Flag for NFC mainline changes"
+    bug: "292140387"
+}

@@ -255,6 +255,9 @@ public final class JobStatus {
 
     final String tag;
 
+    /** Whether this job was scheduled by one app on behalf of another. */
+    final boolean mIsProxyJob;
+
     private GrantedUriPermissions uriPerms;
     private boolean prepared;
 
@@ -625,6 +628,9 @@ public final class JobStatus {
                 ? bnNamespace + this.sourceTag + ":" + job.getService().getPackageName()
                 : bnNamespace + job.getService().flattenToShortString();
         this.tag = "*job*/" + this.batteryName + "#" + job.getId();
+
+        final String componentPackage = job.getService().getPackageName();
+        mIsProxyJob = !this.sourcePackageName.equals(componentPackage);
 
         this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
         this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
@@ -1048,6 +1054,11 @@ public final class JobStatus {
         return mLoggingJobId;
     }
 
+    /** Returns whether this job was scheduled by one app on behalf of another. */
+    public boolean isProxyJob() {
+        return mIsProxyJob;
+    }
+
     public void printUniqueId(PrintWriter pw) {
         if (mNamespace != null) {
             pw.print(mNamespace);
@@ -1292,6 +1303,12 @@ public final class JobStatus {
         return mNamespaceHash;
     }
 
+    /**
+     * Returns the tag passed by the calling app to describe the source app work. This is primarily
+     * only valid if {@link #isProxyJob()} returns true, but may be non-null if an app uses
+     * {@link JobScheduler#scheduleAsPackage(JobInfo, String, int, String)} for itself.
+     */
+    @Nullable
     public String getSourceTag() {
         return sourceTag;
     }
@@ -1871,9 +1888,13 @@ public final class JobStatus {
         mReadyDynamicSatisfied = mDynamicConstraints != 0
                 && mDynamicConstraints == (satisfiedConstraints & mDynamicConstraints);
         if (STATS_LOG_ENABLED && (STATSD_CONSTRAINTS_TO_LOG & constraint) != 0) {
-            FrameworkStatsLog.write_non_chained(
+            FrameworkStatsLog.write(
                     FrameworkStatsLog.SCHEDULED_JOB_CONSTRAINT_CHANGED,
-                    sourceUid, null, getBatteryName(), getProtoConstraint(constraint),
+                    isProxyJob() ? new int[]{sourceUid, getUid()} : new int[]{sourceUid},
+                    // Given that the source tag is set by the calling app, it should be connected
+                    // to the calling app in the attribution for a proxied job.
+                    isProxyJob() ? new String[]{null, sourceTag} : new String[]{sourceTag},
+                    getBatteryName(), getProtoConstraint(constraint),
                     state ? FrameworkStatsLog.SCHEDULED_JOB_CONSTRAINT_CHANGED__STATE__SATISFIED
                             : FrameworkStatsLog
                                     .SCHEDULED_JOB_CONSTRAINT_CHANGED__STATE__UNSATISFIED);

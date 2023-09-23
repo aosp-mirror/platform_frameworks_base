@@ -31,6 +31,7 @@ class PasswordBouncerViewModel(
 ) :
     AuthMethodBouncerViewModel(
         isInputEnabled = isInputEnabled,
+        interactor = interactor,
     ) {
 
     private val _password = MutableStateFlow("")
@@ -60,6 +61,10 @@ class PasswordBouncerViewModel(
     /** Notifies that the user has pressed the key for attempting to authenticate the password. */
     fun onAuthenticateKeyPressed() {
         val password = _password.value.toCharArray().toList()
+        if (password.isEmpty()) {
+            return
+        }
+
         _password.value = ""
 
         applicationScope.launch {

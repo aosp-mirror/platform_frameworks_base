@@ -554,6 +554,30 @@ package android.provider {
 
 }
 
+package android.se.omapi {
+
+  @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public class SeFrameworkInitializer {
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @Nullable public static android.se.omapi.SeServiceManager getSeServiceManager();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public static void setSeServiceManager(@NonNull android.se.omapi.SeServiceManager);
+  }
+
+  @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public class SeServiceManager {
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.se.omapi.SeServiceManager.ServiceRegisterer getSeManagerServiceRegisterer();
+  }
+
+  @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public static class SeServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public SeServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public static final class SeServiceManager.ServiceRegisterer {
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @Nullable public android.os.IBinder get();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.os.IBinder getOrThrow() throws android.se.omapi.SeServiceManager.ServiceNotFoundException;
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void register(@NonNull android.os.IBinder);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @Nullable public android.os.IBinder tryGet();
+  }
+
+}
+
 package android.telecom {
 
   public abstract class ConnectionService extends android.app.Service {
