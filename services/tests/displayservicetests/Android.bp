@@ -29,6 +29,7 @@ android_test {
     static_libs: [
         "androidx.test.ext.junit",
         "androidx.test.rules",
+        "flag-junit",
         "frameworks-base-testutils",
         "junit",
         "junit-params",

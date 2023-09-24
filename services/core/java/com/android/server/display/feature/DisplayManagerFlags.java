@@ -43,6 +43,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_HDR_CLAMPER,
             Flags::enableHdrClamper);
 
+    private final FlagState mAdaptiveToneImprovements1 = new FlagState(
+            Flags.FLAG_ENABLE_ADAPTIVE_TONE_IMPROVEMENTS_1,
+            Flags::enableAdaptiveToneImprovements1);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -55,6 +59,13 @@ public class DisplayManagerFlags {
 
     public boolean isHdrClamperEnabled() {
         return mHdrClamperFlagState.isEnabled();
+    }
+
+    /**
+     * Returns whether adaptive tone improvements are enabled
+     */
+    public boolean isAdaptiveTone1Enabled() {
+        return mAdaptiveToneImprovements1.isEnabled();
     }
 
     private static class FlagState {

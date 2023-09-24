@@ -25,3 +25,12 @@ flag {
     bug: "295100043"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_adaptive_tone_improvements_1"
+    namespace: "display_manager"
+    description: "Feature flag for Adaptive Tone Improvements"
+    bug: "299550755"
+    is_fixed_read_only: true
+}
+
