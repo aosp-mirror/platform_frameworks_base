@@ -16,6 +16,7 @@
 
 package com.android.packageinstaller.v2.ui;
 
+import static android.content.Intent.CATEGORY_LAUNCHER;
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
 import static android.os.Process.INVALID_UID;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_INTERNAL_ERROR;
@@ -42,12 +43,18 @@ import com.android.packageinstaller.R;
 import com.android.packageinstaller.v2.model.InstallRepository;
 import com.android.packageinstaller.v2.model.InstallRepository.CallerInfo;
 import com.android.packageinstaller.v2.model.installstagedata.InstallAborted;
+import com.android.packageinstaller.v2.model.installstagedata.InstallFailed;
+import com.android.packageinstaller.v2.model.installstagedata.InstallInstalling;
 import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
+import com.android.packageinstaller.v2.model.installstagedata.InstallSuccess;
 import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired;
 import com.android.packageinstaller.v2.ui.fragments.AnonymousSourceFragment;
 import com.android.packageinstaller.v2.ui.fragments.ExternalSourcesBlockedFragment;
 import com.android.packageinstaller.v2.ui.fragments.InstallConfirmationFragment;
+import com.android.packageinstaller.v2.ui.fragments.InstallFailedFragment;
+import com.android.packageinstaller.v2.ui.fragments.InstallInstallingFragment;
 import com.android.packageinstaller.v2.ui.fragments.InstallStagingFragment;
+import com.android.packageinstaller.v2.ui.fragments.InstallSuccessFragment;
 import com.android.packageinstaller.v2.ui.fragments.SimpleErrorFragment;
 import com.android.packageinstaller.v2.viewmodel.InstallViewModel;
 import com.android.packageinstaller.v2.viewmodel.InstallViewModelFactory;
@@ -109,9 +116,10 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
             InstallAborted aborted = (InstallAborted) installStage;
             switch (aborted.getAbortReason()) {
                 // TODO: check if any dialog is to be shown for ABORT_REASON_INTERNAL_ERROR
-                case ABORT_REASON_INTERNAL_ERROR -> setResult(RESULT_CANCELED, true);
-                case ABORT_REASON_POLICY -> showPolicyRestrictionDialog(aborted);
-                default -> setResult(RESULT_CANCELED, true);
+                case InstallAborted.ABORT_REASON_DONE, InstallAborted.ABORT_REASON_INTERNAL_ERROR ->
+                    setResult(aborted.getActivityResultCode(), aborted.getResultIntent(), true);
+                case InstallAborted.ABORT_REASON_POLICY -> showPolicyRestrictionDialog(aborted);
+                default -> setResult(RESULT_CANCELED, null, true);
             }
         } else if (installStage.getStageCode() == InstallStage.STAGE_USER_ACTION_REQUIRED) {
             InstallUserActionRequired uar = (InstallUserActionRequired) installStage;
@@ -129,6 +137,23 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
                     AnonymousSourceFragment anonymousSourceDialog = new AnonymousSourceFragment();
                     showDialogInner(anonymousSourceDialog);
             }
+        } else if (installStage.getStageCode() == InstallStage.STAGE_INSTALLING) {
+            InstallInstalling installing = (InstallInstalling) installStage;
+            InstallInstallingFragment installingDialog = new InstallInstallingFragment(installing);
+            showDialogInner(installingDialog);
+        } else if (installStage.getStageCode() == InstallStage.STAGE_SUCCESS) {
+            InstallSuccess success = (InstallSuccess) installStage;
+            if (success.shouldReturnResult()) {
+                Intent successIntent = success.getResultIntent();
+                setResult(Activity.RESULT_OK, successIntent, true);
+            } else {
+                InstallSuccessFragment successFragment = new InstallSuccessFragment(success);
+                showDialogInner(successFragment);
+            }
+        } else if (installStage.getStageCode() == InstallStage.STAGE_FAILED) {
+            InstallFailed failed = (InstallFailed) installStage;
+            InstallFailedFragment failedDialog = new InstallFailedFragment(failed);
+            showDialogInner(failedDialog);
         } else {
             Log.d(TAG, "Unimplemented stage: " + installStage.getStageCode());
             showDialogInner(null);
@@ -160,7 +185,7 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
             shouldFinish = false;
             showDialogInner(blockedByPolicyDialog);
         }
-        setResult(RESULT_CANCELED, shouldFinish);
+        setResult(RESULT_CANCELED, null, shouldFinish);
     }
 
     /**
@@ -199,10 +224,8 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
         }
     }
 
-    public void setResult(int resultCode, boolean shouldFinish) {
-        // TODO: This is incomplete. We need to send RESULT_FIRST_USER, RESULT_OK etc
-        //  for relevant use cases. Investigate when to send what result.
-        super.setResult(resultCode);
+    public void setResult(int resultCode, Intent data, boolean shouldFinish) {
+        super.setResult(resultCode, data);
         if (shouldFinish) {
             finish();
         }
@@ -210,8 +233,11 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
 
     @Override
     public void onPositiveResponse(int reasonCode) {
-        if (reasonCode == InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE) {
-            mInstallViewModel.forcedSkipSourceCheck();
+        switch (reasonCode) {
+            case InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE ->
+                mInstallViewModel.forcedSkipSourceCheck();
+            case InstallUserActionRequired.USER_ACTION_REASON_INSTALL_CONFIRMATION ->
+                mInstallViewModel.initiateInstall();
         }
     }
 
@@ -220,7 +246,7 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
         if (stageCode == InstallStage.STAGE_USER_ACTION_REQUIRED) {
             mInstallViewModel.cleanupInstall();
         }
-        setResult(Activity.RESULT_CANCELED, true);
+        setResult(Activity.RESULT_CANCELED, null, true);
     }
 
     @Override
@@ -238,6 +264,14 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
         } catch (ActivityNotFoundException exc) {
             Log.e(TAG, "Settings activity not found for action: "
                 + Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+        }
+    }
+
+    @Override
+    public void openInstalledApp(Intent intent) {
+        setResult(RESULT_OK, intent, true);
+        if (intent != null && intent.hasCategory(CATEGORY_LAUNCHER)) {
+            startActivity(intent);
         }
     }
 
@@ -259,7 +293,7 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
         if (requestCode == REQUEST_TRUST_EXTERNAL_SOURCE) {
             mInstallViewModel.reattemptInstall();
         } else {
-            setResult(Activity.RESULT_CANCELED, true);
+            setResult(Activity.RESULT_CANCELED,  null, true);
         }
     }
 

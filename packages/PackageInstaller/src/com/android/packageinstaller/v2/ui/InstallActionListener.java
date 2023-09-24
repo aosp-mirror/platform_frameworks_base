@@ -16,6 +16,8 @@
 
 package com.android.packageinstaller.v2.ui;
 
+import android.content.Intent;
+
 public interface InstallActionListener {
 
     /**
@@ -32,4 +34,5 @@ public interface InstallActionListener {
      * Method to handle a negative response from the user
      */
     void onNegativeResponse(int stageCode);
+    void openInstalledApp(Intent intent);
 }

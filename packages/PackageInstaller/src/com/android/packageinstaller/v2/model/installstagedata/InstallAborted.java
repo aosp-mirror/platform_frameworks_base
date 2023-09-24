@@ -26,6 +26,7 @@ public class InstallAborted extends InstallStage {
 
     public static final int ABORT_REASON_INTERNAL_ERROR = 0;
     public static final int ABORT_REASON_POLICY = 1;
+    public static final int ABORT_REASON_DONE = 2;
     public static final int DLG_PACKAGE_ERROR = 1;
     private final int mStage = InstallStage.STAGE_ABORTED;
     private final int mAbortReason;

@@ -24,6 +24,7 @@ import static com.android.packageinstaller.v2.model.PackageUtil.getPackageNameFo
 import static com.android.packageinstaller.v2.model.PackageUtil.isCallerSessionOwner;
 import static com.android.packageinstaller.v2.model.PackageUtil.isInstallPermissionGrantedOrRequested;
 import static com.android.packageinstaller.v2.model.PackageUtil.isPermissionGranted;
+import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_DONE;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_INTERNAL_ERROR;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_POLICY;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.DLG_PACKAGE_ERROR;
@@ -34,6 +35,7 @@ import static com.android.packageinstaller.v2.model.installstagedata.InstallUser
 import android.Manifest;
 import android.app.Activity;
 import android.app.AppOpsManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -59,11 +61,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import com.android.packageinstaller.R;
+import com.android.packageinstaller.v2.model.EventResultPersister.OutOfIdsException;
 import com.android.packageinstaller.v2.model.PackageUtil.AppSnippet;
 import com.android.packageinstaller.v2.model.installstagedata.InstallAborted;
+import com.android.packageinstaller.v2.model.installstagedata.InstallFailed;
+import com.android.packageinstaller.v2.model.installstagedata.InstallInstalling;
 import com.android.packageinstaller.v2.model.installstagedata.InstallReady;
 import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
 import com.android.packageinstaller.v2.model.installstagedata.InstallStaging;
+import com.android.packageinstaller.v2.model.installstagedata.InstallSuccess;
 import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired;
 import java.io.File;
 import java.io.IOException;
@@ -71,6 +77,8 @@ import java.io.IOException;
 public class InstallRepository {
 
     private static final String SCHEME_PACKAGE = "package";
+    private static final String BROADCAST_ACTION =
+        "com.android.packageinstaller.ACTION_INSTALL_COMMIT";
     private static final String TAG = InstallRepository.class.getSimpleName();
     private final Context mContext;
     private final PackageManager mPackageManager;
@@ -79,6 +87,7 @@ public class InstallRepository {
     private final DevicePolicyManager mDevicePolicyManager;
     private final AppOpsManager mAppOpsManager;
     private final MutableLiveData<InstallStage> mStagingResult = new MutableLiveData<>();
+    private final MutableLiveData<InstallStage> mInstallResult = new MutableLiveData<>();
     private final boolean mLocalLOGV = false;
     private Intent mIntent;
     private boolean mIsSessionInstall;
@@ -711,6 +720,99 @@ public class InstallRepository {
                     + requestInfo.getOriginatingUid());
                 return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
         }
+    }
+
+
+    /**
+     * Kick off the installation. Register a broadcast listener to get the result of the
+     * installation and commit the staged session here. If the installation was session based,
+     * signal the PackageInstaller that the user has granted permission to proceed with the install
+     */
+    public void initiateInstall() {
+        if (mSessionId > 0) {
+            mPackageInstaller.setPermissionsResult(mSessionId, true);
+            mInstallResult.setValue(new InstallAborted.Builder(ABORT_REASON_DONE)
+                .setActivityResultCode(Activity.RESULT_OK).build());
+            return;
+        }
+
+        Uri uri = mIntent.getData();
+        if (uri != null && SCHEME_PACKAGE.equals(uri.getScheme())) {
+            try {
+                mPackageManager.installExistingPackage(mNewPackageInfo.packageName);
+                setStageBasedOnResult(PackageInstaller.STATUS_SUCCESS, -1, null, -1);
+            } catch (PackageManager.NameNotFoundException e) {
+                setStageBasedOnResult(PackageInstaller.STATUS_FAILURE,
+                    PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null, -1);
+            }
+            return;
+        }
+
+        if (mStagedSessionId <= 0) {
+            // How did we even land here?
+            Log.e(TAG, "Invalid local session and caller initiated session");
+            mInstallResult.setValue(new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR)
+                .build());
+            return;
+        }
+
+        int installId;
+        try {
+            mInstallResult.setValue(new InstallInstalling(mAppSnippet));
+            installId = InstallEventReceiver.addObserver(mContext,
+                EventResultPersister.GENERATE_NEW_ID, this::setStageBasedOnResult);
+        } catch (OutOfIdsException e) {
+            setStageBasedOnResult(PackageInstaller.STATUS_FAILURE,
+                PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null, -1);
+            return;
+        }
+
+        Intent broadcastIntent = new Intent(BROADCAST_ACTION);
+        broadcastIntent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        broadcastIntent.setPackage(mContext.getPackageName());
+        broadcastIntent.putExtra(EventResultPersister.EXTRA_ID, installId);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+            mContext, installId, broadcastIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+
+        try {
+            PackageInstaller.Session session = mPackageInstaller.openSession(mStagedSessionId);
+            session.commit(pendingIntent.getIntentSender());
+        } catch (Exception e) {
+            Log.e(TAG, "Session " + mStagedSessionId + " could not be opened.", e);
+            mPackageInstaller.abandonSession(mStagedSessionId);
+            setStageBasedOnResult(PackageInstaller.STATUS_FAILURE,
+                PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null, -1);
+        }
+    }
+
+    private void setStageBasedOnResult(int statusCode, int legacyStatus, String message,
+        int serviceId) {
+        if (statusCode == PackageInstaller.STATUS_SUCCESS) {
+            boolean shouldReturnResult = mIntent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
+
+            InstallSuccess.Builder successBuilder = new InstallSuccess.Builder(mAppSnippet)
+                .setShouldReturnResult(shouldReturnResult);
+            Intent resultIntent;
+            if (shouldReturnResult) {
+                resultIntent = new Intent()
+                    .putExtra(Intent.EXTRA_INSTALL_RESULT, PackageManager.INSTALL_SUCCEEDED);
+            } else {
+                resultIntent = mPackageManager
+                    .getLaunchIntentForPackage(mNewPackageInfo.packageName);
+            }
+            successBuilder.setResultIntent(resultIntent);
+
+            mInstallResult.setValue(successBuilder.build());
+        } else {
+            mInstallResult.setValue(
+                new InstallFailed(mAppSnippet, statusCode, legacyStatus, message));
+        }
+    }
+
+    public MutableLiveData<InstallStage> getInstallResult() {
+        return mInstallResult;
     }
 
     /**
