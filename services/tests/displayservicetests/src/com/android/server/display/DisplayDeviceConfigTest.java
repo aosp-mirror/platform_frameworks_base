@@ -103,12 +103,6 @@ public final class DisplayDeviceConfigTest {
         assertEquals(mDisplayDeviceConfig.getName(), "Example Display");
         assertEquals(mDisplayDeviceConfig.getAmbientHorizonLong(), 5000);
         assertEquals(mDisplayDeviceConfig.getAmbientHorizonShort(), 50);
-        assertEquals(mDisplayDeviceConfig.getBrightnessRampDecreaseMaxMillis(), 3000);
-        assertEquals(mDisplayDeviceConfig.getBrightnessRampIncreaseMaxMillis(), 2000);
-        assertEquals(mDisplayDeviceConfig.getBrightnessRampFastDecrease(), 0.01f, ZERO_DELTA);
-        assertEquals(mDisplayDeviceConfig.getBrightnessRampFastIncrease(), 0.02f, ZERO_DELTA);
-        assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowIncrease(), 0.04f, ZERO_DELTA);
-        assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowDecrease(), 0.03f, ZERO_DELTA);
         assertEquals(mDisplayDeviceConfig.getBrightnessDefault(), 0.5f, ZERO_DELTA);
         assertArrayEquals(mDisplayDeviceConfig.getBrightness(), BRIGHTNESS, ZERO_DELTA);
         assertArrayEquals(mDisplayDeviceConfig.getNits(), NITS, ZERO_DELTA);
@@ -235,7 +229,8 @@ public final class DisplayDeviceConfigTest {
     @Test
     public void testInvalidLuxThrottling() throws Exception {
         setupDisplayDeviceConfigFromDisplayConfigFile(
-                getContent(getInvalidLuxThrottling(), getValidProxSensor()));
+                getContent(getInvalidLuxThrottling(), getValidProxSensor(),
+                        /* includeIdleMode= */ true));
 
         Map<DisplayDeviceConfig.BrightnessLimitMapType, Map<Float, Float>> luxThrottlingData =
                 mDisplayDeviceConfig.getLuxThrottlingData();
@@ -258,6 +253,10 @@ public final class DisplayDeviceConfigTest {
 
         // We should fall back to the config resource
         verifyConfigValuesFromConfigResource();
+        assertEquals(3000, mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounce());
+        assertEquals(4000, mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounce());
+        assertEquals(3000, mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounceIdle());
+        assertEquals(4000, mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounceIdle());
     }
 
     @Test
@@ -438,7 +437,8 @@ public final class DisplayDeviceConfigTest {
     @Test
     public void testProximitySensorWithEmptyValuesFromDisplayConfig() throws IOException {
         setupDisplayDeviceConfigFromDisplayConfigFile(
-                getContent(getValidLuxThrottling(), getProxSensorWithEmptyValues()));
+                getContent(getValidLuxThrottling(), getProxSensorWithEmptyValues(),
+                        /* includeIdleMode= */ true));
         assertNull(mDisplayDeviceConfig.getProximitySensor());
     }
 
@@ -575,6 +575,39 @@ public final class DisplayDeviceConfigTest {
         assertEquals(mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounce(), 1000);
         assertEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounceIdle(), 2500);
         assertEquals(mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounceIdle(), 1500);
+    }
+
+    @Test
+    public void testBrightnessRamps() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampDecreaseMaxMillis(), 3000);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampIncreaseMaxMillis(), 2000);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampDecreaseMaxIdleMillis(), 5000);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampIncreaseMaxIdleMillis(), 4000);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampFastDecrease(), 0.01f, ZERO_DELTA);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampFastIncrease(), 0.02f, ZERO_DELTA);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowDecrease(), 0.03f, ZERO_DELTA);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowIncrease(), 0.04f, ZERO_DELTA);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowDecreaseIdle(), 0.05f, ZERO_DELTA);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowIncreaseIdle(), 0.06f, ZERO_DELTA);
+    }
+
+    @Test
+    public void testBrightnessRamps_IdleFallsBackToConfigInteractive() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile(getContent(getValidLuxThrottling(),
+                getValidProxSensor(), /* includeIdleMode= */ false));
+
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampDecreaseMaxMillis(), 3000);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampIncreaseMaxMillis(), 2000);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampDecreaseMaxIdleMillis(), 3000);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampIncreaseMaxIdleMillis(), 2000);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampFastDecrease(), 0.01f, ZERO_DELTA);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampFastIncrease(), 0.02f, ZERO_DELTA);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowDecrease(), 0.03f, ZERO_DELTA);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowIncrease(), 0.04f, ZERO_DELTA);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowDecreaseIdle(), 0.03f, ZERO_DELTA);
+        assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowIncreaseIdle(), 0.04f, ZERO_DELTA);
     }
 
     private String getValidLuxThrottling() {
@@ -731,11 +764,103 @@ public final class DisplayDeviceConfigTest {
               + "</hdrBrightnessConfig>";
     }
 
-    private String getContent() {
-        return getContent(getValidLuxThrottling(), getValidProxSensor());
+    private String getRampSpeedsIdle() {
+        return "<brighteningLightDebounceIdleMillis>"
+                +           "2500"
+                +       "</brighteningLightDebounceIdleMillis>\n"
+                +       "<darkeningLightDebounceIdleMillis>"
+                +           "1500"
+                +       "</darkeningLightDebounceIdleMillis>\n";
     }
 
-    private String getContent(String brightnessCapConfig, String proxSensor) {
+    private String getThresholdsIdle() {
+        return  "<ambientBrightnessChangeThresholdsIdle>\n"
+                +       "<brighteningThresholds>\n"
+                +           "<minimum>20</minimum>\n"
+                +           "<brightnessThresholdPoints>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>0</threshold><percentage>21</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>500</threshold><percentage>22</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>600</threshold><percentage>23</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +           "</brightnessThresholdPoints>\n"
+                +       "</brighteningThresholds>\n"
+                +       "<darkeningThresholds>\n"
+                +           "<minimum>40</minimum>\n"
+                +           "<brightnessThresholdPoints>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>0</threshold><percentage>23</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>700</threshold><percentage>24</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>800</threshold><percentage>25</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +           "</brightnessThresholdPoints>\n"
+                +       "</darkeningThresholds>\n"
+                +   "</ambientBrightnessChangeThresholdsIdle>\n"
+                +   "<displayBrightnessChangeThresholdsIdle>\n"
+                +       "<brighteningThresholds>\n"
+                +           "<minimum>0.2</minimum>\n"
+                +           "<brightnessThresholdPoints>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>0</threshold><percentage>17</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>0.12</threshold><percentage>18</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>0.22</threshold><percentage>19</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +           "</brightnessThresholdPoints>\n"
+                +       "</brighteningThresholds>\n"
+                +       "<darkeningThresholds>\n"
+                +           "<minimum>0.4</minimum>\n"
+                +           "<brightnessThresholdPoints>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>0</threshold><percentage>19</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>0.13</threshold><percentage>20</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +               "<brightnessThresholdPoint>\n"
+                +                   "<threshold>0.23</threshold><percentage>21</percentage>\n"
+                +               "</brightnessThresholdPoint>\n"
+                +           "</brightnessThresholdPoints>\n"
+                +       "</darkeningThresholds>\n"
+                +   "</displayBrightnessChangeThresholdsIdle>\n";
+    }
+
+    private String getScreenBrightnessRampSlowIdle() {
+        return "<screenBrightnessRampSlowDecreaseIdle>"
+                +       "0.05"
+                +   "</screenBrightnessRampSlowDecreaseIdle>\n"
+                +   "<screenBrightnessRampSlowIncreaseIdle>"
+                +       "0.06"
+                +   "</screenBrightnessRampSlowIncreaseIdle>\n";
+    }
+
+    private String getScreenBrightnessRampCapsIdle() {
+        return "<screenBrightnessRampIncreaseMaxIdleMillis>"
+                +       "4000"
+                +   "</screenBrightnessRampIncreaseMaxIdleMillis>\n"
+                +   "<screenBrightnessRampDecreaseMaxIdleMillis>"
+                +       "5000"
+                +   "</screenBrightnessRampDecreaseMaxIdleMillis>\n";
+
+    }
+    private String getContent() {
+        return getContent(getValidLuxThrottling(), getValidProxSensor(),
+                /* includeIdleMode= */ true);
+    }
+
+    private String getContent(String brightnessCapConfig, String proxSensor,
+            boolean includeIdleMode) {
         return "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<displayConfiguration>\n"
                 +   "<name>Example Display</name>\n"
@@ -778,12 +903,7 @@ public final class DisplayDeviceConfigTest {
                 +   "<autoBrightness>\n"
                 +       "<brighteningLightDebounceMillis>2000</brighteningLightDebounceMillis>\n"
                 +       "<darkeningLightDebounceMillis>1000</darkeningLightDebounceMillis>\n"
-                +       "<brighteningLightDebounceIdleMillis>"
-                +           "2500"
-                +       "</brighteningLightDebounceIdleMillis>\n"
-                +       "<darkeningLightDebounceIdleMillis>"
-                +           "1500"
-                +       "</darkeningLightDebounceIdleMillis>\n"
+                + (includeIdleMode ? getRampSpeedsIdle() : "")
                 +       "<displayBrightnessMapping>\n"
                 +            "<displayBrightnessPoint>\n"
                 +                "<lux>50</lux>\n"
@@ -899,76 +1019,19 @@ public final class DisplayDeviceConfigTest {
                 +           "</brightnessThresholdPoints>\n"
                 +       "</darkeningThresholds>\n"
                 +   "</displayBrightnessChangeThresholds>\n"
-                +   "<ambientBrightnessChangeThresholdsIdle>\n"
-                +       "<brighteningThresholds>\n"
-                +           "<minimum>20</minimum>\n"
-                +           "<brightnessThresholdPoints>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>0</threshold><percentage>21</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>500</threshold><percentage>22</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>600</threshold><percentage>23</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +           "</brightnessThresholdPoints>\n"
-                +       "</brighteningThresholds>\n"
-                +       "<darkeningThresholds>\n"
-                +           "<minimum>40</minimum>\n"
-                +           "<brightnessThresholdPoints>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>0</threshold><percentage>23</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>700</threshold><percentage>24</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>800</threshold><percentage>25</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +           "</brightnessThresholdPoints>\n"
-                +       "</darkeningThresholds>\n"
-                +   "</ambientBrightnessChangeThresholdsIdle>\n"
-                +   "<displayBrightnessChangeThresholdsIdle>\n"
-                +       "<brighteningThresholds>\n"
-                +           "<minimum>0.2</minimum>\n"
-                +           "<brightnessThresholdPoints>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>0</threshold><percentage>17</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>0.12</threshold><percentage>18</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>0.22</threshold><percentage>19</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +           "</brightnessThresholdPoints>\n"
-                +       "</brighteningThresholds>\n"
-                +       "<darkeningThresholds>\n"
-                +           "<minimum>0.4</minimum>\n"
-                +           "<brightnessThresholdPoints>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>0</threshold><percentage>19</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>0.13</threshold><percentage>20</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +               "<brightnessThresholdPoint>\n"
-                +                   "<threshold>0.23</threshold><percentage>21</percentage>\n"
-                +               "</brightnessThresholdPoint>\n"
-                +           "</brightnessThresholdPoints>\n"
-                +       "</darkeningThresholds>\n"
-                +   "</displayBrightnessChangeThresholdsIdle>\n"
-                +   "<screenBrightnessRampFastDecrease>0.01</screenBrightnessRampFastDecrease> "
-                +   "<screenBrightnessRampFastIncrease>0.02</screenBrightnessRampFastIncrease>  "
-                +   "<screenBrightnessRampSlowDecrease>0.03</screenBrightnessRampSlowDecrease>"
-                +   "<screenBrightnessRampSlowIncrease>0.04</screenBrightnessRampSlowIncrease>"
+                + (includeIdleMode ?  getThresholdsIdle() : "")
+                +   "<screenBrightnessRampFastDecrease>0.01</screenBrightnessRampFastDecrease>\n"
+                +   "<screenBrightnessRampFastIncrease>0.02</screenBrightnessRampFastIncrease>\n"
+                +   "<screenBrightnessRampSlowDecrease>0.03</screenBrightnessRampSlowDecrease>\n"
+                +   "<screenBrightnessRampSlowIncrease>0.04</screenBrightnessRampSlowIncrease>\n"
+                + (includeIdleMode ? getScreenBrightnessRampSlowIdle() : "")
                 +   "<screenBrightnessRampIncreaseMaxMillis>"
                 +       "2000"
-                +   "</screenBrightnessRampIncreaseMaxMillis>"
+                +   "</screenBrightnessRampIncreaseMaxMillis>\n"
                 +   "<screenBrightnessRampDecreaseMaxMillis>"
                 +       "3000"
-                +   "</screenBrightnessRampDecreaseMaxMillis>"
+                +   "</screenBrightnessRampDecreaseMaxMillis>\n"
+                + (includeIdleMode ?  getScreenBrightnessRampCapsIdle() : "")
                 +   "<ambientLightHorizonLong>5000</ambientLightHorizonLong>\n"
                 +   "<ambientLightHorizonShort>50</ambientLightHorizonShort>\n"
                 +   "<screenBrightnessRampIncreaseMaxMillis>"
@@ -1200,6 +1263,13 @@ public final class DisplayDeviceConfigTest {
 
         when(mResources.getString(com.android.internal.R.string.config_displayLightSensorType))
                 .thenReturn("test_light_sensor");
+
+        when(mResources.getInteger(
+                R.integer.config_autoBrightnessBrighteningLightDebounce))
+                .thenReturn(3000);
+        when(mResources.getInteger(
+                R.integer.config_autoBrightnessDarkeningLightDebounce))
+                .thenReturn(4000);
 
         mDisplayDeviceConfig = DisplayDeviceConfig.create(mContext, true);
     }

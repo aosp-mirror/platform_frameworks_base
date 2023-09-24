@@ -34,6 +34,7 @@ aconfig_srcjars = [
     ":sdk_sandbox_flags_lib{.generated_srcjars}",
     ":android.permission.flags-aconfig-java{.generated_srcjars}",
     ":hwui_flags_java_lib{.generated_srcjars}",
+    ":display_flags_lib{.generated_srcjars}",
 ]
 
 filegroup {
@@ -303,5 +304,12 @@ java_aconfig_library {
 java_aconfig_library {
     name: "hwui_flags_java_lib",
     aconfig_declarations: "hwui_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Display
+java_aconfig_library {
+    name: "display_flags_lib",
+    aconfig_declarations: "display_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

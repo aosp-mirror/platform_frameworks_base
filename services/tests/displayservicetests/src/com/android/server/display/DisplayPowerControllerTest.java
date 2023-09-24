@@ -53,6 +53,10 @@ import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.testing.TestableContext;
 import android.util.FloatProperty;
@@ -71,6 +75,7 @@ import com.android.server.display.RampAnimator.DualRampAnimator;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.display.feature.DisplayManagerFlags;
+import com.android.server.display.feature.flags.Flags;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 import com.android.server.policy.WindowManagerPolicy;
@@ -107,6 +112,11 @@ public final class DisplayPowerControllerTest {
     private static final float BRIGHTNESS_RAMP_RATE_SLOW_INCREASE_IDLE = 0.5f;
     private static final float BRIGHTNESS_RAMP_RATE_SLOW_DECREASE_IDLE = 0.6f;
 
+    private static final long BRIGHTNESS_RAMP_INCREASE_MAX = 1000;
+    private static final long BRIGHTNESS_RAMP_DECREASE_MAX = 2000;
+    private static final long BRIGHTNESS_RAMP_INCREASE_MAX_IDLE = 3000;
+    private static final long BRIGHTNESS_RAMP_DECREASE_MAX_IDLE = 4000;
+
     private OffsettableClock mClock;
     private TestLooper mTestLooper;
     private Handler mHandler;
@@ -129,6 +139,9 @@ public final class DisplayPowerControllerTest {
     private ColorDisplayService.ColorDisplayServiceInternal mCdsiMock;
     @Mock
     private DisplayWhiteBalanceController mDisplayWhiteBalanceControllerMock;
+    @Mock
+    private DisplayManagerFlags mDisplayManagerFlagsMock;
+
     @Captor
     private ArgumentCaptor<SensorEventListener> mSensorEventListenerCaptor;
 
@@ -146,6 +159,9 @@ public final class DisplayPowerControllerTest {
 
     @Rule
     public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -1260,6 +1276,110 @@ public final class DisplayPowerControllerTest {
                 eq(BRIGHTNESS_RAMP_RATE_MINIMUM), eq(false));
     }
 
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_ADAPTIVE_TONE_IMPROVEMENTS_1)
+    public void testRampMaxTimeInteractiveThenIdle() {
+        // Send a display power request
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        dpr.useProximitySensor = true;
+        mHolder.dpc.requestPowerState(dpr, false /* waitForNegativeProximity */);
+
+        // Run updatePowerState
+        advanceTime(1);
+
+        setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
+                mHolder.config, /* isEnabled= */ true);
+
+        verify(mHolder.animator).setAnimationTimeLimits(BRIGHTNESS_RAMP_INCREASE_MAX,
+                BRIGHTNESS_RAMP_DECREASE_MAX);
+
+        // switch to idle
+        mHolder.dpc.setAutomaticScreenBrightnessMode(/* idle= */ true);
+        advanceTime(1);
+
+        verify(mHolder.animator, times(2)).setAnimationTimeLimits(BRIGHTNESS_RAMP_INCREASE_MAX,
+                BRIGHTNESS_RAMP_DECREASE_MAX);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_ADAPTIVE_TONE_IMPROVEMENTS_1)
+    public void testRampMaxTimeInteractiveThenIdle_DifferentValues() {
+        when(mDisplayManagerFlagsMock.isAdaptiveTone1Enabled()).thenReturn(true);
+        // Send a display power request
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        dpr.useProximitySensor = true;
+        mHolder.dpc.requestPowerState(dpr, false /* waitForNegativeProximity */);
+
+        // Run updatePowerState
+        advanceTime(1);
+
+        setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
+                mHolder.config, /* isEnabled= */ true);
+
+        verify(mHolder.animator).setAnimationTimeLimits(BRIGHTNESS_RAMP_INCREASE_MAX,
+                BRIGHTNESS_RAMP_DECREASE_MAX);
+
+        // switch to idle
+        mHolder.dpc.setAutomaticScreenBrightnessMode(/* idle= */ true);
+        advanceTime(1);
+
+        verify(mHolder.animator).setAnimationTimeLimits(BRIGHTNESS_RAMP_INCREASE_MAX_IDLE,
+                BRIGHTNESS_RAMP_DECREASE_MAX_IDLE);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_ADAPTIVE_TONE_IMPROVEMENTS_1)
+    public void testRampMaxTimeIdle() {
+        // Send a display power request
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        dpr.useProximitySensor = true;
+        mHolder.dpc.requestPowerState(dpr, false /* waitForNegativeProximity */);
+
+        // Run updatePowerState
+        advanceTime(1);
+
+        // once on setup
+        verify(mHolder.animator).setAnimationTimeLimits(BRIGHTNESS_RAMP_INCREASE_MAX,
+                BRIGHTNESS_RAMP_DECREASE_MAX);
+
+        setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
+                mHolder.config, /* isEnabled= */ true);
+
+        // switch to idle mode
+        mHolder.dpc.setAutomaticScreenBrightnessMode(true);
+
+        // second time when switching to idle screen brightness mode
+        verify(mHolder.animator, times(2)).setAnimationTimeLimits(BRIGHTNESS_RAMP_INCREASE_MAX,
+                BRIGHTNESS_RAMP_DECREASE_MAX);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_ADAPTIVE_TONE_IMPROVEMENTS_1)
+    public void testRampMaxTimeIdle_DifferentValues() {
+        when(mDisplayManagerFlagsMock.isAdaptiveTone1Enabled()).thenReturn(true);
+
+        // Send a display power request
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        dpr.useProximitySensor = true;
+        mHolder.dpc.requestPowerState(dpr, false /* waitForNegativeProximity */);
+
+        // Run updatePowerState
+        advanceTime(1);
+
+        setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
+                mHolder.config, /* isEnabled= */ true);
+
+        // switch to idle mode
+        mHolder.dpc.setAutomaticScreenBrightnessMode(true);
+
+        verify(mHolder.animator).setAnimationTimeLimits(BRIGHTNESS_RAMP_INCREASE_MAX_IDLE,
+                BRIGHTNESS_RAMP_DECREASE_MAX_IDLE);
+    }
+
     private void advanceTime(long timeMs) {
         mClock.fastForward(timeMs);
         mTestLooper.dispatchAll();
@@ -1315,6 +1435,7 @@ public final class DisplayPowerControllerTest {
                 });
         when(displayDeviceConfigMock.getScreenOffBrightnessSensorValueToLux())
                 .thenReturn(new int[0]);
+
         when(displayDeviceConfigMock.getBrightnessRampFastDecrease())
                 .thenReturn(BRIGHTNESS_RAMP_RATE_FAST_DECREASE);
         when(displayDeviceConfigMock.getBrightnessRampFastIncrease())
@@ -1327,6 +1448,15 @@ public final class DisplayPowerControllerTest {
                 .thenReturn(BRIGHTNESS_RAMP_RATE_SLOW_DECREASE_IDLE);
         when(displayDeviceConfigMock.getBrightnessRampSlowIncreaseIdle())
                 .thenReturn(BRIGHTNESS_RAMP_RATE_SLOW_INCREASE_IDLE);
+
+        when(displayDeviceConfigMock.getBrightnessRampIncreaseMaxMillis())
+                .thenReturn(BRIGHTNESS_RAMP_INCREASE_MAX);
+        when(displayDeviceConfigMock.getBrightnessRampDecreaseMaxMillis())
+                .thenReturn(BRIGHTNESS_RAMP_DECREASE_MAX);
+        when(displayDeviceConfigMock.getBrightnessRampIncreaseMaxIdleMillis())
+                .thenReturn(BRIGHTNESS_RAMP_INCREASE_MAX_IDLE);
+        when(displayDeviceConfigMock.getBrightnessRampDecreaseMaxIdleMillis())
+                .thenReturn(BRIGHTNESS_RAMP_DECREASE_MAX_IDLE);
     }
 
     private DisplayPowerControllerHolder createDisplayPowerController(int displayId,
@@ -1358,7 +1488,6 @@ public final class DisplayPowerControllerTest {
         final HighBrightnessModeMetadata hbmMetadata = mock(HighBrightnessModeMetadata.class);
         final BrightnessSetting brightnessSetting = mock(BrightnessSetting.class);
         final DisplayDeviceConfig config = mock(DisplayDeviceConfig.class);
-        final DisplayManagerFlags flags = mock(DisplayManagerFlags.class);
 
         setUpDisplay(displayId, uniqueId, display, device, config, isEnabled);
 
@@ -1366,11 +1495,11 @@ public final class DisplayPowerControllerTest {
                 mContext, injector, mDisplayPowerCallbacksMock, mHandler,
                 mSensorManagerMock, mDisplayBlankerMock, display,
                 mBrightnessTrackerMock, brightnessSetting, () -> {},
-                hbmMetadata, /* bootCompleted= */ false, flags);
+                hbmMetadata, /* bootCompleted= */ false, mDisplayManagerFlagsMock);
 
         return new DisplayPowerControllerHolder(dpc, display, displayPowerState, brightnessSetting,
                 animator, automaticBrightnessController, screenOffBrightnessSensorController,
-                hbmController, hbmMetadata, brightnessMappingStrategy, injector);
+                hbmController, hbmMetadata, brightnessMappingStrategy, injector, config);
     }
 
     /**
@@ -1389,6 +1518,7 @@ public final class DisplayPowerControllerTest {
         public final HighBrightnessModeMetadata hbmMetadata;
         public final BrightnessMappingStrategy brightnessMappingStrategy;
         public final DisplayPowerController.Injector injector;
+        public final DisplayDeviceConfig config;
 
         DisplayPowerControllerHolder(DisplayPowerController dpc, LogicalDisplay display,
                 DisplayPowerState displayPowerState, BrightnessSetting brightnessSetting,
@@ -1398,7 +1528,8 @@ public final class DisplayPowerControllerTest {
                 HighBrightnessModeController hbmController,
                 HighBrightnessModeMetadata hbmMetadata,
                 BrightnessMappingStrategy brightnessMappingStrategy,
-                DisplayPowerController.Injector injector) {
+                DisplayPowerController.Injector injector,
+                DisplayDeviceConfig config) {
             this.dpc = dpc;
             this.display = display;
             this.displayPowerState = displayPowerState;
@@ -1410,6 +1541,7 @@ public final class DisplayPowerControllerTest {
             this.hbmMetadata = hbmMetadata;
             this.brightnessMappingStrategy = brightnessMappingStrategy;
             this.injector = injector;
+            this.config = config;
         }
     }
 
