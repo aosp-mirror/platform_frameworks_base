@@ -53,7 +53,7 @@ import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorEvent;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
+import android.compat.annotation.EnabledAfter;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
@@ -131,7 +131,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
      * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public static final long MAKE_VIRTUAL_DISPLAY_FLAGS_CONSISTENT_WITH_DISPLAY_MANAGER =
             294837146L;
 
