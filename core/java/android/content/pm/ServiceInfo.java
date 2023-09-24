@@ -486,7 +486,7 @@ public class ServiceInfo extends ComponentInfo
      * Here is an example:
      * <pre>
      *  &lt;uses-permission
-     *      android:name="android.permissions.FOREGROUND_SERVICE_SPECIAL_USE"
+     *      android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
      *  /&gt;
      *  &lt;service
      *      android:name=".MySpecialForegroundService"
@@ -506,7 +506,7 @@ public class ServiceInfo extends ComponentInfo
      * in both platforms.
      * <pre>
      *  &lt;uses-permission
-     *      android:name="android.permissions.FOREGROUND_SERVICE_SPECIAL_USE"
+     *      android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
      *      android:maxSdkVersion="last_sdk_version_without_type_foo"
      *  /&gt;
      *  &lt;service
