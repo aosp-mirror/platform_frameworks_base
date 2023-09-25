@@ -19,6 +19,7 @@ package com.android.server.wm.flicker.service.quickswitch.scenarios
 import android.app.Instrumentation
 import android.tools.common.NavBar
 import android.tools.common.Rotation
+import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
@@ -46,7 +47,9 @@ abstract class QuickSwitchBetweenTwoAppsBack(val rotation: Rotation = Rotation.R
         tapl.setExpectedRotation(rotation.value)
         tapl.setIgnoreTaskbarVisibility(true)
         testApp1.launchViaIntent(wmHelper)
+        ChangeDisplayOrientationRule.setRotation(rotation)
         testApp2.launchViaIntent(wmHelper)
+        ChangeDisplayOrientationRule.setRotation(rotation)
     }
 
     @Test
