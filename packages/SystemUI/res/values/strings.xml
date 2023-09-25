@@ -459,6 +459,9 @@
 
     <!-- Content description of the bluetooth icon when connected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_connected">Bluetooth connected.</string>
+
+    <!-- Content description of the bluetooth device icon. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_bluetooth_device_icon">Bluetooth device icon</string>
     <!-- Content description of the bluetooth icon when connecting for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
 
     <!-- Content description of the battery when battery state is unknown for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -621,6 +624,17 @@
     <!-- QuickSettings: Bluetooth (Off) [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Bluetooth detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_detail_empty_text">No paired devices available</string>
+    <!-- QuickSettings: Bluetooth dialog subtitle [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_bluetooth_tile_subtitle">Tap to connect or disconnect</string>
+    <!-- QuickSettings: Bluetooth dialog see all devices [CHAR LIMIT=NONE]-->
+    <string name="see_all_bluetooth_devices">See all</string>
+    <!-- QuickSettings: Bluetooth dialog turn on Bluetooth [CHAR LIMIT=NONE]-->
+    <string name="turn_on_bluetooth">Use Bluetooth</string>
+    <!-- QuickSettings: Bluetooth dialog device connected default summary [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_bluetooth_device_connected">Connected</string>
+    <!-- QuickSettings: Bluetooth dialog device saved default summary [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_bluetooth_device_saved">Saved</string>
+
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
     <!-- QuickSettings: Bluetooth secondary label for an audio device being connected [CHAR LIMIT=20]-->
