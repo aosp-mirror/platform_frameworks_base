@@ -3104,7 +3104,7 @@
     configured. This is shown as part of a dialog that explains to the user why they cannot select
     this shortcut for their lock screen right now. [CHAR LIMIT=NONE].
     -->
-    <string name="home_quick_affordance_unavailable_configure_the_app">&#8226; At least one device is available</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app">&#8226; At least one device or device panel are available</string>
 
     <!---
     Explains that the notes app is not available. This is shown as part of a dialog that explains to
