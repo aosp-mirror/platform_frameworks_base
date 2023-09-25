@@ -257,8 +257,16 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             return false;
         }
 
-        // Badged bubble image
-        Drawable bubbleDrawable = iconFactory.getBubbleDrawable(c, info.shortcutInfo, b.getIcon());
+        Drawable bubbleDrawable = null;
+        try {
+            // Badged bubble image
+            bubbleDrawable = iconFactory.getBubbleDrawable(c, info.shortcutInfo,
+                    b.getIcon());
+        } catch (Exception e) {
+            // If we can't create the icon we'll default to the app icon
+            Log.w(TAG, "Exception creating icon for the bubble: " + b.getKey());
+        }
+
         if (bubbleDrawable == null) {
             // Default to app icon
             bubbleDrawable = appIcon;
@@ -268,7 +276,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 b.isImportantConversation());
         info.badgeBitmap = badgeBitmapInfo.icon;
         // Raw badge bitmap never includes the important conversation ring
-        info.rawBadgeBitmap = b.isImportantConversation() // is this needed for bar?
+        info.rawBadgeBitmap = b.isImportantConversation()
                 ? iconFactory.getBadgeBitmap(badgedIcon, false).icon
                 : badgeBitmapInfo.icon;
 

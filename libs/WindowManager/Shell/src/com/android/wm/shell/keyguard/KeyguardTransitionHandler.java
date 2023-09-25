@@ -76,6 +76,10 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
     private IRemoteTransition mOccludeByDreamTransition = null;
     private IRemoteTransition mUnoccludeTransition = null;
 
+    // While set true, Keyguard has created a remote animation runner to handle the open app
+    // transition.
+    private boolean mIsLaunchingActivityOverLockscreen;
+
     private final class StartedTransition {
         final TransitionInfo mInfo;
         final SurfaceControl.Transaction mFinishT;
@@ -120,7 +124,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull TransitionFinishCallback finishCallback) {
-        if (!handles(info)) {
+        if (!handles(info) || mIsLaunchingActivityOverLockscreen) {
             return false;
         }
 
@@ -312,6 +316,12 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                 mOccludeByDreamTransition = occludeByDreamTransition;
                 mUnoccludeTransition = unoccludeTransition;
             });
+        }
+
+        @Override
+        public void setLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen) {
+            mMainExecutor.execute(() ->
+                    mIsLaunchingActivityOverLockscreen = isLaunchingActivityOverLockscreen);
         }
     }
 }
