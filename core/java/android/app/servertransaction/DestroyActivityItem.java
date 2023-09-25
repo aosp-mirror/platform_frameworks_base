@@ -50,6 +50,13 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     }
 
     @Override
+    public void postExecute(@NonNull ClientTransactionHandler client,
+            @NonNull PendingTransactionActions pendingActions) {
+        // Cleanup after execution.
+        client.getActivitiesToBeDestroyed().remove(getActivityToken());
+    }
+
+    @Override
     public int getTargetState() {
         return ON_DESTROY;
     }
