@@ -517,7 +517,8 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"등록되지 않음"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"사용할 수 없음"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC가 임의 선택됨"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{기기 0대 연결됨}=1{기기 1대 연결됨}other{기기 #대 연결됨}}"</string>
+    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
+    <skip />
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"시간 늘리기"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"시간 줄이기"</string>
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
