@@ -805,10 +805,10 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"控制锁屏密码和 PIN 码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"监控屏幕解锁尝试次数"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"监视在解锁屏幕时输错密码的次数，如果输错次数过多，则锁定平板电脑或清除其所有数据。"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定平板电脑或清除其所有数据。"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"监控用户在解锁屏幕时输错密码的次数；如果用户输错密码的次数超出上限，系统就会锁定 Android TV 设备或清空 Android TV 设备上的所有数据。"</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定信息娱乐系统或清除信息娱乐系统上的所有数据。"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"监视在解锁屏幕时输错密码的次数，如果输错次数过多，则锁定手机或清除其所有数据。"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定手机或清除其所有数据。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定平板电脑或清空此用户的所有数据。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"监控用户在解锁屏幕时输错密码的次数；如果用户输错密码的次数超出上限，系统就会锁定 Android TV 设备或清空该用户的所有数据。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定信息娱乐系统或清除此个人资料的所有数据。"</string>

@@ -804,11 +804,11 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Дозволува сопственикот да ја ажурира апликацијата што претходно ја инсталирал без дејство од корисникот"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Постави правила за лозинката"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролирај ги должината и знаците што се дозволени за лозинки и PIN-броеви за отклучување екран."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Следи ги обидите за отклучување на екранот"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Посматрај го бројот на неточни лозинки што се напишани за да се отклучи екранот и заклучи го таблетот или избриши ги сите податоци од него ако бидат напишани премногу неточни лозинки."</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Следење на обидите за отклучување на екранот"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Го следи бројот на неточни лозинки што се внесени за отклучување на екранот и го заклучува таблетот или ги брише сите податоци од него ако се внесат голем број неточни лозинки."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Го следи бројот на погрешно внесени лозинки при отклучување на екранот и го заклучува уредот Android TV или ги брише сите податоци од уредот Android TV доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го системот за информации и забава или избриши ги сите негови податоци доколку се внесени премногу погрешни лозинки."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Посматрај го бројот на неточни лозинки што се напишани за да се отклучи екранот и заклучи го телефонот или избриши ги сите податоци од него ако бидат напишани премногу неточни лозинки."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Го следи бројот на неточни лозинки што се внесени за отклучување на екранот и го заклучува телефонот или ги брише сите податоци од него ако се внесат голем број неточни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го таблетот или избриши ги сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Го следи бројот на погрешно внесени лозинки при отклучување на екранот и го заклучува уредот Android TV или ги брише сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го системот за информации и забава или избриши ги сите податоци од овој профил доколку се внесени премногу погрешни лозинки."</string>
@@ -817,11 +817,11 @@
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Промени го заклучувањето на екранот."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Заклучи го екранот"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Контролирај како и кога се заклучува екранот."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Избриши ги сите податоци"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Бришење на сите податоци"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Избриши ги податоците во таблетот без предупредување со ресетирање на фабрички податоци."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Ги брише податоците на вашиот уред Android TV без предупредување, така што ќе изврши ресетирање на фабричките податоци."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Избриши ги податоците во системот за информации и забава без предупредување со ресетирање на фабрички податоци."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Избриши ги податоците во телефонот без предупредување со ресетирање на фабрички податоци."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ги брише податоците од телефонот без предупредување вршејќи ресетирање на фабрички податоци."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Избриши ги податоците на профилот"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Избриши ги податоците на корисникот"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Избриши ги податоците на овој корисник на таблетот без предупредување."</string>
