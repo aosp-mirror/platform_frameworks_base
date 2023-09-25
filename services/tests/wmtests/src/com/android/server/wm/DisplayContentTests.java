@@ -573,7 +573,10 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(window1, mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
 
         // Add a window to the second display, and it should be focused
-        final WindowState window2 = createWindow(null, TYPE_BASE_APPLICATION, dc, "window2");
+        final ActivityRecord app2 = new ActivityBuilder(mAtm)
+                .setTask(new TaskBuilder(mSupervisor).setDisplay(dc).build())
+                .setUseProcess(window1.getProcess()).setOnTop(true).build();
+        final WindowState window2 = createWindow(null, TYPE_BASE_APPLICATION, app2, "window2");
         window2.mActivityRecord.mTargetSdk = targetSdk;
         updateFocusedWindow();
         assertTrue(window2.isFocused());

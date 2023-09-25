@@ -4739,24 +4739,20 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(new Rect(1050, 0, 1750, 1400), mActivity.getBounds());
     }
 
-    private static WindowState addWindowToActivity(ActivityRecord activity) {
+    private WindowState addWindowToActivity(ActivityRecord activity) {
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
         params.setFitInsetsSides(0);
         params.setFitInsetsTypes(0);
         final TestWindowState w = new TestWindowState(
-                activity.mWmService, mock(Session.class), new TestIWindow(), params, activity);
+                activity.mWmService, getTestSession(), new TestIWindow(), params, activity);
         makeWindowVisible(w);
         w.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
         activity.addWindow(w);
         return w;
     }
 
-    private static TestWindowState addStatusBar(DisplayContent displayContent) {
-        final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
-        doReturn(true).when(displayPolicy).hasStatusBar();
-        displayPolicy.onConfigurationChanged();
-
+    private TestWindowState addStatusBar(DisplayContent displayContent) {
         final TestWindowToken token = createTestWindowToken(
                 TYPE_STATUS_BAR, displayContent);
         final WindowManager.LayoutParams attrs =
@@ -4772,11 +4768,12 @@ public class SizeCompatTests extends WindowTestsBase {
                 new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
         };
         final TestWindowState statusBar = new TestWindowState(
-                displayContent.mWmService, mock(Session.class), new TestIWindow(), attrs, token);
+                displayContent.mWmService, getTestSession(), new TestIWindow(), attrs, token);
         token.addWindow(statusBar);
         statusBar.setRequestedSize(displayContent.mBaseDisplayWidth,
                 SystemBarUtils.getStatusBarHeight(displayContent.getDisplayUiContext()));
 
+        final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
         displayPolicy.addWindowLw(statusBar, attrs);
         displayPolicy.layoutWindowLw(statusBar, null, displayContent.mDisplayFrames);
         return statusBar;

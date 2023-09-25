@@ -94,6 +94,7 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IWindow;
+import android.view.IWindowSessionCallback;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -153,7 +154,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     ActivityTaskSupervisor mSupervisor;
     WindowManagerService mWm;
     private final IWindow mIWindow = new TestIWindow();
-    private Session mMockSession;
+    private Session mTestSession;
     private boolean mUseFakeSettingsProvider;
 
     DisplayInfo mDisplayInfo = new DisplayInfo();
@@ -231,7 +232,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
         suppressInsetsAnimation(insetsPolicy.getPermanentControlTarget());
 
         mTransaction = mSystemServicesTestRule.mTransaction;
-        mMockSession = mock(Session.class);
 
         mContext.getSystemService(DisplayManager.class)
                 .getDisplay(Display.DEFAULT_DISPLAY).getDisplayInfo(mDisplayInfo);
@@ -508,6 +508,54 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return statusBar;
     }
 
+    Session getTestSession() {
+        if (mTestSession != null) {
+            return mTestSession;
+        }
+        mTestSession = createTestSession(mAtm);
+        return mTestSession;
+    }
+
+    private Session getTestSession(WindowToken token) {
+        final ActivityRecord r = token.asActivityRecord();
+        if (r == null || r.app == null) {
+            return getTestSession();
+        }
+        // If the activity has a process, let the window session belonging to activity use the
+        // process of the activity.
+        int pid = r.app.getPid();
+        if (pid == 0) {
+            // See SystemServicesTestRule#addProcess, pid 0 isn't added to the map. So generate
+            // a non-zero pid to initialize it.
+            final int numPid = mAtm.mProcessMap.getPidMap().size();
+            pid = numPid > 0 ? mAtm.mProcessMap.getPidMap().keyAt(numPid - 1) + 1 : 1;
+            r.app.setPid(pid);
+            mAtm.mProcessMap.put(pid, r.app);
+        } else {
+            final WindowState win = mRootWindowContainer.getWindow(w -> w.getProcess() == r.app);
+            if (win != null) {
+                // Reuse the same Session if there is a window uses the same process.
+                return win.mSession;
+            }
+        }
+        return createTestSession(mAtm, pid, r.getUid());
+    }
+
+    static Session createTestSession(ActivityTaskManagerService atms) {
+        return createTestSession(atms, WindowManagerService.MY_PID, WindowManagerService.MY_UID);
+    }
+
+    static Session createTestSession(ActivityTaskManagerService atms, int pid, int uid) {
+        if (atms.mProcessMap.getProcess(pid) == null) {
+            SystemServicesTestRule.addProcess(atms, "testPkg", "testProc", pid, uid);
+        }
+        return new Session(atms.mWindowManager, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float scale) {
+            }
+        }, pid, uid);
+    }
+
     WindowState createAppWindow(Task task, int type, String name) {
         final ActivityRecord activity = createNonAttachedActivityRecord(task.getDisplayContent());
         task.addChild(activity, 0);
@@ -587,7 +635,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
             int ownerId, boolean ownerCanAddInternalSystemWindow, IWindow iwindow) {
         return createWindow(parent, type, token, name, ownerId, UserHandle.getUserId(ownerId),
-                ownerCanAddInternalSystemWindow, mWm, mMockSession, iwindow,
+                ownerCanAddInternalSystemWindow, mWm, getTestSession(token), iwindow,
                 mSystemServicesTestRule.getPowerManagerWrapper());
     }
 
@@ -891,7 +939,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     TestWindowState createWindowState(WindowManager.LayoutParams attrs, WindowToken token) {
         SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);
 
-        return new TestWindowState(mWm, mMockSession, mIWindow, attrs, token);
+        return new TestWindowState(mWm, getTestSession(), mIWindow, attrs, token);
     }
 
     /** Creates a {@link DisplayContent} as parts of simulate display info for test. */
@@ -1705,8 +1753,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 final WindowState window = WindowTestsBase.createWindow(null,
                         TYPE_APPLICATION_STARTING, activity,
                         "Starting window", 0 /* ownerId */, 0 /* userId*/,
-                        false /* internalWindows */, mWMService, mock(Session.class),
-                        iWindow,
+                        false /* internalWindows */, mWMService, createTestSession(mAtm), iWindow,
                         mPowerManagerWrapper);
                 activity.mStartingWindow = window;
                 mAppWindowMap.put(info.appToken, window);

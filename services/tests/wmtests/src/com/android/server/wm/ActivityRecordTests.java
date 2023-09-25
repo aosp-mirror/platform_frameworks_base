@@ -147,14 +147,12 @@ import android.view.DisplayInfo;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner.Stub;
 import android.view.IWindowManager;
-import android.view.IWindowSession;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.window.TaskSnapshot;
 
 import androidx.test.filters.MediumTest;
@@ -2072,7 +2070,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
         params.width = params.height = WindowManager.LayoutParams.MATCH_PARENT;
         final TestWindowState w = new TestWindowState(
-                mAtm.mWindowManager, mock(Session.class), new TestIWindow(), params, activity);
+                mAtm.mWindowManager, getTestSession(), new TestIWindow(), params, activity);
         activity.addWindow(w);
 
         // Assume the activity is launching in different rotation, and there was an available
@@ -2082,23 +2080,8 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .build();
         setRotatedScreenOrientationSilently(activity);
         activity.setVisible(false);
-
-        final IWindowSession session = WindowManagerGlobal.getWindowSession();
-        spyOn(session);
-        try {
-            // Return error to skip unnecessary operation.
-            doReturn(WindowManagerGlobal.ADD_STARTING_NOT_NEEDED).when(session).addToDisplay(
-                    any() /* window */,  any() /* attrs */,
-                    anyInt() /* viewVisibility */, anyInt() /* displayId */,
-                    anyInt() /* requestedVisibleTypes */, any() /* outInputChannel */,
-                    any() /* outInsetsState */, any() /* outActiveControls */,
-                    any() /* outAttachedFrame */, any() /* outSizeCompatScale */);
-            mAtm.mWindowManager.mStartingSurfaceController
-                    .createTaskSnapshotSurface(activity, snapshot);
-        } catch (RemoteException ignored) {
-        } finally {
-            reset(session);
-        }
+        mAtm.mWindowManager.mStartingSurfaceController
+                .createTaskSnapshotSurface(activity, snapshot);
 
         // Because the rotation of snapshot and the corresponding top activity are different, fixed
         // rotation should be applied when creating snapshot surface if the display rotation may be
