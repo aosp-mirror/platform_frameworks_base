@@ -104,7 +104,7 @@
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"ଆପଣ ଏକ ଆପ ରେକର୍ଡ କରିବା ସମୟରେ, ସେହି ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ Androidର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ରେକର୍ଡିଂ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ"</string>
-    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ଡିଭାଇସ୍ ଅଡିଓ"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ଡିଭାଇସ ଅଡିଓ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ମ୍ୟୁଜିକ, କଲ ଏବଂ ରିଂଟୋନଗୁଡ଼ିକ ପରି ଆପଣଙ୍କ ଡିଭାଇସରୁ ସାଉଣ୍ଡ"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"ମାଇକ୍ରୋଫୋନ"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"ଡିଭାଇସ୍ ଅଡିଓ ଏବଂ ମାଇକ୍ରୋଫୋନ୍"</string>
@@ -292,8 +292,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ସୀମା"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ଚେତାବନୀ"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ୱାର୍କ ଆପ୍ସ"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ନାଇଟ୍ ଲାଇଟ୍"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ସୂର୍ଯ୍ୟାସ୍ତ ବେଳେ ଅନ୍ ହେବ"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ନାଇଟ ଲାଇଟ"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ସନ୍ଧ୍ୟାରେ ଚାଲୁ ହେବ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ସୂର୍ଯ୍ୟୋଦୟ ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>ରେ ଅନ୍ ହେବ"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> ପର୍ଯ୍ୟନ୍ତ"</string>
@@ -687,7 +687,7 @@
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ଭଲ୍ୟୁମ ବଟନ୍‍ ଶର୍ଟକଟ୍‍"</string>
-    <string name="battery" msgid="769686279459897127">"ବ୍ୟାଟେରୀ"</string>
+    <string name="battery" msgid="769686279459897127">"ବେଟେରୀ"</string>
     <string name="headset" msgid="4485892374984466437">"ହେଡସେଟ୍‍"</string>
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"ସେଟିଂସ୍ ଖୋଲନ୍ତୁ"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"ହେଡଫୋନ୍‍ ସଂଯୁକ୍ତ"</string>
@@ -782,7 +782,7 @@
     <string name="tuner_menu" msgid="363690665924769420">"ମେନୁ"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> ଆପ୍‍"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"ଆଲର୍ଟଗୁଡ଼ିକ"</string>
-    <string name="notification_channel_battery" msgid="9219995638046695106">"ବ୍ୟାଟେରୀ"</string>
+    <string name="notification_channel_battery" msgid="9219995638046695106">"ବେଟେରୀ"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"ସ୍କ୍ରୀନଶଟ୍‍"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Instant Apps"</string>
     <string name="notification_channel_setup" msgid="7660580986090760350">"ସେଟଅପ"</string>
