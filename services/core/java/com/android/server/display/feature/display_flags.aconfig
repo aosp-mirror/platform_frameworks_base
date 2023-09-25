@@ -57,3 +57,11 @@ flag {
     bug: "242093547"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_displays_refresh_rates_synchronization"
+    namespace: "display_manager"
+    description: "Enables synchronization of refresh rates across displays"
+    bug: "294015845"
+    is_fixed_read_only: true
+}

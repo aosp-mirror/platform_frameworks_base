@@ -30,7 +30,8 @@ class VotesStorage {
     private static final String TAG = "VotesStorage";
     // Special ID used to indicate that given vote is to be applied globally, rather than to a
     // specific display.
-    private static final int GLOBAL_ID = -1;
+    @VisibleForTesting
+    static final int GLOBAL_ID = -1;
 
     private boolean mLoggingEnabled;
 

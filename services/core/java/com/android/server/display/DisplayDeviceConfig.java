@@ -500,6 +500,8 @@ public class DisplayDeviceConfig {
 
     public static final String DEFAULT_ID = "default";
 
+    public static final int DEFAULT_LOW_REFRESH_RATE = 60;
+
     private static final float BRIGHTNESS_DEFAULT = 0.5f;
     private static final String ETC_DIR = "etc";
     private static final String DISPLAY_CONFIG_DIR = "displayconfig";
@@ -513,7 +515,6 @@ public class DisplayDeviceConfig {
     private static final int DEFAULT_PEAK_REFRESH_RATE = 0;
     private static final int DEFAULT_REFRESH_RATE = 60;
     private static final int DEFAULT_REFRESH_RATE_IN_HBM = 0;
-    private static final int DEFAULT_LOW_REFRESH_RATE = 60;
     private static final int DEFAULT_HIGH_REFRESH_RATE = 0;
     private static final float[] DEFAULT_BRIGHTNESS_THRESHOLDS = new float[]{};
 

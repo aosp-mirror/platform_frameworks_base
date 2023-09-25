@@ -20,8 +20,12 @@ package com.android.server.display.mode;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.Mode.INVALID_MODE_ID;
 
+
+import static com.android.server.display.mode.DisplayModeDirector.SYNCHRONIZED_REFRESH_RATE_TOLERANCE;
 import static com.android.server.display.mode.Vote.PRIORITY_LIMIT_MODE;
 import static com.android.server.display.mode.Vote.PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE;
+import static com.android.server.display.mode.Vote.PRIORITY_SYNCHRONIZED_REFRESH_RATE;
+import static com.android.server.display.mode.VotesStorage.GLOBAL_ID;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -122,6 +126,8 @@ public class DisplayObserverTest {
                 .thenReturn(0);
         when(mResources.getInteger(R.integer.config_externalDisplayPeakHeight))
                 .thenReturn(0);
+        when(mResources.getBoolean(R.bool.config_refreshRateSynchronizationEnabled))
+                .thenReturn(false);
 
         // Necessary configs to initialize DisplayModeDirector
         when(mResources.getIntArray(R.array.config_brightnessThresholdsOfPeakRefreshRate))
@@ -331,6 +337,58 @@ public class DisplayObserverTest {
         mObserver.onDisplayRemoved(EXTERNAL_DISPLAY);
         assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
         assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+    }
+
+    /** External display added, applied refresh rates synchronization */
+    @Test
+    public void testExternalDisplayAdded_appliedRefreshRatesSynchronization() {
+        when(mDisplayManagerFlags.isDisplayResolutionRangeVotingEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isUserPreferredModeVoteEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isExternalDisplayLimitModeEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isDisplaysRefreshRatesSynchronizationEnabled()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.config_refreshRateSynchronizationEnabled))
+                .thenReturn(true);
+        init();
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
+        mObserver.onDisplayAdded(EXTERNAL_DISPLAY);
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(
+                Vote.forPhysicalRefreshRates(
+                        MAX_REFRESH_RATE - SYNCHRONIZED_REFRESH_RATE_TOLERANCE,
+                        MAX_REFRESH_RATE + SYNCHRONIZED_REFRESH_RATE_TOLERANCE));
+
+        // Remove external display and check that sync vote is no longer present.
+        mObserver.onDisplayRemoved(EXTERNAL_DISPLAY);
+
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
+    }
+
+    /** External display added, disabled feature refresh rates synchronization */
+    @Test
+    public void testExternalDisplayAdded_disabledFeatureRefreshRatesSynchronization() {
+        when(mDisplayManagerFlags.isDisplayResolutionRangeVotingEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isUserPreferredModeVoteEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isExternalDisplayLimitModeEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isDisplaysRefreshRatesSynchronizationEnabled()).thenReturn(false);
+        when(mResources.getBoolean(R.bool.config_refreshRateSynchronizationEnabled))
+                .thenReturn(true);
+        init();
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
+        mObserver.onDisplayAdded(EXTERNAL_DISPLAY);
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
+    }
+
+    /** External display not applied refresh rates synchronization, because
+     * config_refreshRateSynchronizationEnabled is false. */
+    @Test
+    public void testExternalDisplay_notAppliedRefreshRatesSynchronization() {
+        when(mDisplayManagerFlags.isDisplayResolutionRangeVotingEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isUserPreferredModeVoteEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isExternalDisplayLimitModeEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isDisplaysRefreshRatesSynchronizationEnabled()).thenReturn(true);
+        init();
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
+        mObserver.onDisplayAdded(EXTERNAL_DISPLAY);
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
     }
 
     private void init() {

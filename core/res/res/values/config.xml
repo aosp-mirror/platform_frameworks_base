@@ -5245,6 +5245,10 @@
          config_externalDisplayPeakRefreshRate and config_externalDisplayPeakWidth are non-zero. -->
     <integer name="config_externalDisplayPeakHeight">0</integer>
 
+    <!-- Enable synchronization of the displays refresh rates by applying the default low refresh
+         rate. -->
+    <bool name="config_refreshRateSynchronizationEnabled">false</bool>
+
     <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
          vendors to tune the curves to have exact same brightness for different refresh rate. So
          flicker could be observed at switch time. The issue is worse at the gamma lower end.

@@ -4234,6 +4234,7 @@
   <java-symbol type="integer" name="config_externalDisplayPeakRefreshRate" />
   <java-symbol type="integer" name="config_externalDisplayPeakWidth" />
   <java-symbol type="integer" name="config_externalDisplayPeakHeight" />
+  <java-symbol type="bool" name="config_refreshRateSynchronizationEnabled" />
   <java-symbol type="integer" name="config_defaultRefreshRateInZone" />
   <java-symbol type="array" name="config_brightnessThresholdsOfPeakRefreshRate" />
   <java-symbol type="array" name="config_ambientThresholdsOfPeakRefreshRate" />

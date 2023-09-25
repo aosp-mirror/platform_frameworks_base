@@ -59,6 +59,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_MODE_LIMIT_FOR_EXTERNAL_DISPLAY,
             Flags::enableModeLimitForExternalDisplay);
 
+    private final FlagState mDisplaysRefreshRatesSynchronizationState = new FlagState(
+            Flags.FLAG_ENABLE_DISPLAYS_REFRESH_RATES_SYNCHRONIZATION,
+            Flags::enableDisplaysRefreshRatesSynchronization);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -98,6 +102,13 @@ public class DisplayManagerFlags {
      */
     public boolean isExternalDisplayLimitModeEnabled() {
         return mExternalDisplayLimitModeState.isEnabled();
+    }
+
+    /**
+     * @return Whether displays refresh rate synchronization is enabled.
+     */
+    public boolean isDisplaysRefreshRatesSynchronizationEnabled() {
+        return mDisplaysRefreshRatesSynchronizationState.isEnabled();
     }
 
     private static class FlagState {
