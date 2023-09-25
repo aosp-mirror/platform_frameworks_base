@@ -438,7 +438,8 @@ final class UsageStatsProtoV2 {
      * @param in the input stream from which to read events.
      * @param stats the interval stats object which will be populated.
      */
-    public static void read(InputStream in, IntervalStats stats) throws IOException {
+    public static void read(InputStream in, IntervalStats stats, boolean skipEvents)
+            throws IOException {
         final ProtoInputStream proto = new ProtoInputStream(in);
         while (true) {
             switch (proto.nextField()) {
@@ -492,6 +493,9 @@ final class UsageStatsProtoV2 {
                     }
                     break;
                 case (int) IntervalStatsObfuscatedProto.EVENT_LOG:
+                    if (skipEvents) {
+                        break;
+                    }
                     try {
                         final long eventsToken = proto.start(
                                 IntervalStatsObfuscatedProto.EVENT_LOG);
