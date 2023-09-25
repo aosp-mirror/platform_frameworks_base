@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.systemui.deviceentry.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
@@ -13,14 +28,12 @@ import kotlinx.coroutines.flow.asStateFlow
 class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
 
     private var isInsecureLockscreenEnabled = true
-    private var isBypassEnabled = false
+
+    private val _isBypassEnabled = MutableStateFlow(false)
+    override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled
 
     private val _isUnlocked = MutableStateFlow(false)
     override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
-
-    override fun isBypassEnabled(): Boolean {
-        return isBypassEnabled
-    }
 
     override suspend fun isInsecureLockscreenEnabled(): Boolean {
         return isInsecureLockscreenEnabled
@@ -35,7 +48,7 @@ class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
     }
 
     fun setBypassEnabled(isBypassEnabled: Boolean) {
-        this.isBypassEnabled = isBypassEnabled
+        _isBypassEnabled.value = isBypassEnabled
     }
 }
 

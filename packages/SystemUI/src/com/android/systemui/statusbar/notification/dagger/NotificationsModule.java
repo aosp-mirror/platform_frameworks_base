@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.data.NotificationDataLayerModule;
 import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
 import com.android.systemui.statusbar.notification.icon.ConversationIconManager;
 import com.android.systemui.statusbar.notification.icon.IconManager;
@@ -97,6 +98,7 @@ import javax.inject.Provider;
         KeyguardNotificationVisibilityProviderModule.class,
         SeenNotificationsProviderModule.class,
         ShadeEventsModule.class,
+        NotificationDataLayerModule.class,
         NotifPipelineChoreographerModule.class,
         NotificationSectionHeadersModule.class,
         NotificationListViewModelModule.class,

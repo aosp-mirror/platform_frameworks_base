@@ -12,6 +12,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -22,6 +23,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -54,6 +56,7 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
                 keyguardBypassController = keyguardBypassController,
                 keyguardStateController = keyguardStateController,
             )
+        testScope.runCurrent()
     }
 
     @Test
@@ -66,8 +69,7 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
             assertThat(isUnlocked).isFalse()
 
             val captor = argumentCaptor<KeyguardStateController.Callback>()
-            Mockito.verify(keyguardStateController, Mockito.atLeastOnce())
-                .addCallback(captor.capture())
+            verify(keyguardStateController, Mockito.atLeastOnce()).addCallback(captor.capture())
 
             whenever(keyguardStateController.isUnlocked).thenReturn(true)
             captor.value.onUnlockedChanged()
@@ -98,7 +100,12 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             whenever(keyguardBypassController.isBypassEnabled).thenAnswer { false }
             whenever(keyguardBypassController.bypassEnabled).thenAnswer { false }
-            assertThat(underTest.isBypassEnabled()).isFalse()
+            withArgCaptor {
+                    verify(keyguardBypassController).registerOnBypassStateChangedListener(capture())
+                }
+                .onBypassStateChanged(false)
+            runCurrent()
+            assertThat(underTest.isBypassEnabled.value).isFalse()
         }
 
     @Test
@@ -106,7 +113,12 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             whenever(keyguardBypassController.isBypassEnabled).thenAnswer { true }
             whenever(keyguardBypassController.bypassEnabled).thenAnswer { true }
-            assertThat(underTest.isBypassEnabled()).isTrue()
+            withArgCaptor {
+                    verify(keyguardBypassController).registerOnBypassStateChangedListener(capture())
+                }
+                .onBypassStateChanged(true)
+            runCurrent()
+            assertThat(underTest.isBypassEnabled.value).isTrue()
         }
 
     companion object {

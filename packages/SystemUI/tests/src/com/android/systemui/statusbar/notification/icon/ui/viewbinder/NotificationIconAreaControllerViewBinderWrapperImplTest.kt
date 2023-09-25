@@ -26,9 +26,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
 import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.user.domain.UserDomainLayerModule
-import com.android.systemui.util.mockito.whenever
 import dagger.BindsInstance
 import dagger.Component
 import org.junit.Assert.assertFalse
@@ -37,7 +35,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -46,7 +43,6 @@ import org.mockito.MockitoAnnotations
 class NotificationIconAreaControllerViewBinderWrapperImplTest : SysuiTestCase() {
 
     @Mock private lateinit var dozeParams: DozeParameters
-    @Mock private lateinit var aodIcons: NotificationIconContainer
 
     private lateinit var testComponent: TestComponent
     private val underTest
@@ -83,15 +79,6 @@ class NotificationIconAreaControllerViewBinderWrapperImplTest : SysuiTestCase() 
     fun testNotificationIcons_settingShowIcons() {
         underTest.settingsListener.onStatusBarIconsBehaviorChanged(false)
         assertTrue(underTest.shouldShowLowPriorityIcons())
-    }
-
-    @Test
-    fun testAppearResetsTranslation() {
-        underTest.setupAodIcons(aodIcons)
-        whenever(dozeParams.shouldControlScreenOff()).thenReturn(false)
-        underTest.appearAodIcons()
-        verify(aodIcons).translationY = 0f
-        verify(aodIcons).alpha = 1.0f
     }
 
     @SysUISingleton

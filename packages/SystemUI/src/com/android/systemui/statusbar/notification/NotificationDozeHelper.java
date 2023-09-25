@@ -24,6 +24,8 @@ import android.graphics.ColorMatrixColorFilter;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
+
 import com.android.app.animation.Interpolators;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -81,6 +83,11 @@ public class NotificationDozeHelper {
 
     public void setDozing(Consumer<Float> listener, boolean dozing,
             boolean animate, long delay, View view) {
+        setDozing(listener, dozing, animate, delay, view, /* endRunnable= */ null);
+    }
+
+    public void setDozing(Consumer<Float> listener, boolean dozing,
+            boolean animate, long delay, View view, @Nullable Runnable endRunnable) {
         if (animate) {
             startIntensityAnimation(a -> listener.accept((Float) a.getAnimatedValue()), dozing,
                     delay,
@@ -89,6 +96,9 @@ public class NotificationDozeHelper {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             view.setTag(DOZE_ANIMATOR_TAG, null);
+                            if (endRunnable != null) {
+                                endRunnable.run();
+                            }
                         }
 
                         @Override
@@ -102,6 +112,9 @@ public class NotificationDozeHelper {
                 animator.cancel();
             }
             listener.accept(dozing ? 1f : 0f);
+            if (endRunnable != null) {
+                endRunnable.run();
+            }
         }
     }
 

@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.util.concurrency
+package com.android.systemui.util.time
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.util.time.FakeSystemClock
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import java.util.concurrent.Executor
 
 @Module
-interface FakeExecutorModule {
-    @Binds @Main @SysUISingleton fun bindMainExecutor(executor: FakeExecutor): Executor
+interface FakeSystemClockModule {
+    @Binds fun bindFake(fake: FakeSystemClock): SystemClock
 
     companion object {
-        @Provides
-        fun provideFake(clock: FakeSystemClock) = FakeExecutor(clock)
+        @Provides @SysUISingleton fun providesFake() = FakeSystemClock()
     }
 }

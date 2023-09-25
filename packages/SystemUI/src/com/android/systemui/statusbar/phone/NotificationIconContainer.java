@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.collection.ArrayMap;
 
@@ -624,12 +625,32 @@ public class NotificationIconContainer extends ViewGroup {
     }
 
     public void setDozing(boolean dozing, boolean fade, long delay) {
+        setDozing(dozing, fade, delay, /* endRunnable= */ null);
+    }
+
+    public void setDozing(boolean dozing, boolean fade, long delay,
+            @Nullable Runnable endRunnable) {
         mDozing = dozing;
         mDisallowNextAnimation |= !fade;
-        for (int i = 0; i < getChildCount(); i++) {
+        final int childCount = getChildCount();
+        // Track all the child invocations of setDozing, invoking the top-level endRunnable once
+        // they have all completed.
+        final Runnable onChildCompleted = endRunnable == null ? null : new Runnable() {
+            private int mPendingCallbacks = childCount;
+
+            @Override
+            public void run() {
+                if (--mPendingCallbacks == 0) {
+                    endRunnable.run();
+                }
+            }
+        };
+        for (int i = 0; i < childCount; i++) {
             View view = getChildAt(i);
             if (view instanceof StatusBarIconView) {
-                ((StatusBarIconView) view).setDozing(dozing, fade, delay);
+                ((StatusBarIconView) view).setDozing(dozing, fade, delay, onChildCompleted);
+            } else if (onChildCompleted != null) {
+                onChildCompleted.run();
             }
         }
     }
