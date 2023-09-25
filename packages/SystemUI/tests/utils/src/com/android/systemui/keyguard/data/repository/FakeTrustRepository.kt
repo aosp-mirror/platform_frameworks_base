@@ -25,6 +25,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class FakeTrustRepository : TrustRepository {
+    private val _isTrustUsuallyManaged = MutableStateFlow(false)
+    override val isCurrentUserTrustUsuallyManaged: StateFlow<Boolean>
+        get() = _isTrustUsuallyManaged
     private val _isCurrentUserTrusted = MutableStateFlow(false)
     override val isCurrentUserTrusted: Flow<Boolean>
         get() = _isCurrentUserTrusted
@@ -54,5 +57,9 @@ class FakeTrustRepository : TrustRepository {
 
     fun setRequestDismissKeyguard(trustModel: TrustModel) {
         _requestDismissKeyguard.value = trustModel
+    }
+
+    fun setTrustUsuallyManaged(value: Boolean) {
+        _isTrustUsuallyManaged.value = value
     }
 }

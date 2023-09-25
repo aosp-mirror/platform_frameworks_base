@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.shared.model.TrustModel
 import com.android.systemui.user.data.repository.UserRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,6 +37,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -44,19 +47,25 @@ import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates any state relevant to trust agents and trust grants. */
 interface TrustRepository {
+    /** Flow representing whether the current user has enabled any trust agents. */
+    val isCurrentUserTrustUsuallyManaged: StateFlow<Boolean>
+
     /** Flow representing whether the current user is trusted. */
     val isCurrentUserTrusted: Flow<Boolean>
 
     /** Flow representing whether active unlock is running for the current user. */
     val isCurrentUserActiveUnlockRunning: Flow<Boolean>
 
-    /** Reports that whether trust is managed has changed for the current user. */
+    /**
+     * Reports whether a trust agent is currently enabled and managing the trust of the current user
+     */
     val isCurrentUserTrustManaged: StateFlow<Boolean>
 
     /** A trust agent is requesting to dismiss the keyguard from a trust change. */
     val trustAgentRequestingToDismissKeyguard: Flow<TrustModel>
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class TrustRepositoryImpl
 @Inject
@@ -173,6 +182,11 @@ constructor(
                         (it.flags.isInitiatedByUser || it.flags.dismissKeyguardRequested())
                 }
                 .map { it!! }
+
+    override val isCurrentUserTrustUsuallyManaged: StateFlow<Boolean> =
+        userRepository.selectedUserInfo
+            .flatMapLatest { flowOf(trustManager.isTrustUsuallyManaged(it.id)) }
+            .stateIn(applicationScope, started = SharingStarted.Eagerly, false)
 
     private fun isUserTrustManaged(userId: Int) =
         trustManagedForUser[userId]?.isTrustManaged ?: false

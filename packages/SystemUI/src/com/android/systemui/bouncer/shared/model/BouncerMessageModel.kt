@@ -22,7 +22,10 @@ import android.content.res.ColorStateList
  * Represents the message displayed on the bouncer. It has two parts, primary and a secondary
  * message
  */
-data class BouncerMessageModel(val message: Message? = null, val secondaryMessage: Message? = null)
+data class BouncerMessageModel(
+    val message: Message? = null,
+    val secondaryMessage: Message? = null,
+)
 
 /**
  * Representation of a single message on the bouncer. It can be either a string or a string resource
