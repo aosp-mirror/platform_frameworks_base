@@ -1,6 +1,5 @@
 package com.android.systemui.statusbar.notification.interruption
 
-import android.app.Notification
 import android.app.Notification.VISIBILITY_SECRET
 import android.content.Context
 import android.database.ContentObserver
@@ -14,6 +13,8 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -78,7 +79,8 @@ class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val userTracker: UserTracker,
     private val secureSettings: SecureSettings,
-    private val globalSettings: GlobalSettings
+    private val globalSettings: GlobalSettings,
+    private val featureFlags: FeatureFlagsClassic
 ) : CoreStartable, KeyguardNotificationVisibilityProvider {
     private val showSilentNotifsUri =
             secureSettings.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS)
@@ -201,7 +203,7 @@ class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
             // device isn't public, no need to check public-related settings, so allow
             !lockscreenUserManager.isLockscreenPublicMode(user) -> false
             // entry is meant to be secret on the lockscreen, disallow
-            entry.ranking.lockscreenVisibilityOverride == Notification.VISIBILITY_SECRET -> true
+            isRankingVisibilitySecret(entry) -> true
             // disallow if user disallows notifications in public
             else -> !lockscreenUserManager.userAllowsNotificationsInPublic(user)
         }
@@ -212,6 +214,17 @@ class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
             notifUser == UserHandle.USER_ALL -> false
             notifUser == currentUser -> false
             else -> disallowForUser(notifUser)
+        }
+    }
+
+    private fun isRankingVisibilitySecret(entry: NotificationEntry): Boolean {
+        return if (featureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
+            // ranking.lockscreenVisibilityOverride contains possibly out of date DPC and Setting
+            // info, and NotificationLockscreenUserManagerImpl is already listening for updates
+            // to those
+            entry.ranking.channel.lockscreenVisibility == VISIBILITY_SECRET
+        } else {
+            entry.ranking.lockscreenVisibilityOverride == VISIBILITY_SECRET
         }
     }
 
