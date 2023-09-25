@@ -113,6 +113,14 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         WindowContainerTransaction mFinishWCT = null;
 
         /**
+         * Whether the transition has request for remote transition while mLeftoversHandler
+         * isn't remote transition handler.
+         * If true and the mLeftoversHandler can handle the transition, need to notify remote
+         * transition handler to consume the transition.
+         */
+        boolean mHasRequestToRemote;
+
+        /**
          * Mixed transitions are made up of multiple "parts". This keeps track of how many
          * parts are currently animating.
          */
@@ -204,6 +212,10 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                     MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE, transition);
             mixed.mLeftoversHandler = handler.first;
             mActiveTransitions.add(mixed);
+            if (mixed.mLeftoversHandler != mPlayer.getRemoteTransitionHandler()) {
+                mixed.mHasRequestToRemote = true;
+                mPlayer.getRemoteTransitionHandler().handleRequest(transition, request);
+            }
             return handler.second;
         } else if (mSplitHandler.isSplitScreenVisible()
                 && isOpeningType(request.getType())
@@ -331,8 +343,17 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         } else if (mixed.mType == MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE) {
             return false;
         } else if (mixed.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
-            return animateOpenIntentWithRemoteAndPip(mixed, info, startTransaction,
-                    finishTransaction, finishCallback);
+            final boolean handledToPip = animateOpenIntentWithRemoteAndPip(mixed, info,
+                    startTransaction, finishTransaction, finishCallback);
+            // Consume the transition on remote handler if the leftover handler already handle this
+            // transition. And if it cannot, the transition will be handled by remote handler, so
+            // don't consume here.
+            // Need to check leftOverHandler as it may change in #animateOpenIntentWithRemoteAndPip
+            if (handledToPip && mixed.mHasRequestToRemote
+                    && mixed.mLeftoversHandler != mPlayer.getRemoteTransitionHandler()) {
+                mPlayer.getRemoteTransitionHandler().onTransitionConsumed(transition, false, null);
+            }
+            return handledToPip;
         } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_SPLIT) {
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
@@ -803,6 +824,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             mixed.mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
         } else if (mixed.mType == MixedTransition.TYPE_UNFOLD) {
             mUnfoldHandler.onTransitionConsumed(transition, aborted, finishT);
+        }
+        if (mixed.mHasRequestToRemote) {
+            mPlayer.getRemoteTransitionHandler().onTransitionConsumed(transition, aborted, finishT);
         }
     }
 }
