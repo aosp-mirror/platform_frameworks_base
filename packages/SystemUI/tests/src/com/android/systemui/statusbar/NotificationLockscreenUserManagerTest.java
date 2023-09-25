@@ -16,9 +16,18 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
+import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
+import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
+import static android.os.UserHandle.USER_ALL;
+import static android.provider.Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -32,6 +41,7 @@ import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Handler;
@@ -64,6 +74,7 @@ import com.android.systemui.util.settings.FakeSettings;
 import com.google.android.collect.Lists;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -124,8 +135,11 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mWorkUser = new UserInfo(currentUserId + 2, "" /* name */, null /* iconPath */, 0,
                 UserManager.USER_TYPE_PROFILE_MANAGED);
 
+        when(mKeyguardManager.getPrivateNotificationsAllowed()).thenReturn(true);
         when(mUserManager.getProfiles(currentUserId)).thenReturn(Lists.newArrayList(
-                mCurrentUser, mSecondaryUser, mWorkUser));
+                mCurrentUser, mWorkUser));
+        when(mUserManager.getProfiles(mSecondaryUser.id)).thenReturn(Lists.newArrayList(
+                mSecondaryUser));
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                 Handler.createAsync(Looper.myLooper()));
 
@@ -150,14 +164,14 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
     @Test
     public void testLockScreenShowNotificationsFalse() {
-        mSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 0);
+        mSettings.putInt(LOCK_SCREEN_SHOW_NOTIFICATIONS, 0);
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
         assertFalse(mLockscreenUserManager.shouldShowLockscreenNotifications());
     }
 
     @Test
     public void testLockScreenShowNotificationsTrue() {
-        mSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
+        mSettings.putInt(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
         assertTrue(mLockscreenUserManager.shouldShowLockscreenNotifications());
     }
@@ -224,6 +238,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         // THEN work profile notification is redacted
         assertTrue(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
+        assertFalse(mLockscreenUserManager.allowsManagedPrivateNotificationsInPublic());
     }
 
     @Test
@@ -235,6 +250,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         // THEN work profile notification isn't redacted
         assertFalse(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
+        assertTrue(mLockscreenUserManager.allowsManagedPrivateNotificationsInPublic());
     }
 
     @Test
@@ -334,6 +350,262 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.updatePublicMode();
         assertTrue(mLockscreenUserManager.isLockscreenPublicMode(0));
         verify(listener, never()).onNotificationStateChanged();
+    }
+
+    @Test
+    public void testDevicePolicyDoesNotAllowNotifications() {
+        // User allows them
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // DevicePolicy hides notifs on lockscreen
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUser.id))
+                .thenReturn(KEYGUARD_DISABLE_SECURE_NOTIFICATIONS);
+
+        BroadcastReceiver.PendingResult pr = mock(BroadcastReceiver.PendingResult.class);
+        when(pr.getSendingUserId()).thenReturn(mCurrentUser.id);
+        mLockscreenUserManager.mAllUsersReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
+                new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
+
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mCurrentUser.id));
+    }
+
+    @Ignore("b/286230167")
+    @Test
+    public void testDevicePolicyDoesNotAllowNotifications_userAll() {
+        // User allows them
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // DevicePolicy hides notifications
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUser.id))
+                .thenReturn(KEYGUARD_DISABLE_SECURE_NOTIFICATIONS);
+
+        BroadcastReceiver.PendingResult pr = mock(BroadcastReceiver.PendingResult.class);
+        when(pr.getSendingUserId()).thenReturn(mCurrentUser.id);
+        mLockscreenUserManager.mAllUsersReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
+                new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
+
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(USER_ALL));
+    }
+
+    @Test
+    @Ignore("b/286230167")
+    public void testDevicePolicyDoesNotAllowNotifications_secondary() {
+        // User allows notifications
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mSecondaryUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // DevicePolicy hides notifications
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mSecondaryUser.id))
+                .thenReturn(KEYGUARD_DISABLE_SECURE_NOTIFICATIONS);
+
+        BroadcastReceiver.PendingResult pr = mock(BroadcastReceiver.PendingResult.class);
+        when(pr.getSendingUserId()).thenReturn(mSecondaryUser.id);
+        mLockscreenUserManager.mAllUsersReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
+                new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
+
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mSecondaryUser.id));
+
+        // TODO (b/286230167): enable assertion
+        verify(mDevicePolicyManager, atMost(1)).getKeyguardDisabledFeatures(any(), anyInt());
+    }
+
+    @Test
+    public void testDevicePolicy_noPrivateNotifications() {
+        // User allows notifications
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // DevicePolicy hides sensitive content
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUser.id))
+                .thenReturn(KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS);
+
+        BroadcastReceiver.PendingResult pr = mock(BroadcastReceiver.PendingResult.class);
+        when(pr.getSendingUserId()).thenReturn(mCurrentUser.id);
+        mLockscreenUserManager.mAllUsersReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
+                new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
+
+        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+
+        // TODO (b/286230167): enable assertion. It's currently called 4 times.
+        //verify(mDevicePolicyManager, atMost(1)).getKeyguardDisabledFeatures(any(), anyInt());
+    }
+
+    @Test
+    public void testDevicePolicy_noPrivateNotifications_userAll() {
+        // User allows notifications
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // DevicePolicy hides sensitive content
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUser.id))
+                .thenReturn(KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS);
+
+        BroadcastReceiver.PendingResult pr = mock(BroadcastReceiver.PendingResult.class);
+        when(pr.getSendingUserId()).thenReturn(mCurrentUser.id);
+        mLockscreenUserManager.mAllUsersReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
+                new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
+
+        assertTrue(mLockscreenUserManager.needsRedaction(new NotificationEntryBuilder()
+                .setNotification(new Notification())
+                .setUser(UserHandle.ALL)
+                .build()));
+    }
+
+    @Test
+    public void testDevicePolicyPrivateNotifications_secondary() {
+        // User allows notifications
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mSecondaryUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // DevicePolicy hides sensitive content
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mSecondaryUser.id))
+                .thenReturn(KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS);
+
+        BroadcastReceiver.PendingResult pr = mock(BroadcastReceiver.PendingResult.class);
+        when(pr.getSendingUserId()).thenReturn(mSecondaryUser.id);
+        mLockscreenUserManager.mAllUsersReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
+                new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
+
+        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+
+        // TODO (b/286230167): enable assertion. It's currently called 5 times.
+        //verify(mDevicePolicyManager, atMost(1)).getKeyguardDisabledFeatures(any(), anyInt());
+    }
+
+    @Test
+    public void testHideNotifications_primary() {
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 0, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mCurrentUser.id));
+    }
+
+    @Test
+    public void testHideNotifications_secondary() {
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 0, mSecondaryUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mSecondaryUser.id));
+    }
+
+    @Ignore("b/286230167")
+    @Test
+    public void testHideNotifications_workProfile() {
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 0, mWorkUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mWorkUser.id));
+    }
+
+    @Test
+    public void testHideNotifications_secondary_userSwitch() {
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 0, mSecondaryUser.id);
+
+        TestNotificationLockscreenUserManager lockscreenUserManager
+                = new TestNotificationLockscreenUserManager(mContext);
+        lockscreenUserManager.setUpWithPresenter(mPresenter);
+
+        lockscreenUserManager.mUserChangedCallback.onUserChanging(mSecondaryUser.id, mContext);
+
+        assertFalse(lockscreenUserManager.userAllowsNotificationsInPublic(mSecondaryUser.id));
+    }
+
+    @Test
+    public void testShowNotifications_secondary_userSwitch() {
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mSecondaryUser.id);
+
+        TestNotificationLockscreenUserManager lockscreenUserManager
+                = new TestNotificationLockscreenUserManager(mContext);
+        lockscreenUserManager.setUpWithPresenter(mPresenter);
+
+        lockscreenUserManager.mUserChangedCallback.onUserChanging(mSecondaryUser.id, mContext);
+
+        assertTrue(lockscreenUserManager.userAllowsNotificationsInPublic(mSecondaryUser.id));
+    }
+
+    @Ignore("b/286230167")
+    @Test
+    public void testShouldShowLockscreenNotifications_keyguardManagerNoPrivateNotifications() {
+        // User allows notifications
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+        // DevicePolicy allows notifications
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUser.id))
+                .thenReturn(0);
+        BroadcastReceiver.PendingResult pr = mock(BroadcastReceiver.PendingResult.class);
+        when(pr.getSendingUserId()).thenReturn(mCurrentUser.id);
+        mLockscreenUserManager.mAllUsersReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
+                new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
+
+        // KeyguardManager does not
+        when(mKeyguardManager.getPrivateNotificationsAllowed()).thenReturn(false);
+
+        assertFalse(mLockscreenUserManager.shouldShowLockscreenNotifications());
+    }
+
+    @Test
+    public void testUserAllowsNotificationsInPublic_keyguardManagerNoPrivateNotifications() {
+        // User allows notifications
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+        // DevicePolicy allows notifications
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUser.id))
+                .thenReturn(0);
+        BroadcastReceiver.PendingResult pr = mock(BroadcastReceiver.PendingResult.class);
+        when(pr.getSendingUserId()).thenReturn(mCurrentUser.id);
+        mLockscreenUserManager.mAllUsersReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
+                new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
+
+        // KeyguardManager does not
+        when(mKeyguardManager.getPrivateNotificationsAllowed()).thenReturn(false);
+
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mCurrentUser.id));
+    }
+
+    @Test
+    public void testUserAllowsNotificationsInPublic_settingsChange() {
+        // User allows notifications
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        assertTrue(mLockscreenUserManager.userAllowsNotificationsInPublic(mCurrentUser.id));
+
+        // User disables
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 0, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mCurrentUser.id));
+    }
+
+    @Ignore("b/286230167")
+    @Test
+    public void testUserAllowsNotificationsInPublic_devicePolicyChange() {
+        // User allows notifications
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        assertTrue(mLockscreenUserManager.userAllowsNotificationsInPublic(mCurrentUser.id));
+
+        // DevicePolicy disables notifications
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUser.id))
+                .thenReturn(KEYGUARD_DISABLE_SECURE_NOTIFICATIONS);
+        BroadcastReceiver.PendingResult pr = mock(BroadcastReceiver.PendingResult.class);
+        when(pr.getSendingUserId()).thenReturn(mCurrentUser.id);
+        mLockscreenUserManager.mAllUsersReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
+                new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
+
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mCurrentUser.id));
     }
 
     private class TestNotificationLockscreenUserManager
