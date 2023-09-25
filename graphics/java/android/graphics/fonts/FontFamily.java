@@ -16,6 +16,9 @@
 
 package android.graphics.fonts;
 
+import static com.android.text.flags.Flags.FLAG_DEPRECATE_FONTS_XML;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -138,6 +141,7 @@ public final class FontFamily {
          * @return A variable font family. null if a variable font cannot be built from the given
          *         fonts.
          */
+        @FlaggedApi(FLAG_DEPRECATE_FONTS_XML)
         public @Nullable FontFamily buildVariableFamily() {
             int variableFamilyType = analyzeAndResolveVariableType(mFonts);
             if (variableFamilyType == VARIABLE_FONT_FAMILY_TYPE_UNKNOWN) {
