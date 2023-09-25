@@ -17,7 +17,6 @@
 
 package com.android.systemui.biometrics.ui.binder
 
-import android.view.DisplayInfo
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
@@ -33,14 +32,14 @@ object PromptFingerprintIconViewBinder {
     fun bind(view: LottieAnimationView, viewModel: PromptFingerprintIconViewModel) {
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val displayInfo = DisplayInfo()
-                view.context.display?.getDisplayInfo(displayInfo)
-                viewModel.setRotation(displayInfo.rotation)
                 viewModel.onConfigurationChanged(view.context.resources.configuration)
                 launch {
                     viewModel.iconAsset.collect { iconAsset ->
                         if (iconAsset != -1) {
                             view.setAnimation(iconAsset)
+                            // TODO: must replace call below once non-sfps asset logic and
+                            // shouldAnimateIconView logic is migrated to this ViewModel.
+                            view.playAnimation()
                         }
                     }
                 }
