@@ -10,8 +10,33 @@
         motion:duration="0"
         motion:autoTransition="none"/>
 
+    <Transition
+        motion:constraintSetStart="@id/single_constraints"
+        motion:constraintSetEnd="@+id/half_folded_single_constraints"
+        motion:duration="@integer/material_motion_duration_short_1"
+        motion:autoTransition="none"/>
+
     <!-- No changes to default layout -->
     <ConstraintSet android:id="@+id/single_constraints"/>
+
+    <ConstraintSet android:id="@+id/half_folded_single_constraints">
+
+        <Constraint
+            android:id="@+id/pattern_top_guideline"
+            androidprv:layout_constraintGuide_percent=
+                "@dimen/motion_layout_half_fold_bouncer_height_ratio"/>
+
+        <Constraint
+            android:id="@+id/keyguard_selector_fade_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="@dimen/keyguard_eca_top_margin"
+            android:orientation="vertical"
+            androidprv:layout_constraintBottom_toBottomOf="parent"
+            androidprv:layout_constraintTop_toBottomOf="@+id/flow1"/>
+
+    </ConstraintSet>
 
     <ConstraintSet android:id="@+id/split_constraints">
 
