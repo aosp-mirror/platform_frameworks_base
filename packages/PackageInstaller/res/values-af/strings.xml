@@ -76,8 +76,8 @@
     <string name="uninstall_failed" msgid="1847750968168364332">"Deïnstallering onsuksesvol."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Kon nie <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> deïnstalleer nie."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Vee tans <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon uit …"</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Kan nie aktiewe toesteladministrasieprogram deïnstalleer nie"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kan nie aktiewe toesteladministrasieprogram vir <xliff:g id="USERNAME">%1$s</xliff:g> deïnstalleer nie"</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Kan nie aktiewe toesteladministrasie-app deïnstalleer nie"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kan nie aktiewe toesteladministrasie-app vir <xliff:g id="USERNAME">%1$s</xliff:g> deïnstalleer nie"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Dié program word vir sommige gebruikers of profiele vereis en is vir ander gedeïnstalleer"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Hierdie program is nodig vir jou profiel en kan nie gedeïnstalleer word nie."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Jou toesteladministrateur vereis die program; kan nie gedeïnstalleer word nie."</string>
