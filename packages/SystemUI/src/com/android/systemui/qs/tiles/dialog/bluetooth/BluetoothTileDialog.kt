@@ -28,6 +28,7 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -42,11 +43,12 @@ internal class BluetoothTileDialog
 constructor(
     private val bluetoothToggleInitialValue: Boolean,
     private val bluetoothTileDialogCallback: BluetoothTileDialogCallback,
+    private val uiEventLogger: UiEventLogger,
     context: Context,
 ) : SystemUIDialog(context, DEFAULT_THEME, DEFAULT_DISMISS_ON_DEVICE_LOCK) {
 
-    private val mutableBluetoothStateSwitchedFlow: MutableStateFlow<Boolean?> =
-        MutableStateFlow(null)
+    private val mutableBluetoothStateSwitchedFlow: MutableStateFlow<Boolean> =
+        MutableStateFlow(bluetoothToggleInitialValue)
     internal val bluetoothStateSwitchedFlow
         get() = mutableBluetoothStateSwitchedFlow.asStateFlow()
 
@@ -55,31 +57,48 @@ constructor(
     internal val deviceItemClickedFlow
         get() = mutableClickedFlow.asSharedFlow()
 
-    private val deviceItemAdapter: Adapter = Adapter()
+    private val deviceItemAdapter: Adapter = Adapter(bluetoothTileDialogCallback)
 
     private lateinit var toggleView: Switch
     private lateinit var doneButton: View
-    private lateinit var seeAllView: View
+    private lateinit var seeAllViewGroup: View
+    private lateinit var pairNewDeviceViewGroup: View
+    private lateinit var seeAllText: View
+    private lateinit var pairNewDeviceText: View
     private lateinit var deviceListView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        uiEventLogger.log(BluetoothTileDialogUiEvent.BLUETOOTH_TILE_DIALOG_SHOWN)
 
         setContentView(LayoutInflater.from(context).inflate(R.layout.bluetooth_tile_dialog, null))
 
         toggleView = requireViewById(R.id.bluetooth_toggle)
         doneButton = requireViewById(R.id.done_button)
-        seeAllView = requireViewById(R.id.see_all_layout)
+        seeAllViewGroup = requireViewById(R.id.see_all_layout_group)
+        pairNewDeviceViewGroup = requireViewById(R.id.pair_new_device_layout_group)
+        seeAllText = requireViewById(R.id.see_all_text)
+        pairNewDeviceText = requireViewById(R.id.pair_new_device_text)
         deviceListView = requireViewById<RecyclerView>(R.id.device_list)
 
         setupToggle()
         setupRecyclerView()
 
         doneButton.setOnClickListener { dismiss() }
+        seeAllText.setOnClickListener { bluetoothTileDialogCallback.onSeeAllClicked(it) }
+        pairNewDeviceText.setOnClickListener {
+            bluetoothTileDialogCallback.onPairNewDeviceClicked(it)
+        }
     }
 
-    internal fun onDeviceItemUpdated(deviceItem: List<DeviceItem>, showSeeAll: Boolean) {
-        seeAllView.visibility = if (showSeeAll) VISIBLE else GONE
+    // TODO(b/298124674): use DiffUtil or AsyncListDiffer to avoid updating the whole list
+    internal fun onDeviceItemUpdated(
+        deviceItem: List<DeviceItem>,
+        showSeeAll: Boolean,
+        showPairNewDevice: Boolean
+    ) {
+        seeAllViewGroup.visibility = if (showSeeAll) VISIBLE else GONE
+        pairNewDeviceViewGroup.visibility = if (showPairNewDevice) VISIBLE else GONE
         deviceItemAdapter.refreshDeviceItemList(deviceItem)
     }
 
@@ -95,6 +114,7 @@ constructor(
         toggleView.isChecked = bluetoothToggleInitialValue
         toggleView.setOnCheckedChangeListener { _, isChecked ->
             mutableBluetoothStateSwitchedFlow.value = isChecked
+            uiEventLogger.log(BluetoothTileDialogUiEvent.BLUETOOTH_TOGGLE_CLICKED)
         }
     }
 
@@ -105,11 +125,8 @@ constructor(
         }
     }
 
-    internal inner class Adapter : RecyclerView.Adapter<Adapter.DeviceItemViewHolder>() {
-
-        init {
-            setHasStableIds(true)
-        }
+    internal inner class Adapter(private val onClickCallback: BluetoothTileDialogCallback) :
+        RecyclerView.Adapter<Adapter.DeviceItemViewHolder>() {
 
         private val deviceItem: MutableList<DeviceItem> = mutableListOf()
 
@@ -122,11 +139,9 @@ constructor(
 
         override fun getItemCount() = deviceItem.size
 
-        override fun getItemId(position: Int) = position.toLong()
-
         override fun onBindViewHolder(holder: DeviceItemViewHolder, position: Int) {
             val item = getItem(position)
-            holder.bind(item, position)
+            holder.bind(item, position, onClickCallback)
         }
 
         internal fun getItem(position: Int) = deviceItem[position]
@@ -143,17 +158,26 @@ constructor(
         }
 
         internal inner class DeviceItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            private val container = view.requireViewById<View>(R.id.bluetooth_device)
+            private val container = view.requireViewById<View>(R.id.bluetooth_device_row)
+            private val deviceView = view.requireViewById<View>(R.id.bluetooth_device)
             private val nameView = view.requireViewById<TextView>(R.id.bluetooth_device_name)
             private val summaryView = view.requireViewById<TextView>(R.id.bluetooth_device_summary)
             private val iconView = view.requireViewById<ImageView>(R.id.bluetooth_device_icon)
+            private val gearView = view.requireViewById<View>(R.id.gear_icon)
 
-            internal fun bind(item: DeviceItem, position: Int) {
+            internal fun bind(
+                item: DeviceItem,
+                position: Int,
+                deviceItemOnClickCallback: BluetoothTileDialogCallback
+            ) {
                 container.apply {
                     isEnabled = item.isEnabled
                     alpha = item.alpha
                     background = item.background
-                    setOnClickListener { mutableClickedFlow.tryEmit(Pair(item, position)) }
+                }
+                deviceView.setOnClickListener {
+                    mutableClickedFlow.tryEmit(Pair(item, position))
+                    uiEventLogger.log(BluetoothTileDialogUiEvent.DEVICE_CLICKED)
                 }
                 nameView.text = item.deviceName
                 summaryView.text = item.connectionSummary
@@ -163,6 +187,9 @@ constructor(
                         contentDescription = it.second
                     }
                 }
+                gearView.setOnClickListener {
+                    deviceItemOnClickCallback.onDeviceItemGearClicked(item, it)
+                }
             }
         }
     }
@@ -171,5 +198,10 @@ constructor(
         const val ENABLED_ALPHA = 1.0f
         const val DISABLED_ALPHA = 0.3f
         const val MAX_DEVICE_ITEM_ENTRY = 3
+        const val ACTION_BLUETOOTH_DEVICE_DETAILS =
+            "com.android.settings.BLUETOOTH_DEVICE_DETAIL_SETTINGS"
+        const val ACTION_PREVIOUSLY_CONNECTED_DEVICE =
+            "com.android.settings.PREVIOUSLY_CONNECTED_DEVICE"
+        const val ACTION_PAIR_NEW_DEVICE = "android.settings.BLUETOOTH_PAIRING_SETTINGS"
     }
 }

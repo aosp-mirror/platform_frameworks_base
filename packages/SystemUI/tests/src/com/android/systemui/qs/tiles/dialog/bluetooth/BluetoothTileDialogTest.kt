@@ -26,6 +26,7 @@ import android.view.View.VISIBLE
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.DISABLED_ALPHA
@@ -59,13 +60,16 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     @Mock private lateinit var drawable: Drawable
 
+    @Mock private lateinit var uiEventLogger: UiEventLogger
+
     private lateinit var icon: Pair<Drawable, String>
     private lateinit var bluetoothTileDialog: BluetoothTileDialog
     private lateinit var deviceItem: DeviceItem
 
     @Before
     fun setUp() {
-        bluetoothTileDialog = BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, mContext)
+        bluetoothTileDialog =
+            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, uiEventLogger, mContext)
         icon = Pair(drawable, DEVICE_NAME)
         deviceItem =
             DeviceItem(
@@ -83,7 +87,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
     fun testShowDialog_createRecyclerViewWithAdapter() {
         bluetoothTileDialog.show()
 
-        val recyclerView = bluetoothTileDialog.findViewById<RecyclerView>(R.id.device_list)
+        val recyclerView = bluetoothTileDialog.requireViewById<RecyclerView>(R.id.device_list)
 
         assertThat(bluetoothTileDialog.isShowing).isTrue()
         assertThat(recyclerView).isNotNull()
@@ -94,11 +98,16 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     @Test
     fun testShowDialog_displayBluetoothDevice() {
-        bluetoothTileDialog = BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, mContext)
+        bluetoothTileDialog =
+            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, uiEventLogger, mContext)
         bluetoothTileDialog.show()
-        bluetoothTileDialog.onDeviceItemUpdated(listOf(deviceItem), false)
+        bluetoothTileDialog.onDeviceItemUpdated(
+            listOf(deviceItem),
+            showSeeAll = false,
+            showPairNewDevice = false
+        )
 
-        val recyclerView = bluetoothTileDialog.findViewById<RecyclerView>(R.id.device_list)
+        val recyclerView = bluetoothTileDialog.requireViewById<RecyclerView>(R.id.device_list)
         val adapter = recyclerView?.adapter as BluetoothTileDialog.Adapter
         assertThat(adapter.itemCount).isEqualTo(1)
         assertThat(adapter.getItem(0).deviceName).isEqualTo(DEVICE_NAME)
@@ -114,16 +123,17 @@ class BluetoothTileDialogTest : SysuiTestCase() {
         val view =
             LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
         val viewHolder =
-            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, mContext)
-                .Adapter()
+            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, uiEventLogger, mContext)
+                .Adapter(bluetoothTileDialogCallback)
                 .DeviceItemViewHolder(view)
-        viewHolder.bind(deviceItem, 0)
-        val container = view.findViewById<View>(R.id.bluetooth_device)
+        viewHolder.bind(deviceItem, 0, bluetoothTileDialogCallback)
+        val container = view.requireViewById<View>(R.id.bluetooth_device)
+        val deviceView = view.requireViewById<View>(R.id.bluetooth_device)
 
         assertThat(container).isNotNull()
-        assertThat(container!!.isEnabled).isTrue()
+        assertThat(container.isEnabled).isTrue()
         assertThat(container.alpha).isEqualTo(ENABLED_ALPHA)
-        assertThat(container.hasOnClickListeners()).isTrue()
+        assertThat(deviceView.hasOnClickListeners()).isTrue()
     }
 
     @Test
@@ -134,30 +144,40 @@ class BluetoothTileDialogTest : SysuiTestCase() {
         val view =
             LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
         val viewHolder =
-            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, mContext)
-                .Adapter()
+            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, uiEventLogger, mContext)
+                .Adapter(bluetoothTileDialogCallback)
                 .DeviceItemViewHolder(view)
-        viewHolder.bind(deviceItem, 0)
-        val container = view.findViewById<View>(R.id.bluetooth_device)
+        viewHolder.bind(deviceItem, 0, bluetoothTileDialogCallback)
+        val container = view.requireViewById<View>(R.id.bluetooth_device_row)
+        val deviceView = view.requireViewById<View>(R.id.bluetooth_device)
 
         assertThat(container).isNotNull()
-        assertThat(container!!.isEnabled).isFalse()
+        assertThat(container.isEnabled).isFalse()
         assertThat(container.alpha).isEqualTo(DISABLED_ALPHA)
-        assertThat(container.hasOnClickListeners()).isTrue()
+        assertThat(deviceView.hasOnClickListeners()).isTrue()
     }
 
     @Test
-    fun testOnDeviceUpdated_hideSeeAll() {
-        bluetoothTileDialog = BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, mContext)
+    fun testOnDeviceUpdated_hideSeeAll_showPairNew() {
+        bluetoothTileDialog =
+            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, uiEventLogger, mContext)
         bluetoothTileDialog.show()
-        bluetoothTileDialog.onDeviceItemUpdated(listOf(deviceItem), false)
+        bluetoothTileDialog.onDeviceItemUpdated(
+            listOf(deviceItem),
+            showSeeAll = false,
+            showPairNewDevice = true
+        )
 
-        val seeAllLayout = bluetoothTileDialog.findViewById<View>(R.id.see_all_layout)
-        val recyclerView = bluetoothTileDialog.findViewById<RecyclerView>(R.id.device_list)
+        val seeAllLayout = bluetoothTileDialog.requireViewById<View>(R.id.see_all_layout_group)
+        val pairNewLayout =
+            bluetoothTileDialog.requireViewById<View>(R.id.pair_new_device_layout_group)
+        val recyclerView = bluetoothTileDialog.requireViewById<RecyclerView>(R.id.device_list)
         val adapter = recyclerView?.adapter as BluetoothTileDialog.Adapter
 
         assertThat(seeAllLayout).isNotNull()
-        assertThat(seeAllLayout!!.visibility).isEqualTo(GONE)
+        assertThat(seeAllLayout.visibility).isEqualTo(GONE)
+        assertThat(pairNewLayout).isNotNull()
+        assertThat(pairNewLayout.visibility).isEqualTo(VISIBLE)
         assertThat(adapter.itemCount).isEqualTo(1)
     }
 }

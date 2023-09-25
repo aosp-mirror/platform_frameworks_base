@@ -1280,7 +1280,6 @@
     </style>
 
     <style name="BluetoothTileDialog.DeviceSummary">
-        <item name="android:layout_marginEnd">7dp</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
         <item name="android:textAppearance">@style/TextAppearance.Dialog.Body.Message</item>

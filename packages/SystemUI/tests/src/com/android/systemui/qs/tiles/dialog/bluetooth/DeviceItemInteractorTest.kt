@@ -23,6 +23,7 @@ import android.media.AudioManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
@@ -67,6 +68,8 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var localBluetoothManager: LocalBluetoothManager
 
+    @Mock private lateinit var uiEventLogger: UiEventLogger
+
     private lateinit var interactor: DeviceItemInteractor
 
     private lateinit var dispatcher: CoroutineDispatcher
@@ -83,6 +86,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                 audioManager,
                 adapter,
                 localBluetoothManager,
+                uiEventLogger,
                 testScope.backgroundScope,
                 dispatcher
             )

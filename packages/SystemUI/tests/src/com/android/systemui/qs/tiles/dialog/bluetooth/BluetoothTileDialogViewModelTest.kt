@@ -18,10 +18,14 @@ package com.android.systemui.qs.tiles.dialog.bluetooth
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.View
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.nullable
@@ -38,6 +42,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.never
@@ -61,7 +66,15 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var deviceItemInteractor: DeviceItemInteractor
 
+    @Mock private lateinit var activityStarter: ActivityStarter
+
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+
+    @Mock private lateinit var cachedBluetoothDevice: CachedBluetoothDevice
+
+    @Mock private lateinit var deviceItem: DeviceItem
+
+    @Mock private lateinit var uiEventLogger: UiEventLogger
 
     private lateinit var scheduler: TestCoroutineScheduler
     private lateinit var dispatcher: CoroutineDispatcher
@@ -77,6 +90,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
                 deviceItemInteractor,
                 bluetoothStateInteractor,
                 dialogLaunchAnimator,
+                activityStarter,
+                uiEventLogger,
                 testScope.backgroundScope,
                 dispatcher,
             )
@@ -96,6 +111,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
             verify(dialogLaunchAnimator, never()).showFromView(any(), any(), any(), any())
             assertThat(bluetoothTileDialogViewModel.dialog?.isShowing).isTrue()
+            verify(uiEventLogger).log(BluetoothTileDialogUiEvent.BLUETOOTH_TILE_DIALOG_SHOWN)
         }
     }
 
@@ -139,5 +155,17 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
             verify(bluetoothStateInteractor).updateBluetoothStateFlow
         }
+    }
+
+    @Test
+    fun testStartSettingsActivity_activityLaunched_dialogDismissed() {
+        `when`(deviceItem.cachedBluetoothDevice).thenReturn(cachedBluetoothDevice)
+        bluetoothTileDialogViewModel.showDialog(context, null)
+
+        val clickedView = View(context)
+        bluetoothTileDialogViewModel.onPairNewDeviceClicked(clickedView)
+
+        verify(uiEventLogger).log(BluetoothTileDialogUiEvent.PAIR_NEW_DEVICE_CLICKED)
+        verify(activityStarter).postStartActivityDismissingKeyguard(any(), anyInt(), nullable())
     }
 }

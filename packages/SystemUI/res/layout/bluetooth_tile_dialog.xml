@@ -14,155 +14,175 @@
   ~ limitations under the License.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
-    android:layout_width="@dimen/large_dialog_width"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    style="@style/Widget.SliceView.Panel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
 
-    <LinearLayout
-        style="@style/Widget.SliceView.Panel"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/bluetooth_tile_dialog_title"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/bluetooth_dialog_layout_margin"
-        android:layout_marginTop="24dp"
+        android:paddingTop="24dp"
+        android:ellipsize="end"
         android:gravity="center_vertical|center_horizontal"
-        android:orientation="vertical">
+        android:text="@string/quick_settings_bluetooth_label"
+        android:textAppearance="@style/TextAppearance.Dialog.Title"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bluetooth_tile_dialog_subtitle"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/bluetooth_tile_dialog_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="center_vertical|center_horizontal"
-            android:text="@string/quick_settings_bluetooth_label"
-            android:textAppearance="@style/TextAppearance.Dialog.Title"
-            android:textSize="24sp" />
+    <TextView
+        android:id="@+id/bluetooth_tile_dialog_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="@dimen/bluetooth_dialog_layout_margin"
+        android:ellipsize="end"
+        android:gravity="center_vertical|center_horizontal"
+        android:maxLines="1"
+        android:text="@string/quick_settings_bluetooth_tile_subtitle"
+        android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bluetooth_toggle_title"
+        app:layout_constraintTop_toBottomOf="@id/bluetooth_tile_dialog_title" />
 
-        <TextView
-            android:id="@+id/bluetooth_tile_dialog_subtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:ellipsize="end"
-            android:gravity="center_vertical|center_horizontal"
-            android:maxLines="1"
-            android:text="@string/quick_settings_bluetooth_tile_subtitle"
-            android:textAppearance="@style/TextAppearance.Dialog.Body.Message" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/turn_on_bluetooth_layout"
+    <TextView
+        android:id="@+id/bluetooth_toggle_title"
         style="@style/BluetoothTileDialog.Device"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:gravity="center_vertical"
+        android:layout_marginTop="4dp"
+        android:text="@string/turn_on_bluetooth"
+        android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/bluetooth_toggle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bluetooth_tile_dialog_subtitle" />
+
+    <Switch
+        android:id="@+id/bluetooth_toggle"
+        style="@style/BluetoothTileDialog.Device"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:gravity="center|center_vertical"
+        android:paddingEnd="24dp"
+        android:layout_marginTop="10dp"
+        android:contentDescription="@string/turn_on_bluetooth"
+        android:switchMinWidth="@dimen/settingslib_switch_track_width"
+        android:theme="@style/MainSwitch.Settingslib"
+        android:thumb="@drawable/settingslib_thumb_selector"
+        android:track="@drawable/settingslib_track_selector"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/bluetooth_toggle_title"
+        app:layout_constraintTop_toBottomOf="@id/bluetooth_tile_dialog_subtitle" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/pair_new_device_layout_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="ic_add,pair_new_device_text" />
+
+    <ImageView
+        android:id="@+id/ic_add"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="36dp"
+        android:gravity="center_vertical"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_add"
+        app:layout_constraintBottom_toTopOf="@id/device_list"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/pair_new_device_text"
+        app:layout_constraintTop_toBottomOf="@id/bluetooth_toggle_title"
+        android:tint="?android:attr/textColorPrimary" />
+
+    <TextView
+        android:id="@+id/pair_new_device_text"
+        style="@style/BluetoothTileDialog.Device"
+        android:layout_width="0dp"
         android:layout_height="@dimen/bluetooth_dialog_device_height"
-        android:gravity="center"
-        android:clickable="false"
-        android:focusable="false"
-        android:baselineAligned="false">
+        android:gravity="center_vertical"
+        android:layout_marginStart="0dp"
+        android:paddingStart="20dp"
+        android:text="@string/pair_new_bluetooth_devices"
+        android:textSize="14sp"
+        android:textAppearance="@style/TextAppearance.Dialog.Title"
+        app:layout_constraintBottom_toTopOf="@id/device_list"
+        app:layout_constraintStart_toEndOf="@+id/ic_add"
+        app:layout_constraintTop_toBottomOf="@id/bluetooth_toggle_title"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="start|center_vertical"
-            android:orientation="vertical"
-            android:clickable="false">
-            <TextView
-                android:id="@+id/bluetooth_toggle_title"
-                android:text="@string/turn_on_bluetooth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="start|center_vertical"
-                android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
-                android:textSize="16sp"/>
-        </LinearLayout>
-
-        <FrameLayout
-            android:layout_width="@dimen/settingslib_switch_track_width"
-            android:layout_height="48dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp">
-            <Switch
-                android:id="@+id/bluetooth_toggle"
-                android:contentDescription="@string/turn_on_bluetooth"
-                android:switchMinWidth="@dimen/settingslib_switch_track_width"
-                android:layout_gravity="center"
-                android:layout_width="@dimen/settingslib_switch_track_width"
-                android:layout_height="match_parent"
-                android:track="@drawable/settingslib_track_selector"
-                android:thumb="@drawable/settingslib_thumb_selector"
-                android:theme="@style/MainSwitch.Settingslib"/>
-        </FrameLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/body_layout"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/device_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:nestedScrollingEnabled="false"
+        android:overScrollMode="never"
+        android:scrollbars="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/pair_new_device_text"
+        app:layout_constraintBottom_toTopOf="@+id/see_all_text" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/device_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
-            android:overScrollMode="never"
-            android:scrollbars="vertical" />
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/see_all_layout_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="ic_arrow,see_all_text" />
 
-        <LinearLayout
-            android:id="@+id/see_all_layout"
-            style="@style/BluetoothTileDialog.Device"
-            android:layout_height="64dp"
-            android:paddingStart="20dp"
-            android:visibility="gone">
+    <ImageView
+        android:id="@+id/ic_arrow"
+        android:layout_marginStart="36dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:importantForAccessibility="no"
+        android:gravity="center_vertical"
+        android:src="@drawable/ic_arrow_forward"
+        app:layout_constraintBottom_toTopOf="@+id/done_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/see_all_text"
+        app:layout_constraintTop_toBottomOf="@id/device_list" />
 
-            <FrameLayout
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical|start"
-                android:clickable="false">
+    <TextView
+        android:id="@+id/see_all_text"
+        style="@style/BluetoothTileDialog.Device"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/bluetooth_dialog_device_height"
+        android:gravity="center_vertical"
+        android:layout_marginStart="0dp"
+        android:paddingStart="20dp"
+        android:text="@string/see_all_bluetooth_devices"
+        android:textSize="14sp"
+        android:textAppearance="@style/TextAppearance.Dialog.Title"
+        app:layout_constraintBottom_toTopOf="@+id/done_button"
+        app:layout_constraintStart_toEndOf="@+id/ic_arrow"
+        app:layout_constraintTop_toBottomOf="@id/device_list"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-                <ImageView
-                    android:id="@+id/arrow_forward"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_arrow_forward"
-                    android:importantForAccessibility="no" />
-            </FrameLayout>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/bluetooth_dialog_layout_margin"
-                android:clickable="false"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="start|center_vertical"
-                    android:text="@string/see_all_bluetooth_devices"
-                    android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
-                    android:textSize="14sp" />
-            </FrameLayout>
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/done_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="@dimen/dialog_side_padding"
-            android:layout_marginEnd="@dimen/dialog_side_padding"
-            android:layout_marginBottom="@dimen/dialog_bottom_padding"
-            android:text="@string/inline_done_button"
-            android:layout_gravity="end|center_vertical"
-            style="@style/Widget.Dialog.Button"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:clickable="true"
-            android:focusable="true"/>
-    </LinearLayout>
-</LinearLayout>
+    <Button
+        android:id="@+id/done_button"
+        style="@style/Widget.Dialog.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dialog_bottom_padding"
+        android:layout_marginEnd="@dimen/dialog_side_padding"
+        android:layout_marginStart="@dimen/dialog_side_padding"
+        android:clickable="true"
+        android:ellipsize="end"
+        android:focusable="true"
+        android:maxLines="1"
+        android:text="@string/inline_done_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/see_all_text" />
+</androidx.constraintlayout.widget.ConstraintLayout>

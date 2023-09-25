@@ -52,16 +52,16 @@ internal class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
             cachedBluetoothDevice = cachedDevice,
             deviceName = cachedDevice.name,
             connectionSummary = cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
-                ?: context.getString(connected),
+                    ?: context.getString(connected),
             iconWithDescription =
-            BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
-                Pair(p.first, p.second)
-            },
+                BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
+                    Pair(p.first, p.second)
+                },
             background = context.getDrawable(backgroundOn),
             isEnabled = !cachedDevice.isBusy,
             alpha =
-            if (cachedDevice.isBusy) BluetoothTileDialog.DISABLED_ALPHA
-            else BluetoothTileDialog.ENABLED_ALPHA,
+                if (cachedDevice.isBusy) BluetoothTileDialog.DISABLED_ALPHA
+                else BluetoothTileDialog.ENABLED_ALPHA,
         )
     }
 }
@@ -80,16 +80,15 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
             cachedBluetoothDevice = cachedDevice,
             deviceName = cachedDevice.name,
             connectionSummary = cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
-                ?: context.getString(connected),
+                    ?: context.getString(connected),
             iconWithDescription =
-            BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
-                Pair(p.first, p.second)
-            },
-            background = context.getDrawable(backgroundOn),
+                BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
+                    Pair(p.first, p.second)
+                },
             isEnabled = !cachedDevice.isBusy,
             alpha =
-            if (cachedDevice.isBusy) BluetoothTileDialog.DISABLED_ALPHA
-            else BluetoothTileDialog.ENABLED_ALPHA,
+                if (cachedDevice.isBusy) BluetoothTileDialog.DISABLED_ALPHA
+                else BluetoothTileDialog.ENABLED_ALPHA,
         )
     }
 }
@@ -108,15 +107,15 @@ internal class SavedDeviceItemFactory : DeviceItemFactory() {
             cachedBluetoothDevice = cachedDevice,
             deviceName = cachedDevice.name,
             connectionSummary = cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
-                ?: context.getString(saved),
+                    ?: context.getString(saved),
             iconWithDescription =
-            BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
-                Pair(p.first, p.second)
-            },
+                BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
+                    Pair(p.first, p.second)
+                },
             isEnabled = !cachedDevice.isBusy,
             alpha =
-            if (cachedDevice.isBusy) BluetoothTileDialog.DISABLED_ALPHA
-            else BluetoothTileDialog.ENABLED_ALPHA,
+                if (cachedDevice.isBusy) BluetoothTileDialog.DISABLED_ALPHA
+                else BluetoothTileDialog.ENABLED_ALPHA,
         )
     }
 }
