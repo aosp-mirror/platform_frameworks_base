@@ -17,12 +17,15 @@
 package android.surfaceflinger;
 
 import static android.server.wm.CtsWindowInfoUtils.waitForWindowOnTop;
+import static android.provider.Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS;
 
 import android.app.Instrumentation;
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
@@ -33,9 +36,11 @@ import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.compatibility.common.util.SystemUtil;
 import com.android.helpers.SimpleperfHelper;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -71,7 +76,7 @@ public class SurfaceFlingerPerfTest {
 
     private int mTransformHint;
     private SimpleperfHelper mSimpleperfHelper = new SimpleperfHelper();
-
+    private static String sImmersiveModeConfirmationValue;
     /** Start simpleperf sampling. */
     public void startSimpleperf(String subcommand, String arguments) {
         if (!mSimpleperfHelper.startCollecting(subcommand, arguments)) {
@@ -88,6 +93,17 @@ public class SurfaceFlingerPerfTest {
 
     @BeforeClass
     public static void suiteSetup() {
+        SystemUtil.runWithShellPermissionIdentity(() -> {
+            // hide immersive mode confirmation dialog
+            final ContentResolver resolver =
+                    InstrumentationRegistry.getInstrumentation().getContext().getContentResolver();
+            sImmersiveModeConfirmationValue =
+                    Settings.Secure.getString(resolver, IMMERSIVE_MODE_CONFIRMATIONS);
+            Settings.Secure.putString(
+                    resolver,
+                    IMMERSIVE_MODE_CONFIRMATIONS,
+                    "confirmed");
+        });
         final Bundle arguments = InstrumentationRegistry.getArguments();
         sProfilingIterations = Integer.parseInt(
                 arguments.getString(ARGUMENT_PROFILING_ITERATIONS, DEFAULT_PROFILING_ITERATIONS));
@@ -97,6 +113,18 @@ public class SurfaceFlingerPerfTest {
                 .getUiAutomation()
                 .executeShellCommand("service call SurfaceFlinger 1041 i32 -1");
     }
+
+    @AfterClass
+    public static void suiteTeardown() {
+        SystemUtil.runWithShellPermissionIdentity(() -> {
+            // Restore the immersive mode confirmation state.
+            Settings.Secure.putString(
+                    InstrumentationRegistry.getInstrumentation().getContext().getContentResolver(),
+                    IMMERSIVE_MODE_CONFIRMATIONS,
+                    sImmersiveModeConfirmationValue);
+        });
+    }
+
 
     @Before
     public void setup() {
