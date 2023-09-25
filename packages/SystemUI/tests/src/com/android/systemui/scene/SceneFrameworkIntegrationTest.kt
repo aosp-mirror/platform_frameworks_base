@@ -76,6 +76,7 @@ import org.junit.runners.JUnit4
  *   being used when the state is as required (e.g. cannot unlock an already unlocked device, cannot
  *   put to sleep a device that's already asleep, etc.).
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class SceneFrameworkIntegrationTest : SysuiTestCase() {
@@ -481,7 +482,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         bouncerSceneJob =
             if (to.key == SceneKey.Bouncer) {
                 testScope.backgroundScope.launch {
-                    bouncerViewModel.authMethod.collect {
+                    bouncerViewModel.authMethodViewModel.collect {
                         // Do nothing. Need this to turn this otherwise cold flow, hot.
                     }
                 }
@@ -556,7 +557,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         assertWithMessage("Cannot enter PIN when not on the Bouncer scene!")
             .that(getCurrentSceneInUi())
             .isEqualTo(SceneKey.Bouncer)
-        val authMethodViewModel by collectLastValue(bouncerViewModel.authMethod)
+        val authMethodViewModel by collectLastValue(bouncerViewModel.authMethodViewModel)
         assertWithMessage("Cannot enter PIN when not using a PIN authentication method!")
             .that(authMethodViewModel)
             .isInstanceOf(PinBouncerViewModel::class.java)
@@ -613,11 +614,12 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private fun TestScope.dismissIme(
         showImeBeforeDismissing: Boolean = true,
     ) {
-        if (showImeBeforeDismissing) {
-            bouncerViewModel.authMethod.value?.onImeVisibilityChanged(true)
+        bouncerViewModel.authMethodViewModel.value?.apply {
+            if (showImeBeforeDismissing) {
+                onImeVisibilityChanged(true)
+            }
+            onImeVisibilityChanged(false)
+            runCurrent()
         }
-
-        bouncerViewModel.authMethod.value?.onImeVisibilityChanged(false)
-        runCurrent()
     }
 }

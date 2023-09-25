@@ -17,13 +17,14 @@
 package com.android.systemui.bouncer.domain.interactor
 
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
+import com.android.systemui.authentication.domain.interactor.AuthenticationResult
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.res.R
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -87,7 +88,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
 
             // Wrong input.
-            assertThat(underTest.authenticate(listOf(9, 8, 7))).isFalse()
+            assertThat(underTest.authenticate(listOf(9, 8, 7)))
+                .isEqualTo(AuthenticationResult.FAILED)
             assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
@@ -95,7 +97,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
 
             // Correct input.
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isTrue()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
+                .isEqualTo(AuthenticationResult.SUCCEEDED)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
@@ -115,13 +118,14 @@ class BouncerInteractorTest : SysuiTestCase() {
             underTest.clearMessage()
 
             // Incomplete input.
-            assertThat(underTest.authenticate(listOf(1, 2), tryAutoConfirm = true)).isNull()
+            assertThat(underTest.authenticate(listOf(1, 2), tryAutoConfirm = true))
+                .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(message).isEmpty()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             // Wrong 6-digit pin
             assertThat(underTest.authenticate(listOf(1, 2, 3, 5, 5, 6), tryAutoConfirm = true))
-                .isFalse()
+                .isEqualTo(AuthenticationResult.FAILED)
             assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
@@ -132,7 +136,7 @@ class BouncerInteractorTest : SysuiTestCase() {
                         tryAutoConfirm = true
                     )
                 )
-                .isTrue()
+                .isEqualTo(AuthenticationResult.SUCCEEDED)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
@@ -150,7 +154,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             underTest.clearMessage()
 
             // Incomplete input.
-            assertThat(underTest.authenticate(listOf(1, 2), tryAutoConfirm = true)).isNull()
+            assertThat(underTest.authenticate(listOf(1, 2), tryAutoConfirm = true))
+                .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(message).isEmpty()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
@@ -161,7 +166,7 @@ class BouncerInteractorTest : SysuiTestCase() {
                         tryAutoConfirm = true
                     )
                 )
-                .isNull()
+                .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(message).isEmpty()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
@@ -187,7 +192,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
 
             // Wrong input.
-            assertThat(underTest.authenticate("alohamora".toList())).isFalse()
+            assertThat(underTest.authenticate("alohamora".toList()))
+                .isEqualTo(AuthenticationResult.FAILED)
             assertThat(message).isEqualTo(MESSAGE_WRONG_PASSWORD)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
@@ -195,7 +201,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
 
             // Correct input.
-            assertThat(underTest.authenticate("password".toList())).isTrue()
+            assertThat(underTest.authenticate("password".toList()))
+                .isEqualTo(AuthenticationResult.SUCCEEDED)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
@@ -220,8 +227,30 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
 
             // Wrong input.
-            assertThat(underTest.authenticate(listOf(AuthenticationPatternCoordinate(1, 2))))
-                .isFalse()
+            val wrongPattern =
+                listOf(
+                    AuthenticationPatternCoordinate(1, 2),
+                    AuthenticationPatternCoordinate(1, 1),
+                    AuthenticationPatternCoordinate(0, 0),
+                    AuthenticationPatternCoordinate(0, 1),
+                )
+            assertThat(wrongPattern).isNotEqualTo(FakeAuthenticationRepository.PATTERN)
+            assertThat(wrongPattern.size).isAtLeast(utils.authenticationRepository.minPatternLength)
+            assertThat(underTest.authenticate(wrongPattern)).isEqualTo(AuthenticationResult.FAILED)
+            assertThat(message).isEqualTo(MESSAGE_WRONG_PATTERN)
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+
+            underTest.resetMessage()
+            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
+
+            // Too short input.
+            val tooShortPattern =
+                FakeAuthenticationRepository.PATTERN.subList(
+                    0,
+                    utils.authenticationRepository.minPatternLength - 1
+                )
+            assertThat(underTest.authenticate(tooShortPattern))
+                .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(message).isEqualTo(MESSAGE_WRONG_PATTERN)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
@@ -229,7 +258,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
 
             // Correct input.
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.PATTERN)).isTrue()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.PATTERN))
+                .isEqualTo(AuthenticationResult.SUCCEEDED)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
@@ -294,7 +324,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) { times ->
                 // Wrong PIN.
-                assertThat(underTest.authenticate(listOf(6, 7, 8, 9))).isFalse()
+                assertThat(underTest.authenticate(listOf(6, 7, 8, 9)))
+                    .isEqualTo(AuthenticationResult.FAILED)
                 if (
                     times < FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING - 1
                 ) {
@@ -317,7 +348,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             )
 
             // Correct PIN, but throttled, so doesn't change away from the bouncer scene:
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isNull()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
+                .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(currentScene?.key).isEqualTo(SceneKey.Bouncer)
             assertTryAgainMessage(
                 message,
@@ -347,7 +379,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(currentScene?.key).isEqualTo(SceneKey.Bouncer)
 
             // Correct PIN and no longer throttled so changes to the Gone scene:
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isTrue()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
+                .isEqualTo(AuthenticationResult.SUCCEEDED)
             assertThat(currentScene?.key).isEqualTo(SceneKey.Gone)
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())

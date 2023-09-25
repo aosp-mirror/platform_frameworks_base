@@ -185,9 +185,6 @@ constructor(
     /** Whether the pattern should be visible for the currently-selected user. */
     val isPatternVisible: StateFlow<Boolean> = repository.isPatternVisible
 
-    /** The minimal length of a pattern. */
-    val minPatternLength: Int = repository.minPatternLength
-
     private var throttlingCountdownJob: Job? = null
 
     init {
@@ -243,39 +240,46 @@ constructor(
      * Attempts to authenticate the user and unlock the device.
      *
      * If [tryAutoConfirm] is `true`, authentication is attempted if and only if the auth method
-     * supports auto-confirming, and the input's length is at least the code's length. Otherwise,
-     * `null` is returned.
+     * supports auto-confirming, and the input's length is at least the required length. Otherwise,
+     * `AuthenticationResult.SKIPPED` is returned.
      *
      * @param input The input from the user to try to authenticate with. This can be a list of
      *   different things, based on the current authentication method.
      * @param tryAutoConfirm `true` if called while the user inputs the code, without an explicit
      *   request to validate.
-     * @return `true` if the authentication succeeded and the device is now unlocked; `false` when
-     *   authentication failed, `null` if the check was not performed.
+     * @return The result of this authentication attempt.
      */
-    suspend fun authenticate(input: List<Any>, tryAutoConfirm: Boolean = false): Boolean? {
+    suspend fun authenticate(
+        input: List<Any>,
+        tryAutoConfirm: Boolean = false
+    ): AuthenticationResult {
         if (input.isEmpty()) {
             throw IllegalArgumentException("Input was empty!")
         }
 
+        val authMethod = getAuthenticationMethod()
         val skipCheck =
             when {
                 // We're being throttled, the UI layer should not have called this; skip the
                 // attempt.
                 isThrottled.value -> true
+                // The pattern is too short; skip the attempt.
+                authMethod == DomainLayerAuthenticationMethodModel.Pattern &&
+                    input.size < repository.minPatternLength -> true
                 // Auto-confirm attempt when the feature is not enabled; skip the attempt.
                 tryAutoConfirm && !isAutoConfirmEnabled.value -> true
                 // Auto-confirm should skip the attempt if the pin entered is too short.
-                tryAutoConfirm && input.size < repository.getPinLength() -> true
+                tryAutoConfirm &&
+                    authMethod == DomainLayerAuthenticationMethodModel.Pin &&
+                    input.size < repository.getPinLength() -> true
                 else -> false
             }
         if (skipCheck) {
-            return null
+            return AuthenticationResult.SKIPPED
         }
 
         // Attempt to authenticate:
-        val authMethod = getAuthenticationMethod()
-        val credential = authMethod.createCredential(input) ?: return null
+        val credential = authMethod.createCredential(input) ?: return AuthenticationResult.SKIPPED
         val authenticationResult = repository.checkCredential(credential)
         credential.zeroize()
 
@@ -299,7 +303,11 @@ constructor(
             refreshThrottling()
         }
 
-        return authenticationResult.isSuccessful
+        return if (authenticationResult.isSuccessful) {
+            AuthenticationResult.SUCCEEDED
+        } else {
+            AuthenticationResult.FAILED
+        }
     }
 
     /** Starts refreshing the throttling state every second. */
@@ -382,4 +390,17 @@ constructor(
                 DomainLayerAuthenticationMethodModel.Pattern
         }
     }
+}
+
+/** Result of a user authentication attempt. */
+enum class AuthenticationResult {
+    /** Authentication succeeded and the device is now unlocked. */
+    SUCCEEDED,
+    /** Authentication failed and the device remains unlocked. */
+    FAILED,
+    /**
+     * Authentication was not performed, e.g. due to insufficient input, and the device remains
+     * unlocked.
+     */
+    SKIPPED,
 }
