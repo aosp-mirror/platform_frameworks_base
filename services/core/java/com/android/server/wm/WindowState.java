@@ -2755,12 +2755,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // bounds, as they would be used to display the dim layer.
                 final TaskFragment taskFragment = getTaskFragment();
                 if (taskFragment != null) {
-                    final Task task = taskFragment.asTask();
-                    if (task != null) {
-                        task.getDimBounds(mTmpRect);
-                    } else {
-                        mTmpRect.set(taskFragment.getBounds());
-                    }
+                    taskFragment.getDimBounds(mTmpRect);
                 } else if (getRootTask() != null) {
                     getRootTask().getDimBounds(mTmpRect);
                 }

@@ -2858,7 +2858,8 @@ class Task extends TaskFragment {
     }
 
     /** Bounds of the task to be used for dimming, as well as touch related tests. */
-    void getDimBounds(Rect out) {
+    @Override
+    void getDimBounds(@NonNull Rect out) {
         if (isRootTask()) {
             getBounds(out);
             return;
