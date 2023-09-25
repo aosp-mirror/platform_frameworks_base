@@ -556,6 +556,7 @@ public:
 };
 
 // ----------------------------------------------------------------------------
+#ifdef BINDER_DEATH_RECIPIENT_WEAK_FROM_JNI
 #if __BIONIC__
 #include <android/api-level.h>
 static bool target_sdk_is_at_least_vic() {
@@ -568,6 +569,7 @@ static constexpr bool target_sdk_is_at_least_vic() {
     return true;
 }
 #endif // __BIONIC__
+#endif // BINDER_DEATH_RECIPIENT_WEAK_FROM_JNI
 
 class JavaDeathRecipient : public IBinder::DeathRecipient
 {
@@ -588,9 +590,12 @@ public:
         // you normally are not interested in the death of a binder service which you don't have any
         // reference to. If however you want to get binderDied() regardless of the proxy object's
         // lifecycle, keep a strong reference to the death recipient object by yourself.
+#ifdef BINDER_DEATH_RECIPIENT_WEAK_FROM_JNI
         if (target_sdk_is_at_least_vic()) {
             mObjectWeak = env->NewWeakGlobalRef(object);
-        } else {
+        } else
+#endif
+        {
             mObject = env->NewGlobalRef(object);
         }
         // These objects manage their own lifetimes so are responsible for final bookkeeping.

@@ -15,7 +15,19 @@ license {
     ],
 }
 
-cc_library_shared {
+soong_config_module_type {
+    name: "cc_library_shared_for_libandroid_runtime",
+    module_type: "cc_library_shared",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "release_binder_death_recipient_weak_from_jni",
+    ],
+    properties: [
+        "cflags",
+    ],
+}
+
+cc_library_shared_for_libandroid_runtime {
     name: "libandroid_runtime",
     host_supported: true,
     cflags: [
@@ -43,6 +55,12 @@ cc_library_shared {
     product_variables: {
         eng: {
             cflags: ["-DNO_RESET_STACK_PROTECTOR"],
+        },
+    },
+
+    soong_config_variables: {
+        release_binder_death_recipient_weak_from_jni: {
+            cflags: ["-DBINDER_DEATH_RECIPIENT_WEAK_FROM_JNI"],
         },
     },
 
