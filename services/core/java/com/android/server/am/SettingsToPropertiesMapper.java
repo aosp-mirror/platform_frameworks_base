@@ -133,6 +133,7 @@ public class SettingsToPropertiesMapper {
         "companion",
         "context_hub",
         "core_experiments_team_internal",
+        "core_graphics",
         "haptics",
         "hardware_backed_security_mainline",
         "media_audio",
