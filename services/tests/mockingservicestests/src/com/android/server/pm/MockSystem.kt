@@ -505,8 +505,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         pkg: ParsingPackage,
         applicationInfo: ApplicationInfo?,
         className: String?
-    ):
-            ActivityInfo {
+    ): ActivityInfo {
         val activityInfo = ActivityInfo()
         activityInfo.applicationInfo = applicationInfo
         activityInfo.packageName = pkg.packageName
@@ -518,8 +517,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         pkg: ParsingPackage,
         applicationInfo: ApplicationInfo?,
         className: String?
-    ):
-            ServiceInfo {
+    ): ServiceInfo {
         val serviceInfo = ServiceInfo()
         serviceInfo.applicationInfo = applicationInfo
         serviceInfo.packageName = pkg.packageName
@@ -699,8 +697,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     /** Override get*Folder methods to point to temporary local directories  */
 
     @Throws(IOException::class)
-    private fun redirectScanPartitions(partitions: List<ScanPartition>):
-            List<ScanPartition> {
+    private fun redirectScanPartitions(partitions: List<ScanPartition>): List<ScanPartition> {
         val spiedPartitions: MutableList<ScanPartition> =
                 ArrayList(partitions.size)
         for (partition: ScanPartition in partitions) {
@@ -732,6 +729,7 @@ class MockSystemRule : TestRule {
             } finally {
                 mockSystem?.cleanup()
                 mockSystem = null
+                Mockito.framework().clearInlineMocks()
             }
         }
     }
