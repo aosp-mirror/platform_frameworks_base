@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.util.concurrency
 
-package com.android.systemui.scene.shared.flag
-
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.util.time.FakeSystemClock
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.Executor
 
-class FakeSceneContainerFlags(
-    var enabled: Boolean = false,
-) : SceneContainerFlags {
-
-    override fun isEnabled(): Boolean {
-        return enabled
-    }
-
-    override fun requirementDescription(): String {
-        return ""
-    }
-}
-
-@Module(includes = [FakeSceneContainerFlagsModule.Bindings::class])
-class FakeSceneContainerFlagsModule(
-    @get:Provides val sceneContainerFlags: FakeSceneContainerFlags = FakeSceneContainerFlags(),
+@Module(includes = [FakeExecutorModule.Bindings::class])
+class FakeExecutorModule(
+    @get:Provides val clock: FakeSystemClock = FakeSystemClock(),
 ) {
+    @get:Provides val executor = FakeExecutor(clock)
+
     @Module
     interface Bindings {
-        @Binds fun bindFake(fake: FakeSceneContainerFlags): SceneContainerFlags
+        @Binds @Main fun bindMainExecutor(executor: FakeExecutor): Executor
     }
 }

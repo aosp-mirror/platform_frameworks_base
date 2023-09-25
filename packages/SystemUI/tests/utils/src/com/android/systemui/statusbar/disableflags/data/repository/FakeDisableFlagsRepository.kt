@@ -14,9 +14,19 @@
 
 package com.android.systemui.statusbar.disableflags.data.repository
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeDisableFlagsRepository : DisableFlagsRepository {
+@SysUISingleton
+class FakeDisableFlagsRepository @Inject constructor() : DisableFlagsRepository {
     override val disableFlags = MutableStateFlow(DisableFlagsModel())
+}
+
+@Module
+interface FakeDisableFlagsRepositoryModule {
+    @Binds fun bindFake(fake: FakeDisableFlagsRepository): DisableFlagsRepository
 }

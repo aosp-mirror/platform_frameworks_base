@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.log
 
-package com.android.systemui.scene.shared.flag
-
+import com.android.internal.logging.UiEventLogger
+import com.android.internal.logging.testing.UiEventLoggerFake
+import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 
-class FakeSceneContainerFlags(
-    var enabled: Boolean = false,
-) : SceneContainerFlags {
+@Module
+interface FakeUiEventLoggerModule {
 
-    override fun isEnabled(): Boolean {
-        return enabled
-    }
+    @Binds fun bindFake(fake: UiEventLoggerFake): UiEventLogger
 
-    override fun requirementDescription(): String {
-        return ""
-    }
-}
-
-@Module(includes = [FakeSceneContainerFlagsModule.Bindings::class])
-class FakeSceneContainerFlagsModule(
-    @get:Provides val sceneContainerFlags: FakeSceneContainerFlags = FakeSceneContainerFlags(),
-) {
     @Module
-    interface Bindings {
-        @Binds fun bindFake(fake: FakeSceneContainerFlags): SceneContainerFlags
+    companion object {
+        @Provides @SysUISingleton fun provideFake(): UiEventLoggerFake = UiEventLoggerFake()
     }
 }

@@ -193,7 +193,7 @@ public abstract class SysuiTestCase {
         return null;
     }
 
-    protected FakeBroadcastDispatcher getFakeBroadcastDispatcher() {
+    public FakeBroadcastDispatcher getFakeBroadcastDispatcher() {
         return mFakeBroadcastDispatcher;
     }
 
