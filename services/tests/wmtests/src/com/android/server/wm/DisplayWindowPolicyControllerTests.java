@@ -275,5 +275,10 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         public boolean isEnteringPipAllowed(int uid) {
             return true;
         }
+
+        @Override
+        public ComponentName getCustomHomeComponent() {
+            return null;
+        }
     }
 }
