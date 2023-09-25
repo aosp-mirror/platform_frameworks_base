@@ -16,19 +16,20 @@
 
 package android.security.net.config;
 
+import static org.junit.Assert.fail;
+
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
-import java.net.Socket;
+
 import java.net.URL;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.TrustManager;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManagerFactory;
 
-import junit.framework.Assert;
-
-public final class TestUtils extends Assert {
+public final class TestUtils {
 
     private TestUtils() {
     }
@@ -36,8 +37,8 @@ public final class TestUtils extends Assert {
     public static void assertConnectionFails(SSLContext context, String host, int port)
             throws Exception {
         try {
-            Socket s = context.getSocketFactory().createSocket(host, port);
-            s.getInputStream();
+            SSLSocket s = (SSLSocket) context.getSocketFactory().createSocket(host, port);
+            s.startHandshake();
             fail("Expected connection to " + host + ":" + port + " to fail.");
         } catch (SSLHandshakeException expected) {
         }
@@ -45,7 +46,8 @@ public final class TestUtils extends Assert {
 
     public static void assertConnectionSucceeds(SSLContext context, String host, int port)
             throws Exception {
-        Socket s = context.getSocketFactory().createSocket(host, port);
+        SSLSocket s = (SSLSocket) context.getSocketFactory().createSocket(host, port);
+        s.startHandshake();
         s.getInputStream();
     }
 
