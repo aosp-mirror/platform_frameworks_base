@@ -63,6 +63,7 @@ public class PackageManagerException extends Exception {
     public static final int INTERNAL_ERROR_STATIC_SHARED_LIB_OVERLAY_TARGETS = -35;
     public static final int INTERNAL_ERROR_APEX_NOT_DIRECTORY = -36;
     public static final int INTERNAL_ERROR_APEX_MORE_THAN_ONE_FILE = -37;
+    public static final int INTERNAL_ERROR_MISSING_USER = -38;
 
     @IntDef(prefix = { "INTERNAL_ERROR_" }, value = {
             INTERNAL_ERROR_NATIVE_LIBRARY_COPY,
