@@ -3817,8 +3817,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Stage APK's fs-verity signature if present.
         maybeStageFsveritySignatureLocked(origFile, targetFile,
                 isFsVerityRequiredForApk(origFile, targetFile));
-        // Stage APK's v4 signature if present.
-        if (android.security.Flags.extendVbChainToUpdatedApk()) {
+        // Stage APK's v4 signature if present, and fs-verity is supported.
+        if (android.security.Flags.extendVbChainToUpdatedApk()
+                && VerityUtils.isFsVeritySupported()) {
             maybeStageV4SignatureLocked(origFile, targetFile);
         }
         // Stage dex metadata (.dm) and corresponding fs-verity signature if present.
