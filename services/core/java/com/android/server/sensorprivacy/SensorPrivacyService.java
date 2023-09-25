@@ -105,6 +105,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.safetycenter.SafetyCenterManager;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
@@ -173,6 +174,8 @@ public final class SensorPrivacyService extends SystemService {
     private CallStateHelper mCallStateHelper;
     private KeyguardManager mKeyguardManager;
 
+    private SafetyCenterManager mSafetyCenterManager;
+
     private int mCurrentUser = USER_NULL;
 
     public SensorPrivacyService(Context context) {
@@ -188,6 +191,7 @@ public final class SensorPrivacyService extends SystemService {
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
         mPackageManagerInternal = getLocalService(PackageManagerInternal.class);
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl();
+        mSafetyCenterManager = mContext.getSystemService(SafetyCenterManager.class);
     }
 
     @Override
@@ -652,8 +656,11 @@ public final class SensorPrivacyService extends SystemService {
             String contentTitle = getUiContext().getString(messageRes);
             Spanned contentText = Html.fromHtml(getUiContext().getString(
                     R.string.sensor_privacy_start_use_notification_content_text, packageLabel), 0);
+            String action = mSafetyCenterManager.isSafetyCenterEnabled()
+                    ? Settings.ACTION_PRIVACY_CONTROLS : Settings.ACTION_PRIVACY_SETTINGS;
+
             PendingIntent contentIntent = PendingIntent.getActivity(mContext, sensor,
-                    new Intent(Settings.ACTION_PRIVACY_SETTINGS),
+                    new Intent(action),
                     PendingIntent.FLAG_IMMUTABLE
                             | PendingIntent.FLAG_UPDATE_CURRENT);
 

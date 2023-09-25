@@ -17,6 +17,8 @@
 package com.android.systemui.qs.tiles
 
 import android.os.Handler
+import android.provider.Settings
+import android.safetycenter.SafetyCenterManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -68,6 +70,8 @@ class MicrophoneToggleTileTest : SysuiTestCase() {
     private lateinit var keyguardStateController: KeyguardStateController
     @Mock
     private lateinit var uiEventLogger: QsEventLogger
+    @Mock
+    private lateinit var safetyCenterManager: SafetyCenterManager
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: MicrophoneToggleTile
@@ -90,7 +94,8 @@ class MicrophoneToggleTileTest : SysuiTestCase() {
                 activityStarter,
                 qsLogger,
                 privacyController,
-                keyguardStateController)
+                keyguardStateController,
+                safetyCenterManager)
     }
 
     @After
@@ -115,5 +120,14 @@ class MicrophoneToggleTileTest : SysuiTestCase() {
         tile.handleUpdateState(state, MICROPHONE_TOGGLE_DISABLED)
 
         assertThat(state.icon).isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_mic_access_off))
+    }
+
+    @Test
+    fun testLongClickIntent() {
+        whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(true)
+        assertThat(tile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_CONTROLS)
+
+        whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(false)
+        assertThat(tile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_SETTINGS)
     }
 }
