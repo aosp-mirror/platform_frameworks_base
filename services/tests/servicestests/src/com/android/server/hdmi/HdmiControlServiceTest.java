@@ -21,8 +21,15 @@ import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
 
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
+import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
+import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
+import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
+import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_3;
 import static com.android.server.hdmi.HdmiControlService.DEVICE_CLEANUP_TIMEOUT;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_HOTPLUG;
+import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_SCREEN_ON;
+import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_SOUNDBAR_MODE;
 import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -51,6 +58,7 @@ import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
 import android.hardware.hdmi.IHdmiControlStatusChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -71,6 +79,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for {@link HdmiControlService} class.
@@ -137,7 +146,7 @@ public class HdmiControlServiceTest {
 
         mLocalDevices.add(mAudioSystemDeviceSpy);
         mLocalDevices.add(mPlaybackDeviceSpy);
-        mHdmiPortInfo = new HdmiPortInfo[4];
+        mHdmiPortInfo = new HdmiPortInfo[5];
         mHdmiPortInfo[0] =
                 new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_INPUT, 0x2100)
                         .setCecSupported(true)
@@ -161,6 +170,13 @@ public class HdmiControlServiceTest {
                         .build();
         mHdmiPortInfo[3] =
                 new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_INPUT, 0x3000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .setEarcSupported(false)
+                        .build();
+        mHdmiPortInfo[4] =
+                new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_OUTPUT, 0x3000)
                         .setCecSupported(true)
                         .setMhlSupported(false)
                         .setArcSupported(false)
@@ -1393,6 +1409,207 @@ public class HdmiControlServiceTest {
         mTestLooper.dispatchAll();
         verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(false, false);
         verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(eq(true), anyBoolean());
+    }
+
+    @Test
+    public void triggerMultipleAddressAllocations_uniqueLocalDevicePerDeviceType() {
+        long allocationDelay = TimeUnit.SECONDS.toMillis(60);
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        // Wake up process that will trigger the address allocation to start.
+        mHdmiControlServiceSpy.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SCREEN_ON));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mTestLooper.dispatchAll();
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // Hotplug In will trigger the address allocation to start.
+        mHdmiControlServiceSpy.onHotplug(4, true);
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_HOTPLUG));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The first allocation finished. The second allocation is still in progress.
+        HdmiCecLocalDevicePlayback firstAllocatedPlayback = mHdmiControlServiceSpy.playback();
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SCREEN_ON));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The second allocation finished.
+        HdmiCecLocalDevicePlayback secondAllocatedPlayback = mHdmiControlServiceSpy.playback();
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_HOTPLUG));
+        // Local devices have the same identity.
+        assertTrue(firstAllocatedPlayback == secondAllocatedPlayback);
+    }
+
+    @Test
+    public void triggerMultipleAddressAllocations_keepLastAllocatedAddress() {
+        // First logical address for playback is free.
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.NACK);
+        mTestLooper.dispatchAll();
+
+        long allocationDelay = TimeUnit.SECONDS.toMillis(60);
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        // Wake up process that will trigger the address allocation to start.
+        mHdmiControlServiceSpy.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SCREEN_ON));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mTestLooper.dispatchAll();
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+
+        // First logical address for playback is busy.
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SCREEN_ON));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mTestLooper.dispatchAll();
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The first allocation finished. The second allocation is still in progress.
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SCREEN_ON));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The second allocation finished. Second logical address for playback is used.
+        HdmiCecLocalDevicePlayback allocatedPlayback = mHdmiControlServiceSpy.playback();
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SCREEN_ON));
+        assertThat(allocatedPlayback.getDeviceInfo().getLogicalAddress())
+                .isEqualTo(ADDR_PLAYBACK_2);
+    }
+
+    @Test
+    public void triggerMultipleAddressAllocations_toggleSoundbarMode_addThenRemoveAudioSystem() {
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+        long allocationDelay = TimeUnit.SECONDS.toMillis(60);
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        // Enabling Dynamic soundbar mode will trigger address allocation.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // Disabling Dynamic soundbar mode will trigger another address allocation.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_DISABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The first allocation finished. The second allocation is still in progress.
+        // The audio system is present in the network.
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNotNull();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The second allocation finished. The audio system is not present in the network.
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
+    }
+
+    @Test
+    public void triggerMultipleAddressAllocations_toggleSoundbarMode_removeThenAddAudioSystem() {
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+        // Enable the setting and check if the audio system local device is found in the network.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNotNull();
+
+        long allocationDelay = TimeUnit.SECONDS.toMillis(60);
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        // Disabling Dynamic soundbar mode will trigger address allocation.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_DISABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // Enabling Dynamic soundbar mode will trigger another address allocation.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The first allocation finished. The second allocation is still in progress.
+        // The audio system is not present in the network.
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The second allocation finished. The audio system is present in the network.
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNotNull();
+    }
+
+    @Test
+    public void failedAddressAllocation_noLocalDevice() {
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_2, SendMessageResult.SUCCESS);
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_3, SendMessageResult.SUCCESS);
+        mNativeWrapper.setPollAddressResponse(ADDR_AUDIO_SYSTEM, SendMessageResult.SUCCESS);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.clearCecLocalDevices();
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiControlServiceSpy.playback()).isNull();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
     }
 
     @Test
