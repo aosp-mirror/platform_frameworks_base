@@ -798,7 +798,7 @@ object Flags {
 
     /** Enable showing a dialog when clicking on Quick Settings bluetooth tile. */
     @JvmField
-    val BLUETOOTH_QS_TILE_DIALOG = unreleasedFlag("bluetooth_qs_tile_dialog")
+    val BLUETOOTH_QS_TILE_DIALOG = unreleasedFlag("bluetooth_qs_tile_dialog", teamfood = true)
 
     // TODO(b/300995746): Tracking Bug
     /** Enable communal hub features. */
