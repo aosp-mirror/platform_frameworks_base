@@ -124,6 +124,11 @@ object Flags {
     val NOTIFICATION_GROUP_EXPANSION_CHANGE =
             unreleasedFlag("notification_group_expansion_change")
 
+    // TODO(b/301955929)
+    @JvmField
+    val NOTIF_LS_BACKGROUND_THREAD =
+            unreleasedFlag("notification_lockscreen_mgr_bg_thread")
+
     // 200 - keyguard/lockscreen
     // ** Flag retired **
     // public static final BooleanFlag KEYGUARD_LAYOUT =
