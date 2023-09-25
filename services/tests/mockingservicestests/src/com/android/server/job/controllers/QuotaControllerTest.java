@@ -33,7 +33,6 @@ import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.sSystemClock;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -75,11 +74,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.platform.test.annotations.LargeTest;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.SparseBooleanArray;
 
+import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ArrayUtils;
@@ -2597,7 +2596,9 @@ public class QuotaControllerTest {
     @Test
     public void testIsWithinEJQuotaLocked_TempAllowlisting_Restricted() {
         setDischarging();
-        JobStatus js = createExpeditedJobStatus("testIsWithinEJQuotaLocked_TempAllowlisting_Restricted", 1);
+        JobStatus js =
+                createExpeditedJobStatus(
+                        "testIsWithinEJQuotaLocked_TempAllowlisting_Restricted", 1);
         setStandbyBucket(RESTRICTED_INDEX, js);
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_FREQUENT_MS, 10 * MINUTE_IN_MILLIS);
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
@@ -6088,7 +6089,8 @@ public class QuotaControllerTest {
         Handler handler = mQuotaController.getHandler();
         spyOn(handler);
 
-        JobStatus job = createExpeditedJobStatus("testEJTimerTracking_TempAllowlisting_Restricted", 1);
+        JobStatus job =
+                createExpeditedJobStatus("testEJTimerTracking_TempAllowlisting_Restricted", 1);
         setStandbyBucket(RESTRICTED_INDEX, job);
         synchronized (mQuotaController.mLock) {
             mQuotaController.maybeStartTrackingJobLocked(job, null);

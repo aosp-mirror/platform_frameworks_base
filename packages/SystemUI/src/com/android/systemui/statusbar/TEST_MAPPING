@@ -13,7 +13,7 @@
           "exclude-annotation": "org.junit.Ignore"
         },
         {
-          "exclude-annotation": "android.platform.test.annotations.LargeTest"
+          "exclude-annotation": "androidx.test.filters.LargeTest"
         },
         {
           "exclude-annotation": "androidx.test.filters.LargeTest"
