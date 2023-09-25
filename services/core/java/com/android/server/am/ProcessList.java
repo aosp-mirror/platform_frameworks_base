@@ -3087,6 +3087,8 @@ public final class ProcessList {
             if (old == proc && proc.isPersistent()) {
                 // We are re-adding a persistent process.  Whatevs!  Just leave it there.
                 Slog.w(TAG, "Re-adding persistent process " + proc);
+                // Ensure that the mCrashing flag is cleared, since this is a restart
+                proc.resetCrashingOnRestart();
             } else if (old != null) {
                 if (old.isKilled()) {
                     // The old process has been killed, we probably haven't had
