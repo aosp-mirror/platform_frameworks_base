@@ -88,6 +88,9 @@ public class MasterClearReceiver extends BroadcastReceiver {
         mWipeEsims = intent.getBooleanExtra(Intent.EXTRA_WIPE_ESIMS, false);
         final boolean forceWipe = intent.getBooleanExtra(Intent.EXTRA_FORCE_MASTER_CLEAR, false)
                 || intent.getBooleanExtra(Intent.EXTRA_FORCE_FACTORY_RESET, false);
+        // This is ONLY used by TestHarnessService within System Server, so we don't add a proper
+        // API constant in Intent for this.
+        final boolean keepMemtagMode = intent.getBooleanExtra("keep_memtag_mode", false);
 
         // TODO(b/189938391): properly handle factory reset on headless system user mode.
         final int sendingUserId = getSendingUserId();
@@ -110,9 +113,11 @@ public class MasterClearReceiver extends BroadcastReceiver {
                 try {
                     Slog.i(TAG, "Calling RecoverySystem.rebootWipeUserData(context, "
                             + "shutdown=" + shutdown + ", reason=" + reason
-                            + ", forceWipe=" + forceWipe + ", wipeEsims=" + mWipeEsims + ")");
+                            + ", forceWipe=" + forceWipe + ", wipeEsims=" + mWipeEsims
+                            + ", keepMemtagMode=" + keepMemtagMode + ")");
                     RecoverySystem
-                            .rebootWipeUserData(context, shutdown, reason, forceWipe, mWipeEsims);
+                            .rebootWipeUserData(
+                                context, shutdown, reason, forceWipe, mWipeEsims, keepMemtagMode);
                     Slog.wtf(TAG, "Still running after master clear?!");
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't perform master clear/factory reset", e);
