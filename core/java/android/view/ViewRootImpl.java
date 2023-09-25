@@ -1151,14 +1151,10 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean isInTouchMode() {
-        IWindowManager windowManager = WindowManagerGlobal.getWindowManagerService();
-        if (windowManager != null) {
-            try {
-                return windowManager.isInTouchMode(getDisplayId());
-            } catch (RemoteException e) {
-            }
+        if (mAttachInfo == null) {
+            return mContext.getResources().getBoolean(R.bool.config_defaultInTouchMode);
         }
-        return false;
+        return mAttachInfo.mInTouchMode;
     }
 
     /**
