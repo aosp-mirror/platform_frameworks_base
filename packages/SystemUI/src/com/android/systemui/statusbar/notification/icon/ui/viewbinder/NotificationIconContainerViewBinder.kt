@@ -21,6 +21,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.launch
 
 /** Binds a [NotificationIconContainer] to its [view model][NotificationIconContainerViewModel]. */
 object NotificationIconContainerViewBinder {
@@ -28,6 +29,10 @@ object NotificationIconContainerViewBinder {
         view: NotificationIconContainer,
         viewModel: NotificationIconContainerViewModel,
     ): DisposableHandle {
-        return view.repeatWhenAttached { repeatOnLifecycle(Lifecycle.State.CREATED) {} }
+        return view.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                launch { viewModel.animationsEnabled.collect(view::setAnimationsEnabled) }
+            }
+        }
     }
 }

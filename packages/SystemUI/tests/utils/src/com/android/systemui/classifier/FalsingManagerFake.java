@@ -21,15 +21,19 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import android.net.Uri;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.FalsingManager;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 /**
  * Simple Fake for testing where {@link FalsingManager} is required.
  */
+@SysUISingleton
 public class FalsingManagerFake implements FalsingManager {
     private boolean mIsFalseTouch;
     private boolean mIsSimpleTap;
@@ -45,6 +49,10 @@ public class FalsingManagerFake implements FalsingManager {
 
     private final List<FalsingBeliefListener> mFalsingBeliefListeners = new ArrayList<>();
     private final List<FalsingTapListener> mTapListeners = new ArrayList<>();
+
+    @Inject
+    public FalsingManagerFake() {
+    }
 
     @Override
     public void onSuccessfulUnlock() {

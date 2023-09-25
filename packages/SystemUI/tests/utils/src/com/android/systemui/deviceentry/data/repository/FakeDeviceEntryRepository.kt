@@ -1,11 +1,16 @@
 package com.android.systemui.deviceentry.data.repository
 
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [DeviceEntryRepository] */
-class FakeDeviceEntryRepository : DeviceEntryRepository {
+@SysUISingleton
+class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
 
     private var isInsecureLockscreenEnabled = true
     private var isBypassEnabled = false
@@ -32,4 +37,9 @@ class FakeDeviceEntryRepository : DeviceEntryRepository {
     fun setBypassEnabled(isBypassEnabled: Boolean) {
         this.isBypassEnabled = isBypassEnabled
     }
+}
+
+@Module
+interface FakeDeviceEntryRepositoryModule {
+    @Binds fun bindFake(fake: FakeDeviceEntryRepository): DeviceEntryRepository
 }

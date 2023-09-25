@@ -1,9 +1,14 @@
 package com.android.systemui.statusbar.policy
 
 import android.content.res.Configuration
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 
 /** Fake implementation of [ConfigurationController] for tests. */
-class FakeConfigurationController : ConfigurationController {
+@SysUISingleton
+class FakeConfigurationController @Inject constructor() : ConfigurationController {
 
     private var listeners = mutableListOf<ConfigurationController.ConfigurationListener>()
 
@@ -32,4 +37,9 @@ class FakeConfigurationController : ConfigurationController {
     }
 
     override fun isLayoutRtl(): Boolean = false
+}
+
+@Module
+interface FakeConfigurationControllerModule {
+    @Binds fun bindFake(fake: FakeConfigurationController): ConfigurationController
 }

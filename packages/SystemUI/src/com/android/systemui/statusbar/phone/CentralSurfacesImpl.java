@@ -2688,7 +2688,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 !mDozeServiceHost.isPulsing(), mDeviceProvisionedController.isFrpActive());
 
         mShadeSurface.setTouchAndAnimationDisabled(disabled);
-        mNotificationIconAreaController.setAnimationsEnabled(!disabled);
+        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            mNotificationIconAreaController.setAnimationsEnabled(!disabled);
+        }
     }
 
     final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
