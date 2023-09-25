@@ -35,7 +35,7 @@
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Υπηρεσίες Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> ζητά εκ μέρους της συσκευής σας <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> άδεια για πρόσβαση στις φωτογραφίες, τα αρχεία μέσων και τις ειδοποιήσεις του τηλεφώνου σας"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Να επιτρέπεται στη συσκευή &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; να εκτελεί αυτήν την ενέργεια;"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Να επιτρέπεται στη συσκευή &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; να εκτελεί αυτή την ενέργεια;"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> ζητά άδεια εκ μέρους της συσκευής σας <xliff:g id="DEVICE_NAME">%2$s</xliff:g> για ροή εφαρμογών και άλλων λειτουργιών του συστήματος σε συσκευές σε κοντινή απόσταση"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"συσκευή"</string>
     <string name="summary_generic_single_device" msgid="4181180669689590417">"Αυτή η εφαρμογή θα μπορεί να συγχρονίζει πληροφορίες μεταξύ του τηλεφώνου και της συσκευής <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, όπως το όνομα ενός ατόμου που σας καλεί."</string>
