@@ -70,7 +70,6 @@ import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
 import android.media.AudioManagerInternal;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
@@ -78,6 +77,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.os.VibratorInfo;
+import android.os.test.TestLooper;
 import android.service.dreams.DreamManagerInternal;
 import android.telecom.TelecomManager;
 import android.util.FeatureFlagUtils;
@@ -160,8 +160,8 @@ class TestPhoneWindowManager {
     @Mock private KeyguardServiceDelegate mKeyguardServiceDelegate;
 
     private StaticMockitoSession mMockitoSession;
-    private HandlerThread mHandlerThread;
     private Handler mHandler;
+    private TestLooper mTestLooper;
 
     private class TestInjector extends PhoneWindowManager.Injector {
         TestInjector(Context context, WindowManagerPolicy.WindowManagerFuncs funcs) {
@@ -184,12 +184,11 @@ class TestPhoneWindowManager {
 
     TestPhoneWindowManager(Context context, boolean supportSettingsUpdate) {
         MockitoAnnotations.initMocks(this);
-        mHandlerThread = new HandlerThread("fake window manager");
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
+        mTestLooper = new TestLooper();
+        mHandler = new Handler(mTestLooper.getLooper());
         mContext = mockingDetails(context).isSpy() ? context : spy(context);
-        mHandler.runWithScissors(() -> setUp(supportSettingsUpdate),  0 /* timeout */);
-        waitForIdle();
+        mHandler.post(() -> setUp(supportSettingsUpdate));
+        mTestLooper.dispatchAll();
     }
 
     private void setUp(boolean supportSettingsUpdate) {
@@ -301,7 +300,6 @@ class TestPhoneWindowManager {
     }
 
     void tearDown() {
-        mHandlerThread.quitSafely();
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         Mockito.reset(mPhoneWindowManager);
         mMockitoSession.finishMocking();
@@ -328,7 +326,7 @@ class TestPhoneWindowManager {
     }
 
     void waitForIdle() {
-        mHandler.runWithScissors(() -> { }, 0 /* timeout */);
+        mTestLooper.dispatchAll();
     }
 
     /**
