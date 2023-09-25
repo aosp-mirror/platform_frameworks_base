@@ -810,7 +810,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 태블릿을 잠그거나 태블릿에 있는 데이터를 모두 지웁니다."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 Android TV 기기를 잠그거나 Android TV 기기의 데이터를 모두 삭제합니다."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"화면 잠금 해제 시 잘못된 비밀번호를 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 인포테인먼트 시스템을 잠그거나 인포테인먼트 시스템의 데이터를 모두 삭제합니다."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 휴대전화를 잠그거나 휴대전화에 있는 데이터를 모두 지웁니다."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 휴대전화를 잠그거나 휴대전화에 있는 데이터를 모두 지웁니다."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 태블릿을 잠그거나 이 사용자의 데이터를 모두 삭제합니다."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 Android TV 기기를 잠그거나 사용자 데이터를 모두 삭제합니다."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"화면 잠금 해제 시 잘못된 비밀번호를 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 인포테인먼트 시스템을 잠그거나 이 프로필의 데이터를 모두 삭제합니다."</string>
