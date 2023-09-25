@@ -16,7 +16,18 @@
 
 package com.android.systemui.qs.tiles.base.interactor
 
-data class QSTileDataRequest(
-    val userId: Int,
-    val trigger: StateUpdateTrigger,
-)
+class FakeDisabledByPolicyInteractor : DisabledByPolicyInteractor {
+
+    var handleResult: Boolean = false
+    var policyResult: DisabledByPolicyInteractor.PolicyResult =
+        DisabledByPolicyInteractor.PolicyResult.TileEnabled
+
+    override suspend fun isDisabled(
+        userId: Int,
+        userRestriction: String?
+    ): DisabledByPolicyInteractor.PolicyResult = policyResult
+
+    override fun handlePolicyResult(
+        policyResult: DisabledByPolicyInteractor.PolicyResult
+    ): Boolean = handleResult
+}
