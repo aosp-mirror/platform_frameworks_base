@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"移去右上角"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"移去左下角"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"移去右下角"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"打開<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"收埋<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"「<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>」設定"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"關閉小視窗氣泡"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"不要透過小視窗顯示對話"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"知道了"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"沒有最近曾使用的小視窗"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"最近使用和關閉的小視窗會在這裡顯示"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"使用對話氣泡進行即時通訊"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"畫面底部的角落會顯示新對話圖示。輕按即可展開圖示；拖曳即可關閉。"</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"隨時控制對話氣泡"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"輕按這裡即可管理哪些應用程式和對話可以使用對話氣泡"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"氣泡"</string>

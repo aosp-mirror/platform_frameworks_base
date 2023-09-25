@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Жоғары оң жаққа жылжыту"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Төменгі сол жаққа жылжыту"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Төменгі оң жаққа жылжыту"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>: жаю"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>: жию"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> параметрлері"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Қалқымалы хабарды жабу"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Әңгіменің қалқыма хабары көрсетілмесін"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Түсінікті"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Жақындағы қалқыма хабарлар жоқ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Соңғы және жабылған қалқыма хабарлар осы жерде көрсетіледі."</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Қалқыма хабарлар арқылы чатта сөйлесу"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Жаңа әңгімелер экранның төменгі бөлігінде белгіше түрінде көрсетіледі. Оларды жаю үшін түртіңіз, ал жабу үшін сүйреңіз."</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Қалқыма хабарларды кез келген уақытта басқарыңыз"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Қалқыма хабарда көрсетілетін қолданбалар мен әңгімелерді реттеу үшін осы жерді түртіңіз."</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Көпіршік"</string>

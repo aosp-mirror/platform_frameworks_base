@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"सिरानमा दायाँतिर सार्नुहोस्"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"पुछारमा बायाँतिर सार्नुहोस्"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"पुछारमा दायाँतिर सार्नुहोस्"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> एक्स्पान्ड गर्नुहोस्"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> कोल्याप्स गर्नुहोस्"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> का सेटिङहरू"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"बबल खारेज गर्नुहोस्"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"वार्तालाप बबलको रूपमा नदेखाइयोस्"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"बुझेँ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"हालैका बबलहरू छैनन्"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"हालैका बबल र खारेज गरिएका बबलहरू यहाँ देखिने छन्"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"बबल प्रयोग गरी कुराकानी गर्नुहोस्"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"नयाँ वार्तालापहरू तपाईंको डिभाइसको स्क्रिनको पुछारको कुनामा आइकनका रूपमा देखिन्छन्। ती आइकन ठुलो बनाउन ट्याप गर्नुहोस् वा ती आइकन हटाउन ड्र्याग गर्नुहोस्।"</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"जुनसुकै बेला बबलसम्बन्धी सुविधा नियन्त्रण गर्नुहोस्"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"कुन एप र कुराकानी बबल प्रयोग गर्न सक्छन् भन्ने कुराको व्यवस्थापन गर्न यहाँ ट्याप गर्नुहोस्"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>

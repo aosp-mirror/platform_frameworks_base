@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ଉପର-ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ତଳ ବାମକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ତଳ ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ବିସ୍ତାର କରନ୍ତୁ"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ସଙ୍କୁଚିତ କରନ୍ତୁ"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ସେଟିଂସ୍"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ବବଲ୍ ଖାରଜ କରନ୍ତୁ"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"ବାର୍ତ୍ତାଳାପକୁ ବବଲ୍ କରନ୍ତୁ ନାହିଁ"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ବୁଝିଗଲି"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ବର୍ତ୍ତମାନ କୌଣସି ବବଲ୍ ନାହିଁ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ବର୍ତ୍ତମାନର ଏବଂ ଖାରଜ କରାଯାଇଥିବା ବବଲଗୁଡ଼ିକ ଏଠାରେ ଦେଖାଯିବ"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"ବବଲଗୁଡ଼ିକୁ ବ୍ୟବହାର କରି ଚାଟ୍ କରନ୍ତୁ"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"ନୂଆ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଆପଣଙ୍କ ସ୍କ୍ରିନର ଏକ ନିମ୍ନ କୋଣରେ ଆଇକନଗୁଡ଼ିକ ଭାବେ ଦେଖାଯାଏ। ସେଗୁଡ଼ିକୁ ବିସ୍ତାର କରିବା ପାଇଁ ଟାପ କରନ୍ତୁ କିମ୍ବା ସେଗୁଡ଼ିକୁ ଖାରଜ କରିବା ପାଇଁ ଡ୍ରାଗ କରନ୍ତୁ।"</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ଯେ କୌଣସି ସମୟରେ ବବଲଗୁଡ଼ିକ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"କେଉଁ ଆପ୍ସ ଓ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ବବଲ ହୋଇପାରିବ ତାହା ପରିଚାଳନା କରିବାକୁ ଏଠାରେ ଟାପ କରନ୍ତୁ"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ବବଲ୍"</string>

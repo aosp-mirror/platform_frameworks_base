@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Move top right"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Move bottom left"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Move bottom right"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"expand <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"collapse <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> settings"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Dismiss bubble"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Don’t bubble conversation"</string>

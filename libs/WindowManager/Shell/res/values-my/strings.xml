@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ညာဘက်ထိပ်သို့ ရွှေ့ပါ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ဘယ်အောက်ခြေသို့ ရွှေ့ရန်"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ညာအောက်ခြေသို့ ရွှေ့ပါ"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ကို ချဲ့ရန်"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ကို ချုံ့ရန်"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ဆက်တင်များ"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ပူဖောင်းကွက် ပယ်ရန်"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"စကားဝိုင်းကို ပူဖောင်းကွက် မပြုလုပ်ပါနှင့်"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"နားလည်ပြီ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"လတ်တလော ပူဖောင်းကွက်များ မရှိပါ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"လတ်တလော ပူဖောင်းကွက်များနှင့် ပိတ်လိုက်သော ပူဖောင်းကွက်များကို ဤနေရာတွင် မြင်ရပါမည်"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"ပူဖောင်းကွက်သုံး၍ ချတ်လုပ်ခြင်း"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"စကားဝိုင်းအသစ်များကို သင့်ဖန်သားပြင် အောက်ခြေထောင့်တွင် သင်္ကေတများအဖြစ် မြင်ရပါမည်။ ၎င်းတို့ကို ဖြန့်ရန်တို့ပါ (သို့) ပယ်ရန်ဖိဆွဲပါ။"</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ပူဖောင်းကွက်ကို အချိန်မရွေး ထိန်းချုပ်ရန်"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"ပူဖောင်းကွက်သုံးနိုင်သည့် အက်ပ်နှင့် စကားဝိုင်းများ စီမံရန် ဤနေရာကို တို့ပါ"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ပူဖောင်းဖောက်သံ"</string>
