@@ -379,8 +379,8 @@ java_defaults {
 java_api_library {
     name: "android-non-updatable.stubs.from-text",
     api_surface: "public",
-    api_files: [
-        ":non-updatable-current.txt",
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
     ],
     defaults: ["android-non-updatable_from_text_defaults"],
     full_api_surface_stub: "android_stubs_current.from-text",
@@ -389,9 +389,9 @@ java_api_library {
 java_api_library {
     name: "android-non-updatable.stubs.system.from-text",
     api_surface: "system",
-    api_files: [
-        ":non-updatable-current.txt",
-        ":non-updatable-system-current.txt",
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
     ],
     defaults: ["android-non-updatable_from_text_defaults"],
     full_api_surface_stub: "android_system_stubs_current.from-text",
@@ -400,10 +400,10 @@ java_api_library {
 java_api_library {
     name: "android-non-updatable.stubs.test.from-text",
     api_surface: "test",
-    api_files: [
-        ":non-updatable-current.txt",
-        ":non-updatable-system-current.txt",
-        ":non-updatable-test-current.txt",
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+        "test-api-stubs-docs-non-updatable.api.contribution",
     ],
     defaults: ["android-non-updatable_from_text_defaults"],
     full_api_surface_stub: "android_test_stubs_current.from-text",
@@ -412,10 +412,10 @@ java_api_library {
 java_api_library {
     name: "android-non-updatable.stubs.module_lib.from-text",
     api_surface: "module_lib",
-    api_files: [
-        ":non-updatable-current.txt",
-        ":non-updatable-system-current.txt",
-        ":non-updatable-module-lib-current.txt",
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+        "module-lib-api-stubs-docs-non-updatable.api.contribution",
     ],
     defaults: ["android-non-updatable_from_text_defaults"],
     full_api_surface_stub: "android_module_lib_stubs_current_full.from-text",
