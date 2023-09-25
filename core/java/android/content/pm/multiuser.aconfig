@@ -1,0 +1,8 @@
+package: "android.multiuser"
+
+flag {
+    name: "save_global_and_guest_restrictions_on_system_user_xml"
+    namespace: "multiuser"
+    description: "Save guest and device policy global restrictions on the SYSTEM user's XML file."
+    bug: "301067944"
+}

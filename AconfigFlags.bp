@@ -35,6 +35,7 @@ aconfig_srcjars = [
     ":android.permission.flags-aconfig-java{.generated_srcjars}",
     ":hwui_flags_java_lib{.generated_srcjars}",
     ":display_flags_lib{.generated_srcjars}",
+    ":android.multiuser.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -252,7 +253,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "android.content.pm.flags-aconfig",
     package: "android.content.pm",
-    srcs: ["core/java/android/content/pm/*.aconfig"],
+    srcs: ["core/java/android/content/pm/flags.aconfig"],
 }
 
 java_aconfig_library {
@@ -311,5 +312,18 @@ java_aconfig_library {
 java_aconfig_library {
     name: "display_flags_lib",
     aconfig_declarations: "display_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Multi user
+aconfig_declarations {
+    name: "android.multiuser.flags-aconfig",
+    package: "android.multiuser",
+    srcs: ["core/java/android/content/pm/multiuser.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.multiuser.flags-aconfig-java",
+    aconfig_declarations: "android.multiuser.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
