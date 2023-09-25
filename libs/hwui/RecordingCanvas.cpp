@@ -539,7 +539,7 @@ struct DrawSkMesh final : Op {
             if (!cpuMesh.indexBuffer()) {
                 gpuMesh = SkMesh::Make(cpuMesh.refSpec(), cpuMesh.mode(), vb, cpuMesh.vertexCount(),
                                        cpuMesh.vertexOffset(), cpuMesh.refUniforms(),
-                                       cpuMesh.bounds())
+                                       SkSpan<SkRuntimeEffect::ChildPtr>(), cpuMesh.bounds())
                                   .mesh;
             } else {
                 sk_sp<SkMesh::IndexBuffer> ib =
@@ -547,7 +547,8 @@ struct DrawSkMesh final : Op {
                 gpuMesh = SkMesh::MakeIndexed(cpuMesh.refSpec(), cpuMesh.mode(), vb,
                                               cpuMesh.vertexCount(), cpuMesh.vertexOffset(), ib,
                                               cpuMesh.indexCount(), cpuMesh.indexOffset(),
-                                              cpuMesh.refUniforms(), cpuMesh.bounds())
+                                              cpuMesh.refUniforms(),
+                                              SkSpan<SkRuntimeEffect::ChildPtr>(), cpuMesh.bounds())
                                   .mesh;
             }
 
