@@ -3519,8 +3519,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         DisplayPowerState getDisplayPowerState(DisplayBlanker blanker, ColorFade colorFade,
                 int displayId, int displayState) {
-            return new DisplayPowerState(blanker, colorFade, displayId, displayState,
-                    new Handler(/*async=*/ true));
+            return new DisplayPowerState(blanker, colorFade, displayId, displayState);
         }
 
         DualRampAnimator<DisplayPowerState> getDualRampAnimator(DisplayPowerState dps,

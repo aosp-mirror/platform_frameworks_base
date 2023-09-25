@@ -113,6 +113,14 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         WindowContainerTransaction mFinishWCT = null;
 
         /**
+         * Whether the transition has request for remote transition while mLeftoversHandler
+         * isn't remote transition handler.
+         * If true and the mLeftoversHandler can handle the transition, need to notify remote
+         * transition handler to consume the transition.
+         */
+        boolean mHasRequestToRemote;
+
+        /**
          * Mixed transitions are made up of multiple "parts". This keeps track of how many
          * parts are currently animating.
          */
@@ -204,6 +212,10 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                     MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE, transition);
             mixed.mLeftoversHandler = handler.first;
             mActiveTransitions.add(mixed);
+            if (mixed.mLeftoversHandler != mPlayer.getRemoteTransitionHandler()) {
+                mixed.mHasRequestToRemote = true;
+                mPlayer.getRemoteTransitionHandler().handleRequest(transition, request);
+            }
             return handler.second;
         } else if (mSplitHandler.isSplitScreenVisible()
                 && isOpeningType(request.getType())
@@ -315,12 +327,22 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         // the time of handleRequest, but we need more information than is available at that time.
         if (KeyguardTransitionHandler.handles(info)) {
             if (mixed != null && mixed.mType != MixedTransition.TYPE_KEYGUARD) {
-                ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                        "Converting mixed transition into a keyguard transition");
-                onTransitionConsumed(transition, false, null);
+                final MixedTransition keyguardMixed =
+                        new MixedTransition(MixedTransition.TYPE_KEYGUARD, transition);
+                mActiveTransitions.add(keyguardMixed);
+                final boolean hasAnimateKeyguard = animateKeyguard(keyguardMixed, info,
+                        startTransaction, finishTransaction, finishCallback);
+                if (hasAnimateKeyguard) {
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "Converting mixed transition into a keyguard transition");
+                    // Consume the original mixed transition
+                    onTransitionConsumed(transition, false, null);
+                    return true;
+                } else {
+                    // Keyguard handler cannot handle it, process through original mixed
+                    mActiveTransitions.remove(keyguardMixed);
+                }
             }
-            mixed = new MixedTransition(MixedTransition.TYPE_KEYGUARD, transition);
-            mActiveTransitions.add(mixed);
         }
 
         if (mixed == null) return false;
@@ -331,8 +353,17 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         } else if (mixed.mType == MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE) {
             return false;
         } else if (mixed.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
-            return animateOpenIntentWithRemoteAndPip(mixed, info, startTransaction,
-                    finishTransaction, finishCallback);
+            final boolean handledToPip = animateOpenIntentWithRemoteAndPip(mixed, info,
+                    startTransaction, finishTransaction, finishCallback);
+            // Consume the transition on remote handler if the leftover handler already handle this
+            // transition. And if it cannot, the transition will be handled by remote handler, so
+            // don't consume here.
+            // Need to check leftOverHandler as it may change in #animateOpenIntentWithRemoteAndPip
+            if (handledToPip && mixed.mHasRequestToRemote
+                    && mixed.mLeftoversHandler != mPlayer.getRemoteTransitionHandler()) {
+                mPlayer.getRemoteTransitionHandler().onTransitionConsumed(transition, false, null);
+            }
+            return handledToPip;
         } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_SPLIT) {
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
@@ -803,6 +834,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             mixed.mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
         } else if (mixed.mType == MixedTransition.TYPE_UNFOLD) {
             mUnfoldHandler.onTransitionConsumed(transition, aborted, finishT);
+        }
+        if (mixed.mHasRequestToRemote) {
+            mPlayer.getRemoteTransitionHandler().onTransitionConsumed(transition, aborted, finishT);
         }
     }
 }

@@ -861,14 +861,10 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"向下移"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"向左移"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"向右移"</string>
-    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
-    <skip />
-    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
-    <skip />
-    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
-    <skip />
-    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
-    <skip />
+    <string name="accessibility_control_increase_window_width" msgid="6992249470832493283">"增加放大鏡闊度"</string>
+    <string name="accessibility_control_decrease_window_width" msgid="5740401560105929681">"縮窄放大鏡闊度"</string>
+    <string name="accessibility_control_increase_window_height" msgid="2200966116612324260">"增加放大鏡高度"</string>
+    <string name="accessibility_control_decrease_window_height" msgid="2054479949445332761">"縮短放大鏡高度"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"放大開關"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"放大成個畫面"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"放大部分螢幕畫面"</string>
@@ -1136,7 +1132,7 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"要允許「<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>」存取所有裝置記錄嗎？"</string>
-    <string name="log_access_confirmation_allow" msgid="752147861593202968">"允許存取一次"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"允許單次存取"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"不允許"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"裝置記錄會記下裝置的活動。應用程式可透過這些記錄找出並修正問題。\n\n部分記錄可能包含敏感資料，因此請只允許信任的應用程式存取所有裝置記錄。\n\n如果不允許此應用程式存取所有裝置記錄，此應用程式仍能存取自己的記錄，且裝置製造商可能仍可存取裝置上的部分記錄或資料。"</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"瞭解詳情"</string>
