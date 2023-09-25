@@ -26,7 +26,6 @@ import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -40,7 +39,9 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
+import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
@@ -69,6 +70,7 @@ constructor(
     private val context: Context,
     private val keyguardIndicationController: KeyguardIndicationController,
     private val lockIconViewController: LockIconViewController,
+    private val shadeInteractor: ShadeInteractor,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -135,6 +137,7 @@ constructor(
                 occludingAppDeviceEntryMessageViewModel,
                 chipbarCoordinator,
                 keyguardStateController,
+                shadeInteractor
             )
     }
 
