@@ -16,7 +16,6 @@
 package com.android.systemui.statusbar.phone
 
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
-import android.content.res.Configuration
 import android.graphics.Point
 import android.util.Log
 import android.view.MotionEvent
@@ -72,10 +71,6 @@ private constructor(
 
     private val configurationListener =
         object : ConfigurationController.ConfigurationListener {
-            override fun onConfigChanged(newConfig: Configuration?) {
-                mView.updateResources()
-            }
-
             override fun onDensityOrFontScaleChanged() {
                 mView.onDensityOrFontScaleChanged()
             }
