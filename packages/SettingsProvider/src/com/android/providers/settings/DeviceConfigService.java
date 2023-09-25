@@ -19,6 +19,7 @@ package com.android.providers.settings;
 import static android.provider.Settings.Config.SYNC_DISABLED_MODE_NONE;
 import static android.provider.Settings.Config.SYNC_DISABLED_MODE_PERSISTENT;
 import static android.provider.Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT;
+
 import static com.android.providers.settings.Flags.supportOverrides;
 
 import android.annotation.SuppressLint;
@@ -180,6 +181,7 @@ public final class DeviceConfigService extends Binder {
             DELETE,
             LIST,
             LIST_NAMESPACES,
+            LIST_LOCAL_OVERRIDES,
             RESET,
             SET_SYNC_DISABLED_FOR_TESTS,
             GET_SYNC_DISABLED_FOR_TESTS,
@@ -263,6 +265,11 @@ public final class DeviceConfigService extends Binder {
                 }
             } else if ("list_namespaces".equalsIgnoreCase(cmd)) {
                 verb = CommandVerb.LIST_NAMESPACES;
+                if (peekNextArg() == null) {
+                    isValid = true;
+                }
+            } else if (supportOverrides() && "list_local_overrides".equalsIgnoreCase(cmd)) {
+                verb = CommandVerb.LIST_LOCAL_OVERRIDES;
                 if (peekNextArg() == null) {
                     isValid = true;
                 }
@@ -418,62 +425,29 @@ public final class DeviceConfigService extends Binder {
                             : "Failed to delete " + key + " from " + namespace);
                     break;
                 case LIST:
-                    if (supportOverrides()) {
-                        pout.println("Server overrides:");
-
-                        Map<String, Map<String, String>> underlyingValues =
-                                DeviceConfig.getUnderlyingValuesForOverriddenFlags();
-
-                        if (namespace != null) {
-                            DeviceConfig.Properties properties =
-                                    DeviceConfig.getProperties(namespace);
-                            List<String> keys = new ArrayList<>(properties.getKeyset());
-                            Collections.sort(keys);
-                            for (String name : keys) {
-                                String valueReadFromDeviceConfig = properties.getString(name, null);
-                                String underlyingValue = underlyingValues.get(namespace).get(name);
-                                String printValue = underlyingValue != null
-                                        ? underlyingValue
-                                        : valueReadFromDeviceConfig;
-                                pout.println(name + "=" + printValue);
-                            }
-                        } else {
-                            for (String line : listAll(iprovider)) {
-                                boolean isPrivateNamespace = false;
-                                for (String privateNamespace : PRIVATE_NAMESPACES) {
-                                    if (line.startsWith(privateNamespace)) {
-                                        isPrivateNamespace = true;
-                                    }
-                                }
-                                if (!isPrivateNamespace) {
-                                    pout.println(line);
-                                }
-                            }
-                        }
-
-                        pout.println("");
-                        pout.println("Local overrides (these take precedence):");
-                        for (String overrideNamespace : underlyingValues.keySet()) {
-                            Map<String, String> flagToValue =
-                                    underlyingValues.get(overrideNamespace);
-                            for (String flag : flagToValue.keySet()) {
-                                String flagText = overrideNamespace + "/" + flag;
-                                String valueText =
-                                        DeviceConfig.getProperty(overrideNamespace, flag);
-                                pout.println(flagText + "=" + valueText);
-                            }
+                    if (namespace != null) {
+                        DeviceConfig.Properties properties =
+                                DeviceConfig.getProperties(namespace);
+                        List<String> keys = new ArrayList<>(properties.getKeyset());
+                        Collections.sort(keys);
+                        for (String name : keys) {
+                            pout.println(name + "=" + properties.getString(name, null));
                         }
                     } else {
-                        if (namespace != null) {
-                            DeviceConfig.Properties properties =
-                                    DeviceConfig.getProperties(namespace);
-                            List<String> keys = new ArrayList<>(properties.getKeyset());
-                            Collections.sort(keys);
-                            for (String name : keys) {
-                                pout.println(name + "=" + properties.getString(name, null));
-                            }
-                        } else {
-                            for (String line : listAll(iprovider)) {
+                        for (String line : listAll(iprovider)) {
+                            if (supportOverrides()) {
+                                boolean isPrivate = false;
+                                for (String privateNamespace : PRIVATE_NAMESPACES) {
+                                    if (line.startsWith(privateNamespace)) {
+                                        isPrivate = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!isPrivate) {
+                                    pout.println(line);
+                                }
+                            } else {
                                 pout.println(line);
                             }
                         }
@@ -501,6 +475,22 @@ public final class DeviceConfigService extends Binder {
                     }
                     for (int i = 0; i < namespaces.size(); i++) {
                         pout.println(namespaces.get(i));
+                    }
+                    break;
+                case LIST_LOCAL_OVERRIDES:
+                    if (supportOverrides()) {
+                        Map<String, Map<String, String>> underlyingValues =
+                                DeviceConfig.getUnderlyingValuesForOverriddenFlags();
+                        for (String overrideNamespace : underlyingValues.keySet()) {
+                            Map<String, String> flagToValue =
+                                    underlyingValues.get(overrideNamespace);
+                            for (String flag : flagToValue.keySet()) {
+                                String flagText = overrideNamespace + "/" + flag;
+                                String valueText =
+                                        DeviceConfig.getProperty(overrideNamespace, flag);
+                                pout.println(flagText + "=" + valueText);
+                            }
+                        }
                     }
                     break;
                 case RESET:
