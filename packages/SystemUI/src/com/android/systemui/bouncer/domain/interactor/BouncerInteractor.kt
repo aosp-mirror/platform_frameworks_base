@@ -235,17 +235,16 @@ constructor(
         repository.setMessage(errorMessage(authenticationInteractor.getAuthenticationMethod()))
     }
 
-    /** If the bouncer is showing, hides the bouncer and return to the lockscreen scene. */
-    fun hide(
-        loggingReason: String,
-    ) {
+    /** Notifies the interactor that the input method editor has been hidden. */
+    fun onImeHidden() {
+        // If the bouncer is showing, hide it and return to the lockscreen scene.
         if (sceneInteractor.desiredScene.value.key != SceneKey.Bouncer) {
             return
         }
 
         sceneInteractor.changeScene(
             scene = SceneModel(SceneKey.Lockscreen),
-            loggingReason = loggingReason,
+            loggingReason = "IME hidden",
         )
     }
 
