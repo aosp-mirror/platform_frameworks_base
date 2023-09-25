@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Hierdie bevoorregte of stelselprogram kan enige tyd met \'n stelselkamera foto\'s neem en video\'s opneem. Vereis dat die program ook die android.permission.CAMERA-toestemming het"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Laat \'n program of diens toe om terugbeloproepe te ontvang oor kameratoestelle wat oopgemaak of toegemaak word."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Hierdie program kan terugbeloproepe ontvang wanneer enige kameratoestel oopgemaak (deur watter program) of toegemaak word."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Laat ’n program of diens toe om toegang tot die kamera te verkry as ’n stelselgebruiker sonder koppelvlak."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Hierdie app het toegang tot die kamera as ’n stelselgebruiker sonder koppelvlak."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"beheer vibrasie"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Laat die program toe om die vibrator te beheer."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Stel die program in staat om toegang tot die vibreerderstand te kry."</string>

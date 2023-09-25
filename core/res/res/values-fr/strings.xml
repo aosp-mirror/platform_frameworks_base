@@ -502,6 +502,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Cette application privilégiée ou système peut utiliser une caméra photo système pour prendre des photos et enregistrer des vidéos à tout moment. Pour cela, l\'application doit également disposer de l\'autorisation android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Autoriser une application ou un service à recevoir des rappels liés à l\'ouverture ou à la fermeture de caméras"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Cette application peut recevoir des rappels lors de la fermeture ou de l\'ouverture d\'une caméra (par une application)."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"contrôler le vibreur"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet à l\'application de contrôler le vibreur."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permet à l\'application d\'accéder à l\'état du vibreur."</string>
@@ -1595,9 +1599,9 @@
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Vous avez dépassé votre limite définie de <xliff:g id="SIZE">%s</xliff:g>"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Données en arrière-plan limitées"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Appuyez pour suppr. restriction."</string>
-    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Conso données mobiles élevée"</string>
+    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Conso élevée des données mobiles"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Vos applications ont utilisé plus de données que d\'habitude"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> a utilisé plus de données que d\'habitude"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"L\'application <xliff:g id="APP">%s</xliff:g> a utilisé plus de données que d\'habitude"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Certificat de sécurité"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"Ce certificat est valide."</string>
     <string name="issued_to" msgid="5975877665505297662">"Délivré à :"</string>

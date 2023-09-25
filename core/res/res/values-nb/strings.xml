@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Denne privilegerte appen eller systemappen kan når som helst ta bilder og spille inn videoer med et systemkamera. Dette krever at appen også har tillatelsen android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tillat at en app eller tjeneste mottar tilbakekallinger om kameraenheter som åpnes eller lukkes."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Denne appen kan motta tilbakekallinger når en kameraenhet blir åpnet (av hvilken app) eller lukket."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Tillat at en app eller tjeneste bruker kameraet som en hodeløs systembruker."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Denne appen kan bruke kameraet som en hodeløs systembruker."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrollere vibreringen"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lar appen kontrollere vibreringsfunksjonen."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Gir appen tilgang til vibreringstilstanden."</string>

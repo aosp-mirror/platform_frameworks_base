@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Tämä oikeutettu tai järjestelmäsovellus voi ottaa järjestelmän kameralla kuvia ja videoita koska tahansa. Sovelluksella on oltava myös android.permission.CAMERA-lupa"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Salli sovelluksen tai palvelun vastaanottaa vastakutsuja kameralaitteiden avaamisesta tai sulkemisesta."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Tämä sovellus voi saada vastakutsuja, kun jokin kameralaite avataan tai suljetaan (jollakin sovelluksella)."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Myönnä sovellukselle tai palvelulle pääsy kameraan järjestelmäkäyttäjänä, jolla ei ole graafista käyttöliittymää."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Tämä sovellus saa pääsyn kameraan järjestelmäkäyttäjänä, jolla ei ole graafista käyttöliittymää."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"hallita värinää"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Antaa sovelluksen hallita värinää."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Sallii sovelluksen käyttää värinätilaa."</string>

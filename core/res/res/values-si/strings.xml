@@ -501,6 +501,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"මෙම වරප්‍රසාද ලත් හෝ පද්ධති යෙදුමට ඕනෑම වේලාවක පද්ධති කැමරාව භාවිත කර පින්තූර ගැනීමට සහ වීඩියෝ පටිගත කිරීමට හැකිය. යෙදුම විසින් රඳවා තබා ගැනීමට android.permission.CAMERA ප්‍රවේශයද අවශ්‍ය වේ"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"විවෘත වෙමින් හෝ වැසෙමින් පවතින කැමරා උපාංග පිළිබඳ පසු ඇමතුම් ලබා ගැනීමට යෙදුමකට හෝ සේවාවකට ඉඩ දෙන්න."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"මෙම යෙදුමට ඕනෑම කැමරා උපාංගයක් විවෘත වෙමින් පවතින විට (කුමන යෙදුමකින්) හෝ වැසෙමින් පවතින විට පසු ඇමතුම් ලබා ගැනීමට හැකිය."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"කම්පනය පාලනය කිරීම"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"කම්පකය පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"යෙදුමට කම්පන තත්ත්වයට ප්‍රවේශ වීමට ඉඩ දෙන්න."</string>

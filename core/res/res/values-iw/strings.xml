@@ -502,6 +502,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"‏האפליקציה הזו בעלת ההרשאות, או אפליקציית המערכת הזו, יכולה לצלם תמונות ולהקליט סרטונים באמצעות מצלמת מערכת בכל זמן. בנוסף, לאפליקציה נדרשת ההרשאה android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"‏אפליקציה או שירות יוכלו לקבל קריאות חוזרות (callback) כשמכשירי מצלמה ייפתחו או ייסגרו."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"‏האפליקציה הזו יכולה לקבל קריאות חוזרות (callback) כשמכשיר מצלמה כלשהו נפתח (באמצעות אפליקציה) או נסגר."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"מתן גישה למצלמת המערכת עבור אפליקציה או שירות כמשתמש באפליקציית מערכת ללא ממשק גרפי"</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"האפליקציה הזו יכולה לגשת למצלמה כמשתמש באפליקציית מערכת ללא ממשק גרפי."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"שליטה ברטט"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"מאפשרת לאפליקציה לשלוט ברטט."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"מאפשרת לאפליקציה לקבל גישה למצב רטט."</string>

@@ -502,6 +502,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ова привилегована системска апликација може да снима слике и видео снимке помоћу камере система у било ком тренутку. Апликација треба да има и дозволу android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дозволите апликацији или услузи да добија повратне позиве о отварању или затварању уређаја са камером."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ова апликација може да добија повратне позиве када се било који уређај са камером отвара или затвара (помоћу неке апликације)."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Дозволите апликацији или услузи да приступа камери као корисник система без графичког корисничког интерфејса."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Ова апликација може да приступа камери као корисник система без графичког корисничког интерфејса."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контрола вибрације"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозвољава апликацији да контролише вибрацију."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Дозвољава апликацији да приступа стању вибрирања."</string>

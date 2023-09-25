@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"ይህ ልዩ ፈቃድ ያለው የሥርዓት መተግበሪያ በማንኛውም ጊዜ የሥርዓት ካሜራን በመጠቀም ሥዕሎችን ማንሣት እና ቪዲዮ መቅረጽ ይችላል። የandroid.permission.CAMERA ፈቃዱ በመተግበሪያውም ጭምር እንዲያዝ ያስፈልገዋል።"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"አንድ መተግበሪያ ወይም አገልግሎት እየተከፈቱ ወይም እየተዘጉ ስላሉ የካሜራ መሣሪያዎች መልሶ ጥሪዎችን እንዲቀበል ይፍቀዱ።"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ማንኛውም የካሜራ መሣሪያ እየተከፈተ (በምን መተግበሪያ) ወይም እየተዘጋ ባለበት ጊዜ ይህ መተግበሪያ መልሶ ጥሪዎችን መቀበል ይችላል።"</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"መተግበሪያ ወይም አገልግሎት ካሜራን እንደ የበይነገፅ-አልባ ሥርዓት ተጠቃሚ እንዲደርስ ይፍቀዱ።"</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"ይህ መተግበሪያ ካሜራን እንደ የበይነገፅ-አልባ ሥርዓት ተጠቃሚ መድረስ ይችላል።"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ነዛሪ ተቆጣጠር"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ነዛሪውን ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"መተግበሪያው የንዝረት ሁኔታውን እንዲደርስ ያስችለዋል።"</string>

@@ -505,6 +505,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"‏إنّ تطبيق النظام هذا، أو التطبيق المزوّد بأذونات مميّزة، يمكنه التقاط صور وتسجيل فيديوهات باستخدام كاميرا النظام في أي وقت. ويجب أن يحصل التطبيق أيضًا على الإذن android.permission.CAMERA."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"يسمح الإذن لتطبيق أو خدمة بتلقّي استدعاءات عما إذا كانت أجهزة الكاميرات مفتوحة أو مغلقة."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"يمكن أن يتلقّى هذا التطبيق استدعاءات عندما تكون هناك كاميرا مفتوحة (بواسطة هذا التطبيق) أو مغلقة."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"التحكم في الاهتزاز"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"للسماح للتطبيق بالتحكم في الهزّاز."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"يسمح هذا الإذن للتطبيق بالوصول إلى حالة الهزّاز."</string>

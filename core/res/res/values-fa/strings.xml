@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"‏این برنامه سیستم یا دارای امتیاز، می‌تواند با استفاده از دوربین سیستم در هرزمانی عکس‌برداری و فیلم‌برداری کند. برنامه به اجازه android.permission.CAMERA هم نیاز دارد."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"مجاز کردن برنامه یا سرویس برای دریافت پاسخ تماس درباره دستگاه‌های دوربینی که باز یا بسته می‌شوند."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"این برنامه می‌تواند هروقت دستگاه دوربین باز (براساس برنامه) یا بسته می‌شود، پاسخ تماس دریافت کند."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"به برنامه یا سرویس اجازه داده شود به‌عنوان «کاربر سیستم بی‌سَر» به دوربین دسترسی پیدا کند."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"این برنامه می‌تواند به‌عنوان «کاربر سیستم بی‌سَر» به دوربین دسترسی پیدا کند."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"کنترل لرزش"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"‏به برنامه اجازه می‎دهد تا لرزاننده را کنترل کند."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"به برنامه اجازه می‌دهد تا به وضعیت لرزاننده دسترسی داشته باشد."</string>

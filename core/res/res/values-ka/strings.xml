@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"ამ პრივილეგირებულ ან სისტემის აპს შეუძლია ფოტოების გადაღება და ვიდეოების ჩაწერა ნებისმიერ დროს სისტემის კამერის გამოყენებით. საჭიროა, რომ აპს ჰქოდეს android.permission.CAMERA ნებართვაც"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ნება დაერთოს აპლიკაციას ან სერვისს, მიიღოს გადმორეკვები კამერის მოწყობილობის გახსნის ან დახურვისას."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ამ აპს შეუძლია მიიღოს გადმორეკვები, როდესაც რომელიმე კამერის მოწყობილობა იხსნება (რომელიმე აპლიკაციით) ან იხურება."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"დაუშვით აპლიკაციის ან სერვისის, როგორც სისტემის (გრაფიკული ინტერფეისის გარეშე) მომხმარებლის, წვდომა კამერაზე."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"ამ აპს შეუძლია კამერაზე წვდომა, როგორც სისტემის (გრაფიკული ინტერფეისის გარეშე) მომხმარებელს."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ვიბრაციის კონტროლი"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"აპს შეეძლება, მართოს ვიბრირება."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ნებას რთავს აპს, ჰქონდეს წვდომა ვიბრაციის მდგომარეობაზე."</string>

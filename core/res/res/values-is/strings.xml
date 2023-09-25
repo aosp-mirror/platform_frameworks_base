@@ -501,6 +501,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Þetta forgangs- eða kerfisforrit hefur heimild til að taka myndir og taka upp myndskeið með myndavél kerfisins hvenær sem er. Forritið þarf einnig að vera með heimildina android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Leyfa forriti eða þjónustu að taka við svörum um myndavélar sem verið er að opna eða loka."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Þetta forrit getur tekið við svörum þegar verið er að opna eða loka myndavél í hvaða forriti sem er."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"stjórna titringi"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Leyfir forriti að stjórna titraranum."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Veitir forritinu aðgang að stöðu titrings."</string>

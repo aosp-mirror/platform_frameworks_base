@@ -501,6 +501,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Осы айрықша немесе жүйе қолданбасы кез келген уақытта жүйелік камера арқылы суретке не бейнеге түсіре алады. Қолданбаға android.permission.CAMERA рұқсаты қажет болады."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Қолданбаға не қызметке ашылып не жабылып жатқан камера құрылғылары туралы кері шақыру алуға рұқсат ету"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Кез келген камера ашылып (көрсетілген қолданба арқылы) не жабылып жатқанда, бұл қолданба кері шақыру алады."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"тербелісті басқару"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Қолданбаға вибраторды басқаруға рұқсат береді."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Қолданбаға діріл күйін пайдалануға мүмкіндік береді."</string>

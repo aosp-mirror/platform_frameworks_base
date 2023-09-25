@@ -501,6 +501,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ứng dụng hệ thống có đặc quyền này có thể dùng máy ảnh hệ thống để chụp ảnh và quay video bất cứ lúc nào. Ngoài ra, ứng dụng này cũng cần có quyền android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Cho phép một ứng dụng hoặc dịch vụ nhận lệnh gọi lại khi các thiết bị máy ảnh đang được mở/đóng."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ứng dụng này có thể nhận các lệnh gọi lại khi có bất kỳ thiết bị camera nào đang được mở (bằng ứng dụng) hoặc đóng."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"kiểm soát rung"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Cho phép ứng dụng kiểm soát bộ rung."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Cho phép ứng dụng truy cập vào trạng thái bộ rung."</string>

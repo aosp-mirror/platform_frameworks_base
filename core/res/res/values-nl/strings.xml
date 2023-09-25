@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Deze gemachtigde app of systeem-app kan op elk gewenst moment foto\'s maken en video\'s opnemen met een systeemcamera. De app moet ook het recht android.permission.CAMERA hebben."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Een app of service toestaan callbacks te ontvangen over camera-apparaten die worden geopend of gesloten."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Deze app kan callbacks ontvangen als een camera-apparaat wordt geopend (en door welke app) of gesloten."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Toestaan dat een app of service toegang tot de camera heeft als gebruiker van een systeem zonder interface."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Deze app heeft toegang tot de camera als gebruiker van een systeem zonder interface."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"trilling beheren"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Hiermee kan de app de trilstand beheren."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Hiermee heeft de app toegang tot de status van de trilstand."</string>

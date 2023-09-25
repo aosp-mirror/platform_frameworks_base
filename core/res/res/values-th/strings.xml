@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"แอปของระบบหรือที่ได้รับสิทธิ์นี้จะถ่ายภาพและบันทึกวิดีโอโดยใช้กล้องของระบบได้ทุกเมื่อ แอปต้องมีสิทธิ์ android.permission.CAMERA ด้วย"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"อนุญาตให้แอปพลิเคชันหรือบริการได้รับโค้ดเรียกกลับเมื่อมีการเปิดหรือปิดอุปกรณ์กล้อง"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"แอปนี้จะได้รับโค้ดเรียกกลับเมื่อมีการปิดหรือเปิดอุปกรณ์กล้อง (โดยแอปพลิเคชันที่เปิด)"</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"อนุญาตให้แอปพลิเคชันหรือบริการเข้าถึงกล้องในฐานะผู้ใช้ระบบแบบไม่มีส่วนหัว"</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"แอปนี้เข้าถึงกล้องในฐานะผู้ใช้ระบบแบบไม่มีส่วนหัว"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ควบคุมการสั่นเตือน"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"อนุญาตให้แอปพลิเคชันควบคุมการสั่นเตือน"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"อนุญาตให้แอปเข้าถึงสถานะการสั่น"</string>

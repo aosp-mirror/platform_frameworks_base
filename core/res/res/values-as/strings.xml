@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"এই বিশেষাধিকাৰ প্ৰাপ্ত অথবা ছিষ্টেম এপ্‌টোৱে এটা ছিষ্টেম কেমেৰা ব্যৱহাৰ কৰি যিকোনো সময়তে ফট’ উঠাব পাৰে আৰু ভিডিঅ’ ৰেকৰ্ড কৰিব পাৰে। লগতে এপ্‌টোৰো android.permission.CAMERAৰ অনুমতি থকাটো প্ৰয়োজনীয়"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"কোনো এপ্লিকেশ্বন অথবা সেৱাক কেমেৰা ডিভাইচসমূহ খোলা অথবা বন্ধ কৰাৰ বিষয়ে কলবেকসমূহ গ্ৰহণ কৰিবলৈ অনুমতি দিয়ক।"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"যিকোনো কেমেৰা ডিভাইচ খুলি থকা অথবা বন্ধ কৰি থকাৰ সময়ত (কোনো এপ্লিকেশ্বনৰ দ্বাৰা) এই এপ্‌টোৱে কলবেক গ্ৰহণ কৰিব পাৰে।"</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"কোনো এপ্লিকেশ্বন বা সেৱাক পৰিধীয় ডিভাইচহীন ছিষ্টেম ব্যৱহাৰকাৰী হিচাপে কেমেৰা এক্সেছ কৰা অনুমতি দিয়ক।"</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"এই এপ্‌টোৱে পৰিধীয় ডিভাইচহীন ছিষ্টেম ব্যৱহাৰকাৰী হিচাপে কেমেৰা এক্সেছ কৰিব পাৰে।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"কম্পন নিয়ন্ত্ৰণ কৰক"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ভাইব্ৰেটৰ নিয়ন্ত্ৰণ কৰিবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"এপ্‌টোক কম্পন স্থিতিটো এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>

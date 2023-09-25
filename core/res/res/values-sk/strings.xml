@@ -503,6 +503,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Táto oprávnená alebo systémová aplikácia môže kedykoľvek fotiť a nahrávať videá fotoaparátom systému. Aplikácia musí mať tiež povolenie android.permission.CAMERA."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Povoliť aplikácii alebo službe prijímať spätné volanie, keď sú zariadenia s kamerou otvorené alebo zatvorené."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Táto aplikácia môže prijímať spätné volania pri otváraní alebo zatváraní ľubovoľného fotoaparátu (s infomáciou o aplikácii, ktorá to robí)."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Povoľte aplikácii alebo službe prístup ku kamere ako systém bez grafického rozhrania."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Táto aplikácia má prístup ku kamere ako systém bez grafického rozhrania."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ovládať vibrovanie"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Umožňuje aplikácii ovládať vibrácie."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Povoľuje aplikácii prístup k stavu vibrátora."</string>

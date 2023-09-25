@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"हे विशेषाधिकृत किंवा सिस्टम ॲप कधीही सिस्टम कॅमेरा वापरून फोटो आणि व्हिडिओ रेकॉर्ड करू शकते. ॲपकडे android.permission.CAMERA परवानगी असण्याचीदेखील आवश्यकता आहे"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"एखाद्या अ‍ॅप्लिकेशन किंवा सेवेला कॅमेरा डिव्हाइस सुरू किंवा बंद केल्याची कॉलबॅक मिळवण्याची अनुमती द्या."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"कोणतेही कॅमेरा डिव्हाइस (कोणत्या अ‍ॅप्लिकेशनने) सुरू किंवा बंद केले जाते तेव्हा हे ॲप कॉलबॅक मिळवू शकते."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"अ‍ॅप्लिकेशन किंवा सेवेला हेडलेस सिस्टीम वापरकर्ता म्हणून कॅमेरा अ‍ॅक्सेस करण्याची अनुमती द्या."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"हे अ‍ॅप हेडलेस सिस्टीम वापरकर्ता म्हणून कॅमेरा अ‍ॅक्सेस करू शकते."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"व्हायब्रेट नियंत्रित करा"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"अ‍ॅप ला व्हायब्रेटर नियंत्रित करण्यासाठी अनुमती देते."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"अ‍ॅपला व्हायब्रेटर स्थितीचा अ‍ॅक्सेस करण्याची अनुमती देते."</string>

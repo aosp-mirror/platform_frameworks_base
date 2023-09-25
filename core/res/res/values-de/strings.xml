@@ -501,6 +501,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Diese privilegierte App oder System-App kann jederzeit mit einer Systemkamera Bilder und Videos aufnehmen. Die App benötigt auch die Berechtigung \"android.permission.CAMERA\"."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Einer App oder einem Dienst den Empfang von Callbacks erlauben, wenn eine Kamera geöffnet oder geschlossen wird."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Diese App kann Callbacks empfangen, wenn eine der Kameras des Geräts von einer Anwendung geöffnet oder geschlossen wird."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"Vibrationsalarm steuern"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ermöglicht der App, den Vibrationsalarm zu steuern"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ermöglicht der App, auf den Vibrationsstatus zuzugreifen."</string>
