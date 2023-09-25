@@ -110,6 +110,7 @@ public final class LineBreakConfig {
      * This value is resolved to {@link #LINE_BREAK_STYLE_NONE} if this value is used for text
      * layout/rendering.
      */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public static final int LINE_BREAK_STYLE_UNSPECIFIED = -1;
 
     /**
@@ -165,6 +166,7 @@ public final class LineBreakConfig {
      * This value is resolved to {@link #LINE_BREAK_WORD_STYLE_NONE} if this value is used for
      * text layout/rendering.
      */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public static final int LINE_BREAK_WORD_STYLE_UNSPECIFIED = -1;
 
     /**
@@ -236,6 +238,7 @@ public final class LineBreakConfig {
          * @param config an override line break config
          * @return This {@code Builder}.
          */
+        @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
         public @NonNull Builder merge(@NonNull LineBreakConfig config) {
             if (config.mLineBreakStyle != LINE_BREAK_STYLE_UNSPECIFIED) {
                 mLineBreakStyle = config.mLineBreakStyle;
@@ -483,6 +486,7 @@ public final class LineBreakConfig {
      * @param config an overriding config.
      * @return newly created instance that is current style merged with passed config.
      */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public @NonNull LineBreakConfig merge(@NonNull LineBreakConfig config) {
         return new LineBreakConfig(
                 config.mLineBreakStyle == LINE_BREAK_STYLE_UNSPECIFIED
