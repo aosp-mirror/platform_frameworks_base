@@ -253,7 +253,8 @@ public class TouchExplorerTest {
         goFromStateClearTo(STATE_TOUCH_EXPLORING_1FINGER);
         moveEachPointers(mLastEvent, p(10, 10));
         send(mLastEvent);
-
+        // Wait 10 ms to make sure that hover enter and exit are not scheduled for the same moment.
+        mHandler.fastForward(10);
         send(upEvent());
         // Wait for sending hover exit event to transit to clear state.
         mHandler.fastForward(USER_INTENT_TIMEOUT);

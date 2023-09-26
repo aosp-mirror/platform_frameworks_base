@@ -32,6 +32,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.RefreshRateRange;
 import android.view.SurfaceControl.Transaction;
 import android.window.DisplayWindowPolicyController;
+import android.window.ScreenCapture;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -109,6 +110,25 @@ public abstract class DisplayManagerInternal {
      * @param listener The listener to unregister.
      */
     public abstract void unregisterDisplayGroupListener(DisplayGroupListener listener);
+
+    /**
+     * Screenshot for internal system-only use such as rotation, etc.  This method includes
+     * secure layers and the result should never be exposed to non-system applications.
+     * This method does not apply any rotation and provides the output in natural orientation.
+     *
+     * @param displayId The display id to take the screenshot of.
+     * @return The buffer or null if we have failed.
+     */
+    public abstract ScreenCapture.ScreenshotHardwareBuffer systemScreenshot(int displayId);
+
+    /**
+     * General screenshot functionality that excludes secure layers and applies appropriate
+     * rotation that the device is currently in.
+     *
+     * @param displayId The display id to take the screenshot of.
+     * @return The buffer or null if we have failed.
+     */
+    public abstract ScreenCapture.ScreenshotHardwareBuffer userScreenshot(int displayId);
 
     /**
      * Returns information about the specified logical display.

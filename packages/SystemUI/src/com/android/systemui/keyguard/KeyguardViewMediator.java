@@ -3798,6 +3798,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     /**
+     * Notify whether keyguard has created a remote animation runner for next app launch.
+     */
+    public void launchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen) {
+        mKeyguardTransitions.setLaunchingActivityOverLockscreen(isLaunchingActivityOverLockscreen);
+    }
+
+    /**
      * Implementation of RemoteAnimationRunner that creates a new
      * {@link ActivityLaunchAnimator.Runner} whenever onAnimationStart is called, delegating the
      * remote animation methods to that runner.

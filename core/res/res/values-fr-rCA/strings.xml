@@ -502,6 +502,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Cette application privilégiée ou système peut prendre des photos ou filmer des vidéos à l\'aide d\'un appareil photo système en tout temps. L\'application doit également posséder l\'autorisation android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Autoriser une application ou un service de recevoir des rappels relatifs à l\'ouverture ou à la fermeture des appareils photos."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Cette application peut recevoir des rappels lorsque l\'appareil photo est ouvert ou fermé (par l\'application en question)."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"gérer le vibreur"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet à l\'application de gérer le vibreur de l\'appareil."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permet à l\'application d\'accéder au mode vibration."</string>

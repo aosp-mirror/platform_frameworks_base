@@ -137,6 +137,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.RefreshRateRange;
 import android.window.DisplayWindowPolicyController;
+import android.window.ScreenCapture;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -2673,6 +2674,42 @@ public final class DisplayManagerService extends SystemService {
         return null;
     }
 
+    private ScreenCapture.ScreenshotHardwareBuffer systemScreenshotInternal(int displayId) {
+        final ScreenCapture.DisplayCaptureArgs captureArgs;
+        synchronized (mSyncRoot) {
+            final IBinder token = getDisplayToken(displayId);
+            if (token == null) {
+                return null;
+            }
+            final LogicalDisplay logicalDisplay = mLogicalDisplayMapper.getDisplayLocked(displayId);
+            if (logicalDisplay == null) {
+                return null;
+            }
+
+            final DisplayInfo displayInfo = logicalDisplay.getDisplayInfoLocked();
+            captureArgs = new ScreenCapture.DisplayCaptureArgs.Builder(token)
+                    .setSize(displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight())
+                    .setCaptureSecureLayers(true)
+                    .setAllowProtected(true)
+                    .build();
+        }
+        return ScreenCapture.captureDisplay(captureArgs);
+    }
+
+    private ScreenCapture.ScreenshotHardwareBuffer userScreenshotInternal(int displayId) {
+        synchronized (mSyncRoot) {
+            final IBinder token = getDisplayToken(displayId);
+            if (token == null) {
+                return null;
+            }
+
+            final ScreenCapture.DisplayCaptureArgs captureArgs =
+                    new ScreenCapture.DisplayCaptureArgs.Builder(token)
+                            .build();
+            return ScreenCapture.captureDisplay(captureArgs);
+        }
+    }
+
     @VisibleForTesting
     DisplayedContentSamplingAttributes getDisplayedContentSamplingAttributesInternal(
             int displayId) {
@@ -4438,6 +4475,16 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public void unregisterDisplayGroupListener(DisplayGroupListener listener) {
             mDisplayGroupListeners.remove(listener);
+        }
+
+        @Override
+        public ScreenCapture.ScreenshotHardwareBuffer systemScreenshot(int displayId) {
+            return systemScreenshotInternal(displayId);
+        }
+
+        @Override
+        public ScreenCapture.ScreenshotHardwareBuffer userScreenshot(int displayId) {
+            return userScreenshotInternal(displayId);
         }
 
         @Override

@@ -57,10 +57,7 @@ class PowerInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        repository =
-            FakePowerRepository(
-                initialInteractive = true,
-            )
+        repository = FakePowerRepository()
         underTest =
             PowerInteractor(
                 repository,

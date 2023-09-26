@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"権限を付与されたこのアプリまたはシステムアプリは、いつでもシステムカメラを使用して写真と動画を撮影できます。アプリには android.permission.CAMERA 権限も必要です"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"カメラデバイスが起動または終了したときにコールバックを受け取ることを、アプリまたはサービスに許可してください。"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"このアプリは、カメラデバイスが（なんらかのアプリによって）起動するとき、または終了するときにコールバックを受け取ることができます。"</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"ヘッドレス システム ユーザーとしてカメラにアクセスすることをアプリまたはサービスに許可してください。"</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"このアプリはヘッドレス システム ユーザーとしてカメラにアクセスできます。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"バイブレーションの制御"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"バイブレーションの制御をアプリに許可します。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"バイブレーションのオン / オフ状態の把握をアプリに許可します。"</string>

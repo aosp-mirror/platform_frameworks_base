@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"ສິດ ຫຼື ແອັບລະບົບນີ້ສາມາດຖ່າຍຮູບ ແລະ ບັນທຶກວິດີໂອໂດຍໃຊ້ກ້ອງຂອງລະບົບຕອນໃດກໍໄດ້. ຕ້ອງໃຊ້ສິດອະນຸຍາດ android.permission.CAMERA ໃຫ້ແອັບຖືນຳ"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນ ຫຼື ບໍລິການຮັບການເອີ້ນກັບກ່ຽວກັບອຸປະກອນກ້ອງຖືກເປີດ ຫຼື ປິດໄດ້."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ແອັບນີ້ສາມາດຮັບການເອີ້ນກັບໄດ້ເມື່ອມີອຸປະກອນກ້ອງໃດຖືກເປີດ (ໂດຍແພັກເກດແອັບພລິເຄຊັນຫຍັງ) ຫຼື ຖືກປິດ."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນ ຫຼື ບໍລິການເຂົ້າເຖິງກ້ອງໃນຖານະຜູ້ໃຊ້ລະບົບແບບບໍ່ມີສ່ວນຫົວ."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"ແອັບນີ້ສາມາດເຂົ້າເຖິງກ້ອງໃນຖານະຜູ້ໃຊ້ລະບົບແບບບໍ່ມີສ່ວນຫົວໄດ້."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ຄວບຄຸມການສັ່ນ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ອະນຸຍາດໃຫ້ແອັບຯຄວບຄຸມໂຕສັ່ນ."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງສະຖານະການສັ່ນໄດ້."</string>

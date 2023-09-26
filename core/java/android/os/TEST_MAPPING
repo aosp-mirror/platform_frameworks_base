@@ -7,7 +7,7 @@
       ],
       "name": "FrameworksVibratorCoreTests",
       "options": [
-        {"exclude-annotation": "android.platform.test.annotations.LargeTest"},
+        {"exclude-annotation": "androidx.test.filters.LargeTest"},
         {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"},
         {"exclude-annotation": "org.junit.Ignore"}
@@ -20,7 +20,7 @@
       ],
       "name": "FrameworksVibratorServicesTests",
       "options": [
-        {"exclude-annotation": "android.platform.test.annotations.LargeTest"},
+        {"exclude-annotation": "androidx.test.filters.LargeTest"},
         {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"},
         {"exclude-annotation": "org.junit.Ignore"}
@@ -33,7 +33,7 @@
       ],
       "name": "CtsVibratorTestCases",
       "options": [
-        {"exclude-annotation": "android.platform.test.annotations.LargeTest"},
+        {"exclude-annotation": "androidx.test.filters.LargeTest"},
         {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"},
         {"exclude-annotation": "org.junit.Ignore"}

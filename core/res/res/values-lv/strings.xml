@@ -502,6 +502,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Šī privileģētā vai sistēmas lietotne var jebkurā brīdī uzņemt attēlus un ierakstīt videoklipus, izmantojot sistēmas kameru. Lietotnei nepieciešama arī atļauja android.permission.CAMERA."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Atļaut lietojumprogrammai vai pakalpojumam saņemt atzvanus par kameras ierīču atvēršanu vai aizvēršanu"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Šajā lietotnē var saņemt atzvanus, ja tiek atvērta vai aizvērta jebkāda kameras ierīce (atkarībā no lietojumprogrammas)."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolēt vibrosignālu"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ļauj lietotnei kontrolēt vibrosignālu."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ļauj lietotnei piekļūt vibrosignāla statusam."</string>

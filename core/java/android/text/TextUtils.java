@@ -2495,8 +2495,14 @@ public class TextUtils {
 
                 // Even if the argument name is `ellipsizeDip`, the unit of this argument is pixels.
                 final int charCount = (int) ((ellipsizeDip + 0.5f) / assumedCharWidthInPx);
-                return TextUtils.trimToSize(gettingCleaned.toString(), charCount)
-                        + getEllipsisString(TruncateAt.END);
+
+                final String text = gettingCleaned.toString();
+                if (TextUtils.isEmpty(text) || text.length() <= charCount) {
+                    return text;
+                } else {
+                    return TextUtils.trimToSize(text, charCount)
+                            + getEllipsisString(TruncateAt.END);
+                }
             } else {
                 // Truncate
                 final TextPaint paint = new TextPaint();

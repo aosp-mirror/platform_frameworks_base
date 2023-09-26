@@ -503,6 +503,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ta aplikacja systemowa z podwyższonymi uprawnieniami może w dowolnym momencie robić zdjęcia i nagrywać filmy przy użyciu aparatu systemowego. Wymaga przyznania uprawnień android.permission.CAMERA również aplikacji."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Zezwól na dostęp aplikacji lub usługi na otrzymywanie wywoływania zwrotnego o urządzeniach z aparatem, kiedy są one uruchamiane lub zamykane."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ta aplikacja może otrzymywać wywołania zwrotne, kiedy urządzenie z aparatem jest uruchamiane (przez jaką aplikację) albo zamykane."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"sterowanie wibracjami"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Pozwala aplikacji na sterowanie wibracjami."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Zezwala aplikacji na dostęp do stanu wibracji"</string>
@@ -812,7 +816,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Przy odblokowywaniu ekranu monitoruj, ile razy wpisano nieprawidłowe hasło i blokuj tablet lub usuń z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitorowanie liczby nieudanych prób odblokowania ekranu za pomocą hasła oraz blokowanie urządzenia z Androidem TV lub kasowanie z niego wszystkich danych w razie wpisania błędnego hasła zbyt wiele razy."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitorowanie przypadków nieprawidłowego wpisania hasła podczas odblokowywania ekranu i blokowanie systemu multimedialno-rozrywkowego lub usuwanie z niego wszystkich danych przy zbyt dużej liczbie błędnych prób."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło, i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło, i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitorowanie, ile razy wpisano błędne hasło podczas odblokowywania ekranu, oraz blokowanie tabletu albo kasowanie wszystkich danych tego użytkownika, gdy zbyt wiele razy wpisano błędne hasło."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitorowanie, ile razy wpisano błędne hasło podczas odblokowywania ekranu, oraz blokowanie urządzenia z Androidem TV albo kasowanie wszystkich danych tego użytkownika, gdy błędne hasło zostało wpisane zbyt wiele razy."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitorowanie przypadków nieprawidłowego wpisania hasła podczas odblokowywania ekranu i blokowanie systemu multimedialno-rozrywkowego lub usuwanie wszystkich danych z profilu przy zbyt dużej liczbie błędnych prób."</string>

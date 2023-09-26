@@ -12,7 +12,7 @@
       "name": "CtsPackageManagerIncrementalStatsHostTestCases",
       "options": [
         {
-          "exclude-annotation": "android.platform.test.annotations.LargeTest"
+          "exclude-annotation": "androidx.test.filters.LargeTest"
         }
       ]
     },
@@ -55,7 +55,7 @@
       "name": "CtsPackageManagerIncrementalStatsHostTestCases",
       "options": [
         {
-          "include-annotation": "android.platform.test.annotations.LargeTest"
+          "include-annotation": "androidx.test.filters.LargeTest"
         }
       ]
     }

@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"ఈ విశేష లేదా సిస్టమ్ యాప్ ఎప్పుడైనా సిస్టమ్ కెమెరాను ఉపయోగించి ఫోటోలు తీయగలదు, వీడియోలను రికార్డ్ చేయగలదు. యాప్‌కు android.permission.CAMERA అనుమతి ఇవ్వడం కూడా అవసరం"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"కెమెరా పరికరాలు తెరుచుకుంటున్నప్పుడు లేదా మూసుకుంటున్నప్పుడు కాల్‌బ్యాక్‌లను స్వీకరించడానికి యాప్‌ను లేదా సర్వీస్‌ను అనుమతించండి."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ఏదైనా కెమెరా పరికరం తెరుచుకుంటున్నప్పుడు (ఏదైనా యాప్ ద్వారా) లేదా మూసుకుంటున్నప్పుడు ఈ యాప్ కాల్‌బ్యాక్‌లను అందుకోగలదు."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"హెడ్‌లెస్ సిస్టమ్ యూజర్‌గా కెమెరాను యాక్సెస్ చేయడానికి అప్లికేషన్ లేదా సర్వీస్‌ను అనుమతించండి."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"ఈ యాప్ హెడ్‌లెస్ సిస్టమ్ యూజర్‌గా కెమెరాను యాక్సెస్ చేయగలదు."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"వైబ్రేషన్‌ను నియంత్రించడం"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"వైబ్రేటర్‌ను నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"వైబ్రేటర్ స్థితిని యాక్సెస్ చేసేందుకు యాప్‌ను అనుమతిస్తుంది."</string>

@@ -41,6 +41,12 @@ import kotlinx.coroutines.flow.stateIn
 
 /** Repository for the current state of the display */
 interface DisplayStateRepository {
+    /**
+     * Whether or not the direction rotation is applied to get to an application's requested
+     * orientation is reversed.
+     */
+    val isReverseDefaultRotation: Boolean
+
     /** Provides the current rear display state. */
     val isInRearDisplayMode: StateFlow<Boolean>
 
@@ -59,6 +65,9 @@ constructor(
     @Main handler: Handler,
     @Main mainExecutor: Executor
 ) : DisplayStateRepository {
+    override val isReverseDefaultRotation =
+        context.resources.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
+
     override val isInRearDisplayMode: StateFlow<Boolean> =
         conflatedCallbackFlow {
                 val sendRearDisplayStateUpdate = { state: Boolean ->
@@ -94,7 +103,11 @@ constructor(
     private fun getDisplayRotation(): DisplayRotation {
         val cachedDisplayInfo = DisplayInfo()
         context.display?.getDisplayInfo(cachedDisplayInfo)
-        return cachedDisplayInfo.rotation.toDisplayRotation()
+        var rotation = cachedDisplayInfo.rotation
+        if (isReverseDefaultRotation) {
+            rotation = (rotation + 1) % 4
+        }
+        return rotation.toDisplayRotation()
     }
 
     override val currentRotation: StateFlow<DisplayRotation> =

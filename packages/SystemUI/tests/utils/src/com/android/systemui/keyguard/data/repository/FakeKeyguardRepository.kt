@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
 import com.android.systemui.common.shared.model.Position
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DismissAction
@@ -31,6 +32,9 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +42,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [KeyguardRepository] */
-class FakeKeyguardRepository : KeyguardRepository {
+@SysUISingleton
+class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _deferKeyguardDone: MutableSharedFlow<KeyguardDone> = MutableSharedFlow()
     override val keyguardDone: Flow<KeyguardDone> = _deferKeyguardDone
 
@@ -279,4 +284,9 @@ class FakeKeyguardRepository : KeyguardRepository {
                 occlusionTransitionRunning
             )
     }
+}
+
+@Module
+interface FakeKeyguardRepositoryModule {
+    @Binds fun bindFake(fake: FakeKeyguardRepository): KeyguardRepository
 }

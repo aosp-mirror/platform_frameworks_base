@@ -501,6 +501,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Denna systemapp med särskild behörighet kan ta bilder och spela in videor med systemets kamera när som helst. Appen måste även ha behörigheten android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tillåt att en app eller tjänst får återanrop när en kameraenhet öppnas eller stängs."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Den här appen kan få återanrop när en kameraenhet öppnas (efter app) eller stängs."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"styra vibration"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tillåter att appen styr vibrationen."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Appen beviljas åtkomst till vibrationsstatus."</string>

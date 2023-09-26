@@ -238,7 +238,7 @@
     <string name="reboot_safemode_title" msgid="5853949122655346734">"safe mode ဖြင့် ပြန်လည် စ တင်ရန်"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"safe mode ကို ပြန်လည် စတင် မလား? ဒီလို စတင်ခြင်းဟာ သင် သွင်းထားသော တတိယပါတီ အပလီကေးရှင်းများအား ရပ်ဆိုင်းထားပါမည်။ ပုံမှန်အတိုင်း ပြန်စလျှင် ထိုအရာများ ပြန်လည် ရောက်ရှိလာပါမည်။"</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"လတ်တလော"</string>
-    <string name="no_recent_tasks" msgid="9063946524312275906">"မကြာမီတုန်းက အက်ပ်များ မရှိပါ"</string>
+    <string name="no_recent_tasks" msgid="9063946524312275906">"မကြာသေးမီက အက်ပ်များ မရှိပါ"</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV ရွေးချယ်စရာများ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ဖုန်းဆိုင်ရာရွေးချယ်မှုများ"</string>
@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"ဤခွင့်ပြုထားသည့် သို့မဟုတ် စနစ်အက်ပ်က စနစ်ကင်မရာအသုံးပြုပြီး ဓာတ်ပုံနှင့် ဗီဒီယိုများကို အချိန်မရွေး ရိုက်ကူးနိုင်သည်။ အက်ပ်ကလည်း android.permission.CAMERA ခွင့်ပြုချက် ရှိရပါမည်"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ကင်မရာစက်များ ပွင့်နေခြင်း သို့မဟုတ် ပိတ်နေခြင်းနှင့် ပတ်သက်ပြီး ပြန်လည်ခေါ်ဆိုမှုများ ရယူရန် အပလီကေးရှင်း သို့မဟုတ် ဝန်ဆောင်မှုကို ခွင့်ပြုခြင်း။"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"(မည်သည့် အပလီကေးရှင်းကြောင့်) ကင်မရာစက်တစ်ခုခု ပွင့်နေသည့်အခါ သို့မဟုတ် ပိတ်နေသည့်အခါ ဤအက်ပ်က ပြန်လည်ခေါ်ဆိုမှုများ ရယူနိုင်သည်။"</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"‘မမြင်နိုင်သော စနစ်အသုံးပြုသူ’ အဖြစ် ကင်မရာသုံးရန် အပလီကေးရှင်း (သို့) ဝန်ဆောင်မှုကို ခွင့်ပြုပါ။"</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"ဤအက်ပ်သည် ‘မမြင်နိုင်သော စနစ်အသုံးပြုသူ’ အဖြစ် ကင်မရာသုံးနိုင်သည်။"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"တုန်ခုန်မှုအား ထိန်းချုပ်ခြင်း"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"အက်ပ်အား တုန်ခါစက်ကို ထိန်းချုပ်ခွင့် ပြုသည်။"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"အက်ပ်ကို တုန်ခါမှုအခြေအနေအား သုံးခွင့်ပေးပါ။"</string>
@@ -2135,7 +2137,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ဤအက်ပ်ကို အသံဖမ်းခွင့် ပေးမထားသော်လည်း ၎င်းသည် ဤ USB စက်ပစ္စည်းမှတစ်ဆင့် အသံများကို ဖမ်းယူနိုင်ပါသည်။"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ပင်မစာမျက်နှာ"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"နောက်သို့"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"လတ်တလောသုံး အက်ပ်များ"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"မကြာသေးမီက အက်ပ်များ"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"အကြောင်းကြားချက်များ"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"အမြန် ဆက်တင်များ"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"ပါဝါ ဒိုင်ယာလော့"</string>

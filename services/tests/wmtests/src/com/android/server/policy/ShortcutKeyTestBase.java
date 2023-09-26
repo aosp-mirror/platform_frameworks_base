@@ -46,7 +46,6 @@ import static com.android.server.policy.WindowManagerPolicy.ACTION_PASS_TO_USER;
 import static java.util.Collections.unmodifiableMap;
 
 import android.content.Context;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.view.InputDevice;
@@ -99,10 +98,6 @@ class ShortcutKeyTestBase {
      *      settings values.
      */
     protected final void setUpPhoneWindowManager(boolean supportSettingsUpdate) {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
         doReturn(mSettingsProviderRule.mockContentResolver(mContext))
                 .when(mContext).getContentResolver();
         mPhoneWindowManager = new TestPhoneWindowManager(mContext, supportSettingsUpdate);

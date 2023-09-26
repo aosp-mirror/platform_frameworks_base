@@ -4681,9 +4681,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             @UserIdInt int userId, @NonNull String recentCallingPackage,
             @NonNull String debugInfo) {
         synchronized (mLock) {
-            final PackageUserStateInternal userState = mSettings.getPackageLPr(
-                    packageName).getUserStateOrDefault(userId);
-            if (userState.isQuarantined()) {
+            final PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
+            // If the package doesn't exist, don't need to proceed to setPackageStoppedState.
+            if (pkgSetting == null) {
+                return;
+            }
+            if (pkgSetting.getUserStateOrDefault(userId).isQuarantined()) {
                 Slog.i(TAG,
                         "Component is quarantined+suspended but being used: "
                                 + packageName + " by " + recentCallingPackage + ", debugInfo: "

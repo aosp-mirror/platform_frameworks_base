@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ang may pribilehiyong app o system app na ito ay makakakuha ng mga larawan at makakapag-record ng mga video gamit ang isang camera ng system anumang oras. Kinakailangang may android.permission.CAMERA na pahintulot din ang app"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Payagan ang isang application o serbisyo na makatanggap ng mga callback tungkol sa pagbubukas o pagsasara ng mga camera device."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Puwedeng makatanggap ang app na ito ng mga callback kapag binubuksan (kung anong application) o isinasara ang anumang camera device."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Payagan ang isang application o serbisyo na i-access ang camera bilang Headless System User."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Maa-access ng app na ito ang camera bilang Headless System User."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolin ang pag-vibrate"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Pinapayagan ang app na kontrolin ang vibrator."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Pinapayagan ang app na ma-access ang naka-vibrate na status."</string>

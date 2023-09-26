@@ -1313,9 +1313,6 @@ public class HdmiControlService extends SystemService {
             localDevice.init();
             localDevices.add(localDevice);
         }
-        // It's now safe to flush existing local devices from mCecController since they were
-        // already moved to 'localDevices'.
-        clearCecLocalDevices();
         mHdmiCecNetwork.clearDeviceList();
         allocateLogicalAddress(localDevices, initiatedBy);
     }
@@ -1344,6 +1341,7 @@ public class HdmiControlService extends SystemService {
                             if (logicalAddress == Constants.ADDR_UNREGISTERED) {
                                 Slog.e(TAG, "Failed to allocate address:[device_type:" + deviceType
                                         + "]");
+                                mHdmiCecNetwork.removeLocalDeviceWithType(deviceType);
                             } else {
                                 // Set POWER_STATUS_ON to all local devices because they share
                                 // lifetime
@@ -1352,6 +1350,8 @@ public class HdmiControlService extends SystemService {
                                         deviceType,
                                         HdmiControlManager.POWER_STATUS_ON, getCecVersion());
                                 localDevice.setDeviceInfo(deviceInfo);
+                                // If a local device of the same type already exists, it will be
+                                // replaced.
                                 mHdmiCecNetwork.addLocalDevice(deviceType, localDevice);
                                 mHdmiCecNetwork.addCecDevice(localDevice.getDeviceInfo());
                                 mCecController.addLogicalAddress(logicalAddress);
@@ -1367,6 +1367,10 @@ public class HdmiControlService extends SystemService {
                                     // since we reallocate the logical address only.
                                     onInitializeCecComplete(initiatedBy);
                                 }
+                                // We remove local devices here, instead of before the start of
+                                // address allocation, to prevent multiple local devices of the
+                                // same type from existing simultaneously.
+                                mHdmiCecNetwork.removeUnusedLocalDevices(allocatedDevices);
                                 mAddressAllocated = true;
                                 notifyAddressAllocated(allocatedDevices, initiatedBy);
                                 // Reinvoke the saved display status callback once the local
@@ -1386,9 +1390,19 @@ public class HdmiControlService extends SystemService {
         }
     }
 
+    /**
+     * Notifies local devices that address allocation finished.
+     * @param devices - list of local devices allocated.
+     * @param initiatedBy - reason for the address allocation.
+     */
+    @VisibleForTesting
     @ServiceThreadOnly
-    private void notifyAddressAllocated(ArrayList<HdmiCecLocalDevice> devices, int initiatedBy) {
+    public void notifyAddressAllocated(ArrayList<HdmiCecLocalDevice> devices, int initiatedBy) {
         assertRunOnServiceThread();
+        if (devices == null || devices.isEmpty()) {
+            Slog.w(TAG, "No local device to notify.");
+            return;
+        }
         List<HdmiCecMessage> bufferedMessages = mCecMessageBuffer.getBuffer();
         for (HdmiCecLocalDevice device : devices) {
             int address = device.getDeviceInfo().getLogicalAddress();

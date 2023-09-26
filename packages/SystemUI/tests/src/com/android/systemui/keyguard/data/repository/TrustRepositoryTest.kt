@@ -28,6 +28,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogcatEchoTracker
 import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -259,5 +260,20 @@ class TrustRepositoryTest : SysuiTestCase() {
 
             listener.value.onIsActiveUnlockRunningChanged(true, users[0].id)
             assertThat(isCurrentUserActiveUnlockRunning).isTrue()
+        }
+
+    @Test
+    fun isTrustUsuallyManaged_providesTheValueForCurrentUser() =
+        testScope.runTest {
+            runCurrent()
+            val trustUsuallyManaged by collectLastValue(underTest.isCurrentUserTrustUsuallyManaged)
+            whenever(trustManager.isTrustUsuallyManaged(users[0].id)).thenReturn(true)
+            whenever(trustManager.isTrustUsuallyManaged(users[1].id)).thenReturn(false)
+
+            userRepository.setSelectedUserInfo(users[0])
+
+            assertThat(trustUsuallyManaged).isTrue()
+            userRepository.setSelectedUserInfo(users[1])
+            assertThat(trustUsuallyManaged).isFalse()
         }
 }

@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"यह खास सिस्टम ऐप्लिकेशन जब चाहे, तस्वीरें लेने और वीडियो रिकॉर्ड करने के लिए सिस्टम के कैमरे का इस्तेमाल कर सकता है. इसके लिए ऐप्लिकेशन को android.permission.CAMERA की अनुमति देना भी ज़रूरी है"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"डिवाइस का कैमरे चालू या बंद होने पर, किसी ऐप्लिकेशन या सेवा को कॉलबैक पाने की मंज़ूरी दें."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"यह ऐप्लिकेशन, डिवाइस के कैमरे को चालू या बंद करते समय (किसी ऐप्लिकेशन से) कॉलबैक पा सकता है."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"ऐप्लिकेशन को हेडलेस सिस्टम यूज़र के तौर पर कैमरा ऐक्सेस करने की अनुमति दें."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"यह ऐप्लिकेशन, हेडलेस सिस्टम यूजर के तौर पर कैमरे को ऐक्सेस कर सकता है."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"कंपन (वाइब्रेशन) को नियंत्रित करें"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ऐप्स को कंपनकर्ता नियंत्रित करने देता है."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"इससे ऐप्लिकेशन, डिवाइस का वाइब्रेटर ऐक्सेस कर पाएगा."</string>
@@ -1596,7 +1598,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"प्रतिबंध निकालने के लिए टैप करें."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"माेबाइल डेटा का ज़्यादा इस्तेमाल"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"आपके ऐप्लिकेशन ने आम तौर पर इस्तेमाल होने वाले डेटा से ज़्यादा डेटा खर्च कर दिया है"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> ने आम तौर पर इस्तेमाल होने वाले डेटा से ज़्यादा डेटा खर्च कर दिया है"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> ने आम तौर पर इस्तेमाल होने वाले डेटा से ज़्यादा डेटा खर्च किया है"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"सुरक्षा प्रमाणपत्र"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"यह प्रमाणपत्र मान्य है."</string>
     <string name="issued_to" msgid="5975877665505297662">"इन्हें जारी किया गया:"</string>

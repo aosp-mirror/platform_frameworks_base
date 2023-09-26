@@ -108,4 +108,13 @@ public abstract class StartingData {
     boolean hasImeSurface() {
         return false;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{"
+                + Integer.toHexString(System.identityHashCode(this))
+                + " waitForSyncTransactionCommit=" + mWaitForSyncTransactionCommit
+                + " removeAfterTransaction= " + mRemoveAfterTransaction
+                + "}";
+    }
 }

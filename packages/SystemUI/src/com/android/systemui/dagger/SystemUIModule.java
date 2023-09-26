@@ -38,6 +38,7 @@ import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
 import com.android.systemui.biometrics.FingerprintReEnrollNotification;
 import com.android.systemui.biometrics.UdfpsDisplayModeProvider;
 import com.android.systemui.biometrics.dagger.BiometricsModule;
+import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule;
 import com.android.systemui.bouncer.ui.BouncerViewModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
@@ -122,6 +123,7 @@ import com.android.systemui.temporarydisplay.dagger.TemporaryDisplayModule;
 import com.android.systemui.tuner.dagger.TunerModule;
 import com.android.systemui.unfold.SysUIUnfoldModule;
 import com.android.systemui.user.UserModule;
+import com.android.systemui.user.domain.UserDomainLayerModule;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
 import com.android.systemui.util.dagger.UtilModule;
 import com.android.systemui.util.kotlin.CoroutinesModule;
@@ -162,6 +164,7 @@ import javax.inject.Named;
         AssistModule.class,
         AuthenticationModule.class,
         BiometricsModule.class,
+        BiometricsDomainLayerModule.class,
         BouncerViewModule.class,
         ClipboardOverlayModule.class,
         ClockRegistryModule.class,
@@ -209,6 +212,7 @@ import javax.inject.Named;
         TelephonyRepositoryModule.class,
         TemporaryDisplayModule.class,
         TunerModule.class,
+        UserDomainLayerModule.class,
         UserModule.class,
         UtilModule.class,
         NoteTaskModule.class,

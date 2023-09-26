@@ -863,14 +863,10 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"下に移動"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"左に移動"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"右に移動"</string>
-    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
-    <skip />
-    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
-    <skip />
-    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
-    <skip />
-    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
-    <skip />
+    <string name="accessibility_control_increase_window_width" msgid="6992249470832493283">"拡大鏡の幅を広くする"</string>
+    <string name="accessibility_control_decrease_window_width" msgid="5740401560105929681">"拡大鏡の幅を狭くする"</string>
+    <string name="accessibility_control_increase_window_height" msgid="2200966116612324260">"拡大鏡の高さを高くする"</string>
+    <string name="accessibility_control_decrease_window_height" msgid="2054479949445332761">"拡大鏡の高さを低くする"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"拡大スイッチ"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"画面全体を拡大します"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"画面の一部を拡大します"</string>

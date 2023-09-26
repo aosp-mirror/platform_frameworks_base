@@ -3429,6 +3429,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void setIsLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen) {
         mIsLaunchingActivityOverLockscreen = isLaunchingActivityOverLockscreen;
+        mKeyguardViewMediator.launchingActivityOverLockscreen(mIsLaunchingActivityOverLockscreen);
     }
 
     @Override

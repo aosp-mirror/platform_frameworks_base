@@ -17,7 +17,6 @@
 package com.android.server.accessibility.magnification;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -27,13 +26,13 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Rect;
 import android.os.Handler;
-import android.platform.test.annotations.LargeTest;
 import android.testing.TestableContext;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;

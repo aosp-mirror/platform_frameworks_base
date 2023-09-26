@@ -18,7 +18,7 @@ package com.android.internal.graphics.cam;
 
 import static org.junit.Assert.assertEquals;
 
-import android.platform.test.annotations.LargeTest;
+import androidx.test.filters.LargeTest;
 
 import org.junit.Assert;
 import org.junit.Test;

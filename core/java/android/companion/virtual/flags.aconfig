@@ -15,6 +15,13 @@ flag {
 }
 
 flag {
+  name: "vdm_custom_home"
+  namespace: "virtual_devices"
+  description: "Enable custom home API"
+  bug: "297168328"
+}
+
+flag {
   name: "vdm_public_apis"
   namespace: "virtual_devices"
   description: "Enable public VDM API for device capabilities"

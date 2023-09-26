@@ -133,6 +133,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     @GuardedBy("mGenericWindowPolicyControllerLock")
     private boolean mShowTasksInHostDeviceRecents;
+    @Nullable private final ComponentName mCustomHomeComponent;
 
     /**
      * Creates a window policy controller that is generic to the different use cases of virtual
@@ -157,6 +158,10 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      * @param intentListenerCallback Callback that is called to intercept intents when matching
      *   passed in filters.
      * @param showTasksInHostDeviceRecents whether to show activities in recents on the host device.
+     * @param customHomeComponent The component acting as a home activity on the virtual display. If
+     *   {@code null}, then the system-default secondary home activity will be used. This is only
+     *   applicable to displays that support home activities, i.e. they're created with the relevant
+     *   virtual display flag.
      */
     public GenericWindowPolicyController(
             int windowFlags,
@@ -172,7 +177,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @Nullable SecureWindowCallback secureWindowCallback,
             @Nullable IntentListenerCallback intentListenerCallback,
             @NonNull Set<String> displayCategories,
-            boolean showTasksInHostDeviceRecents) {
+            boolean showTasksInHostDeviceRecents,
+            @Nullable ComponentName customHomeComponent) {
         super();
         mAllowedUsers = allowedUsers;
         mActivityLaunchAllowedByDefault = activityLaunchAllowedByDefault;
@@ -187,6 +193,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         mIntentListenerCallback = intentListenerCallback;
         mDisplayCategories = displayCategories;
         mShowTasksInHostDeviceRecents = showTasksInHostDeviceRecents;
+        mCustomHomeComponent = customHomeComponent;
     }
 
     /**
@@ -382,6 +389,11 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             mHandler.post(() -> mPipBlockedCallback.onEnteringPipBlocked(uid));
         }
         return false;
+    }
+
+    @Override
+    public @Nullable ComponentName getCustomHomeComponent() {
+        return mCustomHomeComponent;
     }
 
     /**

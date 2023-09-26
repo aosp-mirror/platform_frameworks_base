@@ -517,7 +517,8 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Не зарегистрирован"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Недоступно"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Случайный MAC-адрес"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{Устройства не подключены}=1{Подключено 1 устройство}one{Подключено # устройство}few{Подключено # устройства}many{Подключено # устройств}other{Подключено # устройства}}"</string>
+    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
+    <skip />
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Увеличить продолжительность"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Уменьшить продолжительность"</string>
     <string name="cancel" msgid="5665114069455378395">"Отмена"</string>

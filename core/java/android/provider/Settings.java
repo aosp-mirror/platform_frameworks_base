@@ -687,7 +687,8 @@ public final class Settings {
             "com.android.settings.MONITORING_CERT_INFO";
 
     /**
-     * Activity Action: Show settings to allow configuration of privacy options.
+     * Activity Action: Show settings to allow configuration of privacy options, i.e. permission
+     * manager, privacy dashboard, privacy controls and more.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
@@ -699,6 +700,21 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PRIVACY_SETTINGS =
             "android.settings.PRIVACY_SETTINGS";
+
+    /**
+     * Activity Action: Show privacy controls sub-page, i.e. privacy (camera/mic) toggles and more.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PRIVACY_CONTROLS =
+            "android.settings.PRIVACY_CONTROLS";
 
     /**
      * Activity Action: Show settings to allow configuration of VPN.

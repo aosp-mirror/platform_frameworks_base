@@ -74,9 +74,8 @@ final class DisplayPowerState {
     private volatile boolean mStopped;
 
     DisplayPowerState(
-            DisplayBlanker blanker, ColorFade colorFade, int displayId, int displayState,
-            Handler handler) {
-        mHandler = handler;
+            DisplayBlanker blanker, ColorFade colorFade, int displayId, int displayState) {
+        mHandler = new Handler(true /*async*/);
         mChoreographer = Choreographer.getInstance();
         mBlanker = blanker;
         mColorFade = colorFade;
@@ -318,7 +317,6 @@ final class DisplayPowerState {
         mStopped = true;
         mPhotonicModulator.interrupt();
         dismissColorFade();
-        stopColorFade();
         mCleanListener = null;
         mHandler.removeCallbacksAndMessages(null);
     }
@@ -376,11 +374,6 @@ final class DisplayPowerState {
             mCleanListener = null;
             listener.run();
         }
-    }
-
-    // Clears up color fade resources.
-    private void stopColorFade() {
-        if (mColorFade != null) mColorFade.stop();
     }
 
     private final Runnable mScreenUpdateRunnable = new Runnable() {

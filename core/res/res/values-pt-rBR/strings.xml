@@ -502,6 +502,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Esse app do sistema ou com privilégios pode tirar fotos e gravar vídeos a qualquer momento usando a câmera do sistema. É necessário que o app tenha também a permissão android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permitir que um aplicativo ou serviço receba callbacks sobre dispositivos de câmera sendo abertos ou fechados."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Esse app pode receber callbacks quando um dispositivo de câmera é aberto (por qualquer app) ou fechado."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Permitir que um aplicativo ou serviço acesse a câmera como usuário do sistema headless."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Este app pode acessar a câmera como um usuário do sistema headless."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar vibração"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que o app controle a vibração."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que o app acesse o estado da vibração."</string>

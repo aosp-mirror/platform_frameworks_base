@@ -501,6 +501,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Lolu hlelo lokusebenza oluhle noma lwesistimu lingathatha izithombe futhi lirekhode amavidiyo lisebenzisa ikhamera yesistimu noma kunini. Idinga imvume ye-android.permission.CAMERA ukuthi iphathwe nawuhlelo lokusebenza"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Vumela uhlelo lokusebenza noma isevisi ukwamukela ukuphinda ufonelwe mayelana namadivayisi wekhamera avuliwe noma avaliwe."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Lolu hlelo lokusebenza lungakwazi ukuthola ukuphinda ufonelwe uma noma iyiphi idivayisi yekhamera ivulwa (ngephakheji yohlelo lokusebenza) noma ivalwa."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"lawula ukudlidliza"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ivumela uhlelo lokusebenza ukulawula isidlidlizi."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ivumela uhlelo lokusebenza ukuthi lufinyelele kusimo sesidlidlizeli."</string>

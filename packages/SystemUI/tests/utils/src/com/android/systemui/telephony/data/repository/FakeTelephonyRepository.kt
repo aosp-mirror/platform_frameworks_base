@@ -17,11 +17,16 @@
 
 package com.android.systemui.telephony.data.repository
 
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeTelephonyRepository : TelephonyRepository {
+@SysUISingleton
+class FakeTelephonyRepository @Inject constructor() : TelephonyRepository {
 
     private val _callState = MutableStateFlow(0)
     override val callState: Flow<Int> = _callState.asStateFlow()
@@ -29,4 +34,9 @@ class FakeTelephonyRepository : TelephonyRepository {
     fun setCallState(value: Int) {
         _callState.value = value
     }
+}
+
+@Module
+interface FakeTelephonyRepositoryModule {
+    @Binds fun bindFake(fake: FakeTelephonyRepository): TelephonyRepository
 }

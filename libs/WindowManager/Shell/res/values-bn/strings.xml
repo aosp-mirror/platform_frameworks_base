@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"উপরে ডানদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"নিচে বাঁদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"নিচে ডান দিকে সরান"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> বড় করুন"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> আড়াল করুন"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> সেটিংস"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"বাবল খারিজ করুন"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"কথোপকথন বাবল হিসেবে দেখাবে না"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"বুঝেছি"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"কোনও সাম্প্রতিক বাবল নেই"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"সাম্প্রতিক ও বাতিল করা বাবল এখানে দেখা যাবে"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"বাবল ব্যবহার করে চ্যাট করুন"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"নতুন কথোপকথন, আপনার স্ক্রিনের নিচে কোণার দিকে আইকন হিসেবে দেখায়। সেটি বড় করতে ট্যাপ করুন বা বাতিল করতে টেনে আনুন।"</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"যেকোনও সময় বাবল নিয়ন্ত্রণ করুন"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"কোন অ্যাপ ও কথোপকথনের জন্য বাবলের সুবিধা চান তা ম্যানেজ করতে এখানে ট্যাপ করুন"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"বাবল"</string>

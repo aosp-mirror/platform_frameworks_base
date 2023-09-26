@@ -517,7 +517,8 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Registratsiya qilinmagan"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Mavjud emas"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Tasodifiy MAC manzil"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 ta qurilma ulangan}=1{1 ta qurilma ulangan}other{# ta qurilma ulangan}}"</string>
+    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
+    <skip />
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Ko‘proq vaqt."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Kamroq vaqt."</string>
     <string name="cancel" msgid="5665114069455378395">"Bekor qilish"</string>

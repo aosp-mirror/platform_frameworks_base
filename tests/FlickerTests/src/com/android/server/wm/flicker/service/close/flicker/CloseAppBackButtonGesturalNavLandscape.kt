@@ -31,7 +31,8 @@ import org.junit.runner.RunWith
 @RunWith(FlickerServiceJUnit4ClassRunner::class)
 class CloseAppBackButtonGesturalNavLandscape :
     CloseAppBackButton(NavBar.MODE_GESTURAL, Rotation.ROTATION_90) {
-    @ExpectedScenarios(["APP_CLOSE_TO_HOME"])
+    // TODO: Missing CUJ (b/300078127)
+    @ExpectedScenarios(["ENTIRE_TRACE"])
     @Test
     override fun closeAppBackButtonTest() = super.closeAppBackButtonTest()
 

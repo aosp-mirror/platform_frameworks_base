@@ -502,6 +502,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Questa app di sistema o con privilegi può scattare foto e registrare video tramite una videocamera di sistema in qualsiasi momento. Richiede che anche l\'app disponga dell\'autorizzazione android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Consenti a un\'applicazione o a un servizio di ricevere callback relativi all\'apertura o alla chiusura di videocamere."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Questa app può ricevere callback quando una videocamera viene aperta (da una specifica applicazione) o chiusa."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Consenti a un\'applicazione o a un servizio di accedere alla fotocamera come utente di sistema senza testa."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Questa app può accedere alla fotocamera come utente di sistema senza testa."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controllo vibrazione"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Consente all\'applicazione di controllare la vibrazione."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Consente all\'app di accedere allo stato di vibrazione."</string>
