@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.android.test.binder">
+    <application>
+        <service
+            android:name=".MyService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":service">
+        </service>
+    </application>
+
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.android.test.binder"
+        android:label="Binder leak test">
+    </instrumentation>
+</manifest>
