@@ -20,6 +20,7 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_GROUP_KEY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SEARCHABLE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SWITCH_URI;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
@@ -255,5 +256,27 @@ public class ActivityTileTest {
         final Tile tile = new ActivityTile(mActivityInfo, "category");
 
         assertThat(tile.getType()).isEqualTo(Tile.Type.SWITCH_WITH_ACTION);
+    }
+
+    @Test
+    public void isSearchable_noMetadata_isTrue() {
+        final Tile tile = new ActivityTile(null, "category");
+
+        assertThat(tile.isSearchable()).isTrue();
+    }
+
+    @Test
+    public void isSearchable_notSet_isTrue() {
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
+
+        assertThat(tile.isSearchable()).isTrue();
+    }
+
+    @Test
+    public void isSearchable_isSet_false() {
+        mActivityInfo.metaData.putBoolean(META_DATA_PREFERENCE_SEARCHABLE, false);
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
+
+        assertThat(tile.isSearchable()).isFalse();
     }
 }
