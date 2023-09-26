@@ -20,6 +20,7 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_GROUP_KEY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SEARCHABLE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SWITCH_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITLE;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
@@ -255,6 +256,28 @@ public class ProviderTileTest {
         final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
 
         assertThat(tile.getType()).isEqualTo(Tile.Type.GROUP);
+    }
+
+    @Test
+    public void isSearchable_noMetadata_isTrue() {
+        final Tile tile = new ProviderTile(mProviderInfo, "category", null);
+
+        assertThat(tile.isSearchable()).isTrue();
+    }
+
+    @Test
+    public void isSearchable_notSet_isTrue() {
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+
+        assertThat(tile.isSearchable()).isTrue();
+    }
+
+    @Test
+    public void isSearchable_isSet_false() {
+        mMetaData.putBoolean(META_DATA_PREFERENCE_SEARCHABLE, false);
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+
+        assertThat(tile.isSearchable()).isFalse();
     }
 
     @Implements(TileUtils.class)
