@@ -23,7 +23,6 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_CL
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.animation.Animator;
-import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
@@ -50,14 +49,15 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
+import com.android.systemui.animation.ViewHierarchyAnimator;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
-import com.android.systemui.power.shared.model.ScreenPowerState;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.power.shared.model.ScreenPowerState;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -175,27 +175,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                             return;
                         }
 
-                        final LayoutTransition mediaLayoutTransition =
-                                ((ViewGroup) mediaHostContainer).getLayoutTransition();
-                        if (mediaLayoutTransition == null) return;
-
-                        mediaLayoutTransition.enableTransitionType(LayoutTransition.CHANGING);
+                        ViewHierarchyAnimator.Companion.animateNextUpdate(mediaHostContainer,
+                                Interpolators.STANDARD, /* duration= */ 500L,
+                                /* animateChildren= */ false);
                     });
-
-            mediaHostContainer.addOnLayoutChangeListener(
-                    (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                        final LayoutTransition mediaLayoutTransition =
-                                ((ViewGroup) mediaHostContainer).getLayoutTransition();
-                        if (mediaLayoutTransition == null) return;
-                        if (!mediaLayoutTransition.isTransitionTypeEnabled(
-                                LayoutTransition.CHANGING)) {
-                            return;
-                        }
-                        // Note: when this is called, the LayoutTransition is already been set up.
-                        // Disables the LayoutTransition until it's explicitly enabled again.
-                        mediaLayoutTransition.disableTransitionType(LayoutTransition.CHANGING);
-                    }
-            );
         }
 
         mDumpManager.registerDumpable(getInstanceName(), this);
