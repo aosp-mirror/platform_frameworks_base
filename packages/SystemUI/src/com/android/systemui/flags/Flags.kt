@@ -122,7 +122,7 @@ object Flags {
     // TODO(b/292213543): Tracking Bug
     @JvmField
     val NOTIFICATION_GROUP_EXPANSION_CHANGE =
-            unreleasedFlag("notification_group_expansion_change")
+            unreleasedFlag("notification_group_expansion_change", teamfood = true)
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
