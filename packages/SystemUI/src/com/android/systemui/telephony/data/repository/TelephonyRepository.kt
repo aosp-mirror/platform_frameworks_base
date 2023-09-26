@@ -17,10 +17,13 @@
 
 package com.android.systemui.telephony.data.repository
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.telephony.Annotation
 import android.telephony.TelephonyCallback
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.telephony.TelephonyListenerManager
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -30,6 +33,9 @@ import kotlinx.coroutines.flow.Flow
 interface TelephonyRepository {
     /** The state of the current call. */
     @Annotation.CallState val callState: Flow<Int>
+
+    /** Whether the device has a radio that can be used for telephony. */
+    val hasTelephonyRadio: Boolean
 }
 
 /**
@@ -43,6 +49,7 @@ interface TelephonyRepository {
 class TelephonyRepositoryImpl
 @Inject
 constructor(
+    @Application private val applicationContext: Context,
     private val manager: TelephonyListenerManager,
 ) : TelephonyRepository {
     @Annotation.CallState
@@ -53,4 +60,7 @@ constructor(
 
         awaitClose { manager.removeCallStateListener(listener) }
     }
+
+    override val hasTelephonyRadio: Boolean
+        get() = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
 }
