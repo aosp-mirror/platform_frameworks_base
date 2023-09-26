@@ -26,6 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
@@ -63,6 +64,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Mock private lateinit var defaultNSSLSection: DefaultNotificationStackScrollLayoutSection
     @Mock private lateinit var splitShadeGuidelines: SplitShadeGuidelines
     @Mock private lateinit var aodNotificationIconsSection: AodNotificationIconsSection
+    @Mock private lateinit var aodBurnInSection: AodBurnInSection
 
     @Before
     fun setup() {
@@ -80,6 +82,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultNSSLSection,
                 splitShadeGuidelines,
                 aodNotificationIconsSection,
+                aodBurnInSection,
             )
     }
 

@@ -221,6 +221,7 @@
     <item type="id" name="split_shade_guideline" />
     <item type="id" name="lock_icon" />
     <item type="id" name="lock_icon_bg" />
+    <item type="id" name="burn_in_layer" />
 
     <!-- Privacy dialog -->
     <item type="id" name="privacy_dialog_close_app_button" />

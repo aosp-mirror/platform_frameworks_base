@@ -549,6 +549,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         constraintSet.applyTo(layout);
     }
 
+    public ClockController getClockController() {
+        return mKeyguardClockSwitchController.getClock();
+    }
+
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         mView.dump(pw, args);

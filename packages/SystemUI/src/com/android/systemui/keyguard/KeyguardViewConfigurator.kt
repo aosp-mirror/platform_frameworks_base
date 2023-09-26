@@ -137,7 +137,8 @@ constructor(
                 occludingAppDeviceEntryMessageViewModel,
                 chipbarCoordinator,
                 keyguardStateController,
-                shadeInteractor
+                shadeInteractor,
+                { keyguardStatusViewController!!.getClockController() },
             )
     }
 

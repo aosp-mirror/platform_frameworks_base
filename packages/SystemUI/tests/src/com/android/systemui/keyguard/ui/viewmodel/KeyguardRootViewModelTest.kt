@@ -23,17 +23,23 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.google.common.truth.Truth
+import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.plugins.ClockController
+import com.android.systemui.util.mockito.whenever
+import com.google.common.truth.Truth.assertThat
+import javax.inject.Provider
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.Answers
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
@@ -45,12 +51,16 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     private lateinit var testScope: TestScope
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var keyguardInteractor: KeyguardInteractor
+    @Mock private lateinit var burnInInteractor: BurnInInteractor
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var clockController: ClockController
+
+    private val burnInFlow = MutableStateFlow(BurnInModel())
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
         val testDispatcher = StandardTestDispatcher()
         testScope = TestScope(testDispatcher)
+        MockitoAnnotations.initMocks(this)
 
         val featureFlags =
             FakeFeatureFlags().apply {
@@ -62,7 +72,9 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         keyguardInteractor = withDeps.keyguardInteractor
         repository = withDeps.repository
 
-        underTest = KeyguardRootViewModel(keyguardInteractor)
+        whenever(burnInInteractor.keyguardBurnIn).thenReturn(burnInFlow)
+        underTest = KeyguardRootViewModel(keyguardInteractor, burnInInteractor)
+        underTest.clockControllerProvider = Provider { clockController }
     }
 
     @Test
@@ -70,15 +82,15 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val value = collectLastValue(underTest.alpha)
 
-            Truth.assertThat(value()).isEqualTo(1f)
+            assertThat(value()).isEqualTo(1f)
             repository.setKeyguardAlpha(0.1f)
-            Truth.assertThat(value()).isEqualTo(0.1f)
+            assertThat(value()).isEqualTo(0.1f)
             repository.setKeyguardAlpha(0.5f)
-            Truth.assertThat(value()).isEqualTo(0.5f)
+            assertThat(value()).isEqualTo(0.5f)
             repository.setKeyguardAlpha(0.2f)
-            Truth.assertThat(value()).isEqualTo(0.2f)
+            assertThat(value()).isEqualTo(0.2f)
             repository.setKeyguardAlpha(0f)
-            Truth.assertThat(value()).isEqualTo(0f)
+            assertThat(value()).isEqualTo(0f)
         }
 
     @Test
@@ -87,14 +99,85 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             val value = collectLastValue(underTest.alpha)
             underTest.enablePreviewMode()
 
-            Truth.assertThat(value()).isEqualTo(1f)
+            assertThat(value()).isEqualTo(1f)
             repository.setKeyguardAlpha(0.1f)
-            Truth.assertThat(value()).isEqualTo(1f)
+            assertThat(value()).isEqualTo(1f)
             repository.setKeyguardAlpha(0.5f)
-            Truth.assertThat(value()).isEqualTo(1f)
+            assertThat(value()).isEqualTo(1f)
             repository.setKeyguardAlpha(0.2f)
-            Truth.assertThat(value()).isEqualTo(1f)
+            assertThat(value()).isEqualTo(1f)
             repository.setKeyguardAlpha(0f)
-            Truth.assertThat(value()).isEqualTo(1f)
+            assertThat(value()).isEqualTo(1f)
+        }
+
+    @Test
+    fun translationAndScaleFromBurnInNotDozing() =
+        testScope.runTest {
+            val translationX by collectLastValue(underTest.translationX)
+            val translationY by collectLastValue(underTest.translationY)
+            val scale by collectLastValue(underTest.scale)
+
+            // Set to not dozing (on lockscreen)
+            repository.setDozeAmount(0f)
+
+            // Trigger a change to the burn-in model
+            burnInFlow.value =
+                BurnInModel(
+                    translationX = 20,
+                    translationY = 30,
+                    scale = 0.5f,
+                )
+
+            assertThat(translationX).isEqualTo(0)
+            assertThat(translationY).isEqualTo(0)
+            assertThat(scale).isEqualTo(Pair(1f, true /* scaleClockOnly */))
+        }
+
+    @Test
+    fun translationAndScaleFromBurnFullyDozing() =
+        testScope.runTest {
+            val translationX by collectLastValue(underTest.translationX)
+            val translationY by collectLastValue(underTest.translationY)
+            val scale by collectLastValue(underTest.scale)
+
+            // Set to dozing (on AOD)
+            repository.setDozeAmount(1f)
+
+            // Trigger a change to the burn-in model
+            burnInFlow.value =
+                BurnInModel(
+                    translationX = 20,
+                    translationY = 30,
+                    scale = 0.5f,
+                )
+
+            assertThat(translationX).isEqualTo(20)
+            assertThat(translationY).isEqualTo(30)
+            assertThat(scale).isEqualTo(Pair(0.5f, true /* scaleClockOnly */))
+        }
+
+    @Test
+    fun translationAndScaleFromBurnInUseScaleOnly() =
+        testScope.runTest {
+            whenever(clockController.config.useAlternateSmartspaceAODTransition).thenReturn(true)
+
+            val translationX by collectLastValue(underTest.translationX)
+            val translationY by collectLastValue(underTest.translationY)
+            val scale by collectLastValue(underTest.scale)
+
+            // Set to dozing (on AOD)
+            repository.setDozeAmount(1f)
+
+            // Trigger a change to the burn-in model
+            burnInFlow.value =
+                BurnInModel(
+                    translationX = 20,
+                    translationY = 30,
+                    scale = 0.5f,
+                )
+
+            assertThat(translationX).isEqualTo(0)
+            assertThat(translationY).isEqualTo(0)
+            assertThat(scale).isEqualTo(Pair(0.5f, false /* scaleClockOnly */))
         }
 }
