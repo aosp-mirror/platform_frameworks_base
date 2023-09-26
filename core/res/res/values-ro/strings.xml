@@ -502,6 +502,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Această aplicație de sistem privilegiată poate să fotografieze și să înregistreze videoclipuri folosind o cameră de sistem în orice moment. Necesită și permisiunea android.permission.CAMERA pentru aplicație"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permite unei aplicații sau unui serviciu să primească apeluri inverse atunci când sunt deschise sau închise dispozitive cu cameră."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Această aplicație poate primi apeluri inverse atunci când este deschis (de aplicație) sau închis orice dispozitiv cu cameră."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Permite unei aplicații sau unui serviciu să acceseze camera ca utilizator de sistem fără interfață grafică."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Aplicația poate accesa camera ca utilizator de sistem fără interfață grafică."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlează vibrarea"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite aplicației să controleze mecanismul de vibrare."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite aplicației să acceseze modul de vibrații."</string>

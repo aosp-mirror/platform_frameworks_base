@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"മുകളിൽ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ചുവടെ ഇടതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ചുവടെ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> വികസിപ്പിക്കുക"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ചുരുക്കുക"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ക്രമീകരണം"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ബബിൾ ഡിസ്മിസ് ചെയ്യൂ"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"സംഭാഷണം ബബിൾ ചെയ്യരുത്"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"മനസ്സിലായി"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"അടുത്തിടെയുള്ള ബബിളുകൾ ഒന്നുമില്ല"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"അടുത്തിടെയുള്ള ബബിളുകൾ, ഡിസ്മിസ് ചെയ്ത ബബിളുകൾ എന്നിവ ഇവിടെ ദൃശ്യമാവും"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"ബബിളുകൾ ഉപയോഗിച്ച് ചാറ്റ് ചെയ്യുക"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"പുതിയ സംഭാഷണങ്ങൾ, നിങ്ങളുടെ സ്ക്രീനിന്റെ താഴെ മൂലയിൽ ഐക്കണുകളായി ദൃശ്യമാകും. വികസിപ്പിക്കാൻ അവയിൽ ടാപ്പ് ചെയ്യുക അല്ലെങ്കിൽ ഡിസ്‌മിസ് ചെയ്യാൻ വലിച്ചിടുക."</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ബബിളുകൾ ഏതുസമയത്തും നിയന്ത്രിക്കുക"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"ഏതൊക്കെ ആപ്പുകളും സംഭാഷണങ്ങളും ബബിൾ ചെയ്യാനാകുമെന്നത് മാനേജ് ചെയ്യാൻ ഇവിടെ ടാപ്പ് ചെയ്യുക"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ബബിൾ"</string>

@@ -795,10 +795,19 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             return false;
         }
 
-        // Try pausing the existing resumed activity in the Task if any.
         final Task task = r.getTask();
-        if (task.pauseActivityIfNeeded(r, "realStart")) {
-            return false;
+        if (andResume) {
+            // Try pausing the existing resumed activity in the Task if any.
+            if (task.pauseActivityIfNeeded(r, "realStart")) {
+                return false;
+            }
+            final TaskFragment taskFragment = r.getTaskFragment();
+            if (taskFragment != null && taskFragment.getResumedActivity() != null) {
+                if (taskFragment.startPausing(mUserLeaving, false /* uiSleeping */, r,
+                        "realStart")) {
+                    return false;
+                }
+            }
         }
 
         final Task rootTask = task.getRootTask();

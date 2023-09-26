@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"শীৰ্ষৰ সোঁফালে নিয়ক"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"বুটামটো বাওঁফালে নিয়ক"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"তলৰ সোঁফালে নিয়ক"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> বিস্তাৰ কৰক"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> সংকোচন কৰক"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ছেটিং"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"বাবল অগ্ৰাহ্য কৰক"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"বাৰ্তালাপ বাবল নকৰিব"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"বুজি পালোঁ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"কোনো শেহতীয়া bubbles নাই"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"শেহতীয়া bubbles আৰু অগ্ৰাহ্য কৰা bubbles ইয়াত প্ৰদর্শিত হ\'ব"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Bubbles ব্যৱহাৰ কৰি চাট কৰক"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"নতুন বাৰ্তালাপসমূহ আপোনাৰ স্ক্ৰীনৰ একেবাৰে তলৰ এটা কোণত চিহ্ন হিচাপে দেখা পোৱা যায়। সেইসমূহ বিস্তাৰ কৰিবলৈ টিপক বা অগ্ৰাহ্য কৰিবলৈ টানি আনি এৰক।"</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"যিকোনো সময়তে বাবল নিয়ন্ত্ৰণ কৰক"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"কোনবোৰ এপ্‌ আৰু বাৰ্তালাপ বাবল হ’ব পাৰে সেয়া পৰিচালনা কৰিবলৈ ইয়াত টিপক"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"বাবল"</string>

@@ -1255,21 +1255,6 @@ public final class DisplayPowerController2Test {
     }
 
     @Test
-    public void testPowerStateStopsOnDpcStop() {
-        // Set up
-        DisplayPowerRequest dpr = new DisplayPowerRequest();
-        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
-        advanceTime(1);
-
-        // Stop dpc
-        mHolder.dpc.stop();
-        advanceTime(1);
-
-        // Ensure dps has stopped
-        verify(mHolder.displayPowerState, times(1)).stop();
-    }
-
-    @Test
     public void testRampRateForHdrContent_HdrClamperOff() {
         float hdrBrightness = 0.8f;
         float clampedBrightness = 0.6f;

@@ -2160,6 +2160,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
+     * @see DisplayWindowPolicyController#getCustomHomeComponent() ()
+     */
+    @Nullable ComponentName getCustomHomeComponent() {
+        if (!supportsSystemDecorations() || mDwpcHelper == null) {
+            return null;
+        }
+        return mDwpcHelper.getCustomHomeComponent();
+    }
+
+    /**
      * Applies the rotation transaction. This must be called after {@link #updateRotationUnchecked}
      * (if it returned {@code true}) to actually finish the rotation.
      *

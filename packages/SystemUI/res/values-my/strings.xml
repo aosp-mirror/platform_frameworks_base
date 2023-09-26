@@ -668,8 +668,8 @@
     <string name="group_system_go_back" msgid="8838454003680364227">"နောက်သို့- ယခင်အခြေအနေသို့ ပြန်သွားရန် (နောက်သို့ ခလုတ်)"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"ပင်မစာမျက်နှာ ဝင်ကြည့်ရန်"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"ဖွင့်ထားသောအက်ပ်များ အနှစ်ချုပ်"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"လတ်တလောအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (ရှေ့သို့)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"လတ်တလောအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (နောက်သို့)"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"မကြာသေးမီကအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (ရှေ့သို့)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"မကြာသေးမီကအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (နောက်သို့)"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"အက်ပ်အားလုံးစာရင်းကို ဝင်ကြည့်ပြီး ရှာပါ (ဥပမာ- Search/Launcher)"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"လုပ်ဆောင်စရာဘားကို ဖျောက်ထားပြီး ပြန်ပြရန်"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"စက်စနစ်ဆက်တင်များ ဝင်ကြည့်ရန်"</string>
@@ -863,14 +863,10 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"အောက်သို့ရွှေ့ရန်"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ဘယ်ဘက်သို့ရွှေ့ရန်"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"ညာဘက်သို့ရွှေ့ရန်"</string>
-    <!-- no translation found for accessibility_control_increase_window_width (6992249470832493283) -->
-    <skip />
-    <!-- no translation found for accessibility_control_decrease_window_width (5740401560105929681) -->
-    <skip />
-    <!-- no translation found for accessibility_control_increase_window_height (2200966116612324260) -->
-    <skip />
-    <!-- no translation found for accessibility_control_decrease_window_height (2054479949445332761) -->
-    <skip />
+    <string name="accessibility_control_increase_window_width" msgid="6992249470832493283">"မှန်ဘီလူးအကျယ်ကို တိုးရန်"</string>
+    <string name="accessibility_control_decrease_window_width" msgid="5740401560105929681">"မှန်ဘီလူးအကျယ်ကို လျှော့ရန်"</string>
+    <string name="accessibility_control_increase_window_height" msgid="2200966116612324260">"မှန်ဘီလူးအမြင့်ကို တိုးရန်"</string>
+    <string name="accessibility_control_decrease_window_height" msgid="2054479949445332761">"မှန်ဘီလူးအမြင့်ကို လျှော့ရန်"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ချဲ့ရန် ခလုတ်"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ဖန်သားပြင်အပြည့် ချဲ့သည်"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ဖန်သားပြင် တစ်စိတ်တစ်ပိုင်းကို ချဲ့ပါ"</string>

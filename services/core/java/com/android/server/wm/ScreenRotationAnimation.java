@@ -40,9 +40,11 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.os.IBinder;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -55,6 +57,7 @@ import android.window.ScreenCapture;
 import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.display.DisplayControl;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
@@ -168,10 +171,32 @@ class ScreenRotationAnimation {
         try {
             final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer;
             if (isSizeChanged) {
+                final DisplayAddress address = displayInfo.address;
+                if (!(address instanceof DisplayAddress.Physical)) {
+                    Slog.e(TAG, "Display does not have a physical address: " + displayId);
+                    return;
+                }
+                final DisplayAddress.Physical physicalAddress =
+                        (DisplayAddress.Physical) address;
+                final IBinder displayToken = DisplayControl.getPhysicalDisplayToken(
+                        physicalAddress.getPhysicalDisplayId());
+                if (displayToken == null) {
+                    Slog.e(TAG, "Display token is null.");
+                    return;
+                }
                 // Temporarily not skip screenshot for the rounded corner overlays and screenshot
                 // the whole display to include the rounded corner overlays.
                 setSkipScreenshotForRoundedCornerOverlays(false, t);
-            }
+                mRoundedCornerOverlay = displayContent.findRoundedCornerOverlays();
+                final ScreenCapture.DisplayCaptureArgs captureArgs =
+                        new ScreenCapture.DisplayCaptureArgs.Builder(displayToken)
+                                .setSourceCrop(new Rect(0, 0, width, height))
+                                .setAllowProtected(true)
+                                .setCaptureSecureLayers(true)
+                                .setHintForSeamlessTransition(true)
+                                .build();
+                screenshotBuffer = ScreenCapture.captureDisplay(captureArgs);
+            } else {
                 ScreenCapture.LayerCaptureArgs captureArgs =
                         new ScreenCapture.LayerCaptureArgs.Builder(
                                 displayContent.getSurfaceControl())
@@ -181,6 +206,7 @@ class ScreenRotationAnimation {
                                 .setHintForSeamlessTransition(true)
                                 .build();
                 screenshotBuffer = ScreenCapture.captureLayers(captureArgs);
+            }
 
             if (screenshotBuffer == null) {
                 Slog.w(TAG, "Unable to take screenshot of display " + displayId);

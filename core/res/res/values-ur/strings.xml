@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"‏یہ مراعات یافتہ یا سسٹم ایپ کسی بھی وقت ایک سسٹم کیمرا استعمال کرتے ہوئے تصاویر اور ویڈیوز ریکارڈ کر سکتی ہے۔ ایپ کے پاس android.permission.CAMERA کے ليے بھی اجازت ہونا ضروری ہے۔"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ایپلیکیشن یا سروس کو کیمرا کے آلات کے کُھلنے یا بند ہونے سے متعلق کال بیکس موصول کرنے کی اجازت دیں۔"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"یہ ایپ کال بیکس موصول کر سکتی ہے جب کوئی بھی کیمرا کا آلہ (کسی ایپلیکیشن سے) کھولا جا رہا ہو یا بند کیا جا رہا ہو۔"</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"ایپلیکیشن یا سروس کو ہیڈ لیس سسٹم صارف کے طور پر کیمرا تک رسائی حاصل کرنے کی اجازت دیں۔"</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"یہ ایپ ہیڈ لیس سسٹم صارف کے طور پر کیمرے تک رسائی حاصل کر سکتی ہے۔"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ارتعاش کو کنٹرول کریں"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ایپ کو وائبریٹر کنٹرول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ایپ کو وائبریٹر اسٹیٹ تک رسائی حاصل کرنے کی اجازت دیتا ہے۔"</string>

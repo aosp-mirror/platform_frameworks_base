@@ -124,6 +124,11 @@ object Flags {
     val NOTIFICATION_GROUP_EXPANSION_CHANGE =
             unreleasedFlag("notification_group_expansion_change")
 
+    // TODO(b/301955929)
+    @JvmField
+    val NOTIF_LS_BACKGROUND_THREAD =
+            unreleasedFlag("notification_lockscreen_mgr_bg_thread")
+
     // 200 - keyguard/lockscreen
     // ** Flag retired **
     // public static final BooleanFlag KEYGUARD_LAYOUT =
@@ -798,7 +803,7 @@ object Flags {
 
     /** Enable showing a dialog when clicking on Quick Settings bluetooth tile. */
     @JvmField
-    val BLUETOOTH_QS_TILE_DIALOG = unreleasedFlag("bluetooth_qs_tile_dialog")
+    val BLUETOOTH_QS_TILE_DIALOG = unreleasedFlag("bluetooth_qs_tile_dialog", teamfood = true)
 
     // TODO(b/300995746): Tracking Bug
     /** Enable communal hub features. */

@@ -84,7 +84,6 @@ import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
-import com.android.systemui.res.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
@@ -103,6 +102,7 @@ import com.android.systemui.keyguard.util.IndicationHelper;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
@@ -1256,8 +1256,6 @@ public class KeyguardIndicationController {
             if (biometricSourceType == FACE) {
                 mFaceAcquiredMessageDeferral.reset();
             }
-            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
-            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         @Override
@@ -1278,8 +1276,6 @@ public class KeyguardIndicationController {
             } else if (biometricSourceType == FINGERPRINT) {
                 onFingerprintAuthError(msgId, errString);
             }
-            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
-            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         private void onFaceAuthError(int msgId, String errString) {
@@ -1351,8 +1347,6 @@ public class KeyguardIndicationController {
                     showActionToUnlock();
                 }
             }
-            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
-            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         @Override

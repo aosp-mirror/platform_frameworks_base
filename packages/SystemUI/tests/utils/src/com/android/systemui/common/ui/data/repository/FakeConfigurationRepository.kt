@@ -16,13 +16,18 @@
 
 package com.android.systemui.common.ui.data.repository
 
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeConfigurationRepository : ConfigurationRepository {
+@SysUISingleton
+class FakeConfigurationRepository @Inject constructor() : ConfigurationRepository {
     private val _onAnyConfigurationChange = MutableSharedFlow<Unit>()
     override val onAnyConfigurationChange: Flow<Unit> = _onAnyConfigurationChange.asSharedFlow()
 
@@ -44,4 +49,9 @@ class FakeConfigurationRepository : ConfigurationRepository {
     override fun getDimensionPixelSize(id: Int): Int {
         throw IllegalStateException("Don't use for tests")
     }
+}
+
+@Module
+interface FakeConfigurationRepositoryModule {
+    @Binds fun bindFake(fake: FakeConfigurationRepository): ConfigurationRepository
 }

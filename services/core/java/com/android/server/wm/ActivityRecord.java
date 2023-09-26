@@ -2887,7 +2887,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean animate;
         if (mStartingData != null) {
             if (mStartingData.mWaitForSyncTransactionCommit
-                    || mTransitionController.inCollectingTransition(startingWindow)) {
+                    || mTransitionController.isCollecting(this)) {
                 mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_REMOVE_DIRECTLY;
                 mStartingData.mPrepareRemoveAnimation = prepareAnimation;
                 return;

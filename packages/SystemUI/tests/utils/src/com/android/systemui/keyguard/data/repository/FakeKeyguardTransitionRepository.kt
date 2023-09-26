@@ -18,16 +18,21 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.annotation.FloatRange
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import dagger.Binds
+import dagger.Module
 import java.util.UUID
+import javax.inject.Inject
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
 /** Fake implementation of [KeyguardTransitionRepository] */
-class FakeKeyguardTransitionRepository : KeyguardTransitionRepository {
+@SysUISingleton
+class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitionRepository {
 
     private val _transitions =
         MutableSharedFlow<TransitionStep>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -46,4 +51,9 @@ class FakeKeyguardTransitionRepository : KeyguardTransitionRepository {
         @FloatRange(from = 0.0, to = 1.0) value: Float,
         state: TransitionState
     ) = Unit
+}
+
+@Module
+interface FakeKeyguardTransitionRepositoryModule {
+    @Binds fun bindFake(fake: FakeKeyguardTransitionRepository): KeyguardTransitionRepository
 }

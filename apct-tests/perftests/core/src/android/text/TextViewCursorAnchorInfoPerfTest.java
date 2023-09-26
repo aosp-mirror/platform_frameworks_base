@@ -22,13 +22,13 @@ import android.content.Context;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.PerfTestActivity;
-import android.platform.test.annotations.LargeTest;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.widget.TextView;
 
+import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 
 import org.junit.Before;

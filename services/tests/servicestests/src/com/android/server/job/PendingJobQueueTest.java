@@ -18,7 +18,6 @@ package com.android.server.job;
 
 import static android.app.job.JobInfo.NETWORK_TYPE_ANY;
 import static android.app.job.JobInfo.NETWORK_TYPE_NONE;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -28,12 +27,13 @@ import static org.junit.Assert.fail;
 
 import android.app.job.JobInfo;
 import android.content.ComponentName;
-import android.platform.test.annotations.LargeTest;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArrayMap;
 import android.util.SparseBooleanArray;
 import android.util.SparseLongArray;
+
+import androidx.test.filters.LargeTest;
 
 import com.android.server.job.controllers.JobStatus;
 

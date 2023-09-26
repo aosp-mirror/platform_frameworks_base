@@ -501,6 +501,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Бул артыкчылыктуу тутум колдонмосу системанын камерасын каалаган убакта колдонуп, сүрөткө тартып, видео жаздыра алат. Ошондой эле колдонмого android.permission.CAMERA уруксатын берүү керек"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Колдонмого же кызматка камера ачылып же жабылып жатканда чалууларды кабыл алууга уруксат берүү."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Бул колдонмо камера ачылып (аны ачып жаткан колдонмо көрсөтүлгөндө) же жабылып жатканда чалууларды кабыл алат."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"титирөөнү башкаруу"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Колдонмого дирилдегичти көзөмөлдөө мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Колдонмого дирилдөө абалына кирүүгө уруксат берет."</string>

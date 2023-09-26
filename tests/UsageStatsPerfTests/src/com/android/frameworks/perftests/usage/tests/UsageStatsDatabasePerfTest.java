@@ -122,7 +122,7 @@ public class UsageStatsDatabasePerfTest {
         while (benchmarkState.keepRunning(elapsedTimeNs)) {
             final long startTime = SystemClock.elapsedRealtimeNanos();
             List<UsageEvents.Event> temp = sUsageStatsDatabase.queryUsageStats(
-                    UsageStatsManager.INTERVAL_DAILY, 0, 2, sUsageStatsCombiner);
+                    UsageStatsManager.INTERVAL_DAILY, 0, 2, sUsageStatsCombiner, false);
             final long endTime = SystemClock.elapsedRealtimeNanos();
             elapsedTimeNs = endTime - startTime;
             assertEquals(packageCount * eventsPerPackage, temp.size());

@@ -456,7 +456,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"आपके इस्तेमाल के हिसाब से बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> चलेगी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> तक"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> तक चलेगी"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"बैटरी <xliff:g id="TIME">%1$s</xliff:g> तक खत्म हो जाएगी"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम बैटरी बची है"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम बैटरी बची है (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -517,7 +517,8 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"रजिस्टर नहीं है"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"मौजूद नहीं है"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"एमएसी पता रैंडम पर सेट है"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 डिवाइस कनेक्ट किया गया है}=1{1 डिवाइस कनेक्ट किया गया है}one{# डिवाइस कनेक्ट किया गया है}other{# डिवाइस कनेक्ट किए गए हैं}}"</string>
+    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
+    <skip />
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ज़्यादा समय."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"कम समय."</string>
     <string name="cancel" msgid="5665114069455378395">"रद्द करें"</string>

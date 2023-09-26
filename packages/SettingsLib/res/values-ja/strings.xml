@@ -517,7 +517,8 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"未登録"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"不明"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC はランダムに設定されます"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{接続されているデバイスはありません}=1{1 台のデバイスが接続されています}other{# 台のデバイスが接続されています}}"</string>
+    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
+    <skip />
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"長くします。"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"短くします。"</string>
     <string name="cancel" msgid="5665114069455378395">"キャンセル"</string>

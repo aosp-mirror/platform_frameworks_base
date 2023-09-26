@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Жогорку оң жакка жылдыруу"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Төмөнкү сол жакка жылдыруу"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Төмөнкү оң жакка жылдыруу"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> жайып көрсөтүү"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> жыйыштыруу"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> параметрлери"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Калкып чыкма билдирмени жабуу"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Жазышууда калкып чыкма билдирмелер көрүнбөсүн"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Түшүндүм"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Азырынча эч нерсе жок"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Акыркы жана жабылган калкып чыкма билдирмелер ушул жерде көрүнөт"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Калкып чыкма билдирмелер аркылуу маектешүү"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Жаңы сүйлөшүүлөр экраныңыздын төмөнкү бурчунда сүрөтчөлөр катары көрүнөт. Аларды жайып көрсөтүү үчүн таптап же четке кагуу үчүн сүйрөңүз."</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Калкып чыкма билдирмелерди каалаган убакта көзөмөлдөңүз"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Калкып чыкма билдирме түрүндө көрүнө турган колдонмолор менен маектерди тандоо үчүн бул жерди таптаңыз"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Көбүк"</string>

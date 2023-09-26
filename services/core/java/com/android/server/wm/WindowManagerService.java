@@ -8415,12 +8415,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void captureDisplay(int displayId, @Nullable ScreenCapture.CaptureArgs captureArgs,
-                                   ScreenCapture.ScreenCaptureListener listener) {
-            WindowManagerService.this.captureDisplay(displayId, captureArgs, listener);
-        }
-
-        @Override
         public boolean hasNavigationBar(int displayId) {
             return WindowManagerService.this.hasNavigationBar(displayId);
         }

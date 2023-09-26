@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"اوپر دائیں جانب لے جائيں"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"نیچے بائیں جانب لے جائیں"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"نیچے دائیں جانب لے جائیں"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> کو پھیلائیں"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> کو سکیڑیں"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ترتیبات"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"بلبلہ برخاست کریں"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"گفتگو بلبلہ نہ کریں"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"سمجھ آ گئی"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"کوئی حالیہ بلبلہ نہیں"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"حالیہ بلبلے اور برخاست شدہ بلبلے یہاں ظاہر ہوں گے"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"بلبلے کے ذریعے چیٹ کریں"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"نئی گفتگوئیں آپ کی اسکرین کے نیچے کونے میں آئیکنز کے طور پر ظاہر ہوتی ہیں۔ انہیں پھیلانے کے لیے تھپتھپائیں یا انہیں برخاست کرنے کے لیے گھسیٹیں۔"</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"کسی بھی وقت بلبلے کو کنٹرول کریں"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"یہ نظم کرنے کے لیے یہاں تھپتھپائیں کہ کون سی ایپس اور گفتگوئیں بلبلہ سکتی ہیں"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"بلبلہ"</string>

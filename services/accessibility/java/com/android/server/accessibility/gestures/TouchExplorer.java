@@ -58,6 +58,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.BaseEventStreamTransformation;
 import com.android.server.accessibility.EventStreamTransformation;
+import com.android.server.accessibility.Flags;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
@@ -352,16 +353,34 @@ public class TouchExplorer extends BaseEventStreamTransformation
         }
         // The event for gesture end should be strictly after the
         // last hover exit event.
-        if (mSendTouchExplorationEndDelayed.isPending()) {
-            mSendTouchExplorationEndDelayed.cancel();
-            mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
-        }
+        if (Flags.sendA11yEventsBasedOnState()) {
+            if (mSendTouchExplorationEndDelayed.isPending()) {
+                mSendTouchExplorationEndDelayed.cancel();
+            }
+            if (mState.isTouchExploring()) {
+                mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
+            }
 
-        // The event for touch interaction end should be strictly after the
-        // last hover exit and the touch exploration gesture end events.
-        if (mSendTouchInteractionEndDelayed.isPending()) {
-            mSendTouchInteractionEndDelayed.cancel();
-            mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_INTERACTION_END);
+            // The event for touch interaction end should be strictly after the
+            // last hover exit and the touch exploration gesture end events.
+            if (mSendTouchInteractionEndDelayed.isPending()) {
+                mSendTouchInteractionEndDelayed.cancel();
+            }
+            if (mState.isTouchInteracting()) {
+                mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_INTERACTION_END);
+            }
+        } else {
+            if (mSendTouchExplorationEndDelayed.isPending()) {
+                mSendTouchExplorationEndDelayed.cancel();
+                mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
+            }
+
+            // The event for touch interaction end should be strictly after the
+            // last hover exit and the touch exploration gesture end events.
+            if (mSendTouchInteractionEndDelayed.isPending()) {
+                mSendTouchInteractionEndDelayed.cancel();
+                mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_INTERACTION_END);
+            }
         }
     }
 

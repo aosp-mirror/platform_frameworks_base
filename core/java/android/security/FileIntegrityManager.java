@@ -49,9 +49,18 @@ public final class FileIntegrityManager {
     }
 
     /**
-     * Returns true if APK Verity is supported on the device. When supported, an APK can be
-     * installed with a fs-verity signature (if verified with trusted App Source Certificate) for
-     * continuous on-access verification.
+     * Returns whether fs-verity is supported on the device. fs-verity provides on-access
+     * verification, although the app APIs are only made available to apps in a later SDK version.
+     * Only when this method returns true, the other fs-verity APIs in the same class can succeed.
+     *
+     * <p>The app may not need this method and just call the other APIs (i.e. {@link
+     * #setupFsVerity(File)} and {@link #getFsVerityDigest(File)}) normally and handle any failure.
+     * If some app feature really depends on fs-verity (e.g. protecting integrity of a large file
+     * download), an early check of support status may avoid any cost if it is to fail late.
+     *
+     * <p>Note: for historical reasons this is named {@code isApkVeritySupported()} instead of
+     * {@code isFsVeritySupported()}. It has also been available since API level 30, predating the
+     * other fs-verity APIs.
      */
     public boolean isApkVeritySupported() {
         try {

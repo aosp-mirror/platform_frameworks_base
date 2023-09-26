@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Mover parte superior direita"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Mover p/ parte infer. esquerda"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Mover parte inferior direita"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"expandir <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"reduzir <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Definições de <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Ignorar balão"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Não apresentar a conversa em balões"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Nenhum balão recente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Os balões recentes e ignorados vão aparecer aqui."</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Converse no chat através de balões"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"As novas conversas aparecem como ícones no canto inferior do ecrã. Toque para as expandir ou arraste para as ignorar."</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Controle os balões em qualquer altura"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Toque aqui para gerir que apps e conversas podem aparecer em balões"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Balão"</string>

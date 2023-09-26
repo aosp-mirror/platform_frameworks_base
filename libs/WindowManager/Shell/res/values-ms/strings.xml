@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Alihkan ke atas sebelah kanan"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Alihkan ke bawah sebelah kiri"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Alihkan ke bawah sebelah kanan"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"kembangkan <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"kuncupkan <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Tetapan <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Ketepikan gelembung"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Jangan jadikan perbualan dalam bentuk gelembung"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Tiada gelembung terbaharu"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Gelembung baharu dan gelembung yang diketepikan akan dipaparkan di sini"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Bersembang menggunakan gelembung"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Perbualan baharu dipaparkan sebagai ikon pada penjuru sebelah bawah skrin anda. Ketik untuk mengembangkan perbualan atau seret untuk mengetepikan perbualan."</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Kawal gelembung pada bila-bila masa"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Ketik di sini untuk mengurus apl dan perbualan yang boleh menggunakan gelembung"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Gelembung"</string>

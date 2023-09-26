@@ -1983,6 +1983,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             public void run() {
                 if (mPendingHomeKeyEvent != null) {
                     handleShortPressOnHome(mPendingHomeKeyEvent);
+                    mPendingHomeKeyEvent.recycle();
                     mPendingHomeKeyEvent = null;
                 }
             }
@@ -2027,7 +2028,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mDoubleTapOnHomeBehavior != DOUBLE_TAP_HOME_PIP_MENU
                             || mPictureInPictureVisible) {
                         mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable); // just in case
-                        mPendingHomeKeyEvent = event;
+                        mPendingHomeKeyEvent = KeyEvent.obtain(event);
                         mHandler.postDelayed(mHomeDoubleTapTimeoutRunnable,
                                 ViewConfiguration.getDoubleTapTimeout());
                         return true;
@@ -2035,7 +2036,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
 
                 // Post to main thread to avoid blocking input pipeline.
-                mHandler.post(() -> handleShortPressOnHome(event));
+                final KeyEvent shortPressEvent = KeyEvent.obtain(event);
+                mHandler.post(() -> {
+                    handleShortPressOnHome(shortPressEvent);
+                    shortPressEvent.recycle();
+                });
                 return true;
             }
 
@@ -2062,9 +2067,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (repeatCount == 0) {
                 mHomePressed = true;
                 if (mPendingHomeKeyEvent != null) {
+                    mPendingHomeKeyEvent.recycle();
                     mPendingHomeKeyEvent = null;
                     mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable);
-                    mHandler.post(() -> handleDoubleTapOnHome(event));
+                    final KeyEvent doublePressEvent = KeyEvent.obtain(event);
+                    mHandler.post(() -> {
+                        handleDoubleTapOnHome(doublePressEvent);
+                        doublePressEvent.recycle();
+                    });
                 // TODO(multi-display): Remove display id check once we support recents on
                 // multi-display
                 } else if (mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI
@@ -2074,7 +2084,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
                 if (!keyguardOn) {
                     // Post to main thread to avoid blocking input pipeline.
-                    mHandler.post(() -> handleLongPressOnHome(event));
+                    final KeyEvent longPressEvent = KeyEvent.obtain(event);
+                    mHandler.post(() -> {
+                        handleLongPressOnHome(longPressEvent);
+                        longPressEvent.recycle();
+                    });
                 }
             }
             return true;

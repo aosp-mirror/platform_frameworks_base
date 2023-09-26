@@ -144,7 +144,6 @@ object KeyguardBouncerViewBinder {
                                     )
                                 }
                             } else {
-                                bouncerMessageInteractor.onBouncerBeingHidden()
                                 securityContainerController.onBouncerVisibilityChanged(
                                     /* isVisible= */ false
                                 )

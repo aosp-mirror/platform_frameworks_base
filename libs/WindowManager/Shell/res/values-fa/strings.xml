@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"انتقال به بالا سمت چپ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"انتقال به پایین سمت راست"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"انتقال به پایین سمت چپ"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"ازهم باز کردن <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"جمع کردن <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"تنظیمات <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"رد کردن حبابک"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"مکالمه در حباب نشان داده نشود"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"متوجه‌ام"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"هیچ حبابک جدیدی وجود ندارد"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"حبابک‌های اخیر و حبابک‌های ردشده اینجا ظاهر خواهند شد"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"گپ زدن بااستفاده از حبابک"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"مکالمه‌های جدید به‌صورت نماد در گوشه پایین صفحه‌نمایش نشان داده می‌شود. برای ازهم بازکردن آن‌ها ضربه بزنید یا برای بستن، آن‌ها را بکشید."</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"کنترل حبابک‌ها در هرزمانی"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"برای مدیریت اینکه کدام برنامه‌ها و مکالمه‌ها حباب داشته باشند، ضربه بزنید"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"حباب"</string>

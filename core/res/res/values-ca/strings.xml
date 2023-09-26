@@ -502,6 +502,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Aquesta aplicació del sistema amb privilegis pot fer fotos i gravar vídeos amb una càmera del sistema en qualsevol moment. L\'aplicació també ha de tenir el permís android.permission.CAMERA per accedir-hi."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permet que una aplicació o un servei pugui rebre crides de retorn sobre els dispositius de càmera que s\'obren o es tanquen."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Aquesta aplicació pot rebre crides de retorn quan s\'obre o es tanca un dispositiu de càmera mitjançant l\'aplicació en qüestió."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Permetre que una aplicació o un servei accedeixi a la càmera com a usuari del sistema sense interfície gràfica."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Aquesta aplicació pot accedir a la càmera com a usuari del sistema sense interfície gràfica."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibració"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet que l\'aplicació controli el vibrador."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permet que l\'aplicació accedeixi a l\'estat de vibració."</string>

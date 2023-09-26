@@ -42,6 +42,8 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -50,6 +52,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogViewModel;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
 import java.util.List;
@@ -72,6 +75,10 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     private final Executor mExecutor;
 
+    private final BluetoothTileDialogViewModel mDialogViewModel;
+
+    private final FeatureFlags mFeatureFlags;
+
     @Inject
     public BluetoothTile(
             QSHost host,
@@ -83,13 +90,17 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
-            BluetoothController bluetoothController
+            BluetoothController bluetoothController,
+            FeatureFlags featureFlags,
+            BluetoothTileDialogViewModel dialogViewModel
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = bluetoothController;
         mController.observe(getLifecycle(), mCallback);
         mExecutor = new HandlerExecutor(mainHandler);
+        mFeatureFlags = featureFlags;
+        mDialogViewModel = dialogViewModel;
     }
 
     @Override
@@ -99,11 +110,15 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick(@Nullable View view) {
-        // Secondary clicks are header clicks, just toggle.
-        final boolean isEnabled = mState.value;
-        // Immediately enter transient enabling state when turning bluetooth on.
-        refreshState(isEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
-        mController.setBluetoothEnabled(!isEnabled);
+        if (mFeatureFlags.isEnabled(Flags.BLUETOOTH_QS_TILE_DIALOG)) {
+            mDialogViewModel.showDialog(mContext, view);
+        } else {
+            // Secondary clicks are header clicks, just toggle.
+            final boolean isEnabled = mState.value;
+            // Immediately enter transient enabling state when turning bluetooth on.
+            refreshState(isEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
+            mController.setBluetoothEnabled(!isEnabled);
+        }
     }
 
     @Override

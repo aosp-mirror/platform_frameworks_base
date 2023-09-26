@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Pomjerite gore desno"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Pomjeri dolje lijevo"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Pomjerite dolje desno"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"proširivanje oblačića <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"sužavanje oblačića <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Postavke aplikacije <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Odbaci oblačić"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Nemoj prikazivati razgovor u oblačićima"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Razumijem"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Nema nedavnih oblačića"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Nedavni i odbačeni oblačići će se pojaviti ovdje"</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Chatajte koristeći oblačiće"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Novi razgovori se pojavljuju kao ikone u donjem uglu ekrana. Dodirnite da ih proširite ili prevucite da ih odbacite."</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Upravljajte oblačićima u svakom trenutku"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Dodirnite ovdje da upravljate time koje aplikacije i razgovori mogu imati oblačić"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Oblačić"</string>

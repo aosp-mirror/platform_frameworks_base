@@ -17,6 +17,8 @@
 package com.android.systemui.qs.tiles
 
 import android.os.Handler
+import android.provider.Settings
+import android.safetycenter.SafetyCenterManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -68,6 +70,8 @@ class CameraToggleTileTest : SysuiTestCase() {
     private lateinit var keyguardStateController: KeyguardStateController
     @Mock
     private lateinit var uiEventLogger: QsEventLoggerFake
+    @Mock
+    private lateinit var safetyCenterManager: SafetyCenterManager
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: CameraToggleTile
@@ -89,7 +93,8 @@ class CameraToggleTileTest : SysuiTestCase() {
                 activityStarter,
                 qsLogger,
                 privacyController,
-                keyguardStateController)
+                keyguardStateController,
+                safetyCenterManager)
     }
 
     @After
@@ -116,5 +121,14 @@ class CameraToggleTileTest : SysuiTestCase() {
 
         assertThat(state.icon)
                 .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_camera_access_icon_off))
+    }
+
+    @Test
+    fun testLongClickIntent() {
+        whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(true)
+        assertThat(tile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_CONTROLS)
+
+        whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(false)
+        assertThat(tile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_SETTINGS)
     }
 }

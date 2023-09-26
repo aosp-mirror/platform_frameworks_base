@@ -502,6 +502,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Esta aplicación del sistema o con privilegios puede hacer fotos y grabar vídeos en cualquier momento con una cámara del sistema, aunque debe tener también el permiso android.permission.CAMERA para hacerlo"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permitir que una aplicación o servicio reciba retrollamadas cada vez que se abra o cierre una cámara."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Esta aplicación puede recibir retrollamadas cuando se abre o se cierra la cámara con cualquier aplicación."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la función de vibración."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que la aplicación acceda al ajuste de vibración."</string>

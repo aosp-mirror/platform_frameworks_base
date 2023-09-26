@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"A rendszerkamera használatával ez az előnyben részesített vagy rendszeralkalmazás bármikor készíthet fényképeket és videókat. Az alkalmazásnak az „android.permission.CAMERA” engedéllyel is rendelkeznie kell."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Visszahívás fogadásának engedélyezése alkalmazás vagy szolgáltatás számára, ha a kamerákat megnyitják vagy bezárják."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ez az alkalmazás fogadhat visszahívásokat bármelyik kamera (adott alkalmazás általi) megnyitásakor vagy bezárásakor."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Engedélyezheti a kívánt alkalmazás vagy szolgáltatás számára, hogy hozzáférjen a kamerához headless rendszerfelhasználóként."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Az alkalmazás hozzáférhet a kamerához headless rendszerfelhasználóként."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"rezgés szabályozása"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lehetővé teszi az alkalmazás számára a rezgés vezérlését."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Lehetővé teszi az alkalmazás számára a rezgés állapotához való hozzáférést."</string>

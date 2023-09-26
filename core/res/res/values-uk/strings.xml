@@ -503,6 +503,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Цей пріоритетний системний додаток може будь-коли робити фото й записувати відео, використовуючи камеру системи. Додатку потрібен дозвіл android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дозволити додатку або сервісу отримувати зворотні виклики щодо відкриття чи закриття камер."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Цей додаток може отримувати зворотні виклики, коли одна з камер вмикається (певним додатком) чи вимикається."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"контролювати вібросигнал"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволяє програмі контролювати вібросигнал."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Надає додатку доступ до стану вібрації."</string>

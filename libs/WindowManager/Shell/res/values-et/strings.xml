@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Teisalda üles paremale"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Teisalda alla vasakule"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Teisalda alla paremale"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"laienda <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"ahenda <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Rakenduse <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> seaded"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Sule mull"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Ära kuva vestlust mullina"</string>
@@ -76,10 +78,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Selge"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Hiljutisi mulle pole"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Siin kuvatakse hiljutised ja suletud mullid."</string>
-    <!-- no translation found for bubble_bar_education_stack_title (2486903590422497245) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_stack_text (2446934610817409820) -->
-    <skip />
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Vestelge mullide abil"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Uued vestlused kuvatakse ekraanikuva alanurgas ikoonidena. Puudutage nende laiendamiseks või lohistage neist loobumiseks."</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Juhtige mulle igal ajal"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Puudutage siin, et hallata, milliseid rakendusi ja vestlusi saab mullina kuvada"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Mull"</string>

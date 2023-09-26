@@ -2931,15 +2931,40 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * @return a future that will be completed when the whole process is completed.
      */
     private CompletableFuture<Void> install() {
+        // `futures` either contains only one session (`this`) or contains one parent session
+        // (`this`) and n-1 child sessions.
         List<CompletableFuture<InstallResult>> futures = installNonStaged();
         CompletableFuture<InstallResult>[] arr = new CompletableFuture[futures.size()];
         return CompletableFuture.allOf(futures.toArray(arr)).whenComplete((r, t) -> {
             if (t == null) {
                 setSessionApplied();
+                var multiPackageWarnings = new ArrayList<String>();
+                if (isMultiPackage()) {
+                    // This is a parent session. Collect warnings from children.
+                    for (CompletableFuture<InstallResult> f : futures) {
+                        InstallResult result = f.join();
+                        if (result.session != this && result.extras != null) {
+                            ArrayList<String> childWarnings = result.extras.getStringArrayList(
+                                    PackageInstaller.EXTRA_WARNINGS);
+                            if (!ArrayUtils.isEmpty(childWarnings)) {
+                                multiPackageWarnings.addAll(childWarnings);
+                            }
+                        }
+                    }
+                }
                 for (CompletableFuture<InstallResult> f : futures) {
                     InstallResult result = f.join();
+                    Bundle extras = result.extras;
+                    if (isMultiPackage() && result.session == this
+                            && !multiPackageWarnings.isEmpty()) {
+                        if (extras == null) {
+                            extras = new Bundle();
+                        }
+                        extras.putStringArrayList(
+                                PackageInstaller.EXTRA_WARNINGS, multiPackageWarnings);
+                    }
                     result.session.dispatchSessionFinished(
-                            INSTALL_SUCCEEDED, "Session installed", result.extras);
+                            INSTALL_SUCCEEDED, "Session installed", extras);
                 }
             } else {
                 PackageManagerException e = (PackageManagerException) t.getCause();
@@ -3817,8 +3842,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Stage APK's fs-verity signature if present.
         maybeStageFsveritySignatureLocked(origFile, targetFile,
                 isFsVerityRequiredForApk(origFile, targetFile));
-        // Stage APK's v4 signature if present.
-        if (android.security.Flags.extendVbChainToUpdatedApk()) {
+        // Stage APK's v4 signature if present, and fs-verity is supported.
+        if (android.security.Flags.extendVbChainToUpdatedApk()
+                && VerityUtils.isFsVeritySupported()) {
             maybeStageV4SignatureLocked(origFile, targetFile);
         }
         // Stage dex metadata (.dm) and corresponding fs-verity signature if present.

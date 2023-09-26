@@ -109,6 +109,12 @@ public abstract class DisplayWindowPolicyController {
     }
 
     /**
+     * @return the custom home component specified for the relevant display, if any.
+     */
+    @Nullable
+    public abstract ComponentName getCustomHomeComponent();
+
+    /**
      * Returns {@code true} if all of the given activities can be launched on this virtual display
      * in the configuration defined by the rest of the arguments.
      *

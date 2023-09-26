@@ -34,17 +34,18 @@ java_defaults {
     },
 }
 
-// Opt-in config for optimizing and shrinking the services target using R8.
-// Enabled via `export SYSTEM_OPTIMIZE_JAVA=true`, or explicitly in Make via the
+// Config to control optimizing and shrinking the services target using R8.
+// Set via `export SYSTEM_OPTIMIZE_JAVA=true|false`, or explicitly in Make via the
 // `SOONG_CONFIG_ANDROID_SYSTEM_OPTIMIZE_JAVA` variable.
-// TODO(b/196084106): Enable optimizations by default after stabilizing and
-// building out retrace infrastructure.
 soong_config_module_type {
     name: "system_optimized_java_defaults",
     module_type: "java_defaults",
     config_namespace: "ANDROID",
     bool_variables: ["SYSTEM_OPTIMIZE_JAVA"],
-    properties: ["optimize"],
+    properties: [
+        "optimize",
+        "dxflags",
+    ],
 }
 
 system_optimized_java_defaults {
@@ -75,6 +76,9 @@ system_optimized_java_defaults {
                     // permission subpackage to prune unused jarjar'ed Kotlin dependencies.
                     proguard_flags_files: ["proguard_permission.flags"],
                 },
+                // Explicitly configure R8 to preserve debug info, as this path should
+                // really only allow stripping of permission-specific code and deps.
+                dxflags: ["--debug"],
             },
         },
     },

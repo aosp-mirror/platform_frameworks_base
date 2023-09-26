@@ -43,7 +43,6 @@ import android.window.ScreenCapture;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.wm.WindowManagerInternal;
 
 import libcore.io.Streams;
 
@@ -408,12 +407,6 @@ final class ColorFade {
         }
     }
 
-    void stop() {
-        if (mEglContext != null && mEglDisplay != null) {
-            EGL14.eglDestroyContext(mEglDisplay, mEglContext);
-        }
-    }
-
     /**
      * Draws an animation frame showing the color fade activated at the
      * specified level.
@@ -574,21 +567,8 @@ final class ColorFade {
     }
 
     private ScreenCapture.ScreenshotHardwareBuffer captureScreen() {
-        WindowManagerInternal windowManagerService = LocalServices.getService(
-                WindowManagerInternal.class);
-        ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer;
-        ScreenCapture.SynchronousScreenCaptureListener screenCaptureListener =
-                ScreenCapture.createSyncCaptureListener();
-        ScreenCapture.CaptureArgs captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
-                .setCaptureSecureLayers(true)
-                .setAllowProtected(true)
-                .build();
-        try {
-            windowManagerService.captureDisplay(mDisplayId, captureArgs, screenCaptureListener);
-            screenshotBuffer = screenCaptureListener.getBuffer();
-        } catch (Exception e) {
-            screenshotBuffer = null;
-        }
+        ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
+                mDisplayManagerInternal.systemScreenshot(mDisplayId);
         if (screenshotBuffer == null) {
             Slog.e(TAG, "Failed to take screenshot. Buffer is null");
             return null;

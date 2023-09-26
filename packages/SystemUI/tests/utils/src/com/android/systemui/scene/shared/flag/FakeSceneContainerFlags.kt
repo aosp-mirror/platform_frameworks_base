@@ -16,6 +16,10 @@
 
 package com.android.systemui.scene.shared.flag
 
+import dagger.Binds
+import dagger.Module
+import dagger.Provides
+
 class FakeSceneContainerFlags(
     var enabled: Boolean = false,
 ) : SceneContainerFlags {
@@ -26,5 +30,15 @@ class FakeSceneContainerFlags(
 
     override fun requirementDescription(): String {
         return ""
+    }
+}
+
+@Module(includes = [FakeSceneContainerFlagsModule.Bindings::class])
+class FakeSceneContainerFlagsModule(
+    @get:Provides val sceneContainerFlags: FakeSceneContainerFlags = FakeSceneContainerFlags(),
+) {
+    @Module
+    interface Bindings {
+        @Binds fun bindFake(fake: FakeSceneContainerFlags): SceneContainerFlags
     }
 }

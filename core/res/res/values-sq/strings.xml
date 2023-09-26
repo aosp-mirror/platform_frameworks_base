@@ -501,6 +501,10 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ky aplikacion sistemi ose i privilegjuar mund të nxjerrë fotografi dhe të regjistrojë video duke përdorur një kamerë në çdo moment. Kërkon që autorizimi i android.permission.CAMERA të mbahet edhe nga aplikacioni"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Lejo që një aplikacion ose shërbim të marrë telefonata mbrapsht për pajisjet e kamerës që hapen ose mbyllen."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ky aplikacion mund të marrë telefonata mbrapsht kur hapet ose mbyllet një pajisje e kamerës (nga një aplikacion)."</string>
+    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrollo dridhjen"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lejon aplikacionin të kontrollojë dridhësin."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Lejon që aplikacioni të ketë qasje te gjendja e dridhësit."</string>
@@ -806,11 +810,11 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Lejon zotëruesin të përditësojë aplikacionin që e ka instaluar më parë pa veprimin e përdoruesit"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitoro tentativat e shkyçjes së ekranit"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitoron tentativat e shkyçjes së ekranit"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitoro numrin e fjalëkalimeve të shkruar gabim kur shkyç ekranin. Kyç tabletin ose fshi të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyç pajisjen tënde Android TV ose spastro të gjitha të dhënat e pajisjes sate Android TV nëse shkruhen gabim shumë fjalëkalime."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyç sistemin info-argëtues ose spastro të gjitha të dhënat e tij nëse shkruhen shumë fjalëkalime të gabuara."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitoro numrin e fjalëkalimeve të shkruar gabim kur shkyç ekranin. Kyç telefonin ose fshi të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitoron numrin e fjalëkalimeve të shkruar gabim kur shkyç ekranin. Kyç telefonin ose fshin të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe tabletin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyçe pajisjen tënde Android TV ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyç sistemin info-argëtues ose spastro të gjitha të dhënat e këtij profili nëse shkruhen shumë fjalëkalime të gabuara."</string>

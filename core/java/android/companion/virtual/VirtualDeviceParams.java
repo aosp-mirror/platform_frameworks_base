@@ -229,6 +229,7 @@ public final class VirtualDeviceParams implements Parcelable {
     @Nullable private final String mName;
     // Mapping of @PolicyType to @DevicePolicy
     @NonNull private final SparseIntArray mDevicePolicies;
+    @Nullable private final ComponentName mHomeComponent;
     @NonNull private final List<VirtualSensorConfig> mVirtualSensorConfigs;
     @Nullable private final IVirtualSensorCallback mVirtualSensorCallback;
     private final int mAudioPlaybackSessionId;
@@ -243,6 +244,7 @@ public final class VirtualDeviceParams implements Parcelable {
             @NonNull Set<ComponentName> activityPolicyExemptions,
             @Nullable String name,
             @NonNull SparseIntArray devicePolicies,
+            @Nullable ComponentName homeComponent,
             @NonNull List<VirtualSensorConfig> virtualSensorConfigs,
             @Nullable IVirtualSensorCallback virtualSensorCallback,
             int audioPlaybackSessionId,
@@ -258,6 +260,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 new ArraySet<>(Objects.requireNonNull(activityPolicyExemptions));
         mName = name;
         mDevicePolicies = Objects.requireNonNull(devicePolicies);
+        mHomeComponent = homeComponent;
         mVirtualSensorConfigs = Objects.requireNonNull(virtualSensorConfigs);
         mVirtualSensorCallback = virtualSensorCallback;
         mAudioPlaybackSessionId = audioPlaybackSessionId;
@@ -280,6 +283,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 IVirtualSensorCallback.Stub.asInterface(parcel.readStrongBinder());
         mAudioPlaybackSessionId = parcel.readInt();
         mAudioRecordingSessionId = parcel.readInt();
+        mHomeComponent = parcel.readTypedObject(ComponentName.CREATOR);
     }
 
     /**
@@ -288,6 +292,19 @@ public final class VirtualDeviceParams implements Parcelable {
     @LockState
     public int getLockState() {
         return mLockState;
+    }
+
+    /**
+     * Returns the custom component used as home on all displays owned by this virtual device that
+     * support home activities.
+     *
+     * @see Builder#setHomeComponent
+     */
+    // TODO(b/297168328): Link to the relevant API for creating displays with home support.
+    @FlaggedApi(Flags.FLAG_VDM_CUSTOM_HOME)
+    @Nullable
+    public ComponentName getHomeComponent() {
+        return mHomeComponent;
     }
 
     /**
@@ -468,6 +485,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 mVirtualSensorCallback != null ? mVirtualSensorCallback.asBinder() : null);
         dest.writeInt(mAudioPlaybackSessionId);
         dest.writeInt(mAudioRecordingSessionId);
+        dest.writeTypedObject(mHomeComponent, flags);
     }
 
     @Override
@@ -508,7 +526,7 @@ public final class VirtualDeviceParams implements Parcelable {
         int hashCode = Objects.hash(
                 mLockState, mUsersWithMatchingAccounts, mCrossTaskNavigationExemptions,
                 mDefaultNavigationPolicy, mActivityPolicyExemptions, mDefaultActivityPolicy, mName,
-                mDevicePolicies, mAudioPlaybackSessionId, mAudioRecordingSessionId);
+                mDevicePolicies, mHomeComponent, mAudioPlaybackSessionId, mAudioRecordingSessionId);
         for (int i = 0; i < mDevicePolicies.size(); i++) {
             hashCode = 31 * hashCode + mDevicePolicies.keyAt(i);
             hashCode = 31 * hashCode + mDevicePolicies.valueAt(i);
@@ -528,6 +546,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 + " mActivityPolicyExemptions=" + mActivityPolicyExemptions
                 + " mName=" + mName
                 + " mDevicePolicies=" + mDevicePolicies
+                + " mHomeComponent=" + mHomeComponent
                 + " mAudioPlaybackSessionId=" + mAudioPlaybackSessionId
                 + " mAudioRecordingSessionId=" + mAudioRecordingSessionId
                 + ")";
@@ -588,6 +607,7 @@ public final class VirtualDeviceParams implements Parcelable {
         @Nullable private VirtualSensorCallback mVirtualSensorCallback;
         @Nullable private Executor mVirtualSensorDirectChannelCallbackExecutor;
         @Nullable private VirtualSensorDirectChannelCallback mVirtualSensorDirectChannelCallback;
+        @Nullable private ComponentName mHomeComponent;
 
         private static class VirtualSensorCallbackDelegate extends IVirtualSensorCallback.Stub {
             @NonNull
@@ -661,6 +681,23 @@ public final class VirtualDeviceParams implements Parcelable {
         @NonNull
         public Builder setLockState(@LockState int lockState) {
             mLockState = lockState;
+            return this;
+        }
+
+        /**
+         * Specifies a component to be used as home on all displays owned by this virtual device
+         * that support home activities.
+         * *
+         * <p>Note: Only relevant for virtual displays that support home activities.</p>
+         *
+         * @param homeComponent The component name to be used as home. If unset, then the system-
+         *   default secondary home activity will be used.
+         */
+        // TODO(b/297168328): Link to the relevant API for creating displays with home support.
+        @FlaggedApi(Flags.FLAG_VDM_CUSTOM_HOME)
+        @NonNull
+        public Builder setHomeComponent(@Nullable ComponentName homeComponent) {
+            mHomeComponent = homeComponent;
             return this;
         }
 
@@ -1031,6 +1068,7 @@ public final class VirtualDeviceParams implements Parcelable {
                     mActivityPolicyExemptions,
                     mName,
                     mDevicePolicies,
+                    mHomeComponent,
                     mVirtualSensorConfigs,
                     virtualSensorCallbackDelegate,
                     mAudioPlaybackSessionId,

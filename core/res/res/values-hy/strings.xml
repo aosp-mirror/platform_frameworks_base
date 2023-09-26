@@ -501,6 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Այս արտոնյալ կամ համակարգային հավելվածը կարող է ցանկացած պահի լուսանկարել և տեսագրել՝ օգտագործելով համակարգի տեսախցիկները։ Հավելվածին նաև անհրաժեշտ է android.permission.CAMERA թույլտվությունը։"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Թույլատրել հավելվածին կամ ծառայությանը հետզանգեր ստանալ՝ տեսախցիկների բացվելու և փակվելու դեպքում։"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Այս հավելվածը կարող է հետզանգեր ստանալ՝ ցանկացած տեսախցիկի բացվելու (կնշվի բացող հավելվածը) և փակվելու դեպքում։"</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Թույլատրել հավելվածին կամ ծառայությանը օգտագործել որպես միջերեսի համակարգային օգտատեր։"</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Այս հավելվածին ձեր տեսախցիկը հասանելի է որպես առանց միջերեսի համակարգային օգտատեր։"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"կառավարել թրթռումը"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Թույլ է տալիս հավելվածին կառավարել թրթռոցը:"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Հավելվածին թույլ է տալիս օգտագործել սարքի թրթռալու ռեժիմը։"</string>
