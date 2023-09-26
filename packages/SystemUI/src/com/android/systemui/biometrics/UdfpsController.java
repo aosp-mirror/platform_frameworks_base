@@ -32,7 +32,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.SensorProperties;
@@ -54,7 +53,6 @@ import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
@@ -101,7 +99,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
-import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.SystemClock;
 
 import kotlin.Unit;
@@ -135,12 +132,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     private static final String TAG = "UdfpsController";
     private static final long AOD_SEND_FINGER_UP_DELAY_MILLIS = 1000;
 
-    // Minimum required delay between consecutive touch logs in milliseconds.
-    private static final long MIN_TOUCH_LOG_INTERVAL = 50;
     private static final long MIN_UNCHANGED_INTERACTION_LOG_INTERVAL = 50;
-
-    // This algorithm checks whether the touch is within the sensor's bounding box.
-    private static final int BOUNDING_BOX_TOUCH_CONFIG_ID = 0;
 
     private final Context mContext;
     private final Execution mExecution;
@@ -174,8 +166,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @Nullable private final TouchProcessor mTouchProcessor;
     @NonNull private final SessionTracker mSessionTracker;
     @NonNull private final AlternateBouncerInteractor mAlternateBouncerInteractor;
-    @NonNull private final SecureSettings mSecureSettings;
-    @NonNull private final UdfpsUtils mUdfpsUtils;
     @NonNull private final InputManager mInputManager;
     @NonNull private final UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     private final boolean mIgnoreRefreshRate;
@@ -189,8 +179,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @Nullable private final AlternateUdfpsTouchProvider mAlternateTouchProvider;
     @Nullable private UdfpsDisplayModeProvider mUdfpsDisplayMode;
 
-    // Tracks the velocity of a touch to help filter out the touches that move too fast.
-    @Nullable private VelocityTracker mVelocityTracker;
     // The ID of the pointer for which ACTION_DOWN has occurred. -1 means no pointer is active.
     private int mActivePointerId = -1;
     // Whether a pointer has been pilfered for current gesture
@@ -269,7 +257,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             mFgExecutor.execute(() -> UdfpsController.this.showUdfpsOverlay(
                     new UdfpsControllerOverlay(
                         mContext,
-                        mFingerprintManager,
                         mInflater,
                         mWindowManager,
                         mAccessibilityManager,
@@ -283,7 +270,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         mKeyguardStateController,
                         mUnlockedScreenOffAnimationController,
                         mUdfpsDisplayMode,
-                        mSecureSettings,
                         requestId,
                         reason,
                         callback,
@@ -296,7 +282,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         mFeatureFlags,
                         mPrimaryBouncerInteractor,
                         mAlternateBouncerInteractor,
-                        mUdfpsUtils,
                         mUdfpsKeyguardAccessibilityDelegate,
                         mUdfpsKeyguardViewModels
                     )));
@@ -420,23 +405,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mUdfpsDisplayMode = udfpsDisplayMode;
     }
 
-    /**
-     * Calculate the pointer speed given a velocity tracker and the pointer id.
-     * This assumes that the velocity tracker has already been passed all relevant motion events.
-     */
-    public static float computePointerSpeed(@NonNull VelocityTracker tracker, int pointerId) {
-        final float vx = tracker.getXVelocity(pointerId);
-        final float vy = tracker.getYVelocity(pointerId);
-        return (float) Math.sqrt(Math.pow(vx, 2.0) + Math.pow(vy, 2.0));
-    }
-
-    /**
-     * Whether the velocity exceeds the acceptable UDFPS debouncing threshold.
-     */
-    public static boolean exceedsVelocityThreshold(float velocity) {
-        return velocity > 750f;
-    }
-
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -454,49 +422,12 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         }
     };
 
-    /**
-     * Forwards touches to the udfps controller / view
-     */
-    public boolean onTouch(MotionEvent event) {
-        if (mOverlay == null || mOverlay.isHiding()) {
-            return false;
-        }
-        // TODO(b/225068271): may not be correct but no way to get the id yet
-        return onTouch(mOverlay.getRequestId(), event, false);
-    }
-
-    /**
-     * @param x                   coordinate
-     * @param y                   coordinate
-     * @param relativeToUdfpsView true if the coordinates are relative to the udfps view; else,
-     *                            calculate from the display dimensions in portrait orientation
-     */
-    private boolean isWithinSensorArea(UdfpsView udfpsView, float x, float y,
-            boolean relativeToUdfpsView) {
-        if (relativeToUdfpsView) {
-            // TODO: move isWithinSensorArea to UdfpsController.
-            return udfpsView.isWithinSensorArea(x, y);
-        }
-
-        if (mOverlay == null || mOverlay.getAnimationViewController() == null) {
-            return false;
-        }
-
-        return !mOverlay.getAnimationViewController().shouldPauseAuth()
-                && mOverlayParams.getSensorBounds().contains((int) x, (int) y);
-    }
-
     private void tryDismissingKeyguard() {
         if (!mOnFingerDown) {
             playStartHaptic();
         }
         mKeyguardViewManager.notifyKeyguardAuthenticated(false /* primaryAuth */);
         mAttemptedToDismissKeyguard = true;
-    }
-
-    @VisibleForTesting
-    boolean onTouch(long requestId, @NonNull MotionEvent event, boolean fromUdfpsView) {
-        return newOnTouch(requestId, event, fromUdfpsView);
     }
 
     private int getBiometricSessionType() {
@@ -559,7 +490,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         }
     }
 
-    private boolean newOnTouch(long requestId, @NonNull MotionEvent event, boolean fromUdfpsView) {
+    private boolean onTouch(long requestId, @NonNull MotionEvent event, boolean fromUdfpsView) {
         if (!fromUdfpsView) {
             Log.e(TAG, "ignoring the touch injected from outside of UdfpsView");
             return false;
@@ -573,7 +504,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     + mOverlay.getRequestId());
             return false;
         }
-
         if ((mLockscreenShadeTransitionController.getQSDragProgress() != 0f
                 && !mAlternateBouncerInteractor.isVisibleState())
                 || mPrimaryBouncerInteractor.isInTransit()) {
@@ -647,8 +577,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 break;
 
             case UNCHANGED:
-                if (!isWithinSensorArea(mOverlay.getOverlayView(), event.getRawX(), event.getRawY(),
-                        true) && mActivePointerId == MotionEvent.INVALID_POINTER_ID
+                if (mActivePointerId == MotionEvent.INVALID_POINTER_ID
                         && mAlternateBouncerInteractor.isVisibleState()) {
                     // No pointer on sensor, forward to keyguard if alternateBouncer is visible
                     mKeyguardViewManager.onTouch(event);
@@ -660,7 +589,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         logBiometricTouch(processedTouch.getEvent(), data);
 
         // Always pilfer pointers that are within sensor area or when alternate bouncer is showing
-        if (isWithinSensorArea(mOverlay.getOverlayView(), event.getRawX(), event.getRawY(), true)
+        if (mActivePointerId != MotionEvent.INVALID_POINTER_ID
                 || mAlternateBouncerInteractor.isVisibleState()) {
             shouldPilfer = true;
         }
@@ -673,146 +602,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             mPointerPilfered = true;
         }
 
-        return processedTouch.getTouchData().isWithinBounds(mOverlayParams.getNativeSensorBounds());
-    }
-
-    private boolean oldOnTouch(long requestId, @NonNull MotionEvent event, boolean fromUdfpsView) {
-        if (mOverlay == null) {
-            Log.w(TAG, "ignoring onTouch with null overlay");
-            return false;
-        }
-        if (!mOverlay.matchesRequestId(requestId)) {
-            Log.w(TAG, "ignoring stale touch event: " + requestId + " current: "
-                    + mOverlay.getRequestId());
-            return false;
-        }
-
-        final UdfpsView udfpsView = mOverlay.getOverlayView();
-        boolean handled = false;
-        switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_HOVER_ENTER:
-                Trace.beginSection("UdfpsController.onTouch.ACTION_DOWN");
-                // To simplify the lifecycle of the velocity tracker, make sure it's never null
-                // after ACTION_DOWN, and always null after ACTION_CANCEL or ACTION_UP.
-                if (mVelocityTracker == null) {
-                    mVelocityTracker = VelocityTracker.obtain();
-                } else {
-                    // ACTION_UP or ACTION_CANCEL is not guaranteed to be called before a new
-                    // ACTION_DOWN, in that case we should just reuse the old instance.
-                    mVelocityTracker.clear();
-                }
-
-                final boolean withinSensorArea =
-                        isWithinSensorArea(udfpsView, event.getX(), event.getY(), fromUdfpsView);
-                if (withinSensorArea) {
-                    Trace.beginAsyncSection("UdfpsController.e2e.onPointerDown", 0);
-                    Log.v(TAG, "onTouch | action down");
-                    // The pointer that causes ACTION_DOWN is always at index 0.
-                    // We need to persist its ID to track it during ACTION_MOVE that could include
-                    // data for many other pointers because of multi-touch support.
-                    mActivePointerId = event.getPointerId(0);
-                    mVelocityTracker.addMovement(event);
-                    handled = true;
-                    mAcquiredReceived = false;
-                }
-                if ((withinSensorArea || fromUdfpsView) && shouldTryToDismissKeyguard()) {
-                    Log.v(TAG, "onTouch | dismiss keyguard ACTION_DOWN");
-                    tryDismissingKeyguard();
-                }
-
-                Trace.endSection();
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-            case MotionEvent.ACTION_HOVER_MOVE:
-                Trace.beginSection("UdfpsController.onTouch.ACTION_MOVE");
-                final int idx = mActivePointerId == -1
-                        ? event.getPointerId(0)
-                        : event.findPointerIndex(mActivePointerId);
-                if (idx == event.getActionIndex()) {
-                    final boolean actionMoveWithinSensorArea =
-                            isWithinSensorArea(udfpsView, event.getX(idx), event.getY(idx),
-                                    fromUdfpsView);
-                    if ((fromUdfpsView || actionMoveWithinSensorArea)
-                            && shouldTryToDismissKeyguard()) {
-                        Log.v(TAG, "onTouch | dismiss keyguard ACTION_MOVE");
-                        tryDismissingKeyguard();
-                        break;
-                    }
-                    // Map the touch to portrait mode if the device is in landscape mode.
-                    final Point scaledTouch = mUdfpsUtils.getTouchInNativeCoordinates(
-                            idx, event, mOverlayParams);
-                    if (actionMoveWithinSensorArea) {
-                        if (mVelocityTracker == null) {
-                            // touches could be injected, so the velocity tracker may not have
-                            // been initialized (via ACTION_DOWN).
-                            mVelocityTracker = VelocityTracker.obtain();
-                        }
-                        mVelocityTracker.addMovement(event);
-                        // Compute pointer velocity in pixels per second.
-                        mVelocityTracker.computeCurrentVelocity(1000);
-                        // Compute pointer speed from X and Y velocities.
-                        final float v = computePointerSpeed(mVelocityTracker, mActivePointerId);
-                        final float minor = event.getTouchMinor(idx);
-                        final float major = event.getTouchMajor(idx);
-                        final boolean exceedsVelocityThreshold = exceedsVelocityThreshold(v);
-                        final String touchInfo = String.format(
-                                "minor: %.1f, major: %.1f, v: %.1f, exceedsVelocityThreshold: %b",
-                                minor, major, v, exceedsVelocityThreshold);
-                        final long sinceLastLog = mSystemClock.elapsedRealtime() - mTouchLogTime;
-
-                        if (!mOnFingerDown && !mAcquiredReceived && !exceedsVelocityThreshold) {
-                            final float scale = mOverlayParams.getScaleFactor();
-                            float scaledMinor = minor / scale;
-                            float scaledMajor = major / scale;
-                            onFingerDown(requestId, scaledTouch.x, scaledTouch.y, scaledMinor,
-                                    scaledMajor);
-
-                            Log.v(TAG, "onTouch | finger down: " + touchInfo);
-                            mTouchLogTime = mSystemClock.elapsedRealtime();
-                            handled = true;
-                        } else if (sinceLastLog >= MIN_TOUCH_LOG_INTERVAL) {
-                            Log.v(TAG, "onTouch | finger move: " + touchInfo);
-                            mTouchLogTime = mSystemClock.elapsedRealtime();
-                        }
-                    } else {
-                        Log.v(TAG, "onTouch | finger outside");
-                        onFingerUp(requestId, udfpsView);
-                        // Maybe announce for accessibility.
-                        mFgExecutor.execute(() -> {
-                            if (mOverlay == null) {
-                                Log.e(TAG, "touch outside sensor area received"
-                                        + "but serverRequest is null");
-                                return;
-                            }
-                            mOverlay.onTouchOutsideOfSensorArea(scaledTouch);
-                        });
-                    }
-                }
-                Trace.endSection();
-                break;
-
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_HOVER_EXIT:
-                Trace.beginSection("UdfpsController.onTouch.ACTION_UP");
-                mActivePointerId = -1;
-                if (mVelocityTracker != null) {
-                    mVelocityTracker.recycle();
-                    mVelocityTracker = null;
-                }
-                Log.v(TAG, "onTouch | finger up");
-                mAttemptedToDismissKeyguard = false;
-                onFingerUp(requestId, udfpsView);
-                mFalsingManager.isFalseTouch(UDFPS_AUTHENTICATION);
-                Trace.endSection();
-                break;
-
-            default:
-                // Do nothing.
-        }
-        return handled;
+        return mActivePointerId != MotionEvent.INVALID_POINTER_ID;
     }
 
     private boolean shouldTryToDismissKeyguard() {
@@ -858,9 +648,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull SinglePointerTouchProcessor singlePointerTouchProcessor,
             @NonNull SessionTracker sessionTracker,
             @NonNull AlternateBouncerInteractor alternateBouncerInteractor,
-            @NonNull SecureSettings secureSettings,
             @NonNull InputManager inputManager,
-            @NonNull UdfpsUtils udfpsUtils,
             @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
             @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate,
             @NonNull Provider<UdfpsKeyguardViewModels> udfpsKeyguardViewModelsProvider) {
@@ -905,8 +693,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mBiometricExecutor = biometricsExecutor;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
-        mSecureSettings = secureSettings;
-        mUdfpsUtils = udfpsUtils;
         mInputManager = inputManager;
         mUdfpsKeyguardAccessibilityDelegate = udfpsKeyguardAccessibilityDelegate;
 

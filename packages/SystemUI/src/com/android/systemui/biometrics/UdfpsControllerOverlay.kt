@@ -20,7 +20,6 @@ import android.annotation.SuppressLint
 import android.annotation.UiThread
 import android.content.Context
 import android.graphics.PixelFormat
-import android.graphics.Point
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
@@ -29,7 +28,6 @@ import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTING
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
 import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
-import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.os.Build
 import android.os.RemoteException
@@ -64,7 +62,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.settings.SecureSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Provider
 
@@ -82,7 +79,6 @@ const val SETTING_REMOVE_ENROLLMENT_UI = "udfps_overlay_remove_enrollment_ui"
 @UiThread
 class UdfpsControllerOverlay @JvmOverloads constructor(
         private val context: Context,
-        fingerprintManager: FingerprintManager,
         private val inflater: LayoutInflater,
         private val windowManager: WindowManager,
         private val accessibilityManager: AccessibilityManager,
@@ -96,7 +92,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val keyguardStateController: KeyguardStateController,
         private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
         private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
-        private val secureSettings: SecureSettings,
         val requestId: Long,
         @ShowReason val requestReason: Int,
         private val controllerCallback: IUdfpsOverlayControllerCallback,
@@ -106,7 +101,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val primaryBouncerInteractor: PrimaryBouncerInteractor,
         private val alternateBouncerInteractor: AlternateBouncerInteractor,
         private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
-        private val udfpsUtils: UdfpsUtils,
         private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
         private val udfpsKeyguardViewModels: Provider<UdfpsKeyguardViewModels>,
 ) {
@@ -324,25 +318,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         overlayTouchListener = null
 
         return wasShowing
-    }
-
-    /**
-     * This function computes the angle of touch relative to the sensor and maps
-     * the angle to a list of help messages which are announced if accessibility is enabled.
-     *
-     */
-    fun onTouchOutsideOfSensorArea(scaledTouch: Point) {
-        val theStr =
-            udfpsUtils.onTouchOutsideOfSensorArea(
-                touchExplorationEnabled,
-                context,
-                scaledTouch.x,
-                scaledTouch.y,
-                overlayParams
-            )
-        if (theStr != null) {
-            animationViewController?.doAnnounceForAccessibility(theStr)
-        }
     }
 
     /** Cancel this request. */
