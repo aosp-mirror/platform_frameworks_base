@@ -266,17 +266,17 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public void onUserUnlocking(@NonNull TargetUser user) {
-            mStorageManagerService.onUnlockUser(user.getUserIdentifier());
+            mStorageManagerService.onUserUnlocking(user.getUserIdentifier());
         }
 
         @Override
         public void onUserStopped(@NonNull TargetUser user) {
-            mStorageManagerService.onCleanupUser(user.getUserIdentifier());
+            mStorageManagerService.onUserStopped(user.getUserIdentifier());
         }
 
         @Override
         public void onUserStopping(@NonNull TargetUser user) {
-            mStorageManagerService.onStopUser(user.getUserIdentifier());
+            mStorageManagerService.onUserStopping(user.getUserIdentifier());
         }
 
         @Override
@@ -1247,8 +1247,8 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void onUnlockUser(int userId) {
-        Slog.d(TAG, "onUnlockUser " + userId);
+    private void onUserUnlocking(int userId) {
+        Slog.d(TAG, "onUserUnlocking " + userId);
 
         if (userId != UserHandle.USER_SYSTEM) {
             // Check if this user shares media with another user
@@ -1311,8 +1311,8 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void onCleanupUser(int userId) {
-        Slog.d(TAG, "onCleanupUser " + userId);
+    private void onUserStopped(int userId) {
+        Slog.d(TAG, "onUserStopped " + userId);
 
         try {
             mVold.onUserStopped(userId);
@@ -1326,8 +1326,8 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void onStopUser(int userId) {
-        Slog.i(TAG, "onStopUser " + userId);
+    private void onUserStopping(int userId) {
+        Slog.i(TAG, "onUserStopping " + userId);
         try {
             mStorageSessionController.onUserStopping(userId);
         } catch (Exception e) {
