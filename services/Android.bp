@@ -274,4 +274,5 @@ droidstubs {
             tag: ".removed-api.txt",
         },
     ],
+    api_surface: "system-server",
 }
