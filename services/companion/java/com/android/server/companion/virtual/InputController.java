@@ -396,8 +396,8 @@ class InputController {
             }
             if (inputDeviceDescriptor.getDisplayId()
                     != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                throw new IllegalStateException(
-                        "Display id associated with this mouse is not currently targetable");
+                mInputManagerInternal.setVirtualMousePointerDisplayId(
+                        inputDeviceDescriptor.getDisplayId());
             }
             return mNativeWrapper.writeButtonEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getButtonCode(), event.getAction(), event.getEventTimeNanos());
@@ -429,8 +429,8 @@ class InputController {
             }
             if (inputDeviceDescriptor.getDisplayId()
                     != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                throw new IllegalStateException(
-                        "Display id associated with this mouse is not currently targetable");
+                mInputManagerInternal.setVirtualMousePointerDisplayId(
+                        inputDeviceDescriptor.getDisplayId());
             }
             return mNativeWrapper.writeRelativeEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getRelativeX(), event.getRelativeY(), event.getEventTimeNanos());
@@ -447,8 +447,8 @@ class InputController {
             }
             if (inputDeviceDescriptor.getDisplayId()
                     != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                throw new IllegalStateException(
-                        "Display id associated with this mouse is not currently targetable");
+                mInputManagerInternal.setVirtualMousePointerDisplayId(
+                        inputDeviceDescriptor.getDisplayId());
             }
             return mNativeWrapper.writeScrollEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getXAxisMovement(), event.getYAxisMovement(), event.getEventTimeNanos());
@@ -465,8 +465,8 @@ class InputController {
             }
             if (inputDeviceDescriptor.getDisplayId()
                     != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                throw new IllegalStateException(
-                        "Display id associated with this mouse is not currently targetable");
+                mInputManagerInternal.setVirtualMousePointerDisplayId(
+                        inputDeviceDescriptor.getDisplayId());
             }
             return LocalServices.getService(InputManagerInternal.class).getCursorPosition();
         }
