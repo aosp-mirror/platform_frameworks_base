@@ -2409,13 +2409,16 @@ public class Tuner implements AutoCloseable  {
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER)
     @Nullable
     public Descrambler openDescrambler() {
+        acquireTRMSLock("openDescrambler()");
         mDemuxLock.lock();
         try {
-            if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, mDemuxLock)) {
+            // no need to unlock mDemuxLock (so pass null instead) as TRMS lock is already acquired
+            if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, null)) {
                 return null;
             }
             return requestDescrambler();
         } finally {
+            releaseTRMSLock();
             mDemuxLock.unlock();
         }
     }
