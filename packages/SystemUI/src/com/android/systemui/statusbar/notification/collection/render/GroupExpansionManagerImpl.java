@@ -50,7 +50,7 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
      * Set of summary keys whose groups are expanded.
      * NOTE: This should not be modified without notifying listeners, so prefer using
      * {@code setGroupExpanded} when making changes.
-      */
+     */
     private final Set<NotificationEntry> mExpandedGroups = new HashSet<>();
 
     private final FeatureFlags mFeatureFlags;
@@ -104,7 +104,18 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
 
     @Override
     public void setGroupExpanded(NotificationEntry entry, boolean expanded) {
-        final NotificationEntry groupSummary = mGroupMembershipManager.getGroupSummary(entry);
+        NotificationEntry groupSummary = mGroupMembershipManager.getGroupSummary(entry);
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)
+                && entry.getParent() == null) {
+            if (expanded) {
+                throw new IllegalArgumentException("Cannot expand group that is not attached");
+            } else {
+                // The entry is no longer attached, but we still want to make sure we don't have
+                // a stale expansion state.
+                groupSummary = entry;
+            }
+        }
+
         boolean changed;
         if (expanded) {
             changed = mExpandedGroups.add(groupSummary);
