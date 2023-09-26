@@ -1,0 +1,40 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "binder_leak_test_aidl",
+    srcs: ["**/*.aidl"],
+    path: "aidl",
+}
+
+java_defaults {
+    name: "BinderTest.defaults",
+    srcs: [
+        "**/*.java",
+        ":binder_leak_test_aidl",
+    ],
+    static_libs: [
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+        "androidx.test.runner",
+    ],
+}
+
+// Built with target_sdk_version: current
+android_test {
+    name: "BinderLeakTest",
+    defaults: ["BinderTest.defaults"],
+}
+
+// Built with target_sdk_version: 33
+android_test {
+    name: "BinderLeakTest_legacy",
+    defaults: ["BinderTest.defaults"],
+    manifest: "AndroidManifest_legacy.xml",
+}
