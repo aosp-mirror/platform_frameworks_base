@@ -78,10 +78,7 @@ sealed class AuthMethodBouncerViewModel(
      */
     fun onImeVisibilityChanged(isVisible: Boolean) {
         if (isImeVisible && !isVisible) {
-            // The IME has gone from visible to invisible, dismiss the bouncer.
-            interactor.hide(
-                loggingReason = "IME hidden",
-            )
+            interactor.onImeHidden()
         }
 
         isImeVisible = isVisible

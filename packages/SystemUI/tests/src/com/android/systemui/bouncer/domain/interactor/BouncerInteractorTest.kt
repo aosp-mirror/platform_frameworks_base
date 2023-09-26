@@ -395,7 +395,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             val bouncerSceneKey = currentScene?.key
             assertThat(bouncerSceneKey).isEqualTo(SceneKey.Bouncer)
 
-            underTest.hide("")
+            underTest.onImeHidden()
 
             assertThat(currentScene?.key).isEqualTo(SceneKey.Lockscreen)
         }
@@ -409,7 +409,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             val notBouncerSceneKey = currentScene?.key
             assertThat(notBouncerSceneKey).isNotEqualTo(SceneKey.Bouncer)
 
-            underTest.hide("")
+            underTest.onImeHidden()
 
             assertThat(currentScene?.key).isEqualTo(notBouncerSceneKey)
         }
