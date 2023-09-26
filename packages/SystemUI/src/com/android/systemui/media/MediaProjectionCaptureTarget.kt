@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.mediaprojection
+package com.android.systemui.media
 
 import android.os.IBinder
 import android.os.Parcel
 import android.os.Parcelable
 
 /**
- * Class that represents an area that should be captured. Currently it has only a launch cookie that
- * represents a task but we potentially could add more identifiers e.g. for a pair of tasks.
+ * Class that represents an area that should be captured.
+ * Currently it has only a launch cookie that represents a task but
+ * we potentially could add more identifiers e.g. for a pair of tasks.
  */
-data class MediaProjectionCaptureTarget(val launchCookie: IBinder?) : Parcelable {
+data class MediaProjectionCaptureTarget(
+    val launchCookie: IBinder?
+): Parcelable {
 
     constructor(parcel: Parcel) : this(parcel.readStrongBinder())
 

@@ -22,13 +22,11 @@ import android.testing.TestableLooper
 import android.view.View
 import android.widget.Spinner
 import androidx.test.filters.SmallTest
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.mediaprojection.permission.ENTIRE_SCREEN
-import com.android.systemui.mediaprojection.permission.SINGLE_APP
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -37,8 +35,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
