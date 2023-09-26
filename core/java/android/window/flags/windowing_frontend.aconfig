@@ -28,3 +28,12 @@ flag {
   description: "Enable accurate transition readiness tracking"
   bug: "294925498"
 }
+
+
+flag {
+    name: "wallpaper_offset_async"
+    namespace: "windowing_frontend"
+    description: "Do not synchronise the wallpaper offset"
+    bug: "293248754"
+    is_fixed_read_only: true
+}
