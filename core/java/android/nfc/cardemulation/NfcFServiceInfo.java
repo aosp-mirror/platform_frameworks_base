@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+/**********************************************************************
+ * This file is not a part of the NFC mainline module                 *
+ * *******************************************************************/
+
 package android.nfc.cardemulation;
 
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -26,7 +33,9 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.nfc.Flags;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -36,13 +45,16 @@ import android.util.proto.ProtoOutputStream;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
+ * Class to hold NfcF service info.
+ *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
 public final class NfcFServiceInfo implements Parcelable {
     static final String TAG = "NfcFServiceInfo";
 
@@ -51,42 +63,42 @@ public final class NfcFServiceInfo implements Parcelable {
     /**
      * The service that implements this
      */
-    final ResolveInfo mService;
+    private final ResolveInfo mService;
 
     /**
      * Description of the service
      */
-    final String mDescription;
+    private final String mDescription;
 
     /**
      * System Code of the service
      */
-    final String mSystemCode;
+    private final String mSystemCode;
 
     /**
      * System Code of the service registered by API
      */
-    String mDynamicSystemCode;
+    private String mDynamicSystemCode;
 
     /**
      * NFCID2 of the service
      */
-    final String mNfcid2;
+    private final String mNfcid2;
 
     /**
      * NFCID2 of the service registered by API
      */
-    String mDynamicNfcid2;
+    private String mDynamicNfcid2;
 
     /**
      * The uid of the package the service belongs to
      */
-    final int mUid;
+    private final int mUid;
 
     /**
      * LF_T3T_PMM of the service
      */
-    final String mT3tPmm;
+    private final String mT3tPmm;
 
     /**
      * @hide
@@ -104,7 +116,16 @@ public final class NfcFServiceInfo implements Parcelable {
         this.mT3tPmm = t3tPmm;
     }
 
-    public NfcFServiceInfo(PackageManager pm, ResolveInfo info)
+    /**
+     * Creates a new NfcFServiceInfo object.
+     *
+     * @param pm packageManager instance
+     * @param info app component info
+     * @throws XmlPullParserException If an error occurs parsing the element.
+     * @throws IOException If an error occurs reading the element.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public NfcFServiceInfo(@NonNull PackageManager pm, @NonNull ResolveInfo info)
             throws XmlPullParserException, IOException {
         ServiceInfo si = info.serviceInfo;
         XmlResourceParser parser = null;
@@ -192,44 +213,107 @@ public final class NfcFServiceInfo implements Parcelable {
         mUid = si.applicationInfo.uid;
     }
 
+    /**
+     * Returns the app component corresponding to this NFCF service.
+     *
+     * @return app component for this service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public ComponentName getComponent() {
         return new ComponentName(mService.serviceInfo.packageName,
                 mService.serviceInfo.name);
     }
 
+    /**
+     * Returns the system code corresponding to this service.
+     *
+     * @return system code for this service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public String getSystemCode() {
         return (mDynamicSystemCode == null ? mSystemCode : mDynamicSystemCode);
     }
 
-    public void setOrReplaceDynamicSystemCode(String systemCode) {
+    /**
+     * Add or replace a system code to this service.
+     * @param systemCode system code to set or replace
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void setDynamicSystemCode(@NonNull String systemCode) {
         mDynamicSystemCode = systemCode;
     }
 
+    /**
+     * Returns NFC ID2.
+     *
+     * @return nfc id2 to return
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public String getNfcid2() {
         return (mDynamicNfcid2 == null ? mNfcid2 : mDynamicNfcid2);
     }
 
-    public void setOrReplaceDynamicNfcid2(String nfcid2) {
+    /**
+     * Set or replace NFC ID2
+     *
+     * @param nfcid2 NFC ID2 string
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void setDynamicNfcid2(@NonNull String nfcid2) {
         mDynamicNfcid2 = nfcid2;
     }
 
+    /**
+     * Returns description of service.
+     * @return user readable description of service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public String getDescription() {
         return mDescription;
     }
 
+    /**
+     * Returns uid of service.
+     * @return uid of the service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public int getUid() {
         return mUid;
     }
 
+    /**
+     * Returns LF_T3T_PMM of the service
+     * @return returns LF_T3T_PMM of the service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public String getT3tPmm() {
         return mT3tPmm;
     }
 
-    public CharSequence loadLabel(PackageManager pm) {
+    /**
+     * Load application label for this service.
+     * @param pm packagemanager instance
+     * @return label name corresponding to service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
+    public CharSequence loadLabel(@NonNull PackageManager pm) {
         return mService.loadLabel(pm);
     }
 
-    public Drawable loadIcon(PackageManager pm) {
+    /**
+     * Load application icon for this service.
+     * @param pm packagemanager instance
+     * @return app icon corresponding to service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
+    public Drawable loadIcon(@NonNull PackageManager pm) {
         return mService.loadIcon(pm);
     }
 
@@ -270,13 +354,15 @@ public final class NfcFServiceInfo implements Parcelable {
         return getComponent().hashCode();
     }
 
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     @Override
     public int describeContents() {
         return 0;
     }
 
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         mService.writeToParcel(dest, flags);
         dest.writeString(mDescription);
         dest.writeString(mSystemCode);
@@ -293,7 +379,8 @@ public final class NfcFServiceInfo implements Parcelable {
         dest.writeString(mT3tPmm);
     };
 
-    public static final @android.annotation.NonNull Parcelable.Creator<NfcFServiceInfo> CREATOR =
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public static final @NonNull Parcelable.Creator<NfcFServiceInfo> CREATOR =
             new Parcelable.Creator<NfcFServiceInfo>() {
         @Override
         public NfcFServiceInfo createFromParcel(Parcel source) {
@@ -322,7 +409,15 @@ public final class NfcFServiceInfo implements Parcelable {
         }
     };
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    /**
+     * Dump contents of the service for debugging.
+     * @param fd parcelfiledescriptor instance
+     * @param pw printwriter instance
+     * @param args args for dumping
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void dump(@NonNull ParcelFileDescriptor fd, @NonNull PrintWriter pw,
+                     @NonNull String[] args) {
         pw.println("    " + getComponent()
                 + " (Description: " + getDescription() + ")"
                 + " (UID: " + getUid() + ")");
@@ -332,14 +427,15 @@ public final class NfcFServiceInfo implements Parcelable {
     }
 
     /**
-     * Dump debugging info as NfcFServiceInfoProto
+     * Dump debugging info as NfcFServiceInfoProto.
      *
      * If the output belongs to a sub message, the caller is responsible for wrapping this function
      * between {@link ProtoOutputStream#start(long)} and {@link ProtoOutputStream#end(long)}.
      *
      * @param proto the ProtoOutputStream to write to
      */
-    public void dumpDebug(ProtoOutputStream proto) {
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void dumpDebug(@NonNull ProtoOutputStream proto) {
         Utils.dumpDebugComponentName(getComponent(), proto, NfcFServiceInfoProto.COMPONENT_NAME);
         proto.write(NfcFServiceInfoProto.DESCRIPTION, getDescription());
         proto.write(NfcFServiceInfoProto.SYSTEM_CODE, getSystemCode());
@@ -347,4 +443,3 @@ public final class NfcFServiceInfo implements Parcelable {
         proto.write(NfcFServiceInfoProto.T3T_PMM, getT3tPmm());
     }
 }
-

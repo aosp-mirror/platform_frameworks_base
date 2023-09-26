@@ -16,7 +16,11 @@
 
 package android.nfc.cardemulation;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.nfc.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -29,6 +33,11 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+/**********************************************************************
+ * This file is not a part of the NFC mainline module                 *
+ * *******************************************************************/
 
 /**
  * The AidGroup class represents a group of Application Identifiers (AIDs).
@@ -39,28 +48,30 @@ import java.util.List;
  *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
 public final class AidGroup implements Parcelable {
     /**
      * The maximum number of AIDs that can be present in any one group.
      */
-    public static final int MAX_NUM_AIDS = 256;
+    private static final int MAX_NUM_AIDS = 256;
 
-    static final String TAG = "AidGroup";
+    private static final String TAG = "AidGroup";
 
-    @UnsupportedAppUsage
-    final List<String> aids;
-    @UnsupportedAppUsage
-    final String category;
-    @UnsupportedAppUsage
-    final String description;
+
+    private final List<String> mAids;
+    private final String mCategory;
+    @SuppressWarnings("unused") // Unused as of now, but part of the XML input.
+    private final String mDescription;
 
     /**
      * Creates a new AidGroup object.
      *
-     * @param aids The list of AIDs present in the group
-     * @param category The category of this group, e.g. {@link CardEmulation#CATEGORY_PAYMENT}
+     * @param aids list of AIDs present in the group
+     * @param category category of this group, e.g. {@link CardEmulation#CATEGORY_PAYMENT}
      */
-    public AidGroup(List<String> aids, String category) {
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public AidGroup(@NonNull List<String> aids, @Nullable String category) {
         if (aids == null || aids.size() == 0) {
             throw new IllegalArgumentException("No AIDS in AID group.");
         }
@@ -73,45 +84,55 @@ public final class AidGroup implements Parcelable {
             }
         }
         if (isValidCategory(category)) {
-            this.category = category;
+            this.mCategory = category;
         } else {
-            this.category = CardEmulation.CATEGORY_OTHER;
+            this.mCategory = CardEmulation.CATEGORY_OTHER;
         }
-        this.aids = new ArrayList<String>(aids.size());
+        this.mAids = new ArrayList<String>(aids.size());
         for (String aid : aids) {
-            this.aids.add(aid.toUpperCase());
+            this.mAids.add(aid.toUpperCase(Locale.US));
         }
-        this.description = null;
-    }
-
-    @UnsupportedAppUsage
-    AidGroup(String category, String description) {
-        this.aids = new ArrayList<String>();
-        this.category = category;
-        this.description = description;
+        this.mDescription = null;
     }
 
     /**
+     * Creates a new AidGroup object.
+     *
+     * @param category category of this group, e.g. {@link CardEmulation#CATEGORY_PAYMENT}
+     * @param description description of this group
+     */
+    AidGroup(@NonNull String category, @NonNull String description) {
+        this.mAids = new ArrayList<String>();
+        this.mCategory = category;
+        this.mDescription = description;
+    }
+
+    /**
+     * Returns the category of this group.
      * @return the category of this AID group
      */
-    @UnsupportedAppUsage
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public String getCategory() {
-        return category;
+        return mCategory;
     }
 
     /**
+     * Returns the list of AIDs in this group.
+     *
      * @return the list of AIDs in this group
      */
-    @UnsupportedAppUsage
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public List<String> getAids() {
-        return aids;
+        return mAids;
     }
 
     @Override
     public String toString() {
-        StringBuilder out = new StringBuilder("Category: " + category +
-                  ", AIDs:");
-        for (String aid : aids) {
+        StringBuilder out = new StringBuilder("Category: " + mCategory
+                + ", AIDs:");
+        for (String aid : mAids) {
             out.append(aid);
             out.append(", ");
         }
@@ -119,41 +140,44 @@ public final class AidGroup implements Parcelable {
     }
 
     /**
-     * Dump debugging info as AidGroupProto
+     * Dump debugging info as AidGroupProto.
      *
      * If the output belongs to a sub message, the caller is responsible for wrapping this function
      * between {@link ProtoOutputStream#start(long)} and {@link ProtoOutputStream#end(long)}.
      *
      * @param proto the ProtoOutputStream to write to
      */
-    public void dump(ProtoOutputStream proto) {
-        proto.write(AidGroupProto.CATEGORY, category);
-        for (String aid : aids) {
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void dump(@NonNull ProtoOutputStream proto) {
+        proto.write(AidGroupProto.CATEGORY, mCategory);
+        for (String aid : mAids) {
             proto.write(AidGroupProto.AIDS, aid);
         }
     }
 
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     @Override
     public int describeContents() {
         return 0;
     }
 
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(category);
-        dest.writeInt(aids.size());
-        if (aids.size() > 0) {
-            dest.writeStringList(aids);
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString8(mCategory);
+        dest.writeInt(mAids.size());
+        if (mAids.size() > 0) {
+            dest.writeStringList(mAids);
         }
     }
 
-    @UnsupportedAppUsage
-    public static final @android.annotation.NonNull Parcelable.Creator<AidGroup> CREATOR =
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public static final @NonNull Parcelable.Creator<AidGroup> CREATOR =
             new Parcelable.Creator<AidGroup>() {
 
         @Override
         public AidGroup createFromParcel(Parcel source) {
-            String category = source.readString();
+            String category = source.readString8();
             int listSize = source.readInt();
             ArrayList<String> aidList = new ArrayList<String>();
             if (listSize > 0) {
@@ -168,8 +192,17 @@ public final class AidGroup implements Parcelable {
         }
     };
 
-    @UnsupportedAppUsage
-    static public AidGroup createFromXml(XmlPullParser parser) throws XmlPullParserException, IOException {
+    /**
+     * Create an instance of AID group from XML file.
+     *
+     * @param parser input xml parser stream
+     * @throws XmlPullParserException If an error occurs parsing the element.
+     * @throws IOException If an error occurs reading the element.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @Nullable
+    public static AidGroup createFromXml(@NonNull XmlPullParser parser)
+            throws XmlPullParserException, IOException {
         String category = null;
         ArrayList<String> aids = new ArrayList<String>();
         AidGroup group = null;
@@ -210,11 +243,16 @@ public final class AidGroup implements Parcelable {
         return group;
     }
 
-    @UnsupportedAppUsage
-    public void writeAsXml(XmlSerializer out) throws IOException {
+    /**
+     * Serialize instance of AID group to XML file.
+     * @param out XML serializer stream
+     * @throws IOException If an error occurs reading the element.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void writeAsXml(@NonNull XmlSerializer out) throws IOException {
         out.startTag(null, "aid-group");
-        out.attribute(null, "category", category);
-        for (String aid : aids) {
+        out.attribute(null, "category", mCategory);
+        for (String aid : mAids) {
             out.startTag(null, "aid");
             out.attribute(null, "value", aid);
             out.endTag(null, "aid");
@@ -222,7 +260,7 @@ public final class AidGroup implements Parcelable {
         out.endTag(null, "aid-group");
     }
 
-    static boolean isValidCategory(String category) {
+    private static boolean isValidCategory(String category) {
         return CardEmulation.CATEGORY_PAYMENT.equals(category) ||
                 CardEmulation.CATEGORY_OTHER.equals(category);
     }
