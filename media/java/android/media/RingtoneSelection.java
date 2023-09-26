@@ -18,16 +18,23 @@ package android.media;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.net.Uri;
+import android.os.UserHandle;
+import android.os.vibrator.Flags;
 import android.provider.MediaStore;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Immutable representation a desired ringtone, usually originating from a user preference.
@@ -46,7 +53,7 @@ import java.lang.annotation.RetentionPolicy;
  * to be internally consistent and reflect effective values - with the exception of not verifying
  * the actual URI content. For example, loading a selection Uri that sets a sound source to
  * {@link #SOUND_SOURCE_URI}, but doesn't also have a sound Uri set, will result in this class
- * instead returning {@link #SOUND_SOURCE_DEFAULT} from {@link #getSoundSource}.
+ * instead returning {@link #SOUND_SOURCE_UNSPECIFIED} from {@link #getSoundSource}.
  *
  * <h2>Storing preferences</h2>
  *
@@ -57,6 +64,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @TestApi
+@FlaggedApi(Flags.FLAG_HAPTICS_CUSTOMIZATION_ENABLED)
 public final class RingtoneSelection {
 
     /**
@@ -70,7 +78,7 @@ public final class RingtoneSelection {
      * The sound source is not explicitly specified, so it can follow default behavior for its
      * context.
      */
-    public static final int SOUND_SOURCE_DEFAULT = 0;
+    public static final int SOUND_SOURCE_UNSPECIFIED = 0;
 
     /**
      * Sound is explicitly disabled, such as the user having selected "Silent" in the sound picker.
@@ -83,15 +91,25 @@ public final class RingtoneSelection {
     public static final int SOUND_SOURCE_URI = 2;
 
     /**
+     * The sound should explicitly use the system default.
+     *
+     * <p>This value isn't valid within the system default itself.
+     */
+    public static final int SOUND_SOURCE_SYSTEM_DEFAULT = 3;
+
+    // Note: Value 4 reserved for possibility of SOURCE_SOURCE_APPLICATION_DEFAULT.
+
+    /**
      * Directive for how to make sound.
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "SOUND_SOURCE_", value = {
             SOUND_SOURCE_UNKNOWN,
-            SOUND_SOURCE_DEFAULT,
+            SOUND_SOURCE_UNSPECIFIED,
             SOUND_SOURCE_OFF,
             SOUND_SOURCE_URI,
+            SOUND_SOURCE_SYSTEM_DEFAULT,
     })
     public @interface SoundSource {}
 
@@ -106,9 +124,9 @@ public final class RingtoneSelection {
     /**
      * Vibration source is not explicitly specified. If vibration is enabled, this will use the
      * first available of {@link #VIBRATION_SOURCE_AUDIO_CHANNEL},
-     * {@link #VIBRATION_SOURCE_APPLICATION_PROVIDED}, or system default vibration.
+     * {@link #VIBRATION_SOURCE_APPLICATION_DEFAULT}, or {@link #VIBRATION_SOURCE_SYSTEM_DEFAULT}.
      */
-    public static final int VIBRATION_SOURCE_DEFAULT = 0;
+    public static final int VIBRATION_SOURCE_UNSPECIFIED = 0;
 
     /** Specifies that vibration is explicitly disabled for this ringtone. */
     public static final int VIBRATION_SOURCE_OFF = 1;
@@ -117,22 +135,31 @@ public final class RingtoneSelection {
     public static final int VIBRATION_SOURCE_URI = 2;
 
     /**
+     * The vibration should explicitly use the system default.
+     *
+     * <p>This value isn't valid within the system default itself.
+     */
+    public static final int VIBRATION_SOURCE_SYSTEM_DEFAULT = 3;
+
+    /**
      * Specifies that vibration should use the vibration provided by the application. This is
      * typically the application's own default for the use-case, provided via
      * {@link Ringtone.Builder#setVibrationEffect}. For notification channels, this is the vibration
      * effect saved on the notification channel.
      *
      * <p>If no vibration is specified by the application, this value behaves if the source was
-     * {@link #VIBRATION_SOURCE_DEFAULT}.
+     * {@link #VIBRATION_SOURCE_UNSPECIFIED}.
+     *
+     * <p>This value isn't valid within the system default.
      */
-    public static final int VIBRATION_SOURCE_APPLICATION_PROVIDED = 3;
+    public static final int VIBRATION_SOURCE_APPLICATION_DEFAULT = 4;
 
     /**
      * Specifies that vibration should use haptic audio channels from the
      * sound Uri. If the sound URI doesn't have haptic channels, then reverts to the order specified
-     * by {@link #VIBRATION_SOURCE_DEFAULT}.
+     * by {@link #VIBRATION_SOURCE_UNSPECIFIED}.
      */
-    // Numeric gap from VIBRATION_SOURCE_APPLICATION_PROVIDED in case we want other common elements.
+    // Numeric gap from VIBRATION_SOURCE_APPLICATION_DEFAULT in case we want other common elements.
     public static final int VIBRATION_SOURCE_AUDIO_CHANNEL = 10;
 
     /**
@@ -151,10 +178,10 @@ public final class RingtoneSelection {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "VIBRATION_SOURCE_", value = {
             VIBRATION_SOURCE_UNKNOWN,
-            VIBRATION_SOURCE_DEFAULT,
+            VIBRATION_SOURCE_UNSPECIFIED,
             VIBRATION_SOURCE_OFF,
             VIBRATION_SOURCE_URI,
-            VIBRATION_SOURCE_APPLICATION_PROVIDED,
+            VIBRATION_SOURCE_APPLICATION_DEFAULT,
             VIBRATION_SOURCE_AUDIO_CHANNEL,
             VIBRATION_SOURCE_HAPTIC_GENERATOR,
     })
@@ -162,9 +189,12 @@ public final class RingtoneSelection {
 
     /**
      * Configures {@link #RingtoneSelection#fromUri} to treat an unrecognized Uri as the sound Uri
-     * for the returned {@link RingtoneSelection}, with null meaning {@link #SOUND_SOURCE_OFF}.
-     * This behavior is particularly suited to loading values from older settings that may contain
-     * a raw sound Uri or null for silent.
+     * for the returned {@link RingtoneSelection}, with null meaning {@link #SOUND_SOURCE_OFF},
+     * and symbolic default URIs ({@link RingtoneManager#getDefaultUri}) meaning
+     * {@link #SOUND_SOURCE_SYSTEM_DEFAULT}.
+     *
+     * <p>This behavior is particularly suited to loading values from older settings that may
+     * contain a raw sound Uri or null for silent.
      *
      * <p>An unrecognized Uri is one for which {@link #isRingtoneSelectionUri(Uri)} returns false.
      */
@@ -173,7 +203,8 @@ public final class RingtoneSelection {
     /**
      * Configures {@link #RingtoneSelection#fromUri} to treat an unrecognized Uri as the vibration
      * Uri for the returned {@link RingtoneSelection}, with null meaning
-     * {@link #VIBRATION_SOURCE_OFF}.
+     * {@link #VIBRATION_SOURCE_OFF} and symbolic default URIs
+     * ({@link RingtoneManager#getDefaultUri}) meaning {@link #VIBRATION_SOURCE_SYSTEM_DEFAULT}.
      *
      * <p>An unrecognized Uri is one for which {@link #isRingtoneSelectionUri(Uri)} returns false.
      */
@@ -182,7 +213,9 @@ public final class RingtoneSelection {
     /**
      * Configures {@link #RingtoneSelection#fromUri} to treat an unrecognized Uri as an invalid
      * value. Null or an invalid values will revert to default behavior correspnoding to
-     * {@link #DEFAULT_SELECTION_URI_STRING}.
+     * {@link #DEFAULT_SELECTION_URI_STRING}. Symbolic default URIs
+     * ({@link RingtoneManager#getDefaultUri}) will set both
+     * {@link #SOUND_SOURCE_SYSTEM_DEFAULT} and {@link #VIBRATION_SOURCE_SYSTEM_DEFAULT}.
      *
      * <p>An unrecognized Uri is one for which {@link #isRingtoneSelectionUri(Uri)} returns false,
      * which include {@code null}.
@@ -218,10 +251,11 @@ public final class RingtoneSelection {
 
     /* Common param values */
     private static final String SOURCE_OFF_STRING = "off";
+    private static final String SOURCE_SYSTEM_DEFAULT_STRING = "sys";
 
     /* Vibration source param values. */
     private static final String VIBRATION_SOURCE_AUDIO_CHANNEL_STRING = "ac";
-    private static final String VIBRATION_SOURCE_APPLICATION_PROVIDED_STRING = "app";
+    private static final String VIBRATION_SOURCE_APPLICATION_DEFAULT_STRING = "app";
     private static final String VIBRATION_SOURCE_HAPTIC_GENERATOR_STRING = "hg";
 
     @Nullable
@@ -236,53 +270,45 @@ public final class RingtoneSelection {
 
     private RingtoneSelection(@Nullable Uri soundUri, @SoundSource int soundSource,
             @Nullable Uri vibrationUri, @VibrationSource int vibrationSource) {
-        // Enforce guarantees on the source values: revert to unset if they depend on something
-        // that's not set.
-        switch (soundSource) {
-            case SOUND_SOURCE_URI:
-            case SOUND_SOURCE_UNKNOWN:  // Allow unknown to revert to URI before default.
-                mSoundSource = soundUri != null ? SOUND_SOURCE_URI : SOUND_SOURCE_DEFAULT;
-                break;
-            default:
-                mSoundSource = soundSource;
-                break;
-        }
-        switch (vibrationSource) {
-            case VIBRATION_SOURCE_AUDIO_CHANNEL:
-            case VIBRATION_SOURCE_HAPTIC_GENERATOR:
-                mVibrationSource = soundUri != null ? vibrationSource : VIBRATION_SOURCE_DEFAULT;
-                break;
-            case VIBRATION_SOURCE_URI:
-            case VIBRATION_SOURCE_UNKNOWN:  // Allow unknown to revert to URI.
-                mVibrationSource =
-                        vibrationUri != null ? VIBRATION_SOURCE_URI : VIBRATION_SOURCE_DEFAULT;
-                break;
-            default:
-                mVibrationSource = vibrationSource;
-                break;
-        }
+        // Enforce guarantees on the source values: revert to unspecified if they depend on
+        // something that's not set.
+        //
+        // The non-public "unknown" value can't appear in a getter result, it's just a reserved
+        // "null" value and should be treated the same as an unrecognized value. This can be seen
+        // in Uri parsing. For this and other unrecognized values, we either revert them to the URI
+        // source, if a Uri was included, or the "unspecified" source otherwise. This can be
+        // seen in action in the Uri parsing.
+        //
+        // The "unspecified" source is a public value meaning that there is no specific
+        // behavior indicated, and the defaults and fallbacks should be applied. For example, an
+        // vibration source value of "system default" means to explicitly use the system default
+        // vibration. However, an "unspecified" vibration source will first see if audio coupled
+        // or application-default vibrations are available.
+        mSoundSource = switch (soundSource) {
+            // Supported explicit values that don't have a Uri.
+            case SOUND_SOURCE_OFF, SOUND_SOURCE_UNSPECIFIED, SOUND_SOURCE_SYSTEM_DEFAULT ->
+                    soundSource;
+            // Uri and unknown/unrecognized values: use a Uri if one is present, else revert to
+            // unspecified.
+            default ->
+                soundUri != null ? SOUND_SOURCE_URI : SOUND_SOURCE_UNSPECIFIED;
+        };
+        mVibrationSource = switch (vibrationSource) {
+            // Enforce vibration sources that require a sound Uri.
+            case VIBRATION_SOURCE_AUDIO_CHANNEL, VIBRATION_SOURCE_HAPTIC_GENERATOR ->
+                    soundUri != null ? vibrationSource : VIBRATION_SOURCE_UNSPECIFIED;
+            // Supported explicit values that don't rely on any Uri.
+            case VIBRATION_SOURCE_OFF, VIBRATION_SOURCE_UNSPECIFIED,
+                    VIBRATION_SOURCE_SYSTEM_DEFAULT, VIBRATION_SOURCE_APPLICATION_DEFAULT ->
+                    vibrationSource;
+            // Uri and unknown/unrecognized values: use a Uri if one is present, else revert to
+            // unspecified.
+            default ->
+                    vibrationUri != null ? VIBRATION_SOURCE_URI : VIBRATION_SOURCE_UNSPECIFIED;
+        };
         // Clear Uri values if they're un-used by the source.
-        switch (mSoundSource) {
-            case SOUND_SOURCE_OFF:
-                mSoundUri = null;
-                break;
-            default:
-                // Unset case isn't handled here: the defaulting behavior is left to the player.
-                mSoundUri = soundUri;
-                break;
-        }
-        switch (mVibrationSource) {
-            case VIBRATION_SOURCE_OFF:
-            case VIBRATION_SOURCE_APPLICATION_PROVIDED:
-            case VIBRATION_SOURCE_AUDIO_CHANNEL:
-            case VIBRATION_SOURCE_HAPTIC_GENERATOR:
-                mVibrationUri = null;
-                break;
-            default:
-                // Unset case isn't handled here: the defaulting behavior is left to the player.
-                mVibrationUri = vibrationUri;
-                break;
-        }
+        mSoundUri = mSoundSource == SOUND_SOURCE_URI ? soundUri : null;
+        mVibrationUri = mVibrationSource == VIBRATION_SOURCE_URI ? vibrationUri : null;
     }
 
     /**
@@ -360,18 +386,83 @@ public final class RingtoneSelection {
         }
         // Any URI content://media/ringtone
         return ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())
-                && MediaStore.AUTHORITY.equals(uri.getAuthority())
+                && MediaStore.AUTHORITY.equals(
+                        ContentProvider.getAuthorityWithoutUserId(uri.getAuthority()))
                 && MEDIA_URI_RINGTONE_PATH.equals(uri.getPath());
     }
 
+    /**
+     * Strip the specified userId from internal Uris. Non-stripped userIds will typically be
+     * for work profiles referencing system ringtones from the host user.
+     *
+     * This is only for use in RingtoneManager.
+     * @hide
+     */
+    @VisibleForTesting
+    public RingtoneSelection getWithoutUserId(int userIdToStrip) {
+        if (mSoundSource != SOUND_SOURCE_URI && mVibrationSource != VIBRATION_SOURCE_URI) {
+            return this;
+        }
 
+        // Ok if uri is null. We only replace explicit references to the specified (current) userId.
+        int soundUserId = ContentProvider.getUserIdFromUri(mSoundUri, UserHandle.USER_NULL);
+        int vibrationUserId = ContentProvider.getUserIdFromUri(mVibrationUri, UserHandle.USER_NULL);
+        boolean needToChangeSound =
+                soundUserId != UserHandle.USER_NULL && soundUserId == userIdToStrip;
+        boolean needToChangeVibration =
+                vibrationUserId != UserHandle.USER_NULL && vibrationUserId == userIdToStrip;
+
+        // Anything to do?
+        if (!needToChangeSound && !needToChangeVibration) {
+            return this;
+        }
+
+        RingtoneSelection.Builder updated = new Builder(this);
+        // The relevant uris can't be null, because they contain userIdToStrip.
+        if (needToChangeSound) {
+            // mSoundUri is not null, so the result of getUriWithoutUserId won't be null.
+            updated.setSoundSource(ContentProvider.getUriWithoutUserId(mSoundUri));
+        }
+        if (needToChangeVibration) {
+            updated.setVibrationSource(ContentProvider.getUriWithoutUserId(mVibrationUri));
+        }
+        return updated.build();
+    }
+
+    @Override
+    public String toString() {
+        return toUri().toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof RingtoneSelection other)) {
+            return false;
+        }
+        return this.mSoundSource == other.mSoundSource
+                && this.mVibrationSource == other.mVibrationSource
+                && Objects.equals(this.mSoundUri, other.mSoundUri)
+                && Objects.equals(this.mVibrationUri, other.mVibrationUri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mSoundSource, mVibrationSource, mSoundUri, mVibrationUri);
+    }
 
     /**
      * Converts a Uri into a RingtoneSelection.
      *
-     * <p>Null values and Uris that {@link #isRingtoneSelectionUri(Uri)} returns false will be
-     * treated according to the behaviour specified by the {@code unrecognizedValueBehavior}
-     * parameter.
+     * <p>Null values, Uris that {@link #isRingtoneSelectionUri(Uri)} returns false (except for
+     * old-style symbolic default Uris {@link RingtoneManager#getDefaultUri}) will be treated
+     * according to the behaviour specified by the {@code unrecognizedValueBehavior} parameter.
+     *
+     * <p>Symbolic default Uris (where {@link RingtoneManager#getDefaultType(Uri)} returns -1,
+     * will map sources to {@link #SOUND_SOURCE_SYSTEM_DEFAULT} and
+     * {@link #VIBRATION_SOURCE_SYSTEM_DEFAULT}.
      *
      * @param uri The Uri to convert, potentially null.
      * @param unrecognizedValueBehavior indicates how to treat values for which
@@ -384,21 +475,35 @@ public final class RingtoneSelection {
         if (isRingtoneSelectionUri(uri)) {
             return parseRingtoneSelectionUri(uri);
         }
+        // Old symbolic default URIs map to the sources suggested by the unrecognized behavior.
+        // It doesn't always map to both sources because the app may have its own default behavior
+        // to apply, so non-primary sources are left as unspecified, which will revert to the
+        // system default in the absence of an app default.
+        boolean isDefaultUri = RingtoneManager.getDefaultType(uri) > 0;
         RingtoneSelection.Builder builder = new RingtoneSelection.Builder();
         switch (unrecognizedValueBehavior) {
             case FROM_URI_RINGTONE_SELECTION_ONLY:
-                // Always return use-defaults for unrecognized ringtone selection Uris.
+                if (isDefaultUri) {
+                    builder.setSoundSource(SOUND_SOURCE_SYSTEM_DEFAULT);
+                    builder.setVibrationSource(VIBRATION_SOURCE_SYSTEM_DEFAULT);
+                }
+                // Always return unspecified (defaults) for unrecognized ringtone selection Uris.
                 return builder.build();
             case FROM_URI_RINGTONE_SELECTION_OR_SOUND:
                 if (uri == null) {
                     return builder.setSoundSource(SOUND_SOURCE_OFF).build();
+                } else if (isDefaultUri) {
+                    return builder.setSoundSource(SOUND_SOURCE_SYSTEM_DEFAULT).build();
                 } else {
                     return builder.setSoundSource(uri).build();
                 }
             case FROM_URI_RINGTONE_SELECTION_OR_VIBRATION:
                 if (uri == null) {
                     return builder.setVibrationSource(VIBRATION_SOURCE_OFF).build();
+                } else if (isDefaultUri) {
+                    return builder.setVibrationSource(VIBRATION_SOURCE_SYSTEM_DEFAULT).build();
                 } else {
+                    // Unlike sound, there's no legacy settings alias uri for the default.
                     return builder.setVibrationSource(uri).build();
                 }
             default:
@@ -407,7 +512,12 @@ public final class RingtoneSelection {
         }
     }
 
-    /** Parses the Uri, which has already been checked for {@link #isRingtoneSelectionUri(Uri)}. */
+    /**
+     * Parses the Uri, which has already been checked for {@link #isRingtoneSelectionUri(Uri)}.
+     * As a special case to be more compatible, if the RingtoneSelection has a userId specified in
+     * the authority, then this is pushed down into the sound and vibration Uri, as the selection
+     * itself is agnostic.
+     */
     @NonNull
     private static RingtoneSelection parseRingtoneSelectionUri(@NonNull Uri uri) {
         RingtoneSelection.Builder builder = new RingtoneSelection.Builder();
@@ -416,19 +526,39 @@ public final class RingtoneSelection {
                 uri.getQueryParameter(URI_PARAM_VIBRATION_SOURCE));
         Uri soundUri = getParamAsUri(uri, URI_PARAM_SOUND_URI);
         Uri vibrationUri = getParamAsUri(uri, URI_PARAM_VIBRATION_URI);
+
+        // Add userId if necessary. This won't override an existing one in the sound/vib Uris.
+        int userIdFromAuthority = ContentProvider.getUserIdFromAuthority(
+                uri.getAuthority(), UserHandle.USER_NULL);
+        if (userIdFromAuthority != UserHandle.USER_NULL) {
+            // Won't override existing user id.
+            if (soundUri != null) {
+                soundUri = ContentProvider.maybeAddUserId(soundUri, userIdFromAuthority);
+            }
+            if (vibrationUri != null) {
+                vibrationUri = ContentProvider.maybeAddUserId(vibrationUri, userIdFromAuthority);
+            }
+        }
+
+        // Set sound uri if present, but map system default Uris to the system default source.
         if (soundUri != null) {
-            builder.setSoundSource(soundUri);
+            if (RingtoneManager.getDefaultType(uri) >= 0) {
+                builder.setSoundSource(SOUND_SOURCE_SYSTEM_DEFAULT);
+            } else {
+                builder.setSoundSource(soundUri);
+            }
         }
         if (vibrationUri != null) {
             builder.setVibrationSource(vibrationUri);
         }
+
         // Don't set the source if there's a URI and the source is default, because that will
         // override the Uri source set above. In effect, we prioritise "explicit" sources over
         // an implicit Uri source - except for "default", which isn't really explicit.
-        if (soundSource != SOUND_SOURCE_DEFAULT || soundUri == null) {
+        if (soundSource != SOUND_SOURCE_UNSPECIFIED || soundUri == null) {
             builder.setSoundSource(soundSource);
         }
-        if (vibrationSource != VIBRATION_SOURCE_DEFAULT || vibrationUri == null) {
+        if (vibrationSource != VIBRATION_SOURCE_UNSPECIFIED || vibrationUri == null) {
             builder.setVibrationSource(vibrationSource);
         }
         return builder.build();
@@ -450,26 +580,28 @@ public final class RingtoneSelection {
      */
     @Nullable
     private static String soundSourceToString(@SoundSource int soundSource) {
-        switch (soundSource) {
-            case SOUND_SOURCE_OFF: return SOURCE_OFF_STRING;
-            default: return null;
-        }
+        return switch (soundSource) {
+            case SOUND_SOURCE_OFF -> SOURCE_OFF_STRING;
+            case SOUND_SOURCE_SYSTEM_DEFAULT -> SOURCE_SYSTEM_DEFAULT_STRING;
+            default -> null;
+        };
     }
 
     /**
      * Returns the sound source int corresponding to the query string value. Returns
      * {@link #SOUND_SOURCE_UNKNOWN} if the value isn't recognised, and
-     * {@link #SOUND_SOURCE_DEFAULT} if the value is {@code null} (not in the Uri).
+     * {@link #SOUND_SOURCE_UNSPECIFIED} if the value is {@code null} (not in the Uri).
      */
     @SoundSource
     private static int stringToSoundSource(@Nullable String soundSource) {
         if (soundSource == null) {
-            return SOUND_SOURCE_DEFAULT;
+            return SOUND_SOURCE_UNSPECIFIED;
         }
-        switch (soundSource) {
-            case SOURCE_OFF_STRING: return SOUND_SOURCE_OFF;
-            default: return SOUND_SOURCE_UNKNOWN;
-        }
+        return switch (soundSource) {
+            case SOURCE_OFF_STRING -> SOUND_SOURCE_OFF;
+            case SOURCE_SYSTEM_DEFAULT_STRING -> SOUND_SOURCE_SYSTEM_DEFAULT;
+            default -> SOUND_SOURCE_UNKNOWN;
+        };
     }
 
     /**
@@ -478,30 +610,31 @@ public final class RingtoneSelection {
      */
     @Nullable
     private static String vibrationSourceToString(@VibrationSource int vibrationSource) {
-        switch (vibrationSource) {
-            case VIBRATION_SOURCE_OFF: return SOURCE_OFF_STRING;
-            case VIBRATION_SOURCE_AUDIO_CHANNEL: return VIBRATION_SOURCE_AUDIO_CHANNEL_STRING;
-            case VIBRATION_SOURCE_HAPTIC_GENERATOR:
-                return VIBRATION_SOURCE_HAPTIC_GENERATOR_STRING;
-            case VIBRATION_SOURCE_APPLICATION_PROVIDED:
-                return VIBRATION_SOURCE_APPLICATION_PROVIDED_STRING;
-            default: return null;
-        }
+        return switch (vibrationSource) {
+            case VIBRATION_SOURCE_OFF -> SOURCE_OFF_STRING;
+            case VIBRATION_SOURCE_AUDIO_CHANNEL -> VIBRATION_SOURCE_AUDIO_CHANNEL_STRING;
+            case VIBRATION_SOURCE_HAPTIC_GENERATOR -> VIBRATION_SOURCE_HAPTIC_GENERATOR_STRING;
+            case VIBRATION_SOURCE_APPLICATION_DEFAULT ->
+                    VIBRATION_SOURCE_APPLICATION_DEFAULT_STRING;
+            case VIBRATION_SOURCE_SYSTEM_DEFAULT -> SOURCE_SYSTEM_DEFAULT_STRING;
+            default -> null;
+        };
     }
 
     @VibrationSource
     private static int stringToVibrationSource(@Nullable String vibrationSource) {
         if (vibrationSource == null) {
-            return VIBRATION_SOURCE_DEFAULT;
+            return VIBRATION_SOURCE_UNSPECIFIED;
         }
-        switch (vibrationSource) {
-            case SOURCE_OFF_STRING: return VIBRATION_SOURCE_OFF;
-            case VIBRATION_SOURCE_AUDIO_CHANNEL_STRING: return VIBRATION_SOURCE_AUDIO_CHANNEL;
-            case VIBRATION_SOURCE_HAPTIC_GENERATOR_STRING: return VIBRATION_SOURCE_HAPTIC_GENERATOR;
-            case VIBRATION_SOURCE_APPLICATION_PROVIDED_STRING:
-                return VIBRATION_SOURCE_APPLICATION_PROVIDED;
-            default: return VIBRATION_SOURCE_UNKNOWN;
-        }
+        return switch (vibrationSource) {
+            case SOURCE_OFF_STRING -> VIBRATION_SOURCE_OFF;
+            case SOURCE_SYSTEM_DEFAULT_STRING -> VIBRATION_SOURCE_SYSTEM_DEFAULT;
+            case VIBRATION_SOURCE_AUDIO_CHANNEL_STRING -> VIBRATION_SOURCE_AUDIO_CHANNEL;
+            case VIBRATION_SOURCE_HAPTIC_GENERATOR_STRING -> VIBRATION_SOURCE_HAPTIC_GENERATOR;
+            case VIBRATION_SOURCE_APPLICATION_DEFAULT_STRING ->
+                    VIBRATION_SOURCE_APPLICATION_DEFAULT;
+            default -> VIBRATION_SOURCE_UNKNOWN;
+        };
     }
 
     /**
@@ -512,12 +645,13 @@ public final class RingtoneSelection {
     public static final class Builder {
         private Uri mSoundUri;
         private Uri mVibrationUri;
-        @SoundSource private int mSoundSource = SOUND_SOURCE_DEFAULT;
-        @VibrationSource private int mVibrationSource = VIBRATION_SOURCE_DEFAULT;
+        @SoundSource private int mSoundSource = SOUND_SOURCE_UNSPECIFIED;
+        @VibrationSource private int mVibrationSource = VIBRATION_SOURCE_UNSPECIFIED;
 
         /**
          * Creates a new {@link RingtoneSelection} builder. A default ringtone selection has its
-         * sound and vibration source unset, which means they would fall back to system defaults.
+         * sound and vibration source unspecified, which means they would fall back to app/system
+         * defaults.
          */
         public Builder() {}
 
@@ -559,7 +693,9 @@ public final class RingtoneSelection {
          */
         @NonNull
         public Builder setSoundSource(@NonNull Uri soundUri) {
-            mSoundUri = requireNonNull(soundUri);
+            // getCanonicalUri shouldn't return null. If it somehow did, then the
+            // RingtoneSelection constructor will revert this to unspecified.
+            mSoundUri = requireNonNull(soundUri).getCanonicalUri();
             mSoundSource = SOUND_SOURCE_URI;
             return this;
         }
@@ -587,7 +723,9 @@ public final class RingtoneSelection {
          */
         @NonNull
         public Builder setVibrationSource(@NonNull Uri vibrationUri) {
-            mVibrationUri = requireNonNull(vibrationUri);
+            // getCanonicalUri shouldn't return null. If it somehow did, then the
+            // RingtoneSelection constructor will revert this to unspecified.
+            mVibrationUri = requireNonNull(vibrationUri).getCanonicalUri();
             mVibrationSource = VIBRATION_SOURCE_URI;
             return this;
         }
