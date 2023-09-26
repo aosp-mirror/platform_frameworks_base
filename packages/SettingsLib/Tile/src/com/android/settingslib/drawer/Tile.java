@@ -22,6 +22,7 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_NEW_TASK;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_GROUP_KEY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SEARCHABLE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SWITCH_URI;
@@ -421,6 +422,13 @@ public abstract class Tile implements Parcelable {
      */
     public String getGroupKey() {
         return (mMetaData == null) ? null : mMetaData.getString(META_DATA_PREFERENCE_GROUP_KEY);
+    }
+
+    /**
+     * Returns if this is searchable.
+     */
+    public boolean isSearchable() {
+        return mMetaData == null || mMetaData.getBoolean(META_DATA_PREFERENCE_SEARCHABLE, true);
     }
 
     /**
