@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.mediaprojection
+package com.android.systemui.media
 
 import android.content.Context
 import android.media.projection.IMediaProjection

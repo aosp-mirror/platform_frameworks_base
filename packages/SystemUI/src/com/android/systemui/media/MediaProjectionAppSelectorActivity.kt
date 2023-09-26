@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.mediaprojection.appselector
+package com.android.systemui.media
 
 import android.app.ActivityOptions
 import android.content.Intent
@@ -46,11 +46,13 @@ import com.android.internal.app.chooser.TargetInfo
 import com.android.internal.widget.RecyclerView
 import com.android.internal.widget.RecyclerViewAccessibilityDelegate
 import com.android.internal.widget.ResolverDrawerLayout
-import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget
-import com.android.systemui.mediaprojection.MediaProjectionServiceHelper
+import com.android.systemui.res.R
+import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorComponent
+import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorController
+import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler
+import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorView
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.view.MediaProjectionRecentsViewController
-import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.AsyncActivityLauncher
 import javax.inject.Inject

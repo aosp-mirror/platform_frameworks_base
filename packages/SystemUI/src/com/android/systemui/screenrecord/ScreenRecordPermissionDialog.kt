@@ -32,14 +32,10 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Switch
 import androidx.annotation.LayoutRes
-import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget
-import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity
-import com.android.systemui.mediaprojection.permission.BaseScreenSharePermissionDialog
-import com.android.systemui.mediaprojection.permission.ENTIRE_SCREEN
-import com.android.systemui.mediaprojection.permission.SINGLE_APP
-import com.android.systemui.mediaprojection.permission.ScreenShareOption
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.media.MediaProjectionAppSelectorActivity
+import com.android.systemui.media.MediaProjectionCaptureTarget
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserContextProvider
 
 /** Dialog to select screen recording options */
@@ -62,7 +58,6 @@ class ScreenRecordPermissionDialog(
     private lateinit var tapsView: View
     private lateinit var audioSwitch: Switch
     private lateinit var options: Spinner
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setDialogTitle(R.string.screenrecord_permission_dialog_title)
@@ -182,7 +177,6 @@ class ScreenRecordPermissionDialog(
             )
         private const val DELAY_MS: Long = 3000
         private const val INTERVAL_MS: Long = 1000
-
         private fun createOptionList(): List<ScreenShareOption> {
             return listOf(
                 ScreenShareOption(

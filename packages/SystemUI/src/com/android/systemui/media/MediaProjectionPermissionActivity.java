@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.mediaprojection.permission;
+package com.android.systemui.media;
 
 import static android.media.projection.IMediaProjectionManager.EXTRA_PACKAGE_REUSING_GRANTED_CONSENT;
 import static android.media.projection.IMediaProjectionManager.EXTRA_USER_REVIEW_GRANTED_CONSENT;
@@ -22,8 +22,8 @@ import static android.media.projection.ReviewGrantedConsentResult.RECORD_CANCEL;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
-import static com.android.systemui.mediaprojection.permission.ScreenShareOptionKt.ENTIRE_SCREEN;
-import static com.android.systemui.mediaprojection.permission.ScreenShareOptionKt.SINGLE_APP;
+import static com.android.systemui.screenrecord.ScreenShareOptionKt.ENTIRE_SCREEN;
+import static com.android.systemui.screenrecord.ScreenShareOptionKt.SINGLE_APP;
 
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -51,13 +51,13 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Window;
 
+import com.android.systemui.res.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.mediaprojection.MediaProjectionServiceHelper;
-import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog;
-import com.android.systemui.res.R;
+import com.android.systemui.screenrecord.MediaProjectionPermissionDialog;
+import com.android.systemui.screenrecord.ScreenShareOption;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.Utils;
 
