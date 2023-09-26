@@ -1252,6 +1252,7 @@ public abstract class PackageManager {
      */
     // TODO(b/278553670) Unhide and update @links before launch.
     @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public static final long MATCH_ARCHIVED_PACKAGES = 1L << 32;
 
     /**
