@@ -44,6 +44,7 @@ import com.android.systemui.user.domain.interactor.GuestUserInteractor
 import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
 import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
 import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -126,6 +127,7 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
                 refreshUsersScheduler = refreshUsersScheduler,
                 guestUserInteractor = guestInteractor,
                 uiEventLogger = uiEventLogger,
+                userRestrictionChecker = mock(),
             )
         shadeInteractor =
             ShadeInteractor(

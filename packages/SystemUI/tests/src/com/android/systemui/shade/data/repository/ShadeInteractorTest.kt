@@ -25,7 +25,6 @@ import android.os.UserManager
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
@@ -35,6 +34,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
@@ -54,6 +54,7 @@ import com.android.systemui.user.domain.interactor.GuestUserInteractor
 import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
 import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
 import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -153,6 +154,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                 refreshUsersScheduler = refreshUsersScheduler,
                 guestUserInteractor = guestInteractor,
                 uiEventLogger = uiEventLogger,
+                userRestrictionChecker = mock(),
             )
         underTest =
             ShadeInteractor(
