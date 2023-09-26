@@ -38,6 +38,7 @@ aconfig_srcjars = [
     ":display_flags_lib{.generated_srcjars}",
     ":android.multiuser.flags-aconfig-java{.generated_srcjars}",
     ":android.app.flags-aconfig-java{.generated_srcjars}",
+    ":android.credentials.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -353,5 +354,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.hardware.radio.flags-aconfig-java",
     aconfig_declarations: "android.hardware.radio.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Credential Manager
+aconfig_declarations {
+    name: "android.credentials.flags-aconfig",
+    package: "android.credentials.flags",
+    srcs: ["core/java/android/credentials/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.credentials.flags-aconfig-java",
+    aconfig_declarations: "android.credentials.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
