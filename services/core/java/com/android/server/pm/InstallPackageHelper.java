@@ -998,8 +998,7 @@ final class InstallPackageHelper {
                         return;
                     }
                     final boolean isApex = (request.getScanFlags() & SCAN_AS_APEX) != 0;
-                    final boolean isSdkLibrary = packageToScan.isSdkLibrary();
-                    if (!isApex && !isSdkLibrary) {
+                    if (!isApex) {
                         createdAppId.put(packageName, optimisticallyRegisterAppId(request));
                     } else {
                         request.getScannedPackageSetting().setAppId(Process.INVALID_UID);
