@@ -18,7 +18,7 @@ package com.android.systemui.screenrecord;
 
 import static android.app.Activity.RESULT_OK;
 
-import static com.android.systemui.media.MediaProjectionAppSelectorActivity.KEY_CAPTURE_TARGET;
+import static com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity.KEY_CAPTURE_TARGET;
 import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.INTERNAL;
 import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC;
 import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC_AND_INTERNAL;
@@ -41,8 +41,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
 import com.android.systemui.res.R;
-import com.android.systemui.media.MediaProjectionCaptureTarget;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
