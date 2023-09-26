@@ -17,18 +17,7 @@
 #define LOG_TAG "JavaBinder"
 //#define LOG_NDEBUG 0
 
-#include "android_os_Parcel.h"
 #include "android_util_Binder.h"
-
-#include <atomic>
-#include <fcntl.h>
-#include <inttypes.h>
-#include <mutex>
-#include <stdio.h>
-#include <string>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #include <android-base/stringprintf.h>
 #include <binder/BpBinder.h>
@@ -40,7 +29,16 @@
 #include <binder/Stability.h>
 #include <binderthreadstate/CallerUtils.h>
 #include <cutils/atomic.h>
+#include <fcntl.h>
+#include <inttypes.h>
 #include <log/log.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <utils/KeyedVector.h>
 #include <utils/List.h>
 #include <utils/Log.h>
@@ -48,10 +46,11 @@
 #include <utils/SystemClock.h>
 #include <utils/threads.h>
 
-#include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedLocalRef.h>
-#include <nativehelper/ScopedUtfChars.h>
+#include <atomic>
+#include <mutex>
+#include <string>
 
+#include "android_os_Parcel.h"
 #include "core_jni_helpers.h"
 
 //#undef ALOGV
@@ -553,14 +552,48 @@ public:
 };
 
 // ----------------------------------------------------------------------------
+#ifdef BINDER_DEATH_RECIPIENT_WEAK_FROM_JNI
+#if __BIONIC__
+#include <android/api-level.h>
+static bool target_sdk_is_at_least_vic() {
+    return android_get_application_target_sdk_version() >= __ANDROID_API_V__;
+}
+#else
+static constexpr bool target_sdk_is_at_least_vic() {
+    // If not built for Android (i.e. glibc host), follow the latest behavior as there's no compat
+    // requirement there.
+    return true;
+}
+#endif // __BIONIC__
+#endif // BINDER_DEATH_RECIPIENT_WEAK_FROM_JNI
 
 class JavaDeathRecipient : public IBinder::DeathRecipient
 {
 public:
     JavaDeathRecipient(JNIEnv* env, jobject object, const sp<DeathRecipientList>& list)
-        : mVM(jnienv_to_javavm(env)), mObject(env->NewGlobalRef(object)),
-          mObjectWeak(NULL), mList(list)
-    {
+          : mVM(jnienv_to_javavm(env)), mObject(NULL), mObjectWeak(NULL), mList(list) {
+        // b/298374304: For apps targeting Android V or beyond, we no longer hold the global JNI ref
+        // to the death recipient objects. This is to prevent the memory leak which can happen when
+        // the death recipient object internally has a strong reference to the proxy object. Under
+        // the old behavior, you were unable to kill the binder service by dropping all references
+        // to the proxy object - because it is still strong referenced from JNI (here). The only way
+        // to cut the strong reference was to call unlinkDeath(), but it was easy to forget.
+        //
+        // Now, the strong reference to the death recipient is held in the Java-side proxy object.
+        // See BinderProxy.mDeathRecipients. From JNI, only the weak reference is kept. An
+        // implication of this is that you may not receive binderDied() if you drop all references
+        // to the proxy object before the service dies. This should be okay for most cases because
+        // you normally are not interested in the death of a binder service which you don't have any
+        // reference to. If however you want to get binderDied() regardless of the proxy object's
+        // lifecycle, keep a strong reference to the death recipient object by yourself.
+#ifdef BINDER_DEATH_RECIPIENT_WEAK_FROM_JNI
+        if (target_sdk_is_at_least_vic()) {
+            mObjectWeak = env->NewWeakGlobalRef(object);
+        } else
+#endif
+        {
+            mObject = env->NewGlobalRef(object);
+        }
         // These objects manage their own lifetimes so are responsible for final bookkeeping.
         // The list holds a strong reference to this object.
         LOGDEATH("Adding JDR %p to DRL %p", this, list.get());
@@ -573,26 +606,49 @@ public:
     void binderDied(const wp<IBinder>& who)
     {
         LOGDEATH("Receiving binderDied() on JavaDeathRecipient %p\n", this);
-        if (mObject != NULL) {
-            JNIEnv* env = javavm_to_jnienv(mVM);
-            ScopedLocalRef<jobject> jBinderProxy(env, javaObjectForIBinder(env, who.promote()));
-            env->CallStaticVoidMethod(gBinderProxyOffsets.mClass,
-                                      gBinderProxyOffsets.mSendDeathNotice, mObject,
-                                      jBinderProxy.get());
-            if (env->ExceptionCheck()) {
-                jthrowable excep = env->ExceptionOccurred();
-                binder_report_exception(env, excep,
-                                        "*** Uncaught exception returned from death notification!");
-            }
+        if (mObject == NULL && mObjectWeak == NULL) {
+            return;
+        }
+        JNIEnv* env = javavm_to_jnienv(mVM);
+        ScopedLocalRef<jobject> jBinderProxy(env, javaObjectForIBinder(env, who.promote()));
 
-            // Serialize with our containing DeathRecipientList so that we can't
-            // delete the global ref on mObject while the list is being iterated.
+        // Hold a local reference to the recipient. This may fail if the recipient is weakly
+        // referenced, in which case we can't deliver the death notice.
+        ScopedLocalRef<jobject> jRecipient(env,
+                                           env->NewLocalRef(mObject != NULL ? mObject
+                                                                            : mObjectWeak));
+        if (jRecipient.get() == NULL) {
+            ALOGW("Binder died, but death recipient is already garbage collected. If your target "
+                  "sdk level is at or above 35, this can happen when you dropped all references to "
+                  "the binder service before it died. If you want to get a death notice for a "
+                  "binder service which you have no reference to, keep a strong reference to the "
+                  "death recipient by yourself.");
+            return;
+        }
+
+        if (mFired) {
+            ALOGW("Received multiple death notices for the same binder object. Binder driver bug?");
+            return;
+        }
+        mFired = true;
+
+        env->CallStaticVoidMethod(gBinderProxyOffsets.mClass, gBinderProxyOffsets.mSendDeathNotice,
+                                  jRecipient.get(), jBinderProxy.get());
+        if (env->ExceptionCheck()) {
+            jthrowable excep = env->ExceptionOccurred();
+            binder_report_exception(env, excep,
+                                    "*** Uncaught exception returned from death notification!");
+        }
+
+        // Demote from strong ref (if exists) to weak after binderDied() has been delivered, to
+        // allow the DeathRecipient and BinderProxy to be GC'd if no longer needed. Do this in sync
+        // with our containing DeathRecipientList so that we can't delete the global ref on mObject
+        // while the list is being iterated.
+        if (mObject != NULL) {
             sp<DeathRecipientList> list = mList.promote();
             if (list != NULL) {
                 AutoMutex _l(list->lock());
 
-                // Demote from strong ref to weak after binderDied() has been delivered,
-                // to allow the DeathRecipient and BinderProxy to be GC'd if no longer needed.
                 mObjectWeak = env->NewWeakGlobalRef(mObject);
                 env->DeleteGlobalRef(mObject);
                 mObject = NULL;
@@ -659,9 +715,19 @@ protected:
 
 private:
     JavaVM* const mVM;
-    jobject mObject;  // Initial strong ref to Java-side DeathRecipient. Cleared on binderDied().
-    jweak mObjectWeak; // Weak ref to the same Java-side DeathRecipient after binderDied().
+
+    // If target sdk version < 35, the Java-side DeathRecipient is strongly referenced from mObject
+    // upon linkToDeath() and then after binderDied() is called, the strong reference is demoted to
+    // a weak reference (mObjectWeak).
+    // If target sdk version >= 35, the strong reference is never made here (i.e. mObject == NULL
+    // always). Instead, the strong reference to the Java-side DeathRecipient is made in
+    // BinderProxy.mDeathRecipients. In the native world, only the weak reference is kept.
+    jobject mObject;
+    jweak mObjectWeak;
     wp<DeathRecipientList> mList;
+
+    // Whether binderDied was called or not.
+    bool mFired = false;
 };
 
 // ----------------------------------------------------------------------------
@@ -1435,17 +1501,19 @@ static jobject android_os_BinderProxy_getExtension(JNIEnv* env, jobject obj) {
 
 // ----------------------------------------------------------------------------
 
+// clang-format off
 static const JNINativeMethod gBinderProxyMethods[] = {
      /* name, signature, funcPtr */
     {"pingBinder",          "()Z", (void*)android_os_BinderProxy_pingBinder},
     {"isBinderAlive",       "()Z", (void*)android_os_BinderProxy_isBinderAlive},
     {"getInterfaceDescriptor", "()Ljava/lang/String;", (void*)android_os_BinderProxy_getInterfaceDescriptor},
     {"transactNative",      "(ILandroid/os/Parcel;Landroid/os/Parcel;I)Z", (void*)android_os_BinderProxy_transact},
-    {"linkToDeath",         "(Landroid/os/IBinder$DeathRecipient;I)V", (void*)android_os_BinderProxy_linkToDeath},
-    {"unlinkToDeath",       "(Landroid/os/IBinder$DeathRecipient;I)Z", (void*)android_os_BinderProxy_unlinkToDeath},
+    {"linkToDeathNative",   "(Landroid/os/IBinder$DeathRecipient;I)V", (void*)android_os_BinderProxy_linkToDeath},
+    {"unlinkToDeathNative", "(Landroid/os/IBinder$DeathRecipient;I)Z", (void*)android_os_BinderProxy_unlinkToDeath},
     {"getNativeFinalizer",  "()J", (void*)android_os_BinderProxy_getNativeFinalizer},
     {"getExtension",        "()Landroid/os/IBinder;", (void*)android_os_BinderProxy_getExtension},
 };
+// clang-format on
 
 const char* const kBinderProxyPathName = "android/os/BinderProxy";
 
