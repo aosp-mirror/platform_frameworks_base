@@ -16,6 +16,7 @@
 package com.android.hoststubgen.filters
 
 import com.android.hoststubgen.UnknownApiException
+import com.android.hoststubgen.addNonNullElement
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.toHumanReadableClassName
 import com.android.hoststubgen.asm.toHumanReadableMethodName
@@ -127,9 +128,9 @@ class InMemoryOutputFilter(
         mNativeSubstitutionClasses[getClassKey(from)] = to.toHumanReadableClassName()
     }
 
-    override fun getClassLoadHook(className: String): String? {
-        return mClassLoadHooks[getClassKey(className)]
-            ?: super.getClassLoadHook(className)
+    override fun getClassLoadHooks(className: String): List<String> {
+        return addNonNullElement(super.getClassLoadHooks(className),
+            mClassLoadHooks[getClassKey(className)])
     }
 
     fun setClassLoadHook(className: String, methodName: String) {

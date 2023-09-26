@@ -6,8 +6,10 @@
 --enable-non-stub-method-check
 # --no-non-stub-method-check
 
-# --enable-method-logging
-
+#--default-method-call-hook
+#    com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+#--default-class-load-hook
+#    com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
 
 # Standard annotations.
 # Note, each line is a single argument, so we need newlines after each `--xxx-annotation`.

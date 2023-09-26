@@ -19,6 +19,7 @@ import com.android.hoststubgen.ClassParseException
 import com.android.hoststubgen.HostStubGenErrors
 import com.android.hoststubgen.HostStubGenInternalException
 import com.android.hoststubgen.InvalidAnnotationException
+import com.android.hoststubgen.addNonNullElement
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.findAnnotationValueAsString
 import com.android.hoststubgen.asm.findAnyAnnotation
@@ -253,14 +254,14 @@ class AnnotationBasedFilter(
         return null
     }
 
-    override fun getClassLoadHook(className: String): String? {
-        classes.getClass(className).let { cn ->
+    override fun getClassLoadHooks(className: String): List<String> {
+        val e = classes.getClass(className).let { cn ->
             findAnyAnnotation(classLoadHookAnnotations,
                 cn.visibleAnnotations, cn.invisibleAnnotations)?.let { an ->
-                return getAnnotationField(an, "value")?.toHumanReadableMethodName()
+                getAnnotationField(an, "value")?.toHumanReadableMethodName()
             }
         }
-        return null
+        return addNonNullElement(super.getClassLoadHooks(className), e)
     }
 
     private data class MethodKey(val name: String, val desc: String)
