@@ -2028,9 +2028,6 @@ public final class DisplayManagerService extends SystemService {
         mDisplayBrightnesses.delete(displayId);
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
 
-        sendDisplayEventLocked(display, event);
-        scheduleTraversalLocked(false);
-
         if (mDisplayWindowPolicyControllers.contains(displayId)) {
             final IVirtualDevice virtualDevice =
                     mDisplayWindowPolicyControllers.removeReturnOld(displayId).first;
@@ -2041,6 +2038,9 @@ public final class DisplayManagerService extends SystemService {
                 });
             }
         }
+
+        sendDisplayEventLocked(display, event);
+        scheduleTraversalLocked(false);
     }
 
     private void handleLogicalDisplaySwappedLocked(@NonNull LogicalDisplay display) {
