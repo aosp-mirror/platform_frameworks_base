@@ -122,7 +122,7 @@ public final class StartingWindowInfo implements Parcelable {
             TYPE_PARAMETER_PROCESS_RUNNING,
             TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT,
             TYPE_PARAMETER_ACTIVITY_CREATED,
-            TYPE_PARAMETER_ALLOW_ICON,
+            TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN,
             TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN,
             TYPE_PARAMETER_WINDOWLESS,
             TYPE_PARAMETER_LEGACY_SPLASH_SCREEN
@@ -143,7 +143,7 @@ public final class StartingWindowInfo implements Parcelable {
     /** @hide */
     public static final int TYPE_PARAMETER_ACTIVITY_CREATED = 0x00000010;
     /** @hide */
-    public static final int TYPE_PARAMETER_ALLOW_ICON = 0x00000020;
+    public static final int TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN = 0x00000020;
     /**
      * The parameter which indicates if the activity has finished drawing.
      * @hide
