@@ -85,6 +85,7 @@ class MediaCarouselScrollHandlerTest : SysuiTestCase() {
     fun testCarouselScroll_shortScroll() {
         whenever(mediaCarousel.isLayoutRtl).thenReturn(false)
         whenever(mediaCarousel.relativeScrollX).thenReturn(300)
+        whenever(mediaCarousel.scrollX).thenReturn(300)
 
         mediaCarousel.touchListener?.onTouchEvent(motionEventUp)
         executor.runAllReady()
@@ -96,6 +97,7 @@ class MediaCarouselScrollHandlerTest : SysuiTestCase() {
     fun testCarouselScroll_shortScroll_isRTL() {
         whenever(mediaCarousel.isLayoutRtl).thenReturn(true)
         whenever(mediaCarousel.relativeScrollX).thenReturn(300)
+        whenever(mediaCarousel.scrollX).thenReturn(carouselWidth - 300)
 
         mediaCarousel.touchListener?.onTouchEvent(motionEventUp)
         executor.runAllReady()
@@ -107,6 +109,7 @@ class MediaCarouselScrollHandlerTest : SysuiTestCase() {
     fun testCarouselScroll_longScroll() {
         whenever(mediaCarousel.isLayoutRtl).thenReturn(false)
         whenever(mediaCarousel.relativeScrollX).thenReturn(600)
+        whenever(mediaCarousel.scrollX).thenReturn(600)
 
         mediaCarousel.touchListener?.onTouchEvent(motionEventUp)
         executor.runAllReady()
@@ -118,6 +121,7 @@ class MediaCarouselScrollHandlerTest : SysuiTestCase() {
     fun testCarouselScroll_longScroll_isRTL() {
         whenever(mediaCarousel.isLayoutRtl).thenReturn(true)
         whenever(mediaCarousel.relativeScrollX).thenReturn(600)
+        whenever(mediaCarousel.scrollX).thenReturn(carouselWidth - 600)
 
         mediaCarousel.touchListener?.onTouchEvent(motionEventUp)
         executor.runAllReady()
