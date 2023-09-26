@@ -264,6 +264,16 @@ public abstract class DisplayEventReceiver {
     }
 
     /**
+     * Called when a display hotplug event with connection error is received.
+     *
+     * @param timestampNanos The timestamp of the event, in the {@link System#nanoTime()}
+     * timebase.
+     * @param connectionError the hotplug connection error code.
+     */
+    public void onHotplugConnectionError(long timestampNanos, int connectionError) {
+    }
+
+    /**
      * Called when a display mode changed event is received.
      *
      * @param timestampNanos The timestamp of the event, in the {@link System#nanoTime()}
@@ -343,6 +353,11 @@ public abstract class DisplayEventReceiver {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void dispatchHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
         onHotplug(timestampNanos, physicalDisplayId, connected);
+    }
+
+    @SuppressWarnings("unused")
+    private void dispatchHotplugConnectionError(long timestampNanos, int connectionError) {
+        onHotplugConnectionError(timestampNanos, connectionError);
     }
 
     // Called from native code.
