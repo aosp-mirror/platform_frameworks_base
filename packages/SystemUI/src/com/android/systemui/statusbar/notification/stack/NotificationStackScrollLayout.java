@@ -485,8 +485,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private ShadeController mShadeController;
     private Consumer<Boolean> mOnStackYChanged;
 
-    protected boolean mClearAllEnabled;
-
     private Interpolator mHideXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     private final NotificationSectionsManager mSectionsManager;
@@ -667,7 +665,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mDebugPaint.setStyle(Paint.Style.STROKE);
             mDebugPaint.setTextSize(25f);
         }
-        mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
         mGroupMembershipManager = Dependency.get(GroupMembershipManager.class);
         mGroupExpansionManager = Dependency.get(GroupExpansionManager.class);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
@@ -755,8 +752,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private boolean shouldShowDismissView() {
-        return mClearAllEnabled
-                && mController.hasActiveClearableNotifications(ROWS_ALL);
+        return mController.hasActiveClearableNotifications(ROWS_ALL);
     }
 
     private boolean shouldShowFooterView(boolean showDismissView) {
@@ -5160,7 +5156,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     DumpUtilsKt.withIncreasedIndent(
                             pw,
                             () -> {
-                                pw.println("mClearAllEnabled: " + mClearAllEnabled);
                                 pw.println(
                                         "hasActiveClearableNotifications: "
                                                 + mController.hasActiveClearableNotifications(
