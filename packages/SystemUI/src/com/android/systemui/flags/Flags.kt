@@ -178,7 +178,7 @@ object Flags {
      */
     // TODO(b/281655028): Tracking bug
     @JvmField
-    val LIGHT_REVEAL_MIGRATION = unreleasedFlag("light_reveal_migration", teamfood = false)
+    val LIGHT_REVEAL_MIGRATION = unreleasedFlag("light_reveal_migration", teamfood = true)
 
     // TODO(b/301915812): Tracking Bug
     @JvmField
