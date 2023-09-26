@@ -69,7 +69,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
         val deviceItem = savedDeviceItemFactory.create(context, cachedDevice)
 
         assertDeviceItem(deviceItem, DeviceItemType.SAVED_BLUETOOTH_DEVICE)
-        assertThat(deviceItem.background).isNull()
+        assertThat(deviceItem.background).isNotNull()
     }
 
     private fun assertDeviceItem(deviceItem: DeviceItem?, deviceItemType: DeviceItemType) {

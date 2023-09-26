@@ -34,7 +34,6 @@ package com.android.systemui.qs.tiles.dialog.bluetooth
 
 import android.graphics.drawable.Drawable
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.ENABLED_ALPHA
 
 enum class DeviceItemType {
     AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
@@ -48,7 +47,6 @@ data class DeviceItem(
     val deviceName: String = "",
     val connectionSummary: String = "",
     val iconWithDescription: Pair<Drawable, String>? = null,
-    val background: Drawable? = null,
-    var isEnabled: Boolean = true,
-    var alpha: Float = ENABLED_ALPHA
+    val background: Int? = null,
+    var isEnabled: Boolean = true
 )

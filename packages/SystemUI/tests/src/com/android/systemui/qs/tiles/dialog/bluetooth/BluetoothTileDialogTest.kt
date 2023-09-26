@@ -29,8 +29,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.DISABLED_ALPHA
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.ENABLED_ALPHA
 import com.android.systemui.res.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -62,6 +60,8 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     @Mock private lateinit var uiEventLogger: UiEventLogger
 
+    private val subtitleResId = R.string.quick_settings_bluetooth_tile_subtitle
+
     private lateinit var icon: Pair<Drawable, String>
     private lateinit var bluetoothTileDialog: BluetoothTileDialog
     private lateinit var deviceItem: DeviceItem
@@ -69,7 +69,13 @@ class BluetoothTileDialogTest : SysuiTestCase() {
     @Before
     fun setUp() {
         bluetoothTileDialog =
-            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, uiEventLogger, mContext)
+            BluetoothTileDialog(
+                ENABLED,
+                subtitleResId,
+                bluetoothTileDialogCallback,
+                uiEventLogger,
+                mContext
+            )
         icon = Pair(drawable, DEVICE_NAME)
         deviceItem =
             DeviceItem(
@@ -99,7 +105,13 @@ class BluetoothTileDialogTest : SysuiTestCase() {
     @Test
     fun testShowDialog_displayBluetoothDevice() {
         bluetoothTileDialog =
-            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, uiEventLogger, mContext)
+            BluetoothTileDialog(
+                ENABLED,
+                subtitleResId,
+                bluetoothTileDialogCallback,
+                uiEventLogger,
+                mContext
+            )
         bluetoothTileDialog.show()
         bluetoothTileDialog.onDeviceItemUpdated(
             listOf(deviceItem),
@@ -118,49 +130,61 @@ class BluetoothTileDialogTest : SysuiTestCase() {
     @Test
     fun testDeviceItemViewHolder_cachedDeviceNotBusy() {
         deviceItem.isEnabled = true
-        deviceItem.alpha = ENABLED_ALPHA
 
         val view =
             LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
         val viewHolder =
-            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, uiEventLogger, mContext)
+            BluetoothTileDialog(
+                    ENABLED,
+                    subtitleResId,
+                    bluetoothTileDialogCallback,
+                    uiEventLogger,
+                    mContext
+                )
                 .Adapter(bluetoothTileDialogCallback)
                 .DeviceItemViewHolder(view)
-        viewHolder.bind(deviceItem, 0, bluetoothTileDialogCallback)
-        val container = view.requireViewById<View>(R.id.bluetooth_device)
-        val deviceView = view.requireViewById<View>(R.id.bluetooth_device)
+        viewHolder.bind(deviceItem, bluetoothTileDialogCallback)
+        val container = view.requireViewById<View>(R.id.bluetooth_device_row)
 
         assertThat(container).isNotNull()
         assertThat(container.isEnabled).isTrue()
-        assertThat(container.alpha).isEqualTo(ENABLED_ALPHA)
-        assertThat(deviceView.hasOnClickListeners()).isTrue()
+        assertThat(container.hasOnClickListeners()).isTrue()
     }
 
     @Test
     fun testDeviceItemViewHolder_cachedDeviceBusy() {
         deviceItem.isEnabled = false
-        deviceItem.alpha = DISABLED_ALPHA
 
         val view =
             LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
         val viewHolder =
-            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, uiEventLogger, mContext)
+            BluetoothTileDialog(
+                    ENABLED,
+                    subtitleResId,
+                    bluetoothTileDialogCallback,
+                    uiEventLogger,
+                    mContext
+                )
                 .Adapter(bluetoothTileDialogCallback)
                 .DeviceItemViewHolder(view)
-        viewHolder.bind(deviceItem, 0, bluetoothTileDialogCallback)
+        viewHolder.bind(deviceItem, bluetoothTileDialogCallback)
         val container = view.requireViewById<View>(R.id.bluetooth_device_row)
-        val deviceView = view.requireViewById<View>(R.id.bluetooth_device)
 
         assertThat(container).isNotNull()
         assertThat(container.isEnabled).isFalse()
-        assertThat(container.alpha).isEqualTo(DISABLED_ALPHA)
-        assertThat(deviceView.hasOnClickListeners()).isTrue()
+        assertThat(container.hasOnClickListeners()).isTrue()
     }
 
     @Test
     fun testOnDeviceUpdated_hideSeeAll_showPairNew() {
         bluetoothTileDialog =
-            BluetoothTileDialog(ENABLED, bluetoothTileDialogCallback, uiEventLogger, mContext)
+            BluetoothTileDialog(
+                ENABLED,
+                subtitleResId,
+                bluetoothTileDialogCallback,
+                uiEventLogger,
+                mContext
+            )
         bluetoothTileDialog.show()
         bluetoothTileDialog.onDeviceItemUpdated(
             listOf(deviceItem),
