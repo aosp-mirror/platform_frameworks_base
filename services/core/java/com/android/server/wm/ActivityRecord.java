@@ -5365,7 +5365,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Finish should only ever commit visibility=false, so we can check full containment
                 // rather than just direct membership.
                 inFinishingTransition = mTransitionController.inFinishingTransition(this);
-                if (!inFinishingTransition && !mDisplayContent.isSleeping()) {
+                if (!inFinishingTransition && (visible || !mDisplayContent.isSleeping())) {
                     Slog.e(TAG, "setVisibility=" + visible
                             + " while transition is not collecting or finishing "
                             + this + " caller=" + Debug.getCallers(8));
