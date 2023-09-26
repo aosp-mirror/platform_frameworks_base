@@ -22,7 +22,7 @@
     </target_preparer>
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">
-        <option name="package" value="com.android.foldableslib.tests" />
+        <option name="package" value="com.android.foldablesdevicestatelib.tests" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
         <option name="hidden-api-checks" value="false" />
     </test>
