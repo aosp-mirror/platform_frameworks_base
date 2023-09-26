@@ -41,10 +41,10 @@ import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.media.MediaProjectionCaptureTarget;
+import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
+import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.ScreenMediaRecorder.ScreenMediaRecorderListener;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;

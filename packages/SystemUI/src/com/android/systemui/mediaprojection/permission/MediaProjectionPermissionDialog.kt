@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.screenrecord
+package com.android.systemui.mediaprojection.permission
 
 import android.content.Context
 import android.media.projection.MediaProjectionConfig
