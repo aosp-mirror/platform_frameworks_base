@@ -557,7 +557,7 @@ public final class DisplayManagerService extends SystemService {
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContext,
                 new FoldSettingProvider(mContext, new SettingsWrapper()), mDisplayDeviceRepo,
                 new LogicalDisplayListener(), mSyncRoot, mHandler, mFlags);
-        mDisplayModeDirector = new DisplayModeDirector(context, mHandler);
+        mDisplayModeDirector = new DisplayModeDirector(context, mHandler, mFlags);
         mBrightnessSynchronizer = new BrightnessSynchronizer(mContext);
         Resources resources = mContext.getResources();
         mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(

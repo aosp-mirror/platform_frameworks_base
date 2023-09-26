@@ -5227,6 +5227,28 @@
          non-zero. -->
     <integer name="config_defaultPeakRefreshRate">0</integer>
 
+    <!-- External display peak refresh rate for the given device. Change this value if you want to
+         prevent the framework from using higher refresh rates, even if display modes with higher
+         refresh rates are available from hardware composer. Only has an effect if this value and
+         config_externalDisplayPeakWidth and config_externalDisplayPeakHeight are non-zero. -->
+    <integer name="config_externalDisplayPeakRefreshRate">0</integer>
+
+    <!-- External display peak width for the given device. Change this value if you want
+         to prevent the framework from using higher resolution, even if display modes with higher
+         resolutions are available from hardware composer. Only has an effect if this value and
+         config_externalDisplayPeakRefreshRate and config_externalDisplayPeakHeight are non-zero.-->
+    <integer name="config_externalDisplayPeakWidth">0</integer>
+
+    <!-- External display peak height for the given device. Change this value if you want
+         to prevent the framework from using higher resolution, even if display modes with higher
+         resolutions are available from hardware composer. Only has an effect if this value and
+         config_externalDisplayPeakRefreshRate and config_externalDisplayPeakWidth are non-zero. -->
+    <integer name="config_externalDisplayPeakHeight">0</integer>
+
+    <!-- Enable synchronization of the displays refresh rates by applying the default low refresh
+         rate. -->
+    <bool name="config_refreshRateSynchronizationEnabled">false</bool>
+
     <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
          vendors to tune the curves to have exact same brightness for different refresh rate. So
          flicker could be observed at switch time. The issue is worse at the gamma lower end.

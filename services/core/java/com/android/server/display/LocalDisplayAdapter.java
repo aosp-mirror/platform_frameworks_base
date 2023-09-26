@@ -640,6 +640,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.modeId = mActiveModeId;
                 mInfo.renderFrameRate = mActiveRenderFrameRate;
                 mInfo.defaultModeId = getPreferredModeId();
+                mInfo.userPreferredModeId = mUserPreferredModeId;
                 mInfo.supportedModes = getDisplayModes(mSupportedModes);
                 mInfo.colorMode = mActiveColorMode;
                 mInfo.allmSupported = mAllmSupported;

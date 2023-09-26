@@ -19,6 +19,7 @@ package com.android.server.display.mode;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.util.SparseArray;
@@ -70,6 +71,18 @@ public class VotesStorageTest {
         mVotesStorage.updateVote(DISPLAY_ID, PRIORITY, VOTE);
         // THEN listener is notified
         verify(mVotesListener).onChanged();
+    }
+
+    /** Verifies that adding the same vote twice results in a single call to onChanged */
+    @Test
+    public void notifiesVoteListenerCalledOnceIfVoteUpdatedTwice() {
+        // WHEN updateVote is called
+        mVotesStorage.updateVote(DISPLAY_ID, PRIORITY, VOTE);
+        mVotesStorage.updateVote(DISPLAY_ID, PRIORITY, VOTE);
+        mVotesStorage.updateVote(DISPLAY_ID, PRIORITY_OTHER, VOTE_OTHER);
+        mVotesStorage.updateVote(DISPLAY_ID, PRIORITY_OTHER, VOTE);
+        // THEN listener is notified, but only when vote changes.
+        verify(mVotesListener, times(3)).onChanged();
     }
 
     @Test
