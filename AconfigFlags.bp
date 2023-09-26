@@ -36,6 +36,7 @@ aconfig_srcjars = [
     ":hwui_flags_java_lib{.generated_srcjars}",
     ":display_flags_lib{.generated_srcjars}",
     ":android.multiuser.flags-aconfig-java{.generated_srcjars}",
+    ":android.app.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -325,5 +326,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.multiuser.flags-aconfig-java",
     aconfig_declarations: "android.multiuser.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Activity Manager
+aconfig_declarations {
+    name: "android.app.flags-aconfig",
+    package: "android.app",
+    srcs: ["core/java/android/app/activity_manager.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.app.flags-aconfig-java",
+    aconfig_declarations: "android.app.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

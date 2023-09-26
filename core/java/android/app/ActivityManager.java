@@ -24,6 +24,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import android.Manifest;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -3982,6 +3983,7 @@ public class ActivityManager {
      *         the order from most recent to least recent.
      */
     @NonNull
+    @FlaggedApi(Flags.FLAG_APP_START_INFO)
     public List<ApplicationStartInfo> getHistoricalProcessStartReasons(
             @IntRange(from = 0) int maxNum) {
         try {
@@ -4012,6 +4014,7 @@ public class ActivityManager {
      */
     @NonNull
     @SystemApi
+    @FlaggedApi(Flags.FLAG_APP_START_INFO)
     @RequiresPermission(Manifest.permission.DUMP)
     public List<ApplicationStartInfo> getExternalHistoricalProcessStartReasons(
             @NonNull String packageName, @IntRange(from = 0) int maxNum) {
@@ -4044,6 +4047,7 @@ public class ActivityManager {
      *
      * @throws IllegalArgumentException if executor or listener are null.
      */
+    @FlaggedApi(Flags.FLAG_APP_START_INFO)
     public void setApplicationStartInfoCompletionListener(@NonNull final Executor executor,
             @NonNull final Consumer<ApplicationStartInfo> listener) {
         Preconditions.checkNotNull(executor, "executor cannot be null");
@@ -4065,6 +4069,7 @@ public class ActivityManager {
     /**
      * Removes the callback set by {@link #setApplicationStartInfoCompletionListener} if there is one.
      */
+    @FlaggedApi(Flags.FLAG_APP_START_INFO)
     public void clearApplicationStartInfoCompletionListener() {
         try {
             getService().clearApplicationStartInfoCompleteListener(mContext.getUserId());
@@ -4089,6 +4094,7 @@ public class ActivityManager {
      *                    Will thow {@link java.lang.IllegalArgumentException} if not in range.
      * @param timestampNs Clock monotonic time in nanoseconds of event to be recorded.
      */
+    @FlaggedApi(Flags.FLAG_APP_START_INFO)
     public void addStartInfoTimestamp(@IntRange(
             from = ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_DEVELOPER_START,
             to = ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_DEVELOPER) int key,
