@@ -182,7 +182,7 @@ object Flags {
 
     // TODO(b/301915812): Tracking Bug
     @JvmField
-    val NEW_AOD_TRANSITION = unreleasedFlag("new_aod_transition", teamfood = false)
+    val NEW_AOD_TRANSITION = unreleasedFlag("new_aod_transition", teamfood = true)
 
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
