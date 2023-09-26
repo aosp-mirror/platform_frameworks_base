@@ -811,6 +811,12 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1325565952": {
+      "message": "Attempted to get home support flag of a display that does not exist: %d",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-1323783276": {
       "message": "performEnableScreen: bootFinished() failed.",
       "level": "WARN",

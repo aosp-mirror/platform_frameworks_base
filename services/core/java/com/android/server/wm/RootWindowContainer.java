@@ -1696,8 +1696,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         final DisplayContent display = taskDisplayArea.getDisplayContent();
-        if (display == null || display.isRemoved() || !display.supportsSystemDecorations()) {
-            // Can't launch home on display that doesn't support system decorations.
+        if (display == null || display.isRemoved() || !display.isHomeSupported()) {
+            // Can't launch home on display that doesn't support home.
             return false;
         }
 
@@ -3126,10 +3126,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (preferredFocusableRootTask != null) {
             return preferredFocusableRootTask;
         }
-        if (preferredDisplayArea.mDisplayContent.supportsSystemDecorations()) {
+
+        if (preferredDisplayArea.mDisplayContent.isHomeSupported()) {
             // Stop looking for focusable root task on other displays because the preferred display
-            // supports system decorations. Home activity would be launched on the same display if
-            // no focusable root task found.
+            // supports home. Home activity would be launched on the same display if no focusable
+            // root task found.
             return null;
         }
 

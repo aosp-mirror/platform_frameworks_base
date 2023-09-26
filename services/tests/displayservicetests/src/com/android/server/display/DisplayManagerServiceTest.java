@@ -195,7 +195,8 @@ public class DisplayManagerServiceTest {
     @Rule(order = 1)
     public Expect expect = Expect.create();
     @Rule
-    public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public SetFlagsRule mSetFlagsRule =
+            new SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
 
     private Context mContext;
 

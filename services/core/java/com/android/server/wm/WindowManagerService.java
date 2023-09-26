@@ -8269,9 +8269,41 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean shouldShowSystemDecorOnDisplay(int displayId) {
+        public void setHomeSupportedOnDisplay(String displayUniqueId, int displayType,
+                boolean supported) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                synchronized (mGlobalLock) {
+                    mDisplayWindowSettings.setHomeSupportedOnDisplayLocked(
+                            displayUniqueId, displayType, supported);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+
+        @Override
+        public boolean isHomeSupportedOnDisplay(int displayId) {
             synchronized (mGlobalLock) {
-                return WindowManagerService.this.shouldShowSystemDecors(displayId);
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                if (displayContent == null) {
+                    ProtoLog.w(WM_ERROR, "Attempted to get home support flag of a display that "
+                            + "does not exist: %d", displayId);
+                    return false;
+                }
+                return displayContent.isHomeSupported();
+            }
+        }
+
+        @Override
+        public void clearDisplaySettings(String displayUniqueId, int displayType) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                synchronized (mGlobalLock) {
+                    mDisplayWindowSettings.clearDisplaySettings(displayUniqueId, displayType);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
         }
 

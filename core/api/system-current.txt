@@ -4598,6 +4598,14 @@ package android.hardware.display {
     field public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1024; // 0x400
   }
 
+  public final class VirtualDisplayConfig implements android.os.Parcelable {
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") public boolean isHomeSupported();
+  }
+
+  public static final class VirtualDisplayConfig.Builder {
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @NonNull public android.hardware.display.VirtualDisplayConfig.Builder setHomeSupported(boolean);
+  }
+
 }
 
 package android.hardware.hdmi {
