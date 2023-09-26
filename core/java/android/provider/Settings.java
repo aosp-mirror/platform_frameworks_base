@@ -4866,7 +4866,8 @@ public final class Settings {
                 "display_color_mode_vendor_hint";
 
         /**
-         * The user selected min refresh rate in frames per second.
+         * The user selected min refresh rate in frames per second. If infinite, the user wants
+         * the highest possible refresh rate.
          *
          * If this isn't set, 0 will be used.
          * @hide
@@ -4875,7 +4876,8 @@ public final class Settings {
         public static final String MIN_REFRESH_RATE = "min_refresh_rate";
 
         /**
-         * The user selected peak refresh rate in frames per second.
+         * The user selected peak refresh rate in frames per second. If infinite, the user wants
+         * the highest possible refresh rate.
          *
          * If this isn't set, the system falls back to a device specific default.
          * @hide

@@ -22,6 +22,7 @@ import static android.os.PowerManager.BRIGHTNESS_INVALID_FLOAT;
 import static android.view.Display.Mode.INVALID_MODE_ID;
 
 import static com.android.server.display.DisplayDeviceConfig.DEFAULT_LOW_REFRESH_RATE;
+import static com.android.internal.display.RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay;
 
 import android.annotation.IntegerRes;
 import android.annotation.NonNull;
@@ -176,6 +177,8 @@ public class DisplayModeDirector {
 
     private final boolean mIsDisplaysRefreshRatesSynchronizationEnabled;
 
+    private final boolean mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled;
+
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler,
             @NonNull DisplayManagerFlags displayManagerFlags) {
         this(context, handler, new RealInjector(context), displayManagerFlags);
@@ -191,6 +194,8 @@ public class DisplayModeDirector {
             .isExternalDisplayLimitModeEnabled();
         mIsDisplaysRefreshRatesSynchronizationEnabled = displayManagerFlags
             .isDisplaysRefreshRatesSynchronizationEnabled();
+        mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled = displayManagerFlags
+                .isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled();
         mContext = context;
         mHandler = new DisplayModeDirectorHandler(handler.getLooper());
         mInjector = injector;
@@ -1193,8 +1198,7 @@ public class DisplayModeDirector {
         public void observe() {
             final ContentResolver cr = mContext.getContentResolver();
             mInjector.registerPeakRefreshRateObserver(cr, this);
-            cr.registerContentObserver(mMinRefreshRateSetting, false /*notifyDescendants*/, this,
-                    UserHandle.USER_SYSTEM);
+            mInjector.registerMinRefreshRateObserver(cr, this);
             cr.registerContentObserver(mLowPowerModeSetting, false /*notifyDescendants*/, this,
                     UserHandle.USER_SYSTEM);
             cr.registerContentObserver(mMatchContentFrameRateSetting, false /*notifyDescendants*/,
@@ -1292,10 +1296,34 @@ public class DisplayModeDirector {
 
         private void updateRefreshRateSettingLocked() {
             final ContentResolver cr = mContext.getContentResolver();
+            float highestRefreshRate = findHighestRefreshRateForDefaultDisplay(mContext);
+
             float minRefreshRate = Settings.System.getFloatForUser(cr,
                     Settings.System.MIN_REFRESH_RATE, 0f, cr.getUserId());
+            if (Float.isInfinite(minRefreshRate)) {
+                // Infinity means that we want the highest possible refresh rate
+                minRefreshRate = highestRefreshRate;
+
+                if (!mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled) {
+                    // The flag had been turned off, we need to restore the original value
+                    Settings.System.putFloatForUser(cr,
+                            Settings.System.MIN_REFRESH_RATE, minRefreshRate, cr.getUserId());
+                }
+            }
+
             float peakRefreshRate = Settings.System.getFloatForUser(cr,
                     Settings.System.PEAK_REFRESH_RATE, mDefaultPeakRefreshRate, cr.getUserId());
+            if (Float.isInfinite(peakRefreshRate)) {
+                // Infinity means that we want the highest possible refresh rate
+                peakRefreshRate = highestRefreshRate;
+
+                if (!mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled) {
+                    // The flag had been turned off, we need to restore the original value
+                    Settings.System.putFloatForUser(cr,
+                            Settings.System.PEAK_REFRESH_RATE, peakRefreshRate, cr.getUserId());
+                }
+            }
+
             updateRefreshRateSettingLocked(minRefreshRate, peakRefreshRate, mDefaultRefreshRate);
         }
 
@@ -3082,11 +3110,15 @@ public class DisplayModeDirector {
 
     interface Injector {
         Uri PEAK_REFRESH_RATE_URI = Settings.System.getUriFor(Settings.System.PEAK_REFRESH_RATE);
+        Uri MIN_REFRESH_RATE_URI = Settings.System.getUriFor(Settings.System.MIN_REFRESH_RATE);
 
         @NonNull
         DeviceConfigInterface getDeviceConfig();
 
         void registerPeakRefreshRateObserver(@NonNull ContentResolver cr,
+                @NonNull ContentObserver observer);
+
+        void registerMinRefreshRateObserver(@NonNull ContentResolver cr,
                 @NonNull ContentObserver observer);
 
         void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
@@ -3136,6 +3168,13 @@ public class DisplayModeDirector {
         public void registerPeakRefreshRateObserver(@NonNull ContentResolver cr,
                 @NonNull ContentObserver observer) {
             cr.registerContentObserver(PEAK_REFRESH_RATE_URI, false /*notifyDescendants*/,
+                    observer, UserHandle.USER_SYSTEM);
+        }
+
+        @Override
+        public void registerMinRefreshRateObserver(@NonNull ContentResolver cr,
+                @NonNull ContentObserver observer) {
+            cr.registerContentObserver(MIN_REFRESH_RATE_URI, false /*notifyDescendants*/,
                     observer, UserHandle.USER_SYSTEM);
         }
 
