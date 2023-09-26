@@ -17,6 +17,7 @@
 package com.android.server.net;
 
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.VpnManager.NOTIFICATION_CHANNEL_VPN;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -24,6 +25,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.Notification;
@@ -59,6 +61,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class LockdownVpnTrackerTest {
@@ -91,6 +95,8 @@ public class LockdownVpnTrackerTest {
     @Mock private NetworkInfo mVpnNetworkInfo;
     @Mock private VpnConfig mVpnConfig;
     @Mock private Network mNetwork;
+    @Mock private Network mNetwork2;
+    @Mock private Network mVpnNetwork;
 
     private HandlerThread mHandlerThread;
     private Handler mHandler;
@@ -134,6 +140,9 @@ public class LockdownVpnTrackerTest {
         doReturn(mVpnNetworkInfo).when(mVpn).getNetworkInfo();
         doReturn(false).when(mVpnNetworkInfo).isConnectedOrConnecting();
         doReturn(mVpnConfig).when(mVpn).getLegacyVpnConfig();
+        // mVpnConfig is a mock but the production code will try to add addresses in this array
+        // assuming it's non-null, so it needs to be initialized.
+        mVpnConfig.addresses = new ArrayList<>();
 
         mProfile = createTestVpnProfile();
     }
@@ -216,6 +225,97 @@ public class LockdownVpnTrackerTest {
         verify(mNotificationManager).notify(any(), eq(SystemMessage.NOTE_VPN_STATUS),
                 argThat(notification -> isExpectedNotification(notification,
                         R.string.vpn_lockdown_connecting, R.drawable.vpn_disconnected)));
+    }
+
+    private void doTestDefaultLpChanged(LinkProperties startingLp, LinkProperties newLp) {
+        initAndVerifyLockdownVpnTracker();
+        final NetworkCallback defaultCallback = getDefaultNetworkCallback();
+        callCallbacksForNetworkConnect(
+                defaultCallback, mNetwork, TEST_CELL_NC, startingLp, true /* blocked */);
+        clearInvocations(mVpn, mCm, mNotificationManager);
+
+        // LockdownVpnTracker#handleStateChangedLocked() is not called on the same network even if
+        // the LinkProperties change.
+        defaultCallback.onLinkPropertiesChanged(mNetwork, newLp);
+
+        // Ideally the VPN should start if it hasn't already, but it doesn't because nothing calls
+        // LockdownVpnTracker#handleStateChangedLocked. This is a bug.
+        // TODO: consider fixing this.
+        verify(mVpn, never()).stopVpnRunnerPrivileged();
+        verify(mVpn, never()).startLegacyVpnPrivileged(any(), any(), any());
+        verify(mNotificationManager, never()).cancel(any(), eq(SystemMessage.NOTE_VPN_STATUS));
+    }
+
+    @Test
+    public void testDefaultLPChanged_V4AddLinkAddressV4() {
+        final LinkProperties lp = new LinkProperties(TEST_CELL_LP);
+        lp.setInterfaceName("rmnet0");
+        lp.addLinkAddress(new LinkAddress("192.0.2.3/25"));
+        doTestDefaultLpChanged(TEST_CELL_LP, lp);
+    }
+
+    @Test
+    public void testDefaultLPChanged_V4AddLinkAddressV6() {
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("rmnet0");
+        lp.addLinkAddress(new LinkAddress("192.0.2.3/25"));
+        final LinkProperties newLp = new LinkProperties(lp);
+        newLp.addLinkAddress(new LinkAddress("2001:db8::1/64"));
+        doTestDefaultLpChanged(lp, newLp);
+    }
+
+    @Test
+    public void testDefaultLPChanged_V6AddLinkAddressV4() {
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("rmnet0");
+        lp.addLinkAddress(new LinkAddress("2001:db8::1/64"));
+        final LinkProperties newLp = new LinkProperties(lp);
+        newLp.addLinkAddress(new LinkAddress("192.0.2.3/25"));
+        doTestDefaultLpChanged(lp, newLp);
+    }
+
+    @Test
+    public void testDefaultLPChanged_AddLinkAddressV4() {
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("rmnet0");
+        doTestDefaultLpChanged(lp, TEST_CELL_LP);
+    }
+
+    @Test
+    public void testDefaultNetworkChanged() {
+        initAndVerifyLockdownVpnTracker();
+        final NetworkCallback defaultCallback = getDefaultNetworkCallback();
+        final NetworkCallback vpnCallback = getVpnNetworkCallback();
+        callCallbacksForNetworkConnect(defaultCallback, mNetwork);
+        clearInvocations(mVpn, mCm, mNotificationManager);
+
+        // New network and LinkProperties received
+        final NetworkCapabilities wifiNc = new NetworkCapabilities.Builder()
+                .addTransportType(TRANSPORT_WIFI)
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED)
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED)
+                .build();
+        final LinkProperties wifiLp = new LinkProperties();
+        wifiLp.setInterfaceName("wlan0");
+        callCallbacksForNetworkConnect(
+                defaultCallback, mNetwork2, wifiNc, wifiLp, true /* blocked */);
+
+        // Vpn is restarted.
+        verify(mVpn).stopVpnRunnerPrivileged();
+        verify(mVpn).startLegacyVpnPrivileged(mProfile, mNetwork2, wifiLp);
+        verify(mNotificationManager, never()).cancel(any(), eq(SystemMessage.NOTE_VPN_STATUS));
+        verify(mNotificationManager).notify(any(), eq(SystemMessage.NOTE_VPN_STATUS),
+                argThat(notification -> isExpectedNotification(notification,
+                        R.string.vpn_lockdown_connecting, R.drawable.vpn_disconnected)));
+
+        // Vpn is Connected
+        doReturn(true).when(mVpnNetworkInfo).isConnectedOrConnecting();
+        doReturn(true).when(mVpnNetworkInfo).isConnected();
+        vpnCallback.onAvailable(mVpnNetwork);
+        verify(mNotificationManager).notify(any(), eq(SystemMessage.NOTE_VPN_STATUS),
+                argThat(notification -> isExpectedNotification(notification,
+                        R.string.vpn_lockdown_connected, R.drawable.vpn_connected)));
+
     }
 
     @Test
