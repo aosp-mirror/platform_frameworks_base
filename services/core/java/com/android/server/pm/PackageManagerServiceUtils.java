@@ -44,6 +44,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -69,6 +70,7 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
 import android.os.incremental.V4Signature;
@@ -180,8 +182,9 @@ public class PackageManagerServiceUtils {
     public @interface SharedUserIdJoinType {}
 
     /**
-     * Components of apps targeting Android T and above will stop receiving intents from
-     * external callers that do not match its declared intent filters.
+     * Intents sent from apps targeting Android V and above will stop resolving to components with
+     * non matching intent filters, even when explicitly setting a component name, unless the
+     * target components are in the same app as the calling app.
      *
      * When an app registers an exported component in its manifest and adds an <intent-filter>,
      * the component can be started by any intent - even those that do not match the intent filter.
@@ -189,8 +192,9 @@ public class PackageManagerServiceUtils {
      * Without checking the intent when the component is started, in some circumstances this can
      * allow 3P apps to trigger internal-only functionality.
      */
+    @Overridable
     @ChangeId
-    @Disabled  /* Revert enforcement: b/274147456 */
+    @Disabled  /* Enforcement reverted in T: b/274147456 */
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     /**
@@ -1187,19 +1191,27 @@ public class PackageManagerServiceUtils {
     public static void applyEnforceIntentFilterMatching(
             PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
-            Intent intent, String resolvedType, int filterCallingUid) {
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
+            int filterCallingUid) {
         if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
+
+        // Do not enforce filter matching when the caller is system or root
+        if (ActivityManager.canAccessUnexportedComponents(filterCallingUid)) return;
 
         final Printer logPrinter = DEBUG_INTENT_MATCHING
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
 
+        final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
+
+        final boolean enforce = compat.isChangeEnabledByUidInternal(
+                ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, filterCallingUid);
+
         for (int i = resolveInfos.size() - 1; i >= 0; --i) {
             final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
 
-            // Do not enforce filter matching when the caller is system, root, or the same app
-            if (ActivityManager.checkComponentPermission(null, filterCallingUid,
-                    info.applicationInfo.uid, false) == PackageManager.PERMISSION_GRANTED) {
+            // Skip filter matching when the caller is targeting the same app
+            if (UserHandle.isSameApp(filterCallingUid, info.applicationInfo.uid)) {
                 continue;
             }
 
@@ -1221,14 +1233,11 @@ public class PackageManagerServiceUtils {
                 continue;
             }
 
-            // Only enforce filter matching if target app's target SDK >= T
-            final boolean enforce = compat.isChangeEnabledInternal(
-                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo);
-
             boolean match = false;
             for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
                 IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
-                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
+                if (IntentResolver.intentMatchesFilter(
+                        intentFilter, intent, resolvedType, defaultOnly)) {
                     match = true;
                     break;
                 }
