@@ -100,7 +100,11 @@ public interface NotificationInterruptStateProvider {
         /**
          * The notification is coming from a suspended packages, so FSI is suppressed.
          */
-        NO_FSI_SUSPENDED(false);
+        NO_FSI_SUSPENDED(false),
+        /**
+         * The device is not provisioned, launch FSI.
+         */
+        FSI_NOT_PROVISIONED(true);
 
         public final boolean shouldLaunch;
 

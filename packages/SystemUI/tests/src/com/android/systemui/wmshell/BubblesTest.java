@@ -126,6 +126,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -391,7 +392,8 @@ public class BubblesTest extends SysuiTestCase {
                         mock(NotifPipelineFlags.class),
                         mock(KeyguardNotificationVisibilityProvider.class),
                         mock(UiEventLogger.class),
-                        mock(UserTracker.class)
+                        mock(UserTracker.class),
+                        mock(DeviceProvisionedController.class)
                 );
 
         mShellTaskOrganizer = new ShellTaskOrganizer(mock(ShellInit.class),
