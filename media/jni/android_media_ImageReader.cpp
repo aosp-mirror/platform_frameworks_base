@@ -32,9 +32,17 @@
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_graphics_GraphicBuffer.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
+#ifdef __ANDROID__ // Layoutlib does not support Gr
 #include <grallocusage/GrallocUsageConversion.h>
+#else
+#define GRALLOC_USAGE_PROTECTED 0
+#define GRALLOC_USAGE_SW_READ_OFTEN 0
+#define GRALLOC_USAGE_SW_WRITE_OFTEN 0
+#endif
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware
 #include <private/android/AHardwareBufferHelpers.h>
+#endif
 
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
@@ -395,7 +403,11 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint w
             width, height, format, maxImages, getpid(),
             createProcessUniqueId());
     uint64_t consumerUsage =
+#ifdef __ANDROID__ // Layoutlib does not support hardware
             android_hardware_HardwareBuffer_convertToGrallocUsageBits(ndkUsage);
+#else
+            0;
+#endif
 
     bufferConsumer = new BufferItemConsumer(gbConsumer, consumerUsage, maxImages,
             /*controlledByApp*/true);
@@ -746,6 +758,7 @@ static bool Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
     return true;
 }
 
+#ifdef __ANDROID__
 static void ImageReader_unlockGraphicBuffer(JNIEnv* env, jobject /*thiz*/,
         jobject buffer) {
     sp<GraphicBuffer> graphicBuffer =
@@ -828,6 +841,7 @@ static jobjectArray ImageReader_createImagePlanes(JNIEnv* env, jobject /*thiz*/,
 
     return imagePlanes;
 }
+#endif
 
 static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
         int numPlanes, int readerFormat, uint64_t ndkReaderUsage)
@@ -901,6 +915,7 @@ static jint Image_getHeight(JNIEnv* env, jobject thiz)
     return getBufferHeight(buffer);
 }
 
+#ifdef __ANDROID__
 static jint Image_getFenceFd(JNIEnv* env, jobject thiz)
 {
     BufferItem* buffer = Image_getBufferItem(env, thiz);
@@ -910,6 +925,7 @@ static jint Image_getFenceFd(JNIEnv* env, jobject thiz)
 
     return -1;
 }
+#endif
 
 static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
 {
@@ -934,6 +950,7 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
     }
 }
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware
 static jobject Image_getHardwareBuffer(JNIEnv* env, jobject thiz) {
     BufferItem* buffer = Image_getBufferItem(env, thiz);
     AHardwareBuffer* b = AHardwareBuffer_from_GraphicBuffer(buffer->mGraphicBuffer.get());
@@ -941,6 +958,29 @@ static jobject Image_getHardwareBuffer(JNIEnv* env, jobject thiz) {
     // to link against libandroid.so
     return android_hardware_HardwareBuffer_createFromAHardwareBuffer(env, b);
 }
+#endif
+
+#ifndef __ANDROID__
+
+static jobjectArray Image_createSurfacePlanes_SurfaceImage(JNIEnv* env, jclass clazz, jobject image,
+                                                           int numPlanes, int readerFormat,
+                                                           uint64_t ndkReaderUsage) {
+    return Image_createSurfacePlanes(env, image, numPlanes, readerFormat, ndkReaderUsage);
+}
+
+static jint Image_getWidth_SurfaceImage(JNIEnv* env, jclass clazz, jobject image) {
+    return Image_getWidth(env, image);
+}
+
+static jint Image_getHeight_SurfaceImage(JNIEnv* env, jclass clazz, jobject image) {
+    return Image_getHeight(env, image);
+}
+
+static jint Image_getFormat_SurfaceImage(JNIEnv* env, jclass clazz, jobject image,
+                                         jint readerFormat) {
+    return Image_getFormat(env, image, readerFormat);
+}
+#endif
 
 } // extern "C"
 
@@ -954,23 +994,42 @@ static const JNINativeMethod gImageReaderMethods[] = {
     {"nativeImageSetup",       "(Landroid/media/Image;)I",   (void*)ImageReader_imageSetup },
     {"nativeGetSurface",       "()Landroid/view/Surface;",   (void*)ImageReader_getSurface },
     {"nativeDetachImage",      "(Landroid/media/Image;)I",   (void*)ImageReader_detachImage },
+#ifdef __ANDROID__
     {"nativeCreateImagePlanes",
         "(ILandroid/graphics/GraphicBuffer;IIIIII)[Landroid/media/ImageReader$ImagePlane;",
                                                              (void*)ImageReader_createImagePlanes },
     {"nativeUnlockGraphicBuffer",
         "(Landroid/graphics/GraphicBuffer;)V",             (void*)ImageReader_unlockGraphicBuffer },
+#endif
     {"nativeDiscardFreeBuffers", "()V",                      (void*)ImageReader_discardFreeBuffers }
 };
 
 static const JNINativeMethod gImageMethods[] = {
+#ifdef __ANDROID__
     {"nativeCreatePlanes",      "(IIJ)[Landroid/media/ImageReader$SurfaceImage$SurfacePlane;",
                                                              (void*)Image_createSurfacePlanes },
+#else  // No access to ImageReader$SurfaceImage$SurfacePlane in RNG
+    {"nativeCreatePlanes",      "(IIJ)[Ljava/lang/Object;",  (void*)Image_createSurfacePlanes },
+#endif
     {"nativeGetWidth",          "()I",                       (void*)Image_getWidth },
     {"nativeGetHeight",         "()I",                       (void*)Image_getHeight },
     {"nativeGetFormat",         "(I)I",                      (void*)Image_getFormat },
+#ifdef __ANDROID__ // Layoutlib does not support hardware
     {"nativeGetFenceFd",        "()I",                       (void*)Image_getFenceFd },
     {"nativeGetHardwareBuffer", "()Landroid/hardware/HardwareBuffer;",
                                                              (void*)Image_getHardwareBuffer },
+#endif
+
+#ifndef __ANDROID__
+    {"nativeSurfaceImageCreatePlanes", "(Ljava/lang/Object;IIJ)[Ljava/lang/Object;",
+                                        (void*)Image_createSurfacePlanes_SurfaceImage },
+    {"nativeSurfaceImageGetWidth",     "(Ljava/lang/Object;)I",
+                                        (void*)Image_getWidth_SurfaceImage },
+    {"nativeSurfaceImageGetHeight",    "(Ljava/lang/Object;)I",
+                                        (void*)Image_getHeight_SurfaceImage },
+    {"nativeSurfaceImageGetFormat",    "(Ljava/lang/Object;I)I",
+                                        (void*)Image_getFormat_SurfaceImage },
+#endif
 };
 
 int register_android_media_ImageReader(JNIEnv *env) {

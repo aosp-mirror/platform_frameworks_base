@@ -317,6 +317,12 @@ cc_library_shared {
             cflags: [
                 "-Wno-unused-const-variable",
                 "-Wno-unused-function",
+                "-DLOG_ALWAYS_FATAL_IF(cond, ...)=if(cond) LOG_ALWAYS_FATAL(...)",
+                "-DLOG_ALWAYS_FATAL(...)=__android_log_call_aborter(\"Fatal Error\")",
+                // Use all declarations in native_window.h in Layoutlib
+                "-D__INTRODUCED_IN(n)=",
+                "-D__ANDROID_API__=10000",
+                "-D__HOST_JVM__",
             ],
             srcs: [
                 "LayoutlibLoader.cpp",
@@ -410,6 +416,12 @@ cc_library_shared {
             },
         },
         host: {
+            cflags: [
+                "-Wno-unused-const-variable",
+                "-Wno-unused-function",
+                // Declarations used in native_window.h
+                "-D__INTRODUCED_IN(n)=",
+            ],
             srcs: [
                 "android_animation_PropertyValuesHolder.cpp",
                 "libcore_util_NativeAllocationRegistry.cpp",
@@ -422,6 +434,8 @@ cc_library_shared {
                 "com_android_internal_util_VirtualRefBasePtr.cpp",
                 "android_view_Surface.cpp",
                 "RobolectricNativeRuntime.cpp",
+                // Utilized to get rendered result pixels
+                ":libmedia_host_common",
             ],
             static_libs: [
                 "libnativehelper",

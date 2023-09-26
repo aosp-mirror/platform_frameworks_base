@@ -17,7 +17,9 @@
 // #define LOG_NDEBUG 0
 #define LOG_TAG "AndroidMediaUtils"
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware
 #include <hardware/camera3.h>
+#endif
 #include <utils/Log.h>
 #include "android_media_Utils.h"
 
@@ -80,6 +82,7 @@ bool isPossiblyYUV(PixelFormat format) {
     }
 }
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware
 uint32_t Image_getBlobSize(LockedImage* buffer, bool usingRGBAOverride) {
     ALOGV("%s", __FUNCTION__);
     LOG_ALWAYS_FATAL_IF(buffer == NULL, "Input buffer is NULL!!!");
@@ -115,6 +118,11 @@ uint32_t Image_getBlobSize(LockedImage* buffer, bool usingRGBAOverride) {
 
     return size;
 }
+#else
+uint32_t Image_getBlobSize(LockedImage* buffer, bool usingRGBAOverride) {
+    return buffer->stride * buffer->height * 4;
+}
+#endif
 
 status_t getLockedImageInfo(LockedImage* buffer, int idx,
         int32_t containerFormat, uint8_t **base, uint32_t *size, int *pixelStride, int *rowStride) {
