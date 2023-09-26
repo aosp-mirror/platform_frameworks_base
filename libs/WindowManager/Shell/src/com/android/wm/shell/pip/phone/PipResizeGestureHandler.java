@@ -579,6 +579,12 @@ public class PipResizeGestureHandler {
                     resizeRectAboutCenter(mLastResizeBounds, mMaxSize.x, mMaxSize.y);
                 }
 
+                // If user resize is smaller than min size, auto resize to min
+                if (mLastResizeBounds.width() < mMinSize.x
+                        || mLastResizeBounds.height() < mMinSize.y) {
+                    resizeRectAboutCenter(mLastResizeBounds, mMinSize.x, mMinSize.y);
+                }
+
                 // get the current movement bounds
                 final Rect movementBounds = mPipBoundsAlgorithm
                         .getMovementBounds(mLastResizeBounds);
@@ -679,6 +685,8 @@ public class PipResizeGestureHandler {
         pw.println(innerPrefix + "mEnablePinchResize=" + mEnablePinchResize);
         pw.println(innerPrefix + "mThresholdCrossed=" + mThresholdCrossed);
         pw.println(innerPrefix + "mOhmOffset=" + mOhmOffset);
+        pw.println(innerPrefix + "mMinSize=" + mMinSize);
+        pw.println(innerPrefix + "mMaxSize=" + mMaxSize);
     }
 
     class PipResizeInputEventReceiver extends BatchedInputEventReceiver {

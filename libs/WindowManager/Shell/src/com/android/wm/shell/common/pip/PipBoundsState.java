@@ -622,6 +622,8 @@ public class PipBoundsState {
         pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
         pw.println(innerPrefix + "mHasUserMovedPip=" + mHasUserMovedPip);
         pw.println(innerPrefix + "mHasUserResizedPip=" + mHasUserResizedPip);
+        pw.println(innerPrefix + "mMinSize=" + mMinSize);
+        pw.println(innerPrefix + "mMaxSize=" + mMaxSize);
         if (mPipReentryState == null) {
             pw.println(innerPrefix + "mPipReentryState=null");
         } else {
