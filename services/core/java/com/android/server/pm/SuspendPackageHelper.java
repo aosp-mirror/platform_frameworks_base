@@ -26,17 +26,13 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.app.BroadcastOptions;
-import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
@@ -47,7 +43,6 @@ import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.LocalServices;
@@ -207,19 +202,22 @@ public final class SuspendPackageHelper {
             }
         });
 
+        final Computer newSnapshot = mPm.snapshotComputer();
         if (!notifyPackagesList.isEmpty()) {
             final String[] changedPackages =
                     notifyPackagesList.toArray(new String[0]);
-            sendPackagesSuspendedForUser(
+            mBroadcastHelper.sendPackagesSuspendedOrUnsuspendedForUser(newSnapshot,
                     suspended ? Intent.ACTION_PACKAGES_SUSPENDED
                             : Intent.ACTION_PACKAGES_UNSUSPENDED,
                     changedPackages, notifyUids.toArray(), quarantined, userId);
-            sendMyPackageSuspendedOrUnsuspended(changedPackages, suspended, userId);
+            mBroadcastHelper.sendMyPackageSuspendedOrUnsuspended(newSnapshot, changedPackages,
+                    suspended, userId);
             mPm.scheduleWritePackageRestrictions(userId);
         }
         // Send the suspension changed broadcast to ensure suspension state is not stale.
         if (!changedPackagesList.isEmpty()) {
-            sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_SUSPENSION_CHANGED,
+            mBroadcastHelper.sendPackagesSuspendedOrUnsuspendedForUser(newSnapshot,
+                    Intent.ACTION_PACKAGES_SUSPENSION_CHANGED,
                     changedPackagesList.toArray(new String[0]), changedUids.toArray(), quarantined,
                     userId);
         }
@@ -269,8 +267,10 @@ public final class SuspendPackageHelper {
      * @return The app extras of the suspended package.
      */
     @Nullable
-    Bundle getSuspendedPackageAppExtras(@NonNull Computer snapshot, @NonNull String packageName,
-            int userId, int callingUid) {
+    static Bundle getSuspendedPackageAppExtras(@NonNull Computer snapshot,
+                                               @NonNull String packageName,
+                                               int userId,
+                                               int callingUid) {
         final PackageStateInternal ps = snapshot.getPackageStateInternal(packageName, callingUid);
         if (ps == null) {
             return null;
@@ -299,7 +299,7 @@ public final class SuspendPackageHelper {
      *                                   suspensions will be removed.
      * @param userId The user for which the changes are taking place.
      */
-    void removeSuspensionsBySuspendingPackage(@NonNull Computer computer,
+    void removeSuspensionsBySuspendingPackage(@NonNull Computer snapshot,
             @NonNull String[] packagesToChange,
             @NonNull Predicate<String> suspendingPackagePredicate, int userId) {
         final List<String> unsuspendedPackages = new ArrayList<>();
@@ -307,7 +307,7 @@ public final class SuspendPackageHelper {
         final ArrayMap<String, ArraySet<String>> pkgToSuspendingPkgsToCommit = new ArrayMap<>();
         for (String packageName : packagesToChange) {
             final PackageStateInternal packageState =
-                    computer.getPackageStateInternal(packageName);
+                    snapshot.getPackageStateInternal(packageName);
             final PackageUserStateInternal packageUserState = packageState == null
                     ? null : packageState.getUserStateOrDefault(userId);
             if (packageUserState == null || !packageUserState.isSuspended()) {
@@ -350,11 +350,14 @@ public final class SuspendPackageHelper {
         });
 
         mPm.scheduleWritePackageRestrictions(userId);
+        final Computer newSnapshot = mPm.snapshotComputer();
         if (!unsuspendedPackages.isEmpty()) {
             final String[] packageArray = unsuspendedPackages.toArray(
                     new String[unsuspendedPackages.size()]);
-            sendMyPackageSuspendedOrUnsuspended(packageArray, false, userId);
-            sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_UNSUSPENDED,
+            mBroadcastHelper.sendMyPackageSuspendedOrUnsuspended(newSnapshot, packageArray,
+                    false, userId);
+            mBroadcastHelper.sendPackagesSuspendedOrUnsuspendedForUser(newSnapshot,
+                    Intent.ACTION_PACKAGES_UNSUSPENDED,
                     packageArray, unsuspendedUids.toArray(), false, userId);
         }
     }
@@ -610,38 +613,6 @@ public final class SuspendPackageHelper {
     }
 
     /**
-     * Send broadcast intents for packages suspension changes.
-     *
-     * @param intent The action name of the suspension intent.
-     * @param pkgList The names of packages which have suspension changes.
-     * @param uidList The uids of packages which have suspension changes.
-     * @param userId The user where packages reside.
-     */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    void sendPackagesSuspendedForUser(@NonNull String intent, @NonNull String[] pkgList,
-            @NonNull int[] uidList, boolean quarantined, int userId) {
-        final Handler handler = mInjector.getHandler();
-        final Bundle extras = new Bundle(3);
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
-        if (quarantined) {
-            extras.putBoolean(Intent.EXTRA_QUARANTINED, true);
-        }
-        final int flags = Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND;
-        final Bundle options = new BroadcastOptions()
-                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
-                .toBundle();
-        handler.post(() -> mBroadcastHelper.sendPackageBroadcast(intent, null /* pkg */,
-                extras, flags, null /* targetPkg */, null /* finishedReceiver */,
-                new int[]{userId}, null /* instantUserIds */, null /* broadcastAllowList */,
-                (callingUid, intentExtras) -> BroadcastHelper.filterExtrasChangedPackageList(
-                        mPm.snapshotComputer(), callingUid, intentExtras),
-                options));
-        mPm.notifyPackageMonitor(intent, null /* pkg */, extras, new int[]{userId},
-                null /* instantUserIds */, null /* broadcastAllowList */);
-    }
-
-    /**
      * Suspends packages on behalf of an admin.
      *
      * @return array of packages that are unsuspendable, either because admin is not allowed to
@@ -755,38 +726,5 @@ public final class SuspendPackageHelper {
                     callingUid);
         }
         return false;
-    }
-
-    private void sendMyPackageSuspendedOrUnsuspended(String[] affectedPackages, boolean suspended,
-            int userId) {
-        final Handler handler = mInjector.getHandler();
-        final String action = suspended
-                ? Intent.ACTION_MY_PACKAGE_SUSPENDED
-                : Intent.ACTION_MY_PACKAGE_UNSUSPENDED;
-        handler.post(() -> {
-            final IActivityManager am = ActivityManager.getService();
-            if (am == null) {
-                Slog.wtf(TAG, "IActivityManager null. Cannot send MY_PACKAGE_ "
-                        + (suspended ? "" : "UN") + "SUSPENDED broadcasts");
-                return;
-            }
-            final int[] targetUserIds = new int[] {userId};
-            final Computer snapshot = mPm.snapshotComputer();
-            for (String packageName : affectedPackages) {
-                final Bundle appExtras = suspended
-                        ? getSuspendedPackageAppExtras(snapshot, packageName, userId, SYSTEM_UID)
-                        : null;
-                final Bundle intentExtras;
-                if (appExtras != null) {
-                    intentExtras = new Bundle(1);
-                    intentExtras.putBundle(Intent.EXTRA_SUSPENDED_PACKAGE_EXTRAS, appExtras);
-                } else {
-                    intentExtras = null;
-                }
-                mBroadcastHelper.doSendBroadcast(action, null, intentExtras,
-                        Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, packageName, null,
-                        targetUserIds, false, null, null, null);
-            }
-        });
     }
 }

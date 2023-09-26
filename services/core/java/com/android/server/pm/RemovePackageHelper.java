@@ -22,6 +22,7 @@ import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
+
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
@@ -69,9 +70,11 @@ final class RemovePackageHelper {
     private final PermissionManagerServiceInternal mPermissionManager;
     private final SharedLibrariesImpl mSharedLibraries;
     private final AppDataHelper mAppDataHelper;
+    private final BroadcastHelper mBroadcastHelper;
 
     // TODO(b/198166813): remove PMS dependency
-    RemovePackageHelper(PackageManagerService pm, AppDataHelper appDataHelper) {
+    RemovePackageHelper(PackageManagerService pm, AppDataHelper appDataHelper,
+                        BroadcastHelper broadcastHelper) {
         mPm = pm;
         mIncrementalManager = mPm.mInjector.getIncrementalManager();
         mInstaller = mPm.mInjector.getInstaller();
@@ -79,10 +82,7 @@ final class RemovePackageHelper {
         mPermissionManager = mPm.mInjector.getPermissionManagerServiceInternal();
         mSharedLibraries = mPm.mInjector.getSharedLibrariesImpl();
         mAppDataHelper = appDataHelper;
-    }
-
-    RemovePackageHelper(PackageManagerService pm) {
-        this(pm, new AppDataHelper(pm));
+        mBroadcastHelper = broadcastHelper;
     }
 
     public void removeCodePath(File codePath) {
@@ -265,7 +265,8 @@ final class RemovePackageHelper {
 
         final List<AndroidPackage> sharedUserPkgs =
                 sus != null ? sus.getPackages() : Collections.emptyList();
-        final PreferredActivityHelper preferredActivityHelper = new PreferredActivityHelper(mPm);
+        final PreferredActivityHelper preferredActivityHelper = new PreferredActivityHelper(mPm,
+                mBroadcastHelper);
         final int[] userIds = (userId == UserHandle.USER_ALL) ? mUserManagerInternal.getUserIds()
                 : new int[] {userId};
         for (int nextUserId : userIds) {
@@ -395,10 +396,10 @@ final class RemovePackageHelper {
             }
             if (changedUsers.size() > 0) {
                 final PreferredActivityHelper preferredActivityHelper =
-                        new PreferredActivityHelper(mPm);
+                        new PreferredActivityHelper(mPm, mBroadcastHelper);
                 preferredActivityHelper.updateDefaultHomeNotLocked(mPm.snapshotComputer(),
                         changedUsers);
-                mPm.postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
+                mBroadcastHelper.sendPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
             }
         } else if (!deletedPs.isSystem() && outInfo != null && !outInfo.mIsUpdate
                 && outInfo.mRemovedUsers != null) {
