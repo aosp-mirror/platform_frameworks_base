@@ -19,10 +19,10 @@ package com.android.systemui.biometrics.ui.viewmodel
 
 import android.annotation.RawRes
 import android.content.res.Configuration
-import android.view.Surface
 import com.android.systemui.R
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
+import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -35,19 +35,21 @@ constructor(
     private val displayStateInteractor: DisplayStateInteractor,
     promptSelectorInteractor: PromptSelectorInteractor,
 ) {
-    /** Current device rotation. */
-    private var rotation: Int = Surface.ROTATION_0
-
     /** Current BiometricPromptLayout.iconView asset. */
     val iconAsset: Flow<Int> =
         combine(
+            displayStateInteractor.currentRotation,
             displayStateInteractor.isFolded,
             displayStateInteractor.isInRearDisplayMode,
             promptSelectorInteractor.sensorType,
-        ) { isFolded: Boolean, isInRearDisplayMode: Boolean, sensorType: FingerprintSensorType ->
+        ) {
+            rotation: DisplayRotation,
+            isFolded: Boolean,
+            isInRearDisplayMode: Boolean,
+            sensorType: FingerprintSensorType ->
             when (sensorType) {
                 FingerprintSensorType.POWER_BUTTON ->
-                    getSideFpsAnimationAsset(isFolded, isInRearDisplayMode)
+                    getSideFpsAnimationAsset(rotation, isFolded, isInRearDisplayMode)
                 // Replace below when non-SFPS iconAsset logic is migrated to this ViewModel
                 else -> -1
             }
@@ -55,11 +57,12 @@ constructor(
 
     @RawRes
     private fun getSideFpsAnimationAsset(
+        rotation: DisplayRotation,
         isDeviceFolded: Boolean,
         isInRearDisplayMode: Boolean,
     ): Int =
         when (rotation) {
-            Surface.ROTATION_90 ->
+            DisplayRotation.ROTATION_90 ->
                 if (isInRearDisplayMode) {
                     R.raw.biometricprompt_rear_portrait_reverse_base
                 } else if (isDeviceFolded) {
@@ -67,7 +70,7 @@ constructor(
                 } else {
                     R.raw.biometricprompt_portrait_base_topleft
                 }
-            Surface.ROTATION_270 ->
+            DisplayRotation.ROTATION_270 ->
                 if (isInRearDisplayMode) {
                     R.raw.biometricprompt_rear_portrait_base
                 } else if (isDeviceFolded) {
@@ -88,9 +91,5 @@ constructor(
     /** Called on configuration changes */
     fun onConfigurationChanged(newConfig: Configuration) {
         displayStateInteractor.onConfigurationChanged(newConfig)
-    }
-
-    fun setRotation(newRotation: Int) {
-        rotation = newRotation
     }
 }

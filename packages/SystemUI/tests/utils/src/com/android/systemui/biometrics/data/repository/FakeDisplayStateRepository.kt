@@ -29,6 +29,8 @@ class FakeDisplayStateRepository : DisplayStateRepository {
     private val _currentRotation = MutableStateFlow<DisplayRotation>(DisplayRotation.ROTATION_0)
     override val currentRotation: StateFlow<DisplayRotation> = _currentRotation.asStateFlow()
 
+    override val isReverseDefaultRotation = false
+
     fun setIsInRearDisplayMode(isInRearDisplayMode: Boolean) {
         _isInRearDisplayMode.value = isInRearDisplayMode
     }
