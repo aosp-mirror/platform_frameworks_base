@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -75,6 +76,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private final KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
     private final UiEventLogger mUiEventLogger;
     private final UserTracker mUserTracker;
+    private final DeviceProvisionedController mDeviceProvisionedController;
 
     @VisibleForTesting
     protected boolean mUseHeadsUp = false;
@@ -121,7 +123,8 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             NotifPipelineFlags flags,
             KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
             UiEventLogger uiEventLogger,
-            UserTracker userTracker) {
+            UserTracker userTracker,
+            DeviceProvisionedController deviceProvisionedController) {
         mContentResolver = contentResolver;
         mPowerManager = powerManager;
         mBatteryController = batteryController;
@@ -163,6 +166,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                     headsUpObserver);
         }
         headsUpObserver.onChange(true); // set up
+        mDeviceProvisionedController = deviceProvisionedController;
     }
 
     @Override
@@ -332,6 +336,12 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                 return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_LOCKED_SHADE,
                         suppressedByDND);
             }
+        }
+
+        // The device is not provisioned, launch FSI.
+        if (!mDeviceProvisionedController.isDeviceProvisioned()) {
+            return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_NOT_PROVISIONED,
+                    suppressedByDND);
         }
 
         // Detect the case determined by b/231322873 to launch FSI while device is in use,
