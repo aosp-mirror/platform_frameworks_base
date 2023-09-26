@@ -250,6 +250,7 @@ public class Watchdog implements Dumpable {
         private Monitor mCurrentMonitor;
         private long mStartTimeMillis;
         private int mPauseCount;
+        private long mOneOffTimeoutMillis;
 
         HandlerChecker(Handler handler, String name) {
             mHandler = handler;
@@ -269,7 +270,13 @@ public class Watchdog implements Dumpable {
          * @param handlerCheckerTimeoutMillis the timeout to use for this run
          */
         public void scheduleCheckLocked(long handlerCheckerTimeoutMillis) {
-            mWaitMaxMillis = handlerCheckerTimeoutMillis;
+            if (mOneOffTimeoutMillis > 0) {
+              mWaitMaxMillis = mOneOffTimeoutMillis;
+              mOneOffTimeoutMillis = 0;
+            } else {
+              mWaitMaxMillis = handlerCheckerTimeoutMillis;
+            }
+
             if (mCompleted) {
                 // Safe to update monitors in queue, Handler is not in the middle of work
                 mMonitors.addAll(mMonitorQueue);
@@ -350,6 +357,23 @@ public class Watchdog implements Dumpable {
                 mCompleted = true;
                 mCurrentMonitor = null;
             }
+        }
+
+        /**
+         * Sets the timeout of the HandlerChecker for one run.
+         *
+         * <p>The current run will be ignored and the next run will be set to this timeout.
+         *
+         * <p>If a one off timeout is already set, the maximum timeout will be used.
+         */
+        public void setOneOffTimeoutLocked(int temporaryTimeoutMillis, String reason) {
+            mOneOffTimeoutMillis = Math.max(temporaryTimeoutMillis, mOneOffTimeoutMillis);
+            // Mark as completed, because there's a chance we called this after the watchog
+            // thread loop called Object#wait after 'WAITED_HALF'. In that case we want to ensure
+            // the next call to #getCompletionStateLocked for this checker returns 'COMPLETED'
+            mCompleted = true;
+            Slog.i(TAG, "Extending timeout of HandlerChecker: " + mName + " for reason: "
+                    + reason + ". New timeout: " + mOneOffTimeoutMillis);
         }
 
         /** Pause the HandlerChecker. */
@@ -598,6 +622,27 @@ public class Watchdog implements Dumpable {
         }
     }
 
+     /**
+     * Sets a one-off timeout for the next run of the watchdog for this thread. This is useful
+     * to run a slow operation on one of the monitored thread.
+     *
+     * <p>After the next run, the timeout will go back to the default value.
+     *
+     * <p>If the current thread has not been added to the Watchdog, this call is a no-op.
+     *
+     * <p>If a one-off timeout for the current thread is already, the max value will be used.
+     */
+    public void setOneOffTimeoutForCurrentThread(int oneOffTimeoutMillis, String reason) {
+        synchronized (mLock) {
+            for (HandlerCheckerAndTimeout hc : mHandlerCheckers) {
+                HandlerChecker checker = hc.checker();
+                if (Thread.currentThread().equals(checker.getThread())) {
+                    checker.setOneOffTimeoutLocked(oneOffTimeoutMillis, reason);
+                }
+            }
+        }
+    }
+
     /**
      * Pauses Watchdog action for the currently running thread. Useful before executing long running
      * operations that could falsely trigger the watchdog. Each call to this will require a matching
@@ -609,7 +654,7 @@ public class Watchdog implements Dumpable {
      * adds another pause and will require an additional {@link #resumeCurrentThread} to resume.
      *
      * <p>Note: Use with care, as any deadlocks on the current thread will be undetected until all
-     * pauses have been resumed.
+     * pauses have been resumed. Prefer to use #setOneOffTimeoutForCurrentThread.
      */
     public void pauseWatchingCurrentThread(String reason) {
         synchronized (mLock) {
