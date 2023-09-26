@@ -754,8 +754,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
-    private final WindowProcessController mWpcForDisplayAreaConfigChanges;
-
     class DrawHandler {
         Consumer<SurfaceControl.Transaction> mConsumer;
         int mSeqId;
@@ -1129,7 +1127,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mBaseLayer = 0;
             mSubLayer = 0;
             mWinAnimator = null;
-            mWpcForDisplayAreaConfigChanges = null;
             mOverrideScale = 1f;
             return;
         }
@@ -1186,11 +1183,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Adding %s to %s", this, parentWindow);
             parentWindow.addChild(this, sWindowSubLayerComparator);
         }
-
-        // System process or invalid process cannot register to display area config change.
-        mWpcForDisplayAreaConfigChanges = (s.mPid == MY_PID || s.mPid < 0)
-                ? null
-                : service.mAtmService.getProcessController(s.mPid, s.mUid);
     }
 
     boolean shouldWindowHandleBeTrusted(Session s) {
@@ -3621,14 +3613,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** @return {@code true} if the process registered to a display area as a config listener. */
     private boolean registeredForDisplayAreaConfigChanges() {
         final WindowState parentWindow = getParentWindow();
-        final WindowProcessController wpc = parentWindow != null
-                ? parentWindow.mWpcForDisplayAreaConfigChanges
-                : mWpcForDisplayAreaConfigChanges;
-        return wpc != null && wpc.registeredForDisplayAreaConfigChanges();
+        final Session session = parentWindow != null ? parentWindow.mSession : mSession;
+        if (session.mPid == MY_PID) {
+            // System process cannot register to display area config change.
+            return false;
+        }
+        return session.mProcess.registeredForDisplayAreaConfigChanges();
     }
 
+    @NonNull
     WindowProcessController getProcess() {
-        return mWpcForDisplayAreaConfigChanges;
+        return mSession.mProcess;
     }
 
     /**

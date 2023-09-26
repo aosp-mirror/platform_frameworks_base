@@ -42,6 +42,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ClipData;
@@ -100,6 +101,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final IWindowSessionCallback mCallback;
     final int mUid;
     final int mPid;
+    @NonNull
+    final WindowProcessController mProcess;
     private final String mStringName;
     SurfaceSession mSurfaceSession;
     private int mNumWindow = 0;
@@ -126,11 +129,23 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final boolean mSetsUnrestrictedKeepClearAreas;
 
     public Session(WindowManagerService service, IWindowSessionCallback callback) {
+        this(service, callback, Binder.getCallingPid(), Binder.getCallingUid());
+    }
+
+    @VisibleForTesting
+    Session(WindowManagerService service, IWindowSessionCallback callback,
+            int callingPid, int callingUid) {
         mService = service;
         mCallback = callback;
-        mUid = Binder.getCallingUid();
-        mPid = Binder.getCallingPid();
-        mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
+        mPid = callingPid;
+        mUid = callingUid;
+        synchronized (service.mGlobalLock) {
+            mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
+            mProcess = service.mAtmService.mProcessMap.getProcess(mPid);
+        }
+        if (mProcess == null) {
+            throw new IllegalStateException("Unknown pid=" + mPid + " uid=" + mUid);
+        }
         mCanAddInternalSystemWindow = service.mContext.checkCallingOrSelfPermission(
                 INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
         mCanForceShowingInsets = service.mAtmService.isCallerRecents(mUid)
@@ -715,13 +730,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     void windowAddedLocked() {
         if (mPackageName == null) {
-            final WindowProcessController wpc = mService.mAtmService.mProcessMap.getProcess(mPid);
-            if (wpc != null) {
-                mPackageName = wpc.mInfo.packageName;
-                mRelayoutTag = "relayoutWindow: " + mPackageName;
-            } else {
-                Slog.e(TAG_WM, "Unknown process pid=" + mPid);
-            }
+            mPackageName = mProcess.mInfo.packageName;
+            mRelayoutTag = "relayoutWindow: " + mPackageName;
         }
         if (mSurfaceSession == null) {
             if (DEBUG) {
