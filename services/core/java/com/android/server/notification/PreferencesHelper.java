@@ -1459,9 +1459,9 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
-    @Override
     public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
-            int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty) {
+            int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty,
+            boolean includeBlocked, Set<String> activeChannelFilter) {
         Objects.requireNonNull(pkg);
         Map<String, NotificationChannelGroup> groups = new ArrayMap<>();
         synchronized (mPackagePreferences) {
@@ -1473,7 +1473,11 @@ public class PreferencesHelper implements RankingConfig {
             int N = r.channels.size();
             for (int i = 0; i < N; i++) {
                 final NotificationChannel nc = r.channels.valueAt(i);
-                if (includeDeleted || !nc.isDeleted()) {
+                boolean includeChannel = (includeDeleted || !nc.isDeleted())
+                        && (activeChannelFilter == null
+                                || (includeBlocked && nc.getImportance() == IMPORTANCE_NONE)
+                                || activeChannelFilter.contains(nc.getId()));
+                if (includeChannel) {
                     if (nc.getGroup() != null) {
                         if (r.groups.get(nc.getGroup()) != null) {
                             NotificationChannelGroup ncg = groups.get(nc.getGroup());
@@ -1481,7 +1485,6 @@ public class PreferencesHelper implements RankingConfig {
                                 ncg = r.groups.get(nc.getGroup()).clone();
                                 ncg.setChannels(new ArrayList<>());
                                 groups.put(nc.getGroup(), ncg);
-
                             }
                             ncg.addChannel(nc);
                         }
