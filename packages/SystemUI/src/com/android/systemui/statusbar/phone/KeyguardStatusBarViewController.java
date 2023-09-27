@@ -42,13 +42,13 @@ import com.android.keyguard.CarrierTextController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.logging.KeyguardLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -67,6 +67,8 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.ui.binder.KeyguardStatusBarViewBinder;
+import com.android.systemui.statusbar.ui.viewmodel.KeyguardStatusBarViewModel;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.settings.SecureSettings;
@@ -110,6 +112,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final KeyguardStatusBarViewModel mKeyguardStatusBarViewModel;
     private final BiometricUnlockController mBiometricUnlockController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final StatusBarContentInsetsProvider mInsetsProvider;
@@ -283,6 +286,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             KeyguardStateController keyguardStateController,
             KeyguardBypassController bypassController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
+            KeyguardStatusBarViewModel keyguardStatusBarViewModel,
             BiometricUnlockController biometricUnlockController,
             SysuiStatusBarStateController statusBarStateController,
             StatusBarContentInsetsProvider statusBarContentInsetsProvider,
@@ -309,6 +313,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mKeyguardStateController = keyguardStateController;
         mKeyguardBypassController = bypassController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mKeyguardStatusBarViewModel = keyguardStatusBarViewModel;
         mBiometricUnlockController = biometricUnlockController;
         mStatusBarStateController = statusBarStateController;
         mInsetsProvider = statusBarContentInsetsProvider;
@@ -356,6 +361,9 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         super.onInit();
         mCarrierTextController.init();
         mBatteryMeterViewController.init();
+        if (isMigrationEnabled()) {
+            KeyguardStatusBarViewBinder.bind(mView, mKeyguardStatusBarViewModel);
+        }
     }
 
     @Override
@@ -380,7 +388,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             // whenever the shade is opened on top of lockscreen, and then re-attached when the
             // shade is closed. So, we need to re-add the IconManager each time we're re-attached to
             // get icon updates.
-            if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW)) {
+            if (isMigrationEnabled()) {
                 mStatusBarIconController.addIconGroup(mTintedIconManager);
             }
         }
@@ -455,6 +463,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Sets the dozing state. */
     public void setDozing(boolean dozing) {
+        if (isMigrationEnabled()) {
+            // [KeyguardStatusBarViewModel] will automatically handle dozing.
+            return;
+        }
         mDozing = dozing;
     }
 
@@ -502,6 +514,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         if (!isKeyguardShowing()) {
             return;
         }
+        if (isMigrationEnabled()) {
+            // [KeyguardStatusBarViewBinder] will handle view state updates.
+            return;
+        }
 
         float alphaQsExpansion = 1 - Math.min(
                 1, mShadeViewStateProvider.getLockscreenShadeDragProgress() * 2);
@@ -539,6 +555,11 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
      * Updates the {@link KeyguardStatusBarView} state based on the provided values.
      */
     public void updateViewState(float alpha, int visibility) {
+        if (isMigrationEnabled()) {
+            // [KeyguardStatusBarViewBinder] will handle view state updates.
+            return;
+        }
+
         if (mDisableStateTracker.isDisabled()) {
             visibility = View.INVISIBLE;
         }
@@ -646,8 +667,17 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
      * @param alpha a value between 0 and 1. -1 if the value is to be reset/ignored.
      */
     public void setAlpha(float alpha) {
+        if (isMigrationEnabled()) {
+            // [KeyguardStatusBarViewBinder] will handle view state updates.
+            return;
+        }
+
         mExplicitAlpha = alpha;
         updateViewState();
+    }
+
+    private boolean isMigrationEnabled() {
+        return mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW);
     }
 
     private final ContentObserver mVolumeSettingObserver = new ContentObserver(null) {

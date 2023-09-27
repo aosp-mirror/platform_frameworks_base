@@ -49,14 +49,22 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.CarrierTextController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.logging.KeyguardLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
+import com.android.systemui.scene.SceneTestUtils;
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
 import com.android.systemui.shade.ShadeViewStateProvider;
+import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -66,6 +74,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.ui.viewmodel.KeyguardStatusBarViewModel;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
@@ -78,6 +87,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -133,15 +144,34 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private KeyguardStatusBarView mKeyguardStatusBarView;
     private KeyguardStatusBarViewController mController;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+    private final TestScope mTestScope = TestScopeProvider.getTestScope();
+    private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
+    private KeyguardInteractor mKeyguardInteractor;
+    private KeyguardStatusBarViewModel mViewModel;
 
     @Before
     public void setup() throws Exception {
         mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, false);
         mShadeViewStateProvider = new TestShadeViewStateProvider();
+        mShadeViewStateProvider = new TestShadeViewStateProvider();
 
         MockitoAnnotations.initMocks(this);
 
         when(mIconManagerFactory.create(any(), any())).thenReturn(mIconManager);
+
+        mKeyguardInteractor = new KeyguardInteractor(
+                mKeyguardRepository,
+                mCommandQueue,
+                mFeatureFlags,
+                new FakeSceneContainerFlags(),
+                new FakeKeyguardBouncerRepository(),
+                new FakeConfigurationRepository(),
+                new FakeShadeRepository(),
+                () -> new SceneTestUtils(this).sceneInteractor());
+        mViewModel =
+                new KeyguardStatusBarViewModel(
+                        mTestScope.getBackgroundScope(),
+                        mKeyguardInteractor);
 
         allowTestableLooperAsMainThread();
         TestableLooper.get(this).runWithLooper(() -> {
@@ -169,6 +199,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mKeyguardUpdateMonitor,
+                mViewModel,
                 mBiometricUnlockController,
                 mStatusBarStateController,
                 mStatusBarContentInsetsProvider,
@@ -452,6 +483,94 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mController.updateViewState();
 
         assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
+    @Test
+    public void updateViewState_dozingTrue_flagOff_viewHidden() {
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, false);
+        mController.init();
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        mController.setDozing(true);
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
+    @Test
+    public void updateViewState_dozingFalse_flagOff_viewShown() {
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, false);
+        mController.init();
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        mController.setDozing(false);
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void updateViewState_flagOn_doesNothing() {
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
+        mController.init();
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        mKeyguardStatusBarView.setVisibility(View.GONE);
+        mKeyguardStatusBarView.setAlpha(0.456f);
+
+        mController.updateViewState();
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mKeyguardStatusBarView.getAlpha()).isEqualTo(0.456f);
+    }
+
+    @Test
+    public void updateViewStateWithAlphaAndVis_flagOn_doesNothing() {
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
+        mController.init();
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        mKeyguardStatusBarView.setVisibility(View.GONE);
+        mKeyguardStatusBarView.setAlpha(0.456f);
+
+        mController.updateViewState(0.789f, View.VISIBLE);
+
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mKeyguardStatusBarView.getAlpha()).isEqualTo(0.456f);
+    }
+
+    @Test
+    public void setAlpha_flagOn_doesNothing() {
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
+        mController.init();
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        mKeyguardStatusBarView.setAlpha(0.456f);
+
+        mController.setAlpha(0.123f);
+
+        assertThat(mKeyguardStatusBarView.getAlpha()).isEqualTo(0.456f);
+    }
+
+    @Test
+    public void setDozing_flagOn_doesNothing() {
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
+        mController.init();
+        mController.onViewAttached();
+        updateStateToKeyguard();
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
+
+        mController.setDozing(true);
+        mController.updateViewState();
+
+        // setDozing(true) should typically cause the view to hide. But since the flag is on, we
+        // should ignore these set dozing calls and stay the same visibility.
+        assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
