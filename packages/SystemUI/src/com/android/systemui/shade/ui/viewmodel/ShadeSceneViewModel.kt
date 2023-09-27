@@ -16,10 +16,10 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
-import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -34,15 +34,15 @@ class ShadeSceneViewModel
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    authenticationInteractor: AuthenticationInteractor,
+    deviceEntryInteractor: DeviceEntryInteractor,
     private val bouncerInteractor: BouncerInteractor,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
 ) {
     /** The key of the scene we should switch to when swiping up. */
     val upDestinationSceneKey: StateFlow<SceneKey> =
         combine(
-                authenticationInteractor.isUnlocked,
-                authenticationInteractor.canSwipeToDismiss,
+                deviceEntryInteractor.isUnlocked,
+                deviceEntryInteractor.canSwipeToEnter,
             ) { isUnlocked, canSwipeToDismiss ->
                 upDestinationSceneKey(
                     isUnlocked = isUnlocked,
@@ -54,8 +54,8 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue =
                     upDestinationSceneKey(
-                        isUnlocked = authenticationInteractor.isUnlocked.value,
-                        canSwipeToDismiss = authenticationInteractor.canSwipeToDismiss.value,
+                        isUnlocked = deviceEntryInteractor.isUnlocked.value,
+                        canSwipeToDismiss = deviceEntryInteractor.canSwipeToEnter.value,
                     ),
             )
 

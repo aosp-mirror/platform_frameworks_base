@@ -74,7 +74,6 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
                 getSecurityMode = getSecurityMode,
                 backgroundDispatcher = testUtils.testDispatcher,
                 userRepository = userRepository,
-                keyguardRepository = testUtils.keyguardRepository,
                 lockPatternUtils = lockPatternUtils,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )

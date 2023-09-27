@@ -83,7 +83,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
-
     private val sceneContainerConfig = utils.fakeSceneContainerConfig()
     private val sceneRepository =
         utils.fakeSceneContainerRepository(
@@ -93,14 +92,12 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         utils.sceneInteractor(
             repository = sceneRepository,
         )
-
-    private val authenticationRepository = utils.authenticationRepository()
-    private val authenticationInteractor =
-        utils.authenticationInteractor(
-            repository = authenticationRepository,
+    private val authenticationInteractor = utils.authenticationInteractor()
+    private val deviceEntryInteractor =
+        utils.deviceEntryInteractor(
+            authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
         )
-
     private val communalInteractor = utils.communalInteractor()
 
     private val transitionState =
@@ -116,6 +113,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private val bouncerInteractor =
         utils.bouncerInteractor(
+            deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
         )
@@ -128,7 +126,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private val lockscreenSceneViewModel =
         LockscreenSceneViewModel(
             applicationScope = testScope.backgroundScope,
-            authenticationInteractor = authenticationInteractor,
+            deviceEntryInteractor = deviceEntryInteractor,
             communalInteractor = communalInteractor,
             longPress =
                 KeyguardLongPressViewModel(
@@ -178,12 +176,12 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         shadeSceneViewModel =
             ShadeSceneViewModel(
                 applicationScope = testScope.backgroundScope,
-                authenticationInteractor = authenticationInteractor,
+                deviceEntryInteractor = deviceEntryInteractor,
                 bouncerInteractor = bouncerInteractor,
                 shadeHeaderViewModel = shadeHeaderViewModel,
             )
 
-        authenticationRepository.setUnlocked(false)
+        utils.deviceEntryRepository.setUnlocked(false)
 
         val displayTracker = FakeDisplayTracker(context)
         val sysUiState = SysUiState(displayTracker)
@@ -191,6 +189,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             SceneContainerStartable(
                 applicationScope = testScope.backgroundScope,
                 sceneInteractor = sceneInteractor,
+                deviceEntryInteractor = deviceEntryInteractor,
                 authenticationInteractor = authenticationInteractor,
                 keyguardInteractor = keyguardInteractor,
                 flags = utils.sceneContainerFlags,
@@ -417,13 +416,13 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         // Set the lockscreen enabled bit _before_ set the auth method as the code picks up on the
         // lockscreen enabled bit _after_ the auth method is changed and the lockscreen enabled bit
         // is not an observable that can trigger a new evaluation.
-        authenticationRepository.setLockscreenEnabled(
+        utils.deviceEntryRepository.setInsecureLockscreenEnabled(
             authMethod !is DomainLayerAuthenticationMethodModel.None
         )
-        authenticationRepository.setAuthenticationMethod(authMethod.toDataLayer())
+        utils.authenticationRepository.setAuthenticationMethod(authMethod.toDataLayer())
         if (!authMethod.isSecure) {
             // When the auth method is not secure, the device is never considered locked.
-            authenticationRepository.setUnlocked(true)
+            utils.deviceEntryRepository.setUnlocked(true)
         }
         runCurrent()
     }
@@ -528,14 +527,14 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .that(authMethod.isSecure)
             .isTrue()
 
-        authenticationRepository.setUnlocked(false)
+        utils.deviceEntryRepository.setUnlocked(false)
         runCurrent()
     }
 
     /** Unlocks the device by entering the correct PIN. Ends up in the Gone scene. */
     private fun TestScope.unlockDevice() {
         assertWithMessage("Cannot unlock a device that's already unlocked!")
-            .that(authenticationInteractor.isUnlocked.value)
+            .that(deviceEntryInteractor.isUnlocked.value)
             .isFalse()
 
         emulateUserDrivenTransition(SceneKey.Bouncer)

@@ -44,13 +44,16 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
-    private val authenticationInteractor =
-        utils.authenticationInteractor(
-            repository = utils.authenticationRepository(),
-        )
+    private val authenticationInteractor = utils.authenticationInteractor()
     private val sceneInteractor = utils.sceneInteractor()
+    private val deviceEntryInteractor =
+        utils.deviceEntryInteractor(
+            authenticationInteractor = authenticationInteractor,
+            sceneInteractor = utils.sceneInteractor(),
+        )
     private val bouncerInteractor =
         utils.bouncerInteractor(
+            deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
         )
@@ -139,7 +142,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
-            utils.authenticationRepository.setUnlocked(false)
+            utils.deviceEntryRepository.setUnlocked(false)
             sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -207,7 +210,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
 
     private fun TestScope.lockDeviceAndOpenPasswordBouncer() {
         utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Password)
-        utils.authenticationRepository.setUnlocked(false)
+        utils.deviceEntryRepository.setUnlocked(false)
         sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
         sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
 

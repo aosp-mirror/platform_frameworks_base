@@ -36,10 +36,8 @@ import com.android.internal.logging.UiEventLogger
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
-import com.android.systemui.res.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate
 import com.android.systemui.biometrics.SideFpsController
 import com.android.systemui.biometrics.SideFpsUiRequestSource
@@ -47,6 +45,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.classifier.FalsingA11yDelegate
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -54,6 +53,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
@@ -157,7 +157,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     private lateinit var sceneTestUtils: SceneTestUtils
     private lateinit var sceneInteractor: SceneInteractor
     private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
-    private lateinit var authenticationInteractor: AuthenticationInteractor
+    private lateinit var deviceEntryInteractor: DeviceEntryInteractor
     @Mock private lateinit var primaryBouncerInteractor: Lazy<PrimaryBouncerInteractor>
     private lateinit var sceneTransitionStateFlow: MutableStateFlow<ObservableTransitionState>
 
@@ -229,10 +229,10 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         sceneTransitionStateFlow =
             MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Lockscreen))
         sceneInteractor.setTransitionState(sceneTransitionStateFlow)
-        authenticationInteractor =
-            sceneTestUtils.authenticationInteractor(
-                repository = sceneTestUtils.authenticationRepository(),
-                sceneInteractor = sceneInteractor
+        deviceEntryInteractor =
+            sceneTestUtils.deviceEntryInteractor(
+                authenticationInteractor = sceneTestUtils.authenticationInteractor(),
+                sceneInteractor = sceneInteractor,
             )
 
         underTest =
@@ -268,7 +268,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 keyguardTransitionInteractor,
                 primaryBouncerInteractor,
             ) {
-                authenticationInteractor
+                deviceEntryInteractor
             }
     }
 

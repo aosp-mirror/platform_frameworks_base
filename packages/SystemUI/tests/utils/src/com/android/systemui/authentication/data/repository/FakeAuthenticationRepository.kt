@@ -24,19 +24,18 @@ import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationResultModel
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
+import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class FakeAuthenticationRepository(
+    private val deviceEntryRepository: FakeDeviceEntryRepository,
     private val currentTime: () -> Long,
 ) : AuthenticationRepository {
 
     private val _isAutoConfirmEnabled = MutableStateFlow(false)
     override val isAutoConfirmEnabled: StateFlow<Boolean> = _isAutoConfirmEnabled.asStateFlow()
-
-    private val _isUnlocked = MutableStateFlow(false)
-    override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
 
     override val hintedPinLength: Int = HINTING_PIN_LENGTH
 
@@ -53,7 +52,6 @@ class FakeAuthenticationRepository(
 
     override val minPatternLength: Int = 4
 
-    private var isLockscreenEnabled = true
     private var failedAttemptCount = 0
     private var throttlingEndTimestamp = 0L
     private var credentialOverride: List<Any>? = null
@@ -72,13 +70,9 @@ class FakeAuthenticationRepository(
         credentialOverride = pin
     }
 
-    override suspend fun isLockscreenEnabled(): Boolean {
-        return isLockscreenEnabled
-    }
-
     override suspend fun reportAuthenticationAttempt(isSuccessful: Boolean) {
         failedAttemptCount = if (isSuccessful) 0 else failedAttemptCount + 1
-        _isUnlocked.value = isSuccessful
+        deviceEntryRepository.setUnlocked(isSuccessful)
     }
 
     override suspend fun getPinLength(): Int {
@@ -97,16 +91,8 @@ class FakeAuthenticationRepository(
         _throttling.value = throttlingModel
     }
 
-    fun setUnlocked(isUnlocked: Boolean) {
-        _isUnlocked.value = isUnlocked
-    }
-
     fun setAutoConfirmEnabled(isEnabled: Boolean) {
         _isAutoConfirmEnabled.value = isEnabled
-    }
-
-    fun setLockscreenEnabled(isLockscreenEnabled: Boolean) {
-        this.isLockscreenEnabled = isLockscreenEnabled
     }
 
     override suspend fun setThrottleDuration(durationMs: Int) {
