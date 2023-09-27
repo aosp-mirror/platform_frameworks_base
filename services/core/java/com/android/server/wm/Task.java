@@ -5417,8 +5417,7 @@ class Task extends TaskFragment {
         // Basic case: for simple app-centric recents, we need to recreate
         // the task if the affinity has changed.
 
-        final String affinity = ActivityRecord.computeTaskAffinity(destAffinity, srec.getUid(),
-                srec.launchMode, srec.mActivityComponent);
+        final String affinity = ActivityRecord.computeTaskAffinity(destAffinity, srec.getUid());
         if (srec == null || srec.getTask().affinity == null
                 || !srec.getTask().affinity.equals(affinity)) {
             return true;

@@ -2117,8 +2117,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         hasBeenLaunched = false;
         mTaskSupervisor = supervisor;
 
-        info.taskAffinity = computeTaskAffinity(info.taskAffinity, info.applicationInfo.uid,
-                info.launchMode, mActivityComponent);
+        info.taskAffinity = computeTaskAffinity(info.taskAffinity, info.applicationInfo.uid);
         taskAffinity = info.taskAffinity;
         final String uid = Integer.toString(info.applicationInfo.uid);
         if (info.windowLayout != null && info.windowLayout.windowLayoutAffinity != null
@@ -2218,19 +2217,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *
      * @param affinity The affinity of the activity.
      * @param uid The user-ID that has been assigned to this application.
-     * @param launchMode The activity launch mode
-     * @param componentName The activity component name. This is only useful when the given
-     *                      launchMode is {@link ActivityInfo#LAUNCH_SINGLE_INSTANCE}
      * @return The task affinity
      */
-    static String computeTaskAffinity(String affinity, int uid, int launchMode,
-            ComponentName componentName) {
+    static String computeTaskAffinity(String affinity, int uid) {
         final String uidStr = Integer.toString(uid);
         if (affinity != null && !affinity.startsWith(uidStr)) {
             affinity = uidStr + ":" + affinity;
-            if (launchMode == LAUNCH_SINGLE_INSTANCE && componentName != null) {
-                affinity += ":" + componentName.hashCode();
-            }
         }
         return affinity;
     }

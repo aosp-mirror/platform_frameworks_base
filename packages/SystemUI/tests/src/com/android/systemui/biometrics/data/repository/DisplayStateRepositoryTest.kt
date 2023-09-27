@@ -82,6 +82,11 @@ class DisplayStateRepositoryTest : SysuiTestCase() {
             rearDisplayDeviceStates
         )
 
+        mContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_reverseDefaultRotation,
+            false
+        )
+
         mContext = spy(mContext)
         whenever(mContext.display).thenReturn(display)
 
