@@ -17,31 +17,33 @@
 package com.android.credentialmanager.mapper
 
 import android.content.Intent
-import android.content.pm.PackageManager
+import com.android.credentialmanager.ktx.cancelUiRequest
 import com.android.credentialmanager.ktx.requestInfo
 import com.android.credentialmanager.model.Request
 
 fun Intent.toRequestClose(
-    packageManager: PackageManager,
     previousIntent: Intent? = null,
 ): Request.Close? {
     // Close request comes as "Cancel" request from Credential Manager API
-    val currentRequest = toRequestCancel(packageManager = packageManager) ?: return null
+    this.cancelUiRequest?.let { cancelUiRequest ->
 
-    if (currentRequest.showCancellationUi) {
-        // Current request is to Cancel and not to Close
-        return null
-    }
-
-    previousIntent?.let {
-        val previousToken = previousIntent.requestInfo?.token
-        val currentToken = this.requestInfo?.token
-
-        if (previousToken != currentToken) {
-            // Current cancellation is for a different request, don't close the current flow.
+        if (cancelUiRequest.shouldShowCancellationUi()) {
+            // Current request is to Cancel and not to Close
             return null
         }
+
+        previousIntent?.let {
+            val previousToken = previousIntent.requestInfo?.token
+            val currentToken = this.requestInfo?.token
+
+            if (previousToken != currentToken) {
+                // Current cancellation is for a different request, don't close the current flow.
+                return null
+            }
+        }
+
+        return Request.Close
     }
 
-    return Request.Close
+    return null
 }

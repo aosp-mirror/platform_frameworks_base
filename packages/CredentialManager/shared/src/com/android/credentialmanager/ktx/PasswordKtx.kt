@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager
+package com.android.credentialmanager.ktx
 
-import android.app.Application
-import com.android.credentialmanager.di.inject
-import com.android.credentialmanager.repository.PasswordRepository
-import com.android.credentialmanager.repository.RequestRepository
+import androidx.activity.result.IntentSenderRequest
+import com.android.credentialmanager.IS_AUTO_SELECTED_KEY
+import com.android.credentialmanager.model.Password
 
-class CredentialSelectorApp : Application() {
+fun Password.getIntentSenderRequest(
+    isAutoSelected: Boolean = false
+): IntentSenderRequest {
+    val entryIntent = entry.frameworkExtrasIntent
+    entryIntent?.putExtra(IS_AUTO_SELECTED_KEY, isAutoSelected)
 
-    lateinit var requestRepository: RequestRepository
-    lateinit var passwordRepository: PasswordRepository
-
-    override fun onCreate() {
-        super.onCreate()
-
-        inject()
-    }
+    return IntentSenderRequest.Builder(
+        pendingIntent = passwordCredentialEntry.pendingIntent
+    ).setFillInIntent(entryIntent).build()
 }
