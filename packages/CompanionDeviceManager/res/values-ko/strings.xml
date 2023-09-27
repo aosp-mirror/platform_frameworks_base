@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"부속 기기 관리자"</string>
-    <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;앱에서 &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;에 액세스하도록 허용하시겠습니까?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; 앱에서 &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;에 액세스하도록 허용하시겠습니까?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"시계"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;에서 관리할 기기 선택"</string>
     <string name="chooser_title" msgid="2235819929238267637">"설정할 <xliff:g id="PROFILE_NAME">%1$s</xliff:g> 선택"</string>
