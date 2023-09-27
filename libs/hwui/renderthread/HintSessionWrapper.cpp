@@ -72,6 +72,7 @@ void HintSessionWrapper::destroy() {
         mSessionValid = true;
         mHintSession = nullptr;
     }
+    mResetsSinceLastReport = 0;
 }
 
 bool HintSessionWrapper::init() {
@@ -111,10 +112,10 @@ bool HintSessionWrapper::init() {
 
     // Use a placeholder target value to initialize,
     // this will always be replaced elsewhere before it gets used
-    int64_t defaultTargetDurationNanos = 16666667;
+    int64_t targetDurationNanos =
+            mLastTargetWorkDuration == 0 ? kDefaultTargetDuration : mLastTargetWorkDuration;
     mHintSessionFuture = CommonPool::async([=, this, tids = std::move(tids)] {
-        return mBinding->createSession(manager, tids.data(), tids.size(),
-                                       defaultTargetDurationNanos);
+        return mBinding->createSession(manager, tids.data(), tids.size(), targetDurationNanos);
     });
     return false;
 }
