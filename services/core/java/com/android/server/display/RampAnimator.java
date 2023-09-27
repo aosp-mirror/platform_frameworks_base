@@ -20,8 +20,6 @@ import android.animation.ValueAnimator;
 import android.util.FloatProperty;
 import android.view.Choreographer;
 
-import com.android.internal.display.BrightnessUtils;
-
 /**
  * A custom animator that progressively updates a property value at
  * a given variable rate until it reaches a particular target value.
