@@ -143,6 +143,7 @@ public class SecureSettings {
         Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
         Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED,
         Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
+        Settings.Secure.VOLUME_DIALOG_DISMISS_TIMEOUT,
         Settings.Secure.VOLUME_HUSH_GESTURE,
         Settings.Secure.MANUAL_RINGER_TOGGLE_COUNT,
         Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
