@@ -112,6 +112,9 @@ public class PhoneStatusBarView extends FrameLayout {
         mDisplayCutout = null;
     }
 
+    // Per b/300629388, we let the PhoneStatusBarView detect onConfigurationChanged to
+    // updateResources, instead of letting the PhoneStatusBarViewController detect onConfigChanged
+    // then notify PhoneStatusBarView.
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
