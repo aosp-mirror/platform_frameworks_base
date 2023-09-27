@@ -163,7 +163,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             }
             mCurrentUser = KeyguardUpdateMonitor.getCurrentUser();
             showPrimarySecurityScreen(false);
-            reinflateViewFlipper((l) -> {});
+            if (mCurrentSecurityMode != SecurityMode.SimPin
+                    && mCurrentSecurityMode != SecurityMode.SimPuk) {
+                reinflateViewFlipper((l) -> {});
+            }
         }
     };
 
