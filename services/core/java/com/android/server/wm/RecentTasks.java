@@ -183,6 +183,8 @@ class RecentTasks {
 
     /** The non-empty tasks that are removed from recent tasks (see {@link #removeForAddTask}). */
     private final ArrayList<Task> mHiddenTasks = new ArrayList<>();
+    /** The maximum size that the hidden tasks are cached. */
+    private static final int MAX_HIDDEN_TASK_SIZE = 10;
 
     /** Whether to trim inactive tasks when activities are idle. */
     private boolean mCheckTrimmableTasksOnIdle;
@@ -1497,9 +1499,13 @@ class RecentTasks {
         return task.compareTo(rootHomeTask) < 0;
     }
 
-    /** Remove the tasks that user may not be able to return. */
+    /** Remove the tasks that user may not be able to return when exceeds the cache limit. */
     private void removeUnreachableHiddenTasks(int windowingMode) {
-        for (int i = mHiddenTasks.size() - 1; i >= 0; i--) {
+        final int size = mHiddenTasks.size();
+        if (size <= MAX_HIDDEN_TASK_SIZE) {
+            return;
+        }
+        for (int i = size - 1; i >= MAX_HIDDEN_TASK_SIZE; i--) {
             final Task hiddenTask = mHiddenTasks.get(i);
             if (!hiddenTask.hasChild() || hiddenTask.inRecents) {
                 // The task was removed by other path or it became reachable (added to recents).
@@ -1543,7 +1549,7 @@ class RecentTasks {
                 // A non-empty task is replaced by a new task. Because the removed task is no longer
                 // managed by the recent tasks list, add it to the hidden list to prevent the task
                 // from becoming dangling.
-                mHiddenTasks.add(removedTask);
+                mHiddenTasks.add(0, removedTask);
             }
             notifyTaskRemoved(removedTask, false /* wasTrimmed */, false /* killProcess */);
             if (DEBUG_RECENTS_TRIM_TASKS) {
