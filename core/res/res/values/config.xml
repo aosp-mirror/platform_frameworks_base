@@ -1424,6 +1424,11 @@
     <!-- Is the lock-screen disabled for new users by default -->
     <bool name="config_disableLockscreenByDefault">false</bool>
 
+    <!-- Provides default value for double line clock in lock screen setting:
+         0 - Don't show double line clock
+         1 - Show double line clock in lock screen (default) -->
+    <integer name="config_doublelineClockDefault">1</integer>
+
     <!-- If true, enables verification of the lockscreen credential in the factory reset protection
         flow. This should be true if gatekeeper / weaver credentials can still be checked after a
         factory reset. -->

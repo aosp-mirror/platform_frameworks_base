@@ -149,6 +149,8 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
                 .thenReturn(100);
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin))
                 .thenReturn(-200);
+        when(mResources.getInteger(com.android.internal.R.integer.config_doublelineClockDefault))
+                .thenReturn(1);
         when(mResources.getInteger(R.integer.keyguard_date_weather_view_invisibility))
                 .thenReturn(INVISIBLE);
 

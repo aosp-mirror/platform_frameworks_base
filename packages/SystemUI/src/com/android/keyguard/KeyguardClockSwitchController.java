@@ -545,7 +545,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private void updateDoubleLineClock() {
         mCanShowDoubleLineClock = mSecureSettings.getIntForUser(
-            Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1,
+            Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, mView.getResources()
+                .getInteger(com.android.internal.R.integer.config_doublelineClockDefault),
                 UserHandle.USER_CURRENT) != 0;
 
         if (!mCanShowDoubleLineClock) {
