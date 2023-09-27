@@ -20,8 +20,10 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.animation.LayoutTransition;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.logging.KeyguardLogger;
@@ -44,6 +46,7 @@ import org.mockito.MockitoAnnotations;
 public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
 
     @Mock protected KeyguardStatusView mKeyguardStatusView;
+
     @Mock protected KeyguardSliceViewController mKeyguardSliceViewController;
     @Mock protected KeyguardClockSwitchController mKeyguardClockSwitchController;
     @Mock protected KeyguardStateController mKeyguardStateController;
@@ -60,6 +63,10 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
     protected FakeKeyguardRepository mFakeKeyguardRepository;
 
     protected KeyguardStatusViewController mController;
+
+    @Mock protected KeyguardClockSwitch mKeyguardClockSwitch;
+    @Mock protected FrameLayout mMediaHostContainer;
+    @Mock protected LayoutTransition mMediaLayoutTransition;
 
     @Before
     public void setup() {
@@ -93,6 +100,8 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
                 };
 
         when(mKeyguardStatusView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
+
+        when(mKeyguardClockSwitchController.getView()).thenReturn(mKeyguardClockSwitch);
     }
 
     protected void givenViewAttached() {
