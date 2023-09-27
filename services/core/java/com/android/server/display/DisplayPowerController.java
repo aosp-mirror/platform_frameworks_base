@@ -1958,6 +1958,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 // We want to scale HDR brightness level with the SDR level, we also need to restore
                 // SDR brightness immediately when entering dim or low power mode.
                 animateValue = mBrightnessRangeController.getHdrBrightnessValue();
+                mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_HDR);
             }
 
             final float currentBrightness = mPowerState.getScreenBrightness();

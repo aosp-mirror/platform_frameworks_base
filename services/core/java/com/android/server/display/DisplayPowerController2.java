@@ -1564,6 +1564,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 // SDR brightness immediately when entering dim or low power mode.
                 animateValue = mBrightnessRangeController.getHdrBrightnessValue();
                 customTransitionRate = mBrightnessRangeController.getHdrTransitionRate();
+                mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_HDR);
             }
 
             final float currentBrightness = mPowerState.getScreenBrightness();
