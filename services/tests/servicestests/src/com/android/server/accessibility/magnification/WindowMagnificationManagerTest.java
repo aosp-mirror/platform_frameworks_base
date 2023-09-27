@@ -50,7 +50,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.platform.test.annotations.FlakyTest;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.view.InputDevice;
@@ -60,6 +59,7 @@ import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.filters.FlakyTest;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
