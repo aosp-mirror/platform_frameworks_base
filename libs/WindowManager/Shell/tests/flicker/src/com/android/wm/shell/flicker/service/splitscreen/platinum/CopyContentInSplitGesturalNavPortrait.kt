@@ -26,7 +26,7 @@ import org.junit.Test
 
 open class CopyContentInSplitGesturalNavPortrait : CopyContentInSplit(Rotation.ROTATION_0) {
     @get:Rule
-    val flickerServiceRule = FlickerServiceRule(enabled = true, failTestOnFaasFailure = false)
+    val flickerServiceRule = FlickerServiceRule(enabled = true, failTestOnFlicker = false)
 
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
