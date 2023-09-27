@@ -24,6 +24,7 @@ import android.os.PowerManager;
 import android.view.SurfaceControlHdrLayerInfoListener;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.BrightnessUtils;
 import com.android.server.display.config.HdrBrightnessData;
 
 import java.io.PrintWriter;
@@ -178,8 +179,12 @@ public class HdrClamper {
                 debounceTime = mHdrBrightnessData.mBrightnessDecreaseDebounceMillis;
                 transitionDuration = mHdrBrightnessData.mBrightnessDecreaseDurationMillis;
             }
+
+            float maxHlg = BrightnessUtils.convertLinearToGamma(mMaxBrightness);
+            float desiredMaxHlg = BrightnessUtils.convertLinearToGamma(mDesiredMaxBrightness);
+
             mDesiredTransitionRate = Math.abs(
-                    (mMaxBrightness - mDesiredMaxBrightness) * 1000f / transitionDuration);
+                    (maxHlg - desiredMaxHlg) * 1000f / transitionDuration);
 
             mHandler.removeCallbacks(mDebouncer);
             mHandler.postDelayed(mDebouncer, debounceTime);
