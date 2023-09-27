@@ -102,7 +102,8 @@ public class PackageManagerException extends Exception {
             INTERNAL_ERROR_STATIC_SHARED_LIB_PROTECTED_BROADCAST,
             INTERNAL_ERROR_STATIC_SHARED_LIB_OVERLAY_TARGETS,
             INTERNAL_ERROR_APEX_NOT_DIRECTORY,
-            INTERNAL_ERROR_APEX_MORE_THAN_ONE_FILE
+            INTERNAL_ERROR_APEX_MORE_THAN_ONE_FILE,
+            INTERNAL_ERROR_MISSING_USER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InternalErrorCode {}
