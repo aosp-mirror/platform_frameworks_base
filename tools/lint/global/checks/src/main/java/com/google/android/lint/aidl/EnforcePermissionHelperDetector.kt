@@ -131,7 +131,7 @@ class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
                 priority = 6,
                 severity = Severity.ERROR,
                 implementation = Implementation(
-                        EnforcePermissionDetector::class.java,
+                        EnforcePermissionHelperDetector::class.java,
                         EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
                 )
         )
