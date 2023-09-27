@@ -52,7 +52,7 @@
             style="@style/Widget.Dialog.Button.BorderButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/cancel" />
+            android:text="@string/dismiss_dialog" />
 
         <Space
             android:layout_width="0dp"
@@ -64,6 +64,6 @@
             style="@style/Widget.Dialog.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/enable_display" />
+            android:text="@string/mirror_display" />
     </LinearLayout>
 </LinearLayout>
