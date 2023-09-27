@@ -14,6 +14,7 @@
 
 aconfig_srcjars = [
     ":android.app.usage.flags-aconfig-java{.generated_srcjars}",
+    ":android.app.smartspace.flags-aconfig-java{.generated_srcjars}",
     ":android.companion.flags-aconfig-java{.generated_srcjars}",
     ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
     ":android.content.res.flags-aconfig-java{.generated_srcjars}",
@@ -597,5 +598,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.service.notification.flags-aconfig-java",
     aconfig_declarations: "android.service.notification.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Smartspace
+aconfig_declarations {
+    name: "android.app.smartspace.flags-aconfig",
+    package: "android.app.smartspace.flags",
+    srcs: ["core/java/android/app/smartspace/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.app.smartspace.flags-aconfig-java",
+    aconfig_declarations: "android.app.smartspace.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
