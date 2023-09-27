@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui
+package com.android.credentialmanager
 
-sealed class Screen(
-    val route: String,
-) {
-    data object Loading : Screen("loading")
+import android.app.Application
+import com.android.credentialmanager.di.inject
+import com.android.credentialmanager.repository.RequestRepository
 
-    data object SinglePasswordScreen : Screen("singlePasswordScreen")
+class CredentialSelectorApp : Application() {
+
+    lateinit var requestRepository: RequestRepository
+
+    override fun onCreate() {
+        super.onCreate()
+
+        inject()
+    }
 }

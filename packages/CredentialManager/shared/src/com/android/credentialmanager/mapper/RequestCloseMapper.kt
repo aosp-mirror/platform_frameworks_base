@@ -18,22 +18,30 @@ package com.android.credentialmanager.mapper
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.util.Log
-import com.android.credentialmanager.TAG
-import com.android.credentialmanager.ktx.appLabel
-import com.android.credentialmanager.ktx.cancelUiRequest
+import com.android.credentialmanager.ktx.requestInfo
 import com.android.credentialmanager.model.Request
 
-fun Intent.toRequestCancel(packageManager: PackageManager): Request.Cancel? =
-    this.cancelUiRequest?.let { cancelUiRequest ->
-        val appLabel = packageManager.appLabel(cancelUiRequest.appPackageName)
-        if (appLabel == null) {
-            Log.d(TAG, "Received UI cancel request with an invalid package name.")
-            null
-        } else {
-            Request.Cancel(
-                showCancellationUi = cancelUiRequest.shouldShowCancellationUi(),
-                appName = appLabel
-            )
+fun Intent.toRequestClose(
+    packageManager: PackageManager,
+    previousIntent: Intent? = null,
+): Request.Close? {
+    // Close request comes as "Cancel" request from Credential Manager API
+    val currentRequest = toRequestCancel(packageManager = packageManager) ?: return null
+
+    if (currentRequest.showCancellationUi) {
+        // Current request is to Cancel and not to Close
+        return null
+    }
+
+    previousIntent?.let {
+        val previousToken = previousIntent.requestInfo?.token
+        val currentToken = this.requestInfo?.token
+
+        if (previousToken != currentToken) {
+            // Current cancellation is for a different request, don't close the current flow.
+            return null
         }
     }
+
+    return Request.Close
+}

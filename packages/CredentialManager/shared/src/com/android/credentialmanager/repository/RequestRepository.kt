@@ -14,26 +14,32 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.mapper
+package com.android.credentialmanager.repository
 
+import android.app.Application
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.util.Log
 import com.android.credentialmanager.TAG
-import com.android.credentialmanager.ktx.appLabel
-import com.android.credentialmanager.ktx.cancelUiRequest
 import com.android.credentialmanager.model.Request
+import com.android.credentialmanager.parse
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-fun Intent.toRequestCancel(packageManager: PackageManager): Request.Cancel? =
-    this.cancelUiRequest?.let { cancelUiRequest ->
-        val appLabel = packageManager.appLabel(cancelUiRequest.appPackageName)
-        if (appLabel == null) {
-            Log.d(TAG, "Received UI cancel request with an invalid package name.")
-            null
-        } else {
-            Request.Cancel(
-                showCancellationUi = cancelUiRequest.shouldShowCancellationUi(),
-                appName = appLabel
-            )
-        }
+class RequestRepository(
+    private val application: Application,
+) {
+
+    private val _requests = MutableStateFlow<Request?>(null)
+    val requests: StateFlow<Request?> = _requests
+
+    suspend fun processRequest(intent: Intent, previousIntent: Intent? = null) {
+        val request = intent.parse(
+            packageManager = application.packageManager,
+            previousIntent = previousIntent
+        )
+
+        Log.d(TAG, "Request parsed: $request")
+
+        _requests.value = request
     }
+}

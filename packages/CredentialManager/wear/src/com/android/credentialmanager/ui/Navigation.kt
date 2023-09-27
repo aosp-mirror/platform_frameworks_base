@@ -16,10 +16,12 @@
 
 package com.android.credentialmanager.ui
 
-sealed class Screen(
-    val route: String,
-) {
-    data object Loading : Screen("loading")
+import androidx.navigation.NavController
 
-    data object SinglePasswordScreen : Screen("singlePasswordScreen")
+fun NavController.navigateToLoading() {
+    navigate(Screen.Loading.route)
+}
+
+fun NavController.navigateToSinglePasswordScreen() {
+    navigate(Screen.SinglePasswordScreen.route)
 }

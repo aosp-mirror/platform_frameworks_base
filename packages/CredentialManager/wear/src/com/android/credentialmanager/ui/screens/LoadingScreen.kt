@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui
+package com.android.credentialmanager.ui.screens
 
-sealed class Screen(
-    val route: String,
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun LoadingScreen(
+    modifier: Modifier = Modifier
 ) {
-    data object Loading : Screen("loading")
-
-    data object SinglePasswordScreen : Screen("singlePasswordScreen")
+    // Don't display anything, assuming that there should be minimal latency
+    // to parse the Credential Manager intent and define the state of the
+    // app. If latency is big, then a "loading" screen should be displayed
+    // to the user.
 }
