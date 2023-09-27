@@ -6,3 +6,9 @@ flag {
   description: "V2 of the policy engine migrations for Android V"
   bug: "289520697"
 }
+flag {
+  name: "device_policy_size_tracking_enabled"
+  namespace: "enterprise"
+  description: "Add feature to track the total policy size and have a max threshold."
+  bug: "281543351"
+}
