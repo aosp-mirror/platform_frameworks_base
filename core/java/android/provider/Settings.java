@@ -9908,6 +9908,48 @@ public final class Settings {
          */
         public static final String DOCK_SETUP_STATE = "dock_setup_state";
 
+
+        /**
+         * Default, indicates that the user has not yet started the hub mode tutorial.
+         *
+         * @hide
+         */
+        public static final int HUB_MODE_TUTORIAL_NOT_STARTED = 0;
+
+        /**
+         * Indicates that the user has started but not yet completed the hub mode tutorial.
+         * One of the possible states for {@link #HUB_MODE_TUTORIAL_STATE}.
+         *
+         * @hide
+         */
+        public static final int HUB_MODE_TUTORIAL_STARTED = 1;
+
+        /**
+         * Indicates that the user has completed the hub mode tutorial.
+         * One of the possible states for {@link #HUB_MODE_TUTORIAL_STATE}.
+         *
+         * @hide
+         */
+        public static final int HUB_MODE_TUTORIAL_COMPLETED = 10;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                HUB_MODE_TUTORIAL_NOT_STARTED,
+                HUB_MODE_TUTORIAL_STARTED,
+                HUB_MODE_TUTORIAL_COMPLETED
+        })
+        public @interface HubModeTutorialState {
+        }
+
+        /**
+         * Defines the user's current state of navigating through the hub mode tutorial.
+         * The possible states are defined in {@link HubModeTutorialState}.
+         *
+         * @hide
+         */
+        public static final String HUB_MODE_TUTORIAL_STATE = "hub_mode_tutorial_state";
+
         /**
          * The default NFC payment component
          * @hide

@@ -243,6 +243,7 @@ public class SecureSettings {
         Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
         Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
         Settings.Secure.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED,
-        Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED
+        Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED,
+        Settings.Secure.HUB_MODE_TUTORIAL_STATE
     };
 }
