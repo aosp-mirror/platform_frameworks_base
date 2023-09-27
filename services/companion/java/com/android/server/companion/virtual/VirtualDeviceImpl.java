@@ -24,6 +24,7 @@ import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAUL
 import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
+import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
@@ -204,6 +205,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @GuardedBy("mVirtualDeviceLock")
     @NonNull
     private final Set<ComponentName> mActivityPolicyExemptions;
+    private final ComponentName mPermissionDialogComponent;
 
     private ActivityListener createListenerAdapter() {
         return new ActivityListener() {
@@ -317,6 +319,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 mParams.getVirtualSensorCallback(), mParams.getVirtualSensorConfigs());
         mCameraAccessController = cameraAccessController;
         mCameraAccessController.startObservingIfNeeded();
+        if (!Flags.streamPermissions()) {
+            mPermissionDialogComponent = getPermissionDialogComponent();
+        } else {
+            mPermissionDialogComponent = null;
+        }
         try {
             token.linkToDeath(this, 0);
         } catch (RemoteException e) {
@@ -324,8 +331,14 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
         mVirtualDeviceLog.logCreated(deviceId, mOwnerUid);
 
-        mPublicVirtualDeviceObject = new VirtualDevice(
-                this, getDeviceId(), getPersistentDeviceId(), mParams.getName());
+        if (Flags.vdmPublicApis()) {
+            mPublicVirtualDeviceObject = new VirtualDevice(
+                    this, getDeviceId(), getPersistentDeviceId(), mParams.getName(),
+                    getDisplayName());
+        } else {
+            mPublicVirtualDeviceObject = new VirtualDevice(
+                    this, getDeviceId(), getPersistentDeviceId(), mParams.getName());
+        }
 
         if (Flags.dynamicPolicy()) {
             mActivityPolicyExemptions = new ArraySet<>(
@@ -951,6 +964,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 /*crossTaskNavigationExemptions=*/crossTaskNavigationAllowedByDefault
                         ? mParams.getBlockedCrossTaskNavigations()
                         : mParams.getAllowedCrossTaskNavigations(),
+                mPermissionDialogComponent,
                 createListenerAdapter(),
                 this::onEnteringPipBlocked,
                 this::onActivityBlocked,
@@ -961,6 +975,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 homeComponent);
         gwpc.registerRunningAppsChangedListener(/* listener= */ this);
         return gwpc;
+    }
+
+    private ComponentName getPermissionDialogComponent() {
+        Intent intent = new Intent(ACTION_REQUEST_PERMISSIONS);
+        PackageManager packageManager = mContext.getPackageManager();
+        intent.setPackage(packageManager.getPermissionControllerPackageName());
+        return intent.resolveActivity(packageManager);
     }
 
     int createVirtualDisplay(@NonNull VirtualDisplayConfig virtualDisplayConfig,
