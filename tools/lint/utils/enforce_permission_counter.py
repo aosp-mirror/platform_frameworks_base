@@ -16,57 +16,38 @@ import re
 
 import soong_lint_fix
 
-# Libraries that constitute system_server.
-# It is non-trivial to keep in sync with services/Android.bp as some
-# module are post-processed (e.g, services.core).
-TARGETS = [
-        "services.core.unboosted",
-        "services.accessibility",
-        "services.appprediction",
-        "services.appwidget",
-        "services.autofill",
-        "services.backup",
-        "services.companion",
-        "services.contentcapture",
-        "services.contentsuggestions",
-        "services.coverage",
-        "services.devicepolicy",
-        "services.midi",
-        "services.musicsearch",
-        "services.net",
-        "services.people",
-        "services.print",
-        "services.profcollect",
-        "services.restrictions",
-        "services.searchui",
-        "services.smartspace",
-        "services.systemcaptions",
-        "services.translation",
-        "services.texttospeech",
-        "services.usage",
-        "services.usb",
-        "services.voiceinteraction",
-        "services.wallpapereffectsgeneration",
-        "services.wifi",
-]
+CHECK = "AnnotatedAidlCounter"
+LINT_MODULE = "AndroidUtilsLintChecker"
 
-
-class EnforcePermissionMigratedCounter:
+class EnforcePermissionMigratedCounter(soong_lint_fix.SoongLintWrapper):
     """Wrapper around lint_fix to count the number of AIDL methods annotated."""
+
+    def __init__(self):
+        super().__init__(check=CHECK, lint_module=LINT_MODULE)
+
     def run(self):
-        opts = soong_lint_fix.SoongLintFixOptions()
-        opts.check = "AnnotatedAidlCounter"
-        opts.lint_module = "AndroidUtilsLintChecker"
-        opts.no_fix = True
-        opts.modules = TARGETS
+        self._setup()
 
-        self.linter = soong_lint_fix.SoongLintFix(opts)
-        self.linter.run()
-        self.parse_lint_reports()
+        # Analyze the dependencies of the "services" module and the module
+        # "services.core.unboosted".
+        service_module = self._find_module("services")
+        dep_modules = self._find_module_java_deps(service_module) + \
+                      [self._find_module("services.core.unboosted")]
 
-    def parse_lint_reports(self):
+        # Skip dependencies that are not services. Skip the "services.core"
+        # module which is analyzed via "services.core.unboosted".
+        modules = []
+        for module in dep_modules:
+            if "frameworks/base/services" not in module.path:
+                continue
+            if module.name == "services.core":
+                continue
+            modules.append(module)
+
+        self._lint(modules)
+
         counts = { "unannotated": 0, "enforced": 0, "notRequired": 0 }
-        for module in self.linter._modules:
+        for module in modules:
             with open(module.lint_report, "r") as f:
                 content = f.read()
                 keys = dict(re.findall(r'(\w+)=(\d+)', content))
