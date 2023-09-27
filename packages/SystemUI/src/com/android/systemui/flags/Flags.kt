@@ -788,7 +788,7 @@ object Flags {
 
     /** Enable haptic slider component in the brightness slider */
     @JvmField
-    val HAPTIC_BRIGHTNESS_SLIDER = unreleasedFlag("haptic_brightness_slider")
+    val HAPTIC_BRIGHTNESS_SLIDER = unreleasedFlag("haptic_brightness_slider", teamfood = true)
 
     // TODO(b/287205379): Tracking bug
     @JvmField
