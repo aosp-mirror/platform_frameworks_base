@@ -237,8 +237,7 @@ object Flags {
     /** Whether page transition animations in the wallpaper picker are enabled */
     // TODO(b/291710220): Tracking bug.
     @JvmField
-    val WALLPAPER_PICKER_PAGE_TRANSITIONS =
-        unreleasedFlag("wallpaper_picker_page_transitions", teamfood = true)
+    val WALLPAPER_PICKER_PAGE_TRANSITIONS = releasedFlag("wallpaper_picker_page_transitions")
 
     /** Add "Apply" button to wall paper picker's grid preview page. */
     // TODO(b/294866904): Tracking bug.
