@@ -36,10 +36,6 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
     private final int mCpuClusterCount;
     // Total number of CPU scaling steps across all clusters
     private final int mCpuScalingStepCount;
-    // Number of CPU power brackets used for compression of time-in-state data
-    private final int mCpuPowerBracketCount;
-    // Map of scaling step to the corresponding power brackets mScalingStepToBracket[step]->bracket
-    private final int[] mScalingStepToBracket;
     // Map of scaling step to the corresponding core cluster mScalingStepToCluster[step]->cluster
     private final int[] mScalingStepToCluster;
     // Average power consumed by the CPU when it is powered up (per power_profile.xml)
@@ -64,13 +60,10 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
 
     public CpuAggregatedPowerStatsProcessor(PowerProfile powerProfile,
             CpuScalingPolicies scalingPolicies) {
-        int[] scalingStepToPowerBracketMap = CpuPowerStatsCollector.getScalingStepToPowerBracketMap(
-                powerProfile, scalingPolicies);
         mCpuScalingStepCount = scalingPolicies.getScalingStepCount();
-        mCpuPowerBracketCount = powerProfile.getCpuPowerBracketCount();
-        mScalingStepToCluster = new int[scalingStepToPowerBracketMap.length];
-        mScalingStepToBracket = new int[scalingStepToPowerBracketMap.length];
-        mPowerMultipliersByScalingStep = new double[scalingStepToPowerBracketMap.length];
+        mScalingStepToCluster = new int[mCpuScalingStepCount];
+        mPowerMultipliersByScalingStep = new double[mCpuScalingStepCount];
+
         int step = 0;
         int[] policies = scalingPolicies.getPolicies();
         mCpuClusterCount = policies.length;
@@ -84,8 +77,6 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
                 mScalingStepToCluster[step] = cluster;
                 mPowerMultipliersByScalingStep[step] =
                         powerProfile.getAveragePowerForCpuScalingStep(policy, i) / HOUR_IN_MILLIS;
-                mScalingStepToBracket[step] =
-                        powerProfile.getCpuPowerBracketForScalingStep(policy, i);
                 step++;
             }
         }
@@ -248,14 +239,16 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
     private void estimatePowerByDeviceState(PowerComponentAggregatedPowerStats stats,
             Intermediates intermediates) {
         int cpuScalingStepCount = mStatsLayout.getCpuScalingStepCount();
+        int powerBracketCount = mStatsLayout.getCpuPowerBracketCount();
+        int[] scalingStepToBracketMap = mStatsLayout.getScalingStepToPowerBracketMap();
         List<DeviceStateEstimation> deviceStateEstimations = mPlan.deviceStateEstimations;
         for (int dse = deviceStateEstimations.size() - 1; dse >= 0; dse--) {
             DeviceStateEstimation deviceStateEstimation = deviceStateEstimations.get(dse);
             deviceStateEstimation.intermediates = new DeviceStatsIntermediates();
             DeviceStatsIntermediates deviceStatsIntermediates =
                     (DeviceStatsIntermediates) deviceStateEstimation.intermediates;
-            deviceStatsIntermediates.timeByBracket = new long[mCpuPowerBracketCount];
-            deviceStatsIntermediates.powerByBracket = new double[mCpuPowerBracketCount];
+            deviceStatsIntermediates.timeByBracket = new long[powerBracketCount];
+            deviceStatsIntermediates.powerByBracket = new double[powerBracketCount];
 
             stats.getDeviceStats(mTmpDeviceStatsArray, deviceStateEstimation.stateValues);
             double power = 0;
@@ -265,12 +258,13 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
                 }
 
                 long timeInStep = mStatsLayout.getTimeByScalingStep(mTmpDeviceStatsArray, step);
-                deviceStatsIntermediates.timeByBracket[mScalingStepToBracket[step]] += timeInStep;
-
                 double stepPower = intermediates.powerByScalingStep[step] * timeInStep
                                    / intermediates.timeByScalingStep[step];
                 power += stepPower;
-                deviceStatsIntermediates.powerByBracket[mScalingStepToBracket[step]] += stepPower;
+
+                int bracket = scalingStepToBracketMap[step];
+                deviceStatsIntermediates.timeByBracket[bracket] += timeInStep;
+                deviceStatsIntermediates.powerByBracket[bracket] += stepPower;
             }
             deviceStatsIntermediates.power = power;
             mStatsLayout.setDevicePowerEstimate(mTmpDeviceStatsArray, power);
@@ -283,8 +277,9 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
             CombinedDeviceStateEstimate cdse = mPlan.combinedDeviceStateEstimations.get(i);
             DeviceStatsIntermediates cdseIntermediates =
                     new DeviceStatsIntermediates();
-            cdseIntermediates.timeByBracket = new long[mCpuPowerBracketCount];
-            cdseIntermediates.powerByBracket = new double[mCpuPowerBracketCount];
+            int bracketCount = mStatsLayout.getCpuPowerBracketCount();
+            cdseIntermediates.timeByBracket = new long[bracketCount];
+            cdseIntermediates.powerByBracket = new double[bracketCount];
             cdse.intermediates = cdseIntermediates;
             List<DeviceStateEstimation> deviceStateEstimations = cdse.deviceStateEstimations;
             for (int j = deviceStateEstimations.size() - 1; j >= 0; j--) {
@@ -292,7 +287,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
                 DeviceStatsIntermediates intermediates =
                         (DeviceStatsIntermediates) dse.intermediates;
                 cdseIntermediates.power += intermediates.power;
-                for (int k = 0; k < intermediates.powerByBracket.length; k++) {
+                for (int k = 0; k < bracketCount; k++) {
                     cdseIntermediates.timeByBracket[k] += intermediates.timeByBracket[k];
                     cdseIntermediates.powerByBracket[k] += intermediates.powerByBracket[k];
                 }
@@ -319,7 +314,8 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
                     continue;
                 }
 
-                long timeInBracket = mStatsLayout.getTimeByPowerBracket(mTmpUidStatsArray, bracket);
+                long timeInBracket = mStatsLayout.getUidTimeByPowerBracket(mTmpUidStatsArray,
+                        bracket);
                 if (timeInBracket == 0) {
                     continue;
                 }
@@ -354,6 +350,17 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
             sb.append(mStatsLayout.getTimeByCluster(stats, cluster));
         }
         sb.append("] uptime: ").append(mStatsLayout.getUptime(stats));
+        int energyConsumerCount = mStatsLayout.getEnergyConsumerCount();
+        if (energyConsumerCount > 0) {
+            sb.append(" energy: [");
+            for (int i = 0; i < energyConsumerCount; i++) {
+                if (i != 0) {
+                    sb.append(", ");
+                }
+                sb.append(mStatsLayout.getConsumedEnergy(stats, i));
+            }
+            sb.append("]");
+        }
         sb.append(" power: ").append(
                 BatteryStats.formatCharge(mStatsLayout.getDevicePowerEstimate(stats)));
         return sb.toString();
@@ -369,7 +376,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
             if (bracket != 0) {
                 sb.append(", ");
             }
-            sb.append(mStatsLayout.getTimeByPowerBracket(stats, bracket));
+            sb.append(mStatsLayout.getUidTimeByPowerBracket(stats, bracket));
         }
         sb.append("] power: ").append(
                 BatteryStats.formatCharge(mStatsLayout.getUidPowerEstimate(stats)));

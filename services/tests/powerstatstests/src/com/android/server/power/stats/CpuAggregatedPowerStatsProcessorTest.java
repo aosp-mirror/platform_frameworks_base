@@ -162,7 +162,7 @@ public class CpuAggregatedPowerStatsProcessorTest {
             mStatsLayout.addDeviceSectionCpuTimeByCluster(2);
             mStatsLayout.addDeviceSectionUptime();
             mStatsLayout.addDeviceSectionPowerEstimate();
-            mStatsLayout.addUidSectionCpuTimeByPowerBracket(3);
+            mStatsLayout.addUidSectionCpuTimeByPowerBracket(new int[]{0, 1, 2});
             mStatsLayout.addUidSectionPowerEstimate();
 
             PersistableBundle extras = new PersistableBundle();

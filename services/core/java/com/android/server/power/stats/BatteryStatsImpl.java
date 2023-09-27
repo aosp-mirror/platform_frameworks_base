@@ -10937,7 +10937,8 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         mCpuPowerStatsCollector = new CpuPowerStatsCollector(mCpuScalingPolicies, mPowerProfile,
-                mHandler, mBatteryStatsConfig.getPowerStatsThrottlePeriodCpu());
+                () -> mBatteryVoltageMv, mHandler,
+                mBatteryStatsConfig.getPowerStatsThrottlePeriodCpu());
         mCpuPowerStatsCollector.addConsumer(this::recordPowerStats);
 
         mStartCount++;
@@ -14437,6 +14438,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final int level, /* not final */ int temp, final int voltageMv, final int chargeUah,
             final int chargeFullUah, final long chargeTimeToFullSeconds,
             final long elapsedRealtimeMs, final long uptimeMs, final long currentTimeMs) {
+
         // Temperature is encoded without the signed bit, so clamp any negative temperatures to 0.
         temp = Math.max(0, temp);
 
@@ -15618,18 +15620,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 pw.print(": ");
                 pw.println(timeUs / 1000);
             }
-        }
-    }
-
-    @GuardedBy("this")
-    private void dumpCpuPowerBracketsLocked(PrintWriter pw) {
-        pw.println("CPU power brackets; cluster/freq in MHz(avg current in mA):");
-        final int bracketCount = mPowerProfile.getCpuPowerBracketCount();
-        for (int bracket = 0; bracket < bracketCount; bracket++) {
-            pw.print("    ");
-            pw.print(bracket);
-            pw.print(": ");
-            pw.println(mPowerProfile.getCpuPowerBracketDescription(mCpuScalingPolicies, bracket));
         }
     }
 
@@ -16989,8 +16979,10 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.println();
             dumpConstantsLocked(pw);
 
-            pw.println();
-            dumpCpuPowerBracketsLocked(pw);
+            if (mCpuPowerStatsCollector != null) {
+                pw.println();
+                mCpuPowerStatsCollector.dumpCpuPowerBracketsLocked(pw);
+            }
 
             pw.println();
             dumpEnergyConsumerStatsLocked(pw);
