@@ -19,7 +19,7 @@ package com.android.systemui.qs;
 import static com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE;
 import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
-import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
+import static com.android.systemui.qs.dagger.QSScopeModule.QS_USING_MEDIA_PLAYER;
 
 import android.view.MotionEvent;
 import android.view.View;

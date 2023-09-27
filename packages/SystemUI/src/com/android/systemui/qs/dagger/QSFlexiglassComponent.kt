@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.dagger;
+package com.android.systemui.qs.dagger
 
-import com.android.systemui.qs.QSFragmentLegacy;
+import android.view.View
+import com.android.systemui.dagger.qualifiers.RootView
+import dagger.BindsInstance
+import dagger.Subcomponent
 
-import dagger.BindsInstance;
-import dagger.Subcomponent;
-
-/**
- * Dagger Subcomponent for {@link QSFragmentLegacy}.
- */
-@Subcomponent(modules = {QSFragmentModule.class})
+@Subcomponent(modules = [QSFlexiglassModule::class])
 @QSScope
-public interface QSFragmentComponent extends QSComponent {
+interface QSFlexiglassComponent : QSComponent {
 
-    /** Factory for building a {@link QSFragmentComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        QSFragmentComponent create(@BindsInstance QSFragmentLegacy qsFragment);
+        fun create(@RootView @BindsInstance rootView: View): QSFlexiglassComponent
     }
 }

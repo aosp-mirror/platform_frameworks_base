@@ -29,6 +29,7 @@ import com.android.systemui.log.LogcatEchoTrackerDebug;
 import com.android.systemui.log.LogcatEchoTrackerProd;
 import com.android.systemui.log.table.TableLogBuffer;
 import com.android.systemui.log.table.TableLogBufferFactory;
+import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.wakelock.WakeLockLog;
@@ -229,12 +230,12 @@ public class LogModule {
     }
 
     /**
-     * Provides a logging buffer for logs related to {@link com.android.systemui.qs.QSFragment}'s
+     * Provides a logging buffer for logs related to {@link QSFragmentLegacy}'s
      * disable flag adjustments.
      */
     @Provides
     @SysUISingleton
-    @QSFragmentDisableLog
+    @QSDisableLog
     public static LogBuffer provideQSFragmentDisableLogBuffer(LogBufferFactory factory) {
         return factory.create("QSFragmentDisableFlagsLog", 10 /* maxSize */,
                 false /* systrace */);

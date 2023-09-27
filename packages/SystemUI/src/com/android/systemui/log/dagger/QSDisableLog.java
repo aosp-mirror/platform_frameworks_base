@@ -19,6 +19,7 @@ package com.android.systemui.log.dagger;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.android.systemui.log.LogBuffer;
+import com.android.systemui.qs.QSFragmentLegacy;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -27,10 +28,10 @@ import javax.inject.Qualifier;
 
 /**
  * A {@link LogBuffer} for disable flag adjustments made in
- * {@link com.android.systemui.qs.QSFragment}.
+ * {@link QSFragmentLegacy}.
  */
 @Qualifier
 @Documented
 @Retention(RUNTIME)
-public @interface QSFragmentDisableLog {
+public @interface QSDisableLog {
 }

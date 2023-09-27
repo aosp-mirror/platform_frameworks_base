@@ -23,7 +23,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.android.settingslib.Utils
-import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -34,6 +33,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.dagger.QSFlagsModule.PM_LITE_ENABLED
 import com.android.systemui.qs.footer.data.model.UserSwitcherStatusModel
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractor
+import com.android.systemui.res.R
 import com.android.systemui.util.icuMessageFormat
 import javax.inject.Inject
 import javax.inject.Named
@@ -43,7 +43,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -201,8 +200,8 @@ class FooterActionsViewModel(
      * will suspend indefinitely and will need to be cancelled to stop observing.
      *
      * Important: [quickSettingsContext] must be the [Context] associated to the
-     * [Quick Settings fragment][com.android.systemui.qs.QSFragment], and the call to this function
-     * must be cancelled when that fragment is destroyed.
+     * [Quick Settings fragment][com.android.systemui.qs.QSFragmentLegacy], and the call to this
+     * function must be cancelled when that fragment is destroyed.
      */
     suspend fun observeDeviceMonitoringDialogRequests(quickSettingsContext: Context) {
         footerActionsInteractor.deviceMonitoringDialogRequests.collect {

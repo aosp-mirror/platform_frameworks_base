@@ -34,14 +34,14 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSEditEvent;
-import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -199,7 +199,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
     }
 
     /** */
-    public void setQs(@Nullable QSFragment qsFragment) {
+    public void setQs(@Nullable QS qsFragment) {
         mView.setQs(qsFragment);
     }
 

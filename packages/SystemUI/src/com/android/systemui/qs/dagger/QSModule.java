@@ -52,7 +52,7 @@ import dagger.multibindings.Multibinds;
 /**
  * Module for QS dependencies
  */
-@Module(subcomponents = {QSFragmentComponent.class},
+@Module(subcomponents = {QSFragmentComponent.class, QSFlexiglassComponent.class},
         includes = {
                 MediaModule.class,
                 QSExternalModule.class,
