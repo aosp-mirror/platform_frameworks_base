@@ -166,11 +166,12 @@ public:
 #endif
                 mMesh = SkMesh::MakeIndexed(mMeshSpec, meshMode, vb, mVertexCount, mVertexOffset,
                                             ib, mIndexCount, mIndexOffset, mBuilder->fUniforms,
-                                            mBounds)
+                                            SkSpan<SkRuntimeEffect::ChildPtr>(), mBounds)
                                 .mesh;
             } else {
                 mMesh = SkMesh::Make(mMeshSpec, meshMode, vb, mVertexCount, mVertexOffset,
-                                     mBuilder->fUniforms, mBounds)
+                                     mBuilder->fUniforms, SkSpan<SkRuntimeEffect::ChildPtr>(),
+                                     mBounds)
                                 .mesh;
             }
             mIsDirty = false;

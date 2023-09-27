@@ -16,6 +16,9 @@
 
 package android.graphics.text;
 
+import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
+
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -248,6 +251,7 @@ public class LineBreaker {
          * @see Layout#getUseBoundsForWidth()
          * @see StaticLayout.Builder#setUseBoundsForWidth(boolean)
          */
+        @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
         public @NonNull Builder setUseBoundsForWidth(boolean useBoundsForWidth) {
             mUseBoundsForWidth = useBoundsForWidth;
             return this;

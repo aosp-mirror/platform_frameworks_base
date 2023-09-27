@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +38,7 @@ import java.util.Set;
 /**
  * Provide information related to a processes startup.
  */
+@FlaggedApi(Flags.FLAG_APP_START_INFO)
 public final class ApplicationStartInfo implements Parcelable {
 
     /**

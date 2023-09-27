@@ -470,6 +470,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.modeId = deviceInfo.modeId;
             mBaseDisplayInfo.renderFrameRate = deviceInfo.renderFrameRate;
             mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
+            mBaseDisplayInfo.userPreferredModeId = deviceInfo.userPreferredModeId;
             mBaseDisplayInfo.supportedModes = Arrays.copyOf(
                     deviceInfo.supportedModes, deviceInfo.supportedModes.length);
             mBaseDisplayInfo.colorMode = deviceInfo.colorMode;

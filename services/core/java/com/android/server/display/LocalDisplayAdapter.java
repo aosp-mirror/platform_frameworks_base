@@ -640,6 +640,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.modeId = mActiveModeId;
                 mInfo.renderFrameRate = mActiveRenderFrameRate;
                 mInfo.defaultModeId = getPreferredModeId();
+                mInfo.userPreferredModeId = mUserPreferredModeId;
                 mInfo.supportedModes = getDisplayModes(mSupportedModes);
                 mInfo.colorMode = mActiveColorMode;
                 mInfo.allmSupported = mAllmSupported;
@@ -1344,6 +1345,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     public interface DisplayEventListener {
         void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected);
+        void onHotplugConnectionError(long timestampNanos, int connectionError);
         void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
                 long renderPeriod);
         void onFrameRateOverridesChanged(long timestampNanos, long physicalDisplayId,
@@ -1363,6 +1365,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         @Override
         public void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
             mListener.onHotplug(timestampNanos, physicalDisplayId, connected);
+        }
+
+        @Override
+        public void onHotplugConnectionError(long timestampNanos, int errorCode) {
+            mListener.onHotplugConnectionError(timestampNanos, errorCode);
         }
 
         @Override
@@ -1387,6 +1394,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 } else {
                     tryDisconnectDisplayLocked(physicalDisplayId);
                 }
+            }
+        }
+
+        @Override
+        public void onHotplugConnectionError(long timestampNanos, int connectionError) {
+            if (DEBUG) {
+                Slog.d(TAG, "onHotplugConnectionError("
+                        + "timestampNanos=" + timestampNanos
+                        + ", connectionError=" + connectionError + ")");
             }
         }
 

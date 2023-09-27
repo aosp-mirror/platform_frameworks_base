@@ -93,6 +93,7 @@ filter_output() {
   if (( $simple )) ; then
     # For "simple output" mode,
     # - Normalize the constant numbers (replace with "#x")
+    # - Normalize byte code offsets and other similar numbers. (e.g. "0:" -> "x:")
     # - Remove the constant pool
     # - Remove the line number table
     # - Some other transient lines
@@ -100,6 +101,7 @@ filter_output() {
     # `/PATTERN-1/,/PATTERN-1/{//!d}` is a trick to delete lines between two patterns, without
     # the start and the end lines.
     sed -e 's/#[0-9][0-9]*/#x/g' \
+        -e 's/^\( *\)[0-9][0-9]*:/\1x:/' \
         -e '/^Constant pool:/,/^[^ ]/{//!d}' \
         -e '/^ *line *[0-9][0-9]*: *[0-9][0-9]*$/d' \
         -e '/SHA-256 checksum/d' \

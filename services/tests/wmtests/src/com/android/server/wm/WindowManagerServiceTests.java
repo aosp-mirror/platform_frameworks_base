@@ -82,7 +82,6 @@ import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
 import android.view.ContentRecordingSession;
 import android.view.IWindow;
-import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -496,11 +495,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         spyOn(mWm.mWindowContextListenerController);
 
         final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float v) throws RemoteException {
-            }
-        });
+        final Session session = getTestSession();
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 TYPE_APPLICATION_ATTACHED_DIALOG);
         params.token = windowToken.token;

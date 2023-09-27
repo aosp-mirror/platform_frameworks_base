@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.notification.interruption.KeyguardNotifica
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -48,7 +49,8 @@ public class TestableNotificationInterruptStateProviderImpl
             NotifPipelineFlags flags,
             KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
             UiEventLogger uiEventLogger,
-            UserTracker userTracker) {
+            UserTracker userTracker,
+            DeviceProvisionedController deviceProvisionedController) {
         super(contentResolver,
                 powerManager,
                 ambientDisplayConfiguration,
@@ -61,7 +63,8 @@ public class TestableNotificationInterruptStateProviderImpl
                 flags,
                 keyguardNotificationVisibilityProvider,
                 uiEventLogger,
-                userTracker);
+                userTracker,
+                deviceProvisionedController);
         mUseHeadsUp = true;
     }
 }

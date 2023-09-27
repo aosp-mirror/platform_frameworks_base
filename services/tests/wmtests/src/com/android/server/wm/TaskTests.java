@@ -610,7 +610,7 @@ public class TaskTests extends WindowTestsBase {
         // display.
         final DisplayRotation dr = display.mDisplayContent.getDisplayRotation();
         dr.setFixedToUserRotation(FIXED_TO_USER_ROTATION_ENABLED);
-        dr.setUserRotation(USER_ROTATION_FREE, ROTATION_0);
+        dr.setUserRotation(USER_ROTATION_FREE, ROTATION_0, /* caller= */ "TaskTests");
 
         final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
@@ -642,7 +642,7 @@ public class TaskTests extends WindowTestsBase {
         // Setting app to fixed landscape and changing display
         top.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         // Fix the display orientation to portrait which is 90 degrees for the test display.
-        dr.setUserRotation(USER_ROTATION_FREE, ROTATION_90);
+        dr.setUserRotation(USER_ROTATION_FREE, ROTATION_90, /* caller= */ "TaskTests");
 
         // Fixed orientation request should be resolved on activity level. Task fills display
         // bounds.
@@ -681,7 +681,7 @@ public class TaskTests extends WindowTestsBase {
         // display.
         final DisplayRotation dr = display.mDisplayContent.getDisplayRotation();
         dr.setFixedToUserRotation(FIXED_TO_USER_ROTATION_ENABLED);
-        dr.setUserRotation(USER_ROTATION_FREE, ROTATION_0);
+        dr.setUserRotation(USER_ROTATION_FREE, ROTATION_0, /* caller= */ "TaskTests");
 
         final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();

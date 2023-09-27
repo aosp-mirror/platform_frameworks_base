@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.Display.Mode.INVALID_MODE_ID;
 import static android.view.DisplayInfoProto.APP_HEIGHT;
 import static android.view.DisplayInfoProto.APP_WIDTH;
 import static android.view.DisplayInfoProto.CUTOUT;
@@ -198,6 +199,11 @@ public final class DisplayInfo implements Parcelable {
      * The default display mode.
      */
     public int defaultModeId;
+
+    /**
+     * The user preferred display mode.
+     */
+    public int userPreferredModeId = INVALID_MODE_ID;
 
     /**
      * The supported modes of this display.
@@ -420,6 +426,7 @@ public final class DisplayInfo implements Parcelable {
                 && modeId == other.modeId
                 && renderFrameRate == other.renderFrameRate
                 && defaultModeId == other.defaultModeId
+                && userPreferredModeId == other.userPreferredModeId
                 && Arrays.equals(supportedModes, other.supportedModes)
                 && colorMode == other.colorMode
                 && Arrays.equals(supportedColorModes, other.supportedColorModes)
@@ -478,6 +485,7 @@ public final class DisplayInfo implements Parcelable {
         modeId = other.modeId;
         renderFrameRate = other.renderFrameRate;
         defaultModeId = other.defaultModeId;
+        userPreferredModeId = other.userPreferredModeId;
         supportedModes = Arrays.copyOf(other.supportedModes, other.supportedModes.length);
         colorMode = other.colorMode;
         supportedColorModes = Arrays.copyOf(
@@ -530,6 +538,7 @@ public final class DisplayInfo implements Parcelable {
         modeId = source.readInt();
         renderFrameRate = source.readFloat();
         defaultModeId = source.readInt();
+        userPreferredModeId = source.readInt();
         int nModes = source.readInt();
         supportedModes = new Display.Mode[nModes];
         for (int i = 0; i < nModes; i++) {
@@ -596,6 +605,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(modeId);
         dest.writeFloat(renderFrameRate);
         dest.writeInt(defaultModeId);
+        dest.writeInt(userPreferredModeId);
         dest.writeInt(supportedModes.length);
         for (int i = 0; i < supportedModes.length; i++) {
             supportedModes[i].writeToParcel(dest, flags);
@@ -832,9 +842,12 @@ public final class DisplayInfo implements Parcelable {
         sb.append(presentationDeadlineNanos);
         sb.append(", mode ");
         sb.append(modeId);
+        sb.append(", renderFrameRate ");
         sb.append(renderFrameRate);
         sb.append(", defaultMode ");
         sb.append(defaultModeId);
+        sb.append(", userPreferredModeId ");
+        sb.append(userPreferredModeId);
         sb.append(", modes ");
         sb.append(Arrays.toString(supportedModes));
         sb.append(", hdrCapabilities ");

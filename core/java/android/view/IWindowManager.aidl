@@ -316,14 +316,14 @@ interface IWindowManager
      * android.view.Display#DEFAULT_DISPLAY} and given rotation.
      */
     @UnsupportedAppUsage
-    void freezeRotation(int rotation);
+    void freezeRotation(int rotation, String caller);
 
     /**
      * Equivalent to calling {@link #thawDisplayRotation(int)} with {@link
      * android.view.Display#DEFAULT_DISPLAY}.
      */
     @UnsupportedAppUsage
-    void thawRotation();
+    void thawRotation(String caller);
 
     /**
      * Equivelant to call {@link #isDisplayRotationFrozen(int)} with {@link
@@ -341,7 +341,7 @@ interface IWindowManager
      *        {@link android.view.Surface#ROTATION_270} or -1 to freeze it to current rotation.
      * @hide
      */
-    void freezeDisplayRotation(int displayId, int rotation);
+    void freezeDisplayRotation(int displayId, int rotation, String caller);
 
     /**
      * Release the orientation lock imposed by freezeRotation() on the display.
@@ -349,7 +349,7 @@ interface IWindowManager
      * @param displayId the ID of display which rotation should be thawed.
      * @hide
      */
-    void thawDisplayRotation(int displayId);
+    void thawDisplayRotation(int displayId, String caller);
 
     /**
      * Gets whether the rotation is frozen on the display.

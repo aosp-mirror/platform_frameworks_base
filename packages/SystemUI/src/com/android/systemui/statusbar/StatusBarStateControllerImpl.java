@@ -104,8 +104,9 @@ public class StatusBarStateControllerImpl implements
     // Record the HISTORY_SIZE most recent states
     private int mHistoryIndex = 0;
     private HistoricalState[] mHistoricalRecords = new HistoricalState[HISTORY_SIZE];
-    // This is used by InteractionJankMonitor to get callback from HWUI.
+    // These views are used by InteractionJankMonitor to get callback from HWUI.
     private View mView;
+    private KeyguardClockSwitch mClockSwitchView;
 
     /**
      * If any of the system bars is hidden.
@@ -334,6 +335,7 @@ public class StatusBarStateControllerImpl implements
         if ((mView == null || !mView.isAttachedToWindow())
                 && (view != null && view.isAttachedToWindow())) {
             mView = view;
+            mClockSwitchView = view.findViewById(R.id.keyguard_clock_container);
         }
         mDozeAmountTarget = dozeAmount;
         if (animated) {
@@ -416,21 +418,12 @@ public class StatusBarStateControllerImpl implements
 
     /** Returns the id of the currently rendering clock */
     public String getClockId() {
-        if (mView == null) {
-            return KeyguardClockSwitch.MISSING_CLOCK_ID;
-        }
-
-        View clockSwitch = mView.findViewById(R.id.keyguard_clock_container);
-        if (clockSwitch == null) {
+        if (mClockSwitchView == null) {
             Log.e(TAG, "Clock container was missing");
             return KeyguardClockSwitch.MISSING_CLOCK_ID;
         }
-        if (!(clockSwitch instanceof KeyguardClockSwitch)) {
-            Log.e(TAG, "Clock container was incorrect type: " + clockSwitch);
-            return KeyguardClockSwitch.MISSING_CLOCK_ID;
-        }
 
-        return ((KeyguardClockSwitch) clockSwitch).getClockId();
+        return mClockSwitchView.getClockId();
     }
 
     private void beginInteractionJankMonitor() {

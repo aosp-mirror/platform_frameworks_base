@@ -1021,7 +1021,7 @@ abstract public class ManagedServices {
         synchronized (mSnoozing) {
             mSnoozing.remove(user);
         }
-        rebindServices(true, user);
+        unbindUserServices(user);
     }
 
     public void onUserSwitched(int user) {
@@ -1408,12 +1408,24 @@ abstract public class ManagedServices {
     void unbindOtherUserServices(int currentUser) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("ManagedServices.unbindOtherUserServices_current" + currentUser);
-        final SparseArray<Set<ComponentName>> componentsToUnbind = new SparseArray<>();
+        unbindServicesImpl(currentUser, true /* allExceptUser */);
+        t.traceEnd();
+    }
 
+    void unbindUserServices(int user) {
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("ManagedServices.unbindUserServices" + user);
+        unbindServicesImpl(user, false /* allExceptUser */);
+        t.traceEnd();
+    }
+
+    void unbindServicesImpl(int user, boolean allExceptUser) {
+        final SparseArray<Set<ComponentName>> componentsToUnbind = new SparseArray<>();
         synchronized (mMutex) {
             final Set<ManagedServiceInfo> removableBoundServices = getRemovableConnectedServices();
             for (ManagedServiceInfo info : removableBoundServices) {
-                if (info.userid != currentUser) {
+                if ((allExceptUser && (info.userid != user))
+                        || (!allExceptUser && (info.userid == user))) {
                     Set<ComponentName> toUnbind =
                             componentsToUnbind.get(info.userid, new ArraySet<>());
                     toUnbind.add(info.component);
@@ -1422,7 +1434,6 @@ abstract public class ManagedServices {
             }
         }
         unbindFromServices(componentsToUnbind);
-        t.traceEnd();
     }
 
     protected void unbindFromServices(SparseArray<Set<ComponentName>> componentsToUnbind) {

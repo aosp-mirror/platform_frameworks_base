@@ -67,6 +67,7 @@ droidstubs {
             tag: ".removed-api.txt",
         },
     ],
+    api_surface: "public",
 }
 
 priv_apps = " --show-annotation android.annotation.SystemApi\\(" +
@@ -120,6 +121,7 @@ droidstubs {
             tag: ".removed-api.txt",
         },
     ],
+    api_surface: "system",
 }
 
 droidstubs {
@@ -166,6 +168,7 @@ droidstubs {
             tag: ".removed-api.txt",
         },
     ],
+    api_surface: "test",
 }
 
 droidstubs {
@@ -205,6 +208,7 @@ droidstubs {
             tag: ".removed-api.txt",
         },
     ],
+    api_surface: "module-lib",
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -381,8 +385,8 @@ java_defaults {
 java_api_library {
     name: "android-non-updatable.stubs.from-text",
     api_surface: "public",
-    api_files: [
-        ":non-updatable-current.txt",
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
     ],
     defaults: ["android-non-updatable_from_text_defaults"],
     full_api_surface_stub: "android_stubs_current.from-text",
@@ -391,9 +395,9 @@ java_api_library {
 java_api_library {
     name: "android-non-updatable.stubs.system.from-text",
     api_surface: "system",
-    api_files: [
-        ":non-updatable-current.txt",
-        ":non-updatable-system-current.txt",
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
     ],
     defaults: ["android-non-updatable_from_text_defaults"],
     full_api_surface_stub: "android_system_stubs_current.from-text",
@@ -402,10 +406,10 @@ java_api_library {
 java_api_library {
     name: "android-non-updatable.stubs.test.from-text",
     api_surface: "test",
-    api_files: [
-        ":non-updatable-current.txt",
-        ":non-updatable-system-current.txt",
-        ":non-updatable-test-current.txt",
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+        "test-api-stubs-docs-non-updatable.api.contribution",
     ],
     defaults: ["android-non-updatable_from_text_defaults"],
     full_api_surface_stub: "android_test_stubs_current.from-text",
@@ -414,10 +418,10 @@ java_api_library {
 java_api_library {
     name: "android-non-updatable.stubs.module_lib.from-text",
     api_surface: "module_lib",
-    api_files: [
-        ":non-updatable-current.txt",
-        ":non-updatable-system-current.txt",
-        ":non-updatable-module-lib-current.txt",
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+        "module-lib-api-stubs-docs-non-updatable.api.contribution",
     ],
     defaults: ["android-non-updatable_from_text_defaults"],
     full_api_surface_stub: "android_module_lib_stubs_current_full.from-text",
@@ -615,7 +619,6 @@ java_defaults {
     name: "android_test_stubs_current_contributions",
     api_surface: "test",
     api_contributions: [
-        "test-api-stubs-docs-non-updatable.api.contribution",
         "framework-virtualization.stubs.source.test.api.contribution",
         "framework-location.stubs.source.test.api.contribution",
     ],
@@ -690,6 +693,7 @@ java_api_library {
     api_contributions: [
         "api-stubs-docs-non-updatable.api.contribution",
         "system-api-stubs-docs-non-updatable.api.contribution",
+        "test-api-stubs-docs-non-updatable.api.contribution",
     ],
     visibility: ["//visibility:public"],
 }

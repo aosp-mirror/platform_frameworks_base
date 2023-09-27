@@ -1123,12 +1123,6 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
-    "-1076978367": {
-      "message": "thawRotation: mRotation=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-1075136930": {
       "message": "startLockTaskMode: Can't lock due to auth",
       "level": "WARN",
@@ -1230,6 +1224,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "-962760979": {
+      "message": "thawRotation: mRotation=%d, caller=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-961053385": {
       "message": "attachWindowContextToDisplayArea: calling from non-existing process pid=%d uid=%d",
@@ -2776,6 +2776,12 @@
     "355720268": {
       "message": "stopFreezingDisplayLocked: Unfreezing now",
       "level": "DEBUG",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "364992694": {
+      "message": "freezeDisplayRotation: current rotation=%d, new rotation=%d, caller=%s",
+      "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },

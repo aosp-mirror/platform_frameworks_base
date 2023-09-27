@@ -124,6 +124,8 @@ public final class BugreportParams {
 
     /**
      * Options for a lightweight bugreport intended to be taken for onboarding-related flows.
+     *
+     * @hide
      */
     public static final int BUGREPORT_MODE_ONBOARDING = IDumpstate.BUGREPORT_MODE_ONBOARDING;
 

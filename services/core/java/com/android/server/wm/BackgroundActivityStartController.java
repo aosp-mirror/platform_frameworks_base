@@ -418,7 +418,7 @@ public class BackgroundActivityStartController {
             callerAppUid = realCallingUid;
         }
         // don't abort if the callerApp or other processes of that uid are allowed in any way
-        if (callerApp != null && useCallingUidState) {
+        if (callerApp != null && (useCallingUidState || callerAppBasedOnPiSender)) {
             // first check the original calling process
             final @BalCode int balAllowedForCaller = callerApp
                     .areBackgroundActivityStartsAllowed(appSwitchState);
@@ -509,6 +509,7 @@ public class BackgroundActivityStartController {
                 + "; intent: " + intent
                 + "; callerApp: " + callerApp
                 + "; inVisibleTask: " + (callerApp != null && callerApp.hasActivityInVisibleTask())
+                + "; resultIfPiSenderAllowsBal: " + balCodeToString(resultIfPiSenderAllowsBal)
                 + "]";
         if (resultIfPiSenderAllowsBal != BAL_BLOCK) {
             // We should have returned before if !logVerdictChangeByPiDefaultChange
