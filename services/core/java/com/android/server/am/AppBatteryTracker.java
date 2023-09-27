@@ -82,6 +82,7 @@ import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.AppRestrictionController.UidBatteryUsageProvider;
 import com.android.server.pm.UserManagerInternal;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
@@ -571,8 +572,18 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             builder = new BatteryUsageStatsQuery.Builder()
                     .includeProcessStateData()
                     .aggregateSnapshots(lastUidBatteryUsageStartTs, curStart);
-            updateBatteryUsageStatsOnceInternal(0, buf, builder, userIds, batteryStatsInternal);
+            final BatteryUsageStats statsCommit =
+                    updateBatteryUsageStatsOnceInternal(0,
+                            buf,
+                            builder,
+                            userIds,
+                            batteryStatsInternal);
             curDuration += curStart - lastUidBatteryUsageStartTs;
+            try {
+                statsCommit.close();
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to close a stat");
+            }
         }
         if (needUpdateUidBatteryUsageInWindow && curDuration >= windowSize) {
             // If we do have long enough data for the window, save it.
@@ -648,8 +659,14 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 }
             }
         }
+        try {
+            stats.close();
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed to close a stat");
+        }
     }
 
+    // The BatteryUsageStats object MUST BE CLOSED when finished using
     private BatteryUsageStats updateBatteryUsageStatsOnceInternal(long expectedDuration,
             SparseArray<BatteryUsage> buf, BatteryUsageStatsQuery.Builder builder,
             ArraySet<UserHandle> userIds, BatteryStatsInternal batteryStatsInternal) {
@@ -662,7 +679,16 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             // Shouldn't happen unless in test.
             return null;
         }
+        // We need the first stat in the list, so we should
+        // close out the others.
         final BatteryUsageStats stats = statsList.get(0);
+        for (int i = 1; i < statsList.size(); i++) {
+            try {
+                statsList.get(i).close();
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to close a stat in BatteryUsageStats List");
+            }
+        }
         final List<UidBatteryConsumer> uidConsumers = stats.getUidBatteryConsumers();
         if (uidConsumers != null) {
             final long start = stats.getStatsStartTimestamp();
