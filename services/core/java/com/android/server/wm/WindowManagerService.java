@@ -9646,4 +9646,15 @@ public class WindowManagerService extends IWindowManager.Stub
             Binder.restoreCallingIdentity(origId);
         }
     }
+
+    /**
+     * Resets the spatial ordering of recents for testing purposes.
+     */
+    void resetFreezeRecentTaskListReordering() {
+        if (!checkCallingPermission(MANAGE_ACTIVITY_TASKS,
+                "resetFreezeRecentTaskListReordering()")) {
+            throw new SecurityException("Requires MANAGE_ACTIVITY_TASKS permission");
+        }
+        mAtmService.getRecentTasks().resetFreezeTaskListReorderingOnTimeout();
+    }
 }
