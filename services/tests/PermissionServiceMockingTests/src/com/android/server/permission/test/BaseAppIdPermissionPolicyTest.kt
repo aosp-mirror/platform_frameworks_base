@@ -34,7 +34,6 @@ import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.permission.AppIdPermissionPolicy
 import com.android.server.permission.access.permission.Permission
-import com.android.server.permission.access.permission.PermissionFlags
 import com.android.server.permission.access.util.hasBits
 import com.android.server.pm.parsing.PackageInfoUtils
 import com.android.server.pm.pkg.AndroidPackage
@@ -45,10 +44,8 @@ import com.android.server.pm.pkg.component.ParsedPermissionGroup
 import com.android.server.testutils.any
 import com.android.server.testutils.mock
 import com.android.server.testutils.whenever
-import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Before
 import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyLong
 
@@ -56,7 +53,7 @@ import org.mockito.ArgumentMatchers.anyLong
  * Mocking unit test for AppIdPermissionPolicy.
  */
 @RunWith(AndroidJUnit4::class)
-open class BaseAppIdPermissionPolicyTest {
+abstract class BaseAppIdPermissionPolicyTest {
     protected lateinit var oldState: MutableAccessState
     protected lateinit var newState: MutableAccessState
 
@@ -80,7 +77,7 @@ open class BaseAppIdPermissionPolicyTest {
         .build()
 
     @Before
-    open fun setUp() {
+    fun baseSetUp() {
         oldState = MutableAccessState()
         createUserState(USER_ID_0)
         oldState.mutateExternalState().setPackageStates(ArrayMap())
@@ -139,78 +136,6 @@ open class BaseAppIdPermissionPolicyTest {
         }
     }
 
-    @Test
-    fun testOnAppIdRemoved_appIdIsRemoved_permissionFlagsCleared() {
-        val parsedPermission = mockParsedPermission(PERMISSION_NAME_0, PACKAGE_NAME_0)
-        val permissionOwnerPackageState = mockPackageState(
-            APP_ID_0,
-            mockAndroidPackage(PACKAGE_NAME_0, permissions = listOf(parsedPermission))
-        )
-        val requestingPackageState = mockPackageState(
-            APP_ID_1,
-            mockAndroidPackage(PACKAGE_NAME_1, requestedPermissions = setOf(PERMISSION_NAME_0))
-        )
-        addPackageState(permissionOwnerPackageState)
-        addPackageState(requestingPackageState)
-        addPermission(parsedPermission)
-        setPermissionFlags(APP_ID_1, USER_ID_0, PERMISSION_NAME_0, PermissionFlags.INSTALL_GRANTED)
-
-        mutateState {
-            with(appIdPermissionPolicy) {
-                onAppIdRemoved(APP_ID_1)
-            }
-        }
-
-        val actualFlags = getPermissionFlags(APP_ID_1, USER_ID_0, PERMISSION_NAME_0)
-        val expectedNewFlags = 0
-        assertWithMessage(
-            "After onAppIdRemoved() is called for appId $APP_ID_1 that requests a permission" +
-                " owns by appId $APP_ID_0 with existing permission flags. The actual permission" +
-                " flags $actualFlags should be null"
-        )
-            .that(actualFlags)
-            .isEqualTo(expectedNewFlags)
-    }
-
-    @Test
-    fun testOnPackageRemoved_packageIsRemoved_permissionsAreTrimmedAndStatesAreEvaluated() {
-        // TODO
-        // shouldn't reuse test cases because it's really different despite it's also for
-        // trim permission states. It's different because it's package removal
-    }
-
-    @Test
-    fun testOnPackageInstalled_nonSystemAppIsInstalled_upgradeExemptFlagIsCleared() {
-        // TODO
-        // should be fine for it to be its own test cases and not to re-use
-        // clearRestrictedPermissionImplicitExemption
-    }
-
-    @Test
-    fun testOnPackageInstalled_systemAppIsInstalled_upgradeExemptFlagIsRetained() {
-        // TODO
-    }
-
-    @Test
-    fun testOnPackageInstalled_requestedPermissionAlsoRequestedBySystemApp_exemptFlagIsRetained() {
-        // TODO
-    }
-
-    @Test
-    fun testOnPackageInstalled_restrictedPermissionsNotExempt_getsRestrictionFlags() {
-        // TODO
-    }
-
-    @Test
-    fun testOnPackageInstalled_restrictedPermissionsIsExempted_clearsRestrictionFlags() {
-        // TODO
-    }
-
-    @Test
-    fun testOnStateMutated_notEmpty_isCalledForEachListener() {
-        // TODO
-    }
-
     /**
      * Mock an AndroidPackage with PACKAGE_NAME_0, PERMISSION_NAME_0 and PERMISSION_GROUP_NAME_0
      */
@@ -220,6 +145,15 @@ open class BaseAppIdPermissionPolicyTest {
             permissionGroups = listOf(defaultPermissionGroup),
             permissions = listOf(defaultPermissionTree, defaultPermission)
         )
+
+    protected fun createSimplePermission(isTree: Boolean = false): Permission {
+        val parsedPermission = if (isTree) { defaultPermissionTree } else { defaultPermission }
+        val permissionInfo = PackageInfoUtils.generatePermissionInfo(
+            parsedPermission,
+            PackageManager.GET_META_DATA.toLong()
+        )!!
+        return Permission(permissionInfo, true, Permission.TYPE_MANIFEST, APP_ID_0)
+    }
 
     protected inline fun mutateState(action: MutateStateScope.() -> Unit) {
         newState = oldState.toMutable()
@@ -330,12 +264,23 @@ open class BaseAppIdPermissionPolicyTest {
     ) {
         state.mutateExternalState().apply {
             setPackageStates(
-                packageStates.toMutableMap().apply {
-                    put(packageState.packageName, packageState)
-                }
+                packageStates.toMutableMap().apply { put(packageState.packageName, packageState) }
             )
             mutateAppIdPackageNames().mutateOrPut(packageState.appId) { MutableIndexedListSet() }
                 .add(packageState.packageName)
+        }
+    }
+
+    protected fun removePackageState(
+        packageState: PackageState,
+        state: MutableAccessState = oldState
+    ) {
+        state.mutateExternalState().apply {
+            setPackageStates(
+                packageStates.toMutableMap().apply { remove(packageState.packageName) }
+            )
+            mutateAppIdPackageNames().mutateOrPut(packageState.appId) { MutableIndexedListSet() }
+                .remove(packageState.packageName)
         }
     }
 
@@ -429,6 +374,7 @@ open class BaseAppIdPermissionPolicyTest {
         @JvmStatic protected val PERMISSION_NAME_0 = "permissionName0"
         @JvmStatic protected val PERMISSION_NAME_1 = "permissionName1"
         @JvmStatic protected val PERMISSION_NAME_2 = "permissionName2"
+        @JvmStatic protected val PERMISSION_BELONGS_TO_A_TREE = "permissionTree.permission"
         @JvmStatic protected val PERMISSION_READ_EXTERNAL_STORAGE =
             Manifest.permission.READ_EXTERNAL_STORAGE
         @JvmStatic protected val PERMISSION_POST_NOTIFICATIONS =

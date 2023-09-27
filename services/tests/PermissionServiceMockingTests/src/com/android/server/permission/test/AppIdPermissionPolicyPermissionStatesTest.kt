@@ -43,8 +43,7 @@ class AppIdPermissionPolicyPermissionStatesTest : BaseAppIdPermissionPolicyTest(
     @Parameterized.Parameter(0) lateinit var action: Action
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    fun setUp() {
         if (action == Action.ON_USER_ADDED) {
             createUserState(USER_ID_NEW)
         }
