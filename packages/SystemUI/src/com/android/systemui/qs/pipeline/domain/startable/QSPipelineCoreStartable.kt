@@ -20,6 +20,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.pipeline.domain.interactor.AutoAddInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
+import com.android.systemui.qs.pipeline.domain.interactor.RestoreReconciliationInteractor
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import javax.inject.Inject
 
@@ -30,11 +31,13 @@ constructor(
     private val currentTilesInteractor: CurrentTilesInteractor,
     private val autoAddInteractor: AutoAddInteractor,
     private val featureFlags: QSPipelineFlagsRepository,
+    private val restoreReconciliationInteractor: RestoreReconciliationInteractor,
 ) : CoreStartable {
 
     override fun start() {
         if (featureFlags.pipelineAutoAddEnabled) {
             autoAddInteractor.init(currentTilesInteractor)
+            restoreReconciliationInteractor.start()
         }
     }
 }
