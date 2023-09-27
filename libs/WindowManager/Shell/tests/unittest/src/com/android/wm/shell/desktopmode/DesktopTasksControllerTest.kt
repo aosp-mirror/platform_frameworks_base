@@ -180,7 +180,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps(DEFAULT_DISPLAY, RemoteTransition(TestRemoteTransition()))
 
-        val wct = getLatestWct(type = TRANSIT_OPEN, handlerClass = OneShotRemoteHandler::class.java)
+        val wct =
+            getLatestWct(type = TRANSIT_TO_FRONT, handlerClass = OneShotRemoteHandler::class.java)
         assertThat(wct.hierarchyOps).hasSize(3)
         // Expect order to be from bottom: home, task1, task2
         wct.assertReorderAt(index = 0, homeTask)
@@ -198,7 +199,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps(DEFAULT_DISPLAY, RemoteTransition(TestRemoteTransition()))
 
-        val wct = getLatestWct(type = TRANSIT_OPEN, handlerClass = OneShotRemoteHandler::class.java)
+        val wct =
+            getLatestWct(type = TRANSIT_TO_FRONT, handlerClass = OneShotRemoteHandler::class.java)
         assertThat(wct.hierarchyOps).hasSize(3)
         // Expect order to be from bottom: home, task1, task2
         wct.assertReorderAt(index = 0, homeTask)
@@ -216,7 +218,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps(DEFAULT_DISPLAY, RemoteTransition(TestRemoteTransition()))
 
-        val wct = getLatestWct(type = TRANSIT_OPEN, handlerClass = OneShotRemoteHandler::class.java)
+        val wct =
+            getLatestWct(type = TRANSIT_TO_FRONT, handlerClass = OneShotRemoteHandler::class.java)
         assertThat(wct.hierarchyOps).hasSize(3)
         // Expect order to be from bottom: home, task1, task2
         wct.assertReorderAt(index = 0, homeTask)
@@ -230,7 +233,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps(DEFAULT_DISPLAY, RemoteTransition(TestRemoteTransition()))
 
-        val wct = getLatestWct(type = TRANSIT_OPEN, handlerClass = OneShotRemoteHandler::class.java)
+        val wct =
+            getLatestWct(type = TRANSIT_TO_FRONT, handlerClass = OneShotRemoteHandler::class.java)
         assertThat(wct.hierarchyOps).hasSize(1)
         wct.assertReorderAt(index = 0, homeTask)
     }
@@ -246,7 +250,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps(DEFAULT_DISPLAY, RemoteTransition(TestRemoteTransition()))
 
-        val wct = getLatestWct(type = TRANSIT_OPEN, handlerClass = OneShotRemoteHandler::class.java)
+        val wct =
+            getLatestWct(type = TRANSIT_TO_FRONT, handlerClass = OneShotRemoteHandler::class.java)
         assertThat(wct.hierarchyOps).hasSize(2)
         // Expect order to be from bottom: home, task
         wct.assertReorderAt(index = 0, homeTaskDefaultDisplay)
