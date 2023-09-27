@@ -14,6 +14,7 @@
 
 aconfig_srcjars = [
     ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
+    ":android.nfc.flags-aconfig-java{.generated_srcjars}",
     ":android.os.flags-aconfig-java{.generated_srcjars}",
     ":android.security.flags-aconfig-java{.generated_srcjars}",
     ":com.android.hardware.camera2-aconfig-java{.generated_srcjars}",
@@ -107,6 +108,19 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.os.flags-aconfig-java",
     aconfig_declarations: "android.os.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// NFC
+aconfig_declarations {
+    name: "android.nfc.flags-aconfig",
+    package: "android.nfc",
+    srcs: ["core/java/android/nfc/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.nfc.flags-aconfig-java",
+    aconfig_declarations: "android.nfc.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
