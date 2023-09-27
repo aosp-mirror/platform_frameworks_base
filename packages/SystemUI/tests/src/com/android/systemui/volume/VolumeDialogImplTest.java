@@ -41,7 +41,6 @@ import static org.mockito.Mockito.when;
 import android.app.KeyguardManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
-import android.os.Handler;
 import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -146,10 +145,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
-
-        // Ensure previous tests have not left messages on main looper
-        Handler localHandler = new Handler(mTestableLooper.getLooper());
-        localHandler.removeCallbacksAndMessages(null);
 
         when(mPostureController.getDevicePosture())
                 .thenReturn(DevicePostureController.DEVICE_POSTURE_CLOSED);
