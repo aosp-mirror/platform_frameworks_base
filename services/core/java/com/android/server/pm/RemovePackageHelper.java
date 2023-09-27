@@ -402,7 +402,7 @@ final class RemovePackageHelper {
                 mBroadcastHelper.sendPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
             }
         } else if (!deletedPs.isSystem() && outInfo != null && !outInfo.mIsUpdate
-                && outInfo.mRemovedUsers != null) {
+                && outInfo.mRemovedUsers != null && !outInfo.mIsExternal) {
             // For non-system uninstalls with DELETE_KEEP_DATA, set the installed state to false
             // for affected users. This does not apply to app updates where the old apk is replaced
             // but the old data remains.
