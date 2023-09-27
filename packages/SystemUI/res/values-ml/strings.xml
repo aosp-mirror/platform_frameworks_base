@@ -1141,7 +1141,8 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"കുറുക്കുവഴിയായി Wallet ആപ്പ് ചേർക്കാൻ, ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"കുറുക്കുവഴിയായി Wallet ആപ്പ് ചേർക്കാൻ, ഒരു കാർഡെങ്കിലും ചേർത്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"കുറുക്കുവഴിയായി Home ആപ്പ് ചേർക്കാൻ, ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• ഒരു ഉപകരണമെങ്കിലും ലഭ്യമാണ്"</string>
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
+    <skip />
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"കുറിപ്പ് രേഖപ്പെടുത്തൽ കുറുക്കുവഴി ഉപയോഗിക്കുന്നതിന് ഒരു ഡിഫോൾട്ട് കുറിപ്പ് ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"സ്പർശിച്ച് പിടിക്കുക കുറുക്കുവഴി"</string>

@@ -1141,7 +1141,8 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"सर्टकटका रूपमा Wallet एप हाल्न उक्त एप इन्स्टल गरिएको छ भन्ने कुरा सुनिश्चित गर्नुहोस्"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"सर्टकटका रूपमा Wallet एप हाल्न कम्तीमा एउटा कार्ड हालिएको छ भन्ने कुरा सुनिश्चित गर्नुहोस्"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home एपलाई सर्टकटका रूपमा हाल्न उक्त एप इन्स्टल गरिएको छ भन्ने कुरा सुनिश्चित गर्नुहोस्"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• कम्तीमा एउटा डिभाइस उपलब्ध छ"</string>
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
+    <skip />
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"नोट बनाउनेसम्बन्धी सर्टकट प्रयोग गर्न नोट बनाउने डिफल्ट एप चयन गर्नुहोस्"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"एप चयन गर्नुहोस्"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"सर्टकट थिचिराख्नुहोस्"</string>

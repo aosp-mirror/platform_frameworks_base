@@ -151,7 +151,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ముఖం గుర్తించబడింది. కొనసాగడానికి అన్‌లాక్ చిహ్నం నొక్కండి."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ప్రామాణీకరించబడింది"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ప్రామాణీకరణను రద్దు చేయండి"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"పిన్‌ను ఉపయోగించండి"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PINను ఉపయోగించండి"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ఆకృతిని ఉపయోగించండి"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"పాస్‌వర్డ్‌ను ఉపయోగించండి"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN తప్పు"</string>
@@ -1141,7 +1141,8 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet యాప్‌ను షార్ట్‌కట్‌గా జోడించడానికి, యాప్ ఇన్‌స్టాల్ చేయబడిందని నిర్ధారించుకోండి"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet యాప్‌ను షార్ట్‌కట్‌గా జోడించడానికి, కనీసం ఒక కార్డ్ జోడించబడిందని నిర్ధారించుకోండి"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home యాప్‌ను షార్ట్‌కట్‌గా జోడించడానికి, యాప్ ఇన్‌స్టాల్ చేయబడిందని నిర్ధారించుకోండి"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• కనీసం ఒక పరికరమైనా అందుబాటులో ఉందని"</string>
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
+    <skip />
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"నోట్‌టేకింగ్ షార్ట్‌కట్‌ను ఉపయోగించడానికి ఆటోమేటిక్ సెట్టింగ్ నోట్స్ యాప్‌ను ఎంచుకోండి"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"యాప్‌ను ఎంచుకోండి"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"షార్ట్‌కట్‌ను తాకి, నొక్కి ఉంచు"</string>
