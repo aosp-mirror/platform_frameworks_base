@@ -27,7 +27,7 @@ import org.junit.Test
 open class EnterSplitScreenByDragFromNotificationGesturalNavLandscape :
     EnterSplitScreenByDragFromNotification(Rotation.ROTATION_90) {
     @get:Rule
-    val flickerServiceRule = FlickerServiceRule(enabled = true, failTestOnFaasFailure = false)
+    val flickerServiceRule = FlickerServiceRule(enabled = true, failTestOnFlicker = false)
 
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
