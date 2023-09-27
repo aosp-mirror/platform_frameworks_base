@@ -62,15 +62,6 @@ metalava_cmd = "$(location metalava)"
 metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
 metalava_cmd += " --quiet "
 
-genrule {
-    name: "current-api-xml",
-    tools: ["metalava"],
-    srcs: [":frameworks-base-api-current.txt"],
-    out: ["current.api"],
-    cmd: metalava_cmd + "signature-to-jdiff $(in) $(out)",
-    visibility: ["//visibility:public"],
-}
-
 combined_apis {
     name: "frameworks-base-api",
     bootclasspath: [
