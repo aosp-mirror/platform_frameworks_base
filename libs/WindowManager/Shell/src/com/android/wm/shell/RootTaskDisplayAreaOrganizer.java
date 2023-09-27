@@ -32,6 +32,7 @@ import android.view.SurfaceControl;
 import android.window.DisplayAreaAppearedInfo;
 import android.window.DisplayAreaInfo;
 import android.window.DisplayAreaOrganizer;
+import android.window.SystemPerformanceHinter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -57,6 +58,14 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
             new SparseArray<>();
     /** {@link DisplayAreaContext} list, which is mapped by display IDs. */
     private final SparseArray<DisplayAreaContext> mDisplayAreaContexts = new SparseArray<>();
+
+    private final SystemPerformanceHinter.DisplayRootProvider mPerfRootProvider =
+            new SystemPerformanceHinter.DisplayRootProvider() {
+                @Override
+                public SurfaceControl getRootForDisplay(int displayId) {
+                    return mLeashes.get(displayId);
+                }
+            };
 
     private final Context mContext;
 
@@ -227,6 +236,11 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
     @UiContext
     public Context getContext(int displayId) {
         return mDisplayAreaContexts.get(displayId);
+    }
+
+    @NonNull
+    public SystemPerformanceHinter.DisplayRootProvider getPerformanceRootProvider() {
+        return mPerfRootProvider;
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {
