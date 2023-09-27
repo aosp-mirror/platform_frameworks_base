@@ -807,8 +807,7 @@ object Flags {
 
     // TODO(b/287205379): Tracking bug
     @JvmField
-    val QS_CONTAINER_GRAPH_OPTIMIZER = unreleasedFlag( "qs_container_graph_optimizer",
-            teamfood = true)
+    val QS_CONTAINER_GRAPH_OPTIMIZER = releasedFlag( "qs_container_graph_optimizer")
 
     /** Enable showing a dialog when clicking on Quick Settings bluetooth tile. */
     @JvmField
