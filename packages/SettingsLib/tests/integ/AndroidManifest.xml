@@ -41,7 +41,7 @@
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="com.android.settingslib"
+        android:targetPackage="com.android.settingslib.tests.integ"
         android:label="Tests for SettingsLib">
     </instrumentation>
 </manifest>
