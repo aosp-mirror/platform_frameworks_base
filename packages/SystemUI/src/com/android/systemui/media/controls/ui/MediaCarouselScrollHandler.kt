@@ -282,13 +282,14 @@ class MediaCarouselScrollHandler(
             // It's an up and the fling didn't take it above
             val relativePos = scrollView.relativeScrollX % playerWidthPlusPadding
             val scrollXAmount: Int =
-                if (isRtl xor (relativePos > playerWidthPlusPadding / 2)) {
+                if (relativePos > playerWidthPlusPadding / 2) {
                     playerWidthPlusPadding - relativePos
                 } else {
                     -1 * relativePos
                 }
             if (scrollXAmount != 0) {
-                val newScrollX = scrollView.relativeScrollX + scrollXAmount
+                val dx = if (isRtl) -scrollXAmount else scrollXAmount
+                val newScrollX = scrollView.scrollX + dx
                 // Delay the scrolling since scrollView calls springback which cancels
                 // the animation again..
                 mainExecutor.execute { scrollView.smoothScrollTo(newScrollX, scrollView.scrollY) }
@@ -539,7 +540,8 @@ class MediaCarouselScrollHandler(
         // If the removed media item is "left of" the active one (in an absolute sense), we need to
         // scroll the view to keep that player in view.  This is because scroll position is always
         // calculated from left to right.
-        val leftOfActive = if (isRtl) !beforeActive else beforeActive
+        // For RTL, we need to scroll if the visible media player is the last item.
+        val leftOfActive = if (isRtl && visibleMediaIndex != 0) !beforeActive else beforeActive
         if (leftOfActive) {
             scrollView.scrollX = Math.max(scrollView.scrollX - playerWidthPlusPadding, 0)
         }

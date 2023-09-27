@@ -47,6 +47,22 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_ADAPTIVE_TONE_IMPROVEMENTS_1,
             Flags::enableAdaptiveToneImprovements1);
 
+    private final FlagState mDisplayResolutionRangeVotingState = new FlagState(
+            Flags.FLAG_ENABLE_DISPLAY_RESOLUTION_RANGE_VOTING,
+            Flags::enableDisplayResolutionRangeVoting);
+
+    private final FlagState mUserPreferredModeVoteState = new FlagState(
+            Flags.FLAG_ENABLE_USER_PREFERRED_MODE_VOTE,
+            Flags::enableUserPreferredModeVote);
+
+    private final FlagState mExternalDisplayLimitModeState = new FlagState(
+            Flags.FLAG_ENABLE_MODE_LIMIT_FOR_EXTERNAL_DISPLAY,
+            Flags::enableModeLimitForExternalDisplay);
+
+    private final FlagState mDisplaysRefreshRatesSynchronizationState = new FlagState(
+            Flags.FLAG_ENABLE_DISPLAYS_REFRESH_RATES_SYNCHRONIZATION,
+            Flags::enableDisplaysRefreshRatesSynchronization);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -66,6 +82,33 @@ public class DisplayManagerFlags {
      */
     public boolean isAdaptiveTone1Enabled() {
         return mAdaptiveToneImprovements1.isEnabled();
+    }
+
+    /** Returns whether resolution range voting feature is enabled or not. */
+    public boolean isDisplayResolutionRangeVotingEnabled() {
+        return mDisplayResolutionRangeVotingState.isEnabled();
+    }
+
+    /**
+     * @return Whether user preferred mode is added as a vote in
+     *      {@link com.android.server.display.mode.DisplayModeDirector}
+     */
+    public boolean isUserPreferredModeVoteEnabled() {
+        return mUserPreferredModeVoteState.isEnabled();
+    }
+
+    /**
+     * @return Whether external display mode limitation is enabled.
+     */
+    public boolean isExternalDisplayLimitModeEnabled() {
+        return mExternalDisplayLimitModeState.isEnabled();
+    }
+
+    /**
+     * @return Whether displays refresh rate synchronization is enabled.
+     */
+    public boolean isDisplaysRefreshRatesSynchronizationEnabled() {
+        return mDisplaysRefreshRatesSynchronizationState.isEnabled();
     }
 
     private static class FlagState {

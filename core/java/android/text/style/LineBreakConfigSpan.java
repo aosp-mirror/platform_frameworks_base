@@ -35,6 +35,7 @@ public class LineBreakConfigSpan {
      * Construct a new {@link LineBreakConfigSpan}
      * @param lineBreakConfig a line break config
      */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public LineBreakConfigSpan(@NonNull LineBreakConfig lineBreakConfig) {
         mLineBreakConfig = lineBreakConfig;
     }
@@ -43,6 +44,7 @@ public class LineBreakConfigSpan {
      * Gets an associated line break config.
      * @return associated line break config.
      */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public @NonNull LineBreakConfig getLineBreakConfig() {
         return mLineBreakConfig;
     }

@@ -134,22 +134,24 @@ constructor(
             )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), null)
 
-    private val mobileSubscriptionsChangeEvent: Flow<Unit> = conflatedCallbackFlow {
-        val callback =
-            object : SubscriptionManager.OnSubscriptionsChangedListener() {
-                override fun onSubscriptionsChanged() {
-                    logger.logOnSubscriptionsChanged()
-                    trySend(Unit)
-                }
+    private val mobileSubscriptionsChangeEvent: Flow<Unit> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : SubscriptionManager.OnSubscriptionsChangedListener() {
+                        override fun onSubscriptionsChanged() {
+                            logger.logOnSubscriptionsChanged()
+                            trySend(Unit)
+                        }
+                    }
+
+                subscriptionManager.addOnSubscriptionsChangedListener(
+                    bgDispatcher.asExecutor(),
+                    callback,
+                )
+
+                awaitClose { subscriptionManager.removeOnSubscriptionsChangedListener(callback) }
             }
-
-        subscriptionManager.addOnSubscriptionsChangedListener(
-            bgDispatcher.asExecutor(),
-            callback,
-        )
-
-        awaitClose { subscriptionManager.removeOnSubscriptionsChangedListener(callback) }
-    }
+            .flowOn(bgDispatcher)
 
     /**
      * State flow that emits the set of mobile data subscriptions, each represented by its own
@@ -184,6 +186,7 @@ constructor(
                 telephonyManager.registerTelephonyCallback(bgDispatcher.asExecutor(), callback)
                 awaitClose { telephonyManager.unregisterTelephonyCallback(callback) }
             }
+            .flowOn(bgDispatcher)
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,

@@ -337,6 +337,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         WindowState appWindow = task.getTopVisibleAppMainWindow();
         WindowOnBackInvokedDispatcher dispatcher =
                 new WindowOnBackInvokedDispatcher(context);
+        spyOn(appWindow.mSession);
         doAnswer(invocation -> {
             appWindow.setOnBackInvokedCallbackInfo(invocation.getArgument(1));
             return null;

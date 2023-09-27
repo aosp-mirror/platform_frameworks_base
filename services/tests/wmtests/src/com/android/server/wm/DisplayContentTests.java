@@ -573,7 +573,10 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(window1, mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
 
         // Add a window to the second display, and it should be focused
-        final WindowState window2 = createWindow(null, TYPE_BASE_APPLICATION, dc, "window2");
+        final ActivityRecord app2 = new ActivityBuilder(mAtm)
+                .setTask(new TaskBuilder(mSupervisor).setDisplay(dc).build())
+                .setUseProcess(window1.getProcess()).setOnTop(true).build();
+        final WindowState window2 = createWindow(null, TYPE_BASE_APPLICATION, app2, "window2");
         window2.mActivityRecord.mTargetSdk = targetSdk;
         updateFocusedWindow();
         assertTrue(window2.isFocused());
@@ -1088,7 +1091,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         assertFalse(dc.getRotationReversionController().isAnyOverrideActive());
         dc.getDisplayRotation().setUserRotation(WindowManagerPolicy.USER_ROTATION_LOCKED,
-                ROTATION_90);
+                ROTATION_90, /* caller= */ "DisplayContentTests");
         updateAllDisplayContentAndRotation(dc);
         assertEquals(ROTATION_90, dc.getDisplayRotation()
                 .rotationForOrientation(SCREEN_ORIENTATION_UNSPECIFIED, ROTATION_90));
@@ -1107,7 +1110,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(ROTATION_90, dc.getDisplayRotation()
                 .rotationForOrientation(SCREEN_ORIENTATION_UNSPECIFIED, ROTATION_0));
         dc.getDisplayRotation().setUserRotation(WindowManagerPolicy.USER_ROTATION_FREE,
-                ROTATION_0);
+                ROTATION_0, /* caller= */ "DisplayContentTests");
     }
 
     @Test
@@ -1134,7 +1137,8 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
         dc.getDisplayRotation().setUserRotation(
-                WindowManagerPolicy.USER_ROTATION_LOCKED, ROTATION_180);
+                WindowManagerPolicy.USER_ROTATION_LOCKED, ROTATION_180,
+                /* caller= */ "DisplayContentTests");
         final int newOrientation = getRotatedOrientation(dc);
 
         final Task task = new TaskBuilder(mSupervisor)
@@ -1174,7 +1178,8 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
         dc.getDisplayRotation().setUserRotation(
-                WindowManagerPolicy.USER_ROTATION_LOCKED, ROTATION_0);
+                WindowManagerPolicy.USER_ROTATION_LOCKED, ROTATION_0,
+                /* caller= */ "DisplayContentTests");
         dc.getDefaultTaskDisplayArea().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         final int newOrientation = getRotatedOrientation(dc);
 

@@ -700,7 +700,7 @@ public class DisplayAreaTest extends WindowTestsBase {
     }
 
     private WindowState createWindowState(WindowToken token) {
-        return new WindowState(mWm, mock(Session.class), new TestIWindow(), token,
+        return new WindowState(mWm, getTestSession(), new TestIWindow(), token,
                 null /* parentWindow */, 0 /* appOp */, new WindowManager.LayoutParams(),
                 View.VISIBLE, 0 /* ownerId */, 0 /* showUserId */,
                 false /* ownerCanAddInternalSystemWindow */);

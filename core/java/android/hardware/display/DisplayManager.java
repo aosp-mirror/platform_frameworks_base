@@ -27,6 +27,7 @@ import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -364,11 +365,20 @@ public final class DisplayManager {
 
     /**
      * Virtual display flag: Indicates that the orientation of this display device is coupled to
-     * the rotation of its associated logical display.
+     * the orientation of its associated logical display.
+     * <p>
+     * The flag should not be set when the physical display is mounted in a fixed orientation
+     * such as on a desk. Without this flag, display manager will apply a coordinate transformation
+     * such as a scale and translation to letterbox or pillarbox format under the assumption that
+     * the physical orientation of the display is invariant. With this flag set, the content will
+     * rotate to fill in the space of the display, as it does on the internal device display.
+     * </p>
      *
      * @see #createVirtualDisplay
      * @hide
      */
+    @SuppressLint("UnflaggedApi")
+    @SystemApi
     public static final int VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT = 1 << 7;
 
     /**

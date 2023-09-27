@@ -91,6 +91,7 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.TestUtils;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.mode.DisplayModeDirector.BrightnessObserver;
 import com.android.server.display.mode.DisplayModeDirector.DesiredDisplayModeSpecs;
 import com.android.server.sensors.SensorManagerInternal;
@@ -110,7 +111,9 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -121,10 +124,114 @@ import junitparams.Parameters;
 @SmallTest
 @RunWith(JUnitParamsRunner.class)
 public class DisplayModeDirectorTest {
-    // The tolerance within which we consider something approximately equals.
+    public static Collection<Object[]> getAppRequestedSizeTestCases() {
+        var appRequestedSizeTestCases = Arrays.asList(new Object[][] {
+                {DEFAULT_MODE_75.getModeId(), Float.POSITIVE_INFINITY,
+                        DEFAULT_MODE_75.getRefreshRate(), Map.of()},
+                {APP_MODE_HIGH_90.getModeId(), Float.POSITIVE_INFINITY,
+                        APP_MODE_HIGH_90.getRefreshRate(),
+                        Map.of(
+                                Vote.PRIORITY_APP_REQUEST_SIZE,
+                                Vote.forSize(APP_MODE_HIGH_90.getPhysicalWidth(),
+                                        APP_MODE_HIGH_90.getPhysicalHeight()),
+                                Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+                                Vote.forBaseModeRefreshRate(APP_MODE_HIGH_90.getRefreshRate()))},
+                {LIMIT_MODE_70.getModeId(), Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY,
+                        Map.of(
+                                Vote.PRIORITY_APP_REQUEST_SIZE,
+                                Vote.forSize(APP_MODE_HIGH_90.getPhysicalWidth(),
+                                        APP_MODE_HIGH_90.getPhysicalHeight()),
+                                Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+                                Vote.forBaseModeRefreshRate(APP_MODE_HIGH_90.getRefreshRate()),
+                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.forSize(LIMIT_MODE_70.getPhysicalWidth(),
+                                        LIMIT_MODE_70.getPhysicalHeight()))},
+                {LIMIT_MODE_70.getModeId(), LIMIT_MODE_70.getRefreshRate(),
+                        LIMIT_MODE_70.getRefreshRate(),
+                        Map.of(
+                                Vote.PRIORITY_APP_REQUEST_SIZE,
+                                Vote.forSize(APP_MODE_65.getPhysicalWidth(),
+                                        APP_MODE_65.getPhysicalHeight()),
+                                Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+                                Vote.forBaseModeRefreshRate(APP_MODE_65.getRefreshRate()),
+                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.forSize(LIMIT_MODE_70.getPhysicalWidth(),
+                                        LIMIT_MODE_70.getPhysicalHeight()))},
+                {LIMIT_MODE_70.getModeId(), LIMIT_MODE_70.getRefreshRate(),
+                        LIMIT_MODE_70.getRefreshRate(),
+                        Map.of(
+                                Vote.PRIORITY_APP_REQUEST_SIZE,
+                                Vote.forSize(APP_MODE_65.getPhysicalWidth(),
+                                        APP_MODE_65.getPhysicalHeight()),
+                                Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+                                Vote.forBaseModeRefreshRate(APP_MODE_65.getRefreshRate()),
+                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.forSizeAndPhysicalRefreshRatesRange(
+                                    0, 0,
+                                    LIMIT_MODE_70.getPhysicalWidth(),
+                                    LIMIT_MODE_70.getPhysicalHeight(),
+                                    0, Float.POSITIVE_INFINITY)), false},
+                {APP_MODE_65.getModeId(), APP_MODE_65.getRefreshRate(),
+                        APP_MODE_65.getRefreshRate(),
+                        Map.of(
+                                Vote.PRIORITY_APP_REQUEST_SIZE,
+                                Vote.forSize(APP_MODE_65.getPhysicalWidth(),
+                                        APP_MODE_65.getPhysicalHeight()),
+                                Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+                                Vote.forBaseModeRefreshRate(APP_MODE_65.getRefreshRate()),
+                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.forSizeAndPhysicalRefreshRatesRange(
+                                    0, 0,
+                                    LIMIT_MODE_70.getPhysicalWidth(),
+                                    LIMIT_MODE_70.getPhysicalHeight(),
+                                    0, Float.POSITIVE_INFINITY)), true}});
+
+        final var res = new ArrayList<Object[]>(appRequestedSizeTestCases.size() * 2);
+
+        // Add additional argument for displayResolutionRangeVotingEnabled=false if not present.
+        for (var testCaseArrayArgs : appRequestedSizeTestCases) {
+            if (testCaseArrayArgs.length == 4) {
+                var testCaseListArgs = new ArrayList<>(Arrays.asList(testCaseArrayArgs));
+                testCaseListArgs.add(/* displayResolutionRangeVotingEnabled */ false);
+                res.add(testCaseListArgs.toArray());
+            } else {
+                res.add(testCaseArrayArgs);
+            }
+        }
+
+        // Add additional argument for displayResolutionRangeVotingEnabled=true if not present.
+        for (var testCaseArrayArgs : appRequestedSizeTestCases) {
+            if (testCaseArrayArgs.length == 4) {
+                var testCaseListArgs = new ArrayList<>(Arrays.asList(testCaseArrayArgs));
+                testCaseListArgs.add(/* displayResolutionRangeVotingEnabled */ true);
+                res.add(testCaseListArgs.toArray());
+            }
+        }
+
+        return res;
+    }
+
     private static final String TAG = "DisplayModeDirectorTest";
     private static final boolean DEBUG = false;
     private static final float FLOAT_TOLERANCE = 0.01f;
+
+    private static final Display.Mode APP_MODE_65 = new Display.Mode(
+            /*modeId=*/65, /*width=*/1900, /*height=*/1900, 65);
+    private static final Display.Mode LIMIT_MODE_70 = new Display.Mode(
+            /*modeId=*/70, /*width=*/2000, /*height=*/2000, 70);
+    private static final Display.Mode DEFAULT_MODE_75 = new Display.Mode(
+            /*modeId=*/75, /*width=*/2500, /*height=*/2500, 75);
+    private static final Display.Mode APP_MODE_HIGH_90 = new Display.Mode(
+            /*modeId=*/90, /*width=*/3000, /*height=*/3000, 90);
+    private static final Display.Mode[] TEST_MODES = new Display.Mode[] {
+        new Display.Mode(
+            /*modeId=*/60, /*width=*/1900, /*height=*/1900, 60),
+        APP_MODE_65,
+        LIMIT_MODE_70,
+        DEFAULT_MODE_75,
+        APP_MODE_HIGH_90
+    };
+
     private static final int DISPLAY_ID = Display.DEFAULT_DISPLAY;
     private static final int MODE_ID = 1;
     private static final float TRANSITION_POINT = 0.763f;
@@ -142,6 +249,8 @@ public class DisplayModeDirectorTest {
     public SensorManagerInternal mSensorManagerInternalMock;
     @Mock
     public DisplayManagerInternal mDisplayManagerInternalMock;
+    @Mock
+    private DisplayManagerFlags mDisplayManagerFlags;
 
     @Before
     public void setUp() throws Exception {
@@ -177,7 +286,7 @@ public class DisplayModeDirectorTest {
     private DisplayModeDirector createDirectorFromModeArray(Display.Mode[] modes,
             Display.Mode defaultMode) {
         DisplayModeDirector director =
-                new DisplayModeDirector(mContext, mHandler, mInjector);
+                new DisplayModeDirector(mContext, mHandler, mInjector, mDisplayManagerFlags);
         director.setLoggingEnabled(true);
         SparseArray<Display.Mode[]> supportedModesByDisplay = new SparseArray<>();
         supportedModesByDisplay.put(DISPLAY_ID, modes);
@@ -219,9 +328,8 @@ public class DisplayModeDirectorTest {
         // should take precedence over lower priority votes.
         {
             int minFps = 60;
-            int maxFps = 90;
-            director = createDirectorFromFpsRange(60, 90);
-            assertTrue(2 * numPriorities < maxFps - minFps + 1);
+            int maxFps = minFps + 2 * numPriorities;
+            director = createDirectorFromFpsRange(minFps, maxFps);
             SparseArray<Vote> votes = new SparseArray<>();
             SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
             votesByDisplay.put(DISPLAY_ID, votes);
@@ -472,6 +580,7 @@ public class DisplayModeDirectorTest {
         assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(90);
     }
 
+    /** Resolution range voting disabled */
     @Test
     public void testAppRequestRefreshRateRange() {
         // Confirm that the app request range doesn't include flicker or min refresh rate settings,
@@ -528,6 +637,33 @@ public class DisplayModeDirectorTest {
         assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(75);
         assertThat(desiredSpecs.appRequest.physical.min).isAtMost(60f);
         assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(90f);
+    }
+
+    /** Tests for app requested size */
+    @Parameters(method = "getAppRequestedSizeTestCases")
+    @Test
+    public void testAppRequestedSize(final int expectedBaseModeId,
+                final float expectedPhysicalRefreshRate,
+                final float expectedAppRequestedRefreshRate,
+                final Map<Integer, Vote> votesWithPriorities,
+                final boolean displayResolutionRangeVotingEnabled) {
+        when(mDisplayManagerFlags.isDisplayResolutionRangeVotingEnabled())
+                .thenReturn(displayResolutionRangeVotingEnabled);
+        DisplayModeDirector director = createDirectorFromModeArray(TEST_MODES, DEFAULT_MODE_75);
+
+        SparseArray<Vote> votes = new SparseArray<>();
+        votesWithPriorities.forEach(votes::put);
+
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(DISPLAY_ID, votes);
+        director.injectVotesByDisplay(votesByDisplay);
+
+        var desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.baseModeId).isEqualTo(expectedBaseModeId);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
+        assertThat(desiredSpecs.primary.physical.max).isAtLeast(expectedPhysicalRefreshRate);
+        assertThat(desiredSpecs.appRequest.physical.min).isAtMost(0);
+        assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(expectedAppRequestedRefreshRate);
     }
 
     void verifySpecsWithRefreshRateSettings(DisplayModeDirector director, float minFps,
@@ -843,7 +979,7 @@ public class DisplayModeDirectorTest {
     @Test
     public void testStaleAppRequestSize() {
         DisplayModeDirector director =
-                new DisplayModeDirector(mContext, mHandler, mInjector);
+                new DisplayModeDirector(mContext, mHandler, mInjector, mDisplayManagerFlags);
         Display.Mode[] modes = new Display.Mode[] {
                 new Display.Mode(1, 1280, 720, 60),
         };

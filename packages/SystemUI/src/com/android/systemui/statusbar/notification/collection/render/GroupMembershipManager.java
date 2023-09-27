@@ -25,18 +25,18 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import java.util.List;
 
 /**
- * Helper that determines the group states (parent, summary, children) of a notification.
+ * Helper that determines the group states (parent, summary, children) of a notification. This
+ * generally assumes that the notification is attached (aka its parent is not null).
  */
 public interface GroupMembershipManager {
     /**
-     * @return whether a given notification is a top level entry or is the summary in a group which
-     * has children
+     * @return whether a given notification is the summary in a group which has children
      */
     boolean isGroupSummary(@NonNull NotificationEntry entry);
 
     /**
      * Get the summary of a specified status bar notification. For an isolated notification this
-     * returns itself.
+     * returns null, but if called directly on a summary it returns itself.
      */
     @Nullable
     NotificationEntry getGroupSummary(@NonNull NotificationEntry entry);

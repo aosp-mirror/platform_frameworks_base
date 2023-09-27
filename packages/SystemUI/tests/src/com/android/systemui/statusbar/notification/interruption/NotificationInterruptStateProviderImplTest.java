@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -117,6 +118,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     PendingIntent mPendingIntent;
     @Mock
     UserTracker mUserTracker;
+    @Mock
+    DeviceProvisionedController mDeviceProvisionedController;
 
     private NotificationInterruptStateProviderImpl mNotifInterruptionStateProvider;
 
@@ -141,7 +144,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                         mFlags,
                         mKeyguardNotificationVisibilityProvider,
                         mUiEventLoggerFake,
-                        mUserTracker);
+                        mUserTracker,
+                        mDeviceProvisionedController);
         mNotifInterruptionStateProvider.mUseHeadsUp = true;
     }
 
@@ -691,6 +695,25 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         verify(mLogger, never()).logNoFullscreen(any(), any());
         verify(mLogger, never()).logNoFullscreenWarning(any(), any());
         verify(mLogger).logFullscreen(entry, "FSI_KEYGUARD_SHOWING");
+    }
+
+    @Test
+    public void testShouldFullscreen_suppressedInterruptionsWhenNotProvisioned() {
+        NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        when(mStatusBarStateController.getState()).thenReturn(SHADE);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(false);
+        mNotifInterruptionStateProvider.addSuppressor(mSuppressInterruptions);
+
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.FSI_NOT_PROVISIONED);
+        assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
+                .isTrue();
+        verify(mLogger, never()).logNoFullscreen(any(), any());
+        verify(mLogger, never()).logNoFullscreenWarning(any(), any());
+        verify(mLogger).logFullscreen(entry, "FSI_NOT_PROVISIONED");
     }
 
     @Test

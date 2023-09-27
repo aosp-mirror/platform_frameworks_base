@@ -236,7 +236,8 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 DataLayerAuthenticationMethodModel.Pin
             )
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isTrue()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
+                .isEqualTo(AuthenticationResult.SUCCEEDED)
             assertThat(isThrottled).isFalse()
         }
 
@@ -246,7 +247,8 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 DataLayerAuthenticationMethodModel.Pin
             )
-            assertThat(underTest.authenticate(listOf(9, 8, 7, 6, 5, 4))).isFalse()
+            assertThat(underTest.authenticate(listOf(9, 8, 7, 6, 5, 4)))
+                .isEqualTo(AuthenticationResult.FAILED)
         }
 
     @Test(expected = IllegalArgumentException::class)
@@ -267,7 +269,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 overrideCredential(pin)
             }
 
-            assertThat(underTest.authenticate(pin)).isTrue()
+            assertThat(underTest.authenticate(pin)).isEqualTo(AuthenticationResult.SUCCEEDED)
         }
 
     @Test
@@ -282,7 +284,8 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 DataLayerAuthenticationMethodModel.Pin
             )
-            assertThat(underTest.authenticate(List(17) { 9 })).isFalse()
+            assertThat(underTest.authenticate(List(17) { 9 }))
+                .isEqualTo(AuthenticationResult.FAILED)
         }
 
     @Test
@@ -293,7 +296,8 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 DataLayerAuthenticationMethodModel.Password
             )
 
-            assertThat(underTest.authenticate("password".toList())).isTrue()
+            assertThat(underTest.authenticate("password".toList()))
+                .isEqualTo(AuthenticationResult.SUCCEEDED)
             assertThat(isThrottled).isFalse()
         }
 
@@ -304,7 +308,8 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 DataLayerAuthenticationMethodModel.Password
             )
 
-            assertThat(underTest.authenticate("alohomora".toList())).isFalse()
+            assertThat(underTest.authenticate("alohomora".toList()))
+                .isEqualTo(AuthenticationResult.FAILED)
         }
 
     @Test
@@ -314,7 +319,8 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 DataLayerAuthenticationMethodModel.Pattern
             )
 
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.PATTERN)).isTrue()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.PATTERN))
+                .isEqualTo(AuthenticationResult.SUCCEEDED)
         }
 
     @Test
@@ -327,22 +333,14 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             assertThat(
                     underTest.authenticate(
                         listOf(
-                            AuthenticationPatternCoordinate(
-                                x = 2,
-                                y = 0,
-                            ),
-                            AuthenticationPatternCoordinate(
-                                x = 2,
-                                y = 1,
-                            ),
-                            AuthenticationPatternCoordinate(
-                                x = 2,
-                                y = 2,
-                            ),
+                            AuthenticationPatternCoordinate(x = 2, y = 0),
+                            AuthenticationPatternCoordinate(x = 2, y = 1),
+                            AuthenticationPatternCoordinate(x = 2, y = 2),
+                            AuthenticationPatternCoordinate(x = 1, y = 2),
                         )
                     )
                 )
-                .isFalse()
+                .isEqualTo(AuthenticationResult.FAILED)
         }
 
     @Test
@@ -361,7 +359,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                         tryAutoConfirm = true
                     )
                 )
-                .isNull()
+                .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(isThrottled).isFalse()
         }
 
@@ -379,7 +377,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                         tryAutoConfirm = true
                     )
                 )
-                .isFalse()
+                .isEqualTo(AuthenticationResult.FAILED)
             assertThat(isUnlocked).isFalse()
         }
 
@@ -397,7 +395,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                         tryAutoConfirm = true
                     )
                 )
-                .isFalse()
+                .isEqualTo(AuthenticationResult.FAILED)
             assertThat(isUnlocked).isFalse()
         }
 
@@ -415,7 +413,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                         tryAutoConfirm = true
                     )
                 )
-                .isTrue()
+                .isEqualTo(AuthenticationResult.SUCCEEDED)
             assertThat(isUnlocked).isTrue()
         }
 
@@ -433,7 +431,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                         tryAutoConfirm = true
                     )
                 )
-                .isNull()
+                .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(isUnlocked).isFalse()
         }
 
@@ -445,7 +443,8 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 DataLayerAuthenticationMethodModel.Password
             )
 
-            assertThat(underTest.authenticate("password".toList(), tryAutoConfirm = true)).isNull()
+            assertThat(underTest.authenticate("password".toList(), tryAutoConfirm = true))
+                .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(isUnlocked).isFalse()
         }
 
@@ -490,7 +489,8 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 )
 
             // Correct PIN, but throttled, so doesn't attempt it:
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isNull()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
+                .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(isUnlocked).isFalse()
             assertThat(isThrottled).isTrue()
             assertThat(throttling)
@@ -536,7 +536,8 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 )
 
             // Correct PIN and no longer throttled so unlocks successfully:
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isTrue()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
+                .isEqualTo(AuthenticationResult.SUCCEEDED)
             assertThat(isUnlocked).isTrue()
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())

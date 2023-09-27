@@ -1265,7 +1265,7 @@ public class DisplayRotationTests {
     }
 
     private void freezeRotation(int rotation) {
-        mTarget.freezeRotation(rotation);
+        mTarget.freezeRotation(rotation, /* caller= */ "DisplayRotationTests");
 
         if (mTarget.isDefaultDisplay) {
             mAccelerometerRotationObserver.onChange(false);
@@ -1274,7 +1274,7 @@ public class DisplayRotationTests {
     }
 
     private void thawRotation() {
-        mTarget.thawRotation();
+        mTarget.thawRotation(/* caller= */ "DisplayRotationTests");
 
         if (mTarget.isDefaultDisplay) {
             mAccelerometerRotationObserver.onChange(false);

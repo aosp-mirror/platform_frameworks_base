@@ -95,7 +95,6 @@ import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.Gravity;
 import android.view.IWindow;
-import android.view.IWindowSessionCallback;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
@@ -1332,12 +1331,7 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowToken windowToken = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
                 mDisplayContent);
         final IWindow client = new TestIWindow();
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float v) throws RemoteException {
-
-            }
-        });
+        final Session session = getTestSession();
         final ClientWindowFrames outFrames = new ClientWindowFrames();
         final MergedConfiguration outConfig = new MergedConfiguration();
         final SurfaceControl outSurfaceControl = new SurfaceControl();

@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static android.view.Display.Mode.INVALID_MODE_ID;
+
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayViewport;
 import android.util.DisplayMetrics;
@@ -275,6 +277,11 @@ final class DisplayDeviceInfo {
     public int defaultModeId;
 
     /**
+     * The mode of the display which is preferred by user.
+     */
+    public int userPreferredModeId = INVALID_MODE_ID;
+
+    /**
      * The supported modes of the display.
      */
     public Display.Mode[] supportedModes = Display.Mode.EMPTY_ARRAY;
@@ -472,6 +479,7 @@ final class DisplayDeviceInfo {
                 || modeId != other.modeId
                 || renderFrameRate != other.renderFrameRate
                 || defaultModeId != other.defaultModeId
+                || userPreferredModeId != other.userPreferredModeId
                 || !Arrays.equals(supportedModes, other.supportedModes)
                 || !Arrays.equals(supportedColorModes, other.supportedColorModes)
                 || !Objects.equals(hdrCapabilities, other.hdrCapabilities)
@@ -517,6 +525,7 @@ final class DisplayDeviceInfo {
         modeId = other.modeId;
         renderFrameRate = other.renderFrameRate;
         defaultModeId = other.defaultModeId;
+        userPreferredModeId = other.userPreferredModeId;
         supportedModes = other.supportedModes;
         colorMode = other.colorMode;
         supportedColorModes = other.supportedColorModes;
@@ -559,6 +568,7 @@ final class DisplayDeviceInfo {
         sb.append(", modeId ").append(modeId);
         sb.append(", renderFrameRate ").append(renderFrameRate);
         sb.append(", defaultModeId ").append(defaultModeId);
+        sb.append(", userPreferredModeId ").append(userPreferredModeId);
         sb.append(", supportedModes ").append(Arrays.toString(supportedModes));
         sb.append(", colorMode ").append(colorMode);
         sb.append(", supportedColorModes ").append(Arrays.toString(supportedColorModes));

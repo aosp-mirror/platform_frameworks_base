@@ -71,7 +71,6 @@ android_library {
         "SettingsLibMainSwitchPreference",
         "SettingsLibProfileSelector",
         "SettingsLibProgressBar",
-        "SettingsLibRadioButtonPreference",
         "SettingsLibRestrictedLockUtils",
         "SettingsLibSelectorWithWidgetPreference",
         "SettingsLibSettingsSpinner",

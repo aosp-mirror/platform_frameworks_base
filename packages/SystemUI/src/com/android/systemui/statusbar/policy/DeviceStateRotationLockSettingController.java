@@ -159,7 +159,8 @@ public final class DeviceStateRotationLockSettingController
 
         // Update the rotation policy, if needed, for this new device state
         if (shouldBeLocked != isLocked) {
-            mRotationPolicyWrapper.setRotationLock(shouldBeLocked);
+            mRotationPolicyWrapper.setRotationLock(shouldBeLocked,
+                    /* caller= */"DeviceStateRotationLockSettingController#readPersistedSetting");
         }
     }
 

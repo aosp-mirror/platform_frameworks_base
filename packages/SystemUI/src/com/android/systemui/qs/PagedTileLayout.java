@@ -78,6 +78,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mMinRows = 1;
     private int mMaxColumns = TileLayout.NO_MAX_COLUMNS;
 
+    /**
+     * it's fine to read this value when class is initialized because SysUI is always restarted
+     * when running tests in test harness, see SysUiTestIsolationRule. This check is done quite
+     * often - with every shade open action - so we don't want to potentially make it less
+     * performant only for test use case
+     */
+    private boolean mRunningInTestHarness = ActivityManager.isRunningInTestHarness();
+
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         mScroller = new Scroller(context, SCROLL_CUBIC);
@@ -590,11 +598,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private boolean shouldNotRunAnimation(Set<String> tilesToReveal) {
         boolean noAnimationNeeded = tilesToReveal.isEmpty() || mPages.size() < 2;
         boolean scrollingInProgress = getScrollX() != 0 || !beginFakeDrag();
-        // isRunningInTestHarness() to disable animation in functional testing as it caused
+        // checking mRunningInTestHarness to disable animation in functional testing as it caused
         // flakiness and is not needed there. Alternative solutions were more complex and would
         // still be either potentially flaky or modify internal data.
         // For more info see b/253493927 and b/293234595
-        return noAnimationNeeded || scrollingInProgress || ActivityManager.isRunningInTestHarness();
+        return noAnimationNeeded || scrollingInProgress || mRunningInTestHarness;
     }
 
     private int sanitizePageAction(int action) {
