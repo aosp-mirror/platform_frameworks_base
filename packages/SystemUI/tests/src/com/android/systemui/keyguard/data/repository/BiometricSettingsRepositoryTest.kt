@@ -32,7 +32,6 @@ import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUT
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN
-import com.android.systemui.res.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
@@ -48,6 +47,10 @@ import com.android.systemui.keyguard.data.repository.BiometricType.REAR_FINGERPR
 import com.android.systemui.keyguard.data.repository.BiometricType.SIDE_FINGERPRINT
 import com.android.systemui.keyguard.data.repository.BiometricType.UNDER_DISPLAY_FINGERPRINT
 import com.android.systemui.keyguard.shared.model.DevicePosture
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.eq
@@ -87,6 +90,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var biometricManager: BiometricManager
+    @Mock private lateinit var tableLogger: TableLogBuffer
     @Captor
     private lateinit var strongAuthTracker: ArgumentCaptor<LockPatternUtils.StrongAuthTracker>
     @Captor private lateinit var authControllerCallback: ArgumentCaptor<AuthController.Callback>
@@ -97,6 +101,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     private lateinit var devicePostureRepository: FakeDevicePostureRepository
     private lateinit var facePropertyRepository: FakeFacePropertyRepository
     private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
+    private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
 
     private lateinit var testDispatcher: TestDispatcher
     private lateinit var testScope: TestScope
@@ -112,6 +117,8 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
         devicePostureRepository = FakeDevicePostureRepository()
         facePropertyRepository = FakeFacePropertyRepository()
         fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
+        mobileConnectionsRepository =
+            FakeMobileConnectionsRepository(FakeMobileMappingsProxy(), tableLogger)
     }
 
     private suspend fun createBiometricSettingsRepository() {
@@ -132,6 +139,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
                 dumpManager = dumpManager,
                 facePropertyRepository = facePropertyRepository,
                 fingerprintPropertyRepository = fingerprintPropertyRepository,
+                mobileConnectionsRepository = mobileConnectionsRepository,
             )
         testScope.runCurrent()
         fingerprintPropertyRepository.setProperties(
@@ -418,6 +426,50 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
             broadcastDPMStateChange()
 
             assertThat(isFaceAuthAllowed()).isTrue()
+        }
+
+    @Test
+    fun anySimSecure_disablesFaceAuth() =
+        testScope.runTest {
+            faceAuthIsEnrolled()
+            createBiometricSettingsRepository()
+
+            faceAuthIsEnabledByBiometricManager()
+            doNotDisableKeyguardAuthFeatures()
+            mobileConnectionsRepository.isAnySimSecure.value = false
+            runCurrent()
+
+            val isFaceAuthEnabledAndEnrolled by
+                collectLastValue(underTest.isFaceAuthEnrolledAndEnabled)
+
+            assertThat(isFaceAuthEnabledAndEnrolled).isTrue()
+
+            mobileConnectionsRepository.isAnySimSecure.value = true
+            runCurrent()
+
+            assertThat(isFaceAuthEnabledAndEnrolled).isFalse()
+        }
+
+    @Test
+    fun anySimSecure_disablesFaceAuthToNotCurrentlyRun() =
+        testScope.runTest {
+            faceAuthIsEnrolled()
+
+            createBiometricSettingsRepository()
+            val isFaceAuthCurrentlyAllowed by collectLastValue(underTest.isFaceAuthCurrentlyAllowed)
+
+            deviceIsInPostureThatSupportsFaceAuth()
+            doNotDisableKeyguardAuthFeatures()
+            faceAuthIsStrongBiometric()
+            faceAuthIsEnabledByBiometricManager()
+            mobileConnectionsRepository.isAnySimSecure.value = false
+
+            onStrongAuthChanged(STRONG_AUTH_NOT_REQUIRED, PRIMARY_USER_ID)
+            onNonStrongAuthChanged(false, PRIMARY_USER_ID)
+            assertThat(isFaceAuthCurrentlyAllowed).isTrue()
+
+            mobileConnectionsRepository.isAnySimSecure.value = true
+            assertThat(isFaceAuthCurrentlyAllowed).isFalse()
         }
 
     @Test

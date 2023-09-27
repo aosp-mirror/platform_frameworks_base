@@ -135,6 +135,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 FakeAirplaneModeRepository(),
                 wifiRepository,
                 mock(),
+                mock(),
             )
 
         demoRepo =

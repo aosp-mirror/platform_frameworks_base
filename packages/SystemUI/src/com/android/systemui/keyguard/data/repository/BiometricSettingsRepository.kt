@@ -26,7 +26,6 @@ import android.os.UserHandle
 import android.util.Log
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
@@ -40,6 +39,8 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.shared.model.AuthenticationFlags
 import com.android.systemui.keyguard.shared.model.DevicePosture
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.user.data.repository.UserRepository
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -133,6 +134,7 @@ constructor(
     devicePostureRepository: DevicePostureRepository,
     facePropertyRepository: FacePropertyRepository,
     fingerprintPropertyRepository: FingerprintPropertyRepository,
+    mobileConnectionsRepository: MobileConnectionsRepository,
     dumpManager: DumpManager,
 ) : BiometricSettingsRepository, Dumpable {
 
@@ -346,14 +348,15 @@ constructor(
             .and(isFingerprintBiometricAllowed)
             .stateIn(scope, SharingStarted.Eagerly, false)
 
-    override val isFaceAuthEnrolledAndEnabled: Flow<Boolean>
-        get() = isFaceAuthenticationEnabled.and(isFaceEnrolled)
+    override val isFaceAuthEnrolledAndEnabled: Flow<Boolean> =
+        isFaceAuthenticationEnabled
+            .and(isFaceEnrolled)
+            .and(mobileConnectionsRepository.isAnySimSecure.isFalse())
 
-    override val isFaceAuthCurrentlyAllowed: Flow<Boolean>
-        get() =
-            isFaceAuthEnrolledAndEnabled
-                .and(isFaceBiometricsAllowed)
-                .and(isFaceAuthSupportedInCurrentPosture)
+    override val isFaceAuthCurrentlyAllowed: Flow<Boolean> =
+        isFaceAuthEnrolledAndEnabled
+            .and(isFaceBiometricsAllowed)
+            .and(isFaceAuthSupportedInCurrentPosture)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -426,3 +429,5 @@ private fun DevicePolicyManager.isNotActive(userId: Int, policy: Int): Boolean =
 
 private fun Flow<Boolean>.and(anotherFlow: Flow<Boolean>): Flow<Boolean> =
     this.combine(anotherFlow) { a, b -> a && b }
+
+private fun Flow<Boolean>.isFalse(): Flow<Boolean> = this.map { !it }
