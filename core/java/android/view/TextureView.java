@@ -54,9 +54,9 @@ import android.view.flags.Flags;
  *       <th style="text-align: center;">SurfaceView</th>
  *     </tr>
  *     <tr>
- *       <td>Supports alpha</td>
+ *       <td>Supports View alpha</td>
  *       <td style="text-align: center;">X</td>
- *       <td style="text-align: center;">&nbsp;</td>
+ *       <td style="text-align: center;">U+</td>
  *     </tr>
  *     <tr>
  *       <td>Supports rotations</td>
