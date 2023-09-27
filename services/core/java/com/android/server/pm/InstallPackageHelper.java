@@ -2194,12 +2194,19 @@ final class InstallPackageHelper {
         final String installerPackageName = installRequest.getInstallerPackageName();
 
         if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + pkg.getPath());
+        final int userId = installRequest.getUserId();
+        if (userId != UserHandle.USER_ALL && userId != UserHandle.USER_CURRENT
+                && !mPm.mUserManager.exists(userId)) {
+            installRequest.setError(PackageManagerException.ofInternalError(
+                    "User " + userId + " doesn't exist or has been removed",
+                    PackageManagerException.INTERNAL_ERROR_MISSING_USER));
+            return;
+        }
         synchronized (mPm.mLock) {
             // For system-bundled packages, we assume that installing an upgraded version
             // of the package implies that the user actually wants to run that new code,
             // so we enable the package.
             final PackageSetting ps = mPm.mSettings.getPackageLPr(pkgName);
-            final int userId = installRequest.getUserId();
             if (ps != null) {
                 if (ps.isSystem()) {
                     if (DEBUG_INSTALL) {
