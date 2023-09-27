@@ -63,5 +63,12 @@ flag {
     namespace: "display_manager"
     description: "Enables synchronization of refresh rates across displays"
     bug: "294015845"
+}
+
+flag {
+    name: "enable_display_offload"
+    namespace: "display_manager"
+    description: "Feature flag for DisplayOffload"
+    bug: "299521647"
     is_fixed_read_only: true
 }

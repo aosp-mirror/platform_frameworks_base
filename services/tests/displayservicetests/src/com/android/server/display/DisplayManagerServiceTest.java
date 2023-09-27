@@ -75,6 +75,7 @@ import android.hardware.display.Curve;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloader;
 import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
@@ -87,6 +88,7 @@ import android.media.projection.IMediaProjectionManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.Process;
 import android.os.RemoteException;
@@ -118,10 +120,10 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import com.google.common.truth.Expect;
-
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
+
+import com.google.common.truth.Expect;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -198,9 +200,10 @@ public class DisplayManagerServiceTest {
 
                 @Override
                 LocalDisplayAdapter getLocalDisplayAdapter(SyncRoot syncRoot, Context context,
-                        Handler handler, DisplayAdapter.Listener displayAdapterListener) {
+                        Handler handler, DisplayAdapter.Listener displayAdapterListener,
+                        DisplayManagerFlags flags) {
                     return new LocalDisplayAdapter(syncRoot, context, handler,
-                            displayAdapterListener, new LocalDisplayAdapter.Injector() {
+                            displayAdapterListener, flags, new LocalDisplayAdapter.Injector() {
                         @Override
                         public LocalDisplayAdapter.SurfaceControlProxy getSurfaceControlProxy() {
                             return mSurfaceControlProxy;
@@ -244,8 +247,14 @@ public class DisplayManagerServiceTest {
 
         @Override
         LocalDisplayAdapter getLocalDisplayAdapter(SyncRoot syncRoot, Context context,
-                Handler handler, DisplayAdapter.Listener displayAdapterListener) {
-            return new LocalDisplayAdapter(syncRoot, context, handler, displayAdapterListener,
+                Handler handler, DisplayAdapter.Listener displayAdapterListener,
+                DisplayManagerFlags flags) {
+            return new LocalDisplayAdapter(
+                    syncRoot,
+                    context,
+                    handler,
+                    displayAdapterListener,
+                    flags,
                     new LocalDisplayAdapter.Injector() {
                         @Override
                         public LocalDisplayAdapter.SurfaceControlProxy getSurfaceControlProxy() {
@@ -2445,6 +2454,86 @@ public class DisplayManagerServiceTest {
         assertThat(callback.receivedEvents()).containsExactly(EVENT_DISPLAY_REMOVED,
                 EVENT_DISPLAY_DISCONNECTED);
     }
+
+    @Test
+    public void testRegisterDisplayOffloader_whenEnabled_DisplayHasDisplayOffloadSession() {
+        when(mMockFlags.isDisplayOffloadEnabled()).thenReturn(true);
+        // set up DisplayManager
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        // set up display
+        FakeDisplayDevice displayDevice =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.DEFAULT_DISPLAY);
+        initDisplayPowerController(localService);
+        LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
+        LogicalDisplay display =
+                logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
+        int displayId = display.getDisplayIdLocked();
+
+        // Register DisplayOffloader.
+        DisplayOffloader mockDisplayOffloader = mock(DisplayOffloader.class);
+        localService.registerDisplayOffloader(displayId, mockDisplayOffloader);
+
+        assertThat(display.getDisplayOffloadSessionLocked().getDisplayOffloader()).isEqualTo(
+                mockDisplayOffloader);
+    }
+
+    @Test
+    public void testRegisterDisplayOffloader_whenDisabled_DisplayHasNoDisplayOffloadSession() {
+        when(mMockFlags.isDisplayOffloadEnabled()).thenReturn(false);
+        // set up DisplayManager
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        // set up display
+        FakeDisplayDevice displayDevice =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.DEFAULT_DISPLAY);
+        initDisplayPowerController(localService);
+        LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
+        LogicalDisplay display =
+                logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
+        int displayId = display.getDisplayIdLocked();
+
+        // Register DisplayOffloader.
+        DisplayOffloader mockDisplayOffloader = mock(DisplayOffloader.class);
+        localService.registerDisplayOffloader(displayId, mockDisplayOffloader);
+
+        assertThat(display.getDisplayOffloadSessionLocked()).isNull();
+    }
+
+    private void initDisplayPowerController(DisplayManagerInternal localService) {
+        localService.initPowerManagement(new DisplayManagerInternal.DisplayPowerCallbacks() {
+            @Override
+            public void onStateChanged() {
+
+            }
+
+            @Override
+            public void onProximityPositive() {
+
+            }
+
+            @Override
+            public void onProximityNegative() {
+
+            }
+
+            @Override
+            public void onDisplayStateChange(boolean allInactive, boolean allOff) {
+
+            }
+
+            @Override
+            public void acquireSuspendBlocker(String id) {
+
+            }
+
+            @Override
+            public void releaseSuspendBlocker(String id) {
+
+            }
+        }, new Handler(Looper.getMainLooper()), mSensorManager);
+    }
+
     private void testDisplayInfoFrameRateOverrideModeCompat(boolean compatChangeEnabled) {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);

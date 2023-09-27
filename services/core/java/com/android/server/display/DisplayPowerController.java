@@ -34,6 +34,8 @@ import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
+import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.metrics.LogMaker;
@@ -588,8 +590,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             new SparseArray<>();
 
     private boolean mBootCompleted;
-
     private final DisplayManagerFlags mFlags;
+    private int mDozeStateOverride = Display.STATE_UNKNOWN;
+    private DisplayManagerInternal.DisplayOffloadSession mDisplayOffloadSession;
 
     /**
      * Creates the display power controller.
@@ -954,6 +957,23 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             return mDisplayReadyLocked;
         }
+    }
+
+    @Override
+    public void overrideDozeScreenState(int displayState) {
+        synchronized (mLock) {
+            if (mDisplayOffloadSession == null ||
+                    !DisplayOffloadSession.isSupportedOffloadState(displayState)) {
+                return;
+            }
+            mDozeStateOverride = displayState;
+            sendUpdatePowerState();
+        }
+    }
+
+    @Override
+    public void setDisplayOffloadSession(DisplayOffloadSession session) {
+        mDisplayOffloadSession = session;
     }
 
     @Override
@@ -1518,6 +1538,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 } else {
                     state = Display.STATE_DOZE;
                 }
+                state = mDozeStateOverride == Display.STATE_UNKNOWN ? state : mDozeStateOverride;
                 if (!mAllowAutoBrightnessWhileDozingConfig) {
                     brightnessState = mPowerRequest.dozeScreenBrightness;
                     mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE);
@@ -3001,6 +3022,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             pw.println("  mLeadDisplayId=" + mLeadDisplayId);
             pw.println("  mLightSensor=" + mLightSensor);
             pw.println("  mDisplayBrightnessFollowers=" + mDisplayBrightnessFollowers);
+            pw.println("  mDozeStateOverride=" + mDozeStateOverride);
 
             pw.println();
             pw.println("Display Power Controller Locked State:");
