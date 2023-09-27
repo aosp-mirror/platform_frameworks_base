@@ -49,6 +49,7 @@ public class CallLayout extends FrameLayout {
     private CachingIconView mIcon;
     private CachingIconView mConversationIconBadgeBg;
     private TextView mConversationText;
+    private boolean mSetDataAsyncEnabled = false;
 
     public CallLayout(@NonNull Context context) {
         super(context);
@@ -83,7 +84,8 @@ public class CallLayout extends FrameLayout {
         });
     }
 
-    private void updateCallLayout() {
+    @NonNull
+    private Icon getConversationIcon() {
         CharSequence callerName = "";
         String symbol = "";
         Icon icon = null;
@@ -98,8 +100,7 @@ public class CallLayout extends FrameLayout {
         if (icon == null) {
             icon = mPeopleHelper.createAvatarSymbol(callerName, symbol, mLayoutColor);
         }
-        // TODO(b/179178086): crop/clip the icon to a circle?
-        mConversationIconView.setImageIcon(icon);
+        return icon;
     }
 
     @RemotableViewMethod
@@ -123,10 +124,38 @@ public class CallLayout extends FrameLayout {
     /**
      * Set the notification extras so that this layout has access
      */
-    @RemotableViewMethod
+    @RemotableViewMethod(asyncImpl = "setDataAsync")
     public void setData(Bundle extras) {
-        setUser(extras.getParcelable(Notification.EXTRA_CALL_PERSON, android.app.Person.class));
-        updateCallLayout();
+        final Person person = getPerson(extras);
+        setUser(person);
+
+        final Icon icon = getConversationIcon();
+        mConversationIconView.setImageIcon(icon);
+    }
+
+
+    public void setSetDataAsyncEnabled(boolean setDataAsyncEnabled) {
+        mSetDataAsyncEnabled = setDataAsyncEnabled;
+    }
+
+    /**
+     * Async implementation for setData
+     */
+    public Runnable setDataAsync(Bundle extras) {
+        if (!mSetDataAsyncEnabled) {
+            return () -> setData(extras);
+        }
+
+        final Person person = getPerson(extras);
+        setUser(person);
+
+        final Icon conversationIcon = getConversationIcon();
+        return mConversationIconView.setImageIconAsync(conversationIcon);
+    }
+
+    @Nullable
+    private Person getPerson(Bundle extras) {
+        return extras.getParcelable(Notification.EXTRA_CALL_PERSON, Person.class);
     }
 
     private void setUser(Person user) {
