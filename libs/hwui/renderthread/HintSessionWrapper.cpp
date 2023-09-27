@@ -93,8 +93,17 @@ HintSessionWrapper::HintSessionWrapper(pid_t uiThreadId, pid_t renderThreadId)
         : mUiThreadId(uiThreadId), mRenderThreadId(renderThreadId) {}
 
 HintSessionWrapper::~HintSessionWrapper() {
+    destroy();
+}
+
+void HintSessionWrapper::destroy() {
+    if (mHintSessionFuture.valid()) {
+        mHintSession = mHintSessionFuture.get();
+    }
     if (mHintSession) {
         gAPH_closeSessionFn(mHintSession);
+        mSessionValid = true;
+        mHintSession = nullptr;
     }
 }
 

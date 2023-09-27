@@ -63,7 +63,7 @@ class TemperatureControlBehavior : Behavior {
             // interactions (touch, range)
             subBehavior = cvh.bindBehavior(
                 subBehavior,
-                ControlViewHolder.findBehaviorClass(
+                cvh.findBehaviorClass(
                     control.status,
                     subTemplate,
                     control.deviceType

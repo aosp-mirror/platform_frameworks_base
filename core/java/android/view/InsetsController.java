@@ -69,6 +69,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
+import com.android.internal.util.function.TriFunction;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -77,7 +78,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiFunction;
 
 /**
  * Implements {@link WindowInsetsController} on the client.
@@ -621,7 +621,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private final InsetsState mLastDispatchedState = new InsetsState();
 
     private final Rect mFrame = new Rect();
-    private final BiFunction<InsetsController, InsetsSource, InsetsSourceConsumer> mConsumerCreator;
+    private final TriFunction<InsetsController, Integer, Integer, InsetsSourceConsumer>
+            mConsumerCreator;
     private final SparseArray<InsetsSourceConsumer> mSourceConsumers = new SparseArray<>();
     private final InsetsSourceConsumer mImeSourceConsumer;
     private final Host mHost;
@@ -689,13 +690,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
                     // Don't change the indexes of the sources while traversing. Remove it later.
                     mPendingRemoveIndexes.add(index1);
-
-                    // Remove the consumer as well except the IME one. IME consumer should always
-                    // be there since we need to communicate with InputMethodManager no matter we
-                    // have the source or not.
-                    if (source1.getType() != ime()) {
-                        mSourceConsumers.remove(source1.getId());
-                    }
                 }
 
                 @Override
@@ -750,12 +744,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             };
 
     public InsetsController(Host host) {
-        this(host, (controller, source) -> {
-            if (source.getType() == ime()) {
-                return new ImeInsetsSourceConsumer(source.getId(), controller.mState,
+        this(host, (controller, id, type) -> {
+            if (type == ime()) {
+                return new ImeInsetsSourceConsumer(id, controller.mState,
                         Transaction::new, controller);
             } else {
-                return new InsetsSourceConsumer(source.getId(), source.getType(), controller.mState,
+                return new InsetsSourceConsumer(id, type, controller.mState,
                         Transaction::new, controller);
             }
         }, host.getHandler());
@@ -763,7 +757,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public InsetsController(Host host,
-            BiFunction<InsetsController, InsetsSource, InsetsSourceConsumer> consumerCreator,
+            TriFunction<InsetsController, Integer, Integer, InsetsSourceConsumer> consumerCreator,
             Handler handler) {
         mHost = host;
         mConsumerCreator = consumerCreator;
@@ -815,7 +809,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         };
 
         // Make mImeSourceConsumer always non-null.
-        mImeSourceConsumer = getSourceConsumer(new InsetsSource(ID_IME, ime()));
+        mImeSourceConsumer = getSourceConsumer(ID_IME, ime());
     }
 
     @VisibleForTesting
@@ -893,7 +887,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     cancelledUserAnimationTypes[0] |= type;
                 }
             }
-            getSourceConsumer(source).updateSource(source, animationType);
+            final InsetsSourceConsumer consumer = mSourceConsumers.get(source.getId());
+            if (consumer != null) {
+                consumer.updateSource(source, animationType);
+            } else {
+                mState.addSource(source);
+            }
             existingTypes |= type;
             if (source.isVisible()) {
                 visibleTypes |= type;
@@ -997,8 +996,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         @InsetsType int controllableTypes = 0;
         int consumedControlCount = 0;
-        final int[] showTypes = new int[1];
-        final int[] hideTypes = new int[1];
+        final @InsetsType int[] showTypes = new int[1];
+        final @InsetsType int[] hideTypes = new int[1];
 
         // Ensure to update all existing source consumers
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
@@ -1014,15 +1013,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             consumer.setControl(control, showTypes, hideTypes);
         }
 
+        // Ensure to create source consumers if not available yet.
         if (consumedControlCount != mTmpControlArray.size()) {
-            // Whoops! The server sent us some controls without sending corresponding sources.
             for (int i = mTmpControlArray.size() - 1; i >= 0; i--) {
                 final InsetsSourceControl control = mTmpControlArray.valueAt(i);
-                final InsetsSourceConsumer consumer = mSourceConsumers.get(control.getId());
-                if (consumer == null) {
-                    control.release(SurfaceControl::release);
-                    Log.e(TAG, control + " has no consumer.");
-                }
+                getSourceConsumer(control.getId(), control.getType())
+                        .setControl(control, showTypes, hideTypes);
             }
         }
 
@@ -1587,6 +1583,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (type == ime()) {
             abortPendingImeControlRequest();
         }
+        if (consumer.getType() != ime()) {
+            // IME consumer should always be there since we need to communicate with
+            // InputMethodManager no matter we have the control or not.
+            mSourceConsumers.remove(consumer.getId());
+        }
     }
 
     private void cancelAnimation(InsetsAnimationControlRunner control, boolean invokeCallback) {
@@ -1640,21 +1641,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     @VisibleForTesting
-    public @NonNull InsetsSourceConsumer getSourceConsumer(InsetsSource source) {
-        final int sourceId = source.getId();
-        InsetsSourceConsumer consumer = mSourceConsumers.get(sourceId);
+    public @NonNull InsetsSourceConsumer getSourceConsumer(int id, int type) {
+        InsetsSourceConsumer consumer = mSourceConsumers.get(id);
         if (consumer != null) {
             return consumer;
         }
-        if (source.getType() == ime() && mImeSourceConsumer != null) {
+        if (type == ime() && mImeSourceConsumer != null) {
             // WindowInsets.Type.ime() should be only provided by one source.
             mSourceConsumers.remove(mImeSourceConsumer.getId());
             consumer = mImeSourceConsumer;
-            consumer.setId(sourceId);
+            consumer.setId(id);
         } else {
-            consumer = mConsumerCreator.apply(this, source);
+            consumer = mConsumerCreator.apply(this, id, type);
         }
-        mSourceConsumers.put(sourceId, consumer);
+        mSourceConsumers.put(id, consumer);
         return consumer;
     }
 
@@ -1663,8 +1663,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         return mImeSourceConsumer;
     }
 
-    @VisibleForTesting
-    public void notifyVisibilityChanged() {
+    void notifyVisibilityChanged() {
         mHost.notifyInsetsChanged();
     }
 
