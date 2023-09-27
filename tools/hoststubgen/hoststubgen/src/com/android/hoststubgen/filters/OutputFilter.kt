@@ -71,11 +71,22 @@ abstract class OutputFilter {
     }
 
     /**
-     * Return a "class load hook" method name for a given class.
+     * Return a "class load hook" class name for a given class.
      *
      * (which corresponds to @HostSideTestClassLoadHook of the standard annotations.)
      */
-    open fun getClassLoadHook(className: String): String? {
-        return null
+    open fun getClassLoadHooks(className: String): List<String> {
+        return emptyList()
+    }
+
+    /**
+     * Return the "method call hook" class name.
+     *
+     * The class has to have a function with the following signature:
+     * `public static void onMethodCalled(Class<?> clazz, String name, String descriptor)`.
+     */
+    open fun getMethodCallHooks(className: String, methodName: String, descriptor: String):
+            List<String> {
+        return emptyList()
     }
 }

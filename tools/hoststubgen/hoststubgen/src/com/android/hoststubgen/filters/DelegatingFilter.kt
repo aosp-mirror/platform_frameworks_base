@@ -66,7 +66,15 @@ abstract class DelegatingFilter(
         return fallback.getNativeSubstitutionClass(className)
     }
 
-    override fun getClassLoadHook(className: String): String? {
-        return fallback.getClassLoadHook(className)
+    override fun getClassLoadHooks(className: String): List<String> {
+        return fallback.getClassLoadHooks(className)
+    }
+
+    override fun getMethodCallHooks(
+        className: String,
+        methodName: String,
+        descriptor: String
+    ): List<String> {
+        return fallback.getMethodCallHooks(className, methodName, descriptor)
     }
 }
