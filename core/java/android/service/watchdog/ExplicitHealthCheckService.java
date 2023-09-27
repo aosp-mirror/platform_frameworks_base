@@ -151,7 +151,7 @@ public abstract class ExplicitHealthCheckService extends Service {
      */
     @NonNull public abstract List<String> onGetRequestedPackages();
 
-    private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
+    private final Handler mHandler = Handler.createAsync(Looper.getMainLooper());
     @Nullable private RemoteCallback mCallback;
 
     @Override
