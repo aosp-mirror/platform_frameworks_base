@@ -29,15 +29,16 @@ import org.junit.Test
 import org.mockito.Mockito.mock
 
 @SmallTest
-class QSFragmentDisableFlagsLoggerTest : SysuiTestCase() {
+class QSDisableFlagsLoggerTest : SysuiTestCase() {
 
-    private val buffer = LogBufferFactory(DumpManager(), mock(LogcatEchoTracker::class.java))
-        .create("buffer", 10)
-    private val disableFlagsLogger = DisableFlagsLogger(
-        listOf(DisableFlagsLogger.DisableFlag(0b001, 'A', 'a')),
-        listOf(DisableFlagsLogger.DisableFlag(0b001, 'B', 'b'))
-    )
-    private val logger = QSFragmentDisableFlagsLogger(buffer, disableFlagsLogger)
+    private val buffer =
+        LogBufferFactory(DumpManager(), mock(LogcatEchoTracker::class.java)).create("buffer", 10)
+    private val disableFlagsLogger =
+        DisableFlagsLogger(
+            listOf(DisableFlagsLogger.DisableFlag(0b001, 'A', 'a')),
+            listOf(DisableFlagsLogger.DisableFlag(0b001, 'B', 'b'))
+        )
+    private val logger = QSDisableFlagsLogger(buffer, disableFlagsLogger)
 
     @Test
     fun logDisableFlagChange_bufferHasStates() {
@@ -48,9 +49,8 @@ class QSFragmentDisableFlagsLoggerTest : SysuiTestCase() {
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
         val actualString = stringWriter.toString()
-        val expectedLogString = disableFlagsLogger.getDisableFlagsString(
-            new = state, newAfterLocalModification = state
-        )
+        val expectedLogString =
+            disableFlagsLogger.getDisableFlagsString(new = state, newAfterLocalModification = state)
 
         assertThat(actualString).contains(expectedLogString)
     }

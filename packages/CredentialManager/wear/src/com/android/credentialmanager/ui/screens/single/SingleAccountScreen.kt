@@ -16,31 +16,46 @@
 
 @file:OptIn(ExperimentalHorologistApi::class)
 
-package com.android.credentialmanager.ui.screens
+package com.android.credentialmanager.ui.screens.single
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.wear.compose.foundation.lazy.ScalingLazyListScope
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.components.AccountRow
 import com.android.credentialmanager.ui.components.DialogButtonsRow
 import com.android.credentialmanager.ui.components.SignInHeader
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
+import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 import com.google.android.horologist.compose.layout.belowTimeTextPreview
 import com.google.android.horologist.compose.tools.WearPreview
 
 @Composable
-fun SinglePasskeyScreen(
-    name: String,
-    email: String,
-    onCancelClick: () -> Unit,
-    onOKClick: () -> Unit,
+fun SingleAccountScreen(
+    headerContent: @Composable () -> Unit,
+    accountContent: @Composable () -> Unit,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
+    content: ScalingLazyListScope.() -> Unit,
 ) {
+    ScalingLazyColumn(
+        columnState = columnState,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        item { headerContent() }
+        item { accountContent() }
+        content()
+    }
+}
+
+@WearPreview
+@Composable
+fun SingleAccountScreenPreview() {
     SingleAccountScreen(
         headerContent = {
             SignInHeader(
@@ -50,33 +65,19 @@ fun SinglePasskeyScreen(
         },
         accountContent = {
             AccountRow(
-                name = name,
-                email = email,
-                modifier = Modifier.padding(top = 10.dp),
+                name = "Elisa Beckett",
+                email = "beckett_bakery@gmail.com",
+                modifier = Modifier.padding(top = 10.dp)
             )
         },
-        columnState = columnState,
-        modifier = modifier.padding(horizontal = 10.dp)
+        columnState = belowTimeTextPreview(),
     ) {
         item {
             DialogButtonsRow(
-                onCancelClick = onCancelClick,
-                onOKClick = onOKClick,
+                onCancelClick = {},
+                onOKClick = {},
                 modifier = Modifier.padding(top = 10.dp)
             )
         }
     }
 }
-
-@WearPreview
-@Composable
-fun SinglePasskeyScreenPreview() {
-    SinglePasskeyScreen(
-        name = "Elisa Beckett",
-        email = "beckett_bakery@gmail.com",
-        onCancelClick = {},
-        onOKClick = {},
-        columnState = belowTimeTextPreview(),
-    )
-}
-

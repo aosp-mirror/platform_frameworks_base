@@ -72,7 +72,7 @@ interface FooterActionsInteractor {
      * Show the device monitoring dialog, expanded from [expandable] if it's not null.
      *
      * Important: [quickSettingsContext] *must* be the [Context] associated to the
-     * [Quick Settings fragment][com.android.systemui.qs.QSFragment].
+     * [Quick Settings fragment][com.android.systemui.qs.QSFragmentLegacy].
      */
     fun showDeviceMonitoringDialog(quickSettingsContext: Context, expandable: Expandable?)
 

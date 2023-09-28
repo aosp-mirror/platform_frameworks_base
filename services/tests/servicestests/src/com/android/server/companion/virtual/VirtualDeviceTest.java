@@ -49,6 +49,7 @@ public class VirtualDeviceTest {
     private static final int VIRTUAL_DEVICE_ID = 42;
     private static final String PERSISTENT_ID = "persistentId";
     private static final String DEVICE_NAME = "VirtualDeviceName";
+    private static final String DISPLAY_NAME = "DisplayName";
 
     @Mock
     private IVirtualDevice mVirtualDevice;
@@ -87,7 +88,8 @@ public class VirtualDeviceTest {
     @Test
     public void parcelable_shouldRecreateSuccessfully() {
         VirtualDevice originalDevice =
-                new VirtualDevice(mVirtualDevice, VIRTUAL_DEVICE_ID, PERSISTENT_ID, DEVICE_NAME);
+                new VirtualDevice(mVirtualDevice, VIRTUAL_DEVICE_ID, PERSISTENT_ID, DEVICE_NAME,
+                        DISPLAY_NAME);
         Parcel parcel = Parcel.obtain();
         originalDevice.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
@@ -96,6 +98,7 @@ public class VirtualDeviceTest {
         assertThat(device.getDeviceId()).isEqualTo(VIRTUAL_DEVICE_ID);
         assertThat(device.getPersistentDeviceId()).isEqualTo(PERSISTENT_ID);
         assertThat(device.getName()).isEqualTo(DEVICE_NAME);
+        assertThat(device.getDisplayName().toString()).isEqualTo(DISPLAY_NAME);
     }
 
     @RequiresFlagsEnabled(Flags.FLAG_VDM_PUBLIC_APIS)

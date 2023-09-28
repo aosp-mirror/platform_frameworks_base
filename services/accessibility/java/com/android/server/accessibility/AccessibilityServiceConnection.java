@@ -44,7 +44,6 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.MotionEvent;
 
-
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -169,6 +168,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder service) {
+        AccessibilityUserState userState = mUserStateWeakReference.get();
+        if (userState != null && Flags.addWindowTokenWithoutLock()) {
+            addWindowTokensForAllDisplays();
+        }
         synchronized (mLock) {
             if (mService != service) {
                 if (mService != null) {
@@ -184,7 +187,6 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 }
             }
             mServiceInterface = IAccessibilityServiceClient.Stub.asInterface(service);
-            AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState == null) return;
             userState.addServiceLocked(this);
             mSystemSupport.onClientChangeLocked(false);

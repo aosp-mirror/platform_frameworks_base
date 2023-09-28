@@ -241,7 +241,6 @@ import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
 import static android.provider.Telephony.Carriers.INVALID_APN_ID;
 import static android.security.keystore.AttestationUtils.USE_INDIVIDUAL_ATTESTATION;
-
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
@@ -23455,7 +23454,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public DevicePolicyState getDevicePolicyState() {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS));
-
         return mInjector.binderWithCleanCallingIdentity(mDevicePolicyEngine::getDevicePolicyState);
     }
 

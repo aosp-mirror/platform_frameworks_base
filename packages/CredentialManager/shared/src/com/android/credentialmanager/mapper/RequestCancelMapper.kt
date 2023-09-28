@@ -17,13 +17,23 @@
 package com.android.credentialmanager.mapper
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.util.Log
+import com.android.credentialmanager.TAG
+import com.android.credentialmanager.ktx.appLabel
 import com.android.credentialmanager.ktx.cancelUiRequest
 import com.android.credentialmanager.model.Request
 
-fun Intent.toRequestCancel(): Request.Cancel? =
+fun Intent.toRequestCancel(packageManager: PackageManager): Request.Cancel? =
     this.cancelUiRequest?.let { cancelUiRequest ->
-        Request.Cancel(
-            showCancellationUi = cancelUiRequest.shouldShowCancellationUi(),
-            appPackageName = cancelUiRequest.appPackageName
-        )
+        val appLabel = packageManager.appLabel(cancelUiRequest.appPackageName)
+        if (appLabel == null) {
+            Log.d(TAG, "Received UI cancel request with an invalid package name.")
+            null
+        } else {
+            Request.Cancel(
+                showCancellationUi = cancelUiRequest.shouldShowCancellationUi(),
+                appName = appLabel
+            )
+        }
     }

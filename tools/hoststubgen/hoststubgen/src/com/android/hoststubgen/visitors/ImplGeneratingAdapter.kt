@@ -45,7 +45,7 @@ class ImplGeneratingAdapter(
         return policy.needsInImpl
     }
 
-    private var classLoadHookMethod: String? = null
+    private var classLoadHooks: List<String> = emptyList()
 
     override fun visit(
         version: Int,
@@ -57,22 +57,22 @@ class ImplGeneratingAdapter(
     ) {
         super.visit(version, access, name, signature, superName, interfaces)
 
-        classLoadHookMethod = filter.getClassLoadHook(currentClassName)
+        classLoadHooks = filter.getClassLoadHooks(currentClassName)
 
         // classLoadHookMethod is non-null, then we need to inject code to call it
         // in the class initializer.
         // If the target class already has a class initializer, then we need to inject code to it.
         // Otherwise, we need to create one.
 
-        classLoadHookMethod?.let { callback ->
-            log.d("  ClassLoadHook: $callback")
+        if (classLoadHooks.isNotEmpty()) {
+            log.d("  ClassLoadHooks: $classLoadHooks")
             if (!classes.hasClassInitializer(currentClassName)) {
-                injectClassLoadHook(callback)
+                injectClassLoadHook()
             }
         }
     }
 
-    private fun injectClassLoadHook(callback: String) {
+    private fun injectClassLoadHook() {
         writeRawMembers {
             // Create a class initializer to call onClassLoaded().
             // Each class can only have at most one class initializer, but the base class
@@ -87,7 +87,7 @@ class ImplGeneratingAdapter(
                 // Method prologue
                 mv.visitCode()
 
-                writeClassLoadHookCall(mv)
+                writeClassLoadHookCalls(mv)
                 mv.visitInsn(Opcodes.RETURN)
 
                 // Method epilogue
@@ -97,21 +97,23 @@ class ImplGeneratingAdapter(
         }
     }
 
-    private fun writeClassLoadHookCall(mv: MethodVisitor) {
-        // First argument: the class type.
-        mv.visitLdcInsn(Type.getType("L" + currentClassName + ";"))
+    private fun writeClassLoadHookCalls(mv: MethodVisitor) {
+        classLoadHooks.forEach { classLoadHook ->
+            // First argument: the class type.
+            mv.visitLdcInsn(Type.getType("L" + currentClassName + ";"))
 
-        // Second argument: method name
-        mv.visitLdcInsn(classLoadHookMethod)
+            // Second argument: method name
+            mv.visitLdcInsn(classLoadHook)
 
-        // Call HostTestUtils.onClassLoaded().
-        mv.visitMethodInsn(
-            Opcodes.INVOKESTATIC,
-            HostTestUtils.CLASS_INTERNAL_NAME,
-            "onClassLoaded",
-            "(Ljava/lang/Class;Ljava/lang/String;)V",
-            false
-        )
+            // Call HostTestUtils.onClassLoaded().
+            mv.visitMethodInsn(
+                Opcodes.INVOKESTATIC,
+                HostTestUtils.CLASS_INTERNAL_NAME,
+                "onClassLoaded",
+                "(Ljava/lang/Class;Ljava/lang/String;)V",
+                false
+            )
+        }
     }
 
     override fun updateAccessFlags(
@@ -138,20 +140,22 @@ class ImplGeneratingAdapter(
         var innerVisitor = superVisitor
 
         //  If method logging is enabled, inject call to the logging method.
-        if (options.enableMethodLogging) {
-            innerVisitor = LogInjectingMethodAdapter(
-                    access,
-                    name,
-                    descriptor,
-                    signature,
-                    exceptions,
-                    innerVisitor,
-                    )
+        val methodCallHooks = filter.getMethodCallHooks(currentClassName, name, descriptor)
+        if (methodCallHooks.isNotEmpty()) {
+            innerVisitor = MethodCallHookInjectingAdapter(
+                access,
+                name,
+                descriptor,
+                signature,
+                exceptions,
+                innerVisitor,
+                methodCallHooks,
+                )
         }
 
         // If this class already has a class initializer and a class load hook is needed, then
         // we inject code.
-        if (classLoadHookMethod != null &&
+        if (classLoadHooks.isNotEmpty() &&
             name == CLASS_INITIALIZER_NAME &&
             descriptor == CLASS_INITIALIZER_DESC) {
             innerVisitor = ClassLoadHookInjectingMethodAdapter(
@@ -283,29 +287,37 @@ class ImplGeneratingAdapter(
     }
 
     /**
-     * A method adapter that injects a call to HostTestUtils.logMethodCall() to every method.
+     * Inject calls to the method call hooks.
      *
      * Note, when the target method is a constructor, it may contain calls to `super(...)` or
      * `this(...)`. The logging code will be injected *before* such calls.
      */
-    private inner class LogInjectingMethodAdapter(
+    private inner class MethodCallHookInjectingAdapter(
             access: Int,
             val name: String,
             val descriptor: String,
             signature: String?,
             exceptions: Array<String>?,
-            next: MethodVisitor?
+            next: MethodVisitor?,
+            val hooks: List<String>,
     ) : MethodVisitor(OPCODE_VERSION, next) {
         override fun visitCode() {
             super.visitCode()
-            visitLdcInsn(currentClassName)
-            visitLdcInsn(name)
-            visitLdcInsn(descriptor)
-            visitMethodInsn(Opcodes.INVOKESTATIC,
+
+            hooks.forEach { hook ->
+                mv.visitLdcInsn(Type.getType("L" + currentClassName + ";"))
+                visitLdcInsn(name)
+                visitLdcInsn(descriptor)
+                visitLdcInsn(hook)
+
+                visitMethodInsn(
+                    Opcodes.INVOKESTATIC,
                     HostTestUtils.CLASS_INTERNAL_NAME,
-                    "logMethodCall",
-                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
-                    false)
+                    "callMethodCallHook",
+                    "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+                    false
+                )
+            }
         }
     }
 
@@ -323,7 +335,7 @@ class ImplGeneratingAdapter(
         override fun visitCode() {
             super.visitCode()
 
-            writeClassLoadHookCall(this)
+            writeClassLoadHookCalls(this)
         }
     }
 

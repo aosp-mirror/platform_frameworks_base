@@ -17,6 +17,7 @@
 #include "RenderThread.h"
 
 #include <GrContextOptions.h>
+#include <include/gpu/ganesh/gl/GrGLDirectContext.h>
 #include <android-base/properties.h>
 #include <dlfcn.h>
 #include <gl/GrGLInterface.h>
@@ -286,7 +287,7 @@ void RenderThread::requireGlContext() {
     auto glesVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
     auto size = glesVersion ? strlen(glesVersion) : -1;
     cacheManager().configureContext(&options, glesVersion, size);
-    sk_sp<GrDirectContext> grContext(GrDirectContext::MakeGL(std::move(glInterface), options));
+    sk_sp<GrDirectContext> grContext(GrDirectContexts::MakeGL(std::move(glInterface), options));
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     setGrContext(grContext);
 }

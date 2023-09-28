@@ -1,20 +1,22 @@
 package com.android.systemui.qs
 
-import com.android.systemui.log.dagger.QSFragmentDisableLog
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.dagger.QSDisableLog
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
 import javax.inject.Inject
 
-/** A helper class for logging disable flag changes made in [QSFragment]. */
-class QSFragmentDisableFlagsLogger @Inject constructor(
-    @QSFragmentDisableLog private val buffer: LogBuffer,
+/** A helper class for logging disable flag changes made in [QSImpl]. */
+class QSDisableFlagsLogger
+@Inject
+constructor(
+    @QSDisableLog private val buffer: LogBuffer,
     private val disableFlagsLogger: DisableFlagsLogger
 ) {
 
     /**
-     * Logs a string representing the new state received by [QSFragment] and any modifications that
-     * were made to the flags locally.
+     * Logs a string representing the new state received by [QSImpl] and any modifications that were
+     * made to the flags locally.
      *
      * @param new see [DisableFlagsLogger.getDisableFlagsString]
      * @param newAfterLocalModification see [DisableFlagsLogger.getDisableFlagsString]
@@ -43,4 +45,4 @@ class QSFragmentDisableFlagsLogger @Inject constructor(
     }
 }
 
-private const val TAG = "QSFragmentDisableFlagsLog"
+private const val TAG = "QSDisableFlagsLog"

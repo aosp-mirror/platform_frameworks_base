@@ -57,7 +57,6 @@ public class PartialConversationInfo extends LinearLayout implements
     private StatusBarNotification mSbn;
     private boolean mIsDeviceProvisioned;
     private boolean mIsNonBlockable;
-    private Set<NotificationChannel> mUniqueChannelsInRow;
     private Drawable mPkgIcon;
 
     private boolean mPresentingChannelEditorDialog = false;
@@ -83,7 +82,6 @@ public class PartialConversationInfo extends LinearLayout implements
             ChannelEditorDialogController channelEditorDialogController,
             String pkg,
             NotificationChannel notificationChannel,
-            Set<NotificationChannel> uniqueChannelsInRow,
             NotificationEntry entry,
             NotificationInfo.OnSettingsClickListener onSettingsClick,
             boolean isDeviceProvisioned,
@@ -100,7 +98,6 @@ public class PartialConversationInfo extends LinearLayout implements
         mIsDeviceProvisioned = isDeviceProvisioned;
         mIsNonBlockable = isNonBlockable;
         mChannelEditorDialogController = channelEditorDialogController;
-        mUniqueChannelsInRow = uniqueChannelsInRow;
 
         bindHeader();
         bindActions();
@@ -149,7 +146,7 @@ public class PartialConversationInfo extends LinearLayout implements
                 mPresentingChannelEditorDialog = true;
 
                 mChannelEditorDialogController.prepareDialogForApp(mAppName, mPackageName, mAppUid,
-                        mUniqueChannelsInRow, mPkgIcon, mOnSettingsClickListener);
+                        mNotificationChannel, mPkgIcon, mOnSettingsClickListener);
                 mChannelEditorDialogController.setOnFinishListener(() -> {
                     mPresentingChannelEditorDialog = false;
                     mGutsContainer.closeControls(this, false);

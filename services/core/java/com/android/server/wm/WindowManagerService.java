@@ -5241,16 +5241,17 @@ public class WindowManagerService extends IWindowManager.Stub
             applyForcedPropertiesForDefaultDisplay();
             mAnimator.ready();
             mDisplayReady = true;
-            // Reconfigure all displays to make sure that forced properties and
-            // DisplayWindowSettings are applied.
-            mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);
+            mHasWideColorGamutSupport = queryWideColorGamutSupport();
+            mHasHdrSupport = queryHdrSupport();
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
             mIsFakeTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_FAKETOUCH);
+            // Reconfigure all displays to make sure that the forced properties and
+            // DisplayWindowSettings are applied. In addition, wide-color/hdr/isTouchDevice also
+            // affect the Configuration.
+            mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);
         }
-
-        mAtmService.updateConfiguration(null /* request to compute config */);
     }
 
     public void systemReady() {
@@ -5258,8 +5259,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.systemReady();
         mRoot.forAllDisplayPolicies(DisplayPolicy::systemReady);
         mSnapshotController.systemReady();
-        mHasWideColorGamutSupport = queryWideColorGamutSupport();
-        mHasHdrSupport = queryHdrSupport();
         UiThread.getHandler().post(mSettingsObserver::loadSettings);
         IVrManager vrManager = IVrManager.Stub.asInterface(
                 ServiceManager.getService(Context.VR_SERVICE));
@@ -9646,5 +9645,16 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    /**
+     * Resets the spatial ordering of recents for testing purposes.
+     */
+    void resetFreezeRecentTaskListReordering() {
+        if (!checkCallingPermission(MANAGE_ACTIVITY_TASKS,
+                "resetFreezeRecentTaskListReordering()")) {
+            throw new SecurityException("Requires MANAGE_ACTIVITY_TASKS permission");
+        }
+        mAtmService.getRecentTasks().resetFreezeTaskListReorderingOnTimeout();
     }
 }

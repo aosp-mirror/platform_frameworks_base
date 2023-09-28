@@ -17,12 +17,12 @@
 package com.android.server.pm;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
@@ -63,9 +63,7 @@ public class PackageMonitorCallbackHelperTest {
 
     @Before
     public void setup() {
-        when(mMockSystem.mocks().getInjector().getHandler()).thenReturn(mHandler);
-        mPackageMonitorCallbackHelper = new PackageMonitorCallbackHelper(
-                mMockSystem.mocks().getInjector());
+        mPackageMonitorCallbackHelper = new PackageMonitorCallbackHelper();
     }
 
 
@@ -80,7 +78,7 @@ public class PackageMonitorCallbackHelperTest {
 
         mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
                 FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{0} /* userIds */,
-                null /* instantUserIds */, null /* broadcastAllowList */);
+                null /* instantUserIds */, null /* broadcastAllowList */, mHandler);
 
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).never()).sendResult(any());
     }
@@ -93,7 +91,7 @@ public class PackageMonitorCallbackHelperTest {
                 Binder.getCallingUid());
         mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
                 FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{0}, null /* instantUserIds */,
-                null /* broadcastAllowList */);
+                null /* broadcastAllowList */, mHandler);
 
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).times(1)).sendResult(any());
 
@@ -101,7 +99,7 @@ public class PackageMonitorCallbackHelperTest {
         mPackageMonitorCallbackHelper.unregisterPackageMonitorCallback(callback);
         mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
                 FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{0} /* userIds */,
-                null /* instantUserIds */, null /* broadcastAllowList */);
+                null /* instantUserIds */, null /* broadcastAllowList */, mHandler);
 
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).never()).sendResult(any());
     }
@@ -114,7 +112,7 @@ public class PackageMonitorCallbackHelperTest {
                 Binder.getCallingUid());
         mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
                 FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{0} /* userIds */,
-                null /* instantUserIds */, null /* broadcastAllowList */);
+                null /* instantUserIds */, null /* broadcastAllowList */, mHandler);
 
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).times(1)).sendResult(
@@ -138,7 +136,7 @@ public class PackageMonitorCallbackHelperTest {
         // Notify for user 10
         mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
                 FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{10} /* userIds */,
-                null /* instantUserIds */, null /* broadcastAllowList */);
+                null /* instantUserIds */, null /* broadcastAllowList */, mHandler);
 
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).never()).sendResult(any());
     }
@@ -155,7 +153,7 @@ public class PackageMonitorCallbackHelperTest {
         mPackageMonitorCallbackHelper.notifyPackageChanged(FAKE_PACKAGE_NAME,
                 false /* dontKillApp */, components, FAKE_PACKAGE_UID, null /* reason */,
                 new int[]{0} /* userIds */, null /* instantUserIds */,
-                null /* broadcastAllowList */);
+                null /* broadcastAllowList */, mHandler);
 
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).times(1)).sendResult(
@@ -183,7 +181,8 @@ public class PackageMonitorCallbackHelperTest {
                 Binder.getCallingUid());
         mPackageMonitorCallbackHelper.notifyPackageAddedForNewUsers(FAKE_PACKAGE_NAME,
                 FAKE_PACKAGE_UID, new int[]{0} /* userIds */, new int[0], false /* isArchived */,
-                PackageInstaller.DATA_LOADER_TYPE_STREAMING, null /* broadcastAllowList */);
+                PackageInstaller.DATA_LOADER_TYPE_STREAMING, null /* broadcastAllowList */,
+                mHandler);
 
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).times(1)).sendResult(
@@ -207,7 +206,7 @@ public class PackageMonitorCallbackHelperTest {
                 Binder.getCallingUid());
         mPackageMonitorCallbackHelper.notifyResourcesChanged(true /* mediaStatus */,
                 true /* replacing */, new String[]{FAKE_PACKAGE_NAME},
-                new int[]{FAKE_PACKAGE_UID} /* uids */);
+                new int[]{FAKE_PACKAGE_UID} /* uids */, mHandler);
 
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).times(1)).sendResult(
@@ -240,7 +239,7 @@ public class PackageMonitorCallbackHelperTest {
         mPackageMonitorCallbackHelper.onUserRemoved(10);
         mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
                 FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{10} /* userIds */,
-                null /* instantUserIds */, null /* broadcastAllowList */);
+                null /* instantUserIds */, null /* broadcastAllowList */, mHandler);
 
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).never()).sendResult(any());
     }
@@ -256,7 +255,7 @@ public class PackageMonitorCallbackHelperTest {
                 Binder.getCallingUid());
         mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
                 FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{0} /* userIds */,
-                null /* instantUserIds */, broadcastAllowList);
+                null /* instantUserIds */, broadcastAllowList, mHandler);
 
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).times(1)).sendResult(any());
     }
@@ -272,7 +271,7 @@ public class PackageMonitorCallbackHelperTest {
                 Binder.getCallingUid());
         mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
                 FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{0} /* userIds */,
-                null /* instantUserIds */, broadcastAllowList);
+                null /* instantUserIds */, broadcastAllowList, mHandler);
 
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).never()).sendResult(any());
     }
@@ -288,7 +287,7 @@ public class PackageMonitorCallbackHelperTest {
                 Process.SYSTEM_UID);
         mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
                 FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{0} /* userIds */,
-                null /* instantUserIds */, broadcastAllowList);
+                null /* instantUserIds */, broadcastAllowList, mHandler);
 
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).times(1)).sendResult(any());
     }

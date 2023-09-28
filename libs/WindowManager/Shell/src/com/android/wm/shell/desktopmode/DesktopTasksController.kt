@@ -37,6 +37,7 @@ import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.window.RemoteTransition
 import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
@@ -65,7 +66,9 @@ import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.ShellSharedConstants
+import com.android.wm.shell.transition.OneShotRemoteHandler
 import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.transition.Transitions.TransitionHandler
 import com.android.wm.shell.util.KtProtoLog
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
@@ -139,20 +142,22 @@ class DesktopTasksController(
     }
 
     /** Show all tasks, that are part of the desktop, on top of launcher */
-    fun showDesktopApps(displayId: Int) {
+    fun showDesktopApps(displayId: Int, remoteTransition: RemoteTransition? = null) {
         KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: showDesktopApps")
         val wct = WindowContainerTransaction()
-        // TODO(b/278084491): pass in display id
         bringDesktopAppsToFront(displayId, wct)
 
-        // Execute transaction if there are pending operations
-        if (!wct.isEmpty) {
-            if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-                // TODO(b/268662477): add animation for the transition
-                transitions.startTransition(TRANSIT_NONE, wct, null /* handler */)
-            } else {
-                shellTaskOrganizer.applyTransaction(wct)
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            // TODO(b/255649902): ensure remote transition is supplied once state is introduced
+            val transitionType = if (remoteTransition == null) TRANSIT_NONE else TRANSIT_TO_FRONT
+            val handler = remoteTransition?.let {
+                OneShotRemoteHandler(transitions.mainExecutor, remoteTransition)
             }
+            transitions.startTransition(transitionType, wct, handler).also { t ->
+                handler?.setTransition(t)
+            }
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
         }
     }
 
@@ -1093,11 +1098,11 @@ class DesktopTasksController(
             controller = null
         }
 
-        override fun showDesktopApps(displayId: Int) {
+        override fun showDesktopApps(displayId: Int, remoteTransition: RemoteTransition?) {
             ExecutorUtils.executeRemoteCallWithTaskPermission(
                 controller,
                 "showDesktopApps"
-            ) { c -> c.showDesktopApps(displayId) }
+            ) { c -> c.showDesktopApps(displayId, remoteTransition) }
         }
 
         override fun stashDesktopApps(displayId: Int) {

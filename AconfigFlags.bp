@@ -15,6 +15,7 @@
 aconfig_srcjars = [
     ":android.app.usage.flags-aconfig-java{.generated_srcjars}",
     ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
+    ":android.hardware.radio.flags-aconfig-java{.generated_srcjars}",
     ":android.nfc.flags-aconfig-java{.generated_srcjars}",
     ":android.os.flags-aconfig-java{.generated_srcjars}",
     ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
@@ -339,5 +340,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.app.flags-aconfig-java",
     aconfig_declarations: "android.app.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Broadcast Radio
+aconfig_declarations {
+    name: "android.hardware.radio.flags-aconfig",
+    package: "android.hardware.radio",
+    srcs: ["core/java/android/hardware/radio/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.hardware.radio.flags-aconfig-java",
+    aconfig_declarations: "android.hardware.radio.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

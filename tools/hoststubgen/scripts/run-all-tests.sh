@@ -34,6 +34,7 @@ run ./hoststubgen/test-tiny-framework/diff-and-update-golden.sh
 
 run ./hoststubgen/test-framework/run-test-without-atest.sh
 run ./hoststubgen/test-tiny-framework/run-test-manually.sh
+run atest tiny-framework-dump-test
 run ./scripts/build-framework-hostside-jars-and-extract.sh
 
 # This script is already broken on goog/master

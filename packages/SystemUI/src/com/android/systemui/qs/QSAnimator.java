@@ -28,7 +28,7 @@ import androidx.annotation.Nullable;
 
 import com.android.app.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
@@ -86,8 +86,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private final QuickQSPanel mQuickQsPanel;
     private final QSPanelController mQsPanelController;
     private final QuickQSPanelController mQuickQSPanelController;
-    private final QuickStatusBarHeader mQuickStatusBarHeader;
-    private final QS mQs;
+    private final View mQsRootView;
 
     @Nullable
     private PagedTileLayout mPagedLayout;
@@ -115,8 +114,6 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     // Brightness slider opacity driver. Uses linear interpolator.
     @Nullable
     private TouchAnimator mBrightnessOpacityAnimator;
-    // Animator for Footer actions in QQS
-    private TouchAnimator mQQSFooterActionsAnimator;
     // Height animator for QQS tiles (height changing from QQS size to QS size)
     @Nullable
     private HeightExpansionAnimator mQQSTileHeightAnimator;
@@ -144,22 +141,21 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private int[] mTmpLoc2 = new int[2];
 
     @Inject
-    public QSAnimator(QS qs, QuickQSPanel quickPanel, QuickStatusBarHeader quickStatusBarHeader,
+    public QSAnimator(@RootView View rootView, QuickQSPanel quickPanel,
             QSPanelController qsPanelController,
             QuickQSPanelController quickQSPanelController, QSHost qsTileHost,
             @Main Executor executor, TunerService tunerService,
             QSExpansionPathInterpolator qsExpansionPathInterpolator) {
-        mQs = qs;
+        mQsRootView = rootView;
         mQuickQsPanel = quickPanel;
         mQsPanelController = qsPanelController;
         mQuickQSPanelController = quickQSPanelController;
-        mQuickStatusBarHeader = quickStatusBarHeader;
         mHost = qsTileHost;
         mExecutor = executor;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
         mHost.addCallback(this);
         mQsPanelController.addOnAttachStateChangeListener(this);
-        qs.getView().addOnLayoutChangeListener(this);
+        mQsRootView.addOnLayoutChangeListener(this);
         if (mQsPanelController.isAttachedToWindow()) {
             onViewAttachedToWindow(null);
         }
@@ -314,8 +310,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
                     break;
                 }
 
-                final View tileIcon = tileView.getIcon().getIconView();
-                View view = mQs.getView();
+                View view = mQsRootView;
 
                 // This case: less tiles to animate in small displays.
                 if (count < mQuickQSPanelController.getTileLayout().getNumVisibleTiles()) {
@@ -480,7 +475,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
                 .setStartDelay(QS_TILE_LABEL_FADE_OUT_START)
                 .setEndDelay(QS_TILE_LABEL_FADE_OUT_END);
         SideLabelTileLayout qqsLayout = (SideLabelTileLayout) mQuickQsPanel.getTileLayout();
-        View view = mQs.getView();
+        View view = mQsRootView;
         List<String> specs = mPagedLayout.getSpecsForPage(page);
         if (specs.isEmpty()) {
             // specs should not be empty in a valid secondary page, as we scrolled to it.
@@ -577,7 +572,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
 
             // For (1), compute the distance via the vertical distance between QQS and QS tile
             // layout top.
-            View quickSettingsRootView = mQs.getView();
+            View quickSettingsRootView = mQsRootView;
             View qsTileLayout = (View) mQsPanelController.getTileLayout();
             View qqsTileLayout = (View) mQuickQSPanelController.getTileLayout();
             getRelativePosition(mTmpLoc1, qsTileLayout, quickSettingsRootView);
@@ -607,7 +602,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private int getRelativeTranslationY(View view1, View view2) {
         int[] qsPosition = new int[2];
         int[] qqsPosition = new int[2];
-        View commonView = mQs.getView();
+        View commonView = mQsRootView;
         getRelativePositionInt(qsPosition, view1, commonView);
         getRelativePositionInt(qqsPosition, view2, commonView);
         return qsPosition[1] - qqsPosition[1];
@@ -689,9 +684,6 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         }
         if (mBrightnessTranslationAnimator != null) {
             mBrightnessTranslationAnimator.setPosition(position);
-        }
-        if (mQQSFooterActionsAnimator != null) {
-            mQQSFooterActionsAnimator.setPosition(position);
         }
     }
 

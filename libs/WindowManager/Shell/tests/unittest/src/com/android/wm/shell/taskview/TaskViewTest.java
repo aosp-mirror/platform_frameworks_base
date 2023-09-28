@@ -43,6 +43,8 @@ import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Handler;
+import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
@@ -88,6 +90,10 @@ public class TaskViewTest extends ShellTestCase {
     SyncTransactionQueue mSyncQueue;
     @Mock
     Transitions mTransitions;
+    @Mock
+    Looper mViewLooper;
+    @Mock
+    Handler mViewHandler;
 
     SurfaceSession mSession;
     SurfaceControl mLeash;
@@ -105,6 +111,8 @@ public class TaskViewTest extends ShellTestCase {
                 .build();
 
         mContext = getContext();
+        doReturn(true).when(mViewLooper).isCurrentThread();
+        doReturn(mViewLooper).when(mViewHandler).getLooper();
 
         mTaskInfo = new ActivityManager.RunningTaskInfo();
         mTaskInfo.token = mToken;
@@ -132,6 +140,7 @@ public class TaskViewTest extends ShellTestCase {
         mTaskViewTaskController = spy(new TaskViewTaskController(mContext, mOrganizer,
                 mTaskViewTransitions, mSyncQueue));
         mTaskView = new TaskView(mContext, mTaskViewTaskController);
+        mTaskView.setHandler(mViewHandler);
         mTaskView.setListener(mExecutor, mViewListener);
     }
 
@@ -645,5 +654,18 @@ public class TaskViewTest extends ShellTestCase {
         mTaskViewTaskController.prepareCloseAnimation();
 
         assertThat(mTaskViewTaskController.getTaskInfo()).isNull();
+    }
+
+    @Test
+    public void testOnTaskInfoChangedOnSameUiThread() {
+        mTaskViewTaskController.onTaskInfoChanged(mTaskInfo);
+        verify(mViewHandler, never()).post(any());
+    }
+
+    @Test
+    public void testOnTaskInfoChangedOnDifferentUiThread() {
+        doReturn(false).when(mViewLooper).isCurrentThread();
+        mTaskViewTaskController.onTaskInfoChanged(mTaskInfo);
+        verify(mViewHandler).post(any());
     }
 }

@@ -90,4 +90,12 @@ interface MobileConnectionsRepository {
 
     /** Fallback [MobileIconGroup] in the case where there is no icon in the mapping */
     val defaultMobileIconGroup: Flow<MobileIconGroup>
+
+    /**
+     * If any active SIM on the device is in
+     * [android.telephony.TelephonyManager.SIM_STATE_PIN_REQUIRED] or
+     * [android.telephony.TelephonyManager.SIM_STATE_PUK_REQUIRED] or
+     * [android.telephony.TelephonyManager.SIM_STATE_PERM_DISABLED]
+     */
+    val isAnySimSecure: Flow<Boolean>
 }

@@ -172,6 +172,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_LOCK_TASK_MODE_CHANGED = 75 << MSG_SHIFT;
     private static final int MSG_CONFIRM_IMMERSIVE_PROMPT = 77 << MSG_SHIFT;
     private static final int MSG_IMMERSIVE_CHANGED = 78 << MSG_SHIFT;
+    private static final int MSG_SET_QS_TILES = 79 << MSG_SHIFT;
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
     public static final int FLAG_EXCLUDE_RECENTS_PANEL = 1 << 1;
@@ -301,6 +302,8 @@ public class CommandQueue extends IStatusBar.Stub implements
 
         default void addQsTile(ComponentName tile) { }
         default void remQsTile(ComponentName tile) { }
+
+        default void setQsTiles(String[] tiles) {}
         default void clickTile(ComponentName tile) { }
 
         default void handleSystemKey(KeyEvent arg1) { }
@@ -899,6 +902,13 @@ public class CommandQueue extends IStatusBar.Stub implements
     public void remQsTile(ComponentName tile) {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_REMOVE_QS_TILE, tile).sendToTarget();
+        }
+    }
+
+    @Override
+    public void setQsTiles(String[] tiles) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SET_QS_TILES, tiles).sendToTarget();
         }
     }
 
@@ -1531,6 +1541,11 @@ public class CommandQueue extends IStatusBar.Stub implements
                 case MSG_REMOVE_QS_TILE:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).remQsTile((ComponentName) msg.obj);
+                    }
+                    break;
+                case MSG_SET_QS_TILES:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).setQsTiles((String[]) msg.obj);
                     }
                     break;
                 case MSG_CLICK_QS_TILE:

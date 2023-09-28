@@ -17,6 +17,7 @@ package com.android.hoststubgen
 
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.filters.AnnotationBasedFilter
+import com.android.hoststubgen.filters.DefaultHookInjectingFilter
 import com.android.hoststubgen.filters.ClassWidePolicyPropagatingFilter
 import com.android.hoststubgen.filters.ConstantFilter
 import com.android.hoststubgen.filters.FilterPolicy
@@ -156,22 +157,29 @@ class HostStubGen(val options: HostStubGenOptions) {
         // This is used when a member (methods, fields, nested classes) don't get any polices
         // from upper filters. e.g. when a method has no annotations, then this filter will apply
         // the class-wide policy, if any. (if not, we'll fall back to the above filter.)
-        val classWidePropagator = ClassWidePolicyPropagatingFilter(filter)
+        filter = ClassWidePolicyPropagatingFilter(filter)
+
+        // Inject default hooks from options.
+        filter = DefaultHookInjectingFilter(
+            options.defaultClassLoadHook,
+            options.defaultMethodCallHook,
+            filter
+        )
 
         // Next, Java annotation based filter.
         filter = AnnotationBasedFilter(
-                errors,
-                allClasses,
-                options.stubAnnotations,
-                options.keepAnnotations,
-                options.stubClassAnnotations,
-                options.keepClassAnnotations,
-                options.throwAnnotations,
-                options.removeAnnotations,
-                options.substituteAnnotations,
-                options.nativeSubstituteAnnotations,
-                options.classLoadHookAnnotations,
-                classWidePropagator
+            errors,
+            allClasses,
+            options.stubAnnotations,
+            options.keepAnnotations,
+            options.stubClassAnnotations,
+            options.keepClassAnnotations,
+            options.throwAnnotations,
+            options.removeAnnotations,
+            options.substituteAnnotations,
+            options.nativeSubstituteAnnotations,
+            options.classLoadHookAnnotations,
+            filter
         )
 
         // Next, "text based" filter, which allows to override polices without touching

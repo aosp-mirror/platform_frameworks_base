@@ -154,6 +154,7 @@ oneway interface IStatusBar
 
     void addQsTile(in ComponentName tile);
     void remQsTile(in ComponentName tile);
+    void setQsTiles(in String[] tiles);
     void clickQsTile(in ComponentName tile);
     void handleSystemKey(in KeyEvent key);
 

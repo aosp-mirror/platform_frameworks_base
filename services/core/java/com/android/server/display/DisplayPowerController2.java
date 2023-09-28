@@ -31,6 +31,8 @@ import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
+import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.metrics.LogMaker;
@@ -470,8 +472,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             new SparseArray();
 
     private boolean mBootCompleted;
-
     private final DisplayManagerFlags mFlags;
+
+    private DisplayManagerInternal.DisplayOffloadSession mDisplayOffloadSession;
 
     /**
      * Creates the display power controller.
@@ -549,7 +552,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mBrightnessThrottler = createBrightnessThrottlerLocked();
 
         mBrightnessRangeController = mInjector.getBrightnessRangeController(hbmController,
-                modeChangeCallback, mDisplayDeviceConfig, mHandler, flags);
+                modeChangeCallback, mDisplayDeviceConfig, mHandler, flags,
+                mDisplayDevice.getDisplayTokenLocked(),
+                mDisplayDevice.getDisplayDeviceInfoLocked());
 
         mDisplayBrightnessController =
                 new DisplayBrightnessController(context, null,
@@ -588,21 +593,24 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         if (mDisplayId == Display.DEFAULT_DISPLAY) {
             mCdsi = LocalServices.getService(ColorDisplayServiceInternal.class);
-            boolean active = mCdsi.setReduceBrightColorsListener(new ReduceBrightColorsListener() {
-                @Override
-                public void onReduceBrightColorsActivationChanged(boolean activated,
-                        boolean userInitiated) {
-                    applyReduceBrightColorsSplineAdjustment();
+            if (mCdsi != null) {
+                boolean active = mCdsi.setReduceBrightColorsListener(
+                        new ReduceBrightColorsListener() {
+                            @Override
+                            public void onReduceBrightColorsActivationChanged(boolean activated,
+                                    boolean userInitiated) {
+                                applyReduceBrightColorsSplineAdjustment();
 
-                }
+                            }
 
-                @Override
-                public void onReduceBrightColorsStrengthChanged(int strength) {
+                            @Override
+                            public void onReduceBrightColorsStrengthChanged(int strength) {
+                                applyReduceBrightColorsSplineAdjustment();
+                            }
+                        });
+                if (active) {
                     applyReduceBrightColorsSplineAdjustment();
                 }
-            });
-            if (active) {
-                applyReduceBrightColorsSplineAdjustment();
             }
         } else {
             mCdsi = null;
@@ -757,6 +765,24 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
             return mDisplayReadyLocked;
         }
+    }
+
+    @Override
+    public void overrideDozeScreenState(int displayState) {
+        mHandler.postAtTime(() -> {
+            if (mDisplayOffloadSession == null
+                    || !(DisplayOffloadSession.isSupportedOffloadState(displayState)
+                    || displayState == Display.STATE_UNKNOWN)) {
+                return;
+            }
+            mDisplayStateController.overrideDozeScreenState(displayState);
+            sendUpdatePowerState();
+        }, mClock.uptimeMillis());
+    }
+
+    @Override
+    public void setDisplayOffloadSession(DisplayOffloadSession session) {
+        mDisplayOffloadSession = session;
     }
 
     @Override
@@ -1540,6 +1566,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 // SDR brightness immediately when entering dim or low power mode.
                 animateValue = mBrightnessRangeController.getHdrBrightnessValue();
                 customTransitionRate = mBrightnessRangeController.getHdrTransitionRate();
+                mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_HDR);
             }
 
             final float currentBrightness = mPowerState.getScreenBrightness();
@@ -1871,15 +1898,12 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     private HighBrightnessModeController createHbmControllerLocked(
             HighBrightnessModeMetadata hbmMetadata, Runnable modeChangeCallback) {
-        final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
-        final DisplayDeviceConfig ddConfig = device.getDisplayDeviceConfig();
-        final IBinder displayToken =
-                mLogicalDisplay.getPrimaryDisplayDeviceLocked().getDisplayTokenLocked();
-        final String displayUniqueId =
-                mLogicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId();
+        final DisplayDeviceConfig ddConfig = mDisplayDevice.getDisplayDeviceConfig();
+        final IBinder displayToken = mDisplayDevice.getDisplayTokenLocked();
+        final String displayUniqueId = mDisplayDevice.getUniqueId();
         final DisplayDeviceConfig.HighBrightnessModeData hbmData =
                 ddConfig != null ? ddConfig.getHighBrightnessModeData() : null;
-        final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+        final DisplayDeviceInfo info = mDisplayDevice.getDisplayDeviceInfoLocked();
         return mInjector.getHighBrightnessModeController(mHandler, info.width, info.height,
                 displayToken, displayUniqueId, PowerManager.BRIGHTNESS_MIN,
                 PowerManager.BRIGHTNESS_MAX, hbmData, (sdrBrightness, maxDesiredHdrSdrRatio) ->
@@ -3025,9 +3049,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         BrightnessRangeController getBrightnessRangeController(
                 HighBrightnessModeController hbmController, Runnable modeChangeCallback,
                 DisplayDeviceConfig displayDeviceConfig, Handler handler,
-                DisplayManagerFlags flags) {
+                DisplayManagerFlags flags, IBinder displayToken, DisplayDeviceInfo info) {
             return new BrightnessRangeController(hbmController,
-                    modeChangeCallback, displayDeviceConfig, handler, flags);
+                    modeChangeCallback, displayDeviceConfig, handler, flags, displayToken, info);
         }
 
         DisplayWhiteBalanceController getDisplayWhiteBalanceController(Handler handler,

@@ -28,7 +28,7 @@ import org.junit.runners.BlockJUnit4ClassRunner
 @RunWith(BlockJUnit4ClassRunner::class)
 open class UnlockKeyguardToSplitScreenGesturalNavLandscape : UnlockKeyguardToSplitScreen() {
     @get:Rule
-    val flickerServiceRule = FlickerServiceRule(enabled = true, failTestOnFaasFailure = false)
+    val flickerServiceRule = FlickerServiceRule(enabled = true, failTestOnFlicker = false)
 
     @PlatinumTest(focusArea = "sysui")
     @Presubmit

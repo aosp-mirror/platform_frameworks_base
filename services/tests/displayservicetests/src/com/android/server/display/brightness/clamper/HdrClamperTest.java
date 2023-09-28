@@ -20,6 +20,12 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.os.IBinder;
 import android.os.PowerManager;
 
 import androidx.test.filters.SmallTest;
@@ -31,6 +37,7 @@ import com.android.server.testutils.TestHandler;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -40,7 +47,20 @@ import java.util.Map;
 @SmallTest
 public class HdrClamperTest {
 
-    public static final float FLOAT_TOLERANCE = 0.0001f;
+    private static final float FLOAT_TOLERANCE = 0.0001f;
+    private static final long SEND_TIME_TOLERANCE = 100;
+
+    private static final HdrBrightnessData TEST_HDR_DATA = new HdrBrightnessData(
+            Map.of(500f, 0.6f),
+            /* brightnessIncreaseDebounceMillis= */ 1000,
+            /* brightnessIncreaseDurationMillis= */ 2000,
+            /* brightnessDecreaseDebounceMillis= */ 3000,
+            /* brightnessDecreaseDurationMillis= */4000
+    );
+
+    private static final int WIDTH = 600;
+    private static final int HEIGHT = 800;
+    private static final float MIN_HDR_PERCENT = 0.5f;
 
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
@@ -48,17 +68,31 @@ public class HdrClamperTest {
     @Mock
     private BrightnessClamperController.ClamperChangeListener mMockListener;
 
+    @Mock
+    private IBinder mMockBinder;
+
+    @Mock
+    private HdrClamper.Injector mMockInjector;
+
+    @Mock
+    private HdrClamper.HdrLayerInfoListener mMockHdrInfoListener;
+
     OffsettableClock mClock = new OffsettableClock.Stopped();
 
     private final TestHandler mTestHandler = new TestHandler(null, mClock);
 
 
     private HdrClamper mHdrClamper;
-
+    private HdrClamper.HdrListener mHdrChangeListener;
 
     @Before
     public void setUp() {
-        mHdrClamper = new HdrClamper(mMockListener, mTestHandler);
+        when(mMockInjector.getHdrListener(any(), any())).thenReturn(mMockHdrInfoListener);
+        mHdrClamper = new HdrClamper(mMockListener, mTestHandler, mMockInjector);
+        ArgumentCaptor<HdrClamper.HdrListener> listenerCaptor = ArgumentCaptor.forClass(
+                HdrClamper.HdrListener.class);
+        verify(mMockInjector).getHdrListener(listenerCaptor.capture(), eq(mTestHandler));
+        mHdrChangeListener = listenerCaptor.getValue();
         configureClamper();
     }
 
@@ -68,20 +102,23 @@ public class HdrClamperTest {
 
         assertFalse(mTestHandler.hasMessagesOrCallbacks());
         assertEquals(PowerManager.BRIGHTNESS_MAX, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
+        assertEquals(-1, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
     }
 
     @Test
-    public void testClamper_AmbientLuxChangesBelowLimit() {
+    public void testClamper_AmbientLuxChangesBelowLimit_MaxDecrease() {
         mHdrClamper.onAmbientLuxChange(499);
 
         assertTrue(mTestHandler.hasMessagesOrCallbacks());
         TestHandler.MsgInfo msgInfo = mTestHandler.getPendingMessages().peek();
-        assertEquals(2000, msgInfo.sendTime);
+        assertSendTime(3000, msgInfo.sendTime);
         assertEquals(PowerManager.BRIGHTNESS_MAX, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
+        assertEquals(-1, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
 
-        mClock.fastForward(2000);
+        mClock.fastForward(3000);
         mTestHandler.timeAdvance();
         assertEquals(0.6f, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
+        assertEquals(0.1f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE); // (1-0.6) / 4
     }
 
     @Test
@@ -91,33 +128,65 @@ public class HdrClamperTest {
 
         assertFalse(mTestHandler.hasMessagesOrCallbacks());
         assertEquals(PowerManager.BRIGHTNESS_MAX, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
+        assertEquals(-1, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
     }
 
     @Test
     public void testClamper_AmbientLuxChangesBelowLimit_ThenSlowlyAboveLimit() {
         mHdrClamper.onAmbientLuxChange(499);
-        mClock.fastForward(2000);
+        mClock.fastForward(3000);
         mTestHandler.timeAdvance();
 
         mHdrClamper.onAmbientLuxChange(500);
 
         assertTrue(mTestHandler.hasMessagesOrCallbacks());
         TestHandler.MsgInfo msgInfo = mTestHandler.getPendingMessages().peek();
-        assertEquals(3000, msgInfo.sendTime); // 2000 + 1000
+        assertSendTime(4000, msgInfo.sendTime); // 3000 + 1000
 
         mClock.fastForward(1000);
         mTestHandler.timeAdvance();
         assertEquals(PowerManager.BRIGHTNESS_MAX, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
+        assertEquals(0.2f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE); // (1-0.6) / 2
+    }
+
+    @Test
+    public void testClamper_HdrOff_ThenAmbientLuxChangesBelowLimit() {
+        mHdrChangeListener.onHdrVisible(false);
+        mHdrClamper.onAmbientLuxChange(499);
+
+        assertFalse(mTestHandler.hasMessagesOrCallbacks());
+        assertEquals(PowerManager.BRIGHTNESS_MAX, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
+        assertEquals(-1, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
+    }
+
+    @Test
+    public void testClamper_HdrOff_ThenAmbientLuxChangesBelowLimit_ThenHdrOn() {
+        mHdrChangeListener.onHdrVisible(false);
+        mHdrClamper.onAmbientLuxChange(499);
+        mHdrChangeListener.onHdrVisible(true);
+
+        assertTrue(mTestHandler.hasMessagesOrCallbacks());
+        TestHandler.MsgInfo msgInfo = mTestHandler.getPendingMessages().peek();
+        assertSendTime(3000, msgInfo.sendTime);
+        assertEquals(PowerManager.BRIGHTNESS_MAX, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
+
+        mClock.fastForward(3000);
+        mTestHandler.timeAdvance();
+        assertEquals(0.6f, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
+        assertEquals(0.1f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
+    }
+
+    // MsgInfo.sendTime is calculated first by adding SystemClock.uptimeMillis()
+    // (in Handler.sendMessageDelayed) and then by subtracting SystemClock.uptimeMillis()
+    // (in TestHandler.sendMessageAtTime, there might be several milliseconds difference between
+    // SystemClock.uptimeMillis() calls, and subtracted value might be greater than added.
+    private static void assertSendTime(long expectedTime, long sendTime) {
+        assertTrue(expectedTime >= sendTime);
+        assertTrue(expectedTime - SEND_TIME_TOLERANCE < sendTime);
     }
 
     private void configureClamper() {
-        HdrBrightnessData data = new HdrBrightnessData(
-                Map.of(500f, 0.6f),
-                /* brightnessIncreaseDebounceMillis= */ 1000,
-                /* brightnessIncreaseDurationMillis= */ 1500,
-                /* brightnessDecreaseDebounceMillis= */ 2000,
-                /* brightnessDecreaseDurationMillis= */2500
-        );
-        mHdrClamper.resetHdrConfig(data);
+        mHdrClamper.resetHdrConfig(TEST_HDR_DATA, WIDTH, HEIGHT, MIN_HDR_PERCENT, mMockBinder);
+        mHdrChangeListener.onHdrVisible(true);
     }
 }

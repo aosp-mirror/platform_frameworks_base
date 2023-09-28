@@ -25,5 +25,12 @@ flag {
     name: "send_a11y_events_based_on_state"
     namespace: "accessibility"
     description: "Sends accessibility events in TouchExplorer#onAccessibilityEvent based on internal state to keep it consistent. This reduces test flakiness."
-bug: "295575684"
+    bug: "295575684"
+}
+
+flag {
+    name: "add_window_token_without_lock"
+    namespace: "accessibility"
+    description: "Calls WMS.addWindowToken without holding A11yManagerService#mLock"
+    bug: "297972548"
 }

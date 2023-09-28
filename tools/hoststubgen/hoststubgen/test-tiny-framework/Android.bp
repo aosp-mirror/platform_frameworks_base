@@ -53,6 +53,46 @@ java_genrule_host {
     ],
 }
 
+// Same as "hoststubgen-test-tiny-framework-host", but with more options, to test more hoststubgen
+// features.
+java_genrule_host {
+    name: "hoststubgen-test-tiny-framework-host-ext",
+    defaults: ["hoststubgen-command-defaults"],
+    cmd: hoststubgen_common_options +
+        "--in-jar $(location :hoststubgen-test-tiny-framework) " +
+        "--policy-override-file $(location policy-override-tiny-framework.txt) " +
+
+        // More options.
+        "--default-method-call-hook com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall " +
+        "--default-class-load-hook com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded ",
+    srcs: [
+        ":hoststubgen-test-tiny-framework",
+        "policy-override-tiny-framework.txt",
+    ],
+}
+
+java_genrule_host {
+    name: "hoststubgen-test-tiny-framework-host-ext-stub",
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":hoststubgen-test-tiny-framework-host-ext{host_stub.jar}",
+    ],
+    out: [
+        "host_stub.jar",
+    ],
+}
+
+java_genrule_host {
+    name: "hoststubgen-test-tiny-framework-host-ext-impl",
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":hoststubgen-test-tiny-framework-host-ext{host_impl.jar}",
+    ],
+    out: [
+        "host_impl.jar",
+    ],
+}
+
 // Compile the test jar, using 2 rules.
 // 1. Build the test against the stub.
 java_library_host {
@@ -123,6 +163,30 @@ java_genrule_host {
     visibility: ["//visibility:private"],
 }
 
+java_genrule_host {
+    name: "hoststubgen-test-tiny-framework-host-ext-stub-dump",
+    defaults: ["hoststubgen-jar-dump-defaults"],
+    srcs: [
+        ":hoststubgen-test-tiny-framework-host-ext-stub",
+    ],
+    out: [
+        "12-hoststubgen-test-tiny-framework-host-ext-stub-dump.txt",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_genrule_host {
+    name: "hoststubgen-test-tiny-framework-host-ext-impl-dump",
+    defaults: ["hoststubgen-jar-dump-defaults"],
+    srcs: [
+        ":hoststubgen-test-tiny-framework-host-ext-impl",
+    ],
+    out: [
+        "13-hoststubgen-test-tiny-framework-host-ext-impl-dump.txt",
+    ],
+    visibility: ["//visibility:private"],
+}
+
 // Run it with `atest`. Compare the dump of the jar files to the golden output.
 python_test_host {
     name: "tiny-framework-dump-test",
@@ -136,6 +200,8 @@ python_test_host {
         "hoststubgen-test-tiny-framework-host-stub-dump",
         "hoststubgen-test-tiny-framework-host-impl-dump",
         "hoststubgen-test-tiny-framework-orig-dump",
+        "hoststubgen-test-tiny-framework-host-ext-stub-dump",
+        "hoststubgen-test-tiny-framework-host-ext-impl-dump",
     ],
     test_suites: ["general-tests"],
 }

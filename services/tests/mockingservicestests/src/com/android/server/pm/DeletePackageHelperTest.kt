@@ -34,6 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.mock
 
 @RunWith(JUnit4::class)
 class DeletePackageHelperTest {
@@ -79,7 +80,8 @@ class DeletePackageHelperTest {
         whenever(mUserManagerInternal.getUserInfo(1)).thenReturn(UserInfo(1, "test", 0))
         whenever(mUserManagerInternal.getProfileParentId(1)).thenReturn(1)
 
-        val dph = DeletePackageHelper(mPms)
+        val dph = DeletePackageHelper(mPms, mock(RemovePackageHelper::class.java),
+            mock(BroadcastHelper::class.java))
         val result = dph.deletePackageX("a.data.package", 1L, 1, 0, false)
 
         assertThat(result).isEqualTo(PackageManager.DELETE_FAILED_USER_RESTRICTED)
@@ -97,7 +99,8 @@ class DeletePackageHelperTest {
         whenever(mUserManagerInternal.getUserInfo(parentId)).thenReturn(
             UserInfo(userId, "testparent", 0))
 
-        val dph = DeletePackageHelper(mPms)
+        val dph = DeletePackageHelper(mPms, mock(RemovePackageHelper::class.java),
+            mock(BroadcastHelper::class.java))
         val result = dph.deletePackageX("a.data.package", 1L, userId, 0, false)
 
         assertThat(result).isEqualTo(PackageManager.DELETE_FAILED_USER_RESTRICTED)
@@ -112,7 +115,8 @@ class DeletePackageHelperTest {
         whenever(mPms.checkPermission(CONTROL_KEYGUARD, "a.data.package", USER_SYSTEM))
             .thenReturn(PERMISSION_DENIED)
 
-        val dph = DeletePackageHelper(mPms)
+        val dph = DeletePackageHelper(mPms, mock(RemovePackageHelper::class.java),
+            mock(BroadcastHelper::class.java))
         val result = dph.deletePackageX("a.data.package", 1L, 1,
             PackageManager.DELETE_SYSTEM_APP, false)
 
@@ -133,7 +137,8 @@ class DeletePackageHelperTest {
         whenever(mPms.checkPermission(CONTROL_KEYGUARD, "a.data.package", USER_SYSTEM))
             .thenReturn(PERMISSION_DENIED)
 
-        val dph = DeletePackageHelper(mPms)
+        val dph = DeletePackageHelper(mPms, mock(RemovePackageHelper::class.java),
+            mock(BroadcastHelper::class.java))
         val result = dph.deletePackageX("a.data.package", 1L, userId,
             PackageManager.DELETE_SYSTEM_APP, false)
 
@@ -150,7 +155,8 @@ class DeletePackageHelperTest {
         whenever(mPms.checkPermission(CONTROL_KEYGUARD, "a.data.package", USER_SYSTEM))
             .thenReturn(PERMISSION_DENIED)
 
-        val dph = DeletePackageHelper(mPms)
+        val dph = DeletePackageHelper(mPms, mock(RemovePackageHelper::class.java),
+            mock(BroadcastHelper::class.java))
         val result = dph.deletePackageX("a.data.package", 1L, 1,
                 PackageManager.DELETE_SYSTEM_APP, false)
 
@@ -164,7 +170,8 @@ class DeletePackageHelperTest {
         whenever(mPms.checkPermission(CONTROL_KEYGUARD, "a.data.package", USER_SYSTEM))
             .thenReturn(PERMISSION_GRANTED)
 
-        val dph = DeletePackageHelper(mPms)
+        val dph = DeletePackageHelper(mPms, mock(RemovePackageHelper::class.java),
+            mock(BroadcastHelper::class.java))
         val result = dph.deletePackageX("a.data.package", 1L, 1,
             PackageManager.DELETE_SYSTEM_APP, false)
 

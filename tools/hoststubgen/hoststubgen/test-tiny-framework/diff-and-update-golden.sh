@@ -112,7 +112,7 @@ done
 
 if (( $three_way )) ; then
   echo "# Running 3-way diff with meld..."
-  run meld ${files[*]} &
+  run meld ${files[0]} ${files[1]} ${files[2]} &
 fi
 
 if (( $two_way )) ; then

@@ -57,6 +57,7 @@ import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
+import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.IVirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorCallback;
@@ -100,6 +101,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
@@ -209,6 +211,9 @@ public class VirtualDeviceManagerServiceTest {
                     .setAssociatedDisplayId(DISPLAY_ID_1)
                     .build();
     private static final String TEST_SITE = "http://test";
+
+    @Rule
+    public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Rule
     public AdoptShellPermissionsRule mAdoptShellPermissionsRule = new AdoptShellPermissionsRule(
@@ -327,6 +332,11 @@ public class VirtualDeviceManagerServiceTest {
 
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
+
+        mSetFlagsRule.disableFlags(Flags.FLAG_VDM_PUBLIC_APIS);
+        mSetFlagsRule.disableFlags(Flags.FLAG_DYNAMIC_POLICY);
+        mSetFlagsRule.disableFlags(Flags.FLAG_STREAM_PERMISSIONS);
+        mSetFlagsRule.disableFlags(Flags.FLAG_VDM_CUSTOM_HOME);
 
         doReturn(true).when(mInputManagerInternalMock).setVirtualMousePointerDisplayId(anyInt());
         doNothing().when(mInputManagerInternalMock).setPointerAcceleration(anyFloat(), anyInt());
@@ -1439,6 +1449,50 @@ public class VirtualDeviceManagerServiceTest {
                 PERMISSION_CONTROLLER_PACKAGE_NAME,
                 PERMISSION_CONTROLLER_PACKAGE_NAME,
                 /* displayOnRemoveDevices */  false,
+                /* targetDisplayCategory */ null);
+        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
+                activityInfo, mAssociationInfo.getDisplayName());
+        gwpc.canActivityBeLaunched(activityInfo, blockedAppIntent,
+                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID_1, /*isNewTask=*/false);
+
+        verify(mContext).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    @Test
+    public void openPermissionControllerOnVirtualDisplay_displayOnRemoteDevices_startsWhenFlagIsEnabled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_STREAM_PERMISSIONS);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getDisplayWindowPolicyControllerForTest(
+                DISPLAY_ID_1);
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        ActivityInfo activityInfo = getActivityInfo(
+                PERMISSION_CONTROLLER_PACKAGE_NAME,
+                PERMISSION_CONTROLLER_PACKAGE_NAME,
+                /* displayOnRemoveDevices */ true,
+                /* targetDisplayCategory */ null);
+        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
+                activityInfo, mAssociationInfo.getDisplayName());
+        gwpc.canActivityBeLaunched(activityInfo, blockedAppIntent,
+                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID_1, /*isNewTask=*/false);
+
+        verify(mContext, never()).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    @Test
+    public void openPermissionControllerOnVirtualDisplay_dontDisplayOnRemoteDevices_startsWhenFlagIsEnabled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_STREAM_PERMISSIONS);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getDisplayWindowPolicyControllerForTest(
+                DISPLAY_ID_1);
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        ActivityInfo activityInfo = getActivityInfo(
+                PERMISSION_CONTROLLER_PACKAGE_NAME,
+                PERMISSION_CONTROLLER_PACKAGE_NAME,
+                /* displayOnRemoveDevices */ false,
                 /* targetDisplayCategory */ null);
         Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
                 activityInfo, mAssociationInfo.getDisplayName());

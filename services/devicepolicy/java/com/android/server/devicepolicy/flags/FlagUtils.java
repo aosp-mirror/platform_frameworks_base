@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy.flags;
 
+import static com.android.server.devicepolicy.flags.Flags.devicePolicySizeTrackingEnabled;
 import static com.android.server.devicepolicy.flags.Flags.policyEngineMigrationV2Enabled;
 
 import android.os.Binder;
@@ -26,6 +27,12 @@ public final class FlagUtils {
     public static boolean isPolicyEngineMigrationV2Enabled() {
         return Binder.withCleanCallingIdentity(() -> {
             return policyEngineMigrationV2Enabled();
+        });
+    }
+
+    public static boolean isDevicePolicySizeTrackingEnabled() {
+        return Binder.withCleanCallingIdentity(() -> {
+            return devicePolicySizeTrackingEnabled();
         });
     }
 }

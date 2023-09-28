@@ -65,6 +65,7 @@ private:
     static constexpr nsecs_t kResetHintTimeout = 100_ms;
     static constexpr int64_t kSanityCheckLowerBound = 100_us;
     static constexpr int64_t kSanityCheckUpperBound = 10_s;
+    static constexpr int64_t kDefaultTargetDuration = 16666667;
 
     // Allows easier stub when testing
     class HintSessionBinding {

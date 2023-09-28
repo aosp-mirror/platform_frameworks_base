@@ -540,7 +540,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void forceStopPackage(String);
     method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public static int getCurrentUser();
-    method @FlaggedApi(Flags.FLAG_APP_START_INFO) @NonNull @RequiresPermission(android.Manifest.permission.DUMP) public java.util.List<android.app.ApplicationStartInfo> getExternalHistoricalProcessStartReasons(@NonNull String, @IntRange(from=0) int);
+    method @FlaggedApi("android.app.app_start_info") @NonNull @RequiresPermission(android.Manifest.permission.DUMP) public java.util.List<android.app.ApplicationStartInfo> getExternalHistoricalProcessStartReasons(@NonNull String, @IntRange(from=0) int);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getPackageImportance(String);
     method @NonNull public java.util.Collection<java.util.Locale> getSupportedLocales();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidImportance(int);
@@ -3193,7 +3193,7 @@ package android.companion.virtual {
 
   public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
     method public void addActivityListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
-    method @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY) @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void addActivityPolicyExemption(@NonNull android.content.ComponentName);
+    method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void addActivityPolicyExemption(@NonNull android.content.ComponentName);
     method public void addSoundEffectListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
     method @NonNull public android.content.Context createContext();
@@ -3214,9 +3214,9 @@ package android.companion.virtual {
     method public void launchPendingIntent(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void registerIntentInterceptor(@NonNull android.content.IntentFilter, @NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
     method public void removeActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
-    method @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY) @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.content.ComponentName);
+    method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.content.ComponentName);
     method public void removeSoundEffectListener(@NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
-    method @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY) @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDevicePolicy(int, int);
+    method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDevicePolicy(int, int);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void unregisterIntentInterceptor(@NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
   }
@@ -3232,7 +3232,7 @@ package android.companion.virtual {
     method public int getDefaultActivityPolicy();
     method public int getDefaultNavigationPolicy();
     method public int getDevicePolicy(int);
-    method @FlaggedApi(Flags.FLAG_VDM_CUSTOM_HOME) @Nullable public android.content.ComponentName getHomeComponent();
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @Nullable public android.content.ComponentName getHomeComponent();
     method public int getLockState();
     method @Nullable public String getName();
     method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
@@ -3247,7 +3247,7 @@ package android.companion.virtual {
     field public static final int LOCK_STATE_DEFAULT = 0; // 0x0
     field public static final int NAVIGATION_POLICY_DEFAULT_ALLOWED = 0; // 0x0
     field public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1; // 0x1
-    field @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY) public static final int POLICY_TYPE_ACTIVITY = 3; // 0x3
+    field @FlaggedApi("android.companion.virtual.flags.dynamic_policy") public static final int POLICY_TYPE_ACTIVITY = 3; // 0x3
     field public static final int POLICY_TYPE_AUDIO = 1; // 0x1
     field public static final int POLICY_TYPE_RECENTS = 2; // 0x2
     field public static final int POLICY_TYPE_SENSORS = 0; // 0x0
@@ -3264,7 +3264,7 @@ package android.companion.virtual {
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDevicePolicy(int, int);
-    method @FlaggedApi(Flags.FLAG_VDM_CUSTOM_HOME) @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setHomeComponent(@Nullable android.content.ComponentName);
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setHomeComponent(@Nullable android.content.ComponentName);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setName(@NonNull String);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
@@ -3805,8 +3805,8 @@ package android.content.pm {
   public class PackageInstaller {
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
-    method @FlaggedApi(Flags.FLAG_ARCHIVING) @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void requestArchive(@NonNull String, @NonNull android.content.IntentSender) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @FlaggedApi(Flags.FLAG_ARCHIVING) @RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES, android.Manifest.permission.REQUEST_INSTALL_PACKAGES}) public void requestUnarchive(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @FlaggedApi("android.content.pm.archiving") @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void requestArchive(@NonNull String, @NonNull android.content.IntentSender) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @FlaggedApi("android.content.pm.archiving") @RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES, android.Manifest.permission.REQUEST_INSTALL_PACKAGES}) public void requestUnarchive(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
     field public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
     field public static final String ACTION_CONFIRM_PRE_APPROVAL = "android.content.pm.action.CONFIRM_PRE_APPROVAL";
@@ -3817,8 +3817,8 @@ package android.content.pm {
     field public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
     field public static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
     field public static final String EXTRA_RESOLVED_BASE_PATH = "android.content.pm.extra.RESOLVED_BASE_PATH";
-    field @FlaggedApi(Flags.FLAG_ARCHIVING) public static final String EXTRA_UNARCHIVE_ALL_USERS = "android.content.pm.extra.UNARCHIVE_ALL_USERS";
-    field @FlaggedApi(Flags.FLAG_ARCHIVING) public static final String EXTRA_UNARCHIVE_PACKAGE_NAME = "android.content.pm.extra.UNARCHIVE_PACKAGE_NAME";
+    field @FlaggedApi("android.content.pm.archiving") public static final String EXTRA_UNARCHIVE_ALL_USERS = "android.content.pm.extra.UNARCHIVE_ALL_USERS";
+    field @FlaggedApi("android.content.pm.archiving") public static final String EXTRA_UNARCHIVE_PACKAGE_NAME = "android.content.pm.extra.UNARCHIVE_PACKAGE_NAME";
     field public static final int LOCATION_DATA_APP = 0; // 0x0
     field public static final int LOCATION_MEDIA_DATA = 2; // 0x2
     field public static final int LOCATION_MEDIA_OBB = 1; // 0x1
@@ -3879,7 +3879,7 @@ package android.content.pm {
     method public static void forceSafeLabels();
     method @Deprecated @NonNull public CharSequence loadSafeLabel(@NonNull android.content.pm.PackageManager);
     method @NonNull public CharSequence loadSafeLabel(@NonNull android.content.pm.PackageManager, @FloatRange(from=0) float, int);
-    field @FlaggedApi(Flags.FLAG_ARCHIVING) public boolean isArchived;
+    field @FlaggedApi("android.content.pm.archiving") public boolean isArchived;
   }
 
   public abstract class PackageManager {
@@ -3929,7 +3929,7 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.SET_HARMFUL_APP_WARNINGS) public void setHarmfulAppWarning(@NonNull String, @Nullable CharSequence);
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setPackagesSuspended(@Nullable String[], boolean, @Nullable android.os.PersistableBundle, @Nullable android.os.PersistableBundle, @Nullable String);
     method @Nullable @RequiresPermission(value=android.Manifest.permission.SUSPEND_APPS, conditional=true) public String[] setPackagesSuspended(@Nullable String[], boolean, @Nullable android.os.PersistableBundle, @Nullable android.os.PersistableBundle, @Nullable android.content.pm.SuspendDialogInfo);
-    method @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED) @Nullable @RequiresPermission(value=android.Manifest.permission.SUSPEND_APPS, conditional=true) public String[] setPackagesSuspended(@Nullable String[], boolean, @Nullable android.os.PersistableBundle, @Nullable android.os.PersistableBundle, @Nullable android.content.pm.SuspendDialogInfo, int);
+    method @FlaggedApi("android.content.pm.quarantined_enabled") @Nullable @RequiresPermission(value=android.Manifest.permission.SUSPEND_APPS, conditional=true) public String[] setPackagesSuspended(@Nullable String[], boolean, @Nullable android.os.PersistableBundle, @Nullable android.os.PersistableBundle, @Nullable android.content.pm.SuspendDialogInfo, int);
     method @RequiresPermission(value=android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE, conditional=true) public void setSyntheticAppDetailsActivityEnabled(@NonNull String, boolean);
     method public void setSystemAppState(@NonNull String, int);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public abstract void setUpdateAvailable(@NonNull String, boolean);
@@ -3980,7 +3980,7 @@ package android.content.pm {
     field public static final int FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED = 512; // 0x200
     field public static final int FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED = 256; // 0x100
     field public static final int FLAG_PERMISSION_USER_SET = 1; // 0x1
-    field @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED) public static final int FLAG_SUSPEND_QUARANTINED = 1; // 0x1
+    field @FlaggedApi("android.content.pm.quarantined_enabled") public static final int FLAG_SUSPEND_QUARANTINED = 1; // 0x1
     field public static final int INSTALL_FAILED_ALREADY_EXISTS = -1; // 0xffffffff
     field public static final int INSTALL_FAILED_CONFLICTING_PROVIDER = -13; // 0xfffffff3
     field public static final int INSTALL_FAILED_CONTAINER_ERROR = -18; // 0xffffffee
@@ -9632,67 +9632,67 @@ package android.nfc {
 
 package android.nfc.cardemulation {
 
-  @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public final class AidGroup implements android.os.Parcelable {
-    ctor @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public AidGroup(@NonNull java.util.List<java.lang.String>, @Nullable String);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @Nullable public static android.nfc.cardemulation.AidGroup createFromXml(@NonNull org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public int describeContents();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void dump(@NonNull android.util.proto.ProtoOutputStream);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public java.util.List<java.lang.String> getAids();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getCategory();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void writeAsXml(@NonNull org.xmlpull.v1.XmlSerializer) throws java.io.IOException;
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.AidGroup> CREATOR;
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public final class AidGroup implements android.os.Parcelable {
+    ctor @FlaggedApi("android.nfc.enable_nfc_mainline") public AidGroup(@NonNull java.util.List<java.lang.String>, @Nullable String);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public static android.nfc.cardemulation.AidGroup createFromXml(@NonNull org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public int describeContents();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void dump(@NonNull android.util.proto.ProtoOutputStream);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<java.lang.String> getAids();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public String getCategory();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void writeAsXml(@NonNull org.xmlpull.v1.XmlSerializer) throws java.io.IOException;
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.AidGroup> CREATOR;
   }
 
-  @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public final class ApduServiceInfo implements android.os.Parcelable {
-    ctor @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public ApduServiceInfo(@NonNull android.content.pm.PackageManager, @NonNull android.content.pm.ResolveInfo, boolean) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public int describeContents();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void dump(@NonNull android.os.ParcelFileDescriptor, @NonNull java.io.PrintWriter, @NonNull String[]);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void dumpDebug(@NonNull android.util.proto.ProtoOutputStream);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public java.util.List<android.nfc.cardemulation.AidGroup> getAidGroups();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public java.util.List<java.lang.String> getAids();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getCategoryForAid(@NonNull String);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.content.ComponentName getComponent();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getDescription();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.nfc.cardemulation.AidGroup getDynamicAidGroupForCategory(@NonNull String);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @Nullable public String getOffHostSecureElement();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public java.util.List<java.lang.String> getPrefixAids();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getSettingsActivityName();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public java.util.List<java.lang.String> getSubsetAids();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public int getUid();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public boolean hasCategory(@NonNull String);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public boolean isOnHost();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public CharSequence loadAppLabel(@NonNull android.content.pm.PackageManager);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.graphics.drawable.Drawable loadBanner(@NonNull android.content.pm.PackageManager);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.graphics.drawable.Drawable loadIcon(@NonNull android.content.pm.PackageManager);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public CharSequence loadLabel(@NonNull android.content.pm.PackageManager);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public boolean removeDynamicAidGroupForCategory(@NonNull String);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public boolean requiresScreenOn();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public boolean requiresUnlock();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void resetOffHostSecureElement();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void setDynamicAidGroup(@NonNull android.nfc.cardemulation.AidGroup);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void setOffHostSecureElement(@NonNull String);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.ApduServiceInfo> CREATOR;
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public final class ApduServiceInfo implements android.os.Parcelable {
+    ctor @FlaggedApi("android.nfc.enable_nfc_mainline") public ApduServiceInfo(@NonNull android.content.pm.PackageManager, @NonNull android.content.pm.ResolveInfo, boolean) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public int describeContents();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void dump(@NonNull android.os.ParcelFileDescriptor, @NonNull java.io.PrintWriter, @NonNull String[]);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void dumpDebug(@NonNull android.util.proto.ProtoOutputStream);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<android.nfc.cardemulation.AidGroup> getAidGroups();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<java.lang.String> getAids();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public String getCategoryForAid(@NonNull String);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.content.ComponentName getComponent();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public String getDescription();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.nfc.cardemulation.AidGroup getDynamicAidGroupForCategory(@NonNull String);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public String getOffHostSecureElement();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<java.lang.String> getPrefixAids();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public String getSettingsActivityName();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<java.lang.String> getSubsetAids();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public int getUid();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean hasCategory(@NonNull String);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean isOnHost();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public CharSequence loadAppLabel(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.graphics.drawable.Drawable loadBanner(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.graphics.drawable.Drawable loadIcon(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public CharSequence loadLabel(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public boolean removeDynamicAidGroupForCategory(@NonNull String);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean requiresScreenOn();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean requiresUnlock();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void resetOffHostSecureElement();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setDynamicAidGroup(@NonNull android.nfc.cardemulation.AidGroup);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setOffHostSecureElement(@NonNull String);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.ApduServiceInfo> CREATOR;
   }
 
-  @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public final class NfcFServiceInfo implements android.os.Parcelable {
-    ctor @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public NfcFServiceInfo(@NonNull android.content.pm.PackageManager, @NonNull android.content.pm.ResolveInfo) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public int describeContents();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void dump(@NonNull android.os.ParcelFileDescriptor, @NonNull java.io.PrintWriter, @NonNull String[]);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void dumpDebug(@NonNull android.util.proto.ProtoOutputStream);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.content.ComponentName getComponent();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getDescription();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getNfcid2();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getSystemCode();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getT3tPmm();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public int getUid();
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.graphics.drawable.Drawable loadIcon(@NonNull android.content.pm.PackageManager);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public CharSequence loadLabel(@NonNull android.content.pm.PackageManager);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void setDynamicNfcid2(@NonNull String);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void setDynamicSystemCode(@NonNull String);
-    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.NfcFServiceInfo> CREATOR;
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public final class NfcFServiceInfo implements android.os.Parcelable {
+    ctor @FlaggedApi("android.nfc.enable_nfc_mainline") public NfcFServiceInfo(@NonNull android.content.pm.PackageManager, @NonNull android.content.pm.ResolveInfo) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public int describeContents();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void dump(@NonNull android.os.ParcelFileDescriptor, @NonNull java.io.PrintWriter, @NonNull String[]);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void dumpDebug(@NonNull android.util.proto.ProtoOutputStream);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.content.ComponentName getComponent();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public String getDescription();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public String getNfcid2();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public String getSystemCode();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public String getT3tPmm();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public int getUid();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.graphics.drawable.Drawable loadIcon(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public CharSequence loadLabel(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setDynamicNfcid2(@NonNull String);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setDynamicSystemCode(@NonNull String);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.NfcFServiceInfo> CREATOR;
   }
 
 }
@@ -10705,13 +10705,13 @@ package android.permission {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void onGetUnusedAppCount(@NonNull java.util.function.IntConsumer);
     method @BinderThread public abstract void onGrantOrUpgradeDefaultRuntimePermissions(@NonNull Runnable);
     method @Deprecated @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String);
-    method @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS) @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String, int);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis") @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String, int);
     method @Deprecated @BinderThread public void onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @Deprecated @BinderThread public void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,java.util.List<java.lang.String>>>);
     method @Deprecated @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, @NonNull Runnable);
-    method @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS) @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, int, @NonNull Runnable);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis") @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, int, @NonNull Runnable);
     method @Deprecated @BinderThread public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull android.permission.AdminPermissionControlParams, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onStageAndApplyRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
@@ -16777,13 +16777,13 @@ package android.telephony.satellite {
     field public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_FAILED = 3; // 0x3
     field public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_SUCCESS = 2; // 0x2
     field public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_UNKNOWN = -1; // 0xffffffff
-    field @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG) public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_WAITING_TO_CONNECT = 8; // 0x8
-    field @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG) public static final int SATELLITE_MODEM_STATE_CONNECTED = 7; // 0x7
+    field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_WAITING_TO_CONNECT = 8; // 0x8
+    field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_CONNECTED = 7; // 0x7
     field public static final int SATELLITE_MODEM_STATE_DATAGRAM_RETRYING = 3; // 0x3
     field public static final int SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING = 2; // 0x2
     field public static final int SATELLITE_MODEM_STATE_IDLE = 0; // 0x0
     field public static final int SATELLITE_MODEM_STATE_LISTENING = 1; // 0x1
-    field @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG) public static final int SATELLITE_MODEM_STATE_NOT_CONNECTED = 6; // 0x6
+    field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_NOT_CONNECTED = 6; // 0x6
     field public static final int SATELLITE_MODEM_STATE_OFF = 4; // 0x4
     field public static final int SATELLITE_MODEM_STATE_UNAVAILABLE = 5; // 0x5
     field public static final int SATELLITE_MODEM_STATE_UNKNOWN = -1; // 0xffffffff
