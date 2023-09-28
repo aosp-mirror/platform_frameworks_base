@@ -22,6 +22,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView
 import com.android.systemui.statusbar.ui.viewmodel.KeyguardStatusBarViewModel
+import kotlinx.coroutines.launch
 
 /** Binds [KeyguardStatusBarViewModel] to [KeyguardStatusBarView]. */
 object KeyguardStatusBarViewBinder {
@@ -32,9 +33,13 @@ object KeyguardStatusBarViewBinder {
     ) {
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isVisible.collect { isVisible ->
-                    view.visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
+                launch {
+                    viewModel.isVisible.collect { isVisible ->
+                        view.visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
+                    }
                 }
+
+                launch { viewModel.isBatteryCharging.collect { view.onBatteryChargingChanged(it) } }
             }
         }
     }

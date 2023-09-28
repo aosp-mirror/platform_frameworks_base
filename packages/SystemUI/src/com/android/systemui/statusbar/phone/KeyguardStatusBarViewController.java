@@ -172,7 +172,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             new BatteryController.BatteryStateChangeCallback() {
                 @Override
                 public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-                    mView.onBatteryLevelChanged(charging);
+                    mView.onBatteryChargingChanged(charging);
                 }
             };
 
@@ -435,6 +435,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Sets whether this controller should listen to battery updates. */
     public void setBatteryListening(boolean listening) {
+        if (isMigrationEnabled()) {
+            return;
+        }
+
         if (listening == mBatteryListening) {
             return;
         }

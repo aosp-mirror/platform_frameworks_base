@@ -173,7 +173,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mViewModel =
                 new KeyguardStatusBarViewModel(
                         mTestScope.getBackgroundScope(),
-                        mKeyguardInteractor);
+                        mKeyguardInteractor,
+                        mBatteryController);
 
         allowTestableLooperAsMainThread();
         TestableLooper.get(this).runWithLooper(() -> {
@@ -314,6 +315,15 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mController.setBatteryListening(true);
 
         verify(mBatteryController).addCallback(any());
+    }
+
+    @Test
+    public void setBatteryListening_true_flagOn_callbackNotAdded() {
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
+
+        mController.setBatteryListening(true);
+
+        verify(mBatteryController, never()).addCallback(any());
     }
 
     @Test
