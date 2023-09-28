@@ -145,6 +145,19 @@
           "include-filter": "android.content.pm.cts.PackageManagerShellCommandMultiUserTest"
         }
       ]
+    },
+    {
+      "file_patterns": [
+        "(/|^)InstallPackageHelper\\.java",
+        "services/core/java/com/android/server/pm/parsing/.*",
+        "services/core/java/com/android/server/pm/pkg/parsing/.*"
+      ],
+      "name": "SdkSandboxManagerServiceUnitTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
     }
   ],
   "imports": [
