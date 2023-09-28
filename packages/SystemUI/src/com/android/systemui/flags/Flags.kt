@@ -36,7 +36,10 @@ import com.android.systemui.flags.FlagsFactory.unreleasedFlag
  * See [FeatureFlagsClassicDebug] for instructions on flipping the flags via adb.
  */
 object Flags {
-    @JvmField val TEAMFOOD = unreleasedFlag("teamfood")
+    // IGNORE ME!
+    // Because flags are static, we need an ever-present flag to reference in some of the internal
+    // code that ensure that other flags are referenced and available.
+    @JvmField val NULL_FLAG = unreleasedFlag("null_flag")
 
     // 100 - notification
     // TODO(b/297792660): Tracking Bug

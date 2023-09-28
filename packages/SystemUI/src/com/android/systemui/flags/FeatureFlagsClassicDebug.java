@@ -37,6 +37,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.systemui.FeatureFlags;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -81,6 +82,7 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
     private final Map<String, Boolean> mBooleanFlagCache = new ConcurrentHashMap<>();
     private final Map<String, String> mStringFlagCache = new ConcurrentHashMap<>();
     private final Map<String, Integer> mIntFlagCache = new ConcurrentHashMap<>();
+    private final FeatureFlags mGantryFlags;
     private final Restarter mRestarter;
 
     private final ServerFlagReader.ChangeListener mOnPropertiesChanged =
@@ -125,6 +127,7 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
             @Main Resources resources,
             ServerFlagReader serverFlagReader,
             @Named(ALL_FLAGS) Map<String, Flag<?>> allFlags,
+            FeatureFlags gantryFlags,
             Restarter restarter) {
         mFlagManager = flagManager;
         mContext = context;
@@ -133,6 +136,7 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
         mSystemProperties = systemProperties;
         mServerFlagReader = serverFlagReader;
         mAllFlags = allFlags;
+        mGantryFlags = gantryFlags;
         mRestarter = restarter;
     }
 
@@ -260,9 +264,8 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
         if (!hasServerOverride
                 && !defaultValue
                 && result == null
-                && !flag.getName().equals(Flags.TEAMFOOD.getName())
                 && flag.getTeamfood()) {
-            return isEnabled(Flags.TEAMFOOD);
+            return mGantryFlags.sysuiTeamfood();
         }
 
         return result == null ? mServerFlagReader.readServerOverride(
@@ -537,7 +540,7 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: true");
-
+        pw.println("teamfood: " + mGantryFlags.sysuiTeamfood());
         pw.println("booleans: " + mBooleanFlagCache.size());
         // Sort our flags for dumping
         TreeMap<String, Boolean> dumpBooleanMap = new TreeMap<>(mBooleanFlagCache);
