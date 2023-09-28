@@ -30,12 +30,25 @@ sealed interface Transformation {
      */
     val matcher: ElementMatcher
 
+    /**
+     * The range during which the transformation is applied. If it is `null`, then the
+     * transformation will be applied throughout the whole scene transition.
+     */
+    // TODO(b/240432457): Move this back to PropertyTransformation.
+    val range: TransformationRange?
+        get() = null
+
     /*
      * Reverse this transformation. This is called when we use Transition(from = A, to = B) when
      * animating from B to A and there is no Transition(from = B, to = A) defined.
      */
     fun reverse(): Transformation = this
 }
+
+internal class SharedElementTransformation(
+    override val matcher: ElementMatcher,
+    internal val enabled: Boolean,
+) : Transformation
 
 /** A transformation that is applied on the element during the whole transition. */
 internal interface ModifierTransformation : Transformation {
@@ -52,13 +65,6 @@ internal interface ModifierTransformation : Transformation {
 
 /** A transformation that changes the value of an element property, like its size or offset. */
 internal sealed interface PropertyTransformation<T> : Transformation {
-    /**
-     * The range during which the transformation is applied. If it is `null`, then the
-     * transformation will be applied throughout the whole scene transition.
-     */
-    val range: TransformationRange?
-        get() = null
-
     /**
      * Transform [value], i.e. the value of the transformed property without this transformation.
      */
@@ -92,8 +98,7 @@ internal class RangedPropertyTransformation<T>(
 }
 
 /** The progress-based range of a [PropertyTransformation]. */
-data class TransformationRange
-private constructor(
+data class TransformationRange(
     val start: Float,
     val end: Float,
 ) {
@@ -133,6 +138,6 @@ private constructor(
     }
 
     companion object {
-        private const val BoundUnspecified = Float.MIN_VALUE
+        const val BoundUnspecified = Float.MIN_VALUE
     }
 }
