@@ -25,8 +25,12 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserHandleAware;
 import android.annotation.WorkerThread;
 import android.app.Notification.Builder;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1659,23 +1663,42 @@ public class NotificationManager {
     }
 
     /**
+     * For apps targeting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above, the
+     * {@code setNotificationListenerAccessGranted} method will use the user contained within the
+     * context.
+     * For apps targeting an SDK version <em>below</em> this, the user of the calling process will
+     * be used (Process.myUserHandle()).
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long SET_LISTENER_ACCESS_GRANTED_IS_USER_AWARE = 302563478L;
+
+    /**
      * Grants/revokes Notification Listener access to the given component for current user.
      * To grant access for a particular user, obtain this service by using the {@link Context}
      * provided by {@link Context#createPackageContextAsUser}
      *
      * @param listener Name of component to grant/revoke access
-     * @param granted Grant/revoke access
-     * @param userSet Whether the action was triggered explicitly by user
+     * @param granted  Grant/revoke access
+     * @param userSet  Whether the action was triggered explicitly by user
      * @hide
      */
     @SystemApi
     @TestApi
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS)
     public void setNotificationListenerAccessGranted(
             @NonNull ComponentName listener, boolean granted, boolean userSet) {
         INotificationManager service = getService();
         try {
-            service.setNotificationListenerAccessGranted(listener, granted, userSet);
+            if (CompatChanges.isChangeEnabled(SET_LISTENER_ACCESS_GRANTED_IS_USER_AWARE)) {
+                service.setNotificationListenerAccessGrantedForUser(listener, mContext.getUserId(),
+                        granted, userSet);
+            } else {
+                service.setNotificationListenerAccessGranted(listener, granted, userSet);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

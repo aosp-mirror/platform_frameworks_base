@@ -5730,13 +5730,18 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationListenerAccessGrantedForUser(ComponentName listener, int userId,
                 boolean granted, boolean userSet) {
             Objects.requireNonNull(listener);
+            if (UserHandle.getCallingUserId() != userId) {
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        "setNotificationListenerAccessGrantedForUser for user " + userId);
+            }
             checkNotificationListenerAccess();
             if (granted && listener.flattenToString().length()
                     > NotificationManager.MAX_SERVICE_COMPONENT_NAME_LENGTH) {
                 throw new IllegalArgumentException(
                         "Component name too long: " + listener.flattenToString());
             }
-            if (!userSet && isNotificationListenerAccessUserSet(listener)) {
+            if (!userSet && isNotificationListenerAccessUserSet(listener, userId)) {
                 // Don't override user's choice
                 return;
             }
@@ -5762,9 +5767,8 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        private boolean isNotificationListenerAccessUserSet(ComponentName listener) {
-            return mListeners.isPackageOrComponentUserSet(listener.flattenToString(),
-                    getCallingUserHandle().getIdentifier());
+        private boolean isNotificationListenerAccessUserSet(ComponentName listener, int userId) {
+            return mListeners.isPackageOrComponentUserSet(listener.flattenToString(), userId);
         }
 
         @Override
