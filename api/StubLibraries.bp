@@ -85,6 +85,9 @@ module_libs = " --show-annotation android.annotation.SystemApi\\(" +
 
 droidstubs {
     name: "system-api-stubs-docs-non-updatable",
+    srcs: [
+        ":framework-minus-apex-aconfig-srcjars",
+    ],
     defaults: [
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
@@ -125,6 +128,9 @@ droidstubs {
 
 droidstubs {
     name: "test-api-stubs-docs-non-updatable",
+    srcs: [
+        ":framework-minus-apex-aconfig-srcjars",
+    ],
     defaults: [
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
@@ -171,6 +177,9 @@ droidstubs {
 
 droidstubs {
     name: "module-lib-api-stubs-docs-non-updatable",
+    srcs: [
+        ":framework-minus-apex-aconfig-srcjars",
+    ],
     defaults: [
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
