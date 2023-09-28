@@ -167,7 +167,7 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     }
 
     @VisibleForTesting
-    boolean isSecondaryVisible() {
+    public boolean isSecondaryVisible() {
         return mIsSecondaryVisible;
     }
 
@@ -179,7 +179,8 @@ public abstract class StackScrollerDecorView extends ExpandableView {
         return mIsVisible;
     }
 
-    void setDuration(int duration) {
+    @VisibleForTesting
+    public void setDuration(int duration) {
         mDuration = duration;
     }
 

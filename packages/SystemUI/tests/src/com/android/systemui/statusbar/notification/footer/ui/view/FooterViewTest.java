@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.row;
+package com.android.systemui.statusbar.notification.footer.ui.view;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -31,8 +31,8 @@ import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
