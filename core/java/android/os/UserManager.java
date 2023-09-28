@@ -2940,6 +2940,12 @@ public class UserManager {
      * Used to check if the context user is a restricted profile. Restricted profiles
      * may have a reduced number of available apps, app restrictions, and account restrictions.
      *
+     * <p>The caller must be in the same profile group as the context user or else hold
+     * <li>{@link android.Manifest.permission#MANAGE_USERS},
+     * <li>or {@link android.Manifest.permission#CREATE_USERS},
+     * <li>or, for devices after {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * {@link android.Manifest.permission#QUERY_USERS}.
+     *
      * @return whether the context user is a restricted profile.
      * @hide
      */
@@ -2962,6 +2968,12 @@ public class UserManager {
     /**
      * Check if a user is a restricted profile. Restricted profiles may have a reduced number of
      * available apps, app restrictions, and account restrictions.
+     *
+     * <p>Requires
+     * <li>{@link android.Manifest.permission#MANAGE_USERS},
+     * <li>or {@link android.Manifest.permission#CREATE_USERS},
+     * <li>or, for devices after {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * {@link android.Manifest.permission#QUERY_USERS}.
      *
      * @param user the user to check
      * @return whether the user is a restricted profile.
