@@ -62,6 +62,10 @@ constructor(
                 initialValue = !bouncerInteractor.isThrottled.value,
             )
 
+    // Handle to the scope of the child ViewModel (stored in [authMethod]).
+    private var childViewModelScope: CoroutineScope? = null
+    private val _throttlingDialogMessage = MutableStateFlow<String?>(null)
+
     /** View-model for the current UI, based on the current authentication method. */
     val authMethodViewModel: StateFlow<AuthMethodBouncerViewModel?> =
         authenticationInteractor.authenticationMethod
@@ -72,8 +76,31 @@ constructor(
                 initialValue = null,
             )
 
-    // Handle to the scope of the child ViewModel (stored in [authMethod]).
-    private var childViewModelScope: CoroutineScope? = null
+    /**
+     * A message for a throttling dialog to show when the user has attempted the wrong credential
+     * too many times and now must wait a while before attempting again.
+     *
+     * If `null`, no dialog should be shown.
+     *
+     * Once the dialog is shown, the UI should call [onThrottlingDialogDismissed] when the user
+     * dismisses this dialog.
+     */
+    val throttlingDialogMessage: StateFlow<String?> = _throttlingDialogMessage.asStateFlow()
+
+    /** The user-facing message to show in the bouncer. */
+    val message: StateFlow<MessageViewModel> =
+        combine(bouncerInteractor.message, bouncerInteractor.isThrottled) { message, isThrottled ->
+                toMessageViewModel(message, isThrottled)
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue =
+                    toMessageViewModel(
+                        message = bouncerInteractor.message.value,
+                        isThrottled = bouncerInteractor.isThrottled.value,
+                    ),
+            )
 
     init {
         if (flags.isEnabled()) {
@@ -97,33 +124,6 @@ constructor(
             }
         }
     }
-
-    /** The user-facing message to show in the bouncer. */
-    val message: StateFlow<MessageViewModel> =
-        combine(bouncerInteractor.message, bouncerInteractor.isThrottled) { message, isThrottled ->
-                toMessageViewModel(message, isThrottled)
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue =
-                    toMessageViewModel(
-                        message = bouncerInteractor.message.value,
-                        isThrottled = bouncerInteractor.isThrottled.value,
-                    ),
-            )
-
-    private val _throttlingDialogMessage = MutableStateFlow<String?>(null)
-    /**
-     * A message for a throttling dialog to show when the user has attempted the wrong credential
-     * too many times and now must wait a while before attempting again.
-     *
-     * If `null`, no dialog should be shown.
-     *
-     * Once the dialog is shown, the UI should call [onThrottlingDialogDismissed] when the user
-     * dismisses this dialog.
-     */
-    val throttlingDialogMessage: StateFlow<String?> = _throttlingDialogMessage.asStateFlow()
 
     /** Notifies that the emergency services button was clicked. */
     fun onEmergencyServicesButtonClicked() {
