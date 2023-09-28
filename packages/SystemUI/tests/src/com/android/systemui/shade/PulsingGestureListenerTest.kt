@@ -25,15 +25,13 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.DozeInteractor
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
-import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.tuner.TunerService
@@ -59,8 +57,6 @@ class PulsingGestureListenerTest : SysuiTestCase() {
     private lateinit var dockManager: DockManager
     @Mock
     private lateinit var falsingManager: FalsingManager
-    @Mock
-    private lateinit var falsingCollector: FalsingCollector
     @Mock
     private lateinit var ambientDisplayConfiguration: AmbientDisplayConfiguration
     @Mock
@@ -91,13 +87,11 @@ class PulsingGestureListenerTest : SysuiTestCase() {
         underTest = PulsingGestureListener(
                 falsingManager,
                 dockManager,
-                PowerInteractor(
-                    powerRepository,
-                    FakeKeyguardRepository(),
-                    falsingCollector,
-                    screenOffAnimationController,
-                    statusBarStateController,
-                ),
+                PowerInteractorFactory.create(
+                    repository = powerRepository,
+                    statusBarStateController = statusBarStateController,
+                    screenOffAnimationController = screenOffAnimationController,
+                ).powerInteractor,
                 ambientDisplayConfiguration,
                 statusBarStateController,
                 shadeLogger,

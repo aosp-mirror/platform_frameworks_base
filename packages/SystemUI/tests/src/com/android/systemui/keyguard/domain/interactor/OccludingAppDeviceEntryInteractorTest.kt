@@ -84,6 +84,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var trustRepository: FakeTrustRepository
     private lateinit var powerRepository: FakePowerRepository
+    private lateinit var powerInteractor: PowerInteractor
 
     @Mock private lateinit var indicationHelper: IndicationHelper
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
@@ -103,6 +104,14 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
         featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
         trustRepository = FakeTrustRepository()
         powerRepository = FakePowerRepository()
+        powerInteractor =
+            PowerInteractor(
+                powerRepository,
+                falsingCollector = mock(),
+                screenOffAnimationController = mock(),
+                statusBarStateController = mock(),
+            )
+
         underTest =
             OccludingAppDeviceEntryInteractor(
                 BiometricMessageInteractor(
@@ -120,6 +129,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                         configurationRepository = configurationRepository,
                         sceneInteractor =
                             mock { whenever(transitioningTo).thenReturn(MutableStateFlow(null)) },
+                        powerInteractor = powerInteractor,
                     )
                     .keyguardInteractor,
                 PrimaryBouncerInteractor(
@@ -147,13 +157,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 mockedContext,
                 activityStarter,
-                PowerInteractor(
-                    powerRepository,
-                    keyguardRepository,
-                    falsingCollector = mock(),
-                    screenOffAnimationController = mock(),
-                    statusBarStateController = mock(),
-                ),
+                powerInteractor,
             )
     }
 

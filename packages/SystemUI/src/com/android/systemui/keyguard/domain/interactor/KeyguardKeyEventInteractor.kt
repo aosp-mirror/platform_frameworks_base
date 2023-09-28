@@ -24,6 +24,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor.Companion.handleAction
 import com.android.systemui.media.controls.util.MediaSessionLegacyHelperWrapper
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
@@ -41,6 +42,7 @@ constructor(
     private val shadeController: ShadeController,
     private val mediaSessionLegacyHelperWrapper: MediaSessionLegacyHelperWrapper,
     private val backActionInteractor: BackActionInteractor,
+    private val powerInteractor: PowerInteractor,
 ) {
 
     fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -86,7 +88,7 @@ constructor(
 
     private fun dispatchMenuKeyEvent(): Boolean {
         val shouldUnlockOnMenuPressed =
-            isDeviceInteractive() &&
+            isDeviceAwake() &&
                 (statusBarStateController.state != StatusBarState.SHADE) &&
                 statusBarKeyguardViewManager.shouldDismissOnMenuPressed()
         if (shouldUnlockOnMenuPressed) {
@@ -97,7 +99,7 @@ constructor(
     }
 
     private fun dispatchSpaceEvent(): Boolean {
-        if (isDeviceInteractive() && statusBarStateController.state != StatusBarState.SHADE) {
+        if (isDeviceAwake() && statusBarStateController.state != StatusBarState.SHADE) {
             shadeController.animateCollapseShadeForced()
             return true
         }
@@ -111,7 +113,7 @@ constructor(
         return true
     }
 
-    private fun isDeviceInteractive(): Boolean {
-        return keyguardInteractor.wakefulnessModel.value.isDeviceInteractive()
+    private fun isDeviceAwake(): Boolean {
+        return powerInteractor.detailedWakefulness.value.isAwake()
     }
 }

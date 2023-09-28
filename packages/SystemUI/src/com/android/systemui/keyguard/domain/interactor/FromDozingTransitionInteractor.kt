@@ -23,13 +23,14 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @SysUISingleton
 class FromDozingTransitionInteractor
@@ -39,6 +40,7 @@ constructor(
     override val transitionInteractor: KeyguardTransitionInteractor,
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
+    private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DOZING,
@@ -52,7 +54,7 @@ constructor(
 
     private fun listenForDozingToLockscreenOrOccluded() {
         scope.launch {
-            keyguardInteractor.wakefulnessModel
+            powerInteractor.isAwake
                 .sample(
                     combine(
                         transitionInteractor.startedKeyguardTransitionStep,
@@ -61,11 +63,8 @@ constructor(
                     ),
                     ::toTriple
                 )
-                .collect { (wakefulnessModel, lastStartedTransition, occluded) ->
-                    if (
-                        wakefulnessModel.isStartingToWakeOrAwake() &&
-                            lastStartedTransition.to == KeyguardState.DOZING
-                    ) {
+                .collect { (isAwake, lastStartedTransition, occluded) ->
+                    if (isAwake && lastStartedTransition.to == KeyguardState.DOZING) {
                         startTransitionTo(
                             if (occluded) KeyguardState.OCCLUDED else KeyguardState.LOCKSCREEN
                         )

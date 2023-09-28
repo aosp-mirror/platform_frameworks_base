@@ -22,7 +22,6 @@ import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.FaceWakeUpTriggersConfig
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.CoreStartable
-import com.android.systemui.res.R
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.shared.model.LockoutMode
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
@@ -32,7 +31,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -40,11 +38,12 @@ import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.res.R
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -57,6 +56,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.yield
+import javax.inject.Inject
 
 /**
  * Encapsulates business logic related face authentication being triggered for device entry from
@@ -81,6 +81,7 @@ constructor(
     private val facePropertyRepository: FacePropertyRepository,
     private val keyguardRepository: KeyguardRepository,
     private val faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig,
+    private val powerInteractor: PowerInteractor,
 ) : CoreStartable, KeyguardFaceAuthInteractor {
 
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
@@ -123,7 +124,7 @@ constructor(
                 keyguardTransitionInteractor.dozingToLockscreenTransition
             )
             .filter { it.transitionState == TransitionState.STARTED }
-            .sample(keyguardRepository.wakefulness)
+            .sample(powerInteractor.detailedWakefulness)
             .filter { wakefulnessModel ->
                 val validWakeupReason =
                     faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(

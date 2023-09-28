@@ -22,27 +22,28 @@ import android.content.Context
 import android.graphics.Point
 import androidx.core.animation.Animator
 import androidx.core.animation.ValueAnimator
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
-import com.android.systemui.keyguard.shared.model.WakeSleepReason.TAP
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakeSleepReason.TAP
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LiftReveal
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.PowerButtonReveal
-import javax.inject.Inject
-import kotlin.math.max
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import kotlin.math.max
 
 val DEFAULT_REVEAL_EFFECT = LiftReveal
 
@@ -70,6 +71,7 @@ class LightRevealScrimRepositoryImpl
 constructor(
     keyguardRepository: KeyguardRepository,
     val context: Context,
+    powerInteractor: PowerInteractor,
 ) : LightRevealScrimRepository {
 
     /** The reveal effect used if the device was locked/unlocked via the power button. */
@@ -118,15 +120,18 @@ constructor(
 
     /** The reveal effect we'll use for the next non-biometric unlock (tap, power button, etc). */
     private val nonBiometricRevealEffect: Flow<LightRevealEffect?> =
-        keyguardRepository.wakefulness
-            .filter { it.isStartingToWake() || it.isStartingToSleep() }
-            .flatMapLatest { wakefulnessModel ->
-                when {
-                    wakefulnessModel.isTransitioningFromPowerButton() -> powerButtonRevealEffect
-                    wakefulnessModel.isWakingFrom(TAP) -> tapRevealEffect
-                    else -> flowOf(LiftReveal)
+        powerInteractor
+                .detailedWakefulness
+                .flatMapLatest { wakefulnessModel ->
+                    when {
+                        wakefulnessModel.isAwakeOrAsleepFrom(WakeSleepReason.POWER_BUTTON) ->
+                            powerButtonRevealEffect
+                        wakefulnessModel.isAwakeFrom(TAP) ->
+                            tapRevealEffect
+                        else ->
+                            flowOf(LiftReveal)
+                    }
                 }
-            }
 
     private val revealAmountAnimator = ValueAnimator.ofFloat(0f, 1f).apply { duration = 500 }
 

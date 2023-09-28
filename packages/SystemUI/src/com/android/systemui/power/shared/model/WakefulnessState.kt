@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.shared.model
+package com.android.systemui.power.shared.model
 
-import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.KeyguardService
 
+/**
+ * Raw wakefulness state provided via [KeyguardService]. The "started" vs. "finished" distinction
+ * should not generally be needed except for special cases (keyguard internals).
+ */
 enum class WakefulnessState {
     /** The device is asleep and not interactive. */
     ASLEEP,
@@ -26,19 +30,5 @@ enum class WakefulnessState {
     /** Device is now fully awake and interactive. */
     AWAKE,
     /** Signal that the device is now going to sleep. */
-    STARTING_TO_SLEEP;
-
-    companion object {
-        fun fromWakefulnessLifecycleInt(
-            @WakefulnessLifecycle.Wakefulness value: Int
-        ): WakefulnessState {
-            return when (value) {
-                WakefulnessLifecycle.WAKEFULNESS_ASLEEP -> ASLEEP
-                WakefulnessLifecycle.WAKEFULNESS_WAKING -> STARTING_TO_WAKE
-                WakefulnessLifecycle.WAKEFULNESS_AWAKE -> AWAKE
-                WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP -> STARTING_TO_SLEEP
-                else -> throw IllegalArgumentException("Invalid Wakefulness value: $value")
-            }
-        }
-    }
+    STARTING_TO_SLEEP
 }

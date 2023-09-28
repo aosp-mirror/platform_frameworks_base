@@ -18,6 +18,10 @@
 package com.android.systemui.power.data.repository
 
 import android.os.PowerManager
+import com.android.systemui.power.shared.model.ScreenPowerState
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessModel
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
@@ -28,9 +32,14 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @SysUISingleton
 class FakePowerRepository @Inject constructor() : PowerRepository {
-
     private val _isInteractive = MutableStateFlow(true)
     override val isInteractive: Flow<Boolean> = _isInteractive.asStateFlow()
+
+    private val _wakefulness = MutableStateFlow(WakefulnessModel())
+    override val wakefulness = _wakefulness.asStateFlow()
+
+    private val _screenPowerState = MutableStateFlow(ScreenPowerState.SCREEN_OFF)
+    override val screenPowerState = _screenPowerState.asStateFlow()
 
     var lastWakeWhy: String? = null
     var lastWakeReason: Int? = null
@@ -48,6 +57,25 @@ class FakePowerRepository @Inject constructor() : PowerRepository {
 
     override fun userTouch() {
         userTouchRegistered = true
+    }
+
+    override fun updateWakefulness(
+            rawState: WakefulnessState,
+            lastWakeReason: WakeSleepReason,
+            lastSleepReason: WakeSleepReason,
+            powerButtonLaunchGestureTriggered: Boolean
+    ) {
+        _wakefulness.value =
+            WakefulnessModel(
+                rawState,
+                lastWakeReason,
+                lastSleepReason,
+                powerButtonLaunchGestureTriggered,
+            )
+    }
+
+    override fun setScreenPowerState(state: ScreenPowerState) {
+        _screenPowerState.value = state
     }
 }
 

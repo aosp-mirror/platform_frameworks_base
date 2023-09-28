@@ -138,7 +138,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
-import com.android.systemui.keyguard.shared.model.WakefulnessModel;
+import com.android.systemui.power.shared.model.WakefulnessModel;
 import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
@@ -164,6 +164,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.data.repository.ShadeRepository;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
@@ -605,6 +606,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final SharedNotificationContainerInteractor mSharedNotificationContainerInteractor;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final KeyguardInteractor mKeyguardInteractor;
+    private final PowerInteractor mPowerInteractor;
     private final KeyguardViewConfigurator mKeyguardViewConfigurator;
     private final CoroutineDispatcher mMainDispatcher;
     private boolean mIsAnyMultiShadeExpanded;
@@ -774,7 +776,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             SharedNotificationContainerInteractor sharedNotificationContainerInteractor,
             KeyguardViewConfigurator keyguardViewConfigurator,
             KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
-            SplitShadeStateController splitShadeStateController) {
+            SplitShadeStateController splitShadeStateController,
+            PowerInteractor powerInteractor) {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
@@ -800,6 +803,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mSharedNotificationContainerInteractor = sharedNotificationContainerInteractor;
         mKeyguardInteractor = keyguardInteractor;
+        mPowerInteractor = powerInteractor;
         mKeyguardViewConfigurator = keyguardViewConfigurator;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
@@ -2337,7 +2341,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private WakefulnessModel getWakefulness() {
-        return mKeyguardInteractor.getWakefulnessModel().getValue();
+        return mPowerInteractor.getDetailedWakefulness().getValue();
     }
 
     @VisibleForTesting
@@ -3776,7 +3780,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mDozeLog.traceFling(
                     expand,
                     mTouchAboveFalsingThreshold,
-                    /* screenOnFromTouch=*/ getWakefulness().isDeviceInteractiveFromTapOrGesture());
+                    /* screenOnFromTouch=*/ getWakefulness().isAwakeFromTapOrGesture());
             // Log collapse gesture if on lock screen.
             if (!expand && onKeyguard) {
                 float displayDensity = mCentralSurfaces.getDisplayDensity();

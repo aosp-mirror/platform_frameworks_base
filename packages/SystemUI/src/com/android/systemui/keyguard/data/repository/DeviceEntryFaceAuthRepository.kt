@@ -24,7 +24,6 @@ import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -51,14 +50,12 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.google.errorprone.annotations.CompileTimeConstant
-import java.io.PrintWriter
-import java.util.Arrays
-import java.util.stream.Collectors
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -81,6 +78,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.PrintWriter
+import java.util.Arrays
+import java.util.stream.Collectors
+import javax.inject.Inject
 
 /**
  * API to run face authentication and detection for device entry / on keyguard (as opposed to the
@@ -151,6 +152,7 @@ constructor(
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
     trustRepository: TrustRepository,
     private val keyguardRepository: KeyguardRepository,
+    private val powerInteractor: PowerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     @FaceDetectTableLog private val faceDetectLog: TableLogBuffer,
@@ -316,7 +318,7 @@ constructor(
         // Clear auth status when keyguard is going away or when the user is switching or device
         // starts going to sleep.
         merge(
-                keyguardRepository.wakefulness.map { it.isStartingToSleepOrAsleep() },
+                powerInteractor.isAsleep,
                 if (featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
                     keyguardTransitionInteractor.isInTransitionToState(KeyguardState.GONE)
                 } else {
@@ -366,13 +368,13 @@ constructor(
         return arrayOf(
             Pair(
                 and(
-                        displayStateInteractor.isDefaultDisplayOff,
-                        keyguardRepository.wakefulness.map { it.isAwake() },
-                    )
-                    .isFalse(),
+                    displayStateInteractor.isDefaultDisplayOff,
+                    keyguardTransitionInteractor.isFinishedInStateWhere(
+                            KeyguardState::deviceIsAwakeInState),
+                ).isFalse(),
                 // this can happen if an app is requesting for screen off, the display can
                 // turn off without wakefulness.isStartingToSleepOrAsleep calls
-                "displayIsNotOffWhileAwake",
+                "displayIsNotOffWhileFullyTransitionedToAwake",
             ),
             Pair(
                 biometricSettingsRepository.isFaceAuthEnrolledAndEnabled,
@@ -380,8 +382,8 @@ constructor(
             ),
             Pair(keyguardRepository.isKeyguardGoingAway.isFalse(), "keyguardNotGoingAway"),
             Pair(
-                keyguardRepository.wakefulness.map { it.isStartingToSleep() }.isFalse(),
-                "deviceNotStartingToSleep"
+                powerInteractor.isAsleep.isFalse(),
+                "deviceNotAsleep"
             ),
             Pair(
                 keyguardInteractor.isSecureCameraActive

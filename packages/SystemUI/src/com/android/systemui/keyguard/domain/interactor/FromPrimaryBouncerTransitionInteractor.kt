@@ -26,20 +26,20 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import com.android.wm.shell.animation.Interpolators
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @SysUISingleton
 class FromPrimaryBouncerTransitionInteractor
@@ -51,6 +51,7 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val flags: FeatureFlags,
     private val keyguardSecurityModel: KeyguardSecurityModel,
+    private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.PRIMARY_BOUNCER,
@@ -120,7 +121,7 @@ constructor(
             keyguardInteractor.primaryBouncerShowing
                 .sample(
                     combine(
-                        keyguardInteractor.wakefulnessModel,
+                        powerInteractor.isAwake,
                         transitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.isKeyguardOccluded,
                         keyguardInteractor.isActiveDreamLockscreenHosted,
@@ -131,15 +132,14 @@ constructor(
                 .collect {
                     (
                         isBouncerShowing,
-                        wakefulnessState,
+                            isAwake,
                         lastStartedTransitionStep,
                         occluded,
                         isActiveDreamLockscreenHosted) ->
                     if (
                         !isBouncerShowing &&
                             lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER &&
-                            (wakefulnessState.state == WakefulnessState.AWAKE ||
-                                wakefulnessState.state == WakefulnessState.STARTING_TO_WAKE) &&
+                            isAwake &&
                             !isActiveDreamLockscreenHosted
                     ) {
                         startTransitionTo(
@@ -155,7 +155,7 @@ constructor(
             keyguardInteractor.primaryBouncerShowing
                 .sample(
                     combine(
-                        keyguardInteractor.wakefulnessModel,
+                        powerInteractor.isAsleep,
                         transitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.isAodAvailable,
                         ::Triple
@@ -163,13 +163,12 @@ constructor(
                     ::toQuad
                 )
                 .collect {
-                    (isBouncerShowing, wakefulnessState, lastStartedTransitionStep, isAodAvailable)
+                    (isBouncerShowing, isAsleep, lastStartedTransitionStep, isAodAvailable)
                     ->
                     if (
                         !isBouncerShowing &&
                             lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER &&
-                            (wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP ||
-                                wakefulnessState.state == WakefulnessState.ASLEEP)
+                            isAsleep
                     ) {
                         startTransitionTo(
                             if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
@@ -190,7 +189,9 @@ constructor(
                             ),
                             ::toTriple
                     )
-                    .collect { (isBouncerShowing, isActiveDreamLockscreenHosted, lastStartedTransitionStep) ->
+                    .collect { (isBouncerShowing,
+                                       isActiveDreamLockscreenHosted,
+                                       lastStartedTransitionStep) ->
                         if (
                                 !isBouncerShowing &&
                                 isActiveDreamLockscreenHosted &&

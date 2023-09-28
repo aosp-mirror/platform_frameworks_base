@@ -28,9 +28,9 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.updateFlags
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.logger.SceneLogger
@@ -42,17 +42,16 @@ import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICA
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * Hooks up business logic that manipulates the state of the [SceneInteractor] for the system UI
@@ -72,6 +71,7 @@ constructor(
     @DisplayId private val displayId: Int,
     private val sceneLogger: SceneLogger,
     @FalsingCollectorActual private val falsingCollector: FalsingCollector,
+    private val powerInteractor: PowerInteractor,
 ) : CoreStartable {
 
     override fun start() {
@@ -179,40 +179,34 @@ constructor(
         }
 
         applicationScope.launch {
-            keyguardInteractor.wakefulnessModel
-                .map { wakefulnessModel -> wakefulnessModel.state }
-                .distinctUntilChanged()
-                .collect { wakefulnessState ->
-                    when (wakefulnessState) {
-                        WakefulnessState.STARTING_TO_SLEEP -> {
-                            switchToScene(
+            powerInteractor.isAsleep
+                .collect { isAsleep ->
+                    if (isAsleep) {
+                        switchToScene(
                                 targetSceneKey = SceneKey.Lockscreen,
                                 loggingReason = "device is starting to sleep",
-                            )
-                        }
-                        WakefulnessState.STARTING_TO_WAKE -> {
-                            val authMethod = authenticationInteractor.getAuthenticationMethod()
-                            val isUnlocked = deviceEntryInteractor.isUnlocked.value
-                            when {
-                                authMethod == AuthenticationMethodModel.None -> {
-                                    switchToScene(
+                        )
+                    } else {
+                        val authMethod = authenticationInteractor.getAuthenticationMethod()
+                        val isUnlocked = deviceEntryInteractor.isUnlocked.value
+                        when {
+                            authMethod == AuthenticationMethodModel.None -> {
+                                switchToScene(
                                         targetSceneKey = SceneKey.Gone,
                                         loggingReason =
-                                            "device is starting to wake up while auth method is" +
+                                        "device is starting to wake up while auth method is" +
                                                 " none",
-                                    )
-                                }
-                                authMethod.isSecure && isUnlocked -> {
-                                    switchToScene(
+                                )
+                            }
+                            authMethod.isSecure && isUnlocked -> {
+                                switchToScene(
                                         targetSceneKey = SceneKey.Gone,
                                         loggingReason =
-                                            "device is starting to wake up while unlocked with a" +
+                                        "device is starting to wake up while unlocked with a" +
                                                 " secure auth method",
-                                    )
-                                }
+                                )
                             }
                         }
-                        else -> Unit
                     }
                 }
         }
@@ -259,28 +253,17 @@ constructor(
             keyguardInteractor.isAodAvailable
                 .flatMapLatest { isAodAvailable ->
                     if (!isAodAvailable) {
-                        keyguardInteractor.wakefulnessModel
+                        powerInteractor.detailedWakefulness
                     } else {
                         emptyFlow()
                     }
                 }
-                .map { wakefulnessModel ->
-                    val wakeChange: Boolean? =
-                        when (wakefulnessModel.state) {
-                            WakefulnessState.STARTING_TO_WAKE -> true
-                            WakefulnessState.ASLEEP -> false
-                            else -> null
-                        }
-                    (wakeChange to wakefulnessModel.lastWakeReason).takeIf { wakeChange != null }
-                }
-                .filterNotNull()
-                .distinctUntilChangedBy { it.first }
-                .collect { (wakeChange, wakeReason) ->
+                .distinctUntilChangedBy { it.isAwake() }
+                .collect { wakefulness ->
                     when {
-                        wakeChange == true && wakeReason.isTouch ->
-                            falsingCollector.onScreenOnFromTouch()
-                        wakeChange == true -> falsingCollector.onScreenTurningOn()
-                        wakeChange == false -> falsingCollector.onScreenOff()
+                        wakefulness.isAwakeFromTouch() -> falsingCollector.onScreenOnFromTouch()
+                        wakefulness.isAwake() -> falsingCollector.onScreenTurningOn()
+                        wakefulness.isAsleep() -> falsingCollector.onScreenOff()
                     }
                 }
         }

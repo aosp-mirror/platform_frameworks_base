@@ -154,7 +154,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mNotificationShadeWindowController, mKeyguardStateController, mHandler,
                 mUpdateMonitor, res.getResources(), mKeyguardBypassController,
                 mMetricsLogger, mDumpManager, mPowerManager, mLogger,
-                mNotificationMediaManager, mWakefulnessLifecycle, mScreenLifecycle,
+                mNotificationMediaManager, mWakefulnessLifecycle,
                 mAuthController, mStatusBarStateController,
                 mSessionTracker, mLatencyTracker, mScreenOffAnimationController, mVibratorHelper,
                 mSystemClock,

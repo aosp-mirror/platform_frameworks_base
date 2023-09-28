@@ -29,6 +29,7 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -66,6 +67,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
         KeyguardInteractor(
             repository = repository,
             commandQueue = commandQueue,
+            powerInteractor = PowerInteractorFactory.create().powerInteractor,
             featureFlags = featureFlags,
             sceneContainerFlags = testUtils.sceneContainerFlags,
             deviceEntryRepository = testUtils.deviceEntryRepository,

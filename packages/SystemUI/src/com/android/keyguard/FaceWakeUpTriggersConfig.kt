@@ -24,7 +24,7 @@ import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.util.settings.GlobalSettings
 import java.io.PrintWriter
 import java.util.stream.Collectors

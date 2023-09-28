@@ -20,6 +20,7 @@ import android.os.Trace;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 
 import java.io.PrintWriter;
 
@@ -28,8 +29,11 @@ import javax.inject.Singleton;
 
 /**
  * Tracks the screen lifecycle.
+ *
+ * @deprecated Collect flows from {@link PowerInteractor} instead.
  */
 @Singleton
+@Deprecated
 public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> implements Dumpable {
 
     public static final int SCREEN_OFF = 0;
