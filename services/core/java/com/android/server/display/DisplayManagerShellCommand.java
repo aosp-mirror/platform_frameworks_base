@@ -30,6 +30,7 @@ import java.util.Arrays;
 
 class DisplayManagerShellCommand extends ShellCommand {
     private static final String TAG = "DisplayManagerShellCommand";
+    private static final String NOTIFICATION_TYPES = "on-hotplug-error";
 
     private final DisplayManagerService mService;
     private final DisplayManagerFlags mFlags;
@@ -46,6 +47,10 @@ class DisplayManagerShellCommand extends ShellCommand {
         }
         final PrintWriter pw = getOutPrintWriter();
         switch(cmd) {
+            case "show-notification":
+                return showNotification();
+            case "cancel-notifications":
+                return cancelNotifications();
             case "set-brightness":
                 return setBrightness();
             case "reset-brightness-configuration":
@@ -102,6 +107,10 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.println();
+        pw.println("  show-notification NOTIFICATION_TYPE");
+        pw.println("    Show notification for one of the following types: " + NOTIFICATION_TYPES);
+        pw.println("  cancel-notifications");
+        pw.println("    Cancel notifications.");
         pw.println("  set-brightness BRIGHTNESS");
         pw.println("    Sets the current brightness to BRIGHTNESS (a number between 0 and 1).");
         pw.println("  reset-brightness-configuration");
@@ -169,6 +178,33 @@ class DisplayManagerShellCommand extends ShellCommand {
         for (int i = 0; i < displays.length; i++) {
             out.println("  " + displays[i]);
         }
+        return 0;
+    }
+
+    private int showNotification() {
+        final String notificationType = getNextArg();
+        if (notificationType == null) {
+            getErrPrintWriter().println("Error: no notificationType specified, use one of: "
+                                                + NOTIFICATION_TYPES);
+            return 1;
+        }
+
+        switch(notificationType) {
+            case "on-hotplug-error":
+                mService.getDisplayNotificationManager().onHotplugConnectionError();
+                break;
+            default:
+                getErrPrintWriter().println(
+                        "Error: unexpected notification type=" + notificationType + ", use one of: "
+                                + NOTIFICATION_TYPES);
+                return 1;
+        }
+
+        return 0;
+    }
+
+    private int cancelNotifications() {
+        mService.getDisplayNotificationManager().cancelNotifications();
         return 0;
     }
 

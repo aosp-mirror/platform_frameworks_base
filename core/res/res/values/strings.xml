@@ -826,6 +826,9 @@
          security policy. [CHAR_LIMIT=NONE]-->
     <string name="notification_channel_accessibility_security_policy">Accessibility usage</string>
 
+    <!-- Text shown when viewing channel settings for notifications related to displays -->
+    <string name="notification_channel_display">Display</string>
+
     <!-- Label for foreground service notification when one app is running.
     [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=6826789589341671842] -->
     <string name="foreground_service_app_in_background"><xliff:g id="app_name">%1$s</xliff:g> is
@@ -6289,6 +6292,11 @@ ul.</string>
     <string name="mic_access_on_toast">Microphone is available</string>
     <!-- Toast message that is shown when the user mutes the microphone from the keyboard. [CHAR LIMIT=TOAST] -->
     <string name="mic_access_off_toast">Microphone is blocked</string>
+
+    <!-- Title of connected display unavailable notifications. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_unavailable_notification_title">Can\'t mirror to display</string>
+    <!-- Content of connected display unavailable notification. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_unavailable_notification_content">Use a different cable and try again</string>
 
     <!-- Name of concurrent display notifications. [CHAR LIMIT=NONE] -->
     <string name="concurrent_display_notification_name">Dual screen</string>

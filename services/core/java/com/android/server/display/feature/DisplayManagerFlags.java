@@ -55,6 +55,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_MODE_LIMIT_FOR_EXTERNAL_DISPLAY,
             Flags::enableModeLimitForExternalDisplay);
 
+    private final FlagState mConnectedDisplayErrorHandlingFlagState = new FlagState(
+            Flags.FLAG_ENABLE_CONNECTED_DISPLAY_ERROR_HANDLING,
+            Flags::enableConnectedDisplayErrorHandling);
+
     private final FlagState mBackUpSmoothDisplayAndForcePeakRefreshRateFlagState = new FlagState(
             Flags.FLAG_BACK_UP_SMOOTH_DISPLAY_AND_FORCE_PEAK_REFRESH_RATE,
             Flags::backUpSmoothDisplayAndForcePeakRefreshRate);
@@ -110,6 +114,11 @@ public class DisplayManagerFlags {
     /** Returns whether displayoffload is enabled on not */
     public boolean isDisplayOffloadEnabled() {
         return mDisplayOffloadFlagState.isEnabled();
+    }
+
+    /** Returns whether error notifications for connected displays are enabled on not */
+    public boolean isConnectedDisplayErrorHandlingEnabled() {
+        return mConnectedDisplayErrorHandlingFlagState.isEnabled();
     }
 
     public boolean isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled() {
