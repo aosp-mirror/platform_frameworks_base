@@ -23,8 +23,6 @@ import android.os.UserHandle
 import androidx.lifecycle.DefaultLifecycleObserver
 import com.android.launcher3.icons.IconFactory
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.media.MediaProjectionAppSelectorActivity
-import com.android.systemui.media.MediaProjectionPermissionActivity
 import com.android.systemui.mediaprojection.appselector.data.ActivityTaskManagerLabelLoader
 import com.android.systemui.mediaprojection.appselector.data.ActivityTaskManagerThumbnailLoader
 import com.android.systemui.mediaprojection.appselector.data.AppIconLoader
@@ -37,6 +35,7 @@ import com.android.systemui.mediaprojection.appselector.view.MediaProjectionRece
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider
 import com.android.systemui.mediaprojection.devicepolicy.MediaProjectionDevicePolicyModule
 import com.android.systemui.mediaprojection.devicepolicy.PersonalProfile
+import com.android.systemui.mediaprojection.permission.MediaProjectionPermissionActivity
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.Binds

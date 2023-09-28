@@ -634,7 +634,7 @@
 
         <!-- started from MediaProjectionManager -->
         <activity
-            android:name=".media.MediaProjectionPermissionActivity"
+            android:name=".mediaprojection.permission.MediaProjectionPermissionActivity"
             android:exported="true"
             android:theme="@style/Theme.SystemUI.MediaProjectionAlertDialog"
             android:finishOnCloseSystemDialogs="true"
@@ -643,7 +643,7 @@
             android:visibleToInstantApps="true"/>
 
         <activity
-            android:name=".media.MediaProjectionAppSelectorActivity"
+            android:name=".mediaprojection.appselector.MediaProjectionAppSelectorActivity"
             android:theme="@style/Theme.SystemUI.MediaProjectionAppSelector"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
