@@ -771,6 +771,10 @@ object Flags {
     // TODO(b/302087895): Tracking Bug
     @JvmField val CALL_LAYOUT_ASYNC_SET_DATA = unreleasedFlag("call_layout_async_set_data")
 
+    // TODO(b/302144438): Tracking Bug
+    @JvmField val DECOUPLE_REMOTE_INPUT_DELEGATE_AND_CALLBACK_UPDATE =
+            unreleasedFlag("decouple_remote_input_delegate_and_callback_update")
+
     // 2900 - CentralSurfaces-related flags
 
     // TODO(b/285174336): Tracking Bug
