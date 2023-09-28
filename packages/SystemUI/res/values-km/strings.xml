@@ -1141,7 +1141,8 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"ដើម្បីបញ្ចូល​កម្មវិធី Wallet ជាផ្លូវកាត់ សូមប្រាកដថា​កម្មវិធីត្រូវបានដំឡើង"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"ដើម្បីបញ្ចូល​កម្មវិធី Wallet ជាផ្លូវកាត់ សូមប្រាកដថា​បានបញ្ចូលកាត​យ៉ាងហោចណាស់មួយ"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"ដើម្បីបញ្ចូល​កម្មវិធី Home ជាផ្លូវកាត់ សូមប្រាកដថា​កម្មវិធីត្រូវបានដំឡើង"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• ឧបករណ៍យ៉ាងតិចមួយអាចប្រើបាន"</string>
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
+    <skip />
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"ជ្រើសរើសកម្មវិធីកំណត់ចំណាំលំនាំដើម ដើម្បីប្រើផ្លូវកាត់សម្រាប់ការកត់ចំណាំ"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ជ្រើសរើសកម្មវិធី"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ចុចឱ្យជាប់លើផ្លូវកាត់"</string>

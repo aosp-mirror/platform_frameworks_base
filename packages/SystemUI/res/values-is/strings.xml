@@ -1141,7 +1141,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Til að bæta Veskisforritinu við sem flýtileið skaltu ganga úr skugga um að forritið sé uppsett"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Til að bæta Veskisforritinu við sem flýtileið skaltu ganga úr skugga um að hafa bætt að minnsta kosti einu korti við"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Til að bæta Home-forritinu við sem flýtileið skaltu ganga úr skugga um að forritið sé uppsett"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Að minnsta kosti eitt tæki er tiltækt"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Að minnsta kosti eitt tæki eða tækjasvæði tiltækt"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Veldu sjálfgefið glósuforrit til að nota flýtileið fyrir glósugerð"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Velja forrit"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Haltu flýtilyklinum inni"</string>

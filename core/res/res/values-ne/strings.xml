@@ -1371,7 +1371,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"कनेक्ट गरिएको डिभाइस चार्ज गर्दै। थप विकल्पहरूका लागि ट्याप गर्नुहोस्।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"एनालग अडियोको सहायक उपकरण पत्ता लाग्यो"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"संलग्न गरिएको यन्त्र यो फोनसँग कम्प्याटिबल छैन। थप जान्न ट्याप गर्नुहोस्।"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB डिबगिङ कनेक्ट गरिएको छ कनेक्ट गरिएको छ"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB डिबगिङ कनेक्ट गरिएको छ"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB डिबगिङ अफ गर्न ट्याप गर्नुहोस्‌"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB डिबगिङलाई असक्षम पार्न ट्याप गर्नुहोस्।"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"वायरलेस डिबगिङ जोडियो"</string>

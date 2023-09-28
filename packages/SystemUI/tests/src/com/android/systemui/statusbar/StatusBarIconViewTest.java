@@ -248,7 +248,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateIconScale_smallerFontAndConstrainedDrawableSizeLessThanDpIconSize() {
+    public void testUpdateIconScale_smallerFontAndRawDrawableSizeLessThanDpIconSize() {
         int dpIconSize = 60;
         int dpDrawingSize = 30;
         // smaller font scaling causes the spIconSize < dpIconSize
@@ -262,12 +262,42 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         setIconDrawableWithSize(/* width= */ 50, /* height= */ 50);
         mIconView.maybeUpdateIconScaleDimens();
 
-        // WHEN both the constrained drawable width/height are less than dpIconSize,
+        // WHEN both the raw/constrained drawable width/height are less than dpIconSize,
+        // THEN the icon is scaled up from constrained drawable size to the raw drawable size
+        float scaleToBackRawDrawableSize = (float) 50 / 40;
         // THEN the icon is scaled down from dpIconSize to fit the dpDrawingSize
         float scaleToFitDrawingSize = (float) dpDrawingSize / dpIconSize;
         // THEN the scaled icon should be scaled down further to fit spIconSize
         float scaleToFitSpIconSize = (float) spIconSize / dpIconSize;
-        assertEquals(scaleToFitDrawingSize * scaleToFitSpIconSize, mIconView.getIconScale(), 0.01f);
+        assertEquals(scaleToBackRawDrawableSize * scaleToFitDrawingSize * scaleToFitSpIconSize,
+                mIconView.getIconScale(), 0.01f);
+    }
+
+    @Test
+    public void testUpdateIconScale_smallerFontAndConstrainedDrawableSizeLessThanDpIconSize() {
+        int dpIconSize = 60;
+        int dpDrawingSize = 30;
+        // smaller font scaling causes the spIconSize < dpIconSize
+        int spIconSize = 40;
+        // the icon view layout size would be 40x150
+        //   (the height is always 150 due to TEST_STATUS_BAR_HEIGHT)
+        setUpIconView(dpIconSize, dpDrawingSize, spIconSize);
+        mIconView.setNotification(mock(StatusBarNotification.class));
+        // the raw drawable size is 70x70. When put the drawable into iconView whose
+        // layout size is 40x150, the drawable size would be constrained to 40x40
+        setIconDrawableWithSize(/* width= */ 70, /* height= */ 70);
+        mIconView.maybeUpdateIconScaleDimens();
+
+        // WHEN the raw drawable width/height are larger than dpIconSize,
+        //      but the constrained drawable width/height are less than dpIconSize,
+        // THEN the icon is scaled up from constrained drawable size to fit dpIconSize
+        float scaleToFitDpIconSize = (float) dpIconSize / 40;
+        // THEN the icon is scaled down from dpIconSize to fit the dpDrawingSize
+        float scaleToFitDrawingSize = (float) dpDrawingSize / dpIconSize;
+        // THEN the scaled icon should be scaled down further to fit spIconSize
+        float scaleToFitSpIconSize = (float) spIconSize / dpIconSize;
+        assertEquals(scaleToFitDpIconSize * scaleToFitDrawingSize * scaleToFitSpIconSize,
+                mIconView.getIconScale(), 0.01f);
     }
 
     @Test

@@ -275,7 +275,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Түс инверсиясы"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Түсті түзету"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Қаріп өлшемі"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Пайдаланушыларды басқару"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Параметрлер"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Дайын"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Жабу"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Қосылды"</string>
@@ -1110,7 +1110,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Суретті алдын ала көру"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"өзгерту"</string>
     <string name="add" msgid="81036585205287996">"Қосу"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Пайдаланушыларды басқару"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Параметрлер"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Бұл хабарландыруды бөлінген экранға сүйреп апару мүмкін емес."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi қолжетімсіз"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Басымдық режимі"</string>
@@ -1141,7 +1141,8 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet қолданбасын таңбаша ретінде қосу үшін қолданбаның орнатылғанын тексеріңіз."</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet қолданбасын таңбаша ретінде қосу үшін кемінде бір картаның қосылғанын тексеріңіз."</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home қолданбасын таңбаша ретінде қосу үшін қолданбаның орнатылғанын тексеріңіз."</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Кемінде бір құрылғы қолжетімді."</string>
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
+    <skip />
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Жазба жазу таңбашасын пайдалану үшін әдепкі жазба қолданбаны таңдаңыз."</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Қолданба таңдау"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Таңбашаны басып тұрыңыз."</string>

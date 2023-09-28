@@ -1886,7 +1886,7 @@
     <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Για 1 ώρα}other{Για # ώρες}}"</string>
     <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Για 1 ώ.}other{Για # ώ.}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Έως <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_until" msgid="2250286190237669079">"Έως τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_until" msgid="2250286190237669079">"Έως <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Μέχρι τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (επόμενο ξυπνητήρι)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Μέχρι την απενεργοποίηση"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Μέχρι να απενεργοποιήσετε \"Μην ενοχλείτε\""</string>

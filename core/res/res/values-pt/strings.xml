@@ -1887,7 +1887,7 @@
     <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Por 1 hora}one{Por # hora}many{Por # horas}other{Por # horas}}"</string>
     <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Por 1h}one{Por #h}many{Por #h}other{Por #h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Até <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_until" msgid="2250286190237669079">"Até às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_until" msgid="2250286190237669079">"Até <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Até <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próximo alarme)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Até você desativar"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Até que você desative \"Não perturbe\""</string>

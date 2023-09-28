@@ -275,7 +275,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inverzija boja"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Korekcija boja"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Veličina fonta"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Upravljajte korisnicima"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Upravljaj korisnicima"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Gotovo"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Zatvori"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Povezan"</string>
@@ -1110,7 +1110,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Pregled slike"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"izmenite"</string>
     <string name="add" msgid="81036585205287996">"Dodaj"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Upravljajte korisnicima"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Upravljaj korisnicima"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Ovo obaveštenje ne podržava prevlačenje na podeljeni ekran"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"WiFi nije dostupan"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritetni režim"</string>
@@ -1141,7 +1141,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Da biste dodali aplikaciju Novčanik kao prečicu, uverite se da je aplikacija instalirana"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Da biste dodali aplikaciju Novčanik kao prečicu, uverite se da je dodata bar jedna kartica"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Da biste dodali aplikaciju Home kao prečicu, uverite se da je aplikacija instalirana"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Dostupan je bar jedan uređaj"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Dostupan je bar jedan uređaj ili grupa uređaja"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Izaberite podrazumevanu aplikaciju za beleške da biste koristili prečicu za pravljenje beleški"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Izaberi aplikaciju"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Dodirnite i zadržite prečicu"</string>

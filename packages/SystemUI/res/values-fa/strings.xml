@@ -1141,7 +1141,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"برای افزودن برنامه «کیف پول» به‌عنوان میان‌بر، مطمئن شوید این برنامه نصب شده باشد"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"برای افزودن برنامه «کیف پول» به‌عنوان میان‌بر، مطمئن شوید حداقل یک کارت اضافه شده باشد"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"‏برای افزودن برنامه Home به‌عنوان میان‌بر، مطمئن شوید این برنامه نصب شده باشد"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• حداقل یک دستگاه دردسترس باشد"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• حداقل یک دستگاه یا پانل دستگاه دردسترس است"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"برای استفاده از میان‌بر یادداشت‌برداری، برنامه یادداشت پیش‌فرضی را انتخاب کنید"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"انتخاب برنامه"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"میان‌بر را لمس کنید و نگه دارید"</string>

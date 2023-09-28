@@ -507,9 +507,10 @@ open class ClockRegistry(
         }
     }
 
-    private var isVerifying = AtomicBoolean(false)
+    private var isQueued = AtomicBoolean(false)
     fun verifyLoadedProviders() {
-        val shouldSchedule = isVerifying.compareAndSet(false, true)
+        Log.i(TAG, Thread.currentThread().getStackTrace().toString())
+        val shouldSchedule = isQueued.compareAndSet(false, true)
         if (!shouldSchedule) {
             logger.tryLog(
                 TAG,
@@ -521,48 +522,54 @@ open class ClockRegistry(
         }
 
         scope.launch(bgDispatcher) {
-            if (keepAllLoaded) {
+            // TODO(b/267372164): Use better threading approach when converting to flows
+            synchronized(availableClocks) {
+                isQueued.set(false)
+                if (keepAllLoaded) {
+                    logger.tryLog(
+                        TAG,
+                        LogLevel.INFO,
+                        {},
+                        { "verifyLoadedProviders: keepAllLoaded=true" }
+                    )
+                    // Enforce that all plugins are loaded if requested
+                    for ((_, info) in availableClocks) {
+                        info.manager?.loadPlugin()
+                    }
+                    return@launch
+                }
+
+                val currentClock = availableClocks[currentClockId]
+                if (currentClock == null) {
+                    logger.tryLog(
+                        TAG,
+                        LogLevel.INFO,
+                        {},
+                        { "verifyLoadedProviders: currentClock=null" }
+                    )
+                    // Current Clock missing, load no plugins and use default
+                    for ((_, info) in availableClocks) {
+                        info.manager?.unloadPlugin()
+                    }
+                    return@launch
+                }
+
                 logger.tryLog(
                     TAG,
                     LogLevel.INFO,
                     {},
-                    { "verifyLoadedProviders: keepAllLoaded=true" }
+                    { "verifyLoadedProviders: load currentClock" }
                 )
-                // Enforce that all plugins are loaded if requested
+                val currentManager = currentClock.manager
+                currentManager?.loadPlugin()
+
                 for ((_, info) in availableClocks) {
-                    info.manager?.loadPlugin()
-                }
-                isVerifying.set(false)
-                return@launch
-            }
-
-            val currentClock = availableClocks[currentClockId]
-            if (currentClock == null) {
-                logger.tryLog(
-                    TAG,
-                    LogLevel.INFO,
-                    {},
-                    { "verifyLoadedProviders: currentClock=null" }
-                )
-                // Current Clock missing, load no plugins and use default
-                for ((_, info) in availableClocks) {
-                    info.manager?.unloadPlugin()
-                }
-                isVerifying.set(false)
-                return@launch
-            }
-
-            logger.tryLog(TAG, LogLevel.INFO, {}, { "verifyLoadedProviders: load currentClock" })
-            val currentManager = currentClock.manager
-            currentManager?.loadPlugin()
-
-            for ((_, info) in availableClocks) {
-                val manager = info.manager
-                if (manager != null && currentManager != manager) {
-                    manager.unloadPlugin()
+                    val manager = info.manager
+                    if (manager != null && currentManager != manager) {
+                        manager.unloadPlugin()
+                    }
                 }
             }
-            isVerifying.set(false)
         }
     }
 
