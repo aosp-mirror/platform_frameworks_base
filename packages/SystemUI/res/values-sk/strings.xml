@@ -275,7 +275,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inverzia farieb"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Úprava farieb"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Veľkosť písma"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Spravovať používateľov"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Spravovať použ."</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Hotovo"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Zavrieť"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Pripojené"</string>
@@ -1110,7 +1110,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Ukážka obrázka"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"upraviť"</string>
     <string name="add" msgid="81036585205287996">"Pridať"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Spravovať používateľov"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Spravovať použ."</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Toto upozornenie nepodporuje presun na rozdelenú obrazovku"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi nie je k dispozícii"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Režim priority"</string>
@@ -1141,7 +1141,8 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Ak chcete pridať aplikáciu Peňaženka ako odkaz, uistite sa, že je nainštalovaná"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Ak chcete pridať aplikáciu Peňaženka ako odkaz, uistite sa, že bola pridaná aspoň jedna karta"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Ak chcete pridať aplikáciu Home ako odkaz, uistite sa, že je nainštalovaná"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• K dispozícii je minimálne jedno zariadenie"</string>
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
+    <skip />
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Ak chcete používať odkaz na písanie poznámok, vyberte predvolenú aplikáciu na písanie poznámok"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Výber aplikácie"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pridržte skratku"</string>
