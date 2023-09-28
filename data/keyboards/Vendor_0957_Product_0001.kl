@@ -47,7 +47,6 @@ key usage 0x00070037    PERIOD
 
 # custom keys
 key usage 0x000c01BB    TV_INPUT
-key usage 0x000c0186    MACRO_1     WAKE
 
 key usage 0x000c0185    TV_TELETEXT
 key usage 0x000c0061    CAPTIONS
