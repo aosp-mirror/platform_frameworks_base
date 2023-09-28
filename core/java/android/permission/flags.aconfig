@@ -6,3 +6,10 @@ flag {
   description: "enable device aware permission APIs"
   bug: "274852670"
 }
+
+flag {
+  name: "voice_activation_permission_apis"
+  namespace: "permissions"
+  description: "enable voice activation permission APIs"
+  bug: "287264308"
+}
