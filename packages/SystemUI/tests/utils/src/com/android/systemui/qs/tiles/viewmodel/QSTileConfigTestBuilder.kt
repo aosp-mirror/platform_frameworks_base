@@ -18,28 +18,31 @@ package com.android.systemui.qs.tiles.viewmodel
 
 import androidx.annotation.StringRes
 import com.android.internal.logging.InstanceId
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.qs.pipeline.shared.TileSpec
 
-data class QSTileConfig(
-    val tileSpec: TileSpec,
-    val tileIcon: Icon,
-    @StringRes val tileLabelRes: Int,
-    val instanceId: InstanceId,
-    val metricsSpec: String = tileSpec.spec,
-    val policy: QSTilePolicy = QSTilePolicy.NoRestrictions,
-)
+object QSTileConfigTestBuilder {
 
-/** Represents policy restrictions that may be imposed on the tile. */
-sealed interface QSTilePolicy {
-    /** Tile has no policy restrictions */
-    data object NoRestrictions : QSTilePolicy
+    fun build(configure: BuildingScope.() -> Unit = {}): QSTileConfig =
+        BuildingScope().apply(configure).build()
 
-    /**
-     * Tile might be disabled by policy. [userRestriction] is usually a constant from
-     * [android.os.UserManager] like [android.os.UserManager.DISALLOW_AIRPLANE_MODE].
-     * [com.android.systemui.qs.tiles.base.interactor.DisabledByPolicyInteractor] is commonly used
-     * to resolve this and show user a message when needed.
-     */
-    data class Restricted(val userRestriction: String) : QSTilePolicy
+    class BuildingScope {
+        var tileSpec: TileSpec = TileSpec.create("test_spec")
+        var tileIcon: Icon = Icon.Resource(0, ContentDescription.Resource(0))
+        @StringRes var tileLabel: Int = 0
+        var instanceId: InstanceId = InstanceId.fakeInstanceId(0)
+        var metricsSpec: String = tileSpec.spec
+        var policy: QSTilePolicy = QSTilePolicy.NoRestrictions
+
+        fun build() =
+            QSTileConfig(
+                tileSpec,
+                tileIcon,
+                tileLabel,
+                instanceId,
+                metricsSpec,
+                policy,
+            )
+    }
 }
