@@ -163,6 +163,9 @@ class HandleMenu {
             final ImageButton splitscreenBtn = windowingPillView.findViewById(
                     R.id.split_screen_button);
             final ImageButton floatingBtn = windowingPillView.findViewById(R.id.floating_button);
+            // TODO: Remove once implemented.
+            floatingBtn.setVisibility(View.GONE);
+
             final ImageButton desktopBtn = windowingPillView.findViewById(R.id.desktop_button);
             fullscreenBtn.setOnClickListener(mOnClickListener);
             splitscreenBtn.setOnClickListener(mOnClickListener);
@@ -196,6 +199,9 @@ class HandleMenu {
         }
         final Button selectBtn = moreActionsPillView.findViewById(R.id.select_button);
         selectBtn.setOnClickListener(mOnClickListener);
+        final Button screenshotBtn = moreActionsPillView.findViewById(R.id.screenshot_button);
+        // TODO: Remove once implemented.
+        screenshotBtn.setVisibility(View.GONE);
     }
 
     /**

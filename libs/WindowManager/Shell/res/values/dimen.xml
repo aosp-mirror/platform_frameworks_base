@@ -435,10 +435,10 @@
     <dimen name="desktop_mode_handle_menu_windowing_pill_height">52dp</dimen>
 
     <!-- The height of the handle menu's "More Actions" pill in desktop mode, but not freeform. -->
-    <dimen name="desktop_mode_handle_menu_more_actions_pill_height">156dp</dimen>
+    <dimen name="desktop_mode_handle_menu_more_actions_pill_height">104dp</dimen>
 
     <!-- The height of the handle menu's "More Actions" pill in freeform desktop windowing mode. -->
-    <dimen name="desktop_mode_handle_menu_more_actions_pill_freeform_height">104dp</dimen>
+    <dimen name="desktop_mode_handle_menu_more_actions_pill_freeform_height">52dp</dimen>
 
     <!-- The top margin of the handle menu in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_margin_top">4dp</dimen>
