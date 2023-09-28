@@ -15,6 +15,13 @@ flag {
 }
 
 flag {
+    name: "prevent_sdk_lib_app"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the prevent sdk-library be an application."
+    bug: "295843617"
+}
+
+flag {
     name: "stay_stopped"
     namespace: "backstage_power"
     description: "Feature flag to improve stopped state enforcement"
