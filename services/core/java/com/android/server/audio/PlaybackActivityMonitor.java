@@ -914,7 +914,7 @@ public final class PlaybackActivityMonitor
                 if (DEBUG) { Log.v(TAG, "no players to fade out"); }
                 return false;
             }
-            if (!FadeOutManager.canCauseFadeOut(winner, loser)) {
+            if (!mFadingManager.canCauseFadeOut(winner, loser)) {
                 return false;
             }
             // check if this UID needs to be faded out (return false if not), and gather list of
@@ -928,7 +928,7 @@ public final class PlaybackActivityMonitor
                         && loser.hasSameUid(apc.getClientUid())
                         && apc.getPlayerState()
                         == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
-                    if (!FadeOutManager.canBeFadedOut(apc)) {
+                    if (!mFadingManager.canBeFadedOut(apc)) {
                         // the player is not eligible to be faded out, bail
                         Log.v(TAG, "not fading out player " + apc.getPlayerInterfaceId()
                                 + " uid:" + apc.getClientUid() + " pid:" + apc.getClientPid()
@@ -958,6 +958,16 @@ public final class PlaybackActivityMonitor
         }
         mFadingManager.unfadeOutUid(uid, players);
         mDuckingManager.unduckUid(uid, players);
+    }
+
+    @Override
+    public long getFadeOutDurationMillis(@NonNull AudioAttributes aa) {
+        return mFadingManager.getFadeOutDurationOnFocusLossMillis(aa);
+    }
+
+    @Override
+    public long getFadeInDelayForOffendersMillis(@NonNull AudioAttributes aa) {
+        return mFadingManager.getFadeInDelayForOffendersMillis(aa);
     }
 
     //=================================================================

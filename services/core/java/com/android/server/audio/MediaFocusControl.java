@@ -94,7 +94,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
 
     private final Context mContext;
     private final AppOpsManager mAppOps;
-    private PlayerFocusEnforcer mFocusEnforcer; // never null
+    private final @NonNull PlayerFocusEnforcer mFocusEnforcer;
     private boolean mMultiAudioFocusEnabled = false;
 
     private boolean mRingOrCallActive = false;
@@ -128,7 +128,8 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * @return the fade out duration in ms
      */
     public long getFocusFadeOutDurationForTest() {
-        return FadeOutManager.FADE_OUT_DURATION_MS;
+        return getFadeOutDurationMillis(
+                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build());
     }
 
     /**
@@ -137,7 +138,8 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * @return the time gap after a fade out completion on focus loss, and fade in start in ms
      */
     public long getFocusUnmuteDelayAfterFadeOutForTest() {
-        return FadeOutManager.DELAY_FADE_IN_OFFENDERS_MS;
+        return getFadeInDelayForOffendersMillis(
+                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build());
     }
 
     //=================================================================
@@ -178,6 +180,21 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         mFocusEnforcer.forgetUid(uid);
     }
 
+    @Override
+    public long getFadeOutDurationMillis(@NonNull AudioAttributes aa) {
+        if (aa == null) {
+            return 0;
+        }
+        return mFocusEnforcer.getFadeOutDurationMillis(aa);
+    }
+
+    @Override
+    public long getFadeInDelayForOffendersMillis(@NonNull AudioAttributes aa) {
+        if (aa == null) {
+            return 0;
+        }
+        return mFocusEnforcer.getFadeInDelayForOffendersMillis(aa);
+    }
     //==========================================================================================
     // AudioFocus
     //==========================================================================================
@@ -1401,7 +1418,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         if (!ENFORCE_FADEOUT_FOR_FOCUS_LOSS) {
             return 0;
         }
-        return FadeOutManager.getFadeOutDurationOnFocusLossMillis(aa);
+        return getFadeOutDurationMillis(aa);
     }
 
     private void dumpMultiAudioFocus(PrintWriter pw) {
@@ -1423,14 +1440,14 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             Log.v(TAG, "postDelayedLossAfterFade loser=" + focusLoser.getPackageName());
         }
         mFocusHandler.sendMessageDelayed(
-                mFocusHandler.obtainMessage(MSG_L_FOCUS_LOSS_AFTER_FADE, focusLoser),
-                FadeOutManager.FADE_OUT_DURATION_MS);
+                mFocusHandler.obtainMessage(MSG_L_FOCUS_LOSS_AFTER_FADE, focusLoser), delayMs);
     }
 
-    private void postForgetUidLater(int uid) {
+    private void postForgetUidLater(FocusRequester focusRequester) {
         mFocusHandler.sendMessageDelayed(
-                mFocusHandler.obtainMessage(MSL_L_FORGET_UID, new ForgetFadeUidInfo(uid)),
-                FadeOutManager.DELAY_FADE_IN_OFFENDERS_MS);
+                mFocusHandler.obtainMessage(MSL_L_FORGET_UID,
+                        new ForgetFadeUidInfo(focusRequester.getClientUid())),
+                getFadeInDelayForOffendersMillis(focusRequester.getAudioAttributes()));
     }
 
     //=================================================================
@@ -1466,7 +1483,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                             if (loser.isInFocusLossLimbo()) {
                                 loser.dispatchFocusChange(AudioManager.AUDIOFOCUS_LOSS);
                                 loser.release();
-                                postForgetUidLater(loser.getClientUid());
+                                postForgetUidLater(loser);
                             }
                         }
                         break;
