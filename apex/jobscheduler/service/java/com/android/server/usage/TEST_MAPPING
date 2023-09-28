@@ -4,7 +4,6 @@
       "name": "CtsUsageStatsTestCases",
       "options": [
         {"include-filter": "android.app.usage.cts.UsageStatsTest"},
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.MediumTest"},
         {"exclude-annotation": "androidx.test.filters.LargeTest"}
@@ -21,7 +20,6 @@
       "name": "FrameworksServicesTests",
       "options": [
         {"include-filter": "com.android.server.usage"},
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"}
       ]
     }

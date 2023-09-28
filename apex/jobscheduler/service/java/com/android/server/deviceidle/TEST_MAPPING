@@ -4,7 +4,6 @@
       "name": "FrameworksMockingServicesTests",
       "options": [
         {"include-filter": "com.android.server.DeviceIdleControllerTest"},
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"}
       ]
     }
