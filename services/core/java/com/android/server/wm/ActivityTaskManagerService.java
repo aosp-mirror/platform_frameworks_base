@@ -3855,11 +3855,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return null;
                 }
                 if (updateCache) {
-                    return mWindowManager.mTaskSnapshotController.recordSnapshot(task,
-                            true /* snapshotHome */);
+                    return mWindowManager.mTaskSnapshotController.recordSnapshot(task);
                 } else {
-                    return mWindowManager.mTaskSnapshotController.captureSnapshot(task,
-                            true /* snapshotHome */);
+                    return mWindowManager.mTaskSnapshotController.captureSnapshot(task);
                 }
             }
         } finally {

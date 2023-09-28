@@ -83,9 +83,10 @@ class SnapshotController {
             Transition.ChangeInfo info = changeInfos.get(i);
             // Intentionally skip record snapshot for changes originated from PiP.
             if (info.mWindowingMode == WINDOWING_MODE_PINNED) continue;
-            if (info.mContainer.asTask() != null && !info.mContainer.isVisibleRequested()) {
-                mTaskSnapshotController.recordSnapshot(info.mContainer.asTask(),
-                        false /* allowSnapshotHome */);
+            if (info.mContainer.isActivityTypeHome()) continue;
+            final Task task = info.mContainer.asTask();
+            if (task != null && !task.isVisibleRequested()) {
+                mTaskSnapshotController.recordSnapshot(task);
             }
             // Won't need to capture activity snapshot in close transition.
             if (isTransitionClose) {

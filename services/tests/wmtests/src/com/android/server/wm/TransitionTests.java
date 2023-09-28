@@ -1441,7 +1441,7 @@ public class TransitionTests extends WindowTestsBase {
         // normally.
         mWm.mSyncEngine.abort(openTransition.getSyncId());
 
-        verify(taskSnapshotController, times(1)).recordSnapshot(eq(task2), eq(false));
+        verify(taskSnapshotController, times(1)).recordSnapshot(eq(task2));
 
         controller.finishTransition(openTransition);
 
@@ -1481,7 +1481,7 @@ public class TransitionTests extends WindowTestsBase {
 
         // Make sure we haven't called recordSnapshot (since we are transient, it shouldn't be
         // called until finish).
-        verify(taskSnapshotController, times(0)).recordSnapshot(eq(task1), eq(false));
+        verify(taskSnapshotController, times(0)).recordSnapshot(eq(task1));
 
         enteringAnimReports.clear();
         doCallRealMethod().when(mWm.mRoot).ensureActivitiesVisible(any(),
@@ -1514,7 +1514,7 @@ public class TransitionTests extends WindowTestsBase {
         assertFalse(activity1.isVisible());
         assertFalse(activity1.app.hasActivityInVisibleTask());
 
-        verify(taskSnapshotController, times(1)).recordSnapshot(eq(task1), eq(false));
+        verify(taskSnapshotController, times(1)).recordSnapshot(eq(task1));
         assertTrue(enteringAnimReports.contains(activity2));
     }
 

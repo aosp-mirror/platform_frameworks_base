@@ -1197,7 +1197,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                 "  Commit activity becoming invisible: %s", ar);
                         final SnapshotController snapController = mController.mSnapshotController;
-                        if (mTransientLaunches != null && !task.isVisibleRequested()) {
+                        if (mTransientLaunches != null && !task.isVisibleRequested()
+                                && !task.isActivityTypeHome()) {
                             final long startTimeNs = mLogger.mSendTimeNs;
                             final long lastSnapshotTimeNs = snapController.mTaskSnapshotController
                                     .getSnapshotCaptureTime(task.mTaskId);
@@ -1205,8 +1206,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                             // transition only if a snapshot was not already captured by request
                             // during the transition
                             if (lastSnapshotTimeNs < startTimeNs) {
-                                snapController.mTaskSnapshotController
-                                        .recordSnapshot(task, false /* allowSnapshotHome */);
+                                snapController.mTaskSnapshotController.recordSnapshot(task);
                             } else {
                                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                         "  Skipping post-transition snapshot for task %d",

@@ -901,7 +901,8 @@ public class RecentsAnimationController implements DeathRecipient {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             final Task task = adapter.mTask;
-            snapshotController.recordSnapshot(task, false /* allowSnapshotHome */);
+            if (task.isActivityTypeHome()) continue;
+            snapshotController.recordSnapshot(task);
             final TaskSnapshot snapshot = snapshotController.getSnapshot(task.mTaskId, task.mUserId,
                     false /* restoreFromDisk */, false /* isLowResolution */);
             if (snapshot != null) {

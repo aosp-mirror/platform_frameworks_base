@@ -15,6 +15,9 @@
  */
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -137,41 +140,35 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
     protected abstract boolean use16BitFormat();
 
     /**
-     * This is different than {@link #recordSnapshotInner(TYPE, boolean)} because it doesn't store
+     * This is different than {@link #recordSnapshotInner(TYPE)} because it doesn't store
      * the snapshot to the cache and returns the TaskSnapshot immediately.
      *
      * This is only used for testing so the snapshot content can be verified.
      */
-    // TODO(b/264551777): clean up the "snapshotHome" argument
     @VisibleForTesting
-    TaskSnapshot captureSnapshot(TYPE source, boolean snapshotHome) {
+    TaskSnapshot captureSnapshot(TYPE source) {
         final TaskSnapshot snapshot;
-        if (snapshotHome) {
-            snapshot = snapshot(source);
-        } else {
-            switch (getSnapshotMode(source)) {
-                case SNAPSHOT_MODE_NONE:
-                    return null;
-                case SNAPSHOT_MODE_APP_THEME:
-                    snapshot = drawAppThemeSnapshot(source);
-                    break;
-                case SNAPSHOT_MODE_REAL:
-                    snapshot = snapshot(source);
-                    break;
-                default:
-                    snapshot = null;
-                    break;
-            }
+        switch (getSnapshotMode(source)) {
+            case SNAPSHOT_MODE_NONE:
+                return null;
+            case SNAPSHOT_MODE_APP_THEME:
+                snapshot = drawAppThemeSnapshot(source);
+                break;
+            case SNAPSHOT_MODE_REAL:
+                snapshot = snapshot(source);
+                break;
+            default:
+                snapshot = null;
+                break;
         }
         return snapshot;
     }
 
-    final TaskSnapshot recordSnapshotInner(TYPE source, boolean allowSnapshotHome) {
+    final TaskSnapshot recordSnapshotInner(TYPE source) {
         if (shouldDisableSnapshots()) {
             return null;
         }
-        final boolean snapshotHome = allowSnapshotHome && source.isActivityTypeHome();
-        final TaskSnapshot snapshot = captureSnapshot(source, snapshotHome);
+        final TaskSnapshot snapshot = captureSnapshot(source);
         if (snapshot == null) {
             return null;
         }
@@ -189,25 +186,24 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
 
     @VisibleForTesting
     int getSnapshotMode(TYPE source) {
-        final ActivityRecord topChild = getTopActivity(source);
-        if (!source.isActivityTypeStandardOrUndefined() && !source.isActivityTypeAssistant()) {
+        final int type = source.getActivityType();
+        if (type == ACTIVITY_TYPE_RECENTS || type == ACTIVITY_TYPE_DREAM) {
             return SNAPSHOT_MODE_NONE;
-        } else if (topChild != null && topChild.shouldUseAppThemeSnapshot()) {
-            return SNAPSHOT_MODE_APP_THEME;
-        } else {
+        }
+        if (type == ACTIVITY_TYPE_HOME) {
             return SNAPSHOT_MODE_REAL;
         }
+        final ActivityRecord topChild = getTopActivity(source);
+        if (topChild != null && topChild.shouldUseAppThemeSnapshot()) {
+            return SNAPSHOT_MODE_APP_THEME;
+        }
+        return SNAPSHOT_MODE_REAL;
     }
 
     @Nullable
     TaskSnapshot snapshot(TYPE source) {
-        return snapshot(source, PixelFormat.UNKNOWN);
-    }
-
-    @Nullable
-    TaskSnapshot snapshot(TYPE source, int pixelFormat) {
         TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
-        if (!prepareTaskSnapshot(source, pixelFormat, builder)) {
+        if (!prepareTaskSnapshot(source, builder)) {
             // Failed some pre-req. Has been logged.
             return null;
         }
@@ -305,14 +301,12 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
      * information from the task and populates the builder.
      *
      * @param source the window to capture
-     * @param pixelFormat the desired pixel format, or {@link PixelFormat#UNKNOWN} to
-     *                    automatically select
      * @param builder the snapshot builder to populate
      *
      * @return true if the state of the task is ok to proceed
      */
     @VisibleForTesting
-    boolean prepareTaskSnapshot(TYPE source, int pixelFormat, TaskSnapshot.Builder builder) {
+    boolean prepareTaskSnapshot(TYPE source, TaskSnapshot.Builder builder) {
         final Pair<ActivityRecord, WindowState> result = checkIfReadyToSnapshot(source);
         if (result == null) {
             return false;
@@ -329,6 +323,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         builder.setLetterboxInsets(letterboxInsets);
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
         final boolean isShowWallpaper = mainWindow.hasWallpaper();
+        int pixelFormat = builder.getPixelFormat();
         if (pixelFormat == PixelFormat.UNKNOWN) {
             pixelFormat = use16BitFormat() && activity.fillsParent()
                     && !(isWindowTranslucent && isShowWallpaper)

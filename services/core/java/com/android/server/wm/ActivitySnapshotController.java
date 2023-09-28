@@ -280,7 +280,7 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
         if (DEBUG) {
             Slog.d(TAG, "ActivitySnapshotController#recordSnapshot " + activity);
         }
-        final TaskSnapshot snapshot = recordSnapshotInner(activity, false /* allowSnapshotHome */);
+        final TaskSnapshot snapshot = recordSnapshotInner(activity);
         if (snapshot != null) {
             final int code = getSystemHashCode(activity);
             addUserSavedFile(code, activity.mUserId, snapshot);

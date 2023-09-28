@@ -261,7 +261,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final TaskSnapshot.Builder builder =
                 new TaskSnapshot.Builder();
         boolean success = mWm.mTaskSnapshotController.prepareTaskSnapshot(
-                mAppWindow.mActivityRecord.getTask(), PixelFormat.UNKNOWN, builder);
+                mAppWindow.mActivityRecord.getTask(), builder);
 
         assertTrue(success);
         // The pixel format should be selected automatically.
@@ -270,7 +270,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         // Snapshot should not be taken while the rotation of activity and task are different.
         doReturn(true).when(mAppWindow.mActivityRecord).hasFixedRotationTransform();
         success = mWm.mTaskSnapshotController.prepareTaskSnapshot(
-                mAppWindow.mActivityRecord.getTask(), PixelFormat.UNKNOWN, builder);
+                mAppWindow.mActivityRecord.getTask(), builder);
 
         assertFalse(success);
     }
