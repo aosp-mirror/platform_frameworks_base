@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
 import android.app.IApplicationThread;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -81,23 +80,6 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
     @UnsupportedAppUsage
     public List<ClientTransactionItem> getCallbacks() {
         return mActivityCallbacks;
-    }
-
-    /** Get the target activity. */
-    @Nullable
-    @UnsupportedAppUsage
-    public IBinder getActivityToken() {
-        // TODO(b/260873529): remove after we allow multiple activity items in one transaction.
-        if (mLifecycleStateRequest != null) {
-            return mLifecycleStateRequest.getActivityToken();
-        }
-        for (int i = mActivityCallbacks.size() - 1; i >= 0; i--) {
-            final IBinder token = mActivityCallbacks.get(i).getActivityToken();
-            if (token != null) {
-                return token;
-            }
-        }
-        return null;
     }
 
     /** Get the target state lifecycle request. */

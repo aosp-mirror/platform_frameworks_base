@@ -19,7 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.servertransaction.ClientTransaction;
-import android.app.servertransaction.ClientTransactionItem;
+import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.TransactionExecutor;
 import android.content.Context;
@@ -108,7 +108,7 @@ public abstract class ClientTransactionHandler {
     // and deliver callbacks.
 
     /** Get activity and its corresponding transaction item which are going to destroy. */
-    public abstract Map<IBinder, ClientTransactionItem> getActivitiesToBeDestroyed();
+    public abstract Map<IBinder, DestroyActivityItem> getActivitiesToBeDestroyed();
 
     /** Destroy the activity. */
     public abstract void handleDestroyActivity(@NonNull ActivityClientRecord r, boolean finishing,

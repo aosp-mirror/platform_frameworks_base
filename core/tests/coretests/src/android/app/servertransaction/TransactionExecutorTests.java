@@ -28,6 +28,7 @@ import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -247,7 +248,7 @@ public class TransactionExecutorTests {
 
     @Test
     public void testDoNotLaunchDestroyedActivity() {
-        final Map<IBinder, ClientTransactionItem> activitiesToBeDestroyed = new ArrayMap<>();
+        final Map<IBinder, DestroyActivityItem> activitiesToBeDestroyed = new ArrayMap<>();
         when(mTransactionHandler.getActivitiesToBeDestroyed()).thenReturn(activitiesToBeDestroyed);
         // Assume launch transaction is still in queue, so there is no client record.
         when(mTransactionHandler.getActivityClient(any())).thenReturn(null);
@@ -259,7 +260,7 @@ public class TransactionExecutorTests {
                 DestroyActivityItem.obtain(token, false /* finished */, 0 /* configChanges */));
         destroyTransaction.preExecute(mTransactionHandler);
         // The activity should be added to to-be-destroyed container.
-        assertEquals(1, mTransactionHandler.getActivitiesToBeDestroyed().size());
+        assertEquals(1, activitiesToBeDestroyed.size());
 
         // A previous queued launch transaction runs on main thread (execute).
         final ClientTransaction launchTransaction = ClientTransaction.obtain(null /* client */);
@@ -274,7 +275,7 @@ public class TransactionExecutorTests {
 
         // After the destroy transaction has been executed, the token should be removed.
         mExecutor.execute(destroyTransaction);
-        assertEquals(0, mTransactionHandler.getActivitiesToBeDestroyed().size());
+        assertTrue(activitiesToBeDestroyed.isEmpty());
     }
 
     @Test
