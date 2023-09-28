@@ -69,6 +69,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
+import android.compat.testing.PlatformCompatChangeRule;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
@@ -95,16 +96,20 @@ import android.util.Pair;
 import android.widget.RemoteViews;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.internal.util.ContrastColorUtil;
 
 import junit.framework.Assert;
 
+import libcore.junit.util.compat.CoreCompatChangeRule;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 import java.util.List;
@@ -115,6 +120,9 @@ import java.util.function.Consumer;
 public class NotificationTest {
 
     private Context mContext;
+
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
     @Before
     public void setUp() {
@@ -1775,6 +1783,42 @@ public class NotificationTest {
 
         Notification.CarExtender recoveredExtender = new Notification.CarExtender(notification);
         assertThat(recoveredExtender.getColor()).isEqualTo(1234);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges({Notification.WEARABLE_EXTENDER_BACKGROUND_BLOCKED})
+    public void wearableBackgroundBlockEnabled_wearableBackgroundSet_valueRemainsNull() {
+        Notification.WearableExtender extender = new Notification.WearableExtender();
+        Bitmap bitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
+        extender.setBackground(bitmap);
+        Notification notif =
+                new Notification.Builder(mContext, "test id")
+                        .setSmallIcon(1)
+                        .setContentTitle("test_title")
+                        .extend(extender)
+                        .build();
+
+        Notification.WearableExtender result = new Notification.WearableExtender(notif);
+        Assert.assertNull(result.getBackground());
+    }
+
+    @Test
+    @CoreCompatChangeRule.DisableCompatChanges({Notification.WEARABLE_EXTENDER_BACKGROUND_BLOCKED})
+    public void wearableBackgroundBlockDisabled_wearableBackgroundSet_valueKeepsBitmap() {
+        Notification.WearableExtender extender = new Notification.WearableExtender();
+        Bitmap bitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
+        extender.setBackground(bitmap);
+        Notification notif =
+                new Notification.Builder(mContext, "test id")
+                        .setSmallIcon(1)
+                        .setContentTitle("test_title")
+                        .extend(extender)
+                        .build();
+
+        Notification.WearableExtender result = new Notification.WearableExtender(notif);
+        Bitmap resultBitmap = result.getBackground();
+        assertNotNull(resultBitmap);
+        Assert.assertEquals(bitmap, resultBitmap);
     }
 
     private void assertValid(Notification.Colors c) {

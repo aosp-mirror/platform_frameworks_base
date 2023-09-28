@@ -17,9 +17,13 @@
 package com.android.server.display.brightness.clamper;
 
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.PowerManager;
+import android.view.SurfaceControlHdrLayerInfoListener;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.config.HdrBrightnessData;
 
 import java.io.PrintWriter;
@@ -33,10 +37,17 @@ public class HdrClamper {
 
     private final Runnable mDebouncer;
 
+    private final HdrLayerInfoListener mHdrListener;
+
     @Nullable
     private HdrBrightnessData mHdrBrightnessData = null;
 
+    @Nullable
+    private IBinder mRegisteredDisplayToken = null;
+
     private float mAmbientLux = Float.MAX_VALUE;
+
+    private boolean mHdrVisible = false;
 
     private float mMaxBrightness = PowerManager.BRIGHTNESS_MAX;
     private float mDesiredMaxBrightness = PowerManager.BRIGHTNESS_MAX;
@@ -47,6 +58,12 @@ public class HdrClamper {
 
     public HdrClamper(BrightnessClamperController.ClamperChangeListener clamperChangeListener,
             Handler handler) {
+        this(clamperChangeListener, handler, new Injector());
+    }
+
+    @VisibleForTesting
+    public HdrClamper(BrightnessClamperController.ClamperChangeListener clamperChangeListener,
+            Handler handler, Injector injector) {
         mClamperChangeListener = clamperChangeListener;
         mHandler = handler;
         mDebouncer = () -> {
@@ -54,6 +71,10 @@ public class HdrClamper {
             mMaxBrightness = mDesiredMaxBrightness;
             mClamperChangeListener.onChanged();
         };
+        mHdrListener = injector.getHdrListener((visible) -> {
+            mHdrVisible = visible;
+            recalculateBrightnessCap(mHdrBrightnessData, mAmbientLux, mHdrVisible);
+        }, handler);
     }
 
     // Called in same looper: mHandler.getLooper()
@@ -72,16 +93,37 @@ public class HdrClamper {
      */
     public void onAmbientLuxChange(float ambientLux) {
         mAmbientLux = ambientLux;
-        recalculateBrightnessCap(mHdrBrightnessData, ambientLux);
+        recalculateBrightnessCap(mHdrBrightnessData, ambientLux, mHdrVisible);
     }
 
     /**
      * Updates brightness cap config.
      * Called in same looper: mHandler.getLooper()
      */
-    public void resetHdrConfig(HdrBrightnessData data) {
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    public void resetHdrConfig(HdrBrightnessData data, int width, int height,
+            float minimumHdrPercentOfScreen, IBinder displayToken) {
         mHdrBrightnessData = data;
-        recalculateBrightnessCap(data, mAmbientLux);
+        mHdrListener.mHdrMinPixels = (float) (width * height) * minimumHdrPercentOfScreen;
+        if (displayToken != mRegisteredDisplayToken) { // token changed, resubscribe
+            if (mRegisteredDisplayToken != null) { // previous token not null, unsubscribe
+                mHdrListener.unregister(mRegisteredDisplayToken);
+                mHdrVisible = false;
+            }
+            if (displayToken != null) { // new token not null, subscribe
+                mHdrListener.register(displayToken);
+            }
+            mRegisteredDisplayToken = displayToken;
+        }
+        recalculateBrightnessCap(data, mAmbientLux, mHdrVisible);
+    }
+
+    /** Clean up all resources */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    public void stop() {
+        if (mRegisteredDisplayToken != null) {
+            mHdrListener.unregister(mRegisteredDisplayToken);
+        }
     }
 
     /**
@@ -98,13 +140,28 @@ public class HdrClamper {
         pw.println("  mAmbientLux=" + mAmbientLux);
     }
 
-    private void recalculateBrightnessCap(HdrBrightnessData data, float ambientLux) {
-        if (data == null) {
-            mHandler.removeCallbacks(mDebouncer);
+    private void reset() {
+        if (mMaxBrightness == PowerManager.BRIGHTNESS_MAX
+                && mDesiredMaxBrightness == PowerManager.BRIGHTNESS_MAX && mTransitionRate == -1f
+                && mDesiredTransitionRate == -1f) { // already done reset, do nothing
             return;
         }
-        float expectedMaxBrightness = findBrightnessLimit(data, ambientLux);
+        mHandler.removeCallbacks(mDebouncer);
+        mMaxBrightness = PowerManager.BRIGHTNESS_MAX;
+        mDesiredMaxBrightness = PowerManager.BRIGHTNESS_MAX;
+        mDesiredTransitionRate = -1f;
+        mTransitionRate = 1f;
+        mClamperChangeListener.onChanged();
+    }
 
+    private void recalculateBrightnessCap(HdrBrightnessData data, float ambientLux,
+            boolean hdrVisible) {
+        if (data == null || !hdrVisible) {
+            reset();
+            return;
+        }
+
+        float expectedMaxBrightness = findBrightnessLimit(data, ambientLux);
         if (mMaxBrightness == expectedMaxBrightness) {
             mDesiredMaxBrightness = mMaxBrightness;
             mDesiredTransitionRate = -1f;
@@ -127,6 +184,8 @@ public class HdrClamper {
             mHandler.removeCallbacks(mDebouncer);
             mHandler.postDelayed(mDebouncer, debounceTime);
         }
+        // do nothing if expectedMaxBrightness == mDesiredMaxBrightness
+        // && expectedMaxBrightness != mMaxBrightness
     }
 
     private float findBrightnessLimit(HdrBrightnessData data, float ambientLux) {
@@ -142,5 +201,37 @@ public class HdrClamper {
             }
         }
         return foundMaxBrightness;
+    }
+
+    @FunctionalInterface
+    interface HdrListener {
+        void onHdrVisible(boolean visible);
+    }
+
+    static class HdrLayerInfoListener extends SurfaceControlHdrLayerInfoListener {
+        private final HdrListener mHdrListener;
+
+        private final Handler mHandler;
+
+        private float mHdrMinPixels = Float.MAX_VALUE;
+
+        HdrLayerInfoListener(HdrListener hdrListener, Handler handler) {
+            mHdrListener = hdrListener;
+            mHandler = handler;
+        }
+
+        @Override
+        public void onHdrInfoChanged(IBinder displayToken, int numberOfHdrLayers, int maxW,
+                int maxH, int flags, float maxDesiredHdrSdrRatio) {
+            mHandler.post(() ->
+                    mHdrListener.onHdrVisible(
+                            numberOfHdrLayers > 0 && (float) (maxW * maxH) >= mHdrMinPixels));
+        }
+    }
+
+    static class Injector {
+        HdrLayerInfoListener getHdrListener(HdrListener hdrListener, Handler handler) {
+            return new HdrLayerInfoListener(hdrListener, handler);
+        }
     }
 }

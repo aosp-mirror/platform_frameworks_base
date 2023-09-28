@@ -23,6 +23,11 @@ package android.app {
     method @Deprecated public android.app.Notification.Builder setTimeout(long);
   }
 
+  public static final class Notification.WearableExtender implements android.app.Notification.Extender {
+    method @Deprecated public android.graphics.Bitmap getBackground();
+    method @Deprecated public android.app.Notification.WearableExtender setBackground(android.graphics.Bitmap);
+  }
+
 }
 
 package android.app.slice {

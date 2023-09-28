@@ -12,6 +12,7 @@ android_library {
     manifest: "AndroidManifest.xml",
     srcs: ["src/**/*.kt"],
     static_libs: [
+        "androidx.activity_activity-compose",
         "androidx.core_core-ktx",
         "androidx.credentials_credentials",
         "guava",

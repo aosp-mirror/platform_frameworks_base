@@ -19,6 +19,7 @@ package com.android.server.display;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,15 +28,18 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.ContentObserver;
+import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.view.Display;
+import android.view.DisplayAdjustments;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
@@ -59,6 +63,7 @@ public class BrightnessSynchronizerTest {
     private static final float EPSILON = 0.00001f;
     private static final Uri BRIGHTNESS_URI =
             Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS);
+    private static final float BRIGHTNESS_MAX = 0.6f;
 
     private Context mContext;
     private MockContentResolver mContentResolverSpy;
@@ -66,6 +71,7 @@ public class BrightnessSynchronizerTest {
     private DisplayListener mDisplayListener;
     private ContentObserver mContentObserver;
     private TestLooper mTestLooper;
+    private BrightnessSynchronizer mSynchronizer;
 
     @Mock private DisplayManager mDisplayManagerMock;
     @Captor private ArgumentCaptor<DisplayListener> mDisplayListenerCaptor;
@@ -74,7 +80,17 @@ public class BrightnessSynchronizerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mContext = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
+
+        Display display = mock(Display.class);
+        when(display.getDisplayAdjustments()).thenReturn(new DisplayAdjustments());
+        BrightnessInfo info = new BrightnessInfo(PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                PowerManager.BRIGHTNESS_MIN, BRIGHTNESS_MAX,
+                BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF, BRIGHTNESS_MAX,
+                BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE);
+        when(display.getBrightnessInfo()).thenReturn(info);
+
+        mContext = spy(new ContextWrapper(
+                ApplicationProvider.getApplicationContext().createDisplayContext(display)));
         mContentResolverSpy = spy(new MockContentResolver(mContext));
         mContentResolverSpy.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolverSpy);
@@ -128,13 +144,12 @@ public class BrightnessSynchronizerTest {
     @Test
     public void testSetSameIntValue_nothingUpdated() {
         putFloatSetting(0.5f);
-        putIntSetting(128);
         start();
 
-        putIntSetting(128);
+        putIntSetting(fToI(0.5f));
         advanceTime(10);
         verify(mDisplayManagerMock, times(0)).setBrightness(
-                eq(Display.DEFAULT_DISPLAY), eq(iToF(128)));
+                eq(Display.DEFAULT_DISPLAY), eq(0.5f));
     }
 
     @Test
@@ -154,14 +169,13 @@ public class BrightnessSynchronizerTest {
         // Verify that this update did not get sent to float, because synchronizer
         // is still waiting for confirmation of its first value.
         verify(mDisplayManagerMock, times(0)).setBrightness(
-                eq(Display.DEFAULT_DISPLAY), eq(iToF(20)));
+                Display.DEFAULT_DISPLAY, iToF(20));
 
         // Send the confirmation of the initial change. This should trigger the new value to
         // finally be processed and we can verify that the new value (20) is sent.
         putIntSetting(fToI(0.4f));
         advanceTime(10);
-        verify(mDisplayManagerMock).setBrightness(
-                eq(Display.DEFAULT_DISPLAY), eq(iToF(20)));
+        verify(mDisplayManagerMock).setBrightness(Display.DEFAULT_DISPLAY, iToF(20));
 
     }
 
@@ -183,8 +197,7 @@ public class BrightnessSynchronizerTest {
         advanceTime(200);
 
         // Verify that the new value gets sent because the timeout expired.
-        verify(mDisplayManagerMock).setBrightness(
-                eq(Display.DEFAULT_DISPLAY), eq(iToF(20)));
+        verify(mDisplayManagerMock).setBrightness(Display.DEFAULT_DISPLAY, iToF(20));
 
         // Send a confirmation of the initial event, BrightnessSynchronizer should treat this as a
         // new event because the timeout had already expired
@@ -196,14 +209,14 @@ public class BrightnessSynchronizerTest {
 
         // Verify we sent what would have been the confirmation as a new event to displaymanager.
         // We do both fToI and iToF because the conversions are not symmetric.
-        verify(mDisplayManagerMock).setBrightness(
-                eq(Display.DEFAULT_DISPLAY), eq(iToF(fToI(0.4f))));
+        verify(mDisplayManagerMock).setBrightness(Display.DEFAULT_DISPLAY,
+                iToF(fToI(0.4f)));
     }
 
-    private BrightnessSynchronizer start() {
-        BrightnessSynchronizer bs = new BrightnessSynchronizer(mContext, mTestLooper.getLooper(),
+    private void start() {
+        mSynchronizer = new BrightnessSynchronizer(mContext, mTestLooper.getLooper(),
                 mClock::now);
-        bs.startSynchronizing();
+        mSynchronizer.startSynchronizing();
         verify(mDisplayManagerMock).registerDisplayListener(mDisplayListenerCaptor.capture(),
                 isA(Handler.class), eq(DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
         mDisplayListener = mDisplayListenerCaptor.getValue();
@@ -211,7 +224,6 @@ public class BrightnessSynchronizerTest {
         verify(mContentResolverSpy).registerContentObserver(eq(BRIGHTNESS_URI), eq(false),
                 mContentObserverCaptor.capture(), eq(UserHandle.USER_ALL));
         mContentObserver = mContentObserverCaptor.getValue();
-        return bs;
     }
 
     private int getIntSetting() throws Exception {
@@ -241,11 +253,11 @@ public class BrightnessSynchronizerTest {
     }
 
     private int fToI(float brightness) {
-        return BrightnessSynchronizer.brightnessFloatToInt(brightness);
+        return mSynchronizer.brightnessFloatToIntSetting(brightness);
     }
 
     private float iToF(int brightness) {
-        return BrightnessSynchronizer.brightnessIntToFloat(brightness);
+        return mSynchronizer.brightnessIntSettingToFloat(brightness);
     }
 
     private void advanceTime(long timeMs) {

@@ -61,7 +61,8 @@ public abstract class NotificationRowModule {
     static Set<NotifRemoteViewsFactory> provideNotifRemoteViewsFactories(
             FeatureFlags featureFlags,
             PrecomputedTextViewFactory precomputedTextViewFactory,
-            BigPictureLayoutInflaterFactory bigPictureLayoutInflaterFactory
+            BigPictureLayoutInflaterFactory bigPictureLayoutInflaterFactory,
+            CallLayoutSetDataAsyncFactory callLayoutSetDataAsyncFactory
     ) {
         final Set<NotifRemoteViewsFactory> replacementFactories = new HashSet<>();
         if (featureFlags.isEnabled(Flags.PRECOMPUTED_TEXT)) {
@@ -69,6 +70,9 @@ public abstract class NotificationRowModule {
         }
         if (featureFlags.isEnabled(Flags.BIGPICTURE_NOTIFICATION_LAZY_LOADING)) {
             replacementFactories.add(bigPictureLayoutInflaterFactory);
+        }
+        if (featureFlags.isEnabled(Flags.CALL_LAYOUT_ASYNC_SET_DATA)) {
+            replacementFactories.add(callLayoutSetDataAsyncFactory);
         }
         return replacementFactories;
     }

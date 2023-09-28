@@ -21,8 +21,11 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +39,10 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.server.accessibility.test.MessageCapturingHandler;
@@ -43,6 +50,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -57,6 +65,9 @@ public class UiAutomationManagerTest {
     final UiAutomationManager mUiAutomationManager = new UiAutomationManager(new Object());
 
     MessageCapturingHandler mMessageCapturingHandler;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock Context mMockContext;
     @Mock AccessibilityServiceInfo mMockServiceInfo;
@@ -195,6 +206,24 @@ public class UiAutomationManagerTest {
         assertFalse(mUiAutomationManager.isTouchExplorationEnabledLocked());
         assertEquals(0, mUiAutomationManager.getRelevantEventTypes());
         assertEquals(0, mUiAutomationManager.getRequestedEventMaskLocked());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK)
+    public void registerUiAutomationService_callsAddWindowTokenUsingHandler() {
+        register(0);
+        // registerUiTestAutomationServiceLocked() should not directly call addWindowToken.
+        verify(mMockWindowManagerInternal, never()).addWindowToken(
+                any(), anyInt(), anyInt(), any());
+
+        // Advance UiAutomationManager#UiAutomationService's handler.
+        mMessageCapturingHandler.sendAllMessages();
+
+        // After advancing the handler we expect addWindowToken to have been called
+        // by the UiAutomationService instance.
+        verify(mMockWindowManagerInternal).addWindowToken(
+                any(), eq(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY),
+                anyInt(), eq(null));
     }
 
     private void register(int flags) {

@@ -39,11 +39,16 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.Display;
+import android.view.WindowManager;
 
 import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.accessibility.test.MessageCapturingHandler;
@@ -75,6 +80,9 @@ public class AccessibilityServiceConnectionTest {
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     AccessibilityServiceConnection mConnection;
 
@@ -113,6 +121,8 @@ public class AccessibilityServiceConnectionTest {
 
         when(mMockIBinder.queryLocalInterface(any())).thenReturn(mMockServiceClient);
         when(mMockA11yTrace.isA11yTracingEnabled()).thenReturn(false);
+        when(mMockContext.getSystemService(Context.DISPLAY_SERVICE))
+                .thenReturn(new DisplayManager(mMockContext));
 
         mConnection = new AccessibilityServiceConnection(mMockUserState, mMockContext,
                 COMPONENT_NAME, mMockServiceInfo, SERVICE_ID, mHandler, new Object(),
@@ -166,6 +176,18 @@ public class AccessibilityServiceConnectionTest {
         mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
         mHandler.sendAllMessages();
         assertFalse(mConnection.getServiceInfo().crashed);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK)
+    public void onServiceConnected_addsWindowTokens() {
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
+
+        verify(mMockWindowManagerInternal).addWindowToken(
+                any(), eq(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY),
+                anyInt(), eq(null));
     }
 
     private void setServiceBinding(ComponentName componentName) {

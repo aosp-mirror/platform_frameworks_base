@@ -1,15 +1,17 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.android.systemui.qs;
@@ -20,21 +22,18 @@ import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
-import static com.android.systemui.statusbar.disableflags.DisableFlagsLogger.DisableState;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Trace;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
 import androidx.annotation.FloatRange;
@@ -47,7 +46,6 @@ import androidx.lifecycle.LifecycleRegistry;
 import com.android.app.animation.Interpolators;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dump.DumpManager;
@@ -58,19 +56,20 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
-import com.android.systemui.qs.dagger.QSFragmentComponent;
+import com.android.systemui.qs.dagger.QSComponent;
 import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-import com.android.systemui.util.LifecycleFragment;
 import com.android.systemui.util.Utils;
 
 import java.io.PrintWriter;
@@ -80,8 +79,8 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Callbacks,
-        StatusBarStateController.StateListener, Dumpable {
+public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateController.StateListener,
+        Dumpable {
     private static final String TAG = "QS";
     private static final boolean DEBUG = false;
     private static final String EXTRA_EXPANDED = "expanded";
@@ -113,8 +112,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MediaHost mQsMediaHost;
     private final MediaHost mQqsMediaHost;
-    private final QSFragmentComponent.Factory mQsComponentFactory;
-    private final QSFragmentDisableFlagsLogger mQsFragmentDisableFlagsLogger;
+    private final QSDisableFlagsLogger mQsDisableFlagsLogger;
     private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
     private final FeatureFlags mFeatureFlags;
     private final QSLogger mLogger;
@@ -167,14 +165,17 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     private boolean mIsSmallScreen;
 
+    private CommandQueue mCommandQueue;
+
+    private View mRootView;
+
     @Inject
-    public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
+    public QSImpl(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
             SysuiStatusBarStateController statusBarStateController, CommandQueue commandQueue,
             @Named(QS_PANEL) MediaHost qsMediaHost,
             @Named(QUICK_QS_PANEL) MediaHost qqsMediaHost,
             KeyguardBypassController keyguardBypassController,
-            QSFragmentComponent.Factory qsComponentFactory,
-            QSFragmentDisableFlagsLogger qsFragmentDisableFlagsLogger,
+            QSDisableFlagsLogger qsDisableFlagsLogger,
             DumpManager dumpManager, QSLogger qsLogger,
             FooterActionsController footerActionsController,
             FooterActionsViewModel.Factory footerActionsViewModelFactory,
@@ -184,12 +185,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mQsMediaHost = qsMediaHost;
         mQqsMediaHost = qqsMediaHost;
-        mQsComponentFactory = qsComponentFactory;
-        mQsFragmentDisableFlagsLogger = qsFragmentDisableFlagsLogger;
+        mQsDisableFlagsLogger = qsDisableFlagsLogger;
         mLogger = qsLogger;
         mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
         mFeatureFlags = featureFlags;
-        commandQueue.observe(getLifecycle(), this);
+        mCommandQueue = commandQueue;
         mBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
         mDumpManager = dumpManager;
@@ -199,34 +199,23 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-            Bundle savedInstanceState) {
-        try {
-            Trace.beginSection("QSFragment#onCreateView");
-            inflater = inflater.cloneInContext(new ContextThemeWrapper(getContext(),
-                    R.style.Theme_SystemUI_QuickSettings));
-            return inflater.inflate(R.layout.qs_panel, container, false);
-        } finally {
-            Trace.endSection();
-        }
-    }
+    public void onComponentCreated(QSComponent qsComponent, @Nullable Bundle savedInstanceState) {
+        mRootView = qsComponent.getRootView();
 
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        QSFragmentComponent qsFragmentComponent = mQsComponentFactory.create(this);
-        mQSPanelController = qsFragmentComponent.getQSPanelController();
-        mQuickQSPanelController = qsFragmentComponent.getQuickQSPanelController();
+        mCommandQueue.addCallback(this);
+
+        mQSPanelController = qsComponent.getQSPanelController();
+        mQuickQSPanelController = qsComponent.getQuickQSPanelController();
 
         mQSPanelController.init();
         mQuickQSPanelController.init();
 
-        mQSFooterActionsViewModel = mFooterActionsViewModelFactory.create(/* lifecycleOwner */
-                this);
-        bindFooterActionsView(view);
+        mQSFooterActionsViewModel = mFooterActionsViewModelFactory
+                .create(mListeningAndVisibilityLifecycleOwner);
+        bindFooterActionsView(mRootView);
         mFooterActionsController.init();
 
-        mQSPanelScrollView = view.findViewById(R.id.expanded_qs_scroll_view);
+        mQSPanelScrollView = mRootView.findViewById(R.id.expanded_qs_scroll_view);
         mQSPanelScrollView.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     updateQsBounds();
@@ -238,26 +227,26 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     if (mScrollListener != null) {
                         mScrollListener.onQsPanelScrollChanged(scrollY);
                     }
-        });
-        mHeader = view.findViewById(R.id.header);
-        mFooter = qsFragmentComponent.getQSFooter();
+                });
+        mHeader = mRootView.findViewById(R.id.header);
+        mFooter = qsComponent.getQSFooter();
 
-        mQSContainerImplController = qsFragmentComponent.getQSContainerImplController();
+        mQSContainerImplController = qsComponent.getQSContainerImplController();
         mQSContainerImplController.init();
         mContainer = mQSContainerImplController.getView();
         mDumpManager.registerDumpable(mContainer.getClass().getSimpleName(), mContainer);
 
-        mQSAnimator = qsFragmentComponent.getQSAnimator();
-        mQSSquishinessController = qsFragmentComponent.getQSSquishinessController();
+        mQSAnimator = qsComponent.getQSAnimator();
+        mQSSquishinessController = qsComponent.getQSSquishinessController();
 
-        mQSCustomizerController = qsFragmentComponent.getQSCustomizerController();
+        mQSCustomizerController = qsComponent.getQSCustomizerController();
         mQSCustomizerController.init();
         mQSCustomizerController.setQs(this);
         if (savedInstanceState != null) {
             setQsVisible(savedInstanceState.getBoolean(EXTRA_VISIBLE));
             setExpanded(savedInstanceState.getBoolean(EXTRA_EXPANDED));
             setListening(savedInstanceState.getBoolean(EXTRA_LISTENING));
-            setEditLocation(view);
+            setEditLocation(mRootView);
             mQSCustomizerController.restoreInstanceState(savedInstanceState);
             if (mQsExpanded) {
                 mQSPanelController.getTileLayout().restoreInstanceState(savedInstanceState);
@@ -265,7 +254,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         mStatusBarStateController.addCallback(this);
         onStateChanged(mStatusBarStateController.getState());
-        view.addOnLayoutChangeListener(
+        mRootView.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     boolean sizeChanged = (oldTop - oldBottom) != (top - bottom);
                     if (sizeChanged) {
@@ -327,15 +316,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mScrollListener = listener;
     }
 
-    @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         mDumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
-    @Override
     public void onDestroy() {
-        super.onDestroy();
+        mCommandQueue.removeCallback(this);
         mStatusBarStateController.removeCallback(this);
         if (mListening) {
             setListening(false);
@@ -351,9 +337,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mListeningAndVisibilityLifecycleOwner.destroy();
     }
 
-    @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         outState.putBoolean(EXTRA_EXPANDED, mQsExpanded);
         outState.putBoolean(EXTRA_LISTENING, mListening);
         outState.putBoolean(EXTRA_VISIBLE, mQsVisible);
@@ -394,9 +378,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mPanelView = panelView;
     }
 
-    @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
         setEditLocation(getView());
         if (newConfig.getLayoutDirection() != mLayoutDirection) {
             mLayoutDirection = newConfig.getLayoutDirection();
@@ -452,9 +434,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         int state2BeforeAdjustment = state2;
         state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
 
-        mQsFragmentDisableFlagsLogger.logDisableFlagChange(
-                /* new= */ new DisableState(state1, state2BeforeAdjustment),
-                /* newAfterLocalModification= */ new DisableState(state1, state2)
+        mQsDisableFlagsLogger.logDisableFlagChange(
+                /* new= */ new DisableFlagsLogger.DisableState(state1, state2BeforeAdjustment),
+                /* newAfterLocalModification= */ new DisableFlagsLogger.DisableState(state1, state2)
         );
 
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
@@ -919,32 +901,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         getView().setY(-getQsMinExpansionHeight());
     }
 
-    private final ViewTreeObserver.OnPreDrawListener mStartHeaderSlidingIn
-            = new ViewTreeObserver.OnPreDrawListener() {
-        @Override
-        public boolean onPreDraw() {
-            getView().getViewTreeObserver().removeOnPreDrawListener(this);
-            getView().animate()
-                    .translationY(0f)
-                    .setDuration(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE)
-                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                    .setListener(mAnimateHeaderSlidingInListener)
-                    .start();
-            return true;
-        }
-    };
-
-    private final Animator.AnimatorListener mAnimateHeaderSlidingInListener
-            = new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            mHeaderAnimating = false;
-            updateQsState();
-            // Unset the listener, otherwise this may persist for another view property animation
-            getView().animate().setListener(null);
-        }
-    };
-
     @Override
     public void onUpcomingStateChanged(int upcomingState) {
         if (upcomingState == KEYGUARD) {
@@ -1028,6 +984,20 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             return "INVISIBLE";
         }
         return "GONE";
+    }
+
+    @Override
+    public View getView() {
+        return mRootView;
+    }
+
+    @Override
+    public Context getContext() {
+        return mRootView.getContext();
+    }
+
+    private Resources getResources() {
+        return getContext().getResources();
     }
 
     /**

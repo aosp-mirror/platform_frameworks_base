@@ -102,6 +102,7 @@ cc_library_shared_for_libandroid_runtime {
     static_libs: [
         "libnativehelper_lazy",
         "libziparchive_for_incfs",
+        "libguiflags",
     ],
 
     export_include_dirs: [

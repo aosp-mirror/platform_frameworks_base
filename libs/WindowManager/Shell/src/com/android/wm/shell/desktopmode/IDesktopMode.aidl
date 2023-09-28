@@ -17,6 +17,7 @@
 package com.android.wm.shell.desktopmode;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.window.RemoteTransition;
 import com.android.wm.shell.desktopmode.IDesktopTaskListener;
 
 /**
@@ -25,7 +26,7 @@ import com.android.wm.shell.desktopmode.IDesktopTaskListener;
 interface IDesktopMode {
 
     /** Show apps on the desktop on the given display */
-    void showDesktopApps(int displayId);
+    void showDesktopApps(int displayId, in RemoteTransition remoteTransition);
 
     /** Stash apps on the desktop to allow launching another app from home screen */
     void stashDesktopApps(int displayId);

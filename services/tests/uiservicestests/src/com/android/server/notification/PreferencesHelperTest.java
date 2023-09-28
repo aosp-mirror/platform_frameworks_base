@@ -141,6 +141,7 @@ import com.android.server.UiServiceTestCase;
 import com.android.server.notification.PermissionHelper.PackagePermission;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.json.JSONArray;
@@ -563,7 +564,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2.getId(), false));
 
         List<NotificationChannelGroup> actualGroups = mHelper.getNotificationChannelGroups(
-                PKG_N_MR1, UID_N_MR1, false, true, false).getList();
+                PKG_N_MR1, UID_N_MR1, false, true, false, true, null).getList();
         boolean foundNcg = false;
         for (NotificationChannelGroup actual : actualGroups) {
             if (ncg.getId().equals(actual.getId())) {
@@ -647,7 +648,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3.getId(), false));
 
         List<NotificationChannelGroup> actualGroups = mHelper.getNotificationChannelGroups(
-                PKG_N_MR1, UID_N_MR1, false, true, false).getList();
+                PKG_N_MR1, UID_N_MR1, false, true, false, true, null).getList();
         boolean foundNcg = false;
         for (NotificationChannelGroup actual : actualGroups) {
             if (ncg.getId().equals(actual.getId())) {
@@ -2620,6 +2621,16 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testOnlyHasDefaultChannel() throws Exception {
+        assertTrue(mHelper.onlyHasDefaultChannel(PKG_N_MR1, UID_N_MR1));
+        assertFalse(mHelper.onlyHasDefaultChannel(PKG_O, UID_O));
+
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, getChannel(), true, false,
+                UID_N_MR1, false);
+        assertFalse(mHelper.onlyHasDefaultChannel(PKG_N_MR1, UID_N_MR1));
+    }
+
+    @Test
     public void testCreateDeletedChannel() throws Exception {
         long[] vibration = new long[]{100, 67, 145, 156};
         NotificationChannel channel =
@@ -2641,16 +2652,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // No long deleted, using old settings
         compareChannels(channel,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, newChannel.getId(), false));
-    }
-
-    @Test
-    public void testOnlyHasDefaultChannel() throws Exception {
-        assertTrue(mHelper.onlyHasDefaultChannel(PKG_N_MR1, UID_N_MR1));
-        assertFalse(mHelper.onlyHasDefaultChannel(PKG_O, UID_O));
-
-        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, getChannel(), true, false,
-                UID_N_MR1, false);
-        assertFalse(mHelper.onlyHasDefaultChannel(PKG_N_MR1, UID_N_MR1));
     }
 
     @Test
@@ -2884,7 +2885,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 UID_N_MR1});
 
         assertEquals(0, mHelper.getNotificationChannelGroups(
-                PKG_N_MR1, UID_N_MR1, true, true, false).getList().size());
+                PKG_N_MR1, UID_N_MR1, true, true, false, true, null).getList().size());
     }
 
     @Test
@@ -3022,7 +3023,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 UID_N_MR1, false);
 
         List<NotificationChannelGroup> actual = mHelper.getNotificationChannelGroups(
-                PKG_N_MR1, UID_N_MR1, true, true, false).getList();
+                PKG_N_MR1, UID_N_MR1, true, true, false, true, null).getList();
         assertEquals(3, actual.size());
         for (NotificationChannelGroup group : actual) {
             if (group.getId() == null) {
@@ -3056,14 +3057,15 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel1.setGroup(ncg.getId());
         mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true, false,
                 UID_N_MR1, false);
-        mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1, true, true, false).getList();
+        mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1, true, true, false, true, null)
+                .getList();
 
         channel1.setImportance(IMPORTANCE_LOW);
         mHelper.updateNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true,
                 UID_N_MR1, false);
 
         List<NotificationChannelGroup> actual = mHelper.getNotificationChannelGroups(
-                PKG_N_MR1, UID_N_MR1, true, true, false).getList();
+                PKG_N_MR1, UID_N_MR1, true, true, false, true, null).getList();
 
         assertEquals(2, actual.size());
         for (NotificationChannelGroup group : actual) {
@@ -3089,7 +3091,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 UID_N_MR1, false);
 
         List<NotificationChannelGroup> actual = mHelper.getNotificationChannelGroups(
-                PKG_N_MR1, UID_N_MR1, false, false, true).getList();
+                PKG_N_MR1, UID_N_MR1, false, false, true, true, null).getList();
 
         assertEquals(2, actual.size());
         for (NotificationChannelGroup group : actual) {
@@ -5784,6 +5786,62 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 /* isStickyHunFlagEnabled= */ true);
 
         assertFalse(isUserSet);
+    }
+
+    @Test
+    public void testGetNotificationChannelGroups_withChannelFilter_includeBlocked() {
+        NotificationChannel channel =
+                new NotificationChannel("id2", "name1", NotificationManager.IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel, true, false,
+                UID_N_MR1, false);
+        // modifying same object, don't need to call updateNotificationChannel
+        channel.setImportance(IMPORTANCE_NONE);
+
+        NotificationChannel channel2 =
+                new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2, true, false,
+                UID_N_MR1, false);
+
+        NotificationChannel channel3 =
+                new NotificationChannel("id3", "name3", NotificationManager.IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3, true, false,
+                UID_N_MR1, false);
+
+        Set<String> filter = ImmutableSet.of("id3");
+
+        NotificationChannelGroup actual = mHelper.getNotificationChannelGroups(
+                PKG_N_MR1, UID_N_MR1, false, true, false, true, filter).getList().get(0);
+        assertEquals(2, actual.getChannels().size());
+        assertEquals(1, actual.getChannels().stream().filter(c -> c.getId().equals("id3")).count());
+        assertEquals(1, actual.getChannels().stream().filter(c -> c.getId().equals("id2")).count());
+    }
+
+    @Test
+    public void testGetNotificationChannelGroups_withChannelFilter_doNotIncludeBlocked() {
+        NotificationChannel channel =
+                new NotificationChannel("id2", "name1", NotificationManager.IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel, true, false,
+                UID_N_MR1, false);
+        // modifying same object, don't need to call updateNotificationChannel
+        channel.setImportance(IMPORTANCE_NONE);
+
+        NotificationChannel channel2 =
+                new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2, true, false,
+                UID_N_MR1, false);
+
+        NotificationChannel channel3 =
+                new NotificationChannel("id3", "name3", NotificationManager.IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3, true, false,
+                UID_N_MR1, false);
+
+        Set<String> filter = ImmutableSet.of("id3");
+
+        NotificationChannelGroup actual = mHelper.getNotificationChannelGroups(
+                PKG_N_MR1, UID_N_MR1, false, true, false, false, filter).getList().get(0);
+        assertEquals(1, actual.getChannels().size());
+        assertEquals(1, actual.getChannels().stream().filter(c -> c.getId().equals("id3")).count());
+        assertEquals(0, actual.getChannels().stream().filter(c -> c.getId().equals("id2")).count());
     }
 
     private static NotificationChannel cloneChannel(NotificationChannel original) {

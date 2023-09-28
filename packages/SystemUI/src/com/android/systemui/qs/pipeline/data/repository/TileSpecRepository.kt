@@ -18,34 +18,19 @@ package com.android.systemui.qs.pipeline.data.repository
 
 import android.annotation.UserIdInt
 import android.content.res.Resources
-import android.database.ContentObserver
-import android.provider.Settings
 import android.util.SparseArray
 import com.android.systemui.res.R
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.retail.data.repository.RetailModeRepository
-import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 
 /** Repository that tracks the current tiles. */
 interface TileSpecRepository {
@@ -55,7 +40,7 @@ interface TileSpecRepository {
      *
      * Tiles will never be [TileSpec.Invalid] in the list and it will never be empty.
      */
-    fun tilesSpecs(@UserIdInt userId: Int): Flow<List<TileSpec>>
+    suspend fun tilesSpecs(@UserIdInt userId: Int): Flow<List<TileSpec>>
 
     /**
      * Adds a [tile] for a given [userId] at [position]. Using [POSITION_AT_END] will add the tile
@@ -81,6 +66,8 @@ interface TileSpecRepository {
      */
     suspend fun setTiles(@UserIdInt userId: Int, tiles: List<TileSpec>)
 
+    suspend fun reconcileRestore(restoreData: RestoreData, currentAutoAdded: Set<TileSpec>)
+
     companion object {
         /** Position to indicate the end of the list */
         const val POSITION_AT_END = -1
@@ -88,27 +75,22 @@ interface TileSpecRepository {
 }
 
 /**
- * Implementation of [TileSpecRepository] that persist the values of tiles in
- * [Settings.Secure.QS_TILES].
- *
- * All operations against [Settings] will be performed in a background thread.
+ * Implementation of [TileSpecRepository] that delegates to an instance of [UserTileSpecRepository]
+ * for each user.
  *
  * If the device is in retail mode, the tiles are fixed to the value of
  * [R.string.quick_settings_tiles_retail_mode].
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class TileSpecSettingsRepository
 @Inject
 constructor(
-    private val secureSettings: SecureSettings,
     @Main private val resources: Resources,
     private val logger: QSPipelineLogger,
     private val retailModeRepository: RetailModeRepository,
-    @Background private val backgroundDispatcher: CoroutineDispatcher,
+    private val userTileSpecRepositoryFactory: UserTileSpecRepository.Factory,
 ) : TileSpecRepository {
-
-    private val mutex = Mutex()
-    private val tileSpecsPerUser = SparseArray<List<TileSpec>>()
 
     private val retailModeTiles by lazy {
         resources
@@ -118,123 +100,59 @@ constructor(
             .filter { it !is TileSpec.Invalid }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun tilesSpecs(userId: Int): Flow<List<TileSpec>> {
+    private val userTileRepositories = SparseArray<UserTileSpecRepository>()
+
+    override suspend fun tilesSpecs(userId: Int): Flow<List<TileSpec>> {
+        if (userId !in userTileRepositories) {
+            val userTileRepository = userTileSpecRepositoryFactory.create(userId)
+            userTileRepositories.put(userId, userTileRepository)
+        }
+        val realTiles = userTileRepositories.get(userId).tiles()
+
         return retailModeRepository.retailMode.flatMapLatest { inRetailMode ->
             if (inRetailMode) {
                 logger.logUsingRetailTiles()
                 flowOf(retailModeTiles)
             } else {
-                settingsTiles(userId)
+                realTiles
             }
         }
     }
 
-    private fun settingsTiles(userId: Int): Flow<List<TileSpec>> {
-        return conflatedCallbackFlow {
-                val observer =
-                    object : ContentObserver(null) {
-                        override fun onChange(selfChange: Boolean) {
-                            trySend(Unit)
-                        }
-                    }
-
-                secureSettings.registerContentObserverForUser(SETTING, observer, userId)
-
-                awaitClose { secureSettings.unregisterContentObserver(observer) }
-            }
-            .onStart { emit(Unit) }
-            .map { loadTiles(userId) }
-            .onEach { logger.logTilesChangedInSettings(it, userId) }
-            .distinctUntilChanged()
-            .map { parseTileSpecs(it, userId).also { storeTiles(userId, it) } }
-            .distinctUntilChanged()
-            .onEach { mutex.withLock { tileSpecsPerUser.put(userId, it) } }
-            .flowOn(backgroundDispatcher)
-    }
-
-    override suspend fun addTile(userId: Int, tile: TileSpec, position: Int) =
-        mutex.withLock {
-            if (tile == TileSpec.Invalid) {
-                return
-            }
-            val tilesList = tileSpecsPerUser.get(userId, emptyList()).toMutableList()
-            if (tile !in tilesList) {
-                if (position < 0 || position >= tilesList.size) {
-                    tilesList.add(tile)
-                } else {
-                    tilesList.add(position, tile)
-                }
-                storeTiles(userId, tilesList)
-                tileSpecsPerUser.put(userId, tilesList)
-            }
-        }
-
-    override suspend fun removeTiles(userId: Int, tiles: Collection<TileSpec>) =
-        mutex.withLock {
-            if (tiles.all { it == TileSpec.Invalid }) {
-                return
-            }
-            val tilesList = tileSpecsPerUser.get(userId, emptyList()).toMutableList()
-            if (tilesList.removeAll(tiles)) {
-                storeTiles(userId, tilesList.toList())
-                tileSpecsPerUser.put(userId, tilesList)
-            }
-        }
-
-    override suspend fun setTiles(userId: Int, tiles: List<TileSpec>) =
-        mutex.withLock {
-            val filtered = tiles.filter { it != TileSpec.Invalid }
-            if (filtered.isNotEmpty()) {
-                storeTiles(userId, filtered)
-                tileSpecsPerUser.put(userId, tiles)
-            }
-        }
-
-    private suspend fun storeTiles(@UserIdInt forUser: Int, tiles: List<TileSpec>) {
+    override suspend fun addTile(userId: Int, tile: TileSpec, position: Int) {
         if (retailModeRepository.inRetailMode) {
-            // No storing tiles when in retail mode
             return
         }
-        val toStore =
-            tiles
-                .filter { it !is TileSpec.Invalid }
-                .joinToString(DELIMITER, transform = TileSpec::spec)
-        withContext(backgroundDispatcher) {
-            secureSettings.putStringForUser(
-                SETTING,
-                toStore,
-                null,
-                false,
-                forUser,
-                true,
-            )
+        if (tile is TileSpec.Invalid) {
+            return
         }
+        userTileRepositories.get(userId)?.addTile(tile, position)
     }
 
-    private suspend fun loadTiles(userId: Int): String {
-        return withContext(backgroundDispatcher) {
-            secureSettings.getStringForUser(SETTING, userId) ?: ""
+    override suspend fun removeTiles(userId: Int, tiles: Collection<TileSpec>) {
+        if (retailModeRepository.inRetailMode) {
+            return
         }
+        userTileRepositories.get(userId)?.removeTiles(tiles)
     }
 
-    private fun parseTileSpecs(tilesFromSettings: String, user: Int): List<TileSpec> {
-        val fromSettings =
-            tilesFromSettings.split(DELIMITER).map(TileSpec::create).filter {
-                it != TileSpec.Invalid
-            }
-        return if (fromSettings.isNotEmpty()) {
-            fromSettings.also { logger.logParsedTiles(it, false, user) }
-        } else {
-            QSHost.getDefaultSpecs(resources)
-                .map(TileSpec::create)
-                .filter { it != TileSpec.Invalid }
-                .also { logger.logParsedTiles(it, true, user) }
+    override suspend fun setTiles(userId: Int, tiles: List<TileSpec>) {
+        if (retailModeRepository.inRetailMode) {
+            return
         }
+        userTileRepositories.get(userId)?.setTiles(tiles)
+    }
+
+    override suspend fun reconcileRestore(
+        restoreData: RestoreData,
+        currentAutoAdded: Set<TileSpec>
+    ) {
+        userTileRepositories
+            .get(restoreData.userId)
+            ?.reconcileRestore(restoreData, currentAutoAdded)
     }
 
     companion object {
-        private const val SETTING = Settings.Secure.QS_TILES
-        private const val DELIMITER = ","
+        private const val DELIMITER = TilesSettingConverter.DELIMITER
     }
 }

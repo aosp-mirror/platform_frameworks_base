@@ -17,7 +17,6 @@
 package com.android.systemui.qs;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -44,9 +43,6 @@ import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
 
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +50,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.inject.Named;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 /**
  * Controller for QSPanel views.
@@ -135,7 +132,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             T view,
             QSHost host,
             QSCustomizerController qsCustomizerController,
-            @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
+            boolean usingMediaPlayer,
             MediaHost mediaHost,
             MetricsLogger metricsLogger,
             UiEventLogger uiEventLogger,

@@ -139,7 +139,6 @@ final class VerifyingSession {
     private final UserHandle mUser;
     @NonNull
     private final PackageManagerService mPm;
-    private final InstallPackageHelper mInstallPackageHelper;
 
     VerifyingSession(UserHandle user, File stagedDir, IPackageInstallObserver2 observer,
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
@@ -147,7 +146,6 @@ final class VerifyingSession {
             boolean userActionRequired, PackageManagerService pm) {
         mPm = pm;
         mUser = user;
-        mInstallPackageHelper = new InstallPackageHelper(mPm);
         mOriginInfo = OriginInfo.fromStagedFile(stagedDir);
         mObserver = observer;
         mInstallFlags = sessionParams.installFlags;
@@ -181,7 +179,7 @@ final class VerifyingSession {
         PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mPm.mContext,
                 mPackageLite, mOriginInfo.mResolvedPath, mInstallFlags, mPackageAbiOverride);
 
-        Pair<Integer, String> ret = mInstallPackageHelper.verifyReplacingVersionCode(
+        Pair<Integer, String> ret = mPm.verifyReplacingVersionCode(
                 pkgLite, mRequiredInstalledVersionCode, mInstallFlags);
         setReturnCode(ret.first, ret.second);
         if (mRet != INSTALL_SUCCEEDED) {
@@ -729,7 +727,7 @@ final class VerifyingSession {
                 continue;
             }
 
-            final int verifierUid = mInstallPackageHelper.getUidForVerifier(verifierInfo);
+            final int verifierUid = mPm.getUidForVerifier(verifierInfo);
             if (verifierUid == -1) {
                 continue;
             }

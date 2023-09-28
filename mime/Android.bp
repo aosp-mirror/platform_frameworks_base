@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 package {
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
@@ -125,6 +124,6 @@ java_genrule {
     srcs: [
         "java-res/vendor.mime.types",
     ],
-    //    strip comments            normalize whitepace       drop empty lines   prepend ? to fields that are missing it
-    cmd: "awk '{gsub(/#.*$$/,\"\"); $$1=$$1; print;}' $(in) | grep ' '         | awk '{for(i=1;i<=NF;i++) { sub(/^\\??/, \"?\", $$i); }; print}' > $(out)",
+    //    strip comments            normalize whitepace       drop empty lines           prepend ? to fields that are missing it
+    cmd: "awk '{gsub(/#.*$$/,\"\"); $$1=$$1; print;}' $(in) | (grep ' ' || echo -n '') | awk '{for(i=1;i<=NF;i++) { sub(/^\\??/, \"?\", $$i); }; print}' > $(out)",
 }

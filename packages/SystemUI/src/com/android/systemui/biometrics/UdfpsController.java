@@ -1096,8 +1096,19 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             // cancel the fingerprint scan.
             mCancelAodFingerUpAction = mFgExecutor.executeDelayed(this::tryAodSendFingerUp,
                     AOD_SEND_FINGER_UP_DELAY_MILLIS);
-            // using a hard-coded value for major and minor until it is available from the sensor
-            onFingerDown(requestId, screenX, screenY, minor, major);
+            // using a hard-coded value for orientation, time and gestureStart until they are
+            // available from the sensor.
+            onFingerDown(
+                    requestId,
+                    MotionEvent.INVALID_POINTER_ID /* pointerId */,
+                    screenX,
+                    screenY,
+                    minor,
+                    major,
+                    0f /* orientation */,
+                    0L /* time */,
+                    0L /* gestureStart */,
+                    true /* isAod */);
         };
 
         if (mScreenOn) {

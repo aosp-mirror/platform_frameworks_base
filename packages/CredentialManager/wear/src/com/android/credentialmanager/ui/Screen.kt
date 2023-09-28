@@ -19,5 +19,7 @@ package com.android.credentialmanager.ui
 sealed class Screen(
     val route: String,
 ) {
-    data object Main : Screen("main")
+    data object Loading : Screen("loading")
+
+    data object SinglePasswordScreen : Screen("singlePasswordScreen")
 }

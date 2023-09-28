@@ -14,6 +14,7 @@
 
 import argparse
 import json
+import functools
 import os
 import shutil
 import subprocess
@@ -28,6 +29,7 @@ SOONG_UI = "build/soong/soong_ui.bash"
 PATH_PREFIX = "out/soong/.intermediates"
 PATH_SUFFIX = "android_common/lint"
 FIX_ZIP = "suggested-fixes.zip"
+MODULE_JAVA_DEPS = "out/soong/module_bp_java_deps.json"
 
 
 class SoongModule:
@@ -49,9 +51,24 @@ class SoongModule:
         print(f"Found module {partial_path}/{self._name}.")
         self._path = f"{PATH_PREFIX}/{partial_path}/{self._name}/{PATH_SUFFIX}"
 
+    def find_java_deps(self, module_java_deps):
+        """Finds the dependencies of a Java module in the loaded module_bp_java_deps.json.
+
+        Returns:
+            A list of module names.
+        """
+        if self._name not in module_java_deps:
+            raise Exception(f"Module {self._name} not found!")
+
+        return module_java_deps[self._name]["dependencies"]
+
     @property
     def name(self):
         return self._name
+
+    @property
+    def path(self):
+        return self._path
 
     @property
     def lint_report(self):
@@ -62,52 +79,25 @@ class SoongModule:
         return f"{self._path}/{FIX_ZIP}"
 
 
-class SoongLintFix:
+class SoongLintWrapper:
     """
-    This class creates a command line tool that will apply lint fixes to the
-    platform via the necessary combination of soong and shell commands.
+    This class wraps the necessary calls to Soong and/or shell commands to lint
+    platform modules and apply suggested fixes if desired.
 
-    It breaks up these operations into a few "private" methods that are
-    intentionally exposed so experimental code can tweak behavior.
-
-    The entry point, `run`, will apply lint fixes using the intermediate
-    `suggested-fixes` directory that soong creates during its invocation of
-    lint.
-
-    Basic usage:
-    ```
-    from soong_lint_fix import SoongLintFix
-
-    opts = SoongLintFixOptions()
-    opts.parse_args(sys.argv)
-    SoongLintFix(opts).run()
-    ```
+    It breaks up these operations into a few methods that are available to
+    sub-classes (see SoongLintFix for an example).
     """
-    def __init__(self, opts):
-        self._opts = opts
+    def __init__(self, check=None, lint_module=None):
+        self._check = check
+        self._lint_module = lint_module
         self._kwargs = None
-        self._modules = []
-
-    def run(self):
-        """
-        Run the script
-        """
-        self._setup()
-        self._find_modules()
-        self._lint()
-
-        if not self._opts.no_fix:
-            self._fix()
-
-        if self._opts.print:
-            self._print()
 
     def _setup(self):
         env = os.environ.copy()
-        if self._opts.check:
-            env["ANDROID_LINT_CHECK"] = self._opts.check
-        if self._opts.lint_module:
-            env["ANDROID_LINT_CHECK_EXTRA_MODULES"] = self._opts.lint_module
+        if self._check:
+            env["ANDROID_LINT_CHECK"] = self._check
+        if self._lint_module:
+            env["ANDROID_LINT_CHECK_EXTRA_MODULES"] = self._lint_module
 
         self._kwargs = {
             "env": env,
@@ -117,7 +107,10 @@ class SoongLintFix:
 
         os.chdir(ANDROID_BUILD_TOP)
 
-        print("Refreshing soong modules...")
+    @functools.cached_property
+    def _module_info(self):
+        """Returns the JSON content of module-info.json."""
+        print("Refreshing Soong modules...")
         try:
             os.mkdir(ANDROID_PRODUCT_OUT)
         except OSError:
@@ -125,19 +118,54 @@ class SoongLintFix:
         subprocess.call(f"{SOONG_UI} --make-mode {PRODUCT_OUT}/module-info.json", **self._kwargs)
         print("done.")
 
-
-    def _find_modules(self):
         with open(f"{ANDROID_PRODUCT_OUT}/module-info.json") as f:
-            module_info = json.load(f)
+            return json.load(f)
 
-        for module_name in self._opts.modules:
-            module = SoongModule(module_name)
-            module.find(module_info)
-            self._modules.append(module)
+    def _find_module(self, module_name):
+        """Returns a SoongModule from a module name.
 
-    def _lint(self):
+        Ensures that the module is known to Soong.
+        """
+        module = SoongModule(module_name)
+        module.find(self._module_info)
+        return module
+
+    def _find_modules(self, module_names):
+        modules = []
+        for module_name in module_names:
+            modules.append(self._find_module(module_name))
+        return modules
+
+    @functools.cached_property
+    def _module_java_deps(self):
+        """Returns the JSON content of module_bp_java_deps.json."""
+        print("Refreshing Soong Java deps...")
+        subprocess.call(f"{SOONG_UI} --make-mode {MODULE_JAVA_DEPS}", **self._kwargs)
+        print("done.")
+
+        with open(f"{MODULE_JAVA_DEPS}") as f:
+            return json.load(f)
+
+    def _find_module_java_deps(self, module):
+        """Returns a list a dependencies for a module.
+
+        Args:
+            module: A SoongModule.
+
+        Returns:
+            A list of SoongModule.
+        """
+        deps = []
+        dep_names = module.find_java_deps(self._module_java_deps)
+        for dep_name in dep_names:
+            dep = SoongModule(dep_name)
+            dep.find(self._module_info)
+            deps.append(dep)
+        return deps
+
+    def _lint(self, modules):
         print("Cleaning up any old lint results...")
-        for module in self._modules:
+        for module in modules:
             try:
                 os.remove(f"{module.lint_report}")
                 os.remove(f"{module.suggested_fixes}")
@@ -145,13 +173,13 @@ class SoongLintFix:
                 pass
         print("done.")
 
-        target = " ".join([ module.lint_report for module in self._modules ])
+        target = " ".join([ module.lint_report for module in modules ])
         print(f"Generating {target}")
         subprocess.call(f"{SOONG_UI} --make-mode {target}", **self._kwargs)
         print("done.")
 
-    def _fix(self):
-        for module in self._modules:
+    def _fix(self, modules):
+        for module in modules:
             print(f"Copying suggested fixes for {module.name} to the tree...")
             with zipfile.ZipFile(f"{module.suggested_fixes}") as zip:
                 for name in zip.namelist():
@@ -161,11 +189,38 @@ class SoongLintFix:
                         shutil.copyfileobj(src, dst)
             print("done.")
 
-    def _print(self):
-        for module in self._modules:
+    def _print(self, modules):
+        for module in modules:
             print(f"### lint-report.txt {module.name} ###", end="\n\n")
             with open(module.lint_report, "r") as f:
                 print(f.read())
+
+
+class SoongLintFix(SoongLintWrapper):
+    """
+    Basic usage:
+    ```
+    from soong_lint_fix import SoongLintFix
+
+    opts = SoongLintFixOptions()
+    opts.parse_args()
+    SoongLintFix(opts).run()
+    ```
+    """
+    def __init__(self, opts):
+        super().__init__(check=opts.check, lint_module=opts.lint_module)
+        self._opts = opts
+
+    def run(self):
+        self._setup()
+        modules = self._find_modules(self._opts.modules)
+        self._lint(modules)
+
+        if not self._opts.no_fix:
+            self._fix(modules)
+
+        if self._opts.print:
+            self._print(modules)
 
 
 class SoongLintFixOptions:

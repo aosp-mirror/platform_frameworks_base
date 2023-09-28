@@ -75,6 +75,7 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 
 import dagger.Lazy;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -198,6 +199,11 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     @Override
     public void remQsTile(ComponentName tile) {
         mQSHost.removeTileByUser(tile);
+    }
+
+    @Override
+    public void setQsTiles(String[] tiles) {
+        mQSHost.changeTilesByUser(mQSHost.getSpecs(), Arrays.stream(tiles).toList());
     }
 
     @Override

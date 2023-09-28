@@ -28,9 +28,10 @@ import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
 import androidx.annotation.VisibleForTesting
 import com.android.internal.telephony.PhoneConstants
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings.Config
-import com.android.systemui.res.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -38,6 +39,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
@@ -94,6 +96,7 @@ constructor(
     // See [CarrierMergedConnectionRepository] for details.
     wifiRepository: WifiRepository,
     private val fullMobileRepoFactory: FullMobileConnectionRepository.Factory,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) : MobileConnectionsRepository {
     private var subIdRepositoryCache: MutableMap<Int, FullMobileConnectionRepository> =
         mutableMapOf()
@@ -252,6 +255,27 @@ constructor(
             .map { mobileMappingsProxy.getDefaultIcons(it) }
             .distinctUntilChanged()
             .onEach { logger.logDefaultMobileIconGroup(it) }
+
+    override val isAnySimSecure: Flow<Boolean> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : KeyguardUpdateMonitorCallback() {
+                        override fun onSimStateChanged(subId: Int, slotId: Int, simState: Int) {
+                            logger.logOnSimStateChanged()
+                            trySend(keyguardUpdateMonitor.isSimPinSecure)
+                        }
+                    }
+                keyguardUpdateMonitor.registerCallback(callback)
+                trySend(false)
+                awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
+            }
+            .logDiffsForTable(
+                tableLogger,
+                LOGGING_PREFIX,
+                columnName = "isAnySimSecure",
+                initialValue = false,
+            )
+            .distinctUntilChanged()
 
     override fun getRepoForSubId(subId: Int): FullMobileConnectionRepository =
         getOrCreateRepoForSubId(subId)

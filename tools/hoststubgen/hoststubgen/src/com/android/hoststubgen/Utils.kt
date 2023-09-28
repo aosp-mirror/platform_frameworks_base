@@ -31,3 +31,23 @@ fun normalizeTextLine(s: String): String {
     // Remove surrounding whitespace.
     return uncommented.trim()
 }
+
+fun <T> addLists(a: List<T>, b: List<T>): List<T> {
+    if (a.isEmpty()) {
+        return b
+    }
+    if (b.isEmpty()) {
+        return a
+    }
+    return a + b
+}
+
+fun <T> addNonNullElement(a: List<T>, b: T?): List<T> {
+    if (b == null) {
+        return a
+    }
+    if (a.isEmpty()) {
+        return listOf(b)
+    }
+    return a + b
+}

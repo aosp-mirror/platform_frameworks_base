@@ -1506,11 +1506,17 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    public void onAdded() {
+    /**
+     * Called when the connection is first created. Add a window token for all known displays.
+     * <p>
+     * <strong>Note:</strong> Should not be called while holding the AccessibilityManagerService
+     * lock because this calls out to WindowManagerService.
+     */
+    void addWindowTokensForAllDisplays() {
         final Display[] displays = mDisplayManager.getDisplays();
         for (int i = 0; i < displays.length; i++) {
             final int displayId = displays[i].getDisplayId();
-            onDisplayAdded(displayId);
+            addWindowTokenForDisplay(displayId);
         }
     }
 
@@ -1518,9 +1524,13 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      * Called whenever a logical display has been added to the system. Add a window token for adding
      * an accessibility overlay.
      *
+     * <p>
+     * <strong>Note:</strong> Should not be called while holding the AccessibilityManagerService
+     * lock because this calls out to WindowManagerService.
+     *
      * @param displayId The id of the logical display that was added.
      */
-    public void onDisplayAdded(int displayId) {
+    void addWindowTokenForDisplay(int displayId) {
         final long identity = Binder.clearCallingIdentity();
         try {
             final IBinder overlayWindowToken = new Binder();

@@ -562,7 +562,8 @@ public class SecureChannel {
     private byte[] constructToken(D2DHandshakeContext.Role role, byte[] authValue)
             throws GeneralSecurityException {
         MessageDigest hash = MessageDigest.getInstance("SHA-256");
-        byte[] roleUtf8 = role.name().getBytes(StandardCharsets.UTF_8);
+        String roleName = role == Role.INITIATOR ? "Initiator" : "Responder";
+        byte[] roleUtf8 = roleName.getBytes(StandardCharsets.UTF_8);
         int tokenLength = roleUtf8.length + authValue.length;
         return hash.digest(ByteBuffer.allocate(tokenLength)
                 .put(roleUtf8)

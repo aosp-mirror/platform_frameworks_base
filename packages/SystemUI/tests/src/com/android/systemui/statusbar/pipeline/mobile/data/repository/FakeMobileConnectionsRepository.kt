@@ -90,6 +90,8 @@ class FakeMobileConnectionsRepository(
     private val _defaultMobileIconGroup = MutableStateFlow(DEFAULT_ICON)
     override val defaultMobileIconGroup = _defaultMobileIconGroup
 
+    override val isAnySimSecure = MutableStateFlow(false)
+
     fun setSubscriptions(subs: List<SubscriptionModel>) {
         _subscriptions.value = subs
     }

@@ -141,6 +141,32 @@ public final class DisplayStateControllerTest {
         assertEquals(false, mDisplayStateController.shouldPerformScreenOffTransition());
     }
 
+    @Test
+    public void dozeScreenStateOverrideToDozeSuspend_DozePolicy_updateDisplayStateToDozeSuspend() {
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+        mDisplayStateController.overrideDozeScreenState(Display.STATE_DOZE_SUSPEND);
+
+        int state = mDisplayStateController.updateDisplayState(displayPowerRequest, DISPLAY_ENABLED,
+                !DISPLAY_IN_TRANSITION);
+
+        assertEquals(state, Display.STATE_DOZE_SUSPEND);
+    }
+
+    @Test
+    public void dozeScreenStateOverrideToDozeSuspend_OffPolicy_displayRemainOff() {
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
+        mDisplayStateController.overrideDozeScreenState(Display.STATE_DOZE_SUSPEND);
+
+        int state = mDisplayStateController.updateDisplayState(displayPowerRequest, DISPLAY_ENABLED,
+                !DISPLAY_IN_TRANSITION);
+
+        assertEquals(state, Display.STATE_OFF);
+    }
+
     private void validDisplayState(int policy, int displayState, boolean isEnabled,
             boolean isInTransition) {
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(

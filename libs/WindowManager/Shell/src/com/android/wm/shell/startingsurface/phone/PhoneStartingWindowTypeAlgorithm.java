@@ -30,7 +30,7 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCR
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_ICON;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_WINDOWLESS;
 
 import android.window.StartingWindowInfo;
@@ -52,7 +52,8 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
         final boolean processRunning = (parameter & TYPE_PARAMETER_PROCESS_RUNNING) != 0;
         final boolean allowTaskSnapshot = (parameter & TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT) != 0;
         final boolean activityCreated = (parameter & TYPE_PARAMETER_ACTIVITY_CREATED) != 0;
-        final boolean allowIcon = (parameter & TYPE_PARAMETER_ALLOW_ICON) != 0;
+        final boolean isSolidColorSplashScreen =
+                (parameter & TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN) != 0;
         final boolean legacySplashScreen =
                 ((parameter & TYPE_PARAMETER_LEGACY_SPLASH_SCREEN) != 0);
         final boolean activityDrawn = (parameter & TYPE_PARAMETER_ACTIVITY_DRAWN) != 0;
@@ -66,13 +67,13 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
                         + "processRunning=%b, "
                         + "allowTaskSnapshot=%b, "
                         + "activityCreated=%b, "
-                        + "allowIcon=%b, "
+                        + "isSolidColorSplashScreen=%b, "
                         + "legacySplashScreen=%b, "
                         + "activityDrawn=%b, "
                         + "windowless=%b, "
                         + "topIsHome=%b",
                 newTask, taskSwitch, processRunning, allowTaskSnapshot, activityCreated,
-                allowIcon, legacySplashScreen, activityDrawn, windowlessSurface,
+                isSolidColorSplashScreen, legacySplashScreen, activityDrawn, windowlessSurface,
                 topIsHome);
 
         if (windowlessSurface) {
@@ -80,7 +81,7 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
         }
         if (!topIsHome) {
             if (!processRunning || newTask || (taskSwitch && !activityCreated)) {
-                return getSplashscreenType(allowIcon, legacySplashScreen);
+                return getSplashscreenType(isSolidColorSplashScreen, legacySplashScreen);
             }
         }
 
@@ -94,18 +95,18 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
                 }
             }
             if (!activityDrawn && !topIsHome) {
-                return getSplashscreenType(allowIcon, legacySplashScreen);
+                return getSplashscreenType(isSolidColorSplashScreen, legacySplashScreen);
             }
         }
         return STARTING_WINDOW_TYPE_NONE;
     }
 
-    private static int getSplashscreenType(boolean allowIcon, boolean legacySplashScreen) {
-        if (allowIcon) {
-            return legacySplashScreen ? STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
+    private static int getSplashscreenType(boolean solidColorSplashScreen,
+            boolean legacySplashScreen) {
+        return solidColorSplashScreen
+                ? STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN
+                : legacySplashScreen
+                        ? STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
                         : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-        } else {
-            return STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN;
-        }
     }
 }

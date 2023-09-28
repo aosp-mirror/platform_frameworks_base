@@ -18,7 +18,9 @@ package com.android.server.pm;
 
 import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_DELETED_BY_DO;
 import static android.os.Process.INVALID_UID;
+
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
+
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -407,11 +409,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     private void removeStagingDirs(ArraySet<File> stagingDirsToRemove) {
-        final RemovePackageHelper removePackageHelper = new RemovePackageHelper(mPm);
         // Clean up orphaned staging directories
         for (File stage : stagingDirsToRemove) {
             Slog.w(TAG, "Deleting orphan stage " + stage);
-            removePackageHelper.removeCodePath(stage);
+            mPm.removeCodePath(stage);
         }
     }
 
@@ -1320,9 +1321,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     @Override
     public void installExistingPackage(String packageName, int installFlags, int installReason,
             IntentSender statusReceiver, int userId, List<String> allowListedPermissions) {
-        final InstallPackageHelper installPackageHelper = new InstallPackageHelper(mPm);
 
-        var result = installPackageHelper.installExistingPackageAsUser(packageName, userId,
+        var result = mPm.installExistingPackageAsUser(packageName, userId,
                 installFlags, installReason, allowListedPermissions, statusReceiver);
 
         int returnCode = result.first;

@@ -955,6 +955,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
     }
 
+    public void setTiles(String tiles) {
+        enforceStatusBarOrShell();
+
+        if (mBar != null) {
+            try {
+                mBar.setQsTiles(tiles.split(","));
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
     public void clickTile(ComponentName component) {
         enforceStatusBarOrShell();
 

@@ -76,28 +76,38 @@ public final class FileIntegrityManager {
      * Enables fs-verity to the owned file under the calling app's private directory. It always uses
      * the common configuration, i.e. SHA-256 digest algorithm, 4K block size, and without salt.
      *
-     * The operation can only succeed when the file is not opened as writable by any process.
+     * <p>For enabling fs-verity to succeed, the device must support fs-verity, the file must be
+     * writable by the app and not already have fs-verity enabled, and the file must not currently
+     * be open for writing by any process. To check whether the device supports fs-verity, use
+     * {@link #isApkVeritySupported()}.
      *
-     * It takes O(file size) time to build the underlying data structure for continuous
+     * <p>It takes O(file size) time to build the underlying data structure for continuous
      * verification. The operation is atomic, i.e. it's either enabled or not, even in case of
      * power failure during or after the call.
      *
-     * Note for the API users: When the file's authenticity is crucial, the app typical needs to
+     * <p>Note for the API users: When the file's authenticity is crucial, the app typical needs to
      * perform a signature check by itself before using the file. The signature is often delivered
      * as a separate file and stored next to the targeting file in the filesystem. The public key of
      * the signer (normally the same app developer) can be put in the APK, and the app can use the
      * public key to verify the signature to the file's actual fs-verity digest (from {@link
-     * #getFsVerityDigest}) before using the file. The exact format is not prescribed by the
+     * #getFsVerityDigest(File)}) before using the file. The exact format is not prescribed by the
      * framework. App developers may choose to use common practices like JCA for the signing and
      * verification, or their own preferred approach.
      *
-     * @param file The file to enable fs-verity. It should be an absolute path.
+     * @param file The file to enable fs-verity. It must represent an absolute path.
+     * @throws IllegalArgumentException If the provided file is not an absolute path.
+     * @throws IOException If the operation failed.
      *
      * @see <a href="https://www.kernel.org/doc/html/next/filesystems/fsverity.html">Kernel doc</a>
      */
     @FlaggedApi(Flags.FLAG_FSVERITY_API)
     public void setupFsVerity(@NonNull File file) throws IOException {
         if (!file.isAbsolute()) {
+            // fs-verity is to be enabled by installd, which enforces the validation to the
+            // (untrusted) file path passed from here. To make this less error prone, installd
+            // accepts only absolute path. When a relative path is provided, we fail with an
+            // explicit exception to help developers understand the requirement to use an absolute
+            // path.
             throw new IllegalArgumentException("Expect an absolute path");
         }
         IFsveritySetupAuthToken authToken;
@@ -121,11 +131,12 @@ public final class FileIntegrityManager {
     }
 
     /**
-     * Returns the fs-verity digest for the owned file under the calling app's
-     * private directory, or null when the file does not have fs-verity enabled.
+     * Returns the fs-verity digest for the owned file under the calling app's private directory, or
+     * null when the file does not have fs-verity enabled (including when fs-verity is not supported
+     * on older devices).
      *
      * @param file The file to measure the fs-verity digest.
-     * @return The fs-verity digeset in byte[], null if none.
+     * @return The fs-verity digest in byte[], null if none.
      * @see <a href="https://www.kernel.org/doc/html/next/filesystems/fsverity.html">Kernel doc</a>
      */
     @FlaggedApi(Flags.FLAG_FSVERITY_API)

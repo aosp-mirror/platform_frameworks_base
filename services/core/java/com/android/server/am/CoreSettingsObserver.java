@@ -173,6 +173,16 @@ final class CoreSettingsObserver extends ContentObserver {
                 TextFlags.NAMESPACE, TextFlags.ENABLE_NEW_CONTEXT_MENU,
                 TextFlags.KEY_ENABLE_NEW_CONTEXT_MENU, boolean.class,
                 TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT));
+
+        // Register all text aconfig flags.
+        for (String flag : TextFlags.TEXT_ACONFIGS_FLAGS) {
+            sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
+                    TextFlags.NAMESPACE,
+                    flag,
+                    TextFlags.getKeyForFlag(flag),
+                    boolean.class,
+                    false));  // All aconfig flags are false by default.
+        }
         // add other device configs here...
     }
     private static volatile boolean sDeviceConfigContextEntriesLoaded = false;

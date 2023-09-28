@@ -48,6 +48,9 @@ class HostStubGenOptions(
         var nativeSubstituteAnnotations: MutableSet<String> = mutableSetOf(),
         var classLoadHookAnnotations: MutableSet<String> = mutableSetOf(),
 
+        var defaultClassLoadHook: String? = null,
+        var defaultMethodCallHook: String? = null,
+
         var intersectStubJars: MutableSet<String> = mutableSetOf(),
 
         var policyOverrideFile: String? = null,
@@ -62,8 +65,6 @@ class HostStubGenOptions(
         var enableClassChecker: Boolean = false,
         var enablePreTrace: Boolean = false,
         var enablePostTrace: Boolean = false,
-
-        var enableMethodLogging: Boolean = false,
 
         var enableNonStubMethodCallDetection: Boolean = true,
 ) {
@@ -151,6 +152,12 @@ class HostStubGenOptions(
                         ret.classLoadHookAnnotations +=
                             ensureUniqueAnnotation(ai.nextArgRequired(arg))
 
+                    "--default-class-load-hook" ->
+                        ret.defaultClassLoadHook = ai.nextArgRequired(arg)
+
+                    "--default-method-call-hook" ->
+                        ret.defaultMethodCallHook = ai.nextArgRequired(arg)
+
                     "--intersect-stub-jar" ->
                         ret.intersectStubJars += ai.nextArgRequired(arg).ensureFileExists()
 
@@ -166,9 +173,6 @@ class HostStubGenOptions(
 
                     "--enable-post-trace" -> ret.enablePostTrace = true
                     "--no-post-trace" -> ret.enablePostTrace = false
-
-                    "--enable-method-logging" -> ret.enableMethodLogging = true
-                    "--no-method-logging" -> ret.enableMethodLogging = false
 
                     "--enable-non-stub-method-check" -> ret.enableNonStubMethodCallDetection = true
                     "--no-non-stub-method-check" -> ret.enableNonStubMethodCallDetection = false
@@ -290,6 +294,8 @@ class HostStubGenOptions(
               substituteAnnotations=$substituteAnnotations,
               nativeSubstituteAnnotations=$nativeSubstituteAnnotations,
               classLoadHookAnnotations=$classLoadHookAnnotations,
+              defaultClassLoadHook=$defaultClassLoadHook,
+              defaultMethodCallHook=$defaultMethodCallHook,
               intersectStubJars=$intersectStubJars,
               policyOverrideFile=$policyOverrideFile,
               defaultPolicy=$defaultPolicy,
@@ -299,7 +305,6 @@ class HostStubGenOptions(
               enableClassChecker=$enableClassChecker,
               enablePreTrace=$enablePreTrace,
               enablePostTrace=$enablePostTrace,
-              enableMethodLogging=$enableMethodLogging,
               enableNonStubMethodCallDetection=$enableNonStubMethodCallDetection,
             }
             """.trimIndent()

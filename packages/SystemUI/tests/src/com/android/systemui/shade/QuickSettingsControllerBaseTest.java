@@ -34,7 +34,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.dump.DumpManager;
@@ -46,7 +45,8 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.qs.QSFragment;
+import com.android.systemui.qs.QSFragmentLegacy;
+import com.android.systemui.res.R;
 import com.android.systemui.scene.SceneTestUtils;
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
 import com.android.systemui.screenrecord.RecordingController;
@@ -75,18 +75,17 @@ import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.user.domain.interactor.UserInteractor;
 import com.android.systemui.util.kotlin.JavaAdapter;
-
-import dagger.Lazy;
 
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import dagger.Lazy;
 import kotlinx.coroutines.test.TestScope;
 
 public class QuickSettingsControllerBaseTest extends SysuiTestCase {
@@ -109,7 +108,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     @Mock protected KeyguardBottomAreaView mQsFrame;
     @Mock protected KeyguardStatusBarView mKeyguardStatusBar;
     @Mock protected QS mQs;
-    @Mock protected QSFragment mQSFragment;
+    @Mock protected QSFragmentLegacy mQSFragment;
     @Mock protected Lazy<NotificationPanelViewController> mPanelViewControllerLazy;
     @Mock protected NotificationPanelViewController mNotificationPanelViewController;
     @Mock protected NotificationPanelView mPanelView;

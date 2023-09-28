@@ -44,6 +44,7 @@ public final class VirtualDevice implements Parcelable {
     private final int mId;
     private final @Nullable String mPersistentId;
     private final @Nullable String mName;
+    private final @Nullable CharSequence mDisplayName;
 
     /**
      * Creates a new instance of {@link VirtualDevice}.
@@ -53,6 +54,18 @@ public final class VirtualDevice implements Parcelable {
      */
     public VirtualDevice(@NonNull IVirtualDevice virtualDevice, int id,
             @Nullable String persistentId, @Nullable String name) {
+        this(virtualDevice, id, persistentId, name, null);
+    }
+
+    /**
+     * Creates a new instance of {@link VirtualDevice}. Only to be used by the
+     * VirtualDeviceManagerService.
+     *
+     * @hide
+     */
+    public VirtualDevice(@NonNull IVirtualDevice virtualDevice, int id,
+            @Nullable String persistentId, @Nullable String name,
+            @Nullable CharSequence displayName) {
         if (id <= Context.DEVICE_ID_DEFAULT) {
             throw new IllegalArgumentException("VirtualDevice ID must be greater than "
                     + Context.DEVICE_ID_DEFAULT);
@@ -61,6 +74,7 @@ public final class VirtualDevice implements Parcelable {
         mId = id;
         mPersistentId = persistentId;
         mName = name;
+        mDisplayName = displayName;
     }
 
     private VirtualDevice(@NonNull Parcel parcel) {
@@ -68,6 +82,7 @@ public final class VirtualDevice implements Parcelable {
         mId = parcel.readInt();
         mPersistentId = parcel.readString8();
         mName = parcel.readString8();
+        mDisplayName = parcel.readCharSequence();
     }
 
     /**
@@ -109,6 +124,15 @@ public final class VirtualDevice implements Parcelable {
      */
     public @Nullable String getName() {
         return mName;
+    }
+
+    /**
+     * Returns the human-readable name of the virtual device, if defined, which is suitable to be
+     * shown in UI.
+     */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    public @Nullable CharSequence getDisplayName() {
+        return mDisplayName;
     }
 
     /**
@@ -156,6 +180,7 @@ public final class VirtualDevice implements Parcelable {
         dest.writeInt(mId);
         dest.writeString8(mPersistentId);
         dest.writeString8(mName);
+        dest.writeCharSequence(mDisplayName);
     }
 
     @Override
@@ -165,6 +190,7 @@ public final class VirtualDevice implements Parcelable {
                 + " mId=" + mId
                 + " mPersistentId=" + mPersistentId
                 + " mName=" + mName
+                + " mDisplayName=" + mDisplayName
                 + ")";
     }
 

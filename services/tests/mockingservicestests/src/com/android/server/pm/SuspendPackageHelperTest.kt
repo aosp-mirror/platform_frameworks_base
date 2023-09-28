@@ -22,12 +22,11 @@ import android.os.Binder
 import android.os.PersistableBundle
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
-import com.android.server.testutils.nullable
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.Mockito
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
@@ -44,17 +43,10 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         testHandler.flush()
 
         verify(pms).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
-        verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_PACKAGES_SUSPENDED),
-            nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-            nullable(), nullable(), nullable(), nullable())
-        verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_SUSPENDED), nullable(),
-            nullable(), any(), eq(TEST_PACKAGE_1), nullable(), any(), any(), nullable(),
-            nullable(), nullable())
-        verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_SUSPENDED), nullable(),
-            nullable(), any(), eq(TEST_PACKAGE_2), nullable(), any(), any(), nullable(),
-            nullable(), nullable())
+        verify(broadcastHelper).sendPackagesSuspendedOrUnsuspendedForUser(any(Computer::class.java),
+            eq(Intent.ACTION_PACKAGES_SUSPENDED), pkgListCaptor.capture(), any(), any(), any())
 
-        var modifiedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
+        var modifiedPackages = pkgListCaptor.value
         assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
         assertThat(failedNames).isEmpty()
     }
@@ -146,6 +138,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
                 null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
                 TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */, false /* quarantined */)
         testHandler.flush()
+        Mockito.clearInvocations(broadcastHelper)
         assertThat(failedNames).isEmpty()
         failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 targetPackages, false /* suspended */, null /* appExtras */,
@@ -154,17 +147,13 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         testHandler.flush()
 
         verify(pms, times(2)).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
-        verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_PACKAGES_UNSUSPENDED),
-            nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-            nullable(), nullable(), nullable(), nullable())
-        verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_UNSUSPENDED),
-            nullable(), nullable(), any(), eq(TEST_PACKAGE_1), nullable(), any(), any(),
-            nullable(), nullable(), nullable())
-        verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_UNSUSPENDED),
-            nullable(), nullable(), any(), eq(TEST_PACKAGE_2), nullable(), any(), any(),
-            nullable(), nullable(), nullable())
+        verify(broadcastHelper).sendPackagesSuspendedOrUnsuspendedForUser(any(Computer::class.java),
+                eq(Intent.ACTION_PACKAGES_UNSUSPENDED), pkgListCaptor.capture(), any(), any(),
+                any())
+        verify(broadcastHelper).sendMyPackageSuspendedOrUnsuspended(any(Computer::class.java),
+                any(), any(), any())
 
-        var modifiedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
+        var modifiedPackages = pkgListCaptor.value
         assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
         assertThat(failedNames).isEmpty()
     }
@@ -206,7 +195,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         testHandler.flush()
         assertThat(failedNames).isEmpty()
 
-        val result = suspendPackageHelper.getSuspendedPackageAppExtras(pms.snapshotComputer(),
+        val result = SuspendPackageHelper.getSuspendedPackageAppExtras(pms.snapshotComputer(),
             TEST_PACKAGE_1, TEST_USER_ID, deviceOwnerUid)!!
 
         assertThat(result.getString(TEST_PACKAGE_1)).isEqualTo(TEST_PACKAGE_1)
@@ -222,14 +211,15 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
                 null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid,
                 false /* forQuietMode */, false /* quarantined */)
         testHandler.flush()
+        Mockito.clearInvocations(broadcastHelper)
         assertThat(failedNames).isEmpty()
         assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
             TEST_PACKAGE_1, TEST_USER_ID, deviceOwnerUid)).isEqualTo(DEVICE_OWNER_PACKAGE)
         assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
             TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(DEVICE_OWNER_PACKAGE)
-        assertThat(suspendPackageHelper.getSuspendedPackageAppExtras(pms.snapshotComputer(),
+        assertThat(SuspendPackageHelper.getSuspendedPackageAppExtras(pms.snapshotComputer(),
             TEST_PACKAGE_1, TEST_USER_ID, deviceOwnerUid)).isNotNull()
-        assertThat(suspendPackageHelper.getSuspendedPackageAppExtras(pms.snapshotComputer(),
+        assertThat(SuspendPackageHelper.getSuspendedPackageAppExtras(pms.snapshotComputer(),
             TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isNotNull()
 
         suspendPackageHelper.removeSuspensionsBySuspendingPackage(pms.snapshotComputer(),
@@ -238,23 +228,18 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
 
         testHandler.flush()
         verify(pms, times(2)).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
-        verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_PACKAGES_UNSUSPENDED),
-            nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-            nullable(), nullable(), nullable(), nullable())
-        verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_UNSUSPENDED),
-            nullable(), nullable(), any(), eq(TEST_PACKAGE_1), nullable(), any(), any(),
-            nullable(), nullable(), nullable())
-        verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_UNSUSPENDED),
-            nullable(), nullable(), any(), eq(TEST_PACKAGE_2), nullable(), any(), any(),
-            nullable(), nullable(), nullable())
+        verify(broadcastHelper).sendPackagesSuspendedOrUnsuspendedForUser(any(Computer::class.java),
+                eq(Intent.ACTION_PACKAGES_UNSUSPENDED), any(), any(), any(), any())
+        verify(broadcastHelper).sendMyPackageSuspendedOrUnsuspended(any(Computer::class.java),
+                any(), any(), any())
 
         assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
             TEST_PACKAGE_1, TEST_USER_ID, deviceOwnerUid)).isNull()
         assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
             TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isNull()
-        assertThat(suspendPackageHelper.getSuspendedPackageAppExtras(pms.snapshotComputer(),
+        assertThat(SuspendPackageHelper.getSuspendedPackageAppExtras(pms.snapshotComputer(),
             TEST_PACKAGE_1, TEST_USER_ID, deviceOwnerUid)).isNull()
-        assertThat(suspendPackageHelper.getSuspendedPackageAppExtras(pms.snapshotComputer(),
+        assertThat(SuspendPackageHelper.getSuspendedPackageAppExtras(pms.snapshotComputer(),
             TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isNull()
     }
 
@@ -318,40 +303,5 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
             TEST_PACKAGE_1, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)!!
 
         assertThat(result.title).isEqualTo(TEST_PACKAGE_1)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun sendPackagesSuspendedForUser() {
-        suspendPackageHelper.sendPackagesSuspendedForUser(
-            Intent.ACTION_PACKAGES_SUSPENDED, packagesToChange, uidsToChange, false, TEST_USER_ID)
-        testHandler.flush()
-        verify(broadcastHelper).sendPackageBroadcast(any(), nullable(), bundleCaptor.capture(),
-                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable(),
-                nullable())
-
-        var changedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
-        var changedUids = bundleCaptor.value.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
-        assertThat(changedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
-        assertThat(changedUids).asList().containsExactly(
-                packageSetting1.appId, packageSetting2.appId)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun sendPackagesSuspendModifiedForUser() {
-        suspendPackageHelper.sendPackagesSuspendedForUser(
-            Intent.ACTION_PACKAGES_SUSPENSION_CHANGED, packagesToChange, uidsToChange, false, TEST_USER_ID)
-        testHandler.flush()
-        verify(broadcastHelper).sendPackageBroadcast(
-                eq(Intent.ACTION_PACKAGES_SUSPENSION_CHANGED), nullable(), bundleCaptor.capture(),
-                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable(),
-                nullable())
-
-        var modifiedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
-        var modifiedUids = bundleCaptor.value.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
-        assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
-        assertThat(modifiedUids).asList().containsExactly(
-                packageSetting1.appId, packageSetting2.appId)
     }
 }

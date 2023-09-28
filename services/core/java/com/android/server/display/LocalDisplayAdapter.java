@@ -22,6 +22,9 @@ import static android.view.Display.Mode.INVALID_MODE_ID;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.res.Resources;
+import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloader;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.sidekick.SidekickInternal;
 import android.os.Build;
 import android.os.Handler;
@@ -47,6 +50,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.mode.DisplayModeDirector;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
@@ -80,21 +84,24 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private final boolean mIsBootDisplayModeSupported;
 
+    private final DisplayManagerFlags mFlags;
+
     private Context mOverlayContext;
 
     // Called with SyncRoot lock held.
     LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context,
-            Handler handler, Listener listener) {
-        this(syncRoot, context, handler, listener, new Injector());
+            Handler handler, Listener listener, DisplayManagerFlags flags) {
+        this(syncRoot, context, handler, listener, flags, new Injector());
     }
 
     @VisibleForTesting
     LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context, Handler handler,
-            Listener listener, Injector injector) {
+            Listener listener, DisplayManagerFlags flags, Injector injector) {
         super(syncRoot, context, handler, listener, TAG);
         mInjector = injector;
         mSurfaceControlProxy = mInjector.getSurfaceControlProxy();
         mIsBootDisplayModeSupported = mSurfaceControlProxy.getBootDisplayModeSupport();
+        mFlags = flags;
     }
 
     @Override
@@ -224,6 +231,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private boolean mAllmRequested;
         private boolean mGameContentTypeRequested;
         private boolean mSidekickActive;
+        private boolean mDisplayOffloadActive;
         private SurfaceControl.StaticDisplayInfo mStaticDisplayInfo;
         // The supported display modes according to SurfaceFlinger
         private SurfaceControl.DisplayMode[] mSfDisplayModes;
@@ -746,8 +754,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public Runnable requestDisplayStateLocked(final int state, final float brightnessState,
-                final float sdrBrightnessState) {
+        public Runnable requestDisplayStateLocked(
+                final int state,
+                final float brightnessState,
+                final float sdrBrightnessState,
+                DisplayOffloadSession displayOffloadSession) {
+
             // Assume that the brightness is off if the display is being turned off.
             assert state != Display.STATE_OFF
                     || brightnessState == PowerManager.BRIGHTNESS_OFF_FLOAT;
@@ -813,18 +825,39 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                     + ", state=" + Display.stateToString(state) + ")");
                         }
 
-                        // We must tell sidekick to stop controlling the display before we
-                        // can change its power mode, so do that first.
-                        if (mSidekickActive) {
-                            Trace.traceBegin(Trace.TRACE_TAG_POWER,
-                                    "SidekickInternal#endDisplayControl");
-                            try {
-                                mSidekickInternal.endDisplayControl();
-                            } finally {
-                                Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                        DisplayOffloader displayOffloader =
+                                displayOffloadSession == null
+                                        ? null
+                                        : displayOffloadSession.getDisplayOffloader();
+
+                        boolean isDisplayOffloadEnabled = mFlags.isDisplayOffloadEnabled();
+
+                        // We must tell sidekick/displayoffload to stop controlling the display
+                        // before we can change its power mode, so do that first.
+                        if (isDisplayOffloadEnabled) {
+                            if (mDisplayOffloadActive && displayOffloader != null) {
+                                Trace.traceBegin(Trace.TRACE_TAG_POWER,
+                                        "DisplayOffloader#stopOffload");
+                                try {
+                                    displayOffloader.stopOffload();
+                                } finally {
+                                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                                }
+                                mDisplayOffloadActive = false;
                             }
-                            mSidekickActive = false;
+                        } else {
+                            if (mSidekickActive) {
+                                Trace.traceBegin(Trace.TRACE_TAG_POWER,
+                                        "SidekickInternal#endDisplayControl");
+                                try {
+                                    mSidekickInternal.endDisplayControl();
+                                } finally {
+                                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                                }
+                                mSidekickActive = false;
+                            }
                         }
+
                         final int mode = getPowerModeForState(state);
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayState("
                                 + "id=" + physicalDisplayId
@@ -836,16 +869,32 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
                         setCommittedState(state);
+
                         // If we're entering a suspended (but not OFF) power state and we
-                        // have a sidekick available, tell it now that it can take control.
-                        if (Display.isSuspendedState(state) && state != Display.STATE_OFF
-                                && mSidekickInternal != null && !mSidekickActive) {
-                            Trace.traceBegin(Trace.TRACE_TAG_POWER,
-                                    "SidekickInternal#startDisplayControl");
-                            try {
-                                mSidekickActive = mSidekickInternal.startDisplayControl(state);
-                            } finally {
-                                Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                        // have a sidekick/displayoffload available, tell it now that it can take
+                        // control.
+                        if (isDisplayOffloadEnabled) {
+                            if (DisplayOffloadSession.isSupportedOffloadState(state) &&
+                                    displayOffloader != null
+                                    && !mDisplayOffloadActive) {
+                                Trace.traceBegin(
+                                        Trace.TRACE_TAG_POWER, "DisplayOffloader#startOffload");
+                                try {
+                                    mDisplayOffloadActive = displayOffloader.startOffload();
+                                } finally {
+                                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                                }
+                            }
+                        } else {
+                            if (Display.isSuspendedState(state) && state != Display.STATE_OFF
+                                    && mSidekickInternal != null && !mSidekickActive) {
+                                Trace.traceBegin(Trace.TRACE_TAG_POWER,
+                                        "SidekickInternal#startDisplayControl");
+                                try {
+                                    mSidekickActive = mSidekickInternal.startDisplayControl(state);
+                                } finally {
+                                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                                }
                             }
                         }
                     }
@@ -857,6 +906,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             updateDeviceInfoLocked();
                         }
                     }
+
 
                     private void setDisplayBrightness(float brightnessState,
                             float sdrBrightnessState) {

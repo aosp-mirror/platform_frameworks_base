@@ -69,10 +69,12 @@ final class PreferredActivityHelper {
     private static final String TAG_DEFAULT_APPS = "da";
 
     private final PackageManagerService mPm;
+    private final BroadcastHelper mBroadcastHelper;
 
     // TODO(b/198166813): remove PMS dependency
-    PreferredActivityHelper(PackageManagerService pm) {
+    PreferredActivityHelper(PackageManagerService pm, BroadcastHelper broadcastHelper) {
         mPm = pm;
+        mBroadcastHelper = broadcastHelper;
     }
 
     private ResolveInfo findPreferredActivityNotLocked(@NonNull Computer snapshot, Intent intent,
@@ -120,7 +122,7 @@ final class PreferredActivityHelper {
         }
         if (changedUsers.size() > 0) {
             updateDefaultHomeNotLocked(mPm.snapshotComputer(), changedUsers);
-            mPm.postPreferredActivityChangedBroadcast(userId);
+            mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
             mPm.scheduleWritePackageRestrictions(userId);
         }
     }
@@ -167,7 +169,7 @@ final class PreferredActivityHelper {
         return mPm.setActiveLauncherPackage(packageName, userId,
                 successful -> {
                     if (successful) {
-                        mPm.postPreferredActivityChangedBroadcast(userId);
+                        mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
                     }
                 });
     }
@@ -215,7 +217,7 @@ final class PreferredActivityHelper {
         }
         // Re-snapshot after mLock
         if (!(isHomeFilter(filter) && updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId))) {
-            mPm.postPreferredActivityChangedBroadcast(userId);
+            mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
         }
     }
 
@@ -411,7 +413,7 @@ final class PreferredActivityHelper {
         if (isHomeFilter(filter)) {
             updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
         }
-        mPm.postPreferredActivityChangedBroadcast(userId);
+        mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
     }
 
     public void clearPackagePersistentPreferredActivities(String packageName, int userId) {
@@ -426,7 +428,7 @@ final class PreferredActivityHelper {
         }
         if (changed) {
             updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
-            mPm.postPreferredActivityChangedBroadcast(userId);
+            mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
             mPm.scheduleWritePackageRestrictions(userId);
         }
     }
@@ -443,7 +445,7 @@ final class PreferredActivityHelper {
         }
         if (changed) {
             updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
-            mPm.postPreferredActivityChangedBroadcast(userId);
+            mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
             mPm.scheduleWritePackageRestrictions(userId);
         }
     }
@@ -616,7 +618,7 @@ final class PreferredActivityHelper {
                 mPm.clearPackagePreferredActivitiesLPw(null, changedUsers, userId);
             }
             if (changedUsers.size() > 0) {
-                mPm.postPreferredActivityChangedBroadcast(userId);
+                mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
             }
             synchronized (mPm.mLock) {
                 mPm.mSettings.applyDefaultPreferredAppsLPw(userId);

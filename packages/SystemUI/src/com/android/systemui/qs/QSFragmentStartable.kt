@@ -31,10 +31,13 @@ class QSFragmentStartable
 @Inject
 constructor(
     private val fragmentService: FragmentService,
-    private val qsFragmentProvider: Provider<QSFragment>
+    private val qsFragmentLegacyProvider: Provider<QSFragmentLegacy>
 ) : CoreStartable {
     override fun start() {
-        fragmentService.addFragmentInstantiationProvider(QSFragment::class.java, qsFragmentProvider)
+        fragmentService.addFragmentInstantiationProvider(
+            QSFragmentLegacy::class.java,
+            qsFragmentLegacyProvider
+        )
     }
 }
 

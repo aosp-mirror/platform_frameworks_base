@@ -224,7 +224,9 @@ class AccessibilityUserState {
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
         if (!mBoundServices.contains(serviceConnection)) {
-            serviceConnection.onAdded();
+            if (!Flags.addWindowTokenWithoutLock()) {
+                serviceConnection.addWindowTokensForAllDisplays();
+            }
             mBoundServices.add(serviceConnection);
             mComponentNameToServiceMap.put(serviceConnection.getComponentName(), serviceConnection);
             mServiceInfoChangeListener.onServiceInfoChangedLocked(this);

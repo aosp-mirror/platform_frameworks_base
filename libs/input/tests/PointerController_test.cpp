@@ -148,6 +148,25 @@ void MockPointerControllerPolicyInterface::onPointerDisplayIdChanged(int32_t dis
     latestPointerDisplayId = displayId;
 }
 
+class TestPointerController : public PointerController {
+public:
+    TestPointerController(sp<android::gui::WindowInfosListener>& registeredListener,
+                          sp<PointerControllerPolicyInterface> policy, const sp<Looper>& looper,
+                          SpriteController& spriteController)
+          : PointerController(
+                    policy, looper, spriteController,
+                    /*enabled=*/true,
+                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
+                        // Register listener
+                        registeredListener = listener;
+                    },
+                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
+                        // Unregister listener
+                        if (registeredListener == listener) registeredListener = nullptr;
+                    }) {}
+    ~TestPointerController() override {}
+};
+
 class PointerControllerTest : public Test {
 protected:
     PointerControllerTest();
@@ -159,6 +178,7 @@ protected:
     sp<MockPointerControllerPolicyInterface> mPolicy;
     std::unique_ptr<MockSpriteController> mSpriteController;
     std::shared_ptr<PointerController> mPointerController;
+    sp<android::gui::WindowInfosListener> mRegisteredListener;
 
 private:
     void loopThread();
@@ -181,11 +201,12 @@ PointerControllerTest::PointerControllerTest() : mPointerSprite(new NiceMock<Moc
     EXPECT_CALL(*mSpriteController, createSprite())
             .WillOnce(Return(mPointerSprite));
 
-    mPointerController =
-            PointerController::create(mPolicy, mLooper, *mSpriteController, /*enabled=*/true);
+    mPointerController = std::make_unique<TestPointerController>(mRegisteredListener, mPolicy,
+                                                                 mLooper, *mSpriteController);
 }
 
 PointerControllerTest::~PointerControllerTest() {
+    mPointerController.reset();
     mRunning.store(false, std::memory_order_relaxed);
     mThread.join();
 }
@@ -316,31 +337,16 @@ TEST_F(PointerControllerTest, notifiesPolicyWhenPointerDisplayChanges) {
 
 class PointerControllerWindowInfoListenerTest : public Test {};
 
-class TestPointerController : public PointerController {
-public:
-    TestPointerController(sp<android::gui::WindowInfosListener>& registeredListener,
-                          const sp<Looper>& looper, SpriteController& spriteController)
-          : PointerController(
-                    new MockPointerControllerPolicyInterface(), looper, spriteController,
-                    /*enabled=*/true,
-                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
-                        // Register listener
-                        registeredListener = listener;
-                    },
-                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
-                        // Unregister listener
-                        if (registeredListener == listener) registeredListener = nullptr;
-                    }) {}
-};
-
 TEST_F(PointerControllerWindowInfoListenerTest,
        doesNotCrashIfListenerCalledAfterPointerControllerDestroyed) {
     sp<Looper> looper = new Looper(false);
     auto spriteController = NiceMock<MockSpriteController>(looper);
     sp<android::gui::WindowInfosListener> registeredListener;
     sp<android::gui::WindowInfosListener> localListenerCopy;
+    sp<MockPointerControllerPolicyInterface> policy = new MockPointerControllerPolicyInterface();
     {
-        TestPointerController pointerController(registeredListener, looper, spriteController);
+        TestPointerController pointerController(registeredListener, policy, looper,
+                                                spriteController);
         ASSERT_NE(nullptr, registeredListener) << "WindowInfosListener was not registered";
         localListenerCopy = registeredListener;
     }

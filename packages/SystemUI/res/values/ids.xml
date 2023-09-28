@@ -233,6 +233,11 @@
     <item type="id" name="pin_pad"/>
 
     <!--
+    Tag used to store pending intent registration listeners in NotificationTemplateViewWrapper
+    -->
+    <item type="id" name="pending_intent_listener_tag" />
+
+    <!--
     Used to tag views programmatically added to the smartspace area so they can be more easily
     removed later.
     -->

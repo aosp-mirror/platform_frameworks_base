@@ -32,12 +32,15 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloader;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -55,6 +58,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.R;
 import com.android.server.LocalServices;
 import com.android.server.display.LocalDisplayAdapter.BacklightAdapter;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.mode.DisplayModeDirector;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
@@ -72,6 +76,7 @@ import org.mockito.quality.Strictness;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -107,7 +112,14 @@ public class LocalDisplayAdapterTest {
     private LightsManager mMockedLightsManager;
     @Mock
     private LogicalLight mMockedBacklight;
+    @Mock
+    private DisplayManagerFlags mFlags;
+
     private Handler mHandler;
+
+    private DisplayOffloadSession mDisplayOffloadSession;
+
+    private DisplayOffloader mDisplayOffloader;
 
     private TestListener mListener = new TestListener();
 
@@ -120,6 +132,8 @@ public class LocalDisplayAdapterTest {
     private static final float[] DISPLAY_RANGE_NITS = { 2.685f, 478.5f };
     private static final int[] BACKLIGHT_RANGE = { 1, 255 };
     private static final float[] BACKLIGHT_RANGE_ZERO_TO_ONE = { 0.0f, 1.0f };
+    private static final List<Integer> mDisplayOffloadSupportedStates
+            = new ArrayList<>(List.of(Display.STATE_DOZE_SUSPEND));
 
     @Before
     public void setUp() throws Exception {
@@ -134,7 +148,7 @@ public class LocalDisplayAdapterTest {
         mInjector = new Injector();
         when(mSurfaceControlProxy.getBootDisplayModeSupport()).thenReturn(true);
         mAdapter = new LocalDisplayAdapter(mMockedSyncRoot, mMockedContext, mHandler,
-                mListener, mInjector);
+                mListener, mFlags, mInjector);
         spyOn(mAdapter);
         doReturn(mMockedContext).when(mAdapter).getOverlayContext();
 
@@ -185,6 +199,8 @@ public class LocalDisplayAdapterTest {
         when(mMockedResources.getIntArray(
             com.android.internal.R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate))
             .thenReturn(new int[]{});
+        doReturn(true).when(mFlags).isDisplayOffloadEnabled();
+        initDisplayOffloadSession();
     }
 
     @After
@@ -1107,6 +1123,72 @@ public class LocalDisplayAdapterTest {
         DisplayDeviceInfo info = displayDevice.getDisplayDeviceInfoLocked();
 
         assertThat(info.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP).isEqualTo(0);
+    }
+
+
+    @Test
+    public void test_displayStateToSupportedState_DisplayOffloadStart()
+            throws InterruptedException {
+        // prepare a display.
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        DisplayDevice displayDevice = mListener.addedDisplays.get(0);
+
+        for (Integer supportedState : mDisplayOffloadSupportedStates) {
+            Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(
+                    supportedState, 0, 0, mDisplayOffloadSession);
+            changeStateRunnable.run();
+
+            verify(mDisplayOffloader).startOffload();
+        }
+    }
+
+    @Test
+    public void test_displayStateToDozeFromDozeSuspend_DisplayOffloadStop()
+            throws InterruptedException {
+        // prepare a display.
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        DisplayDevice displayDevice = mListener.addedDisplays.get(0);
+
+        Runnable changeStateToDozeSuspendRunnable = displayDevice.requestDisplayStateLocked(
+                Display.STATE_DOZE_SUSPEND, 0, 0, mDisplayOffloadSession);
+        Runnable changeStateToDozeRunnable = displayDevice.requestDisplayStateLocked(
+                Display.STATE_DOZE, 0, 0, mDisplayOffloadSession);
+        changeStateToDozeSuspendRunnable.run();
+        changeStateToDozeRunnable.run();
+
+        verify(mDisplayOffloader).stopOffload();
+    }
+
+    private void initDisplayOffloadSession() {
+        mDisplayOffloader = spy(new DisplayOffloader() {
+            @Override
+            public boolean startOffload() {
+                return true;
+            }
+
+            @Override
+            public void stopOffload() {}
+        });
+
+        mDisplayOffloadSession = new DisplayOffloadSession() {
+            @Override
+            public void setDozeStateOverride(int displayState) {}
+
+            @Override
+            public DisplayOffloader getDisplayOffloader() {
+                return mDisplayOffloader;
+            }
+        };
     }
 
     private void setupCutoutAndRoundedCorners() {
