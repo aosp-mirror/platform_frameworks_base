@@ -669,7 +669,7 @@
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Nešto nije uredu. Pokušajte ponovo."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona za otisak prsta"</string>
     <string name="device_unlock_notification_name" msgid="2632928999862915709">"Otključavanje uređaja"</string>
-    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Pokušajte s drugim načinom zaključavanja"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Pokušajte s drugim načinom otključavanja"</string>
     <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Koristite otključavanje licem kada se vaš otisak prsta ne prepozna, naprimjer kada su vam prsti mokri"</string>
     <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Koristite otključavanje otiskom prsta kada se vaše lice ne prepozna, naprimjer kada nema dovoljno svjetla"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Otključavanje licem"</string>
