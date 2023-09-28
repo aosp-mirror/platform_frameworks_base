@@ -92,7 +92,7 @@ constructor(
             .stateIn(
                 tileScope,
                 SharingStarted.WhileSubscribed(),
-                false,
+                true,
             )
 
     private var currentLifeState: QSTileLifecycle = QSTileLifecycle.DEAD

@@ -70,6 +70,7 @@ public class QSFactoryImpl implements QSFactory {
         if (tile != null) {
             tile.initialize();
             tile.postStale(); // Tile was just created, must be stale.
+            tile.setTileSpec(tileSpec);
         }
         return tile;
     }
