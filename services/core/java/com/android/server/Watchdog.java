@@ -323,7 +323,7 @@ public class Watchdog implements Dumpable {
         String describeBlockedStateLocked() {
             final String prefix;
             if (mCurrentMonitor == null) {
-                prefix = "Blocked in handler on ";
+                prefix = "Blocked in handler";
             } else {
                 prefix =  "Blocked in monitor " + mCurrentMonitor.getClass().getName();
             }
