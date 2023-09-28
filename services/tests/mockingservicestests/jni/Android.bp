@@ -22,6 +22,7 @@ cc_library_shared {
     srcs: [
         ":lib_cachedAppOptimizer_native",
         ":lib_gameManagerService_native",
+        ":lib_oomConnection_native",
         "onload.cpp",
     ],
 
@@ -42,6 +43,7 @@ cc_library_shared {
         "libgui",
         "libhidlbase",
         "liblog",
+        "libmemevents",
         "libmeminfo",
         "libnativehelper",
         "libprocessgroup",
