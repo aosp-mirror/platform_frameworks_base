@@ -401,7 +401,9 @@ public class TvView extends ViewGroup {
 
     private void resetInternal() {
         mSessionCallback = null;
-        mPendingAppPrivateCommands.clear();
+        synchronized (mPendingAppPrivateCommands) {
+            mPendingAppPrivateCommands.clear();
+        }
         if (mSession != null) {
             setSessionSurface(null);
             removeSessionOverlayView();
@@ -691,7 +693,10 @@ public class TvView extends ViewGroup {
         } else {
             Log.w(TAG, "sendAppPrivateCommand - session not yet created (action \"" + action
                     + "\" pending)");
-            mPendingAppPrivateCommands.add(Pair.create(action, data));
+
+            synchronized (mPendingAppPrivateCommands) {
+                mPendingAppPrivateCommands.add(Pair.create(action, data));
+            }
         }
     }
 
@@ -1320,10 +1325,13 @@ public class TvView extends ViewGroup {
             mSession = session;
             if (session != null) {
                 // Sends the pending app private commands first.
-                for (Pair<String, Bundle> command : mPendingAppPrivateCommands) {
-                    mSession.sendAppPrivateCommand(command.first, command.second);
+
+                synchronized (mPendingAppPrivateCommands) {
+                    for (Pair<String, Bundle> command : mPendingAppPrivateCommands) {
+                        mSession.sendAppPrivateCommand(command.first, command.second);
+                    }
+                    mPendingAppPrivateCommands.clear();
                 }
-                mPendingAppPrivateCommands.clear();
 
                 synchronized (sMainTvViewLock) {
                     if (hasWindowFocus() && TvView.this == sMainTvView.get()
