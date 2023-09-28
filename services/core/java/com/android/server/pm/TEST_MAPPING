@@ -63,6 +63,7 @@
     },
     {
       "name": "GtsSecurityHostTestCases",
+      "keywords": ["internal"],
       "options": [
         {
           "include-filter": "com.google.android.security.gts.PackageVerifierTest"
