@@ -316,7 +316,14 @@ oneway interface IStatusBar
      */
     void requestTileServiceListeningState(in ComponentName componentName);
 
-    void requestAddTile(in ComponentName componentName, in CharSequence appName, in CharSequence label, in Icon icon, in IAddTileResultCallback callback);
+    void requestAddTile(
+        int callingUid,
+        in ComponentName componentName,
+        in CharSequence appName,
+        in CharSequence label,
+        in Icon icon,
+        in IAddTileResultCallback callback
+    );
     void cancelRequestAddTile(in String packageName);
 
     /** Notifies System UI about an update to the media tap-to-transfer sender state. */

@@ -51,15 +51,15 @@ public class QSFactoryImpl implements QSFactory {
 
     protected final Map<String, Provider<QSTileImpl<?>>> mTileMap;
     private final Lazy<QSHost> mQsHostLazy;
-    private final Provider<CustomTile.Builder> mCustomTileBuilderProvider;
+    private final Provider<CustomTile.Factory> mCustomTileFactoryProvider;
 
     @Inject
     public QSFactoryImpl(
             Lazy<QSHost> qsHostLazy,
-            Provider<CustomTile.Builder> customTileBuilderProvider,
+            Provider<CustomTile.Factory> customTileFactoryProvider,
             Map<String, Provider<QSTileImpl<?>>> tileMap) {
         mQsHostLazy = qsHostLazy;
-        mCustomTileBuilderProvider = customTileBuilderProvider;
+        mCustomTileFactoryProvider = customTileFactoryProvider;
         mTileMap = tileMap;
     }
 
@@ -87,7 +87,7 @@ public class QSFactoryImpl implements QSFactory {
         // Custom tiles
         if (tileSpec.startsWith(CustomTile.PREFIX)) {
             return CustomTile.create(
-                    mCustomTileBuilderProvider.get(), tileSpec, mQsHostLazy.get().getUserContext());
+                    mCustomTileFactoryProvider.get(), tileSpec, mQsHostLazy.get().getUserContext());
         }
 
         // Broken tiles.

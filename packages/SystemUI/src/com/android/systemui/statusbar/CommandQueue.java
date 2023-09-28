@@ -442,6 +442,7 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#requestAddTile
          */
         default void requestAddTile(
+                int callingUid,
                 @NonNull ComponentName componentName,
                 @NonNull CharSequence appName,
                 @NonNull CharSequence label,
@@ -1314,6 +1315,7 @@ public class CommandQueue extends IStatusBar.Stub implements
 
     @Override
     public void requestAddTile(
+            int callingUid,
             @NonNull ComponentName componentName,
             @NonNull CharSequence appName,
             @NonNull CharSequence label,
@@ -1326,6 +1328,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         args.arg3 = label;
         args.arg4 = icon;
         args.arg5 = callback;
+        args.arg6 = callingUid;
         mHandler.obtainMessage(MSG_TILE_SERVICE_REQUEST_ADD, args).sendToTarget();
     }
 
@@ -1772,8 +1775,9 @@ public class CommandQueue extends IStatusBar.Stub implements
                     CharSequence label = (CharSequence) args.arg3;
                     Icon icon = (Icon) args.arg4;
                     IAddTileResultCallback callback = (IAddTileResultCallback) args.arg5;
+                    int callingUid = (int) args.arg6;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).requestAddTile(
+                        mCallbacks.get(i).requestAddTile(callingUid,
                                 componentName, appName, label, icon, callback);
                     }
                     args.recycle();
