@@ -404,9 +404,9 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktivér vinduer i frit format"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktivér understøttelse af eksperimentelle vinduer i frit format"</string>
     <string name="desktop_mode" msgid="2389067840550544462">"Computertilstand"</string>
-    <string name="local_backup_password_title" msgid="4631017948933578709">"Kode til lokal backup"</string>
+    <string name="local_backup_password_title" msgid="4631017948933578709">"Kode til lokal sikkerhedskopi"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Lokale komplette backups er i øjeblikket ikke beskyttet"</string>
-    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tryk for at skifte eller fjerne adgangskoden til fuld lokal backup"</string>
+    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tryk for at skifte eller fjerne adgangskoden til fuld lokal sikkerhedskopiering"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Ny adgangskode til sikkerhedskopi er angivet"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"Ny adgangskode og bekræftelse matcher ikke"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"Fejl ved angivelse af adgangskode til sikkerhedskopi"</string>

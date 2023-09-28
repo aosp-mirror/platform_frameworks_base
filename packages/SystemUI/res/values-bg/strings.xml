@@ -1110,7 +1110,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Визуализация на изображението"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"редактиране"</string>
     <string name="add" msgid="81036585205287996">"Добавяне"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Управление на потребителите"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Потребители"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Това известие не поддържа плъзгане за разделяне на екрана"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi не е налице"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Приоритетен режим"</string>
@@ -1141,7 +1141,8 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"За да добавите пряк път към приложението Wallet, уверете се, че то е инсталирано"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"За да добавите пряк път към приложението Wallet, уверете се, че е добавена поне една карта"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"За да добавите пряк път към приложението Home, уверете се, че то е инсталирано"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Налице е поне едно устройство."</string>
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
+    <skip />
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Изберете стандартно приложение за бележки, за да използвате прекия път за водене на бележки"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Избиране на приложение"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Докоснете и задръжте прекия път"</string>

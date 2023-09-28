@@ -1141,7 +1141,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Pulqabı tətbiqini qısayol kimi əlavə etmək üçün tətbiq quraşdırılmalıdır"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Pulqabı tətbiqini qısayol kimi əlavə etmək üçün kart əlavə edilməlidir"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home tətbiqini qısayol kimi əlavə etmək üçün tətbiq quraşdırılmalıdır"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Ən azı bir cihaz əlçatandır"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Ən az bir cihaz və ya cihaz paneli əlçatandır"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Qeydgötürmə qısayolu üçün defolt qeyd tətbiqi seçin"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Tətbiq seçin"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Qısayola toxunub saxlayın"</string>
