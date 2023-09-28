@@ -163,8 +163,8 @@ public class DimmerTests extends WindowTestsBase {
     public void testUpdateDimsAppliesCrop() {
         mHost.addChild(mChild, 0);
 
-        final float alpha = 0.8f;
-        mDimmer.dimAbove(mChild, alpha);
+        mDimmer.adjustAppearance(mChild, 1, 1);
+        mDimmer.adjustRelativeLayer(mChild, -1);
 
         int width = 100;
         int height = 300;
@@ -176,42 +176,13 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDimAboveWithChildCreatesSurfaceAboveChild_Smooth() {
-        assumeTrue(Flags.dimmerRefactor());
-        final float alpha = 0.8f;
-        mHost.addChild(mChild, 0);
-        mDimmer.dimAbove(mChild, alpha);
-        SurfaceControl dimLayer = mDimmer.getDimLayer();
-
-        assertNotNull("Dimmer should have created a surface", dimLayer);
-
-        mDimmer.updateDims(mTransaction);
-        verify(sTestAnimation).startAnimation(eq(dimLayer), eq(mTransaction),
-                anyInt(), any(SurfaceAnimator.OnAnimationFinishedCallback.class));
-        verify(mTransaction).setRelativeLayer(dimLayer, mChild.mControl, 1);
-        verify(mTransaction, lastCall()).setAlpha(dimLayer, alpha);
-    }
-
-    @Test
-    public void testDimAboveWithChildCreatesSurfaceAboveChild_Legacy() {
-        assumeFalse(Flags.dimmerRefactor());
-        final float alpha = 0.8f;
-        mHost.addChild(mChild, 0);
-        mDimmer.dimAbove(mChild, alpha);
-        SurfaceControl dimLayer = mDimmer.getDimLayer();
-
-        assertNotNull("Dimmer should have created a surface", dimLayer);
-
-        verify(mHost.getPendingTransaction()).setAlpha(dimLayer, alpha);
-        verify(mHost.getPendingTransaction()).setRelativeLayer(dimLayer, mChild.mControl, 1);
-    }
-
-    @Test
     public void testDimBelowWithChildSurfaceCreatesSurfaceBelowChild_Smooth() {
         assumeTrue(Flags.dimmerRefactor());
         final float alpha = 0.7f;
+        final int blur = 50;
         mHost.addChild(mChild, 0);
-        mDimmer.dimBelow(mChild, alpha, 50);
+        mDimmer.adjustAppearance(mChild, alpha, blur);
+        mDimmer.adjustRelativeLayer(mChild, -1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
 
         assertNotNull("Dimmer should have created a surface", dimLayer);
@@ -221,7 +192,7 @@ public class DimmerTests extends WindowTestsBase {
                 anyInt(), any(SurfaceAnimator.OnAnimationFinishedCallback.class));
         verify(mTransaction).setRelativeLayer(dimLayer, mChild.mControl, -1);
         verify(mTransaction, lastCall()).setAlpha(dimLayer, alpha);
-        verify(mTransaction).setBackgroundBlurRadius(dimLayer, 50);
+        verify(mTransaction).setBackgroundBlurRadius(dimLayer, blur);
     }
 
     @Test
@@ -229,7 +200,8 @@ public class DimmerTests extends WindowTestsBase {
         assumeFalse(Flags.dimmerRefactor());
         final float alpha = 0.7f;
         mHost.addChild(mChild, 0);
-        mDimmer.dimBelow(mChild, alpha, 50);
+        mDimmer.adjustAppearance(mChild, alpha, 20);
+        mDimmer.adjustRelativeLayer(mChild, -1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
 
         assertNotNull("Dimmer should have created a surface", dimLayer);
@@ -244,12 +216,15 @@ public class DimmerTests extends WindowTestsBase {
         mHost.addChild(mChild, 0);
 
         final float alpha = 0.8f;
+        final int blur = 50;
         // Dim once
-        mDimmer.dimBelow(mChild, alpha, 0);
+        mDimmer.adjustAppearance(mChild, alpha, blur);
+        mDimmer.adjustRelativeLayer(mChild, -1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
         mDimmer.updateDims(mTransaction);
         // Reset, and don't dim
         mDimmer.resetDimStates();
+        mDimmer.adjustRelativeLayer(mChild, -1);
         mDimmer.updateDims(mTransaction);
         verify(mTransaction).show(dimLayer);
         verify(mTransaction).remove(dimLayer);
@@ -261,7 +236,8 @@ public class DimmerTests extends WindowTestsBase {
         mHost.addChild(mChild, 0);
 
         final float alpha = 0.8f;
-        mDimmer.dimAbove(mChild, alpha);
+        mDimmer.adjustAppearance(mChild, alpha, 20);
+        mDimmer.adjustRelativeLayer(mChild, -1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
         mDimmer.resetDimStates();
 
@@ -278,13 +254,16 @@ public class DimmerTests extends WindowTestsBase {
         mHost.addChild(mChild, 0);
 
         final float alpha = 0.8f;
+        final int blur = 20;
         // Dim once
-        mDimmer.dimBelow(mChild, alpha, 0);
+        mDimmer.adjustAppearance(mChild, alpha, blur);
+        mDimmer.adjustRelativeLayer(mChild, -1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
         mDimmer.updateDims(mTransaction);
         // Reset and dim again
         mDimmer.resetDimStates();
-        mDimmer.dimAbove(mChild, alpha);
+        mDimmer.adjustAppearance(mChild, alpha, blur);
+        mDimmer.adjustRelativeLayer(mChild, -1);
         mDimmer.updateDims(mTransaction);
         verify(mTransaction).show(dimLayer);
         verify(mTransaction, never()).remove(dimLayer);
@@ -294,7 +273,8 @@ public class DimmerTests extends WindowTestsBase {
     public void testDimUpdateWhileDimming() {
         mHost.addChild(mChild, 0);
         final float alpha = 0.8f;
-        mDimmer.dimAbove(mChild, alpha);
+        mDimmer.adjustAppearance(mChild, alpha, 20);
+        mDimmer.adjustRelativeLayer(mChild, -1);
         final Rect bounds = mDimmer.getDimBounds();
 
         SurfaceControl dimLayer = mDimmer.getDimLayer();
@@ -314,7 +294,8 @@ public class DimmerTests extends WindowTestsBase {
     public void testRemoveDimImmediately_Smooth() {
         assumeTrue(Flags.dimmerRefactor());
         mHost.addChild(mChild, 0);
-        mDimmer.dimAbove(mChild, 1);
+        mDimmer.adjustAppearance(mChild, 1, 2);
+        mDimmer.adjustRelativeLayer(mChild, -1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
         mDimmer.updateDims(mTransaction);
         verify(mTransaction, times(1)).show(dimLayer);
@@ -333,7 +314,8 @@ public class DimmerTests extends WindowTestsBase {
     public void testRemoveDimImmediately_Legacy() {
         assumeFalse(Flags.dimmerRefactor());
         mHost.addChild(mChild, 0);
-        mDimmer.dimAbove(mChild, 1);
+        mDimmer.adjustAppearance(mChild, 1, 0);
+        mDimmer.adjustRelativeLayer(mChild, -1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
         mDimmer.updateDims(mTransaction);
         verify(mTransaction, times(1)).show(dimLayer);
@@ -351,16 +333,16 @@ public class DimmerTests extends WindowTestsBase {
     @Test
     public void testDimmerWithBlurUpdatesTransaction_Legacy() {
         assumeFalse(Flags.dimmerRefactor());
-        TestWindowContainer child = new TestWindowContainer(mWm);
-        mHost.addChild(child, 0);
+        mHost.addChild(mChild, 0);
 
         final int blurRadius = 50;
-        mDimmer.dimBelow(child, 0, blurRadius);
+        mDimmer.adjustAppearance(mChild, 1, blurRadius);
+        mDimmer.adjustRelativeLayer(mChild, -1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
 
         assertNotNull("Dimmer should have created a surface", dimLayer);
 
         verify(mHost.getPendingTransaction()).setBackgroundBlurRadius(dimLayer, blurRadius);
-        verify(mHost.getPendingTransaction()).setRelativeLayer(dimLayer, child.mControl, -1);
+        verify(mHost.getPendingTransaction()).setRelativeLayer(dimLayer, mChild.mControl, -1);
     }
 }

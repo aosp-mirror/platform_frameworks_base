@@ -28,6 +28,9 @@ import com.android.window.flags.Flags;
  * black layers of varying opacity at various Z-levels which create the effect of a Dim.
  */
 public abstract class Dimmer {
+
+    static final boolean DIMMER_REFACTOR = Flags.dimmerRefactor();
+
     /**
      * The {@link WindowContainer} that our Dims are bounded to. We may be dimming on behalf of the
      * host, some controller of it, or one of the hosts children.
@@ -40,7 +43,7 @@ public abstract class Dimmer {
 
     // Constructs the correct type of dimmer
     static Dimmer create(WindowContainer host) {
-        return Flags.dimmerRefactor() ? new SmoothDimmer(host) : new LegacyDimmer(host);
+        return DIMMER_REFACTOR ? new SmoothDimmer(host) : new LegacyDimmer(host);
     }
 
     @NonNull
@@ -48,32 +51,34 @@ public abstract class Dimmer {
         return mHost;
     }
 
-    protected abstract void dim(
-            WindowContainer container, int relativeLayer, float alpha, int blurRadius);
+    /**
+     * Position the dim relatively to the dimming container.
+     * Normally called together with #setAppearance, it can be called alone to keep the dim parented
+     * to a visible container until the next dimming container is ready.
+     * If multiple containers call this method, only the changes relative to the topmost will be
+     * applied.
+     *
+     * For each call to {@link WindowContainer#prepareSurfaces()} the DimState will be reset, and
+     * the child of the host should call adjustRelativeLayer and {@link Dimmer#adjustAppearance} to
+     * continue dimming. Indeed, this method won't be able to keep dimming or get a new DimState
+     * without also adjusting the appearance.
+     * @param container      The container which to dim above. Should be a child of the host.
+     * @param relativeLayer  The position of the dim wrt the container
+     */
+    protected abstract void adjustRelativeLayer(WindowContainer container, int relativeLayer);
 
     /**
-     * Place a dim above the given container, which should be a child of the host container.
-     * for each call to {@link WindowContainer#prepareSurfaces} the Dim state will be reset
-     * and the child should call dimAbove again to request the Dim to continue.
-     *
-     * @param container The container which to dim above. Should be a child of our host.
-     * @param alpha     The alpha at which to Dim.
+     * Set the aspect of the dim layer, and request to keep dimming.
+     * For each call to {@link WindowContainer#prepareSurfaces} the Dim state will be reset, and the
+     * child should call setAppearance again to request the Dim to continue.
+     * If multiple containers call this method, only the changes relative to the topmost will be
+     * applied.
+     * @param container  Container requesting the dim
+     * @param alpha      Dim amount
+     * @param blurRadius Blur amount
      */
-    void dimAbove(@NonNull WindowContainer container, float alpha) {
-        dim(container, 1, alpha, 0);
-    }
-
-    /**
-     * Like {@link #dimAbove} but places the dim below the given container.
-     *
-     * @param container  The container which to dim below. Should be a child of our host.
-     * @param alpha      The alpha at which to Dim.
-     * @param blurRadius The amount of blur added to the Dim.
-     */
-
-    void dimBelow(@NonNull WindowContainer container, float alpha, int blurRadius) {
-        dim(container, -1, alpha, blurRadius);
-    }
+    protected abstract void adjustAppearance(
+            WindowContainer container, float alpha, int blurRadius);
 
     /**
      * Mark all dims as pending completion on the next call to {@link #updateDims}
