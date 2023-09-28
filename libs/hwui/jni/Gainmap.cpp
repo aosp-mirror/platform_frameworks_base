@@ -208,8 +208,6 @@ static void Gainmap_writeToParcel(JNIEnv* env, jobject, jlong nativeObject, jobj
     p.writeFloat(info.fDisplayRatioHdr);
     // base image type
     p.writeInt32(static_cast<int32_t>(info.fBaseImageType));
-    // type
-    p.writeInt32(static_cast<int32_t>(info.fType));
 #else
     doThrowRE(env, "Cannot use parcels outside of Android!");
 #endif
@@ -232,7 +230,6 @@ static void Gainmap_readFromParcel(JNIEnv* env, jobject, jlong nativeObject, job
     info.fDisplayRatioSdr = p.readFloat();
     info.fDisplayRatioHdr = p.readFloat();
     info.fBaseImageType = static_cast<SkGainmapInfo::BaseImageType>(p.readInt32());
-    info.fType = static_cast<SkGainmapInfo::Type>(p.readInt32());
 
     fromJava(nativeObject)->info = info;
 #else
