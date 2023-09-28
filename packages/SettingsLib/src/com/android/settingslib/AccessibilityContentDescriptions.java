@@ -50,6 +50,7 @@ public class AccessibilityContentDescriptions {
     };
 
     public static final int WIFI_NO_CONNECTION = R.string.accessibility_no_wifi;
+    public static final int WIFI_OTHER_DEVICE_CONNECTION = R.string.accessibility_wifi_other_device;
 
     public static final int NO_CALLING = R.string.accessibility_no_calling;
 

@@ -345,6 +345,8 @@
     <string name="accessibility_wifi_three_bars">Wifi three bars.</string>
     <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_signal_full">Wifi signal full.</string>
+    <!-- Content description of the WIFI signal when the WIFI is connected using the signal from a different device owned by the user. For accessibility (not shown on the screen) [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_other_device">Connected to your device.</string>
 
     <!-- Content description of the Wi-Fi security type. This message indicates this is an open Wi-Fi (no password needed) [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_security_type_none">Open network</string>
