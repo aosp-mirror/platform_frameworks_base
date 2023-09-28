@@ -32,7 +32,7 @@ android_library {
         "SettingsLibUtils",
         "SettingsLibWidget",
         "setupdesign",
-        "zxing-core-1.7",
+        "zxing-core",
         "androidx.room_room-runtime",
         "settingslib_flags_lib",
     ],
