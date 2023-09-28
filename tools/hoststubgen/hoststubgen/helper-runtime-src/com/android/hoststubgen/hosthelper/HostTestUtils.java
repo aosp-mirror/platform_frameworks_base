@@ -69,7 +69,8 @@ public class HostTestUtils {
             String methodDescriptor,
             String callbackMethod
     ) {
-        callStaticMethodByName(callbackMethod, methodClass, methodName, methodDescriptor);
+        callStaticMethodByName(callbackMethod, "method call hook", methodClass,
+                methodName, methodDescriptor);
     }
 
     /**
@@ -167,31 +168,38 @@ public class HostTestUtils {
         logPrintStream.println("! Class loaded: " + loadedClass.getCanonicalName()
                 + " calling hook " + callbackMethod);
 
-        callStaticMethodByName(callbackMethod, loadedClass);
+        callStaticMethodByName(callbackMethod, "class load hook", loadedClass);
     }
 
-    private static void callStaticMethodByName(String classAndMethodName, Object... args) {
+    private static void callStaticMethodByName(String classAndMethodName,
+            String description, Object... args) {
         // Forward the call to callbackMethod.
         final int lastPeriod = classAndMethodName.lastIndexOf(".");
-        final String className = classAndMethodName.substring(0, lastPeriod);
-        final String methodName = classAndMethodName.substring(lastPeriod + 1);
 
-        if (lastPeriod < 0 || className.isEmpty() || methodName.isEmpty()) {
+        if ((lastPeriod) < 0 || (lastPeriod == classAndMethodName.length() - 1)) {
             throw new HostTestException(String.format(
-                    "Unable to find class load hook: malformed method name \"%s\"",
+                    "Unable to find %s: malformed method name \"%s\"",
+                    description,
                     classAndMethodName));
         }
+
+        final String className = classAndMethodName.substring(0, lastPeriod);
+        final String methodName = classAndMethodName.substring(lastPeriod + 1);
 
         Class<?> clazz = null;
         try {
             clazz = Class.forName(className);
         } catch (Exception e) {
             throw new HostTestException(String.format(
-                    "Unable to find class load hook: Class %s not found", className), e);
+                    "Unable to find %s: Class %s not found",
+                    description,
+                    className), e);
         }
         if (!Modifier.isPublic(clazz.getModifiers())) {
             throw new HostTestException(String.format(
-                    "Unable to find class load hook: Class %s must be public", className));
+                    "Unable to find %s: Class %s must be public",
+                    description,
+                    className));
         }
 
         Class<?>[] argTypes = new Class[args.length];
@@ -204,25 +212,23 @@ public class HostTestUtils {
             method = clazz.getMethod(methodName, argTypes);
         } catch (Exception e) {
             throw new HostTestException(String.format(
-                    "Unable to find class load hook: class %s doesn't have method %s"
+                    "Unable to find %s: class %s doesn't have method %s"
                             + " (method must take exactly one parameter of type Class,"
                             + " and public static)",
-                    className,
-                    methodName), e);
+                    description, className, methodName), e);
         }
         if (!(Modifier.isPublic(method.getModifiers())
                 && Modifier.isStatic(method.getModifiers()))) {
             throw new HostTestException(String.format(
-                    "Unable to find class load hook: Method %s in class %s must be public static",
-                    methodName, className));
+                    "Unable to find %s: Method %s in class %s must be public static",
+                    description, methodName, className));
         }
         try {
             method.invoke(null, args);
         } catch (Exception e) {
             throw new HostTestException(String.format(
-                    "Unable to invoke class load hook %s.%s",
-                    className,
-                    methodName), e);
+                    "Unable to invoke %s %s.%s",
+                    description, className, methodName), e);
         }
     }
 
