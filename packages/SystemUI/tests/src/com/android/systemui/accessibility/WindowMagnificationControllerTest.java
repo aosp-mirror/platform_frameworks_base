@@ -88,9 +88,9 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.util.leak.ReferenceTestUtils;
 import com.android.systemui.util.settings.SecureSettings;
@@ -121,6 +121,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     private static final int LAYOUT_CHANGE_TIMEOUT_MS = 5000;
+    // The duration couldn't too short, otherwise the animation check on bounce effect
+    // won't work in expectation. (b/299537784)
+    private static final int BOUNCE_EFFECT_DURATION_MS = 2000;
     private static final long ANIMATION_DURATION_MS = 300;
     private final long mWaitingAnimationPeriod = 2 * ANIMATION_DURATION_MS;
     @Mock
@@ -205,6 +208,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                         mSysUiState,
                         () -> mWindowSessionSpy,
                         mSecureSettings);
+        mWindowMagnificationController.setBounceEffectDuration(BOUNCE_EFFECT_DURATION_MS);
 
         verify(mMirrorWindowControl).setWindowDelegate(
                 any(MirrorWindowControl.MirrorWindowDelegate.class));
