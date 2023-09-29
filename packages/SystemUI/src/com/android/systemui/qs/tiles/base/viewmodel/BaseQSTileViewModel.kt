@@ -1,8 +1,26 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.qs.tiles.base.viewmodel
 
 import androidx.annotation.CallSuper
 import androidx.annotation.VisibleForTesting
 import com.android.internal.util.Preconditions
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.qs.tiles.base.interactor.DisabledByPolicyInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataRequest
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
@@ -10,10 +28,13 @@ import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.base.interactor.StateUpdateTrigger
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileLifecycle
+import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.util.kotlin.sample
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -25,6 +46,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -37,40 +59,35 @@ import kotlinx.coroutines.flow.stateIn
  * Provides a hassle-free way to implement new tiles according to current System UI architecture
  * standards. THis ViewModel is cheap to instantiate and does nothing until it's moved to
  * [QSTileLifecycle.ALIVE] state.
+ *
+ * Inject [BaseQSTileViewModel.Factory] to create a new instance of this class.
  */
-abstract class BaseQSTileViewModel<DATA_TYPE>
+class BaseQSTileViewModel<DATA_TYPE>
 @VisibleForTesting
 constructor(
-    final override val config: QSTileConfig,
+    override val config: QSTileConfig,
     private val userActionInteractor: QSTileUserActionInteractor<DATA_TYPE>,
     private val tileDataInteractor: QSTileDataInteractor<DATA_TYPE>,
     private val mapper: QSTileDataToStateMapper<DATA_TYPE>,
+    private val disabledByPolicyInteractor: DisabledByPolicyInteractor,
     private val backgroundDispatcher: CoroutineDispatcher,
     private val tileScope: CoroutineScope,
 ) : QSTileViewModel {
 
-    /**
-     * @param config contains all the static information (like TileSpec) about the tile.
-     * @param userActionInteractor encapsulates user input processing logic. Use it to start
-     *   activities, show dialogs or otherwise update the tile state.
-     * @param tileDataInteractor provides [DATA_TYPE] and its availability.
-     * @param backgroundDispatcher is used to run the internal [DATA_TYPE] processing and call
-     *   interactors methods. This should likely to be @Background CoroutineDispatcher.
-     * @param mapper maps [DATA_TYPE] to the [QSTileState] that is then displayed by the View layer.
-     *   It's called in [backgroundDispatcher], so it's safe to perform long running operations
-     *   there.
-     */
+    @AssistedInject
     constructor(
-        config: QSTileConfig,
-        userActionInteractor: QSTileUserActionInteractor<DATA_TYPE>,
-        tileDataInteractor: QSTileDataInteractor<DATA_TYPE>,
-        mapper: QSTileDataToStateMapper<DATA_TYPE>,
-        backgroundDispatcher: CoroutineDispatcher,
+        @Assisted config: QSTileConfig,
+        @Assisted userActionInteractor: QSTileUserActionInteractor<DATA_TYPE>,
+        @Assisted tileDataInteractor: QSTileDataInteractor<DATA_TYPE>,
+        @Assisted mapper: QSTileDataToStateMapper<DATA_TYPE>,
+        disabledByPolicyInteractor: DisabledByPolicyInteractor,
+        @Background backgroundDispatcher: CoroutineDispatcher,
     ) : this(
         config,
         userActionInteractor,
         tileDataInteractor,
         mapper,
+        disabledByPolicyInteractor,
         backgroundDispatcher,
         CoroutineScope(SupervisorJob())
     )
@@ -145,7 +162,7 @@ constructor(
         userIds
             .flatMapLatest { userId ->
                 merge(
-                        userInputFlow(),
+                        userInputFlow(userId),
                         forceUpdates.map { StateUpdateTrigger.ForceUpdate },
                     )
                     .onStart { emit(StateUpdateTrigger.InitialRequest) }
@@ -172,14 +189,41 @@ constructor(
                 replay = 1, // we only care about the most recent value
             )
 
-    private fun userInputFlow(): Flow<StateUpdateTrigger> {
+    private fun userInputFlow(userId: Int): Flow<StateUpdateTrigger> {
         data class StateWithData<T>(val state: QSTileState, val data: T)
 
+        return when (config.policy) {
+            is QSTilePolicy.NoRestrictions -> userInputs
+            is QSTilePolicy.Restricted ->
+                userInputs.filter {
+                    val result =
+                        disabledByPolicyInteractor.isDisabled(userId, config.policy.userRestriction)
+                    !disabledByPolicyInteractor.handlePolicyResult(result)
+                }
         // Skip the input until there is some data
-        return userInputs.sample(
-            state.combine(tileData) { state, data -> StateWithData(state, data) }
-        ) { input, stateWithData ->
+        }.sample(state.combine(tileData) { state, data -> StateWithData(state, data) }) {
+            input,
+            stateWithData ->
             StateUpdateTrigger.UserAction(input, stateWithData.state, stateWithData.data)
         }
+    }
+
+    interface Factory<T> {
+
+        /**
+         * @param config contains all the static information (like TileSpec) about the tile.
+         * @param userActionInteractor encapsulates user input processing logic. Use it to start
+         *   activities, show dialogs or otherwise update the tile state.
+         * @param tileDataInteractor provides [DATA_TYPE] and its availability.
+         * @param mapper maps [DATA_TYPE] to the [QSTileState] that is then displayed by the View
+         *   layer. It's called in [backgroundDispatcher], so it's safe to perform long running
+         *   operations there.
+         */
+        fun create(
+            config: QSTileConfig,
+            userActionInteractor: QSTileUserActionInteractor<T>,
+            tileDataInteractor: QSTileDataInteractor<T>,
+            mapper: QSTileDataToStateMapper<T>,
+        ): BaseQSTileViewModel<T>
     }
 }
