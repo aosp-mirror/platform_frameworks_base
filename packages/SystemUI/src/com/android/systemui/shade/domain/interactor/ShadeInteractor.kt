@@ -129,6 +129,9 @@ constructor(
         combine(shadeExpansion, qsExpansion) { shadeExp, qsExp -> maxOf(shadeExp, qsExp) }
             .stateIn(scope, SharingStarted.Eagerly, 0f)
 
+    /** Whether either the shade or QS is fully expanded. */
+    val isAnyFullyExpanded: Flow<Boolean> = anyExpansion.map { it >= 1f }.distinctUntilChanged()
+
     /** Whether either the shade or QS is expanding from a fully collapsed state. */
     val isAnyExpanding: Flow<Boolean> =
         anyExpansion

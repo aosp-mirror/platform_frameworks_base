@@ -16,4 +16,14 @@ package android.app;
       * Sets a specified app’s app-specific grammatical gender.
       */
      void setRequestedApplicationGrammaticalGender(String appPackageName, int userId, int gender);
+
+     /**
+      * Sets the grammatical gender to system.
+      */
+     void setSystemWideGrammaticalGender(int userId, int gender);
+
+     /**
+      * Gets the grammatical gender from system.
+      */
+     int getSystemGrammaticalGender(int userId);
  }

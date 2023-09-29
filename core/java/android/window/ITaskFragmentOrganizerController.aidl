@@ -25,9 +25,12 @@ import android.window.WindowContainerTransaction;
 interface ITaskFragmentOrganizerController {
 
     /**
-     * Registers a TaskFragmentOrganizer to manage TaskFragments.
+     * Registers a TaskFragmentOrganizer to manage TaskFragments. Registering a system
+     * organizer requires MANAGE_ACTIVITY_TASKS permission, and the organizer will have additional
+     * system capabilities.
      */
-    void registerOrganizer(in ITaskFragmentOrganizer organizer);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value=android.Manifest.permission.MANAGE_ACTIVITY_TASKS, conditional=true)")
+    void registerOrganizer(in ITaskFragmentOrganizer organizer, in boolean isSystemOrganizer);
 
     /**
      * Unregisters a previously registered TaskFragmentOrganizer.

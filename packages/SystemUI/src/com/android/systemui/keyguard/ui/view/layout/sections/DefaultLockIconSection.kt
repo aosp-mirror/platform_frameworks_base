@@ -29,11 +29,11 @@ import androidx.constraintlayout.widget.ConstraintSet
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
-import com.android.systemui.res.R
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import javax.inject.Inject
 
@@ -73,11 +73,11 @@ constructor(
         val mBottomPaddingPx =
             context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)
         val bounds = windowManager.currentWindowMetrics.bounds
-        val insets = windowManager.currentWindowMetrics.windowInsets
         var widthPixels = bounds.right.toFloat()
         if (featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)) {
             // Assumed to be initially neglected as there are no left or right insets in portrait.
             // However, on landscape, these insets need to included when calculating the midpoint.
+            val insets = windowManager.currentWindowMetrics.windowInsets
             widthPixels -= (insets.systemWindowInsetLeft + insets.systemWindowInsetRight).toFloat()
         }
         val heightPixels = bounds.bottom.toFloat()

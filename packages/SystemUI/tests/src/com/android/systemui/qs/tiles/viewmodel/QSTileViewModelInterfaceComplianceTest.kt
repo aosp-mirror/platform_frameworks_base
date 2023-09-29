@@ -1,11 +1,14 @@
 package com.android.systemui.qs.tiles.viewmodel
 
-import android.graphics.drawable.Icon
+import android.graphics.drawable.ShapeDrawable
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.MediumTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.interactor.FakeQSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.FakeQSTileUserActionInteractor
@@ -71,20 +74,21 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
                 fakeQSTileUserActionInteractor,
                 fakeQSTileDataInteractor,
                 object : QSTileDataToStateMapper<Any> {
-                    override fun map(config: QSTileConfig, data: Any): QSTileState {
-                        return QSTileState(config.tileIcon, config.tileLabel)
-                    }
+                    override fun map(config: QSTileConfig, data: Any): QSTileState =
+                        QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {}
                 },
                 testCoroutineDispatcher,
                 tileScope = scope.backgroundScope,
             ) {}
 
     private companion object {
+
         val TEST_QS_TILE_CONFIG =
             QSTileConfig(
                 TileSpec.create("default"),
-                Icon.createWithContentUri(""),
-                "",
+                Icon.Loaded(ShapeDrawable(), null),
+                0,
+                InstanceId.fakeInstanceId(0),
             )
     }
 }

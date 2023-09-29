@@ -1,5 +1,6 @@
 package com.android.keyguard
 
+import android.animation.LayoutTransition
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -32,6 +33,20 @@ class KeyguardStatusViewTest : SysuiTestCase() {
         keyguardStatusView =
             LayoutInflater.from(context).inflate(R.layout.keyguard_status_view, /* root= */ null)
                 as KeyguardStatusView
+    }
+
+    @Test
+    fun mediaViewHasLayoutTransitionInDisabledState() {
+        val layoutTransition = (mediaView as ViewGroup).layoutTransition
+        assertThat(layoutTransition).isNotNull()
+        assertThat(layoutTransition.isTransitionTypeEnabled(LayoutTransition.CHANGE_APPEARING))
+            .isFalse()
+        assertThat(layoutTransition.isTransitionTypeEnabled(LayoutTransition.CHANGE_DISAPPEARING))
+            .isFalse()
+        assertThat(layoutTransition.isTransitionTypeEnabled(LayoutTransition.APPEARING)).isFalse()
+        assertThat(layoutTransition.isTransitionTypeEnabled(LayoutTransition.DISAPPEARING))
+            .isFalse()
+        assertThat(layoutTransition.isTransitionTypeEnabled(LayoutTransition.CHANGING)).isFalse()
     }
 
     @Test

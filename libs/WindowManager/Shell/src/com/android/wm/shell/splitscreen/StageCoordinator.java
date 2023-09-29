@@ -720,6 +720,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSplitLayout.setDivideRatio(snapPosition);
         updateWindowBounds(mSplitLayout, wct);
         wct.reorder(mRootTaskInfo.token, true);
+        wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                false /* reparentLeafTaskIfRelaunch */);
         setRootForceTranslucent(false, wct);
 
         // Make sure the launch options will put tasks in the corresponding split roots
@@ -767,6 +769,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSplitLayout.setDivideRatio(snapPosition);
         updateWindowBounds(mSplitLayout, wct);
         wct.reorder(mRootTaskInfo.token, true);
+        wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                false /* reparentLeafTaskIfRelaunch */);
         setRootForceTranslucent(false, wct);
 
         options1 = options1 != null ? options1 : new Bundle();

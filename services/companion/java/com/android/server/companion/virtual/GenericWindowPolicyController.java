@@ -121,7 +121,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
-    final ArraySet<Integer> mRunningUids = new ArraySet<>();
+    private final ArraySet<Integer> mRunningUids = new ArraySet<>();
     @Nullable private final ActivityListener mActivityListener;
     @Nullable private final PipBlockedCallback mPipBlockedCallback;
     @Nullable private final IntentListenerCallback mIntentListenerCallback;

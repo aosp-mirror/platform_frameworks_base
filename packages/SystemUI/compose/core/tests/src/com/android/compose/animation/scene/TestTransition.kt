@@ -23,7 +23,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.SemanticsNodeInteractionCollection
+import androidx.compose.ui.test.hasParent
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 
 @DslMarker annotation class TransitionTestDsl
@@ -59,8 +63,21 @@ interface TransitionTestBuilder {
 
 @TransitionTestDsl
 interface TransitionTestAssertionScope {
-    /** Assert on [element]. */
-    fun onElement(element: ElementKey): SemanticsNodeInteraction
+    /**
+     * Assert on [element].
+     *
+     * Note that presence/value assertions on the returned [SemanticsNodeInteraction] will fail if 0
+     * or more than 1 elements matched [element]. If you need to assert on a shared element that
+     * will be present multiple times in the layout during transitions, either specify the [scene]
+     * in which you are matching or use [onSharedElement] instead.
+     */
+    fun onElement(element: ElementKey, scene: SceneKey? = null): SemanticsNodeInteraction
+
+    /**
+     * Assert on a shared [element]. This will throw if [element] is not shared and present only in
+     * one scene during a transition.
+     */
+    fun onSharedElement(element: ElementKey): SemanticsNodeInteractionCollection
 }
 
 /**
@@ -73,20 +90,22 @@ fun ComposeContentTestRule.testTransition(
     toSceneContent: @Composable SceneScope.() -> Unit,
     transition: TransitionBuilder.() -> Unit,
     layoutModifier: Modifier = Modifier,
+    fromScene: SceneKey = TestScenes.SceneA,
+    toScene: SceneKey = TestScenes.SceneB,
     builder: TransitionTestBuilder.() -> Unit,
 ) {
     testTransition(
-        from = TestScenes.SceneA,
-        to = TestScenes.SceneB,
+        from = fromScene,
+        to = toScene,
         transitionLayout = { currentScene, onChangeScene ->
             SceneTransitionLayout(
                 currentScene,
                 onChangeScene,
-                transitions { from(TestScenes.SceneA, to = TestScenes.SceneB, transition) },
+                transitions { from(fromScene, to = toScene, transition) },
                 layoutModifier.fillMaxSize(),
             ) {
-                scene(TestScenes.SceneA, content = fromSceneContent)
-                scene(TestScenes.SceneB, content = toSceneContent)
+                scene(fromScene, content = fromSceneContent)
+                scene(toScene, content = toSceneContent)
             }
         },
         builder,
@@ -111,8 +130,24 @@ fun ComposeContentTestRule.testTransition(
     val test = transitionTest(builder)
     val assertionScope =
         object : TransitionTestAssertionScope {
-            override fun onElement(element: ElementKey): SemanticsNodeInteraction {
-                return this@testTransition.onNodeWithTag(element.name)
+            override fun onElement(
+                element: ElementKey,
+                scene: SceneKey?
+            ): SemanticsNodeInteraction {
+                return if (scene == null) {
+                    onNodeWithTag(element.testTag)
+                } else {
+                    onNode(hasTestTag(element.testTag) and hasParent(hasTestTag(scene.testTag)))
+                }
+            }
+
+            override fun onSharedElement(element: ElementKey): SemanticsNodeInteractionCollection {
+                val interaction = onAllNodesWithTag(element.testTag)
+                val matches = interaction.fetchSemanticsNodes(atLeastOneRootRequired = false).size
+                if (matches < 2) {
+                    error("Element $element is not shared ($matches matches)")
+                }
+                return interaction
             }
         }
 

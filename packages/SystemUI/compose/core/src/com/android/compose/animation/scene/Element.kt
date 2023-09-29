@@ -151,7 +151,7 @@ internal fun Modifier.element(
                 element.lastAlpha = alpha
             }
         }
-        .testTag(key.name)
+        .testTag(key.testTag)
 }
 
 private fun shouldDrawElement(
@@ -167,7 +167,8 @@ private fun shouldDrawElement(
             state.fromScene == state.toScene ||
             !layoutImpl.isTransitionReady(state) ||
             state.fromScene !in element.sceneValues ||
-            state.toScene !in element.sceneValues
+            state.toScene !in element.sceneValues ||
+            !isSharedElementEnabled(layoutImpl, state, element.key)
     ) {
         return true
     }
@@ -189,6 +190,26 @@ private fun shouldDrawElement(
     } else {
         isHighestScene
     }
+}
+
+private fun isSharedElementEnabled(
+    layoutImpl: SceneTransitionLayoutImpl,
+    transition: TransitionState.Transition,
+    element: ElementKey,
+): Boolean {
+    val spec = layoutImpl.transitions.transitionSpec(transition.fromScene, transition.toScene)
+    val sharedInFromScene = spec.transformations(element, transition.fromScene).shared
+    val sharedInToScene = spec.transformations(element, transition.toScene).shared
+
+    // The sharedElement() transformation must either be null or be the same in both scenes.
+    if (sharedInFromScene != sharedInToScene) {
+        error(
+            "Different sharedElement() transformations matched $element (from=$sharedInFromScene " +
+                "to=$sharedInToScene)"
+        )
+    }
+
+    return sharedInFromScene?.enabled ?: true
 }
 
 /**
@@ -213,7 +234,7 @@ private fun Modifier.modifierTransformations(
 
             return layoutImpl.transitions
                 .transitionSpec(fromScene, state.toScene)
-                .transformations(element.key)
+                .transformations(element.key, scene.key)
                 .modifier
                 .fold(this) { modifier, transformation ->
                     with(transformation) {
@@ -407,17 +428,20 @@ private inline fun <T> computeValue(
     // The element is shared: interpolate between the value in fromScene and the value in toScene.
     // TODO(b/290184746): Support non linear shared paths as well as a way to make sure that shared
     // elements follow the finger direction.
-    if (fromValues != null && toValues != null) {
+    val isSharedElement = fromValues != null && toValues != null
+    if (isSharedElement && isSharedElementEnabled(layoutImpl, state, element.key)) {
         return lerp(
-            sceneValue(fromValues),
-            sceneValue(toValues),
+            sceneValue(fromValues!!),
+            sceneValue(toValues!!),
             transitionProgress,
         )
     }
 
     val transformation =
         transformation(
-            layoutImpl.transitions.transitionSpec(fromScene, toScene).transformations(element.key)
+            layoutImpl.transitions
+                .transitionSpec(fromScene, toScene)
+                .transformations(element.key, scene.key)
         )
         // If there is no transformation explicitly associated to this element value, let's use
         // the value given by the system (like the current position and size given by the layout
@@ -426,12 +450,21 @@ private inline fun <T> computeValue(
 
     // Get the transformed value, i.e. the target value at the beginning (for entering elements) or
     // end (for leaving elements) of the transition.
+    val sceneValues =
+        checkNotNull(
+            when {
+                isSharedElement && scene.key == fromScene -> fromValues
+                isSharedElement -> toValues
+                else -> fromValues ?: toValues
+            }
+        )
+
     val targetValue =
         transformation.transform(
             layoutImpl,
             scene,
             element,
-            fromValues ?: toValues!!,
+            sceneValues,
             state,
             idleValue,
         )
@@ -440,7 +473,7 @@ private inline fun <T> computeValue(
     val rangeProgress = transformation.range?.progress(transitionProgress) ?: transitionProgress
 
     // Interpolate between the value at rest and the value before entering/after leaving.
-    val isEntering = fromValues == null
+    val isEntering = scene.key == toScene
     return if (isEntering) {
         lerp(targetValue, idleValue, rangeProgress)
     } else {

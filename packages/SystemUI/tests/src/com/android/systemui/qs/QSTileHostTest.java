@@ -66,6 +66,7 @@ import com.android.systemui.qs.external.TileServiceKey;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.qs.tiles.di.NewQSTileFactory;
 import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
@@ -76,6 +77,8 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+
+import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -102,8 +105,6 @@ public class QSTileHostTest extends SysuiTestCase {
     private static final String SETTING = QSHost.TILES_SETTING;
 
     @Mock
-    private QSFactory mDefaultFactory;
-    @Mock
     private PluginManager mPluginManager;
     @Mock
     private TunerService mTunerService;
@@ -117,7 +118,6 @@ public class QSTileHostTest extends SysuiTestCase {
     private CustomTile mCustomTile;
     @Mock
     private UserTracker mUserTracker;
-    private SecureSettings mSecureSettings;
     @Mock
     private CustomTileStatePersister mCustomTileStatePersister;
     @Mock
@@ -126,6 +126,10 @@ public class QSTileHostTest extends SysuiTestCase {
     private TileLifecycleManager mTileLifecycleManager;
     @Mock
     private UserFileManager mUserFileManager;
+
+    private SecureSettings mSecureSettings;
+
+    private QSFactory mDefaultFactory;
 
     private SparseArray<SharedPreferences> mSharedPreferencesByUser;
 
@@ -144,6 +148,8 @@ public class QSTileHostTest extends SysuiTestCase {
 
         mFeatureFlags.set(Flags.QS_PIPELINE_NEW_HOST, false);
         mFeatureFlags.set(Flags.QS_PIPELINE_AUTO_ADD, false);
+        // TODO(b/299909337): Add test checking the new factory is used when the flag is on
+        mFeatureFlags.set(Flags.QS_PIPELINE_NEW_TILES, false);
         mQSPipelineFlagsRepository = new QSPipelineFlagsRepository(mFeatureFlags);
 
         mMainExecutor = new FakeExecutor(new FakeSystemClock());
@@ -164,7 +170,8 @@ public class QSTileHostTest extends SysuiTestCase {
 
         mSecureSettings = new FakeSettings();
         saveSetting("");
-        mQSTileHost = new TestQSTileHost(mContext, mDefaultFactory, mMainExecutor,
+        setUpTileFactory();
+        mQSTileHost = new TestQSTileHost(mContext, () -> null, mDefaultFactory, mMainExecutor,
                 mPluginManager, mTunerService, () -> mAutoTiles, mShadeController,
                 mQSLogger, mUserTracker, mSecureSettings, mCustomTileStatePersister,
                 mTileLifecycleManagerFactory, mUserFileManager, mQSPipelineFlagsRepository);
@@ -178,7 +185,6 @@ public class QSTileHostTest extends SysuiTestCase {
                 mMainExecutor.runAllReady();
             }
         }, mUserTracker.getUserId());
-        setUpTileFactory();
     }
 
     private void saveSetting(String value) {
@@ -191,32 +197,29 @@ public class QSTileHostTest extends SysuiTestCase {
     }
 
     private void setUpTileFactory() {
-        // Only create this kind of tiles
-        when(mDefaultFactory.createTile(anyString())).thenAnswer(
-                invocation -> {
-                    String spec = invocation.getArgument(0);
-                    if ("spec1".equals(spec)) {
-                        return new TestTile1(mQSTileHost);
-                    } else if ("spec2".equals(spec)) {
-                        return new TestTile2(mQSTileHost);
-                    } else if ("spec3".equals(spec)) {
-                        return new TestTile3(mQSTileHost);
-                    } else if ("na".equals(spec)) {
-                        return new NotAvailableTile(mQSTileHost);
-                    } else if (CUSTOM_TILE_SPEC.equals(spec)) {
-                        QSTile tile = mCustomTile;
-                        QSTile.State s = mock(QSTile.State.class);
-                        s.spec = spec;
-                        when(mCustomTile.getState()).thenReturn(s);
-                        return tile;
-                    } else if ("internet".equals(spec)
-                            || "wifi".equals(spec)
-                            || "cell".equals(spec)) {
-                        return new TestTile1(mQSTileHost);
-                    } else {
-                        return null;
-                    }
-                });
+        mDefaultFactory = new FakeQSFactory(spec -> {
+            if ("spec1".equals(spec)) {
+                return new TestTile1(mQSTileHost);
+            } else if ("spec2".equals(spec)) {
+                return new TestTile2(mQSTileHost);
+            } else if ("spec3".equals(spec)) {
+                return new TestTile3(mQSTileHost);
+            } else if ("na".equals(spec)) {
+                return new NotAvailableTile(mQSTileHost);
+            } else if (CUSTOM_TILE_SPEC.equals(spec)) {
+                QSTile tile = mCustomTile;
+                QSTile.State s = mock(QSTile.State.class);
+                s.spec = spec;
+                when(mCustomTile.getState()).thenReturn(s);
+                return tile;
+            } else if ("internet".equals(spec)
+                    || "wifi".equals(spec)
+                    || "cell".equals(spec)) {
+                return new TestTile1(mQSTileHost);
+            } else {
+                return null;
+            }
+        });
         when(mCustomTile.isAvailable()).thenReturn(true);
     }
 
@@ -703,7 +706,7 @@ public class QSTileHostTest extends SysuiTestCase {
     }
 
     private class TestQSTileHost extends QSTileHost {
-        TestQSTileHost(Context context,
+        TestQSTileHost(Context context, Lazy<NewQSTileFactory> newQSTileFactoryProvider,
                 QSFactory defaultFactory, Executor mainExecutor,
                 PluginManager pluginManager, TunerService tunerService,
                 Provider<AutoTileManager> autoTiles,
@@ -712,7 +715,7 @@ public class QSTileHostTest extends SysuiTestCase {
                 CustomTileStatePersister customTileStatePersister,
                 TileLifecycleManager.Factory tileLifecycleManagerFactory,
                 UserFileManager userFileManager, QSPipelineFlagsRepository featureFlags) {
-            super(context, defaultFactory, mainExecutor, pluginManager,
+            super(context, newQSTileFactoryProvider, defaultFactory, mainExecutor, pluginManager,
                     tunerService, autoTiles,  shadeController, qsLogger,
                     userTracker, secureSettings, customTileStatePersister,
                     tileLifecycleManagerFactory, userFileManager, featureFlags);

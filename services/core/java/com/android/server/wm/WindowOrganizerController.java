@@ -99,6 +99,7 @@ import android.window.IWindowOrganizerController;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentCreationParams;
 import android.window.TaskFragmentOperation;
+import android.window.TaskFragmentOrganizerToken;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -1993,8 +1994,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 creationParams.getFragmentToken(), true /* createdByOrganizer */);
         // Set task fragment organizer immediately, since it might have to be notified about further
         // actions.
-        taskFragment.setTaskFragmentOrganizer(creationParams.getOrganizer(),
-                ownerActivity.getUid(), ownerActivity.info.processName);
+        TaskFragmentOrganizerToken organizerToken = creationParams.getOrganizer();
+        taskFragment.setTaskFragmentOrganizer(organizerToken,
+                ownerActivity.getUid(), ownerActivity.info.processName,
+                mTaskFragmentOrganizerController.isSystemOrganizer(organizerToken));
         final int position;
         if (creationParams.getPairedPrimaryFragmentToken() != null) {
             // When there is a paired primary TaskFragment, we want to place the new TaskFragment

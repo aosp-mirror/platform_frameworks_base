@@ -303,6 +303,11 @@ object Flags {
     @JvmField val MIGRATE_CLOCKS_TO_BLUEPRINT =
             unreleasedFlag("migrate_clocks_to_blueprint")
 
+    /** Migrate KeyguardRootView to use composables. */
+    // TODO(b/301969856): Tracking Bug.
+    @JvmField val KEYGUARD_ROOT_VIEW_USE_COMPOSE =
+        unreleasedFlag("keyguard_root_view_use_compose")
+
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug
     @JvmField
@@ -770,6 +775,10 @@ object Flags {
 
     // TODO(b/302087895): Tracking Bug
     @JvmField val CALL_LAYOUT_ASYNC_SET_DATA = unreleasedFlag("call_layout_async_set_data")
+
+    // TODO(b/302144438): Tracking Bug
+    @JvmField val DECOUPLE_REMOTE_INPUT_DELEGATE_AND_CALLBACK_UPDATE =
+            unreleasedFlag("decouple_remote_input_delegate_and_callback_update")
 
     // 2900 - CentralSurfaces-related flags
 

@@ -62,7 +62,7 @@ import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ActivityResultItem;
 import android.app.servertransaction.ClientTransaction;
-import android.app.servertransaction.ClientTransactionItem;
+import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.PendingTransactionActions.StopInfo;
@@ -375,8 +375,8 @@ public final class ActivityThread extends ClientTransactionHandler
     @GuardedBy("mPendingOverrideConfigs")
     private final ArrayMap<IBinder, Configuration> mPendingOverrideConfigs = new ArrayMap<>();
     /** The activities to be truly destroyed (not include relaunch). */
-    final Map<IBinder, ClientTransactionItem> mActivitiesToBeDestroyed =
-            Collections.synchronizedMap(new ArrayMap<IBinder, ClientTransactionItem>());
+    final Map<IBinder, DestroyActivityItem> mActivitiesToBeDestroyed =
+            Collections.synchronizedMap(new ArrayMap<>());
     // List of new activities that should be reported when next we idle.
     final ArrayList<ActivityClientRecord> mNewActivities = new ArrayList<>();
     // Number of activities that are currently visible on-screen.
@@ -5799,7 +5799,7 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
-    public Map<IBinder, ClientTransactionItem> getActivitiesToBeDestroyed() {
+    public Map<IBinder, DestroyActivityItem> getActivitiesToBeDestroyed() {
         return mActivitiesToBeDestroyed;
     }
 

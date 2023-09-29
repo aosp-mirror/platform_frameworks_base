@@ -71,7 +71,6 @@ import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.display.BrightnessConfiguration;
-import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
@@ -95,7 +94,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.view.ContentRecordingSession;
 import android.view.Display;
-import android.view.DisplayAdjustments;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
 import android.view.DisplayInfo;
@@ -103,6 +101,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.DisplayWindowPolicyController;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
@@ -333,11 +332,7 @@ public class DisplayManagerServiceTest {
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.addService(UserManagerInternal.class, mMockUserManagerInternal);
         // TODO: b/287945043
-        Display display = mock(Display.class);
-        when(display.getDisplayAdjustments()).thenReturn(new DisplayAdjustments());
-        when(display.getBrightnessInfo()).thenReturn(mock(BrightnessInfo.class));
-        mContext = spy(new ContextWrapper(
-                ApplicationProvider.getApplicationContext().createDisplayContext(display)));
+        mContext = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mResources = Mockito.spy(mContext.getResources());
         manageDisplaysPermission(/* granted= */ false);
         when(mContext.getResources()).thenReturn(mResources);
@@ -1912,6 +1907,7 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testSettingTwoBrightnessConfigurationsOnMultiDisplay() {
+        Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
         DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
 
         // get the first two internal displays

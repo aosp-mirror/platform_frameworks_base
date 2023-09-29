@@ -1,6 +1,6 @@
 package com.android.systemui.qs.pipeline.domain.interactor
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
 @RoboPilotTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class RestoreReconciliationInteractorTest : SysuiTestCase() {
 

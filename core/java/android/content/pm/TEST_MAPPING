@@ -45,7 +45,8 @@
             ]
         },
         {
-            "name":"CarrierAppIntegrationTestCases"
+            "name":"CarrierAppIntegrationTestCases",
+            "keywords": ["internal"]
         },
         {
             "name":"CtsSilentUpdateHostTestCases"

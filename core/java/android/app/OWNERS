@@ -54,6 +54,9 @@ per-file IBackupAgent.aidl = file:/services/backup/OWNERS
 per-file Broadcast* = file:/BROADCASTS_OWNERS
 per-file ReceiverInfo* = file:/BROADCASTS_OWNERS
 
+# GrammaticalInflectionManager
+per-file *GrammaticalInflection* = file:/services/core/java/com/android/server/grammaticalinflection/OWNERS
+
 # KeyguardManager
 per-file KeyguardManager.java = file:/services/core/java/com/android/server/locksettings/OWNERS
 

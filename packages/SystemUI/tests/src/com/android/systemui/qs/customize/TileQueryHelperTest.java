@@ -124,6 +124,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
                     if (FACTORY_TILES.contains(spec)) {
                         FakeQSTile tile = new FakeQSTile(mBgExecutor, mMainExecutor);
                         tile.setState(mState);
+                        tile.setTileSpec(spec);
                         return tile;
                     } else {
                         return null;
@@ -284,7 +285,10 @@ public class TileQueryHelperTest extends SysuiTestCase {
         Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.QS_TILES, null);
 
         QSTile t = mock(QSTile.class);
-        when(mQSHost.createTile("hotspot")).thenReturn(t);
+        when(mQSHost.createTile("hotspot")).thenAnswer(invocation -> {
+            t.setTileSpec("hotspot");
+            return t;
+        });
 
         mContext.getOrCreateTestableResources().addOverride(R.string.quick_settings_tiles_stock,
                 "hotspot");

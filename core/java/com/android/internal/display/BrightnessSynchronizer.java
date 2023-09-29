@@ -16,11 +16,9 @@
 
 package com.android.internal.display;
 
-import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
-import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.net.Uri;
@@ -56,7 +54,8 @@ public class BrightnessSynchronizer {
     private static final int MSG_RUN_UPDATE = 1;
 
     // The tolerance within which we consider brightness values approximately equal to eachother.
-    public static final float EPSILON = 0.0001f;
+    // This value is approximately 1/3 of the smallest possible brightness value.
+    public static final float EPSILON = 0.001f;
 
     private static int sBrightnessUpdateCount = 1;
 
@@ -285,74 +284,6 @@ public class BrightnessSynchronizer {
     }
 
     /**
-     * Converts between the int brightness setting and the float brightness system. The int
-     * brightness setting is between 0-255 and matches the brightness slider - e.g. 128 is 50% on
-     * the slider. Accounts for special values such as OFF and invalid values. Accounts for
-     * brightness limits; the maximum value here represents the max value allowed on the slider.
-     */
-    @VisibleForTesting
-    @SuppressLint("AndroidFrameworkRequiresPermission")
-    public float brightnessIntSettingToFloat(int brightnessInt) {
-        if (brightnessInt == PowerManager.BRIGHTNESS_OFF) {
-            return PowerManager.BRIGHTNESS_OFF_FLOAT;
-        } else if (brightnessInt == PowerManager.BRIGHTNESS_INVALID) {
-            return PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        } else {
-            final float minInt = PowerManager.BRIGHTNESS_OFF + 1;
-            final float maxInt = PowerManager.BRIGHTNESS_ON;
-
-            // Normalize to the range [0, 1]
-            float userPerceptionBrightness = MathUtils.norm(minInt, maxInt, brightnessInt);
-
-            // Convert from user-perception to linear scale
-            float linearBrightness = BrightnessUtils.convertGammaToLinear(userPerceptionBrightness);
-
-            // Interpolate to the range [0, currentlyAllowedMax]
-            final Display display = mContext.getDisplay();
-            if (display == null) {
-                return PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            }
-            final BrightnessInfo info = display.getBrightnessInfo();
-            return MathUtils.lerp(info.brightnessMinimum, info.brightnessMaximum, linearBrightness);
-        }
-    }
-
-    /**
-     * Translates specified value from the float brightness system to the setting int brightness
-     * system. The value returned is between 0-255 and matches the brightness slider - e.g. 128 is
-     * 50% on the slider. Accounts for special values such as OFF and invalid values. Accounts for
-     * brightness limits; the maximum value here represents the max value currently allowed on
-     * the slider.
-     */
-    @VisibleForTesting
-    @SuppressLint("AndroidFrameworkRequiresPermission")
-    public int brightnessFloatToIntSetting(float brightnessFloat) {
-        if (floatEquals(brightnessFloat, PowerManager.BRIGHTNESS_OFF_FLOAT)) {
-            return PowerManager.BRIGHTNESS_OFF;
-        } else if (Float.isNaN(brightnessFloat)) {
-            return PowerManager.BRIGHTNESS_INVALID;
-        } else {
-            // Normalize to the range [0, 1]
-            final Display display = mContext.getDisplay();
-            if (display == null) {
-                return PowerManager.BRIGHTNESS_INVALID;
-            }
-            final BrightnessInfo info = display.getBrightnessInfo();
-            float linearBrightness =
-                    MathUtils.norm(info.brightnessMinimum, info.brightnessMaximum, brightnessFloat);
-
-            // Convert from linear to user-perception scale
-            float userPerceptionBrightness = BrightnessUtils.convertLinearToGamma(linearBrightness);
-
-            // Interpolate to the range [0, 255]
-            final float minInt = PowerManager.BRIGHTNESS_OFF + 1;
-            final float maxInt = PowerManager.BRIGHTNESS_ON;
-            float intBrightness = MathUtils.lerp(minInt, maxInt, userPerceptionBrightness);
-            return Math.round(intBrightness);
-        }
-    }
-
-    /**
      * Encapsulates a brightness change event and contains logic for synchronizing the appropriate
      * settings for the specified brightness change.
      */
@@ -490,14 +421,14 @@ public class BrightnessSynchronizer {
             if (mSourceType == TYPE_INT) {
                 return (int) mBrightness;
             }
-            return brightnessFloatToIntSetting(mBrightness);
+            return brightnessFloatToInt(mBrightness);
         }
 
         private float getBrightnessAsFloat() {
             if (mSourceType == TYPE_FLOAT) {
                 return mBrightness;
             }
-            return brightnessIntSettingToFloat((int) mBrightness);
+            return brightnessIntToFloat((int) mBrightness);
         }
 
         private String toStringLabel(int type, float brightness) {

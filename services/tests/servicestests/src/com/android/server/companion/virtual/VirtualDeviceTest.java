@@ -32,11 +32,12 @@ import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.flags.Flags;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -50,6 +51,9 @@ public class VirtualDeviceTest {
     private static final String PERSISTENT_ID = "persistentId";
     private static final String DEVICE_NAME = "VirtualDeviceName";
     private static final String DISPLAY_NAME = "DisplayName";
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private IVirtualDevice mVirtualDevice;
@@ -101,9 +105,10 @@ public class VirtualDeviceTest {
         assertThat(device.getDisplayName().toString()).isEqualTo(DISPLAY_NAME);
     }
 
-    @RequiresFlagsEnabled(Flags.FLAG_VDM_PUBLIC_APIS)
     @Test
     public void virtualDevice_getDisplayIds() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_VDM_PUBLIC_APIS);
+
         VirtualDevice virtualDevice =
                 new VirtualDevice(
                         mVirtualDevice, VIRTUAL_DEVICE_ID, /*persistentId=*/null, /*name=*/null);
@@ -116,9 +121,10 @@ public class VirtualDeviceTest {
         assertThat(virtualDevice.getDisplayIds()).isEqualTo(displayIds);
     }
 
-    @RequiresFlagsEnabled(Flags.FLAG_VDM_PUBLIC_APIS)
     @Test
     public void virtualDevice_hasCustomSensorSupport() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_VDM_PUBLIC_APIS);
+
         VirtualDevice virtualDevice =
                 new VirtualDevice(
                         mVirtualDevice, VIRTUAL_DEVICE_ID, /*persistentId=*/null, /*name=*/null);

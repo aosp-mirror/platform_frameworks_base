@@ -85,29 +85,11 @@ public final class SatelliteManager {
     @Nullable private final Context mContext;
 
     /**
-     * Create a new SatelliteManager object pinned to the given subscription ID.
-     * This is needed only to handle carrier specific satellite features.
-     * For eg: requestSatelliteAttachEnabledForCarrier and
-     *         requestIsSatelliteAttachEnabledForCarrier
-     *
-     * @return a SatelliteManager that uses the given subId for all satellite activities.
-     * @throws IllegalArgumentException if the subscription is invalid.
-     * @hide
-     */
-    public SatelliteManager createForSubscriptionId(int subId) {
-        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-            throw new IllegalArgumentException("Invalid subscription ID");
-        }
-        return new SatelliteManager(mContext, subId);
-    }
-
-    /**
      * Create an instance of the SatelliteManager.
      *
      * @param context The context the SatelliteManager belongs to.
      * @hide
      */
-
     public SatelliteManager(@Nullable Context context) {
         this(context, SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
     }
@@ -846,8 +828,8 @@ public final class SatelliteManager {
     /**
      * Satellite communication restricted by geolocation. This can be
      * triggered based upon geofence input provided by carrier to enable or disable satellite.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_GEOLOCATION = 1;
 
     /** @hide */
@@ -1643,26 +1625,28 @@ public final class SatelliteManager {
      * {@code true}.</li>
      * </ul>
      *
+     * @param subId The subscription ID of the carrier.
      * @param enableSatellite {@code true} to enable the satellite and {@code false} to disable.
      * @param executor The executor on which the error code listener will be called.
      * @param resultListener Listener for the {@link SatelliteError} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
-     * @hide
+     * @throws IllegalArgumentException if the subscription is invalid.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    public void requestSatelliteAttachEnabledForCarrier(boolean enableSatellite,
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public void requestSatelliteAttachEnabledForCarrier(int subId, boolean enableSatellite,
             @NonNull @CallbackExecutor Executor executor,
             @SatelliteResult @NonNull Consumer<Integer> resultListener) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(resultListener);
 
         if (enableSatellite) {
-            removeSatelliteAttachRestrictionForCarrier(
+            removeSatelliteAttachRestrictionForCarrier(subId,
                     SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER, executor, resultListener);
         } else {
-            addSatelliteAttachRestrictionForCarrier(
+            addSatelliteAttachRestrictionForCarrier(subId,
                     SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER, executor, resultListener);
         }
     }
@@ -1671,6 +1655,7 @@ public final class SatelliteManager {
      * Request to get whether the carrier supported satellite plmn scan and attach by modem is
      * enabled by user.
      *
+     * @param subId The subscription ID of the carrier.
      * @param executor The executor on which the callback will be called.
      * @param callback The callback object to which the result will be delivered.
      *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
@@ -1681,16 +1666,17 @@ public final class SatelliteManager {
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
-     * @hide
+     * @throws IllegalArgumentException if the subscription is invalid.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    public void requestIsSatelliteAttachEnabledForCarrier(
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public void requestIsSatelliteAttachEnabledForCarrier(int subId,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
-        Set<Integer> restrictionReason = getSatelliteAttachRestrictionReasonsForCarrier();
+        Set<Integer> restrictionReason = getSatelliteAttachRestrictionReasonsForCarrier(subId);
         executor.execute(() -> callback.onResult(
                 !restrictionReason.contains(SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER)));
     }
@@ -1699,19 +1685,25 @@ public final class SatelliteManager {
      * Add a restriction reason for disallowing carrier supported satellite plmn scan and attach
      * by modem.
      *
+     * @param subId The subscription ID of the carrier.
      * @param reason Reason for disallowing satellite communication.
      * @param executor The executor on which the error code listener will be called.
      * @param resultListener Listener for the {@link SatelliteError} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
-     * @hide
+     * @throws IllegalArgumentException if the subscription is invalid.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    public void addSatelliteAttachRestrictionForCarrier(
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public void addSatelliteAttachRestrictionForCarrier(int subId,
             @SatelliteCommunicationRestrictionReason int reason,
             @NonNull @CallbackExecutor Executor executor,
             @SatelliteResult @NonNull Consumer<Integer> resultListener) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            throw new IllegalArgumentException("Invalid subscription ID");
+        }
+
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -1722,7 +1714,7 @@ public final class SatelliteManager {
                                 () -> resultListener.accept(result)));
                     }
                 };
-                telephony.addSatelliteAttachRestrictionForCarrier(mSubId, reason, errorCallback);
+                telephony.addSatelliteAttachRestrictionForCarrier(subId, reason, errorCallback);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -1736,19 +1728,25 @@ public final class SatelliteManager {
      * Remove a restriction reason for disallowing carrier supported satellite plmn scan and attach
      * by modem.
      *
+     * @param subId The subscription ID of the carrier.
      * @param reason Reason for disallowing satellite communication.
      * @param executor The executor on which the error code listener will be called.
      * @param resultListener Listener for the {@link SatelliteError} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
-     * @hide
+     * @throws IllegalArgumentException if the subscription is invalid.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    public void removeSatelliteAttachRestrictionForCarrier(
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public void removeSatelliteAttachRestrictionForCarrier(int subId,
             @SatelliteCommunicationRestrictionReason int reason,
             @NonNull @CallbackExecutor Executor executor,
             @SatelliteResult @NonNull Consumer<Integer> resultListener) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            throw new IllegalArgumentException("Invalid subscription ID");
+        }
+
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -1759,7 +1757,7 @@ public final class SatelliteManager {
                                 () -> resultListener.accept(result)));
                     }
                 };
-                telephony.removeSatelliteAttachRestrictionForCarrier(mSubId, reason, errorCallback);
+                telephony.removeSatelliteAttachRestrictionForCarrier(subId, reason, errorCallback);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -1773,34 +1771,40 @@ public final class SatelliteManager {
      * Get reasons for disallowing satellite attach, as requested by
      * {@link #addSatelliteAttachRestrictionForCarrier(int, Executor, Consumer)}
      *
+     * @param subId The subscription ID of the carrier.
      * @return Set of reasons for disallowing satellite communication.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
-     * @hide
+     * @throws IllegalArgumentException if the subscription is invalid.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @SatelliteCommunicationRestrictionReason
-    public @NonNull Set<Integer> getSatelliteAttachRestrictionReasonsForCarrier() {
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @NonNull public Set<Integer> getSatelliteAttachRestrictionReasonsForCarrier(int subId) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            throw new IllegalArgumentException("Invalid subscription ID");
+        }
+
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 int[] receivedArray =
-                        telephony.getSatelliteAttachRestrictionReasonsForCarrier(mSubId);
+                        telephony.getSatelliteAttachRestrictionReasonsForCarrier(subId);
                 if (receivedArray.length == 0) {
-                    logd("received set is empty, create empty set");
+                    logd("receivedArray is empty, create empty set");
                     return new HashSet<>();
                 } else {
                     return Arrays.stream(receivedArray).boxed().collect(Collectors.toSet());
                 }
             } else {
-                throw new IllegalStateException("telephony service is null.");
+                throw new IllegalStateException("Telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("getSatelliteAttachRestrictionReasonsForCarrier() RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
-        return null;
+        return new HashSet<>();
     }
 
     private static ITelephony getITelephony() {

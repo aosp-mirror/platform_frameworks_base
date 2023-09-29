@@ -19,7 +19,7 @@
             "name": "CtsAppOpsTestCases",
             "options": [
                 {
-                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
                 }
             ]
         },

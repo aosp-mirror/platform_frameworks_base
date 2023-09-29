@@ -32,6 +32,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.temporarydisplay.ViewPriority
@@ -55,6 +56,7 @@ object KeyguardRootViewBinder {
         occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
         chipbarCoordinator: ChipbarCoordinator,
         keyguardStateController: KeyguardStateController,
+        shadeInteractor: ShadeInteractor,
     ): DisposableHandle {
         val disposableHandle =
             view.repeatWhenAttached {
@@ -86,6 +88,17 @@ object KeyguardRootViewBinder {
                                     view.requireViewById<View>(R.id.keyguard_status_view)
                                 statusView.translationY = it
                             }
+                        }
+                    }
+
+                    launch {
+                        shadeInteractor.isAnyFullyExpanded.collect { isFullyAnyExpanded ->
+                            view.visibility =
+                                if (isFullyAnyExpanded) {
+                                    View.INVISIBLE
+                                } else {
+                                    View.VISIBLE
+                                }
                         }
                     }
                 }

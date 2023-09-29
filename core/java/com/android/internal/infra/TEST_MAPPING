@@ -4,7 +4,7 @@
       "name": "CtsRoleTestCases",
       "options": [
           {
-              "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+              "exclude-annotation": "androidx.test.filters.FlakyTest"
           }
       ]
     },
@@ -15,7 +15,7 @@
             "include-filter": "android.permission.cts.PermissionControllerTest"
           },
           {
-            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+            "exclude-annotation": "androidx.test.filters.FlakyTest"
           }
       ]
     },

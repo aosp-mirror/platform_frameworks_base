@@ -334,7 +334,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "android.app.flags-aconfig",
     package: "android.app",
-    srcs: ["core/java/android/app/activity_manager.aconfig"],
+    srcs: ["core/java/android/app/*.aconfig"],
 }
 
 java_aconfig_library {

@@ -23,6 +23,7 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_CL
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.animation.Animator;
+import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
@@ -101,6 +102,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final Rect mClipBounds = new Rect();
     private final KeyguardInteractor mKeyguardInteractor;
 
+    private Boolean mSplitShadeEnabled = false;
     private Boolean mStatusViewCentered = true;
 
     private DumpManager mDumpManager;
@@ -150,6 +152,48 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     @Override
     public void onInit() {
         mKeyguardClockSwitchController.init();
+        final View mediaHostContainer = mView.findViewById(R.id.status_view_media_container);
+        if (mediaHostContainer != null) {
+            mKeyguardClockSwitchController.getView().addOnLayoutChangeListener(
+                    (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                        if (!mSplitShadeEnabled
+                                || mKeyguardClockSwitchController.getView().getSplitShadeCentered()
+                                // Note: isKeyguardVisible() returns false after Launcher -> AOD.
+                                || !mKeyguardUpdateMonitor.isKeyguardVisible()) {
+                            return;
+                        }
+
+                        int oldHeight = oldBottom - oldTop;
+                        if (v.getHeight() == oldHeight) return;
+
+                        if (mediaHostContainer.getVisibility() != View.VISIBLE
+                                // If the media is appearing, also don't do the transition.
+                                || mediaHostContainer.getHeight() == 0) {
+                            return;
+                        }
+
+                        final LayoutTransition mediaLayoutTransition =
+                                ((ViewGroup) mediaHostContainer).getLayoutTransition();
+                        if (mediaLayoutTransition == null) return;
+
+                        mediaLayoutTransition.enableTransitionType(LayoutTransition.CHANGING);
+                    });
+
+            mediaHostContainer.addOnLayoutChangeListener(
+                    (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                        final LayoutTransition mediaLayoutTransition =
+                                ((ViewGroup) mediaHostContainer).getLayoutTransition();
+                        if (mediaLayoutTransition == null) return;
+                        if (!mediaLayoutTransition.isTransitionTypeEnabled(
+                                LayoutTransition.CHANGING)) {
+                            return;
+                        }
+                        // Note: when this is called, the LayoutTransition is already been set up.
+                        // Disables the LayoutTransition until it's explicitly enabled again.
+                        mediaLayoutTransition.disableTransitionType(LayoutTransition.CHANGING);
+                    }
+            );
+        }
 
         mDumpManager.registerDumpable(getInstanceName(), this);
         if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
@@ -385,6 +429,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      */
     public void setSplitShadeEnabled(boolean enabled) {
         mKeyguardClockSwitchController.setSplitShadeEnabled(enabled);
+        mSplitShadeEnabled = enabled;
     }
 
     /**
