@@ -26,6 +26,8 @@ import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
 
+import static com.android.server.deviceidle.Flags.FLAG_DISABLE_WAKELOCKS_IN_LIGHT_IDLE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
@@ -82,6 +84,7 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
@@ -174,6 +177,8 @@ public class PowerManagerServiceTest {
     @Mock private DeviceConfigParameterProvider mDeviceParameterProvider;
 
     @Rule public TestRule compatChangeRule = new PlatformCompatChangeRule();
+
+    @Rule public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private PowerManagerService mService;
     private ContextWrapper mContextSpy;
@@ -2564,6 +2569,58 @@ public class PowerManagerServiceTest {
         assertThat(mService.getBinderServiceInstance()
                 .setFullPowerSavePolicy(mockSetPolicyConfig)).isTrue();
         verify(mBatterySaverStateMachineMock).setFullBatterySaverPolicy(eq(mockSetPolicyConfig));
+    }
+
+    @Test
+    public void testDisableWakelocksInLightDeviceIdle_FlagDisabled_BgApp() {
+        mSetFlagsRule.disableFlags(FLAG_DISABLE_WAKELOCKS_IN_LIGHT_IDLE);
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("fgsWakeLock", PowerManager.PARTIAL_WAKE_LOCK);
+        mService.updateUidProcStateInternal(wakeLock.mOwnerUid, PROCESS_STATE_RECEIVER);
+        mService.setDeviceIdleModeInternal(false);
+        mService.setLightDeviceIdleModeInternal(true);
+
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testDisableWakelocksInLightDeviceIdle_FlagDisabled_FgApp() {
+        mSetFlagsRule.disableFlags(FLAG_DISABLE_WAKELOCKS_IN_LIGHT_IDLE);
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("fgsWakeLock", PowerManager.PARTIAL_WAKE_LOCK);
+        mService.updateUidProcStateInternal(wakeLock.mOwnerUid, PROCESS_STATE_FOREGROUND_SERVICE);
+        mService.setDeviceIdleModeInternal(false);
+        mService.setLightDeviceIdleModeInternal(true);
+
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testDisableWakelocksInLightDeviceIdle_FlagEnabled_BgApp() {
+        mSetFlagsRule.enableFlags(FLAG_DISABLE_WAKELOCKS_IN_LIGHT_IDLE);
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("fgsWakeLock", PowerManager.PARTIAL_WAKE_LOCK);
+        mService.updateUidProcStateInternal(wakeLock.mOwnerUid, PROCESS_STATE_RECEIVER);
+        mService.setDeviceIdleModeInternal(false);
+        mService.setLightDeviceIdleModeInternal(true);
+
+        assertThat(wakeLock.mDisabled).isTrue();
+    }
+
+    @Test
+    public void testDisableWakelocksInLightDeviceIdle_FlagEnabled_FgApp() {
+        mSetFlagsRule.enableFlags(FLAG_DISABLE_WAKELOCKS_IN_LIGHT_IDLE);
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("fgsWakeLock", PowerManager.PARTIAL_WAKE_LOCK);
+        mService.updateUidProcStateInternal(wakeLock.mOwnerUid, PROCESS_STATE_FOREGROUND_SERVICE);
+        mService.setDeviceIdleModeInternal(false);
+        mService.setLightDeviceIdleModeInternal(true);
+
+        assertThat(wakeLock.mDisabled).isFalse();
     }
 
     @Test
