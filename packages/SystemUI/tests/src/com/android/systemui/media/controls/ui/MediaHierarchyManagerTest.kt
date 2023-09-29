@@ -81,6 +81,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var uniqueObjectHostView: UniqueObjectHostView
     @Mock private lateinit var dreamOverlayStateController: DreamOverlayStateController
+    @Mock lateinit var logger: MediaViewLogger
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -121,7 +122,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 notifPanelEvents,
                 settings,
                 fakeHandler,
-                ResourcesSplitShadeStateController()
+                ResourcesSplitShadeStateController(),
+                logger,
             )
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())

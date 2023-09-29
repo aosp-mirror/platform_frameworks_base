@@ -234,6 +234,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
     }
 
+    public KeyguardClockSwitch getView() {
+        return mView;
+    }
+
     private void hideSliceViewAndNotificationIconContainer() {
         View ksv = mView.findViewById(R.id.keyguard_slice_view);
         ksv.setVisibility(View.GONE);

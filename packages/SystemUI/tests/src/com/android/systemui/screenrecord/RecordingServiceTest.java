@@ -41,7 +41,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.media.MediaProjectionCaptureTarget;
+import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;

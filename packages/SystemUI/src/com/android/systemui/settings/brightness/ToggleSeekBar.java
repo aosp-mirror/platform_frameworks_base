@@ -23,14 +23,17 @@ import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.SeekBar;
 
+import androidx.annotation.NonNull;
+
 import com.android.settingslib.RestrictedLockUtils;
-import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
 
 public class ToggleSeekBar extends SeekBar {
     private String mAccessibilityLabel;
 
     private RestrictedLockUtils.EnforcedAdmin mEnforcedAdmin = null;
+
+    private ActivityStarter mActivityStarter;
 
     public ToggleSeekBar(Context context) {
         super(context);
@@ -49,7 +52,7 @@ public class ToggleSeekBar extends SeekBar {
         if (mEnforcedAdmin != null) {
             Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
                     mContext, mEnforcedAdmin);
-            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(intent, 0);
+            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
             return true;
         }
         if (!isEnabled()) {
@@ -73,5 +76,9 @@ public class ToggleSeekBar extends SeekBar {
 
     public void setEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin) {
         mEnforcedAdmin = admin;
+    }
+
+    public void setActivityStarter(@NonNull ActivityStarter activityStarter) {
+        mActivityStarter = activityStarter;
     }
 }

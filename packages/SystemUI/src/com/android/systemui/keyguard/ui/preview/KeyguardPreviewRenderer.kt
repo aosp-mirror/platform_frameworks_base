@@ -62,6 +62,7 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessage
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.shared.clocks.DefaultClockController
 import com.android.systemui.shared.clocks.shared.model.ClockPreviewConstants
@@ -109,6 +110,7 @@ constructor(
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
     private val chipbarCoordinator: ChipbarCoordinator,
     private val keyguardStateController: KeyguardStateController,
+    private val shadeInteractor: ShadeInteractor,
 ) {
 
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
@@ -317,6 +319,7 @@ constructor(
                 occludingAppDeviceEntryMessageViewModel,
                 chipbarCoordinator,
                 keyguardStateController,
+                shadeInteractor,
             )
         )
         rootView.addView(

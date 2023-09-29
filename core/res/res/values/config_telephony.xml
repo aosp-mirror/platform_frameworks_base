@@ -172,28 +172,17 @@
     <integer name="config_satellite_nb_iot_inactivity_timeout_millis">180000</integer>
     <java-symbol type="integer" name="config_satellite_nb_iot_inactivity_timeout_millis" />
 
-    <!-- Telephony config for services supported by satellite providers. The format of each config
-         string in the array is as follows: "PLMN_1:service_1,service_2,..."
-         where PLMN is the satellite PLMN of a provider and service is an integer with the
-         following value:
-            1 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VOICE}
-            2 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_DATA}
-            3 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_SMS}
-            4 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VIDEO}
-            5 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_EMERGENCY}
-            6 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_MMS}
-         Example of a config string: "10011:2,3"
+    <!-- Telephony config for the PLMNs of all satellite providers. This is used by satellite modem
+         to identify providers that should be ignored if the carrier config
+         carrier_supported_satellite_services_per_provider_bundle does not support them.
+         -->
+    <string-array name="config_satellite_providers" translatable="false"></string-array>
+    <java-symbol type="array" name="config_satellite_providers" />
 
-         The PLMNs not configured in this array will be ignored and will not be used for satellite
-         scanning. -->
-    <string-array name="config_satellite_services_supported_by_providers" translatable="false">
-    </string-array>
-    <java-symbol type="array" name="config_satellite_services_supported_by_providers" />
-
-    <!-- The identifier of the satellite's eSIM profile preloaded on the device. The identifier is
-    composed of MCC and MNC of the satellite PLMN with the format "mccmnc". -->
-    <string name="config_satellite_esim_identifier" translatable="false"></string>
-    <java-symbol type="string" name="config_satellite_esim_identifier" />
+    <!-- The identifier of the satellite's SIM profile. The identifier is composed of MCC and MNC
+         of the satellite PLMN with the format "mccmnc". -->
+    <string name="config_satellite_sim_identifier" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_sim_identifier" />
 
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
          will not perform handover if the target transport is out of service, or VoPS not

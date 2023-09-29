@@ -214,12 +214,12 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
-        public void setSatellitePlmn(int simSlot, List<String> plmnList,
-                IIntegerConsumer errorCallback)
+        public void setSatellitePlmn(int simSlot, List<String> carrierPlmnList,
+                List<String> devicePlmnList, IIntegerConsumer errorCallback)
                 throws RemoteException {
             executeMethodAsync(
-                    () -> SatelliteImplBase.this
-                            .setSatellitePlmn(simSlot, plmnList, errorCallback),
+                    () -> SatelliteImplBase.this.setSatellitePlmn(
+                            simSlot, carrierPlmnList, devicePlmnList, errorCallback),
                     "setSatellitePlmn");
         }
 
@@ -655,13 +655,15 @@ public class SatelliteImplBase extends SatelliteService {
      * SIM profile. Acquisition of satellite based system is lower priority to terrestrial
      * networks. UE shall make all attempts to acquire terrestrial service prior to camping on
      * satellite LTE service.
-     * This method must only take effect if {@link #setSatelliteEnabledForCarrier} is {@code true},
-     * and return an error otherwise.
      *
      * @param simLogicalSlotIndex Indicates the SIM logical slot index to which this API will be
      * applied. The modem will use this information to determine the relevant carrier.
      * @param errorCallback The callback to receive the error code result of the operation.
-     * @param plmnList The list of roaming PLMN used for connecting to satellite networks.
+     * @param carrierPlmnList The list of roaming PLMN used for connecting to satellite networks
+     *                        supported by user subscription.
+     * @param allSatellitePlmnList Modem should use the allSatellitePlmnList to identify satellite
+     *                             PLMNs that are not supported by the carrier and make sure not to
+     *                             attach to them.
      *
      * Valid error codes returned:
      *   SatelliteError:NONE
@@ -672,7 +674,8 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteError:RADIO_NOT_AVAILABLE
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      */
-    public void setSatellitePlmn(@NonNull int simLogicalSlotIndex, @NonNull List<String> plmnList,
+    public void setSatellitePlmn(@NonNull int simLogicalSlotIndex,
+            @NonNull List<String> carrierPlmnList, @NonNull List<String> allSatellitePlmnList,
             @NonNull IIntegerConsumer errorCallback) {
         // stub implementation
     }

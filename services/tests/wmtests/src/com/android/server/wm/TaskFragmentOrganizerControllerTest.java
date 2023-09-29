@@ -212,7 +212,30 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         assertTaskFragmentParentInfoChangedTransaction(mTask);
-        assertTaskFragmentAppearedTransaction();
+        assertTaskFragmentAppearedTransaction(false /* hasSurfaceControl */);
+    }
+
+    @Test
+    public void testOnTaskFragmentAppeared_systemOrganizer() {
+        mController.unregisterOrganizer(mIOrganizer);
+        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+
+        // No-op when the TaskFragment is not attached.
+        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
+
+        verify(mOrganizer, never()).onTransactionReady(any());
+
+        // Send callback when the TaskFragment is attached.
+        setupMockParent(mTaskFragment, mTask);
+
+        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
+
+        assertTaskFragmentParentInfoChangedTransaction(mTask);
+
+        // System organizer should receive the SurfaceControl
+        assertTaskFragmentAppearedTransaction(true /* hasSurfaceControl */);
     }
 
     @Test
@@ -1664,7 +1687,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     /** Asserts that there will be a transaction for TaskFragment appeared. */
-    private void assertTaskFragmentAppearedTransaction() {
+    private void assertTaskFragmentAppearedTransaction(boolean hasSurfaceControl) {
         verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
         final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
@@ -1675,6 +1698,11 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertEquals(TYPE_TASK_FRAGMENT_APPEARED, change.getType());
         assertEquals(mTaskFragmentInfo, change.getTaskFragmentInfo());
         assertEquals(mFragmentToken, change.getTaskFragmentToken());
+        if (hasSurfaceControl) {
+            assertNotNull(change.getTaskFragmentSurfaceControl());
+        } else {
+            assertNull(change.getTaskFragmentSurfaceControl());
+        }
     }
 
     /** Asserts that there will be a transaction for TaskFragment info changed. */

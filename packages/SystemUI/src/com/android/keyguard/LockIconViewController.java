@@ -424,11 +424,11 @@ public class LockIconViewController implements Dumpable {
     private void updateConfiguration() {
         WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         Rect bounds = windowManager.getCurrentWindowMetrics().getBounds();
-        WindowInsets insets = windowManager.getCurrentWindowMetrics().getWindowInsets();
         mWidthPixels = bounds.right;
         if (mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)) {
             // Assumed to be initially neglected as there are no left or right insets in portrait
             // However, on landscape, these insets need to included when calculating the midpoint
+            WindowInsets insets = windowManager.getCurrentWindowMetrics().getWindowInsets();
             mWidthPixels -= insets.getSystemWindowInsetLeft() + insets.getSystemWindowInsetRight();
         }
         mHeightPixels = bounds.bottom;

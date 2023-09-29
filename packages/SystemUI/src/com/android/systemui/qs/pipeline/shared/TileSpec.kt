@@ -31,11 +31,7 @@ import com.android.systemui.qs.external.CustomTile
 sealed class TileSpec private constructor(open val spec: String) {
 
     /** Represents a spec that couldn't be parsed into a valid type of tile. */
-    object Invalid : TileSpec("") {
-        override fun toString(): String {
-            return "TileSpec.INVALID"
-        }
-    }
+    data object Invalid : TileSpec("")
 
     /** Container for the spec of a tile provided by SystemUI. */
     data class PlatformTileSpec

@@ -1167,7 +1167,10 @@ public final class AudioAttributes implements Parcelable {
                                 streamType);
                 if (attributes != null) {
                     mUsage = attributes.mUsage;
-                    mContentType = attributes.mContentType;
+                    // on purpose ignoring the content type: stream types are deprecated for
+                    // playback, making assumptions about the content type is prone to
+                    // interpretation errors for ambiguous types such as STREAM_TTS and STREAM_MUSIC
+                    //mContentType = attributes.mContentType;
                     mFlags = attributes.getAllFlags();
                     mMuteHapticChannels = attributes.areHapticChannelsMuted();
                     mIsContentSpatialized = attributes.isContentSpatialized();
@@ -1177,49 +1180,47 @@ public final class AudioAttributes implements Parcelable {
                     mSource = attributes.mSource;
                 }
             }
-            if (mContentType == CONTENT_TYPE_UNKNOWN) {
-                switch (streamType) {
-                    case AudioSystem.STREAM_VOICE_CALL:
-                        mContentType = CONTENT_TYPE_SPEECH;
-                        break;
-                    case AudioSystem.STREAM_SYSTEM_ENFORCED:
-                        mFlags |= FLAG_AUDIBILITY_ENFORCED;
-                        // intended fall through, attributes in common with STREAM_SYSTEM
-                    case AudioSystem.STREAM_SYSTEM:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        break;
-                    case AudioSystem.STREAM_RING:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        break;
-                    case AudioSystem.STREAM_MUSIC:
-                        mContentType = CONTENT_TYPE_MUSIC;
-                        break;
-                    case AudioSystem.STREAM_ALARM:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        break;
-                    case AudioSystem.STREAM_NOTIFICATION:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        break;
-                    case AudioSystem.STREAM_BLUETOOTH_SCO:
-                        mContentType = CONTENT_TYPE_SPEECH;
-                        mFlags |= FLAG_SCO;
-                        break;
-                    case AudioSystem.STREAM_DTMF:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        break;
-                    case AudioSystem.STREAM_TTS:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        mFlags |= FLAG_BEACON;
-                        break;
-                    case AudioSystem.STREAM_ACCESSIBILITY:
-                        mContentType = CONTENT_TYPE_SPEECH;
-                        break;
-                    case AudioSystem.STREAM_ASSISTANT:
-                        mContentType = CONTENT_TYPE_SPEECH;
-                        break;
-                    default:
-                        Log.e(TAG, "Invalid stream type " + streamType + " for AudioAttributes");
-                }
+            switch (streamType) {
+                case AudioSystem.STREAM_VOICE_CALL:
+                    mContentType = CONTENT_TYPE_SPEECH;
+                    break;
+                case AudioSystem.STREAM_SYSTEM_ENFORCED:
+                    mFlags |= FLAG_AUDIBILITY_ENFORCED;
+                    // intended fall through, attributes in common with STREAM_SYSTEM
+                case AudioSystem.STREAM_SYSTEM:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    break;
+                case AudioSystem.STREAM_RING:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    break;
+                case AudioSystem.STREAM_ALARM:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    break;
+                case AudioSystem.STREAM_NOTIFICATION:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    break;
+                case AudioSystem.STREAM_BLUETOOTH_SCO:
+                    mContentType = CONTENT_TYPE_SPEECH;
+                    mFlags |= FLAG_SCO;
+                    break;
+                case AudioSystem.STREAM_DTMF:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    break;
+                case AudioSystem.STREAM_TTS:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    mFlags |= FLAG_BEACON;
+                    break;
+                case AudioSystem.STREAM_ACCESSIBILITY:
+                    mContentType = CONTENT_TYPE_SPEECH;
+                    break;
+                case AudioSystem.STREAM_ASSISTANT:
+                    mContentType = CONTENT_TYPE_SPEECH;
+                    break;
+                case AudioSystem.STREAM_MUSIC:
+                    // leaving as CONTENT_TYPE_UNKNOWN
+                    break;
+                default:
+                    Log.e(TAG, "Invalid stream type " + streamType + " for AudioAttributes");
             }
             if (mUsage == USAGE_UNKNOWN) {
                 mUsage = usageForStreamType(streamType);

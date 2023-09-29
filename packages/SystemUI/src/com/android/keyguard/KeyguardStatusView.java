@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import static java.util.Collections.emptySet;
 
+import android.animation.LayoutTransition;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.os.Build;
@@ -78,6 +79,14 @@ public class KeyguardStatusView extends GridLayout {
         mKeyguardSlice = findViewById(R.id.keyguard_slice_view);
 
         mMediaHostContainer = findViewById(R.id.status_view_media_container);
+        if (mMediaHostContainer != null) {
+            LayoutTransition mediaLayoutTransition = new LayoutTransition();
+            ((ViewGroup) mMediaHostContainer).setLayoutTransition(mediaLayoutTransition);
+            mediaLayoutTransition.disableTransitionType(LayoutTransition.CHANGE_APPEARING);
+            mediaLayoutTransition.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+            mediaLayoutTransition.disableTransitionType(LayoutTransition.APPEARING);
+            mediaLayoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING);
+        }
 
         updateDark();
     }

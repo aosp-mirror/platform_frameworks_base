@@ -48,6 +48,7 @@ import com.android.systemui.qs.nano.QsTileState;
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
+import com.android.systemui.qs.tiles.di.NewQSTileFactory;
 import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
@@ -55,6 +56,8 @@ import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.settings.SecureSettings;
+
+import dagger.Lazy;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -121,6 +124,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
 
     @Inject
     public QSTileHost(Context context,
+            Lazy<NewQSTileFactory> newQsTileFactoryProvider,
             QSFactory defaultFactory,
             @Main Executor mainExecutor,
             PluginManager pluginManager,
@@ -147,6 +151,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
 
         mShadeController = shadeController;
 
+        if (featureFlags.getPipelineTilesEnabled()) {
+            mQsFactories.add(newQsTileFactoryProvider.get());
+        }
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
         mUserTracker = userTracker;
@@ -326,7 +333,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
                 try {
                     tile = createTile(tileSpec);
                     if (tile != null) {
-                        tile.setTileSpec(tileSpec);
                         if (tile.isAvailable()) {
                             newTiles.put(tileSpec, tile);
                             mQSLogger.logTileAdded(tileSpec);

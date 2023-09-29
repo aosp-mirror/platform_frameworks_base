@@ -47,7 +47,6 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Class that manages transaction execution in the correct order.
@@ -75,34 +74,14 @@ public class TransactionExecutor {
      * either remain in the initial state, or last state needed by a callback.
      */
     public void execute(@NonNull ClientTransaction transaction) {
-        if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Start resolving transaction");
-
-        final IBinder token = transaction.getActivityToken();
-        if (token != null) {
-            final Map<IBinder, ClientTransactionItem> activitiesToBeDestroyed =
-                    mTransactionHandler.getActivitiesToBeDestroyed();
-            final ClientTransactionItem destroyItem = activitiesToBeDestroyed.get(token);
-            if (destroyItem != null) {
-                if (transaction.getLifecycleStateRequest() == destroyItem) {
-                    // It is going to execute the transaction that will destroy activity with the
-                    // token, so the corresponding to-be-destroyed record can be removed.
-                    activitiesToBeDestroyed.remove(token);
-                }
-                if (mTransactionHandler.getActivityClient(token) == null) {
-                    // The activity has not been created but has been requested to destroy, so all
-                    // transactions for the token are just like being cancelled.
-                    Slog.w(TAG, tId(transaction) + "Skip pre-destroyed transaction:\n"
-                            + transactionToString(transaction, mTransactionHandler));
-                    return;
-                }
-            }
+        if (DEBUG_RESOLVER) {
+            Slog.d(TAG, tId(transaction) + "Start resolving transaction");
+            Slog.d(TAG, transactionToString(transaction, mTransactionHandler));
         }
 
-        if (DEBUG_RESOLVER) Slog.d(TAG, transactionToString(transaction, mTransactionHandler));
-
         executeCallbacks(transaction);
-
         executeLifecycleState(transaction);
+
         mPendingActions.clear();
         if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "End resolving transaction");
     }
@@ -134,6 +113,14 @@ public class TransactionExecutor {
             final ClientTransactionItem item = callbacks.get(i);
             final IBinder token = item.getActivityToken();
             ActivityClientRecord r = mTransactionHandler.getActivityClient(token);
+
+            if (token != null && r == null
+                    && mTransactionHandler.getActivitiesToBeDestroyed().containsKey(token)) {
+                // The activity has not been created but has been requested to destroy, so all
+                // transactions for the token are just like being cancelled.
+                Slog.w(TAG, "Skip pre-destroyed transaction item:\n" + item);
+                continue;
+            }
 
             if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callback: " + item);
             final int postExecutionState = item.getPostExecutionState();
@@ -211,6 +198,10 @@ public class TransactionExecutor {
         }
 
         if (r == null) {
+            if (mTransactionHandler.getActivitiesToBeDestroyed().get(token) == lifecycleItem) {
+                // Always cleanup for destroy item.
+                lifecycleItem.postExecute(mTransactionHandler, mPendingActions);
+            }
             // Ignore requests for non-existent client records for now.
             return;
         }

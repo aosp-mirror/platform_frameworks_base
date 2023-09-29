@@ -6,7 +6,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserActionHandler
-import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,7 +33,7 @@ class QSTileIntentUserActionHandlerTest : SysuiTestCase() {
     fun testPassesIntentToStarter() {
         val intent = Intent("test.ACTION")
 
-        underTest.handle(QSTileUserAction.Click(context, null), intent)
+        underTest.handle(null, intent)
 
         verify(activityStarted).postStartActivityDismissingKeyguard(eq(intent), eq(0), any())
     }

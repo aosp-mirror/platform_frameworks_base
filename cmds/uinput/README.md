@@ -48,6 +48,7 @@ Register a new uinput device
 | `vid`            | 16-bit integer | Vendor ID                  |
 | `pid`            | 16-bit integer | Product ID                 |
 | `bus`            | string         | Bus that device should use |
+| `port`           | string         | `phys` value to report     |
 | `configuration`  | object array   | uinput device configuration|
 | `ff_effects_max` | integer        | `ff_effects_max` value     |
 | `abs_info`       | array          | Absolute axes information  |

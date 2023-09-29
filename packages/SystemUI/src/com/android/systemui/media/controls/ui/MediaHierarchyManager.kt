@@ -101,7 +101,8 @@ constructor(
     panelEventsEvents: ShadeStateEvents,
     private val secureSettings: SecureSettings,
     @Main private val handler: Handler,
-    private val splitShadeStateController: SplitShadeStateController
+    private val splitShadeStateController: SplitShadeStateController,
+    private val logger: MediaViewLogger,
 ) {
 
     /** Track the media player setting status on lock screen. */
@@ -1057,6 +1058,7 @@ constructor(
                     // that and directly set the mediaFrame's bounds within the premeasured host.
                     targetHost.addView(mediaFrame)
                 }
+                logger.logMediaHostAttachment(currentAttachmentLocation)
                 if (isCrossFadeAnimatorRunning) {
                     // When cross-fading with an animation, we only notify the media carousel of the
                     // location change, once the view is reattached to the new place and not

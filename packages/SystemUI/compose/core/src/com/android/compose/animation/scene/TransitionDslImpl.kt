@@ -31,6 +31,7 @@ import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.PunchHole
 import com.android.compose.animation.scene.transformation.RangedPropertyTransformation
 import com.android.compose.animation.scene.transformation.ScaleSize
+import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.TransformationRange
 import com.android.compose.animation.scene.transformation.Translate
@@ -80,6 +81,7 @@ internal class TransitionBuilderImpl : TransitionBuilder {
     override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
 
     private var range: TransformationRange? = null
+    private var reversed = false
     private val durationMillis: Int by lazy {
         val spec = spec
         if (spec !is DurationBasedAnimationSpec) {
@@ -93,6 +95,12 @@ internal class TransitionBuilderImpl : TransitionBuilder {
         transformations.add(PunchHole(matcher, bounds, shape))
     }
 
+    override fun reversed(builder: TransitionBuilder.() -> Unit) {
+        reversed = true
+        builder()
+        reversed = false
+    }
+
     override fun fractionRange(
         start: Float?,
         end: Float?,
@@ -101,6 +109,10 @@ internal class TransitionBuilderImpl : TransitionBuilder {
         range = TransformationRange(start, end)
         builder()
         range = null
+    }
+
+    override fun sharedElement(matcher: ElementMatcher, enabled: Boolean) {
+        transformations.add(SharedElementTransformation(matcher, enabled))
     }
 
     override fun timestampRange(
@@ -122,11 +134,20 @@ internal class TransitionBuilderImpl : TransitionBuilder {
     }
 
     private fun transformation(transformation: PropertyTransformation<*>) {
-        if (range != null) {
-            transformations.add(RangedPropertyTransformation(transformation, range!!))
-        } else {
-            transformations.add(transformation)
-        }
+        val transformation =
+            if (range != null) {
+                RangedPropertyTransformation(transformation, range!!)
+            } else {
+                transformation
+            }
+
+        transformations.add(
+            if (reversed) {
+                transformation.reverse()
+            } else {
+                transformation
+            }
+        )
     }
 
     override fun fade(matcher: ElementMatcher) {

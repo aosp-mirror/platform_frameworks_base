@@ -21,6 +21,6 @@ import com.android.systemui.plugins.qs.QSTile
 
 class FakeQSFactory(private val tileCreator: (String) -> QSTile?) : QSFactory {
     override fun createTile(tileSpec: String): QSTile? {
-        return tileCreator(tileSpec)
+        return tileCreator(tileSpec)?.also { it.tileSpec = tileSpec }
     }
 }
