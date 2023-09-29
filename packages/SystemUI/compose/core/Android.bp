@@ -34,9 +34,7 @@ android_library {
 
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",
-        "androidx.compose.material3_material3-window-size-class",
         "androidx.savedstate_savedstate",
-        "androidx.window_window",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],
