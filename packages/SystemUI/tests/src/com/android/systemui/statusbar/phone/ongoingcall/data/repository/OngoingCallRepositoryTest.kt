@@ -12,21 +12,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.statusbar.phone.ongoingcall.data.repository
 
-import com.android.systemui.CoreStartable
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.ClassKey
-import dagger.multibindings.IntoMap
+import androidx.test.filters.SmallTest
+import com.android.systemui.SysuiTestCase
+import com.google.common.truth.Truth.assertThat
+import org.junit.Test
 
-@Module
-abstract class LetterboxModule {
-    @Binds
-    @IntoMap
-    @ClassKey(LetterboxBackgroundProvider::class)
-    abstract fun bindFeature(impl: LetterboxBackgroundProvider): CoreStartable
+@SmallTest
+class OngoingCallRepositoryTest : SysuiTestCase() {
+    private val underTest = OngoingCallRepository()
+
+    @Test
+    fun hasOngoingCall_matchesSet() {
+        underTest.setHasOngoingCall(true)
+
+        assertThat(underTest.hasOngoingCall.value).isTrue()
+
+        underTest.setHasOngoingCall(false)
+
+        assertThat(underTest.hasOngoingCall.value).isFalse()
+    }
 }

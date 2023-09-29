@@ -16,11 +16,18 @@
 
 package com.android.systemui.statusbar.data.repository
 
+import com.android.systemui.statusbar.data.model.StatusBarAppearance
+import com.android.systemui.statusbar.data.model.StatusBarMode
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeStatusBarModeRepository : StatusBarModeRepository {
     override val isTransientShown = MutableStateFlow(false)
     override val isInFullscreenMode = MutableStateFlow(false)
+    override val statusBarAppearance = MutableStateFlow<StatusBarAppearance?>(null)
+    override val statusBarMode = MutableStateFlow(StatusBarMode.TRANSPARENT)
+
+    override fun onStatusBarViewInitialized(component: StatusBarFragmentComponent) {}
 
     override fun showTransient() {
         isTransientShown.value = true

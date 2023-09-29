@@ -85,8 +85,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun getRotation() = 0
     override fun setBarStateForTest(state: Int) {}
     override fun acquireGestureWakeLock(time: Long) {}
-    override fun setAppearance(appearance: Int) = false
-    override fun getBarMode() = 0
     override fun resendMessage(msg: Int) {}
     override fun resendMessage(msg: Any?) {}
     override fun setLastCameraLaunchSource(source: Int) {}

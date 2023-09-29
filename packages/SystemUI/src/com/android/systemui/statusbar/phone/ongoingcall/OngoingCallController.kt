@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.time.SystemClock
@@ -57,6 +58,7 @@ import javax.inject.Inject
 class OngoingCallController @Inject constructor(
     @Application private val scope: CoroutineScope,
     private val context: Context,
+    private val ongoingCallRepository: OngoingCallRepository,
     private val notifCollection: CommonNotifCollection,
     private val systemClock: SystemClock,
     private val activityStarter: ActivityStarter,
@@ -207,7 +209,7 @@ class OngoingCallController @Inject constructor(
                 statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(true)
             }
             updateGestureListening()
-            mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
+            sendStateChangeEvent()
         } else {
             // If we failed to update the chip, don't store the call info. Then [hasOngoingCall]
             // will return false and we fall back to typical notification handling.
@@ -261,7 +263,7 @@ class OngoingCallController @Inject constructor(
         tearDownChipView()
         statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(false)
         swipeStatusBarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
-        mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
+        sendStateChangeEvent()
         uidObserver.unregister()
     }
 
@@ -286,6 +288,11 @@ class OngoingCallController @Inject constructor(
         callNotificationInfo = callNotificationInfo?.copy(statusBarSwipedAway = true)
         statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(false)
         swipeStatusBarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
+    }
+
+    private fun sendStateChangeEvent() {
+        ongoingCallRepository.setHasOngoingCall(hasOngoingCall())
+        mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
     }
 
     private data class CallNotificationInfo(
@@ -374,9 +381,7 @@ class OngoingCallController @Inject constructor(
             if (oldIsCallAppVisible != isCallAppVisible) {
                 // Animations may be run as a result of the call's state change, so ensure
                 // the listener is notified on the main thread.
-                mainExecutor.execute {
-                    mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
-                }
+                mainExecutor.execute { sendStateChangeEvent() }
             }
         }
     }
