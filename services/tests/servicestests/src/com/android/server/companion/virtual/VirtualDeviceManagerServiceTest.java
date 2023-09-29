@@ -118,6 +118,7 @@ import com.android.compatibility.common.util.AdoptShellPermissionsRule;
 import com.android.internal.app.BlockedAppStreamingActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
+import com.android.server.companion.virtual.camera.VirtualCameraController;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.sensors.SensorManagerInternal;
 
@@ -1841,13 +1842,25 @@ public class VirtualDeviceManagerServiceTest {
 
     private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid,
             VirtualDeviceParams params) {
-        VirtualDeviceImpl virtualDeviceImpl = new VirtualDeviceImpl(mContext,
-                mAssociationInfo, mVdms, mVirtualDeviceLog, new Binder(),
-                new AttributionSource(ownerUid, "com.android.virtualdevice.test", "virtualdevice"),
-                virtualDeviceId,
-                mInputController, mCameraAccessController,
-                mPendingTrampolineCallback, mActivityListener, mSoundEffectListener,
-                mRunningAppsChangedCallback, params, new DisplayManagerGlobal(mIDisplayManager));
+        VirtualDeviceImpl virtualDeviceImpl =
+                new VirtualDeviceImpl(
+                        mContext,
+                        mAssociationInfo,
+                        mVdms,
+                        mVirtualDeviceLog,
+                        new Binder(),
+                        new AttributionSource(
+                                ownerUid, "com.android.virtualdevice.test", "virtualdevice"),
+                        virtualDeviceId,
+                        mInputController,
+                        mCameraAccessController,
+                        mPendingTrampolineCallback,
+                        mActivityListener,
+                        mSoundEffectListener,
+                        mRunningAppsChangedCallback,
+                        params,
+                        new DisplayManagerGlobal(mIDisplayManager),
+                        new VirtualCameraController(mContext));
         mVdms.addVirtualDevice(virtualDeviceImpl);
         assertThat(virtualDeviceImpl.getAssociationId()).isEqualTo(mAssociationInfo.getId());
         assertThat(virtualDeviceImpl.getPersistentDeviceId())
