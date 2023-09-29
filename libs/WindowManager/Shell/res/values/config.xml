@@ -58,6 +58,9 @@
          if a custom action is present before closing it. -->
     <integer name="config_pipForceCloseDelay">1000</integer>
 
+    <!-- Allow PIP to resize via pinch gesture. -->
+    <bool name="config_pipEnablePinchResize">true</bool>
+
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
 

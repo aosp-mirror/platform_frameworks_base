@@ -414,11 +414,6 @@ public final class SystemUiDeviceConfigFlags {
             "dark_launch_remote_prediction_service_enabled";
 
     /**
-     * (boolean) Whether to enable pinch resizing for PIP.
-     */
-    public static final String PIP_PINCH_RESIZE = "pip_pinch_resize";
-
-    /**
      * (boolean) Whether to enable stashing for PIP.
      */
     public static final String PIP_STASHING = "pip_stashing";
