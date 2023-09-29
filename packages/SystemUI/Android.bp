@@ -212,6 +212,7 @@ android_library {
 
     lint: {
         extra_check_modules: ["SystemUILintChecker"],
+        warning_checks: ["MissingApacheLicenseDetector"],
     },
 }
 
