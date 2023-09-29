@@ -61,13 +61,13 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.settings.SecureSettings;
 
-import dagger.Lazy;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import dagger.Lazy;
 
 /**
  * Handles keeping track of the current user, profiles, and various things related to hiding
@@ -79,8 +79,6 @@ public class NotificationLockscreenUserManagerImpl implements
         NotificationLockscreenUserManager,
         StateListener {
     private static final String TAG = "LockscreenUserManager";
-    private static final boolean ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT = false;
-
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final KeyguardStateController mKeyguardStateController;
     private final SecureSettings mSecureSettings;
@@ -102,7 +100,6 @@ public class NotificationLockscreenUserManagerImpl implements
     private final NotificationClickNotifier mClickNotifier;
     private final Lazy<OverviewProxyService> mOverviewProxyServiceLazy;
     private boolean mShowLockscreenNotifications;
-    private boolean mAllowLockscreenRemoteInput;
     private LockPatternUtils mLockPatternUtils;
     protected KeyguardManager mKeyguardManager;
     private int mState = StatusBarState.SHADE;
@@ -285,14 +282,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE), false,
                 mSettingsObserver);
 
-        if (ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT) {
-            mContext.getContentResolver().registerContentObserver(
-                    mSecureSettings.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT),
-                    false,
-                    mSettingsObserver,
-                    UserHandle.USER_ALL);
-        }
-
         mBroadcastDispatcher.registerReceiver(mAllUsersReceiver,
                 new IntentFilter(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
                 null /* handler */, UserHandle.ALL);
@@ -323,10 +312,6 @@ public class NotificationLockscreenUserManagerImpl implements
         return mShowLockscreenNotifications;
     }
 
-    public boolean shouldAllowLockscreenRemoteInput() {
-        return mAllowLockscreenRemoteInput;
-    }
-
     public boolean isCurrentProfile(int userId) {
         synchronized (mLock) {
             return userId == UserHandle.USER_ALL || mCurrentProfiles.get(userId) != null;
@@ -335,10 +320,6 @@ public class NotificationLockscreenUserManagerImpl implements
 
     private void setShowLockscreenNotifications(boolean show) {
         mShowLockscreenNotifications = show;
-    }
-
-    private void setLockscreenAllowRemoteInput(boolean allowLockscreenRemoteInput) {
-        mAllowLockscreenRemoteInput = allowLockscreenRemoteInput;
     }
 
     protected void updateLockscreenNotificationSetting() {
@@ -352,19 +333,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS) == 0;
 
         setShowLockscreenNotifications(show && allowedByDpm);
-
-        if (ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT) {
-            final boolean remoteInput = mSecureSettings.getIntForUser(
-                    Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT,
-                    0,
-                    mCurrentUserId) != 0;
-            final boolean remoteInputDpm =
-                    (dpmFlags & DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT) == 0;
-
-            setLockscreenAllowRemoteInput(remoteInput && remoteInputDpm);
-        } else {
-            setLockscreenAllowRemoteInput(false);
-        }
     }
 
     /**
@@ -452,7 +420,6 @@ public class NotificationLockscreenUserManagerImpl implements
             mUsersAllowingNotifications.append(userHandle, allowed);
             return allowed;
         }
-
         return mUsersAllowingNotifications.get(userHandle);
     }
 
@@ -619,37 +586,6 @@ public class NotificationLockscreenUserManagerImpl implements
         }
     }
 
-//    public void updatePublicMode() {
-//        //TODO: I think there may be a race condition where mKeyguardViewManager.isShowing() returns
-//        // false when it should be true. Therefore, if we are not on the SHADE, don't even bother
-//        // asking if the keyguard is showing. We still need to check it though because showing the
-//        // camera on the keyguard has a state of SHADE but the keyguard is still showing.
-//        final boolean showingKeyguard = mState != StatusBarState.SHADE
-//              || mKeyguardStateController.isShowing();
-//        final boolean devicePublic = showingKeyguard && isSecure(getCurrentUserId());
-//
-//
-//        // Look for public mode users. Users are considered public in either case of:
-//        //   - device keyguard is shown in secure mode;
-//        //   - profile is locked with a work challenge.
-//        SparseArray<UserInfo> currentProfiles = getCurrentProfiles();
-//        for (int i = currentProfiles.size() - 1; i >= 0; i--) {
-//            final int userId = currentProfiles.valueAt(i).id;
-//            boolean isProfilePublic = devicePublic;
-//            if (!devicePublic && userId != getCurrentUserId()) {
-//                // We can't rely on KeyguardManager#isDeviceLocked() for unified profile challenge
-//                // due to a race condition where this code could be called before
-//                // TrustManagerService updates its internal records, resulting in an incorrect
-//                // state being cached in mLockscreenPublicMode. (b/35951989)
-//                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
-//                        && isSecure(userId)) {
-//                    isProfilePublic = mKeyguardManager.isDeviceLocked(userId);
-//                }
-//            }
-//            setLockscreenPublicMode(isProfilePublic, userId);
-//        }
-//    }
-
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println("NotificationLockscreenUserManager state:");
@@ -657,8 +593,6 @@ public class NotificationLockscreenUserManagerImpl implements
         pw.println(mCurrentUserId);
         pw.print("  mShowLockscreenNotifications=");
         pw.println(mShowLockscreenNotifications);
-        pw.print("  mAllowLockscreenRemoteInput=");
-        pw.println(mAllowLockscreenRemoteInput);
         pw.print("  mCurrentProfiles=");
         synchronized (mLock) {
             for (int i = mCurrentProfiles.size() - 1; i >= 0; i--) {
