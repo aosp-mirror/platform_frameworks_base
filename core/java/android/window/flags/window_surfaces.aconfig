@@ -32,3 +32,10 @@ flag {
     description: "Enable public API for Window Surfaces"
     bug: "287076178"
 }
+
+flag {
+    namespace: "window_surfaces"
+    name: "remove_capture_display"
+    description: "Remove uses of ScreenCapture#captureDisplay"
+    bug: "293445881"
+}
