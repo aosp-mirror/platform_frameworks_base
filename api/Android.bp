@@ -86,6 +86,7 @@ combined_apis {
         "framework-media",
         "framework-mediaprovider",
         "framework-ondevicepersonalization",
+        "framework-pdf",
         "framework-permission",
         "framework-permission-s",
         "framework-scheduling",
