@@ -4534,7 +4534,10 @@
   <java-symbol type="integer" name="device_idle_light_idle_to_init_flex_ms" />
   <java-symbol type="integer" name="device_idle_light_idle_to_max_flex_ms" />
   <java-symbol type="integer" name="device_idle_light_idle_factor" />
+  <java-symbol type="bool" name="device_idle_light_idle_increase_linearly" />
   <java-symbol type="integer" name="device_idle_light_max_idle_to_ms" />
+  <java-symbol type="integer" name="device_idle_light_idle_linear_increase_factor_ms" />
+  <java-symbol type="integer" name="device_idle_light_idle_flex_linear_increase_factor_ms" />
   <java-symbol type="integer" name="device_idle_light_idle_maintenance_min_budget_ms" />
   <java-symbol type="integer" name="device_idle_light_idle_maintenance_max_budget_ms" />
   <java-symbol type="integer" name="device_idle_min_light_maintenance_time_ms" />
