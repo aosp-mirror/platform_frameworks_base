@@ -26,6 +26,7 @@ import com.android.systemui.classifier.FalsingCollectorActual
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.model.SysUiState
@@ -63,6 +64,7 @@ class SceneContainerStartable
 constructor(
     @Application private val applicationScope: CoroutineScope,
     private val sceneInteractor: SceneInteractor,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val flags: SceneContainerFlags,
@@ -119,7 +121,7 @@ constructor(
     /** Switches between scenes based on ever-changing application state. */
     private fun automaticallySwitchScenes() {
         applicationScope.launch {
-            authenticationInteractor.isUnlocked
+            deviceEntryInteractor.isUnlocked
                 .mapNotNull { isUnlocked ->
                     val renderedScenes =
                         when (val transitionState = sceneInteractor.transitionState.value) {
@@ -130,7 +132,6 @@ constructor(
                                     transitionState.toScene,
                                 )
                         }
-                    val isBypassEnabled = authenticationInteractor.isBypassEnabled()
                     when {
                         isUnlocked ->
                             when {
@@ -141,7 +142,7 @@ constructor(
                                 // When the device becomes unlocked in Lockscreen, go to Gone if
                                 // bypass is enabled.
                                 renderedScenes.contains(SceneKey.Lockscreen) ->
-                                    if (isBypassEnabled) {
+                                    if (deviceEntryInteractor.isBypassEnabled()) {
                                         SceneKey.Gone to
                                             "device unlocked in Lockscreen scene with bypass"
                                     } else {
@@ -191,7 +192,7 @@ constructor(
                         }
                         WakefulnessState.STARTING_TO_WAKE -> {
                             val authMethod = authenticationInteractor.getAuthenticationMethod()
-                            val isUnlocked = authenticationInteractor.isUnlocked.value
+                            val isUnlocked = deviceEntryInteractor.isUnlocked.value
                             when {
                                 authMethod == AuthenticationMethodModel.None -> {
                                     switchToScene(
@@ -241,7 +242,7 @@ constructor(
     /** Collects and reports signals into the falsing system. */
     private fun collectFalsingSignals() {
         applicationScope.launch {
-            authenticationInteractor.isLockscreenDismissed.collect { isLockscreenDismissed ->
+            deviceEntryInteractor.isDeviceEntered.collect { isLockscreenDismissed ->
                 if (isLockscreenDismissed) {
                     falsingCollector.onSuccessfulUnlock()
                 }

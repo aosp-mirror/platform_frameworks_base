@@ -47,12 +47,15 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val sceneInteractor = utils.sceneInteractor()
-    private val authenticationInteractor =
-        utils.authenticationInteractor(
-            repository = utils.authenticationRepository(),
+    private val authenticationInteractor = utils.authenticationInteractor()
+    private val deviceEntryInteractor =
+        utils.deviceEntryInteractor(
+            authenticationInteractor = authenticationInteractor,
+            sceneInteractor = utils.sceneInteractor(),
         )
     private val bouncerInteractor =
         utils.bouncerInteractor(
+            deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
         )
@@ -81,7 +84,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.desiredScene)
             val message by collectLastValue(bouncerViewModel.message)
             val pin by collectLastValue(underTest.pinInput.map { it.getPin() })
-            utils.authenticationRepository.setUnlocked(false)
+            utils.deviceEntryRepository.setUnlocked(false)
             sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
 
@@ -103,7 +106,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             val message by collectLastValue(bouncerViewModel.message)
             val pin by collectLastValue(underTest.pinInput.map { it.getPin() })
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setUnlocked(false)
+            utils.deviceEntryRepository.setUnlocked(false)
             sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
 
@@ -358,7 +361,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
     private fun TestScope.lockDeviceAndOpenPinBouncer() {
         utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-        utils.authenticationRepository.setUnlocked(false)
+        utils.deviceEntryRepository.setUnlocked(false)
         sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
         sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
 

@@ -44,12 +44,15 @@ class BouncerViewModelTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
-    private val authenticationInteractor =
-        utils.authenticationInteractor(
-            repository = utils.authenticationRepository,
+    private val authenticationInteractor = utils.authenticationInteractor()
+    private val deviceEntryInteractor =
+        utils.deviceEntryInteractor(
+            authenticationInteractor = authenticationInteractor,
+            sceneInteractor = utils.sceneInteractor(),
         )
     private val bouncerInteractor =
         utils.bouncerInteractor(
+            deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = utils.sceneInteractor(),
         )
@@ -223,6 +226,8 @@ class BouncerViewModelTest : SysuiTestCase() {
                     DataLayerAuthenticationMethodModel.Pattern
             }
         )
-        setLockscreenEnabled(model !is DomainLayerAuthenticationMethodModel.None)
+        utils.deviceEntryRepository.setInsecureLockscreenEnabled(
+            model !is DomainLayerAuthenticationMethodModel.None
+        )
     }
 }

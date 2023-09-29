@@ -48,11 +48,6 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val sceneInteractor = utils.sceneInteractor()
-    private val authenticationInteractor =
-        utils.authenticationInteractor(
-            repository = utils.authenticationRepository(),
-        )
-
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
 
     private var mobileIconsViewModel: MobileIconsViewModel =
@@ -85,10 +80,17 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
 
+        val authenticationInteractor = utils.authenticationInteractor()
+
         underTest =
             QuickSettingsSceneViewModel(
                 bouncerInteractor =
                     utils.bouncerInteractor(
+                        deviceEntryInteractor =
+                            utils.deviceEntryInteractor(
+                                authenticationInteractor = authenticationInteractor,
+                                sceneInteractor = sceneInteractor,
+                            ),
                         authenticationInteractor = authenticationInteractor,
                         sceneInteractor = sceneInteractor,
                     ),
@@ -101,7 +103,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.desiredScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setUnlocked(true)
+            utils.deviceEntryRepository.setUnlocked(true)
             runCurrent()
 
             underTest.onContentClicked()
@@ -114,7 +116,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.desiredScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setUnlocked(false)
+            utils.deviceEntryRepository.setUnlocked(false)
             runCurrent()
 
             underTest.onContentClicked()

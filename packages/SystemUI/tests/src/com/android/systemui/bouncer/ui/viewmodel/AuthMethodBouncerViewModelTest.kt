@@ -37,17 +37,20 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
-    private val authenticationInteractor =
-        utils.authenticationInteractor(
-            utils.authenticationRepository(),
-        )
+    private val authenticationInteractor = utils.authenticationInteractor()
     private val sceneInteractor = utils.sceneInteractor()
+    private val deviceEntryInteractor =
+        utils.deviceEntryInteractor(
+            authenticationInteractor = authenticationInteractor,
+            sceneInteractor = sceneInteractor,
+        )
     private val underTest =
         PinBouncerViewModel(
             applicationContext = context,
             viewModelScope = testScope.backgroundScope,
             interactor =
                 utils.bouncerInteractor(
+                    deviceEntryInteractor = deviceEntryInteractor,
                     authenticationInteractor = authenticationInteractor,
                     sceneInteractor = sceneInteractor,
                 ),

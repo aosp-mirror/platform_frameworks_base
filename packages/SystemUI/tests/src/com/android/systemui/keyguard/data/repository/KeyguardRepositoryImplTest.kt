@@ -44,7 +44,6 @@ import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -81,7 +80,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
     @Mock private lateinit var dozeTransitionListener: DozeTransitionListener
     @Mock private lateinit var authController: AuthController
-    @Mock private lateinit var keyguardBypassController: KeyguardBypassController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dreamOverlayCallbackController: DreamOverlayCallbackController
     @Mock private lateinit var dozeParameters: DozeParameters
@@ -103,7 +101,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 screenLifecycle,
                 biometricUnlockController,
                 keyguardStateController,
-                keyguardBypassController,
                 keyguardUpdateMonitor,
                 dozeTransitionListener,
                 dozeParameters,
@@ -213,23 +210,9 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isBypassEnabled_disabledInController() {
-        whenever(keyguardBypassController.isBypassEnabled).thenReturn(false)
-        whenever(keyguardBypassController.bypassEnabled).thenReturn(false)
-        assertThat(underTest.isBypassEnabled()).isFalse()
-    }
-
-    @Test
-    fun isBypassEnabled_enabledInController() {
-        whenever(keyguardBypassController.isBypassEnabled).thenReturn(true)
-        whenever(keyguardBypassController.bypassEnabled).thenReturn(true)
-        assertThat(underTest.isBypassEnabled()).isTrue()
-    }
-
-    @Test
     fun isAodAvailable() = runTest {
         val flow = underTest.isAodAvailable
-        var isAodAvailable = collectLastValue(flow)
+        val isAodAvailable = collectLastValue(flow)
         runCurrent()
 
         val callback =
@@ -270,29 +253,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             assertThat(latest).isFalse()
 
             job.cancel()
-        }
-
-    @Test
-    fun isKeyguardUnlocked() =
-        testScope.runTest {
-            whenever(keyguardStateController.isUnlocked).thenReturn(false)
-            val isKeyguardUnlocked by collectLastValue(underTest.isKeyguardUnlocked)
-
-            runCurrent()
-            assertThat(isKeyguardUnlocked).isFalse()
-
-            val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
-
-            whenever(keyguardStateController.isUnlocked).thenReturn(true)
-            captor.value.onUnlockedChanged()
-            runCurrent()
-            assertThat(isKeyguardUnlocked).isTrue()
-
-            whenever(keyguardStateController.isUnlocked).thenReturn(false)
-            captor.value.onKeyguardShowingChanged()
-            runCurrent()
-            assertThat(isKeyguardUnlocked).isFalse()
         }
 
     @Test

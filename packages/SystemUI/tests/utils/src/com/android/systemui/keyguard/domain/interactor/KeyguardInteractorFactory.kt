@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
@@ -42,6 +43,7 @@ object KeyguardInteractorFactory {
         sceneContainerFlags: SceneContainerFlags = FakeSceneContainerFlags(),
         repository: FakeKeyguardRepository = FakeKeyguardRepository(),
         commandQueue: FakeCommandQueue = FakeCommandQueue(),
+        deviceEntryRepository: FakeDeviceEntryRepository = FakeDeviceEntryRepository(),
         bouncerRepository: FakeKeyguardBouncerRepository = FakeKeyguardBouncerRepository(),
         configurationRepository: FakeConfigurationRepository = FakeConfigurationRepository(),
         shadeRepository: FakeShadeRepository = FakeShadeRepository(),
@@ -52,6 +54,7 @@ object KeyguardInteractorFactory {
             commandQueue = commandQueue,
             featureFlags = featureFlags,
             sceneContainerFlags = sceneContainerFlags,
+            deviceEntryRepository = deviceEntryRepository,
             bouncerRepository = bouncerRepository,
             configurationRepository = configurationRepository,
             shadeRepository = shadeRepository,
@@ -60,6 +63,7 @@ object KeyguardInteractorFactory {
                 commandQueue = commandQueue,
                 featureFlags = featureFlags,
                 sceneContainerFlags = sceneContainerFlags,
+                deviceEntryRepository = deviceEntryRepository,
                 bouncerRepository = bouncerRepository,
                 configurationRepository = configurationRepository,
                 shadeRepository = shadeRepository,
@@ -69,7 +73,7 @@ object KeyguardInteractorFactory {
     }
 
     /** Provide defaults, otherwise tests will throw an error */
-    fun createFakeFeatureFlags(): FakeFeatureFlags {
+    private fun createFakeFeatureFlags(): FakeFeatureFlags {
         return FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
     }
 
@@ -78,6 +82,7 @@ object KeyguardInteractorFactory {
         val commandQueue: FakeCommandQueue,
         val featureFlags: FakeFeatureFlags,
         val sceneContainerFlags: SceneContainerFlags,
+        val deviceEntryRepository: FakeDeviceEntryRepository,
         val bouncerRepository: FakeKeyguardBouncerRepository,
         val configurationRepository: FakeConfigurationRepository,
         val shadeRepository: FakeShadeRepository,

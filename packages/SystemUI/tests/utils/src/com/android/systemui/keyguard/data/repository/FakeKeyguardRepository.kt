@@ -63,9 +63,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _isKeyguardShowing = MutableStateFlow(false)
     override val isKeyguardShowing: Flow<Boolean> = _isKeyguardShowing
 
-    private val _isKeyguardUnlocked = MutableStateFlow(false)
-    override val isKeyguardUnlocked: StateFlow<Boolean> = _isKeyguardUnlocked.asStateFlow()
-
     private val _isKeyguardOccluded = MutableStateFlow(false)
     override val isKeyguardOccluded: Flow<Boolean> = _isKeyguardOccluded
 
@@ -148,11 +145,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun isKeyguardShowing(): Boolean {
         return _isKeyguardShowing.value
-    }
-
-    private var _isBypassEnabled = false
-    override fun isBypassEnabled(): Boolean {
-        return _isBypassEnabled
     }
 
     override fun setAnimateDozingTransitions(animate: Boolean) {
@@ -250,14 +242,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     fun setStatusBarState(state: StatusBarState) {
         _statusBarState.value = state
-    }
-
-    fun setKeyguardUnlocked(isUnlocked: Boolean) {
-        _isKeyguardUnlocked.value = isUnlocked
-    }
-
-    fun setBypassEnabled(isEnabled: Boolean) {
-        _isBypassEnabled = isEnabled
     }
 
     fun setScreenModel(screenModel: ScreenModel) {
