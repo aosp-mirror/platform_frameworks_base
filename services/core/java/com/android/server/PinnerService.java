@@ -41,6 +41,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -153,6 +154,9 @@ public final class PinnerService extends SystemService {
     @GuardedBy("this")
     private ArraySet<Integer> mPinKeys;
 
+    private static final String DEVICE_CONFIG_KEY_ANON_SIZE = "pin_shared_anon_size";
+    private static final long DEFAULT_ANON_SIZE =
+            SystemProperties.getLong("pinner.pin_shared_anon_size", 0);
     private static final long MAX_ANON_SIZE = 2L * (1L << 30); // 2GB
     private long mPinAnonSize;
     private long mPinAnonAddress;
@@ -180,6 +184,17 @@ public final class PinnerService extends SystemService {
         }
     };
 
+    private DeviceConfig.OnPropertiesChangedListener mDeviceConfigListener =
+            new DeviceConfig.OnPropertiesChangedListener() {
+                @Override
+                public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                    if (DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT.equals(properties.getNamespace())
+                            && properties.getKeyset().contains(DEVICE_CONFIG_KEY_ANON_SIZE)) {
+                        refreshPinAnonConfig();
+                    }
+                }
+            };
+
     public PinnerService(Context context) {
         super(context);
 
@@ -206,6 +221,11 @@ public final class PinnerService extends SystemService {
 
         registerUidListener();
         registerUserSetupCompleteListener();
+
+        DeviceConfig.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                new HandlerExecutor(mPinnerHandler),
+                mDeviceConfigListener);
     }
 
     @Override
@@ -344,6 +364,8 @@ public final class PinnerService extends SystemService {
                 }
             }
         }
+
+        refreshPinAnonConfig();
     }
 
     /**
@@ -560,11 +582,6 @@ public final class PinnerService extends SystemService {
             pinKeys.add(KEY_ASSISTANT);
         }
 
-        mPinAnonSize = DeviceConfig.getLong(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
-                "pin_anon_size",
-                SystemProperties.getLong("pinner.pin_anon_size", 0));
-        mPinAnonSize = Math.max(0, Math.min(mPinAnonSize, MAX_ANON_SIZE));
-
         return pinKeys;
     }
 
@@ -604,7 +621,6 @@ public final class PinnerService extends SystemService {
             int key = currentPinKeys.valueAt(i);
             pinApp(key, userHandle, true /* force */);
         }
-        pinAnonRegion();
     }
 
     /**
@@ -689,10 +705,28 @@ public final class PinnerService extends SystemService {
     }
 
     /**
+     * Handle any changes in the anon region pinner config.
+     */
+    private void refreshPinAnonConfig() {
+        long newPinAnonSize =
+                DeviceConfig.getLong(
+                        DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                        DEVICE_CONFIG_KEY_ANON_SIZE,
+                        DEFAULT_ANON_SIZE);
+        newPinAnonSize = Math.max(0, Math.min(newPinAnonSize, MAX_ANON_SIZE));
+        if (newPinAnonSize != mPinAnonSize) {
+            mPinAnonSize = newPinAnonSize;
+            pinAnonRegion();
+        }
+    }
+
+    /**
      * Pin an empty anonymous region. This should only be used for ablation experiments.
      */
     private void pinAnonRegion() {
         if (mPinAnonSize == 0) {
+            Slog.d(TAG, "pinAnonRegion: releasing pinned region");
+            unpinAnonRegion();
             return;
         }
         long alignedPinSize = mPinAnonSize;
@@ -700,15 +734,21 @@ public final class PinnerService extends SystemService {
             alignedPinSize -= alignedPinSize % PAGE_SIZE;
             Slog.e(TAG, "pinAnonRegion: aligning size to " + alignedPinSize);
         }
-        if (mPinAnonAddress != 0
-                && mCurrentlyPinnedAnonSize != alignedPinSize) {
+        if (mPinAnonAddress != 0) {
+            if (mCurrentlyPinnedAnonSize == alignedPinSize) {
+                Slog.d(TAG, "pinAnonRegion: already pinned region of size " + alignedPinSize);
+                return;
+            }
+            Slog.d(TAG, "pinAnonRegion: resetting pinned region for new size " + alignedPinSize);
             unpinAnonRegion();
         }
         long address = 0;
         try {
+            // Map as SHARED to avoid changing rss.anon for system_server (per /proc/*/status).
+            // The mapping is visible in other rss metrics, and as private dirty in smaps/meminfo.
             address = Os.mmap(0, alignedPinSize,
                     OsConstants.PROT_READ | OsConstants.PROT_WRITE,
-                    OsConstants.MAP_PRIVATE | OsConstants.MAP_ANONYMOUS,
+                    OsConstants.MAP_SHARED | OsConstants.MAP_ANONYMOUS,
                     new FileDescriptor(), /*offset=*/0);
 
             Unsafe tempUnsafe = null;
@@ -729,7 +769,7 @@ public final class PinnerService extends SystemService {
             mCurrentlyPinnedAnonSize = alignedPinSize;
             mPinAnonAddress = address;
             address = -1;
-            Slog.e(TAG, "pinAnonRegion success, size=" + mCurrentlyPinnedAnonSize);
+            Slog.w(TAG, "pinAnonRegion success, size=" + mCurrentlyPinnedAnonSize);
         } catch (Exception ex) {
             Slog.e(TAG, "Could not pin anon region of size " + alignedPinSize, ex);
             return;
@@ -744,6 +784,8 @@ public final class PinnerService extends SystemService {
         if (mPinAnonAddress != 0) {
             safeMunmap(mPinAnonAddress, mCurrentlyPinnedAnonSize);
         }
+        mPinAnonAddress = 0;
+        mCurrentlyPinnedAnonSize = 0;
     }
 
     /**
