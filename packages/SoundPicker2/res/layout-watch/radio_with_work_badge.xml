@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2016 The Android Open Source Project
+<!-- Copyright (C) 2017 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,12 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
 <com.android.soundpicker.CheckedListItem xmlns:android="http://schemas.android.com/apk/res/android"
-     android:layout_width="fill_parent"
-     android:layout_height="wrap_content"
-     android:gravity="center_vertical"
-     android:background="?android:attr/selectableItemBackground"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:background="?android:attr/selectableItemBackground"
     >
 
     <CheckedTextView
@@ -29,10 +28,10 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="?android:attr/textColorAlertDialogListItem"
         android:gravity="center_vertical"
-        android:paddingStart="20dp"
-        android:paddingEnd="?android:attr/dialogPreferredPadding"
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
         android:drawableStart="?android:attr/listChoiceIndicatorSingle"
-        android:drawablePadding="20dp"
+        android:drawablePadding="8dp"
         android:ellipsize="marquee"
         android:layout_toLeftOf="@+id/work_icon"
         android:maxLines="3" />

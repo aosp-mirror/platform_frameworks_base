@@ -40,4 +40,8 @@
 
     <!-- Text for the name of the app. [CHAR LIMIT=12] -->
     <string name="app_label">Sounds</string>
+
+    <string name="empty_list">The list is empty</string>
+    <string name="sound_page_title">Sound</string>
+    <string name="vibration_page_title">Vibration</string>
 </resources>
