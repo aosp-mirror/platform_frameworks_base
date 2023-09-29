@@ -1141,8 +1141,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet ஆப்ஸை ஷார்ட்கட்டாகச் சேர்க்க, அந்த ஆப்ஸ் நிறுவப்பட்டுள்ளதை உறுதிசெய்துகொள்ளவும்"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet ஆப்ஸை ஷார்ட்கட்டாகச் சேர்க்க, அதில் குறைந்தது ஒரு கார்டாவது சேர்க்கப்பட்டுள்ளதை உறுதிசெய்துகொள்ளவும்"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home ஆப்ஸை ஷார்ட்கட்டாகச் சேர்க்க, அந்த ஆப்ஸ் நிறுவப்பட்டுள்ளதை உறுதிசெய்துகொள்ளவும்"</string>
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
-    <skip />
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• குறைந்தபட்சம் ஒரு சாதனம் அல்லது சாதனப் பேனலாவது இருக்கிறது"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"குறிப்பெடுத்தல் ஷார்ட்கட்டைப் பயன்படுத்த, குறிப்பெடுப்பதற்கான இயல்புநிலை ஆப்ஸைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ஆப்ஸைத் தேர்ந்தெடு"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ஷார்ட்கட்டை தொட்டுப் பிடிக்கவும்"</string>

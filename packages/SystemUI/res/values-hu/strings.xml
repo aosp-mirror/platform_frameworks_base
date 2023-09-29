@@ -1141,8 +1141,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Ha szeretné felvenni Wallet alkalmazást gyorsparancsként, gondoskodjon az app telepítéséről"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Ha szeretné felvenni Wallet alkalmazást gyorsparancsként, győződjön meg róla, hogy hozzáadott legalább egy kártyát a szolgáltatáshoz"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Ha szeretné felvenni Home appot gyorsparancsként, gondoskodjon az alkalmazás telepítéséről"</string>
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
-    <skip />
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Legalább egy eszköz vagy eszközpanel rendelkezésre áll"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Válassza ki az alapértelmezett jegyzetkészítő alkalmazást, amelyet a jegyzetelési gyorsparancshoz szeretne használni"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Alkalmazás kiválasztása"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Tartsa nyomva a parancsikont"</string>

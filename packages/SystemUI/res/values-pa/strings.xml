@@ -1141,8 +1141,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet ਐਪ ਨੂੰ ਸ਼ਾਰਟਕੱਟ ਵਜੋਂ ਸ਼ਾਮਲ ਕਰਨ ਲਈ, ਪੱਕਾ ਕਰੋ ਕਿ ਐਪ ਸਥਾਪਤ ਹੈ"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet ਐਪ ਨੂੰ ਸ਼ਾਰਟਕੱਟ ਵਜੋਂ ਸ਼ਾਮਲ ਕਰਨ ਲਈ, ਪੱਕਾ ਕਰੋ ਕਿ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਕਾਰਡ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home ਐਪ ਨੂੰ ਸ਼ਾਰਟਕੱਟ ਵਜੋਂ ਸ਼ਾਮਲ ਕਰਨ ਲਈ, ਪੱਕਾ ਕਰੋ ਕਿ ਐਪ ਸਥਾਪਤ ਹੈ"</string>
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
-    <skip />
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• ਘੱਟੋ-ਘੱਟ ਇੱਕ ਡੀਵਾਈਸ ਜਾਂ ਡੀਵਾਈਸ ਪੈਨਲ ਉਪਲਬਧ ਹੈ"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"ਨੋਟ ਬਣਾਉਣ ਵਾਲੇ ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਨੋਟ ਐਪ ਚੁਣੋ"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ਐਪ ਚੁਣੋ"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ਸ਼ਾਰਟਕੱਟ ਨੂੰ ਸਪਰਸ਼ ਕਰ ਕੇ ਰੱਖੋ"</string>
