@@ -118,7 +118,8 @@ public class HdrClamperTest {
         mClock.fastForward(3000);
         mTestHandler.timeAdvance();
         assertEquals(0.6f, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
-        assertEquals(0.1f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE); // (1-0.6) / 4
+        // 0.6 to HLG = 0.905727, rate = (1-0.905727) / 4
+        assertEquals(0.023568f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
     }
 
     @Test
@@ -146,7 +147,8 @@ public class HdrClamperTest {
         mClock.fastForward(1000);
         mTestHandler.timeAdvance();
         assertEquals(PowerManager.BRIGHTNESS_MAX, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
-        assertEquals(0.2f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE); // (1-0.6) / 2
+        // 0.6 to HLG = 0.905727, rate = (1-0.905727) / 2
+        assertEquals(0.047137f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
     }
 
     @Test
@@ -173,7 +175,8 @@ public class HdrClamperTest {
         mClock.fastForward(3000);
         mTestHandler.timeAdvance();
         assertEquals(0.6f, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
-        assertEquals(0.1f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
+        // 0.6 to HLG = 0.905727, rate = (1-0.905727) / 4
+        assertEquals(0.023568f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
     }
 
     // MsgInfo.sendTime is calculated first by adding SystemClock.uptimeMillis()
