@@ -24,6 +24,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.widget.ImageView
+import androidx.core.animation.CycleInterpolator
+import androidx.core.animation.ObjectAnimator
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -382,6 +384,27 @@ object KeyguardBottomAreaViewBinder {
                         falsingManager,
                     )
                 view.setOnTouchListener(onTouchListener)
+                view.setOnClickListener {
+                    messageDisplayer.invoke(R.string.keyguard_affordance_press_too_short)
+                    val amplitude =
+                        view.context.resources
+                            .getDimensionPixelSize(R.dimen.keyguard_affordance_shake_amplitude)
+                            .toFloat()
+                    val shakeAnimator =
+                        ObjectAnimator.ofFloat(
+                            view,
+                            "translationX",
+                            -amplitude / 2,
+                            amplitude / 2,
+                        )
+                    shakeAnimator.duration =
+                        KeyguardBottomAreaVibrations.ShakeAnimationDuration.inWholeMilliseconds
+                    shakeAnimator.interpolator =
+                        CycleInterpolator(KeyguardBottomAreaVibrations.ShakeAnimationCycles)
+                    shakeAnimator.start()
+
+                    vibratorHelper?.vibrate(KeyguardBottomAreaVibrations.Shake)
+                }
                 view.onLongClickListener =
                     OnLongClickListener(falsingManager, viewModel, vibratorHelper, onTouchListener)
             } else {
