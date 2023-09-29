@@ -39,6 +39,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
+import androidx.annotation.AnyThread
 import androidx.annotation.BinderThread
 import androidx.annotation.UiThread
 import com.android.app.animation.Interpolators
@@ -149,6 +150,10 @@ class ActivityLaunchAnimator(
             override fun onLaunchAnimationProgress(linearProgress: Float) {
                 listeners.forEach { it.onLaunchAnimationProgress(linearProgress) }
             }
+
+            override fun onLaunchAnimationCancelled() {
+                listeners.forEach { it.onLaunchAnimationCancelled() }
+            }
         }
 
     /**
@@ -191,6 +196,7 @@ class ActivityLaunchAnimator(
                     "ActivityLaunchAnimator.callback must be set before using this animator"
                 )
         val runner = createRunner(controller)
+        val runnerDelegate = runner.delegate!!
         val hideKeyguardWithAnimation = callback.isOnKeyguard() && !showOverLockscreen
 
         // Pass the RemoteAnimationAdapter to the intent starter only if we are not hiding the
@@ -241,12 +247,15 @@ class ActivityLaunchAnimator(
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
         // never started.
         if (willAnimate) {
-            runner.delegate.postTimeout()
+            runnerDelegate.postTimeout()
 
             // Hide the keyguard using the launch animation instead of the default unlock animation.
             if (hideKeyguardWithAnimation) {
                 callback.hideKeyguardWithAnimation(runner)
             }
+        } else {
+            // We need to make sure delegate references are dropped to avoid memory leaks.
+            runner.dispose()
         }
     }
 
@@ -345,6 +354,13 @@ class ActivityLaunchAnimator(
          */
         @JvmDefault fun onLaunchAnimationEnd() {}
 
+        /**
+         * The animation was cancelled. Note that [onLaunchAnimationEnd] will still be called after
+         * this if the animation was already started, i.e. if [onLaunchAnimationStart] was called
+         * before the cancellation.
+         */
+        fun onLaunchAnimationCancelled() {}
+
         /** Called when an activity launch animation made progress. */
         @JvmDefault fun onLaunchAnimationProgress(linearProgress: Float) {}
     }
@@ -427,6 +443,39 @@ class ActivityLaunchAnimator(
         fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean? = null) {}
     }
 
+    /**
+     * Invokes [onAnimationComplete] when animation is either cancelled or completed. Delegates all
+     * events to the passed [delegate].
+     */
+    @VisibleForTesting
+    inner class DelegatingAnimationCompletionListener(
+        private val delegate: Listener?,
+        private val onAnimationComplete: () -> Unit
+    ) : Listener {
+        var cancelled = false
+
+        override fun onLaunchAnimationStart() {
+            delegate?.onLaunchAnimationStart()
+        }
+
+        override fun onLaunchAnimationProgress(linearProgress: Float) {
+            delegate?.onLaunchAnimationProgress(linearProgress)
+        }
+
+        override fun onLaunchAnimationEnd() {
+            delegate?.onLaunchAnimationEnd()
+            if (!cancelled) {
+                onAnimationComplete.invoke()
+            }
+        }
+
+        override fun onLaunchAnimationCancelled() {
+            cancelled = true
+            delegate?.onLaunchAnimationCancelled()
+            onAnimationComplete.invoke()
+        }
+    }
+
     @VisibleForTesting
     inner class Runner(
         controller: Controller,
@@ -437,11 +486,21 @@ class ActivityLaunchAnimator(
         listener: Listener? = null
     ) : IRemoteAnimationRunner.Stub() {
         private val context = controller.launchContainer.context
-        internal val delegate: AnimationDelegate
+
+        // This is being passed across IPC boundaries and cycles (through PendingIntentRecords,
+        // etc.) are possible. So we need to make sure we drop any references that might
+        // transitively cause leaks when we're done with animation.
+        @VisibleForTesting var delegate: AnimationDelegate?
 
         init {
             delegate =
-                AnimationDelegate(controller, callback, listener, launchAnimator, disableWmTimeout)
+                AnimationDelegate(
+                    controller,
+                    callback,
+                    DelegatingAnimationCompletionListener(listener, this::dispose),
+                    launchAnimator,
+                    disableWmTimeout
+                )
         }
 
         @BinderThread
@@ -452,14 +511,33 @@ class ActivityLaunchAnimator(
             nonApps: Array<out RemoteAnimationTarget>?,
             finishedCallback: IRemoteAnimationFinishedCallback?
         ) {
+            val delegate = delegate
             context.mainExecutor.execute {
-                delegate.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback)
+                if (delegate == null) {
+                    Log.i(TAG, "onAnimationStart called after completion")
+                    // Animation started too late and timed out already. We need to still
+                    // signal back that we're done with it.
+                    finishedCallback?.onAnimationFinished()
+                } else {
+                    delegate.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback)
+                }
             }
         }
 
         @BinderThread
         override fun onAnimationCancelled() {
-            context.mainExecutor.execute { delegate.onAnimationCancelled() }
+            val delegate = delegate
+            context.mainExecutor.execute {
+                delegate ?: Log.wtf(TAG, "onAnimationCancelled called after completion")
+                delegate?.onAnimationCancelled()
+            }
+        }
+
+        @AnyThread
+        fun dispose() {
+            // Drop references to animation controller once we're done with the animation
+            // to avoid leaking.
+            context.mainExecutor.execute { delegate = null }
         }
     }
 
@@ -585,6 +663,7 @@ class ActivityLaunchAnimator(
                     )
                 }
                 controller.onLaunchAnimationCancelled()
+                listener?.onLaunchAnimationCancelled()
                 return
             }
 
@@ -822,6 +901,7 @@ class ActivityLaunchAnimator(
                 Log.d(TAG, "Calling controller.onLaunchAnimationCancelled() [animation timed out]")
             }
             controller.onLaunchAnimationCancelled()
+            listener?.onLaunchAnimationCancelled()
         }
 
         @UiThread
@@ -843,6 +923,7 @@ class ActivityLaunchAnimator(
                 )
             }
             controller.onLaunchAnimationCancelled()
+            listener?.onLaunchAnimationCancelled()
         }
 
         private fun IRemoteAnimationFinishedCallback.invoke() {
