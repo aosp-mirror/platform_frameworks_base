@@ -32635,6 +32635,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)
      * @param enabled whether auto handwriting initiation is enabled for this view.
      * @attr ref android.R.styleable#View_autoHandwritingEnabled
+     * @see EditorInfo#setStylusHandwritingEnabled(boolean)
      */
     public void setAutoHandwritingEnabled(boolean enabled) {
         if (enabled) {

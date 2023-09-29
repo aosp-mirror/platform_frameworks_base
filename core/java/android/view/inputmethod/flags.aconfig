@@ -7,3 +7,11 @@ flag {
     bug: "298172246"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "editorinfo_handwriting_enabled"
+    namespace: "input_method"
+    description: "Feature flag for adding EditorInfo#mStylusHandwritingEnabled"
+    bug: "293898187"
+    is_fixed_read_only: true
+}
