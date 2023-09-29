@@ -38,6 +38,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.Sensor;
@@ -142,6 +143,7 @@ public final class DisplayPowerControllerTest {
                     .setStrictness(Strictness.LENIENT)
                     .spyStatic(SystemProperties.class)
                     .spyStatic(BatteryStatsService.class)
+                    .spyStatic(ActivityManager.class)
                     .build();
 
     @Rule
@@ -167,9 +169,14 @@ public final class DisplayPowerControllerTest {
 
         mContext.addMockSystemService(PowerManager.class, mPowerManagerMock);
 
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_displayColorFadeDisabled, false);
+
         doAnswer((Answer<Void>) invocationOnMock -> null).when(() ->
                 SystemProperties.set(anyString(), any()));
         doAnswer((Answer<Void>) invocationOnMock -> null).when(BatteryStatsService::getService);
+        doAnswer((Answer<Boolean>) invocationOnMock -> false)
+                .when(ActivityManager::isLowRamDeviceStatic);
 
         setUpSensors();
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
