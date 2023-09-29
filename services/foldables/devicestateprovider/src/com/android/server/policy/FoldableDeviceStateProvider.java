@@ -21,6 +21,7 @@ import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STA
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.TYPE_EXTERNAL;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -33,11 +34,14 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.PowerManager;
 import android.hardware.display.DisplayManager;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.PowerManager;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
@@ -45,6 +49,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.devicestate.DeviceState;
 import com.android.server.devicestate.DeviceStateProvider;
+import com.android.server.policy.feature.flags.FeatureFlags;
+import com.android.server.policy.feature.flags.FeatureFlagsImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,14 +61,14 @@ import java.util.function.Function;
 
 /**
  * Device state provider for foldable devices.
- *
+ * <p>
  * It is an implementation of {@link DeviceStateProvider} tailored specifically for
  * foldable devices and allows simple callback-based configuration with hall sensor
  * and hinge angle sensor values.
  */
 public final class FoldableDeviceStateProvider implements DeviceStateProvider,
         SensorEventListener, PowerManager.OnThermalStatusChangedListener,
-       DisplayManager.DisplayListener  {
+        DisplayManager.DisplayListener {
 
     private static final String TAG = "FoldableDeviceStateProvider";
     private static final boolean DEBUG = false;
@@ -76,6 +82,13 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
     // Map of state identifier to a boolean supplier that returns true when all required conditions
     // are met for the device to be in the state.
     private final SparseArray<BooleanSupplier> mStateConditions = new SparseArray<>();
+
+    // Map of state identifier to a boolean supplier that returns true when the device state has all
+    // the conditions needed for availability.
+    private final SparseArray<BooleanSupplier> mStateAvailabilityConditions = new SparseArray<>();
+
+    @GuardedBy("mLock")
+    private final SparseBooleanArray mExternalDisplaysConnected = new SparseBooleanArray();
 
     private final Sensor mHingeAngleSensor;
     private final DisplayManager mDisplayManager;
@@ -99,7 +112,23 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
     @GuardedBy("mLock")
     private boolean mPowerSaveModeEnabled;
 
-    public FoldableDeviceStateProvider(@NonNull Context context,
+    private final boolean mIsDualDisplayBlockingEnabled;
+
+    public FoldableDeviceStateProvider(
+            @NonNull Context context,
+            @NonNull SensorManager sensorManager,
+            @NonNull Sensor hingeAngleSensor,
+            @NonNull Sensor hallSensor,
+            @NonNull DisplayManager displayManager,
+            @NonNull DeviceStateConfiguration[] deviceStateConfigurations) {
+        this(new FeatureFlagsImpl(), context, sensorManager, hingeAngleSensor, hallSensor,
+                displayManager, deviceStateConfigurations);
+    }
+
+    @VisibleForTesting
+    public FoldableDeviceStateProvider(
+            @NonNull FeatureFlags featureFlags,
+            @NonNull Context context,
             @NonNull SensorManager sensorManager,
             @NonNull Sensor hingeAngleSensor,
             @NonNull Sensor hallSensor,
@@ -112,6 +141,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
         mHingeAngleSensor = hingeAngleSensor;
         mHallSensor = hallSensor;
         mDisplayManager = displayManager;
+        mIsDualDisplayBlockingEnabled = featureFlags.enableDualDisplayBlocking();
 
         sensorManager.registerListener(this, mHingeAngleSensor, SENSOR_DELAY_FASTEST);
         sensorManager.registerListener(this, mHallSensor, SENSOR_DELAY_FASTEST);
@@ -121,20 +151,15 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
             final DeviceStateConfiguration configuration = deviceStateConfigurations[i];
             mOrderedStates[i] = configuration.mDeviceState;
 
-            if (mStateConditions.get(configuration.mDeviceState.getIdentifier()) != null) {
-                throw new IllegalArgumentException("Device state configurations must have unique"
-                        + " device state identifiers, found duplicated identifier: " +
-                        configuration.mDeviceState.getIdentifier());
-            }
-
-            mStateConditions.put(configuration.mDeviceState.getIdentifier(), () ->
-                    configuration.mPredicate.apply(this));
+            assertUniqueDeviceStateIdentifier(configuration);
+            initialiseStateConditions(configuration);
+            initialiseStateAvailabilityConditions(configuration);
         }
 
+        Handler handler = new Handler(Looper.getMainLooper());
         mDisplayManager.registerDisplayListener(
                 /* listener = */ this,
-                /* handler= */ null,
-                /* eventsMask= */ DisplayManager.EVENT_FLAG_DISPLAY_CHANGED);
+                /* handler= */ handler);
 
         Arrays.sort(mOrderedStates, Comparator.comparingInt(DeviceState::getIdentifier));
 
@@ -167,6 +192,26 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
         }
     }
 
+    private void assertUniqueDeviceStateIdentifier(DeviceStateConfiguration configuration) {
+        if (mStateConditions.get(configuration.mDeviceState.getIdentifier()) != null) {
+            throw new IllegalArgumentException("Device state configurations must have unique"
+                    + " device state identifiers, found duplicated identifier: "
+                    + configuration.mDeviceState.getIdentifier());
+        }
+    }
+
+    private void initialiseStateConditions(DeviceStateConfiguration configuration) {
+        mStateConditions.put(configuration.mDeviceState.getIdentifier(), () ->
+                configuration.mActiveStatePredicate.apply(this));
+    }
+
+    private void initialiseStateAvailabilityConditions(DeviceStateConfiguration configuration) {
+        if (configuration.mAvailabilityPredicate != null) {
+            mStateAvailabilityConditions.put(configuration.mDeviceState.getIdentifier(), () ->
+                    configuration.mAvailabilityPredicate.apply(this));
+        }
+    }
+
     @Override
     public void setListener(Listener listener) {
         synchronized (mLock) {
@@ -189,21 +234,34 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
             }
             listener = mListener;
             for (DeviceState deviceState : mOrderedStates) {
-                if (isThermalStatusCriticalOrAbove(mThermalStatus)
-                        && deviceState.hasFlag(
-                        DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL)) {
-                    continue;
+                if (isStateSupported(deviceState)) {
+                    supportedStates.add(deviceState);
                 }
-                if (mPowerSaveModeEnabled && deviceState.hasFlag(
-                        DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE)) {
-                    continue;
-                }
-                supportedStates.add(deviceState);
             }
         }
 
         listener.onSupportedDeviceStatesChanged(
                 supportedStates.toArray(new DeviceState[supportedStates.size()]), reason);
+    }
+
+    @GuardedBy("mLock")
+    private boolean isStateSupported(DeviceState deviceState) {
+        if (isThermalStatusCriticalOrAbove(mThermalStatus)
+                && deviceState.hasFlag(
+                DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL)) {
+            return false;
+        }
+        if (mPowerSaveModeEnabled && deviceState.hasFlag(
+                DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE)) {
+            return false;
+        }
+        if (mIsDualDisplayBlockingEnabled
+                && mStateAvailabilityConditions.contains(deviceState.getIdentifier())) {
+            return mStateAvailabilityConditions
+                    .get(deviceState.getIdentifier())
+                    .getAsBoolean();
+        }
+        return true;
     }
 
     /** Computes the current device state and notifies the listener of a change, if needed. */
@@ -294,7 +352,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
     private void dumpSensorValues() {
         Slog.i(TAG, "Sensor values:");
         dumpSensorValues("Hall Sensor", mHallSensor, mLastHallSensorEvent);
-        dumpSensorValues("Hinge Angle Sensor",mHingeAngleSensor, mLastHingeAngleSensorEvent);
+        dumpSensorValues("Hinge Angle Sensor", mHingeAngleSensor, mLastHingeAngleSensorEvent);
         Slog.i(TAG, "isScreenOn: " + isScreenOn());
     }
 
@@ -307,12 +365,35 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
 
     @Override
     public void onDisplayAdded(int displayId) {
+        // TODO(b/312397262): consider virtual displays cases
+        synchronized (mLock) {
+            if (mIsDualDisplayBlockingEnabled
+                    && !mExternalDisplaysConnected.get(displayId, false)
+                    && mDisplayManager.getDisplay(displayId).getType() == TYPE_EXTERNAL) {
+                mExternalDisplaysConnected.put(displayId, true);
 
+                // Only update the supported state when going from 0 external display to 1
+                if (mExternalDisplaysConnected.size() == 1) {
+                    notifySupportedStatesChanged(
+                            SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_ADDED);
+                }
+            }
+        }
     }
 
     @Override
     public void onDisplayRemoved(int displayId) {
+        synchronized (mLock) {
+            if (mIsDualDisplayBlockingEnabled && mExternalDisplaysConnected.get(displayId, false)) {
+                mExternalDisplaysConnected.delete(displayId);
 
+                // Only update the supported states when going from 1 external display to 0
+                if (mExternalDisplaysConnected.size() == 0) {
+                    notifySupportedStatesChanged(
+                            SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_REMOVED);
+                }
+            }
+        }
     }
 
     @Override
@@ -338,12 +419,22 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
      */
     public static class DeviceStateConfiguration {
         private final DeviceState mDeviceState;
-        private final Function<FoldableDeviceStateProvider, Boolean> mPredicate;
+        private final Function<FoldableDeviceStateProvider, Boolean> mActiveStatePredicate;
+        private final Function<FoldableDeviceStateProvider, Boolean> mAvailabilityPredicate;
 
-        private DeviceStateConfiguration(DeviceState deviceState,
+        private DeviceStateConfiguration(
+                DeviceState deviceState,
                 Function<FoldableDeviceStateProvider, Boolean> predicate) {
+            this(deviceState, predicate, null);
+        }
+
+        private DeviceStateConfiguration(
+                DeviceState deviceState,
+                Function<FoldableDeviceStateProvider, Boolean> activeStatePredicate,
+                Function<FoldableDeviceStateProvider, Boolean> availabilityPredicate) {
             mDeviceState = deviceState;
-            mPredicate = predicate;
+            mActiveStatePredicate = activeStatePredicate;
+            mAvailabilityPredicate = availabilityPredicate;
         }
 
         public static DeviceStateConfiguration createConfig(
@@ -365,21 +456,33 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
                     predicate);
         }
 
+        /** Create a configuration with availability predicate **/
+        public static DeviceStateConfiguration createConfig(
+                @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier,
+                @NonNull String name,
+                @DeviceState.DeviceStateFlags int flags,
+                Function<FoldableDeviceStateProvider, Boolean> predicate,
+                Function<FoldableDeviceStateProvider, Boolean> availabilityPredicate
+        ) {
+            return new DeviceStateConfiguration(new DeviceState(identifier, name, flags),
+                predicate, availabilityPredicate);
+        }
+
         /**
          * Creates a device state configuration for a closed tent-mode aware state.
-         *
+         * <p>
          * During tent mode:
          * - The inner display is OFF
          * - The outer display is ON
          * - The device is partially unfolded (left and right edges could be on the table)
          * In this mode the device the device so it could be used in a posture where both left
          * and right edges of the unfolded device are on the table.
-         *
+         * <p>
          * The predicate returns false after the hinge angle reaches
          * {@code tentModeSwitchAngleDegrees}. Then it switches back only when the hinge angle
          * becomes less than {@code maxClosedAngleDegrees}. Hinge angle is 0 degrees when the device
          * is fully closed and 180 degrees when it is fully unfolded.
-         *
+         * <p>
          * For example, when tentModeSwitchAngleDegrees = 90 and maxClosedAngleDegrees = 5 degrees:
          *  - when unfolding the device from fully closed posture (last state == closed or it is
          *    undefined yet) this state will become not matching after reaching the angle
@@ -435,6 +538,15 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
     }
 
     /**
+     * @return Whether there is an external connected display.
+     */
+    public boolean hasNoConnectedExternalDisplay() {
+        synchronized (mLock) {
+            return mExternalDisplaysConnected.size() == 0;
+        }
+    }
+
+    /**
      * @return Whether the screen is on.
      */
     public boolean isScreenOn() {
@@ -442,6 +554,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
             return mIsScreenOn;
         }
     }
+
     /**
      * @return current hinge angle value of a foldable device
      */
