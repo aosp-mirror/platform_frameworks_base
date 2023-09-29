@@ -176,7 +176,6 @@ class SeekableSliderTracker(
             SliderState.DRAG_HANDLE_REACHED_BOOKEND -> executeOnBookend()
             SliderState.JUMP_TRACK_LOCATION_SELECTED ->
                 sliderListener.onProgressJump(latestProgress)
-            SliderState.JUMP_BOOKEND_SELECTED -> executeOnBookend()
             else -> {}
         }
     }
@@ -197,7 +196,7 @@ class SeekableSliderTracker(
         epsilon: Float = 0.00001f,
     ): Boolean {
         val delta = abs(currentProgress - latestProgress)
-        return abs(delta - config.jumpThreshold) < epsilon
+        return delta > config.jumpThreshold - epsilon
     }
 
     private fun bookendReached(currentProgress: Float): Boolean {
