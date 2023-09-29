@@ -11147,6 +11147,12 @@ public final class Settings {
         public static final String BLUETOOTH_ON_WHILE_DRIVING = "bluetooth_on_while_driving";
 
         /**
+         * Volume dialog timeout in ms.
+         * @hide
+         */
+        public static final String VOLUME_DIALOG_DISMISS_TIMEOUT = "volume_dialog_dismiss_timeout";
+
+        /**
          * What behavior should be invoked when the volume hush gesture is triggered
          * One of VOLUME_HUSH_OFF, VOLUME_HUSH_VIBRATE, VOLUME_HUSH_MUTE.
          *
