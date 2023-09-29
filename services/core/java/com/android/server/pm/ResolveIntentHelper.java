@@ -459,7 +459,7 @@ final class ResolveIntentHelper {
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                             mPlatformCompat, componentResolver, list, true, intent,
-                            resolvedType, filterCallingUid);
+                            resolvedType, flags, filterCallingUid);
                 }
             }
         } else {
@@ -485,7 +485,7 @@ final class ResolveIntentHelper {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                     mPlatformCompat, componentResolver,
-                    list, true, originalIntent, resolvedType, filterCallingUid);
+                    list, true, originalIntent, resolvedType, flags, filterCallingUid);
         }
 
         return computer.applyPostResolutionFilter(list, instantAppPkgName, false, queryingUid,
