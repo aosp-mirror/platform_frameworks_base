@@ -306,6 +306,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.content.pm.VersionedPackage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -18183,7 +18184,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     /**
      * Stops user but allow delayed locking. Delayed locking keeps user unlocked even after
-     * stopping only if {@code config_multiuserDelayUserDataLocking} overlay is set true.
+     * stopping only if {@code config_multiuserDelayUserDataLocking} overlay is set true on the
+     * device or if the user has {@link UserProperties#getAllowStoppingUserWithDelayedLocking()}
+     * set to true.
      *
      * <p>When delayed locking is not enabled through the overlay, this call becomes the same
      * with {@link #stopUserWithCallback(int, IStopUserCallback)} call.
@@ -18195,8 +18198,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      *         other {@code ActivityManager#USER_OP_*} codes for failure.
      *
      */
-    // TODO(b/302662311): Add javadoc changes corresponding to the user property that allows
-    // delayed locking behavior once the private space flag is finalized.
     @Override
     public int stopUserWithDelayedLocking(@UserIdInt int userId, IStopUserCallback callback) {
         return mUserController.stopUser(userId, /* allowDelayedLocking= */ true,

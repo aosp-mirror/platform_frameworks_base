@@ -5577,8 +5577,8 @@ public class UserManager {
     }
 
     /**
-     * Enables or disables quiet mode for a managed profile. If quiet mode is enabled, apps in a
-     * managed profile don't run, generate notifications, or consume data or battery.
+     * Enables or disables quiet mode for a profile. If quiet mode is enabled, apps in the profile
+     * don't run, generate notifications, or consume data or battery.
      * <p>
      * If a user's credential is needed to turn off quiet mode, a confirm credential screen will be
      * shown to the user.
@@ -5586,8 +5586,11 @@ public class UserManager {
      * The change may not happen instantly, however apps can listen for
      * {@link Intent#ACTION_MANAGED_PROFILE_AVAILABLE} and
      * {@link Intent#ACTION_MANAGED_PROFILE_UNAVAILABLE} broadcasts in order to be notified of
-     * the change of the quiet mode. Apps can also check the current state of quiet mode by
-     * calling {@link #isQuietModeEnabled(UserHandle)}.
+     * the change of the quiet mode for managed profile.
+     * Apps can listen to generic broadcasts {@link Intent#ACTION_PROFILE_AVAILABLE} and
+     * {@link Intent#ACTION_PROFILE_UNAVAILABLE} to be notified of the change in quiet mode for
+     * any profiles. Apps can also check the current state of quiet mode by calling
+     * {@link #isQuietModeEnabled(UserHandle)}.
      * <p>
      * The caller must either be the foreground default launcher or have one of these permissions:
      * {@code MANAGE_USERS} or {@code MODIFY_QUIET_MODE}.
@@ -5597,7 +5600,7 @@ public class UserManager {
      * @return {@code false} if user's credential is needed in order to turn off quiet mode,
      *         {@code true} otherwise
      * @throws SecurityException if the caller is invalid
-     * @throws IllegalArgumentException if {@code userHandle} is not a managed profile
+     * @throws IllegalArgumentException if {@code userHandle} is not a profile
      *
      * @see #isQuietModeEnabled(UserHandle)
      */
@@ -5662,7 +5665,6 @@ public class UserManager {
 
     /**
      * Returns whether the given profile is in quiet mode or not.
-     * Notes: Quiet mode is only supported for managed profiles.
      *
      * @param userHandle The user handle of the profile to be queried.
      * @return true if the profile is in quiet mode, false otherwise.
