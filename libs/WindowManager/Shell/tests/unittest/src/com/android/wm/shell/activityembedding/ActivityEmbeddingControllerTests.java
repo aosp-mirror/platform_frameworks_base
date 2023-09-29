@@ -39,7 +39,7 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.TransitionInfoBuilder;
+import com.android.wm.shell.transition.TransitionInfoBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
