@@ -48,6 +48,8 @@ import android.media.MediaRoute2Info;
             case AudioDeviceInfo.TYPE_DOCK_ANALOG:
                 return MediaRoute2Info.TYPE_DOCK;
             case AudioDeviceInfo.TYPE_HDMI:
+            case AudioDeviceInfo.TYPE_HDMI_ARC:
+            case AudioDeviceInfo.TYPE_HDMI_EARC:
                 return MediaRoute2Info.TYPE_HDMI;
             case AudioDeviceInfo.TYPE_USB_DEVICE:
                 return MediaRoute2Info.TYPE_USB_DEVICE;
@@ -81,6 +83,8 @@ import android.media.MediaRoute2Info;
             case AudioDeviceInfo.TYPE_DOCK:
             case AudioDeviceInfo.TYPE_DOCK_ANALOG:
             case AudioDeviceInfo.TYPE_HDMI:
+            case AudioDeviceInfo.TYPE_HDMI_ARC:
+            case AudioDeviceInfo.TYPE_HDMI_EARC:
             case AudioDeviceInfo.TYPE_USB_DEVICE:
                 return true;
             default:
