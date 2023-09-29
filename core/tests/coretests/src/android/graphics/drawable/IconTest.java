@@ -18,13 +18,20 @@ package android.graphics.drawable;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.IUriGrantsManager;
+import android.content.ContentProvider;
+import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.RecordingCanvas;
 import android.graphics.Region;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Parcel;
+import android.os.RemoteException;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
@@ -34,6 +41,7 @@ import com.android.frameworks.coretests.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -457,6 +465,81 @@ public class IconTest extends AndroidTestCase {
         assertThat(drawable.getBitmap().getByteCount()).isAtMost(RecordingCanvas.MAX_BITMAP_SIZE);
     }
 
+    @SmallTest
+    public void testLoadSafeDrawable_loadSuccessful() throws FileNotFoundException {
+        int uid = 12345;
+        String packageName = "test_pkg";
+
+        final Bitmap bit1 = ((BitmapDrawable) getContext().getDrawable(R.drawable.landscape))
+                .getBitmap();
+        final File dir = getContext().getExternalFilesDir(null);
+        final File file1 = new File(dir, "file1-original.png");
+        bit1.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(file1));
+
+        final Icon im1 = Icon.createWithFilePath(file1.toString());
+
+        TestableIUriGrantsManager ugm =
+                new TestableIUriGrantsManager(/* rejectCheckRequests */ false);
+
+        Drawable loadedDrawable = im1.loadDrawableCheckingUriGrant(
+                getContext(), ugm, uid, packageName);
+        assertThat(loadedDrawable).isNotNull();
+
+        assertThat(ugm.mRequests.size()).isEqualTo(1);
+        TestableIUriGrantsManager.CheckRequest r = ugm.mRequests.get(0);
+        assertThat(r.mCallingUid).isEqualTo(uid);
+        assertThat(r.mPackageName).isEqualTo(packageName);
+        assertThat(r.mMode).isEqualTo(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        assertThat(r.mUri).isEqualTo(ContentProvider.getUriWithoutUserId(im1.getUri()));
+        assertThat(r.mUserId).isEqualTo(ContentProvider.getUserIdFromUri(im1.getUri()));
+
+        final Bitmap test1 = Bitmap.createBitmap(loadedDrawable.getIntrinsicWidth(),
+                loadedDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        loadedDrawable.setBounds(0, 0, loadedDrawable.getIntrinsicWidth(),
+                loadedDrawable.getIntrinsicHeight());
+        loadedDrawable.draw(new Canvas(test1));
+
+        bit1.compress(Bitmap.CompressFormat.PNG, 100,
+                new FileOutputStream(new File(dir, "bitmap1-original.png")));
+        test1.compress(Bitmap.CompressFormat.PNG, 100,
+                new FileOutputStream(new File(dir, "bitmap1-test.png")));
+        if (!equalBitmaps(bit1, test1)) {
+            findBitmapDifferences(bit1, test1);
+            fail("bitmap1 differs, check " + dir);
+        }
+    }
+
+    @SmallTest
+    public void testLoadSafeDrawable_grantRejected_nullDrawable() throws FileNotFoundException {
+        int uid = 12345;
+        String packageName = "test_pkg";
+
+        final Bitmap bit1 = ((BitmapDrawable) getContext().getDrawable(R.drawable.landscape))
+                .getBitmap();
+        final File dir = getContext().getExternalFilesDir(null);
+        final File file1 = new File(dir, "file1-original.png");
+        bit1.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(file1));
+
+        final Icon im1 = Icon.createWithFilePath(file1.toString());
+
+        TestableIUriGrantsManager ugm =
+                new TestableIUriGrantsManager(/* rejectCheckRequests */ true);
+
+        Drawable loadedDrawable = im1.loadDrawableCheckingUriGrant(
+                getContext(), ugm, uid, packageName);
+
+        assertThat(ugm.mRequests.size()).isEqualTo(1);
+        TestableIUriGrantsManager.CheckRequest r = ugm.mRequests.get(0);
+        assertThat(r.mCallingUid).isEqualTo(uid);
+        assertThat(r.mPackageName).isEqualTo(packageName);
+        assertThat(r.mMode).isEqualTo(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        assertThat(r.mUri).isEqualTo(ContentProvider.getUriWithoutUserId(im1.getUri()));
+        assertThat(r.mUserId).isEqualTo(ContentProvider.getUserIdFromUri(im1.getUri()));
+
+        assertThat(loadedDrawable).isNull();
+    }
+
+
     // ======== utils ========
 
     static final char[] GRADIENT = " .:;+=xX$#".toCharArray();
@@ -540,5 +623,78 @@ public class IconTest extends AndroidTestCase {
             }
         }
         L(sb.toString());
+    }
+
+    private static class TestableIUriGrantsManager extends IUriGrantsManager.Stub {
+
+        final ArrayList<CheckRequest> mRequests = new ArrayList<>();
+        final boolean mRejectCheckRequests;
+
+        TestableIUriGrantsManager(boolean rejectCheckRequests) {
+            this.mRejectCheckRequests = rejectCheckRequests;
+        }
+
+        @Override
+        public void takePersistableUriPermission(Uri uri, int i, String s, int i1)
+                throws RemoteException {
+
+        }
+
+        @Override
+        public void releasePersistableUriPermission(Uri uri, int i, String s, int i1)
+                throws RemoteException {
+
+        }
+
+        @Override
+        public void grantUriPermissionFromOwner(IBinder iBinder, int i, String s, Uri uri, int i1,
+                int i2, int i3) throws RemoteException {
+
+        }
+
+        @Override
+        public ParceledListSlice getGrantedUriPermissions(String s, int i) throws RemoteException {
+            return null;
+        }
+
+        @Override
+        public void clearGrantedUriPermissions(String s, int i) throws RemoteException {
+
+        }
+
+        @Override
+        public ParceledListSlice getUriPermissions(String s, boolean b, boolean b1)
+                throws RemoteException {
+            return null;
+        }
+
+        @Override
+        public int checkGrantUriPermission_ignoreNonSystem(
+                int uid, String packageName, Uri uri, int mode, int userId)
+                throws RemoteException {
+            CheckRequest r = new CheckRequest(uid, packageName, uri, mode, userId);
+            mRequests.add(r);
+            if (mRejectCheckRequests) {
+                throw new SecurityException();
+            } else {
+                return uid;
+            }
+        }
+
+        static class CheckRequest {
+            final int mCallingUid;
+            final String mPackageName;
+            final Uri mUri;
+            final int mMode;
+            final int mUserId;
+
+            CheckRequest(int callingUid, String packageName, Uri uri, int mode, int userId) {
+                this.mCallingUid = callingUid;
+                this.mPackageName = packageName;
+                this.mUri = uri;
+                this.mMode = mode;
+                this.mUserId = userId;
+            }
+        }
     }
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.external
 
+import android.app.IUriGrantsManager
 import android.app.StatusBarManager
 import android.content.ComponentName
 import android.content.DialogInterface
@@ -57,6 +58,7 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
         private val TEST_COMPONENT = ComponentName("test_pkg", "test_cls")
         private const val TEST_APP_NAME = "App"
         private const val TEST_LABEL = "Label"
+        private const val TEST_UID = 12345
     }
 
     @Mock
@@ -71,6 +73,8 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
     private lateinit var logger: TileRequestDialogEventLogger
     @Mock
     private lateinit var icon: Icon
+    @Mock
+    private lateinit var ugm: IUriGrantsManager
 
     private val instanceIdSequence = InstanceIdSequenceFake(1_000)
     private lateinit var controller: TileServiceRequestController
@@ -88,7 +92,8 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
                 qsHost,
                 commandQueue,
                 commandRegistry,
-                logger
+                logger,
+                ugm,
         ) {
             tileRequestDialog
         }
@@ -98,10 +103,24 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
 
     @Test
     fun requestTileAdd_dataIsPassedToDialog() {
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, Callback())
+        controller.requestTileAdd(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                Callback(),
+        )
 
         verify(tileRequestDialog).setTileData(
-                TileRequestDialog.TileData(TEST_APP_NAME, TEST_LABEL, icon)
+                TileRequestDialog.TileData(
+                        TEST_UID,
+                        TEST_APP_NAME,
+                        TEST_LABEL,
+                        icon,
+                        TEST_COMPONENT.packageName,
+                ),
+                ugm,
         )
     }
 
@@ -110,7 +129,14 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
         `when`(qsHost.indexOf(CustomTile.toSpec(TEST_COMPONENT))).thenReturn(2)
 
         val callback = Callback()
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        controller.requestTileAdd(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                callback,
+        )
 
         assertThat(callback.lastAccepted).isEqualTo(TileServiceRequestController.TILE_ALREADY_ADDED)
         verify(qsHost, never()).addTile(any(ComponentName::class.java), anyBoolean())
@@ -120,7 +146,7 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
     fun tileAlreadyAdded_logged() {
         `when`(qsHost.indexOf(CustomTile.toSpec(TEST_COMPONENT))).thenReturn(2)
 
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon) {}
+        controller.requestTileAdd(TEST_UID, TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon) {}
 
         verify(logger).logTileAlreadyAdded(eq<String>(TEST_COMPONENT.packageName), any())
         verify(logger, never()).logDialogShown(anyString(), any())
@@ -129,19 +155,33 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
 
     @Test
     fun showAllUsers_set() {
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, Callback())
+        controller.requestTileAdd(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                Callback(),
+        )
         verify(tileRequestDialog).setShowForAllUsers(true)
     }
 
     @Test
     fun cancelOnTouchOutside_set() {
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, Callback())
+        controller.requestTileAdd(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                Callback(),
+        )
         verify(tileRequestDialog).setCanceledOnTouchOutside(true)
     }
 
     @Test
     fun dialogShown_logged() {
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon) {}
+        controller.requestTileAdd(TEST_UID, TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon) {}
 
         verify(logger).logDialogShown(eq<String>(TEST_COMPONENT.packageName), any())
     }
@@ -152,7 +192,14 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
                 ArgumentCaptor.forClass(DialogInterface.OnCancelListener::class.java)
 
         val callback = Callback()
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        controller.requestTileAdd(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                callback,
+        )
         verify(tileRequestDialog).setOnCancelListener(capture(cancelListenerCaptor))
 
         cancelListenerCaptor.value.onCancel(tileRequestDialog)
@@ -165,7 +212,7 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
         val cancelListenerCaptor =
                 ArgumentCaptor.forClass(DialogInterface.OnCancelListener::class.java)
 
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon) {}
+        controller.requestTileAdd(TEST_UID, TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon) {}
         val instanceId = InstanceId.fakeInstanceId(instanceIdSequence.lastInstanceId)
 
         verify(tileRequestDialog).setOnCancelListener(capture(cancelListenerCaptor))
@@ -185,7 +232,14 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
                 ArgumentCaptor.forClass(DialogInterface.OnClickListener::class.java)
 
         val callback = Callback()
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        controller.requestTileAdd(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                callback,
+        )
         verify(tileRequestDialog).setPositiveButton(anyInt(), capture(clickListenerCaptor))
 
         clickListenerCaptor.value.onClick(tileRequestDialog, DialogInterface.BUTTON_POSITIVE)
@@ -199,7 +253,7 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
         val clickListenerCaptor =
                 ArgumentCaptor.forClass(DialogInterface.OnClickListener::class.java)
 
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon) {}
+        controller.requestTileAdd(TEST_UID, TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon) {}
         val instanceId = InstanceId.fakeInstanceId(instanceIdSequence.lastInstanceId)
 
         verify(tileRequestDialog).setPositiveButton(anyInt(), capture(clickListenerCaptor))
@@ -219,7 +273,14 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
                 ArgumentCaptor.forClass(DialogInterface.OnClickListener::class.java)
 
         val callback = Callback()
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        controller.requestTileAdd(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                callback,
+        )
         verify(tileRequestDialog).setNegativeButton(anyInt(), capture(clickListenerCaptor))
 
         clickListenerCaptor.value.onClick(tileRequestDialog, DialogInterface.BUTTON_NEGATIVE)
@@ -233,7 +294,7 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
         val clickListenerCaptor =
                 ArgumentCaptor.forClass(DialogInterface.OnClickListener::class.java)
 
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon) {}
+        controller.requestTileAdd(TEST_UID, TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon) {}
         val instanceId = InstanceId.fakeInstanceId(instanceIdSequence.lastInstanceId)
 
         verify(tileRequestDialog).setNegativeButton(anyInt(), capture(clickListenerCaptor))
@@ -257,10 +318,24 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
         val captor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
         verify(commandQueue, atLeastOnce()).addCallback(capture(captor))
 
-        captor.value.requestAddTile(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, Callback())
+        captor.value.requestAddTile(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                Callback(),
+        )
 
         verify(tileRequestDialog).setTileData(
-                TileRequestDialog.TileData(TEST_APP_NAME, TEST_LABEL, icon)
+                TileRequestDialog.TileData(
+                        TEST_UID,
+                        TEST_APP_NAME,
+                        TEST_LABEL,
+                        icon,
+                        TEST_COMPONENT.packageName,
+                ),
+                ugm,
         )
     }
 
@@ -271,7 +346,7 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
         verify(commandQueue, atLeastOnce()).addCallback(capture(captor))
         val c = Callback()
 
-        captor.value.requestAddTile(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, c)
+        captor.value.requestAddTile(TEST_UID, TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, c)
 
         assertThat(c.lastAccepted).isEqualTo(TileServiceRequestController.TILE_ALREADY_ADDED)
     }
@@ -288,7 +363,14 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
                 throw RemoteException()
             }
         }
-        captor.value.requestAddTile(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        captor.value.requestAddTile(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                callback,
+        )
         verify(tileRequestDialog).setOnCancelListener(capture(cancelListenerCaptor))
 
         cancelListenerCaptor.value.onCancel(tileRequestDialog)
@@ -300,7 +382,14 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
             ArgumentCaptor.forClass(DialogInterface.OnDismissListener::class.java)
 
         val callback = Callback()
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        controller.requestTileAdd(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                callback,
+        )
         verify(tileRequestDialog).setOnDismissListener(capture(dismissListenerCaptor))
 
         dismissListenerCaptor.value.onDismiss(tileRequestDialog)
@@ -317,7 +406,14 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
             ArgumentCaptor.forClass(DialogInterface.OnClickListener::class.java)
 
         val callback = Callback()
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        controller.requestTileAdd(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                callback,
+        )
         verify(tileRequestDialog).setPositiveButton(anyInt(), capture(clickListenerCaptor))
         verify(tileRequestDialog).setOnDismissListener(capture(dismissListenerCaptor))
 
@@ -338,7 +434,14 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
             ArgumentCaptor.forClass(DialogInterface.OnCancelListener::class.java)
 
         val callback = Callback()
-        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        controller.requestTileAdd(
+                TEST_UID,
+                TEST_COMPONENT,
+                TEST_APP_NAME,
+                TEST_LABEL,
+                icon,
+                callback,
+        )
         verify(tileRequestDialog).setOnCancelListener(capture(cancelListenerCaptor))
         verify(tileRequestDialog).setOnDismissListener(capture(dismissListenerCaptor))
 
