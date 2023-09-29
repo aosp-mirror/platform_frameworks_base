@@ -50,7 +50,6 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.common.split.SplitScreenUtils;
-import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -298,7 +297,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             mixed.mLeftoversHandler = handler.first;
             mActiveTransitions.add(mixed);
             return handler.second;
-        } else if (mUnfoldHandler != null && mUnfoldHandler.hasUnfold(request)) {
+        } else if (mUnfoldHandler != null && mUnfoldHandler.shouldPlayUnfoldAnimation(request)) {
             final WindowContainerTransaction wct =
                     mUnfoldHandler.handleRequest(transition, request);
             if (wct != null) {

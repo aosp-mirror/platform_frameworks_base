@@ -276,6 +276,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import static com.android.window.flags.Flags.deferDisplayUpdates;
 
 /**
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
@@ -1158,7 +1159,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWallpaperController.resetLargestDisplay(display);
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
-        mDisplayUpdater = new ImmediateDisplayUpdater(this);
+        if (deferDisplayUpdates()) {
+            mDisplayUpdater = new DeferredDisplayUpdater(this);
+        } else {
+            mDisplayUpdater = new ImmediateDisplayUpdater(this);
+        }
         mSystemGestureExclusionLimit = mWmService.mConstants.mSystemGestureExclusionLimitDp
                 * mDisplayMetrics.densityDpi / DENSITY_DEFAULT;
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;

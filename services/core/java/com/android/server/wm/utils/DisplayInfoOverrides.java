@@ -30,7 +30,7 @@ public class DisplayInfoOverrides {
      * Set of DisplayInfo fields that are overridden in DisplayManager using values from
      * WindowManager
      */
-    public static final DisplayInfoFields WM_OVERRIDE_FIELDS = (out, source) -> {
+    public static final DisplayInfoFieldsUpdater WM_OVERRIDE_FIELDS = (out, source) -> {
         out.appWidth = source.appWidth;
         out.appHeight = source.appHeight;
         out.smallestNominalAppWidth = source.smallestNominalAppWidth;
@@ -55,7 +55,7 @@ public class DisplayInfoOverrides {
     public static void copyDisplayInfoFields(@NonNull DisplayInfo out,
             @NonNull DisplayInfo base,
             @Nullable DisplayInfo override,
-            @NonNull DisplayInfoFields fields) {
+            @NonNull DisplayInfoFieldsUpdater fields) {
         out.copyFrom(base);
 
         if (override != null) {
@@ -66,7 +66,7 @@ public class DisplayInfoOverrides {
     /**
      * Callback interface that allows to specify a subset of fields of DisplayInfo object
      */
-    public interface DisplayInfoFields {
+    public interface DisplayInfoFieldsUpdater {
         /**
          * Copies a subset of fields from {@param source} to {@param out}
          *
