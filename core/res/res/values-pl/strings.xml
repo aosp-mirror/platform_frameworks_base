@@ -671,7 +671,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona odcisku palca"</string>
     <string name="device_unlock_notification_name" msgid="2632928999862915709">"Odblokowywanie urządzenia"</string>
     <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Wypróbuj inną metodę odblokowywania"</string>
-    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Jeśli odcisk palca nie jest rozpoznawany, ponieważ przykładowo masz mokre palce, użyj funkcji rozpoznawania twarzy"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Jeśli odcisk palca nie jest rozpoznawany, bo przykładowo masz mokre palce, użyj funkcji rozpoznawania twarzy"</string>
     <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Jeśli twarz nie jest rozpoznawana, na przykład z powodu słabego oświetlenia, użyj funkcji odblokowywania odciskiem palca"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Rozpoznawanie twarzy"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem z rozpoznawaniem twarzy"</string>

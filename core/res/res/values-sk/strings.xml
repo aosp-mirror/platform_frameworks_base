@@ -672,7 +672,7 @@
     <string name="device_unlock_notification_name" msgid="2632928999862915709">"Odomknutie zariadenia"</string>
     <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Vyskúšajte iný spôsob odomknutia"</string>
     <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Použite odomknutie tvárou, keď odtlačok prsta nefunguje, napríklad keď máte mokré prsty"</string>
-    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Použite odomknutie odtlačkom prsta, keď vaša tvár nie je rozpoznaná, napríklad pri nedostatočnom osvetlení"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Použite odomknutie odtlačkom prsta, keď vašu tvár nemožno rozpoznať, napríklad pri nedostatočnom osvetlení"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Odomknutie tvárou"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problém s odomknutím tvárou"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Klepnutím odstráňte model tváre a potom znova pridajte svoju tvár"</string>
