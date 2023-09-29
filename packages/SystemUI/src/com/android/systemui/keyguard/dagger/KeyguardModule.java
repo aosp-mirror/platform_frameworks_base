@@ -28,6 +28,7 @@ import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.keyguard.dagger.KeyguardDisplayModule;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
@@ -100,6 +101,7 @@ import kotlinx.coroutines.CoroutineDispatcher;
             KeyguardDataQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,
             KeyguardFaceAuthModule.class,
+            KeyguardDisplayModule.class,
             StartKeyguardTransitionModule.class,
             ResourceTrimmerModule.class,
         })

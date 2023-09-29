@@ -1275,7 +1275,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             KeyguardStatusView keyguardStatusView = mView.getRootView().findViewById(
                     R.id.keyguard_status_view);
             KeyguardStatusViewComponent statusViewComponent =
-                    mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
+                    mKeyguardStatusViewComponentFactory.build(keyguardStatusView,
+                            mView.getContext().getDisplay());
             mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
             mKeyguardStatusViewController.init();
         }

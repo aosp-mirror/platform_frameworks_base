@@ -82,7 +82,8 @@ constructor(
                 val statusViewComponent =
                     keyguardStatusViewComponentFactory.build(
                         LayoutInflater.from(context).inflate(R.layout.keyguard_status_view, null)
-                            as KeyguardStatusView
+                            as KeyguardStatusView,
+                        context.display
                     )
                 val controller = statusViewComponent.keyguardStatusViewController
                 controller.init()

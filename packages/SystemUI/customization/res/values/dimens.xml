@@ -17,6 +17,7 @@
 -->
 <resources>
     <!-- Clock maximum font size (dp is intentional, to prevent any further scaling) -->
+    <dimen name="presentation_clock_text_size">50dp</dimen>
     <dimen name="large_clock_text_size">150dp</dimen>
     <dimen name="small_clock_text_size">86dp</dimen>
 
