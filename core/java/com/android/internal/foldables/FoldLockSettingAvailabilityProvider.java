@@ -17,16 +17,23 @@
 package com.android.internal.foldables;
 
 import android.content.res.Resources;
+import android.os.Build;
 import android.sysprop.FoldLockBehaviorProperties;
+import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.foldables.flags.Flags;
+
+import java.util.function.Supplier;
 
 /**
  * Wrapper class to access {@link FoldLockBehaviorProperties} and also assists with testing
  */
 public class FoldLockSettingAvailabilityProvider {
 
-    boolean mFoldLockBehaviorResourceValue;
+    private static final String TAG = "FoldLockSettingAvailabilityProvider";
+    private final boolean mFoldLockBehaviorResourceValue;
+    private final Supplier<Boolean> mFoldLockSettingEnabled = Flags::foldLockSettingEnabled;
 
     public FoldLockSettingAvailabilityProvider(Resources resources) {
         mFoldLockBehaviorResourceValue = resources.getBoolean(
@@ -35,6 +42,22 @@ public class FoldLockSettingAvailabilityProvider {
 
     public boolean isFoldLockBehaviorAvailable() {
         return mFoldLockBehaviorResourceValue
-                && FoldLockBehaviorProperties.fold_lock_setting_enabled().orElse(false);
+                && flagOrSystemProperty();
+    }
+
+    private boolean flagOrSystemProperty() {
+        if ((Build.IS_ENG || Build.IS_USERDEBUG)
+                && FoldLockBehaviorProperties.fold_lock_setting_enabled().orElse(false)) {
+            return true;
+        }
+        try {
+            return mFoldLockSettingEnabled.get();
+        } catch (Throwable ex) {
+            Slog.i(TAG,
+                    "Flags not ready yet. Return false for "
+                            + Flags.FLAG_FOLD_LOCK_SETTING_ENABLED,
+                    ex);
+            return false;
+        }
     }
 }
