@@ -142,8 +142,6 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runReset(pw);
                 case "disable-blur":
                     return runSetBlurDisabled(pw);
-                case "reset-freeze-recent-tasks":
-                    return runResetFreezeRecentTaskListReordering(pw);
                 case "shell":
                     return runWmShellCommand(pw);
                 default:
@@ -251,11 +249,6 @@ public class WindowManagerShellCommand extends ShellCommand {
         Settings.Global.putInt(mInternal.mContext.getContentResolver(),
                 Settings.Global.DISABLE_WINDOW_BLURS, disableBlur ? 1 : 0);
 
-        return 0;
-    }
-
-    private int runResetFreezeRecentTaskListReordering(PrintWriter pw) throws RemoteException {
-        mInternal.resetFreezeRecentTaskListReordering();
         return 0;
     }
 
@@ -1499,8 +1492,6 @@ public class WindowManagerShellCommand extends ShellCommand {
         printLetterboxHelp(pw);
         printMultiWindowConfigHelp(pw);
 
-        pw.println("  reset-freeze-recent-tasks");
-        pw.println("    Resets the spatial ordering of the recent tasks list");
         pw.println("  reset [-d DISPLAY_ID]");
         pw.println("    Reset all override settings.");
         if (!IS_USER) {
