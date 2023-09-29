@@ -37,7 +37,9 @@ interface SliderStateListener {
      * Notification that the slider reached a certain progress on the slider track.
      *
      * This method is called in all intermediate steps of a continuous progress change as the slider
-     * moves through the slider track.
+     * moves through the slider track. A single discrete movement of the handle by an external
+     * button or by a jump on the slider track will not trigger this callback. See
+     * [onSelectAndArrow] and [onProgressJump] for these cases.
      *
      * @param[progress] The progress of the slider in the range from 0F to 1F (inclusive).
      */
@@ -56,7 +58,7 @@ interface SliderStateListener {
     fun onProgressJump(@FloatRange(from = 0.0, to = 1.0) progress: Float)
 
     /**
-     * Notification that the slider handle was moved by a button press.
+     * Notification that the slider handle was moved discretely by one step via a button press.
      *
      * @param[progress] The progress of the slider in the range from 0F to 1F (inclusive).
      */

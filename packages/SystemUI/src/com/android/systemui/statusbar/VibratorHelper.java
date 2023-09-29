@@ -167,11 +167,7 @@ public class VibratorHelper {
      * @see Vibrator#getPrimitiveDurations(int...)
      */
     public int[] getPrimitiveDurations(int... primitiveIds) {
-        if (!hasVibrator()) {
-            return new int[]{0};
-        } else {
-            return mVibrator.getPrimitiveDurations(primitiveIds);
-        }
+        return mVibrator.getPrimitiveDurations(primitiveIds);
     }
 
     /**
