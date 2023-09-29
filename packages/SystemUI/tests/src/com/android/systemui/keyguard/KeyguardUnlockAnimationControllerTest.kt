@@ -102,7 +102,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
             notificationShadeWindowController, powerManager, wallpaperManager
         )
         keyguardUnlockAnimationController.setLauncherUnlockController(
-            launcherUnlockAnimationController)
+            "", launcherUnlockAnimationController)
 
         whenever(keyguardViewController.viewRootImpl).thenReturn(mock(ViewRootImpl::class.java))
         whenever(powerManager.isInteractive).thenReturn(true)
