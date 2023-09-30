@@ -1141,8 +1141,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet ऐप्लिकेशन को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि ऐप्लिकेशन इंस्टॉल किया गया हो"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet ऐप्लिकेशन को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि कम से कम एक कार्ड जोड़ा गया हो"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home ऐप्लिकेशन को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि ऐप्लिकेशन इंस्टॉल किया गया हो"</string>
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
-    <skip />
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• कम से कम एक डिवाइस या डिवाइस पैनल उपलब्ध है"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"नोट लेने से जुड़ा शॉर्टकट इस्तेमाल करने के लिए, नोट लेने का डिफ़ॉल्ट ऐप्लिकेशन चुनें"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ऐप्लिकेशन चुनें"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"शॉर्टकट को दबाकर रखें"</string>

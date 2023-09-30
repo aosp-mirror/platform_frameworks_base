@@ -673,7 +673,7 @@
     <string name="avatar_picker_title" msgid="8492884172713170652">"انتخاب عکس نمایه"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"نماد کاربر پیش‌فرض"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"صفحه‌کلید فیزیکی"</string>
-    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"انتخاب طرح‌بندی صفحه‌کلید"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"انتخاب جانمایی صفحه‌کلید"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"پیش‌فرض"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"روشن کردن صفحه‌نمایش"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"اجازه روشن کردن صفحه‌نمایش"</string>
