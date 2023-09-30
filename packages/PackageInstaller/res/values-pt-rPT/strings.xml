@@ -81,7 +81,7 @@
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Esta app é necessária para alguns utilizadores ou perfis e foi desinstalada para outros."</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"O perfil necessita desta app e não é possível desinstalá-la."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Esta app é exigida pelo administrador do disp. e não pode ser desinstalada."</string>
-    <string name="manage_device_administrators" msgid="3092696419363842816">"Gerir aplicações de administração de dispositivos"</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"Gerir apps de administração de dispositivos"</string>
     <string name="manage_users" msgid="1243995386982560813">"Gerir utilizadores"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"Não foi possível desinstalar a app <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Ocorreu um problema ao analisar o pacote."</string>

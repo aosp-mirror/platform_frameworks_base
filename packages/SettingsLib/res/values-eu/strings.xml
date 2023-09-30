@@ -196,7 +196,7 @@
     <string name="tts_status_not_supported" msgid="2702997696245523743">"Ez da <xliff:g id="LOCALE">%1$s</xliff:g> onartzen"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"Egiaztatzen…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> motorraren ezarpenak"</string>
-    <string name="tts_engine_settings_button" msgid="477155276199968948">"Abiarazi motorraren ezarpenak"</string>
+    <string name="tts_engine_settings_button" msgid="477155276199968948">"Exekutatu motorraren ezarpenak"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Motor hobetsia"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"Orokorrak"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Berrezarri ahots-tonua"</string>

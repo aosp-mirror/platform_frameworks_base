@@ -1141,8 +1141,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"ವಾಲೆಟ್ ಆ್ಯಪ್ ಅನ್ನು ಶಾರ್ಟ್‌ಕಟ್ ಆಗಿ ಸೇರಿಸಲು, ಆ್ಯಪ್ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"ವಾಲೆಟ್ ಆ್ಯಪ್ ಅನ್ನು ಶಾರ್ಟ್‌ಕಟ್ ಆಗಿ ಸೇರಿಸಲು, ಕನಿಷ್ಠ ಒಂದು ಕಾರ್ಡ್ ಅನ್ನು ಸೇರಿಸಲಾಗಿದೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home ಆ್ಯಪ್ ಅನ್ನು ಶಾರ್ಟ್‌ಕಟ್ ಆಗಿ ಸೇರಿಸಲು, ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
-    <skip />
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• ಕನಿಷ್ಠ ಒಂದು ಸಾಧನ ಅಥವಾ ಸಾಧನದ ಪ್ಯಾನೆಲ್ ಲಭ್ಯವಿದೆ"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"ನೋಟ್ಸ್ ಮಾಡಿಕೊಳ್ಳುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ಬಳಸಲು ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ಆ್ಯಪ್‌ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ಸ್ಪರ್ಶಿಸಿ ಹೋಲ್ಡ್ ಮಾಡಿ ಶಾರ್ಟ್‌ಕಟ್"</string>

@@ -36,7 +36,7 @@
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Aplikazioak ez du onartzen pantaila zatitua"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Leiho bakar batean ireki daiteke aplikazioa."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Baliteke aplikazioak ez funtzionatzea bigarren mailako pantailetan."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikazioa ezin da abiarazi bigarren mailako pantailatan."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikazioa ezin da exekutatu bigarren mailako pantailatan."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Pantaila-zatitzailea"</string>
     <string name="divider_title" msgid="1963391955593749442">"Pantaila-zatitzailea"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Ezarri ezkerraldea pantaila osoan"</string>

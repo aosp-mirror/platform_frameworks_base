@@ -781,7 +781,7 @@
     <string name="lockscreen_unlock_left" msgid="1417801334370269374">"Ezkerreko lasterbideak desblokeatzeko ere balio du"</string>
     <string name="lockscreen_unlock_right" msgid="4658008735541075346">"Eskuineko lasterbideak desblokeatzeko ere balio du"</string>
     <string name="lockscreen_none" msgid="4710862479308909198">"Bat ere ez"</string>
-    <string name="tuner_launch_app" msgid="3906265365971743305">"Abiarazi <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_launch_app" msgid="3906265365971743305">"Exekutatu <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="tuner_other_apps" msgid="7767462881742291204">"Beste aplikazio batzuk"</string>
     <string name="tuner_circle" msgid="5270591778160525693">"Zirkulua"</string>
     <string name="tuner_plus" msgid="4130366441154416484">"Plus"</string>
@@ -1141,8 +1141,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Diru-zorroa aplikazioa lasterbide gisa gehitzeko, ziurtatu aplikazioa instalatuta dagoela."</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Diru-zorroa aplikazioa lasterbide gisa gehitzeko, ziurtatu gutxienez txartel bat gehitu dela."</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home aplikazioa lasterbide gisa gehitzeko, ziurtatu aplikazioa instalatuta dagoela."</string>
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
-    <skip />
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Gutxienez gailu bat edo gailu-panel bat erabilgarri dago."</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Oharrak idazteko lasterbidea erabiltzeko, hautatu oharretarako aplikazio lehenetsia."</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Hautatu aplikazioa"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Eduki sakatuta lasterbidea"</string>

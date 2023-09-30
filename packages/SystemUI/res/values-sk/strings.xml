@@ -1141,8 +1141,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Ak chcete pridať aplikáciu Peňaženka ako odkaz, uistite sa, že je nainštalovaná"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Ak chcete pridať aplikáciu Peňaženka ako odkaz, uistite sa, že bola pridaná aspoň jedna karta"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Ak chcete pridať aplikáciu Home ako odkaz, uistite sa, že je nainštalovaná"</string>
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (604424593994493281) -->
-    <skip />
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• K dispozícii je minimálne jedno zariadenie alebo panel zariadenia"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Ak chcete používať odkaz na písanie poznámok, vyberte predvolenú aplikáciu na písanie poznámok"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Výber aplikácie"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pridržte skratku"</string>
