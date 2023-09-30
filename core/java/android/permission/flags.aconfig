@@ -13,3 +13,10 @@ flag {
   description: "enable voice activation permission APIs"
   bug: "287264308"
 }
+
+flag {
+    name: "role_controller_in_system_server"
+    namespace: "permissions"
+    description: "enable role controller in system server"
+    bug: "302562590"
+}
