@@ -817,7 +817,7 @@
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Змінити спосіб розблокування екрана."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Блокувати екран"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Контролювати, як і коли блокується екран."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Видалити всі дані"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Видаляти всі дані"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Стирати дані планшетного ПК без попередження, відновлюючи заводські налаштування."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Видаляйте дані пристрою Android TV без попередження шляхом відновлення заводських налаштувань."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Видаляйте всі дані інформаційно-розважальної системи без попередження, відновлюючи заводські налаштування."</string>
@@ -2329,7 +2329,7 @@
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen увімкнено"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> використовує обидва екрани для показу контенту"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Пристрій сильно нагрівається"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Подвійний екран недоступний, оскільки телефон сильно нагрівається"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Функція Dual Screen недоступна, оскільки телефон сильно нагрівається"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Функція Dual Screen недоступна"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Функція Dual Screen недоступна, оскільки ввімкнено режим енергозбереження. Її можна вимкнути в налаштуваннях."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Перейти до налаштувань"</string>

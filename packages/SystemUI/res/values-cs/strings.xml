@@ -111,7 +111,7 @@
     <string name="screenrecord_continue" msgid="4055347133700593164">"Začít"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Nahrávání obrazovky"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Nahrávání obrazovky a zvuku"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Zobrazovat klepnutí na obrazovku"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Zobrazovat klepnutí na displej"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Zastavit"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Sdílet"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Nahrávka obrazovky se uložila"</string>
@@ -1142,7 +1142,7 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Přepnout na pracovní profil"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Nainstalovat pracovní telefonní aplikaci"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Zrušit"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"Přizpůsobit zámek obrazovky"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Přizpůsobit obrazovku uzamčení"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Pokud chcete upravit obrazovku uzamčení, odemkněte zařízení"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Síť Wi-Fi není dostupná"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera je blokována"</string>

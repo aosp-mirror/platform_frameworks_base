@@ -424,7 +424,7 @@
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"সব নীরব বিজ্ঞপ্তি মুছুন"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'বিরক্ত করবে না\' দিয়ে বিজ্ঞপ্তি পজ করা হয়েছে"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"এখন শুরু করুন"</string>
-    <string name="empty_shade_text" msgid="8935967157319717412">"কোনো বিজ্ঞপ্তি নেই"</string>
+    <string name="empty_shade_text" msgid="8935967157319717412">"কোনও বিজ্ঞপ্তি নেই"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"নতুন কোনও বিজ্ঞপ্তি নেই"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"পুরনো বিজ্ঞপ্তি দেখতে আনলক করুন"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"আপনার অভিভাবক এই ডিভাইস ম্যানেজ করেন"</string>
@@ -937,7 +937,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"সেটিংস"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g>-এর <xliff:g id="SONG_NAME">%1$s</xliff:g> গানটি <xliff:g id="APP_LABEL">%3$s</xliff:g> অ্যাপে চলছে"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>টির মধ্যে <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>টি"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> চলছে"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> এখন চালু রয়েছে"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"চালান"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"পজ করুন"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"আগের ট্র্যাক"</string>

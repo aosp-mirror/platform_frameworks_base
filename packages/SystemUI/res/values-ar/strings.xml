@@ -349,7 +349,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"سيؤدي هذا إلى حظر جميع الأصوات والاهتزازات، بما في ذلك ما يرد من التنبيهات والموسيقى والفيديو والألعاب."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"انقر مرة أخرى للفتح"</string>
     <string name="tap_again" msgid="1315420114387908655">"انقر مرة أخرى"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"يمكنك الفتح بالتمرير سريعًا لأعلى."</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"التمرير إلى الأعلى لفتح القفل"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"اضغط على رمز فتح القفل لفتح قفل الشاشة."</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"تم فتح قفل جهازك عند تقريبه من وجهك. مرِّر سريعًا للأعلى لفتح الجهاز."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"تم فتح القفل بالتعرّف على وجهك. لفتح الجهاز، اضغط على رمز فتح القفل."</string>
@@ -937,7 +937,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"الإعدادات"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"يتم تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> للفنان <xliff:g id="ARTIST_NAME">%2$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> من إجمالي <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"\"<xliff:g id="APP_NAME">%1$s</xliff:g>\" قيد التشغيل"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"‫\"<xliff:g id="APP_NAME">%1$s</xliff:g>\" قيد التشغيل"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"تشغيل"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"إيقاف مؤقت"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"المقطع الصوتي السابق"</string>

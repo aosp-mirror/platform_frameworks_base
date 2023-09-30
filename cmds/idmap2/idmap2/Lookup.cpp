@@ -174,7 +174,7 @@ Result<Unit> Lookup(const std::vector<std::string>& args) {
     return Error("failed to parse config");
   }
 
-  std::vector<std::unique_ptr<const ApkAssets>> apk_assets;
+  std::vector<AssetManager2::ApkAssetsPtr> apk_assets;
   std::string target_path;
   std::string target_package_name;
   for (size_t i = 0; i < idmap_paths.size(); i++) {
@@ -217,24 +217,21 @@ Result<Unit> Lookup(const std::vector<std::string>& args) {
     apk_assets.push_back(std::move(overlay_apk));
   }
 
-  // AssetManager2::SetApkAssets requires raw ApkAssets pointers, not unique_ptrs
-  std::vector<const ApkAssets*> raw_pointer_apk_assets;
-  std::transform(apk_assets.cbegin(), apk_assets.cend(), std::back_inserter(raw_pointer_apk_assets),
-                 [](const auto& p) -> const ApkAssets* { return p.get(); });
-  AssetManager2 am;
-  am.SetApkAssets(raw_pointer_apk_assets);
-  am.SetConfiguration(config);
+  {
+    // Make sure |apk_assets| vector outlives the asset manager as it doesn't own the assets.
+    AssetManager2 am(apk_assets, config);
 
-  const Result<ResourceId> resid = ParseResReference(am, resid_str, target_package_name);
-  if (!resid) {
-    return Error(resid.GetError(), "failed to parse resource ID");
-  }
+    const Result<ResourceId> resid = ParseResReference(am, resid_str, target_package_name);
+    if (!resid) {
+      return Error(resid.GetError(), "failed to parse resource ID");
+    }
 
-  const Result<std::string> value = GetValue(&am, *resid);
-  if (!value) {
-    return Error(value.GetError(), "resource 0x%08x not found", *resid);
+    const Result<std::string> value = GetValue(&am, *resid);
+    if (!value) {
+      return Error(value.GetError(), "resource 0x%08x not found", *resid);
+    }
+    std::cout << *value << std::endl;
   }
-  std::cout << *value << std::endl;
 
   return Unit{};
 }

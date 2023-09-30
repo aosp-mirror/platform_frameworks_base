@@ -99,7 +99,7 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"ဖန်သားပြင်ရိုက်ကူးစက်"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"စကရင်ရိုက်ကူးမှု အပြီးသတ်နေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"စတင် ရိုက်သံဖမ်းမလား။"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ရိုက်သံဖမ်းခြင်း စတင်မလား။"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"ရုပ်သံဖမ်းနေစဉ် Android သည် သင့်ဖန်သားပြင်တွင် မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"အက်ပ်တစ်ခုကို ရုပ်သံဖမ်းနေစဉ် Android သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ရုပ်သံ စဖမ်းရန်"</string>
@@ -134,7 +134,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"မျက်နှာ စကင်ဖတ်နေသည်"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ပို့ရန်"</string>
     <string name="cancel" msgid="1089011503403416730">"မလုပ်တော့"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"အတည်ပြုပါ"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"အတည်ပြုရန်"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ထပ်စမ်းကြည့်ရန်"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်ရန် တို့ပါ"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"ထပ်စမ်းကြည့်ပါ"</string>
@@ -654,8 +654,8 @@
     <string name="group_system_go_back" msgid="8838454003680364227">"နောက်သို့- ယခင်အခြေအနေသို့ ပြန်သွားရန် (နောက်သို့ ခလုတ်)"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"ပင်မစာမျက်နှာ ဝင်ကြည့်ရန်"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"ဖွင့်ထားသောအက်ပ်များ အနှစ်ချုပ်"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"လတ်တလောအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (ရှေ့သို့)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"လတ်တလောအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (နောက်သို့)"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"မကြာသေးမီကအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (ရှေ့သို့)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"မကြာသေးမီကအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (နောက်သို့)"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"အက်ပ်အားလုံးစာရင်းကို ဝင်ကြည့်ပြီး ရှာပါ (ဥပမာ- Search/Launcher)"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"လုပ်ဆောင်စရာဘားကို ဖျောက်ထားပြီး ပြန်ပြရန်"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"စက်စနစ်ဆက်တင်များ ဝင်ကြည့်ရန်"</string>
@@ -937,7 +937,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ဆက်တင်များ"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> ၏ <xliff:g id="SONG_NAME">%1$s</xliff:g> ကို <xliff:g id="APP_LABEL">%3$s</xliff:g> တွင် ဖွင့်ထားသည်"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g> အနက် <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ပွင့်နေပါသည်"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> လုပ်ဆောင်နေသည်"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"ဖွင့်ရန်"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"ခဏရပ်ရန်"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"ယခင် တစ်ပုဒ်"</string>
