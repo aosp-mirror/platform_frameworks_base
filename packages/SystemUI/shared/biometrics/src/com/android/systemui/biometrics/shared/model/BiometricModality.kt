@@ -18,7 +18,7 @@ package com.android.systemui.biometrics.shared.model
 
 import android.hardware.biometrics.BiometricAuthenticator
 
-/** Shadows [BiometricAuthenticator.Modality] for Kotlin use within SysUI. */
+/** Shadows [BiometricAuthenticator.Modality] for Kotlin use within SysUI and Settings. */
 enum class BiometricModality {
     None,
     Fingerprint,
