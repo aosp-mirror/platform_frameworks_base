@@ -80,8 +80,8 @@ import androidx.core.math.MathUtils;
 import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.res.R;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
@@ -205,7 +205,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private final Supplier<IWindowSession> mGlobalWindowSessionSupplier;
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     private final MagnificationGestureDetector mGestureDetector;
-    private final int mBounceEffectDuration;
+    private int mBounceEffectDuration;
     private final Choreographer.FrameCallback mMirrorViewGeometryVsyncCallback;
     private Locale mLocale;
     private NumberFormat mPercentFormat;
@@ -272,8 +272,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         setupMagnificationSizeScaleOptions();
 
-        mBounceEffectDuration = mResources.getInteger(
-                com.android.internal.R.integer.config_shortAnimTime);
+        setBounceEffectDuration(mResources.getInteger(
+                com.android.internal.R.integer.config_shortAnimTime));
         updateDimensions();
 
         final Size windowFrameSize = restoreMagnificationWindowFrameSizeIfPossible();
@@ -1459,6 +1459,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 PorterDuff.Mode.SRC_ATOP);
 
         mDragView.setColorFilter(filter);
+    }
+
+    @VisibleForTesting
+    void setBounceEffectDuration(int duration) {
+        mBounceEffectDuration = duration;
     }
 
     private void animateBounceEffect() {
