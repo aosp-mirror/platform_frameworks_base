@@ -189,6 +189,8 @@ public class SoundDoseHelper {
 
     private final AtomicBoolean mEnableCsd = new AtomicBoolean(false);
 
+    private final AtomicBoolean mForceCsdProperty = new AtomicBoolean(false);
+
     private final Object mCsdAsAFeatureLock = new Object();
 
     @GuardedBy("mCsdAsAFeatureLock")
@@ -375,9 +377,21 @@ public class SoundDoseHelper {
         }
     }
 
+    private boolean updateCsdForTestApi() {
+        if (mForceCsdProperty.get() != SystemProperties.getBoolean(
+                SYSTEM_PROPERTY_SAFEMEDIA_CSD_FORCE, false)) {
+            updateCsdEnabled("SystemPropertiesChangeCallback");
+        }
+
+        return mEnableCsd.get();
+    }
+
     float getCsd() {
         if (!mEnableCsd.get()) {
-            return -1.f;
+            // since this will only be called by a test api enable csd if system property is set
+            if (!updateCsdForTestApi()) {
+                return -1.f;
+            }
         }
 
         final ISoundDose soundDose = mSoundDose.get();
@@ -396,7 +410,10 @@ public class SoundDoseHelper {
 
     void setCsd(float csd) {
         if (!mEnableCsd.get()) {
-            return;
+            // since this will only be called by a test api enable csd if system property is set
+            if (!updateCsdForTestApi()) {
+                return;
+            }
         }
 
         SoundDoseRecord[] doseRecordsArray;
@@ -430,7 +447,10 @@ public class SoundDoseHelper {
 
     void resetCsdTimeouts() {
         if (!mEnableCsd.get()) {
-            return;
+            // since this will only be called by a test api enable csd if system property is set
+            if (!updateCsdForTestApi()) {
+                return;
+            }
         }
 
         synchronized (mCsdStateLock) {
@@ -440,7 +460,10 @@ public class SoundDoseHelper {
 
     void forceUseFrameworkMel(boolean useFrameworkMel) {
         if (!mEnableCsd.get()) {
-            return;
+            // since this will only be called by a test api enable csd if system property is set
+            if (!updateCsdForTestApi()) {
+                return;
+            }
         }
 
         final ISoundDose soundDose = mSoundDose.get();
@@ -458,7 +481,10 @@ public class SoundDoseHelper {
 
     void forceComputeCsdOnAllDevices(boolean computeCsdOnAllDevices) {
         if (!mEnableCsd.get()) {
-            return;
+            // since this will only be called by a test api enable csd if system property is set
+            if (!updateCsdForTestApi()) {
+                return;
+            }
         }
 
         final ISoundDose soundDose = mSoundDose.get();
@@ -488,7 +514,7 @@ public class SoundDoseHelper {
         try {
             return soundDose.isSoundDoseHalSupported();
         } catch (RemoteException e) {
-            Log.e(TAG, "Exception while forcing CSD computation on all devices", e);
+            Log.e(TAG, "Exception while querying the csd enabled status", e);
         }
         return false;
     }
@@ -544,7 +570,7 @@ public class SoundDoseHelper {
             audioDeviceCategory.csdCompatible = isHeadphone;
             soundDose.setAudioDeviceCategory(audioDeviceCategory);
         } catch (RemoteException e) {
-            Log.e(TAG, "Exception while forcing the internal MEL computation", e);
+            Log.e(TAG, "Exception while setting the audio device category", e);
         }
     }
 
@@ -894,7 +920,7 @@ public class SoundDoseHelper {
                 mCachedAudioDeviceCategories.clear();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Exception while forcing the internal MEL computation", e);
+            Log.e(TAG, "Exception while initializing the cached audio device categories", e);
         }
 
         synchronized (mCsdAsAFeatureLock) {
@@ -991,19 +1017,20 @@ public class SoundDoseHelper {
     }
 
     private void updateCsdEnabled(String caller) {
-        boolean csdForce = SystemProperties.getBoolean(SYSTEM_PROPERTY_SAFEMEDIA_CSD_FORCE, false);
+        mForceCsdProperty.set(SystemProperties.getBoolean(SYSTEM_PROPERTY_SAFEMEDIA_CSD_FORCE,
+                false));
         // we are using the MCC overlaid legacy flag used for the safe volume enablement
         // to determine whether the MCC enforces any safe hearing standard.
         boolean mccEnforcedSafeMedia = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_safe_media_volume_enabled);
         boolean csdEnable = mContext.getResources().getBoolean(
                 R.bool.config_safe_sound_dosage_enabled);
-        boolean newEnabledCsd = (mccEnforcedSafeMedia && csdEnable) || csdForce;
+        boolean newEnabledCsd = (mccEnforcedSafeMedia && csdEnable) || mForceCsdProperty.get();
 
         synchronized (mCsdAsAFeatureLock) {
             if (!mccEnforcedSafeMedia && csdEnable) {
                 mIsCsdAsAFeatureAvailable = true;
-                newEnabledCsd = mIsCsdAsAFeatureEnabled || csdForce;
+                newEnabledCsd = mIsCsdAsAFeatureEnabled || mForceCsdProperty.get();
                 Log.v(TAG, caller + ": CSD as a feature is not enforced and enabled: "
                         + newEnabledCsd);
             } else {
