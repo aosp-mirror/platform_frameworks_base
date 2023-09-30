@@ -290,10 +290,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void acquireGestureWakeLock(long time);
 
-    boolean setAppearance(int appearance);
-
-    int getBarMode();
-
     void resendMessage(int msg);
 
     void resendMessage(Object msg);

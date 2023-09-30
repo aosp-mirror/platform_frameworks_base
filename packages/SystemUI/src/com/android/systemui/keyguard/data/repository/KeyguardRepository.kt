@@ -47,7 +47,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.WakeAndUnlockMode
 import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -96,9 +95,6 @@ interface KeyguardRepository {
      * becomes invisible to reveal the "occluding activity").
      */
     val isKeyguardShowing: Flow<Boolean>
-
-    /** Is the keyguard in a unlocked state? */
-    val isKeyguardUnlocked: StateFlow<Boolean>
 
     /** Is an activity showing over the keyguard? */
     val isKeyguardOccluded: Flow<Boolean>
@@ -206,14 +202,6 @@ interface KeyguardRepository {
      */
     fun isKeyguardShowing(): Boolean
 
-    /**
-     * Whether lock screen bypass is enabled. When enabled, the lock screen will be automatically
-     * dismissed once the authentication challenge is completed. For example, completing a biometric
-     * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
-     * lock screen.
-     */
-    fun isBypassEnabled(): Boolean
-
     /** Sets whether the bottom area UI should animate the transition out of doze state. */
     fun setAnimateDozingTransitions(animate: Boolean)
 
@@ -265,7 +253,6 @@ constructor(
     screenLifecycle: ScreenLifecycle,
     biometricUnlockController: BiometricUnlockController,
     private val keyguardStateController: KeyguardStateController,
-    private val keyguardBypassController: KeyguardBypassController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val dozeTransitionListener: DozeTransitionListener,
     private val dozeParameters: DozeParameters,
@@ -369,44 +356,6 @@ constructor(
                 awaitClose { keyguardStateController.removeCallback(callback) }
             }
             .distinctUntilChanged()
-
-    override val isKeyguardUnlocked: StateFlow<Boolean> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : KeyguardStateController.Callback {
-                        override fun onUnlockedChanged() {
-                            trySendWithFailureLogging(
-                                keyguardStateController.isUnlocked,
-                                TAG,
-                                "updated isKeyguardUnlocked due to onUnlockedChanged"
-                            )
-                        }
-
-                        override fun onKeyguardShowingChanged() {
-                            trySendWithFailureLogging(
-                                keyguardStateController.isUnlocked,
-                                TAG,
-                                "updated isKeyguardUnlocked due to onKeyguardShowingChanged"
-                            )
-                        }
-                    }
-
-                keyguardStateController.addCallback(callback)
-                // Adding the callback does not send an initial update.
-                trySendWithFailureLogging(
-                    keyguardStateController.isUnlocked,
-                    TAG,
-                    "initial isKeyguardUnlocked"
-                )
-
-                awaitClose { keyguardStateController.removeCallback(callback) }
-            }
-            .distinctUntilChanged()
-            .stateIn(
-                scope,
-                SharingStarted.Eagerly,
-                initialValue = false,
-            )
 
     override val isKeyguardGoingAway: Flow<Boolean> = conflatedCallbackFlow {
         val callback =
@@ -541,10 +490,6 @@ constructor(
 
     override fun isKeyguardShowing(): Boolean {
         return keyguardStateController.isShowing
-    }
-
-    override fun isBypassEnabled(): Boolean {
-        return keyguardBypassController.bypassEnabled
     }
 
     // TODO(b/297345631): Expose this at the interactor level instead so that it can be powered by

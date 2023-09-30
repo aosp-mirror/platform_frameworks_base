@@ -302,12 +302,9 @@ class RecentTasks {
         }
 
         // Always update the reordering time when this is called to ensure that the timeout
-        // is reset.  Extend this duration when running in tests.
-        final long timeout = ActivityManager.isRunningInUserTestHarness()
-                ? mFreezeTaskListTimeoutMs * 10
-                : mFreezeTaskListTimeoutMs;
+        // is reset
         mService.mH.removeCallbacks(mResetFreezeTaskListOnTimeoutRunnable);
-        mService.mH.postDelayed(mResetFreezeTaskListOnTimeoutRunnable, timeout);
+        mService.mH.postDelayed(mResetFreezeTaskListOnTimeoutRunnable, mFreezeTaskListTimeoutMs);
     }
 
     /**

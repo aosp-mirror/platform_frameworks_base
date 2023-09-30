@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowInsets.Type.navigationBars;
+
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
@@ -66,7 +67,6 @@ import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.keyguard.shared.model.DismissAction;
@@ -134,7 +134,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     // dranw its first frame.
     private static final long KEYGUARD_DISMISS_DURATION_LOCKED = 2000;
 
-    private static String TAG = "StatusBarKeyguardViewManager";
+    private static final String TAG = "StatusBarKeyguardViewManager";
     private static final boolean DEBUG = false;
 
     protected final Context mContext;

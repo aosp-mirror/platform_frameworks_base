@@ -39,7 +39,7 @@
           "include-filter": "android.hardware.input.cts.tests"
         },
         {
-          "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ],
       "file_patterns": ["Virtual[^/]*\\.java"]

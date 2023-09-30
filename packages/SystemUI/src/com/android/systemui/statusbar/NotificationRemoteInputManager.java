@@ -482,9 +482,6 @@ public class NotificationRemoteInputManager implements Dumpable {
 
     private boolean showBouncerForRemoteInput(View view, PendingIntent pendingIntent,
             ExpandableNotificationRow row) {
-        if (mLockscreenUserManager.shouldAllowLockscreenRemoteInput()) {
-            return false;
-        }
 
         final int userId = pendingIntent.getCreatorUserHandle().getIdentifier();
 

@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository
+import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -85,6 +86,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     private val uiEventLoggerFake = UiEventLoggerFake()
     private val testScope = TestScope()
     private val statusBarModeRepository = FakeStatusBarModeRepository()
+    private val ongoingCallRepository = OngoingCallRepository()
 
     private lateinit var controller: OngoingCallController
     private lateinit var notifCollectionListener: NotifCollectionListener
@@ -111,6 +113,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
         controller = OngoingCallController(
             testScope.backgroundScope,
             context,
+            ongoingCallRepository,
             notificationCollection,
             clock,
             mockActivityStarter,
@@ -140,10 +143,11 @@ class OngoingCallControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onEntryUpdated_isOngoingCallNotif_listenerNotified() {
+    fun onEntryUpdated_isOngoingCallNotif_listenerAndRepoNotified() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
 
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
+        assertThat(ongoingCallRepository.hasOngoingCall.value).isTrue()
     }
 
     @Test
@@ -154,10 +158,11 @@ class OngoingCallControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onEntryUpdated_notOngoingCallNotif_listenerNotNotified() {
+    fun onEntryUpdated_notOngoingCallNotif_listenerAndRepoNotNotified() {
         notifCollectionListener.onEntryUpdated(createNotCallNotifEntry())
 
         verify(mockOngoingCallListener, never()).onOngoingCallStateChanged(anyBoolean())
+        assertThat(ongoingCallRepository.hasOngoingCall.value).isFalse()
     }
 
     @Test
@@ -167,6 +172,16 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
         verify(mockOngoingCallListener, times(2))
                 .onOngoingCallStateChanged(anyBoolean())
+    }
+
+    @Test
+    fun onEntryUpdated_ongoingCallNotifThenScreeningCallNotif_repoUpdated() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        assertThat(ongoingCallRepository.hasOngoingCall.value).isTrue()
+
+        notifCollectionListener.onEntryUpdated(createScreeningCallNotifEntry())
+
+        assertThat(ongoingCallRepository.hasOngoingCall.value).isFalse()
     }
 
     /** Regression test for b/191472854. */
@@ -276,6 +291,17 @@ class OngoingCallControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun onEntryRemoved_callNotifAddedThenRemoved_repoUpdated() {
+        val ongoingCallNotifEntry = createOngoingCallNotifEntry()
+        notifCollectionListener.onEntryAdded(ongoingCallNotifEntry)
+        assertThat(ongoingCallRepository.hasOngoingCall.value).isTrue()
+
+        notifCollectionListener.onEntryRemoved(ongoingCallNotifEntry, REASON_USER_STOPPED)
+
+        assertThat(ongoingCallRepository.hasOngoingCall.value).isFalse()
+    }
+
+    @Test
     fun onEntryUpdated_callNotifAddedThenRemoved_windowControllerUpdated() {
         val ongoingCallNotifEntry = createOngoingCallNotifEntry()
         notifCollectionListener.onEntryAdded(ongoingCallNotifEntry)
@@ -302,6 +328,22 @@ class OngoingCallControllerTest : SysuiTestCase() {
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
     }
 
+    /** Regression test for b/188491504. */
+    @Test
+    fun onEntryRemoved_removedNotifHasSameKeyAsAddedNotif_repoUpdated() {
+        val ongoingCallNotifEntry = createOngoingCallNotifEntry()
+        notifCollectionListener.onEntryAdded(ongoingCallNotifEntry)
+
+        // Create another notification based on the ongoing call one, but remove the features that
+        // made it a call notification.
+        val removedEntryBuilder = NotificationEntryBuilder(ongoingCallNotifEntry)
+        removedEntryBuilder.modifyNotification(context).style = null
+
+        notifCollectionListener.onEntryRemoved(removedEntryBuilder.build(), REASON_USER_STOPPED)
+
+        assertThat(ongoingCallRepository.hasOngoingCall.value).isFalse()
+    }
+
     @Test
     fun onEntryRemoved_notifKeyDoesNotMatchOngoingCallNotif_listenerNotNotified() {
         notifCollectionListener.onEntryAdded(createOngoingCallNotifEntry())
@@ -310,6 +352,15 @@ class OngoingCallControllerTest : SysuiTestCase() {
         notifCollectionListener.onEntryRemoved(createNotCallNotifEntry(), REASON_USER_STOPPED)
 
         verify(mockOngoingCallListener, never()).onOngoingCallStateChanged(anyBoolean())
+    }
+
+    @Test
+    fun onEntryRemoved_notifKeyDoesNotMatchOngoingCallNotif_repoNotUpdated() {
+        notifCollectionListener.onEntryAdded(createOngoingCallNotifEntry())
+
+        notifCollectionListener.onEntryRemoved(createNotCallNotifEntry(), REASON_USER_STOPPED)
+
+        assertThat(ongoingCallRepository.hasOngoingCall.value).isTrue()
     }
 
     @Test

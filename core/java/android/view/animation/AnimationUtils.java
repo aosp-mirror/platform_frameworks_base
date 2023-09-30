@@ -16,7 +16,11 @@
 
 package android.view.animation;
 
+import static android.view.flags.Flags.FLAG_EXPECTED_PRESENTATION_TIME_API;
+import static android.view.flags.Flags.expectedPresentationTimeApi;
+
 import android.annotation.AnimRes;
+import android.annotation.FlaggedApi;
 import android.annotation.InterpolatorRes;
 import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
@@ -151,7 +155,12 @@ public class AnimationUtils {
      * @return the expected presentation time of a frame in the
      *         {@link System#nanoTime()} time base.
      */
+    @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_API)
     public static long getExpectedPresentationTimeNanos() {
+        if (!expectedPresentationTimeApi()) {
+            return SystemClock.uptimeMillis();
+        }
+
         AnimationState state = sAnimationState.get();
         return state.mExpectedPresentationTimeNanos;
     }
@@ -164,6 +173,7 @@ public class AnimationUtils {
      * @return the expected presentation time of a frame in the
      *         {@link SystemClock#uptimeMillis()} time base.
      */
+    @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_API)
     public static long getExpectedPresentationTimeMillis() {
         return getExpectedPresentationTimeNanos() / TimeUtils.NANOS_PER_MS;
     }

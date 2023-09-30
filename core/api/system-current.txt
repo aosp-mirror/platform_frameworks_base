@@ -3223,14 +3223,14 @@ package android.companion.virtual {
 
   public final class VirtualDeviceParams implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public java.util.Set<android.content.ComponentName> getAllowedActivities();
-    method @NonNull public java.util.Set<android.content.ComponentName> getAllowedCrossTaskNavigations();
+    method @Deprecated @NonNull public java.util.Set<android.content.ComponentName> getAllowedActivities();
+    method @Deprecated @NonNull public java.util.Set<android.content.ComponentName> getAllowedCrossTaskNavigations();
     method public int getAudioPlaybackSessionId();
     method public int getAudioRecordingSessionId();
-    method @NonNull public java.util.Set<android.content.ComponentName> getBlockedActivities();
-    method @NonNull public java.util.Set<android.content.ComponentName> getBlockedCrossTaskNavigations();
-    method public int getDefaultActivityPolicy();
-    method public int getDefaultNavigationPolicy();
+    method @Deprecated @NonNull public java.util.Set<android.content.ComponentName> getBlockedActivities();
+    method @Deprecated @NonNull public java.util.Set<android.content.ComponentName> getBlockedCrossTaskNavigations();
+    method @Deprecated public int getDefaultActivityPolicy();
+    method @Deprecated public int getDefaultNavigationPolicy();
     method public int getDevicePolicy(int);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @Nullable public android.content.ComponentName getHomeComponent();
     method public int getLockState();
@@ -3238,15 +3238,15 @@ package android.companion.virtual {
     method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
     method @NonNull public java.util.List<android.companion.virtual.sensor.VirtualSensorConfig> getVirtualSensorConfigs();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int ACTIVITY_POLICY_DEFAULT_ALLOWED = 0; // 0x0
-    field public static final int ACTIVITY_POLICY_DEFAULT_BLOCKED = 1; // 0x1
+    field @Deprecated public static final int ACTIVITY_POLICY_DEFAULT_ALLOWED = 0; // 0x0
+    field @Deprecated public static final int ACTIVITY_POLICY_DEFAULT_BLOCKED = 1; // 0x1
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.VirtualDeviceParams> CREATOR;
     field public static final int DEVICE_POLICY_CUSTOM = 1; // 0x1
     field public static final int DEVICE_POLICY_DEFAULT = 0; // 0x0
     field public static final int LOCK_STATE_ALWAYS_UNLOCKED = 1; // 0x1
     field public static final int LOCK_STATE_DEFAULT = 0; // 0x0
-    field public static final int NAVIGATION_POLICY_DEFAULT_ALLOWED = 0; // 0x0
-    field public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1; // 0x1
+    field @Deprecated public static final int NAVIGATION_POLICY_DEFAULT_ALLOWED = 0; // 0x0
+    field @Deprecated public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1; // 0x1
     field @FlaggedApi("android.companion.virtual.flags.dynamic_policy") public static final int POLICY_TYPE_ACTIVITY = 3; // 0x3
     field public static final int POLICY_TYPE_AUDIO = 1; // 0x1
     field public static final int POLICY_TYPE_RECENTS = 2; // 0x2
@@ -3257,12 +3257,12 @@ package android.companion.virtual {
     ctor public VirtualDeviceParams.Builder();
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder addVirtualSensorConfig(@NonNull android.companion.virtual.sensor.VirtualSensorConfig);
     method @NonNull public android.companion.virtual.VirtualDeviceParams build();
-    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedActivities(@NonNull java.util.Set<android.content.ComponentName>);
-    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
+    method @Deprecated @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedActivities(@NonNull java.util.Set<android.content.ComponentName>);
+    method @Deprecated @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAudioPlaybackSessionId(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAudioRecordingSessionId(int);
-    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
-    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
+    method @Deprecated @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
+    method @Deprecated @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDevicePolicy(int, int);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setHomeComponent(@Nullable android.content.ComponentName);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);

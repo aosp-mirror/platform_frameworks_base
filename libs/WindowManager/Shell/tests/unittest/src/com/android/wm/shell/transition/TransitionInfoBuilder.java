@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.transition;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 

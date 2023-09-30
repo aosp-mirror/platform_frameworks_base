@@ -26,6 +26,7 @@ import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
@@ -50,6 +51,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val applicationContext: Context,
     private val repository: BouncerRepository,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
     private val sceneInteractor: SceneInteractor,
     flags: SceneContainerFlags,
@@ -144,7 +146,7 @@ constructor(
         message: String? = null,
     ) {
         applicationScope.launch {
-            if (authenticationInteractor.isAuthenticationRequired()) {
+            if (deviceEntryInteractor.isAuthenticationRequired()) {
                 repository.setMessage(
                     message ?: promptMessage(authenticationInteractor.getAuthenticationMethod())
                 )

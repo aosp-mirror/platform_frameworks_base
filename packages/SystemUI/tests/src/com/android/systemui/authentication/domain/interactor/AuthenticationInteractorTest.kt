@@ -20,15 +20,12 @@ import android.app.admin.DevicePolicyManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
-import com.android.systemui.authentication.data.repository.AuthenticationRepository
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -47,13 +44,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
-    private val repository: AuthenticationRepository = utils.authenticationRepository()
-    private val sceneInteractor = utils.sceneInteractor()
-    private val underTest =
-        utils.authenticationInteractor(
-            repository = repository,
-            sceneInteractor = sceneInteractor,
-        )
+    private val underTest = utils.authenticationInteractor()
 
     @Test
     fun authenticationMethod() =
@@ -79,10 +70,10 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val authMethod by collectLastValue(underTest.authenticationMethod)
             runCurrent()
 
-            utils.authenticationRepository.apply {
-                setAuthenticationMethod(DataLayerAuthenticationMethodModel.None)
-                setLockscreenEnabled(true)
-            }
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.None
+            )
+            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
 
             assertThat(authMethod).isEqualTo(DomainLayerAuthenticationMethodModel.Swipe)
             assertThat(underTest.getAuthenticationMethod())
@@ -95,138 +86,14 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val authMethod by collectLastValue(underTest.authenticationMethod)
             runCurrent()
 
-            utils.authenticationRepository.apply {
-                setAuthenticationMethod(DataLayerAuthenticationMethodModel.None)
-                setLockscreenEnabled(false)
-            }
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.None
+            )
+            utils.deviceEntryRepository.setInsecureLockscreenEnabled(false)
 
             assertThat(authMethod).isEqualTo(DomainLayerAuthenticationMethodModel.None)
             assertThat(underTest.getAuthenticationMethod())
                 .isEqualTo(DomainLayerAuthenticationMethodModel.None)
-        }
-
-    @Test
-    fun isUnlocked_whenAuthMethodIsNoneAndLockscreenDisabled_isTrue() =
-        testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
-            utils.authenticationRepository.apply {
-                setAuthenticationMethod(DataLayerAuthenticationMethodModel.None)
-                setLockscreenEnabled(false)
-                // Toggle isUnlocked, twice.
-                //
-                // This is done because the underTest.isUnlocked flow doesn't receive values from
-                // just changing the state above; the actual isUnlocked state needs to change to
-                // cause the logic under test to "pick up" the current state again.
-                //
-                // It is done twice to make sure that we don't actually change the isUnlocked state
-                // from what it originally was.
-                setUnlocked(!utils.authenticationRepository.isUnlocked.value)
-                runCurrent()
-                setUnlocked(!utils.authenticationRepository.isUnlocked.value)
-                runCurrent()
-            }
-
-            assertThat(isUnlocked).isTrue()
-        }
-
-    @Test
-    fun isUnlocked_whenAuthMethodIsNoneAndLockscreenEnabled_isTrue() =
-        testScope.runTest {
-            utils.authenticationRepository.apply {
-                setAuthenticationMethod(DataLayerAuthenticationMethodModel.None)
-                setLockscreenEnabled(true)
-            }
-
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
-            assertThat(isUnlocked).isTrue()
-        }
-
-    @Test
-    fun canSwipeToDismiss_onLockscreenWithSwipe_isTrue() =
-        testScope.runTest {
-            utils.authenticationRepository.apply {
-                setAuthenticationMethod(DataLayerAuthenticationMethodModel.None)
-                setLockscreenEnabled(true)
-            }
-            switchToScene(SceneKey.Lockscreen)
-
-            val canSwipeToDismiss by collectLastValue(underTest.canSwipeToDismiss)
-            assertThat(canSwipeToDismiss).isTrue()
-        }
-
-    @Test
-    fun canSwipeToDismiss_onLockscreenWithPin_isFalse() =
-        testScope.runTest {
-            utils.authenticationRepository.apply {
-                setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
-                setLockscreenEnabled(true)
-            }
-            switchToScene(SceneKey.Lockscreen)
-
-            val canSwipeToDismiss by collectLastValue(underTest.canSwipeToDismiss)
-            assertThat(canSwipeToDismiss).isFalse()
-        }
-
-    @Test
-    fun canSwipeToDismiss_afterLockscreenDismissedInSwipeMode_isFalse() =
-        testScope.runTest {
-            utils.authenticationRepository.apply {
-                setAuthenticationMethod(DataLayerAuthenticationMethodModel.None)
-                setLockscreenEnabled(true)
-            }
-            switchToScene(SceneKey.Lockscreen)
-            switchToScene(SceneKey.Gone)
-
-            val canSwipeToDismiss by collectLastValue(underTest.canSwipeToDismiss)
-            assertThat(canSwipeToDismiss).isFalse()
-        }
-
-    @Test
-    fun isAuthenticationRequired_lockedAndSecured_true() =
-        testScope.runTest {
-            utils.authenticationRepository.apply {
-                setUnlocked(false)
-                runCurrent()
-                setAuthenticationMethod(DataLayerAuthenticationMethodModel.Password)
-            }
-
-            assertThat(underTest.isAuthenticationRequired()).isTrue()
-        }
-
-    @Test
-    fun isAuthenticationRequired_lockedAndNotSecured_false() =
-        testScope.runTest {
-            utils.authenticationRepository.apply {
-                setUnlocked(false)
-                runCurrent()
-                setAuthenticationMethod(DataLayerAuthenticationMethodModel.None)
-            }
-
-            assertThat(underTest.isAuthenticationRequired()).isFalse()
-        }
-
-    @Test
-    fun isAuthenticationRequired_unlockedAndSecured_false() =
-        testScope.runTest {
-            utils.authenticationRepository.apply {
-                setUnlocked(true)
-                runCurrent()
-                setAuthenticationMethod(DataLayerAuthenticationMethodModel.Password)
-            }
-
-            assertThat(underTest.isAuthenticationRequired()).isFalse()
-        }
-
-    @Test
-    fun isAuthenticationRequired_unlockedAndNotSecured_false() =
-        testScope.runTest {
-            utils.authenticationRepository.apply {
-                setUnlocked(true)
-                runCurrent()
-                setAuthenticationMethod(DataLayerAuthenticationMethodModel.None)
-            }
-
-            assertThat(underTest.isAuthenticationRequired()).isFalse()
         }
 
     @Test
@@ -366,7 +233,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun tryAutoConfirm_withAutoConfirmWrongPinCorrectLength_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
                 setAutoConfirmEnabled(true)
@@ -378,13 +244,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.FAILED)
+            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
             assertThat(isUnlocked).isFalse()
         }
 
     @Test
     fun tryAutoConfirm_withAutoConfirmLongerPin_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
                 setAutoConfirmEnabled(true)
@@ -396,13 +262,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.FAILED)
+            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
             assertThat(isUnlocked).isFalse()
         }
 
     @Test
     fun tryAutoConfirm_withAutoConfirmCorrectPin_returnsTrueAndUnlocksDevice() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
                 setAutoConfirmEnabled(true)
@@ -414,13 +280,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
+            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
             assertThat(isUnlocked).isTrue()
         }
 
     @Test
     fun tryAutoConfirm_withoutAutoConfirmButCorrectPin_returnsNullAndHasNoEffects() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
                 setAutoConfirmEnabled(false)
@@ -432,26 +298,27 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.SKIPPED)
+            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
             assertThat(isUnlocked).isFalse()
         }
 
     @Test
     fun tryAutoConfirm_withoutCorrectPassword_returnsNullAndHasNoEffects() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 DataLayerAuthenticationMethodModel.Password
             )
 
             assertThat(underTest.authenticate("password".toList(), tryAutoConfirm = true))
                 .isEqualTo(AuthenticationResult.SKIPPED)
+            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
             assertThat(isUnlocked).isFalse()
         }
 
     @Test
     fun throttling() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
             val throttling by collectLastValue(underTest.throttling)
             val isThrottled by collectLastValue(underTest.isThrottled)
             utils.authenticationRepository.setAuthenticationMethod(
@@ -462,7 +329,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
 
-            utils.authenticationRepository.setUnlocked(false)
+            utils.deviceEntryRepository.setUnlocked(false)
             assertThat(isUnlocked).isFalse()
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
@@ -605,8 +472,4 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
             assertThat(hintedPinLength).isNull()
         }
-
-    private fun switchToScene(sceneKey: SceneKey) {
-        sceneInteractor.changeScene(SceneModel(sceneKey), "reason")
-    }
 }

@@ -29,9 +29,9 @@ import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationResultModel
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.time.SystemClock
@@ -59,18 +59,6 @@ import kotlinx.coroutines.withContext
 
 /** Defines interface for classes that can access authentication-related application state. */
 interface AuthenticationRepository {
-
-    /**
-     * Whether the device is unlocked.
-     *
-     * A device that is not yet unlocked requires unlocking by completing an authentication
-     * challenge according to the current authentication method, unless in cases when the current
-     * authentication method is not "secure" (for example, None); in such cases, the value of this
-     * flow will always be `true`, even if the lockscreen is showing and still needs to be dismissed
-     * by the user to proceed.
-     */
-    val isUnlocked: StateFlow<Boolean>
-
     /**
      * Whether the auto confirm feature is enabled for the currently-selected user.
      *
@@ -129,14 +117,6 @@ interface AuthenticationRepository {
     /** Returns the length of the PIN or `0` if the current auth method is not PIN. */
     suspend fun getPinLength(): Int
 
-    /**
-     * Returns whether the lockscreen is enabled.
-     *
-     * When the lockscreen is not enabled, it shouldn't show in cases when the authentication method
-     * is considered not secure (for example, "swipe" is considered to be "none").
-     */
-    suspend fun isLockscreenEnabled(): Boolean
-
     /** Reports an authentication attempt. */
     suspend fun reportAuthenticationAttempt(isSuccessful: Boolean)
 
@@ -167,6 +147,7 @@ interface AuthenticationRepository {
     suspend fun checkCredential(credential: LockscreenCredential): AuthenticationResultModel
 }
 
+@SysUISingleton
 class AuthenticationRepositoryImpl
 @Inject
 constructor(
@@ -174,19 +155,9 @@ constructor(
     private val getSecurityMode: Function<Int, KeyguardSecurityModel.SecurityMode>,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val userRepository: UserRepository,
-    keyguardRepository: KeyguardRepository,
     private val lockPatternUtils: LockPatternUtils,
     broadcastDispatcher: BroadcastDispatcher,
 ) : AuthenticationRepository {
-
-    override val isUnlocked = keyguardRepository.isKeyguardUnlocked
-
-    override suspend fun isLockscreenEnabled(): Boolean {
-        return withContext(backgroundDispatcher) {
-            val selectedUserId = userRepository.selectedUserId
-            !lockPatternUtils.isLockScreenDisabled(selectedUserId)
-        }
-    }
 
     override val isAutoConfirmEnabled: StateFlow<Boolean> =
         refreshingFlow(

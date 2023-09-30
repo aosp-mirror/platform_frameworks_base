@@ -37,10 +37,6 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val sceneInteractor = utils.sceneInteractor()
-    private val authenticationInteractor =
-        utils.authenticationInteractor(
-            repository = utils.authenticationRepository(),
-        )
 
     private val underTest = createLockscreenSceneViewModel()
 
@@ -49,8 +45,8 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.authenticationRepository.setLockscreenEnabled(true)
-            utils.authenticationRepository.setUnlocked(true)
+            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            utils.deviceEntryRepository.setUnlocked(true)
             sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
@@ -61,7 +57,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setUnlocked(false)
+            utils.deviceEntryRepository.setUnlocked(false)
             sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Bouncer)
@@ -88,7 +84,11 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     private fun createLockscreenSceneViewModel(): LockscreenSceneViewModel {
         return LockscreenSceneViewModel(
             applicationScope = testScope.backgroundScope,
-            authenticationInteractor = authenticationInteractor,
+            deviceEntryInteractor =
+                utils.deviceEntryInteractor(
+                    authenticationInteractor = utils.authenticationInteractor(),
+                    sceneInteractor = utils.sceneInteractor(),
+                ),
             communalInteractor = utils.communalInteractor(),
             longPress =
                 KeyguardLongPressViewModel(

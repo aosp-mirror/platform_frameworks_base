@@ -112,7 +112,7 @@ abstract class RelativeTouchListener : View.OnTouchListener {
                 viewPositionOnTouchDown.set(v.translationX, v.translationY)
 
                 performedLongClick = false
-                v.handler.postDelayed({
+                v.handler?.postDelayed({
                     if (v.isLongClickable) {
                         performedLongClick = v.performLongClick()
                     }
@@ -122,7 +122,7 @@ abstract class RelativeTouchListener : View.OnTouchListener {
             MotionEvent.ACTION_MOVE -> {
                 if (!movedEnough && hypot(dx, dy) > touchSlop && !performedLongClick) {
                     movedEnough = true
-                    v.handler.removeCallbacksAndMessages(null)
+                    v.handler?.removeCallbacksAndMessages(null)
                 }
 
                 if (movedEnough) {
@@ -138,7 +138,7 @@ abstract class RelativeTouchListener : View.OnTouchListener {
                 } else if (!performedLongClick) {
                     v.performClick()
                 } else {
-                    v.handler.removeCallbacksAndMessages(null)
+                    v.handler?.removeCallbacksAndMessages(null)
                 }
 
                 velocityTracker.clear()
@@ -146,7 +146,7 @@ abstract class RelativeTouchListener : View.OnTouchListener {
             }
 
             MotionEvent.ACTION_CANCEL -> {
-                v.handler.removeCallbacksAndMessages(null)
+                v.handler?.removeCallbacksAndMessages(null)
                 velocityTracker.clear()
                 movedEnough = false
             }

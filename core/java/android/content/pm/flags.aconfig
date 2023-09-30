@@ -13,3 +13,10 @@ flag {
     description: "Feature flag to enable the archiving feature."
     bug: "278553670"
 }
+
+flag {
+    name: "stay_stopped"
+    namespace: "backstage_power"
+    description: "Feature flag to improve stopped state enforcement"
+    bug: "296644915"
+}

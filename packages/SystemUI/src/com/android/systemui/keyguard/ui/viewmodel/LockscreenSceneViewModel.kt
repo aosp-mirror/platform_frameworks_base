@@ -16,10 +16,10 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -34,26 +34,22 @@ class LockscreenSceneViewModel
 @Inject
 constructor(
     @Application applicationScope: CoroutineScope,
-    authenticationInteractor: AuthenticationInteractor,
+    deviceEntryInteractor: DeviceEntryInteractor,
     communalInteractor: CommunalInteractor,
     val longPress: KeyguardLongPressViewModel,
 ) {
     /** The key of the scene we should switch to when swiping up. */
     val upDestinationSceneKey: StateFlow<SceneKey> =
-        authenticationInteractor.isUnlocked
+        deviceEntryInteractor.isUnlocked
             .map { isUnlocked -> upDestinationSceneKey(isUnlocked) }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = upDestinationSceneKey(authenticationInteractor.isUnlocked.value),
+                initialValue = upDestinationSceneKey(deviceEntryInteractor.isUnlocked.value),
             )
 
     private fun upDestinationSceneKey(isUnlocked: Boolean): SceneKey {
-        return if (isUnlocked) {
-            SceneKey.Gone
-        } else {
-            SceneKey.Bouncer
-        }
+        return if (isUnlocked) SceneKey.Gone else SceneKey.Bouncer
     }
 
     /** The key of the scene we should switch to when swiping left. */

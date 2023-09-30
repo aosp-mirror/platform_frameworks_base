@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.bubbles;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -27,10 +27,7 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.bubbles.BubbleController;
-import com.android.wm.shell.bubbles.BubbleOverflow;
-import com.android.wm.shell.bubbles.BubbleStackView;
-import com.android.wm.shell.bubbles.TestableBubblePositioner;
+import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
 import org.junit.Test;

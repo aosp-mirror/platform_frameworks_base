@@ -48,6 +48,7 @@ import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.demomode.dagger.DemoModeModule;
+import com.android.systemui.deviceentry.DeviceEntryModule;
 import com.android.systemui.display.DisplayModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dreams.dagger.DreamModule;
@@ -173,6 +174,7 @@ import javax.inject.Named;
         ControlsModule.class,
         CoroutinesModule.class,
         DemoModeModule.class,
+        DeviceEntryModule.class,
         DisableFlagsModule.class,
         DisplayModule.class,
         DreamModule.class,

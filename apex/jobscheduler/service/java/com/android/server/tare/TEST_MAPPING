@@ -4,7 +4,6 @@
             "name": "FrameworksMockingServicesTests",
             "options": [
                 {"include-filter": "com.android.server.tare"},
-                {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
                 {"exclude-annotation": "androidx.test.filters.FlakyTest"}
             ]
         },
@@ -12,7 +11,6 @@
             "name": "FrameworksServicesTests",
             "options": [
                 {"include-filter": "com.android.server.tare"},
-                {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
                 {"exclude-annotation": "androidx.test.filters.FlakyTest"}
             ]
         }

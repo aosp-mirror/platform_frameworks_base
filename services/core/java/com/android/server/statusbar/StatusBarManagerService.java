@@ -2115,7 +2115,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         IStatusBar bar = mBar;
         if (bar != null) {
             try {
-                bar.requestAddTile(componentName, appName, label, icon, proxyCallback);
+                bar.requestAddTile(callingUid, componentName, appName, label, icon, proxyCallback);
                 return;
             } catch (RemoteException e) {
                 Slog.e(TAG, "requestAddTile", e);

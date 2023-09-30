@@ -55,6 +55,7 @@
     },
     {
       "name": "GtsContentTestCases",
+      "keywords": ["internal"],
       "options": [
         {
           "include-filter": "com.google.android.content.gts"

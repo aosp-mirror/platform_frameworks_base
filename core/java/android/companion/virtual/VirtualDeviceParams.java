@@ -94,13 +94,19 @@ public final class VirtualDeviceParams implements Parcelable {
     /**
      * Indicates that activities are allowed by default on this virtual device, unless they are
      * explicitly blocked by {@link Builder#setBlockedActivities}.
+     *
+     * @deprecated Use {@link #POLICY_TYPE_ACTIVITY} and {@link #DEVICE_POLICY_DEFAULT}
      */
+    @Deprecated
     public static final int ACTIVITY_POLICY_DEFAULT_ALLOWED = 0;
 
     /**
      * Indicates that activities are blocked by default on this virtual device, unless they are
      * allowed by {@link Builder#setAllowedActivities}.
+     *
+     * @deprecated Use {@link #POLICY_TYPE_ACTIVITY} and {@link #DEVICE_POLICY_CUSTOM}
      */
+    @Deprecated
     public static final int ACTIVITY_POLICY_DEFAULT_BLOCKED = 1;
 
     /** @hide */
@@ -113,13 +119,19 @@ public final class VirtualDeviceParams implements Parcelable {
     /**
      * Indicates that tasks are allowed to navigate to other tasks on this virtual device,
      * unless they are explicitly blocked by {@link Builder#setBlockedCrossTaskNavigations}.
+     *
+     * @deprecated Use {@link #POLICY_TYPE_ACTIVITY} and {@link #DEVICE_POLICY_DEFAULT}
      */
+    @Deprecated
     public static final int NAVIGATION_POLICY_DEFAULT_ALLOWED = 0;
 
     /**
      * Indicates that tasks are blocked from navigating to other tasks by default on this virtual
      * device, unless allowed by {@link Builder#setAllowedCrossTaskNavigations}.
+     *
+     * @deprecated Use {@link #POLICY_TYPE_ACTIVITY} and {@link #DEVICE_POLICY_CUSTOM}
      */
+    @Deprecated
     public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1;
 
     /** @hide */
@@ -325,7 +337,10 @@ public final class VirtualDeviceParams implements Parcelable {
      * be be allowed by default.
      *
      * @see Builder#setAllowedCrossTaskNavigations(Set)
+     *
+     * @deprecated See {@link VirtualDeviceManager.VirtualDevice#addActivityPolicyExemption}
      */
+    @Deprecated
     @NonNull
     public Set<ComponentName> getAllowedCrossTaskNavigations() {
         return mDefaultNavigationPolicy == NAVIGATION_POLICY_DEFAULT_ALLOWED
@@ -340,7 +355,10 @@ public final class VirtualDeviceParams implements Parcelable {
      * will be be allowed by default.
      *
      * @see Builder#setBlockedCrossTaskNavigations(Set)
+     *
+     * @deprecated See {@link VirtualDeviceManager.VirtualDevice#addActivityPolicyExemption}
      */
+    @Deprecated
     @NonNull
     public Set<ComponentName> getBlockedCrossTaskNavigations() {
         return mDefaultNavigationPolicy == NAVIGATION_POLICY_DEFAULT_BLOCKED
@@ -355,7 +373,10 @@ public final class VirtualDeviceParams implements Parcelable {
      *
      * @see Builder#setAllowedCrossTaskNavigations
      * @see Builder#setBlockedCrossTaskNavigations
+     *
+     * @deprecated Use {@link #getDevicePolicy} with {@link #POLICY_TYPE_ACTIVITY}
      */
+    @Deprecated
     @NavigationPolicy
     public int getDefaultNavigationPolicy() {
         return mDefaultNavigationPolicy;
@@ -366,7 +387,10 @@ public final class VirtualDeviceParams implements Parcelable {
      * allowed, except the ones explicitly blocked.
      *
      * @see Builder#setAllowedActivities(Set)
+     *
+     * @deprecated See {@link VirtualDeviceManager.VirtualDevice#addActivityPolicyExemption}
      */
+    @Deprecated
     @NonNull
     public Set<ComponentName> getAllowedActivities() {
         return mDefaultActivityPolicy == ACTIVITY_POLICY_DEFAULT_ALLOWED
@@ -379,7 +403,10 @@ public final class VirtualDeviceParams implements Parcelable {
      * that all activities in {@link #getAllowedActivities} are allowed.
      *
      * @see Builder#setBlockedActivities(Set)
+     *
+     * @deprecated See {@link VirtualDeviceManager.VirtualDevice#addActivityPolicyExemption}
      */
+    @Deprecated
     @NonNull
     public Set<ComponentName> getBlockedActivities() {
         return mDefaultActivityPolicy == ACTIVITY_POLICY_DEFAULT_BLOCKED
@@ -394,7 +421,10 @@ public final class VirtualDeviceParams implements Parcelable {
      *
      * @see Builder#setBlockedActivities
      * @see Builder#setAllowedActivities
+     *
+     * @deprecated Use {@link #getDevicePolicy} with {@link #POLICY_TYPE_ACTIVITY}
      */
+    @Deprecated
     @ActivityPolicy
     public int getDefaultActivityPolicy() {
         return mDefaultActivityPolicy;
@@ -743,7 +773,11 @@ public final class VirtualDeviceParams implements Parcelable {
          *
          * @param allowedCrossTaskNavigations A set of tasks {@link ComponentName} allowed to
          *   navigate to new tasks in the virtual device.
+         *
+         * @deprecated Use {@link #POLICY_TYPE_ACTIVITY} and
+         *   {@link VirtualDeviceManager.VirtualDevice#addActivityPolicyExemption}
          */
+        @Deprecated
         @NonNull
         public Builder setAllowedCrossTaskNavigations(
                 @NonNull Set<ComponentName> allowedCrossTaskNavigations) {
@@ -774,7 +808,11 @@ public final class VirtualDeviceParams implements Parcelable {
          *
          * @param blockedCrossTaskNavigations A set of tasks {@link ComponentName} to be
          * blocked from navigating to new tasks in the virtual device.
+         *
+         * @deprecated Use {@link #POLICY_TYPE_ACTIVITY} and
+         *   {@link VirtualDeviceManager.VirtualDevice#addActivityPolicyExemption}
          */
+        @Deprecated
         @NonNull
         public Builder setBlockedCrossTaskNavigations(
                 @NonNull Set<ComponentName> blockedCrossTaskNavigations) {
@@ -802,7 +840,11 @@ public final class VirtualDeviceParams implements Parcelable {
          *
          * @param allowedActivities A set of activity {@link ComponentName} allowed to be launched
          *   in the virtual device.
+         *
+         * @deprecated Use {@link #POLICY_TYPE_ACTIVITY} and
+         *   {@link VirtualDeviceManager.VirtualDevice#addActivityPolicyExemption}
          */
+        @Deprecated
         @NonNull
         public Builder setAllowedActivities(@NonNull Set<ComponentName> allowedActivities) {
             if (mDefaultActivityPolicyConfigured
@@ -828,7 +870,11 @@ public final class VirtualDeviceParams implements Parcelable {
          *
          * @param blockedActivities A set of {@link ComponentName} to be blocked launching from
          *   virtual device.
+         *
+         * @deprecated Use {@link #POLICY_TYPE_ACTIVITY} and
+         *   {@link VirtualDeviceManager.VirtualDevice#addActivityPolicyExemption}
          */
+        @Deprecated
         @NonNull
         public Builder setBlockedActivities(@NonNull Set<ComponentName> blockedActivities) {
             if (mDefaultActivityPolicyConfigured

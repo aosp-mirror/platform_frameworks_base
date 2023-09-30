@@ -114,7 +114,6 @@ import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.LaunchAnimator;
 import com.android.systemui.biometrics.AuthController;
@@ -163,6 +162,7 @@ import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -393,7 +393,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private TrackingStartedListener mTrackingStartedListener;
     private OpenCloseListener mOpenCloseListener;
     private GestureRecorder mGestureRecorder;
-    private boolean mPanelExpanded;
 
     private boolean mKeyguardQsUserSwitchEnabled;
     private boolean mKeyguardUserSwitcherEnabled;
@@ -1321,7 +1320,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         // when we switch between split shade and regular shade we want to enforce setting qs to
         // the default state: expanded for split shade and collapsed otherwise
-        if (!isKeyguardShowing() && mPanelExpanded) {
+        if (!isKeyguardShowing() && isPanelExpanded()) {
             mQsController.setExpanded(mSplitShadeEnabled);
         }
         if (isKeyguardShowing() && mQsController.getExpanded() && mSplitShadeEnabled) {
@@ -2630,10 +2629,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private void updatePanelExpanded() {
         boolean isExpanded = !isFullyCollapsed() || mExpectingSynthesizedDown;
-        if (mPanelExpanded != isExpanded) {
-            mPanelExpanded = isExpanded;
+        if (isPanelExpanded() != isExpanded) {
+            setExpandedOrAwaitingInputTransfer(isExpanded);
             updateSystemUiStateFlags();
-            mShadeRepository.setLegacyExpandedOrAwaitingInputTransfer(mPanelExpanded);
             mShadeExpansionStateManager.onShadeExpansionFullyChanged(isExpanded);
             if (!isExpanded) {
                 mQsController.closeQsCustomizer();
@@ -2641,9 +2639,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
     }
 
+    private void setExpandedOrAwaitingInputTransfer(boolean expandedOrAwaitingInputTransfer) {
+        mShadeRepository.setLegacyExpandedOrAwaitingInputTransfer(expandedOrAwaitingInputTransfer);
+    }
+
     @Override
     public boolean isPanelExpanded() {
-        return mPanelExpanded;
+        return mShadeRepository.getLegacyExpandedOrAwaitingInputTransfer().getValue();
     }
 
     private int calculatePanelHeightShade() {
@@ -3392,7 +3394,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         ipw.print("mMaxAllowedKeyguardNotifications=");
         ipw.println(mMaxAllowedKeyguardNotifications);
         ipw.print("mAnimateNextPositionUpdate="); ipw.println(mAnimateNextPositionUpdate);
-        ipw.print("mPanelExpanded="); ipw.println(mPanelExpanded);
+        ipw.print("isPanelExpanded()="); ipw.println(isPanelExpanded());
         ipw.print("mKeyguardQsUserSwitchEnabled="); ipw.println(mKeyguardQsUserSwitchEnabled);
         ipw.print("mKeyguardUserSwitcherEnabled="); ipw.println(mKeyguardUserSwitcherEnabled);
         ipw.print("mDozing="); ipw.println(mDozing);
@@ -3606,7 +3608,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     + isFullyExpanded() + " inQs=" + mQsController.getExpanded());
         }
         mSysUiState
-                .setFlag(SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE, mPanelExpanded)
+                .setFlag(SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE, isPanelExpanded())
                 .setFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
                         isFullyExpanded() && !mQsController.getExpanded())
                 .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED,
