@@ -184,7 +184,7 @@ public class TileServices extends IQSService.Stub {
         }
     }
 
-    private void verifyCaller(CustomTile tile) {
+    private int verifyCaller(CustomTile tile) {
         try {
             String packageName = tile.getComponent().getPackageName();
             int uid = mContext.getPackageManager().getPackageUidAsUser(packageName,
@@ -192,6 +192,7 @@ public class TileServices extends IQSService.Stub {
             if (Binder.getCallingUid() != uid) {
                 throw new SecurityException("Component outside caller's uid");
             }
+            return uid;
         } catch (PackageManager.NameNotFoundException e) {
             throw new SecurityException(e);
         }
@@ -228,7 +229,7 @@ public class TileServices extends IQSService.Stub {
     public void updateQsTile(Tile tile, IBinder token) {
         CustomTile customTile = getTileForToken(token);
         if (customTile != null) {
-            verifyCaller(customTile);
+            int uid = verifyCaller(customTile);
             synchronized (mServices) {
                 final TileServiceManager tileServiceManager = mServices.get(customTile);
                 if (tileServiceManager == null || !tileServiceManager.isLifecycleStarted()) {
@@ -239,7 +240,7 @@ public class TileServices extends IQSService.Stub {
                 tileServiceManager.clearPendingBind();
                 tileServiceManager.setLastUpdate(System.currentTimeMillis());
             }
-            customTile.updateTileState(tile);
+            customTile.updateTileState(tile, uid);
             customTile.refreshState();
         }
     }

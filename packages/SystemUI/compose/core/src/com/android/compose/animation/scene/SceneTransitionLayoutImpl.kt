@@ -158,26 +158,14 @@ internal class SceneTransitionLayoutImpl(
                     BackHandler { onChangeScene(backScene) }
                 }
 
-                Box(
-                    Modifier.drawWithContent {
-                        drawContent()
-
-                        // At this point, all scenes in scenesToCompose are fully laid out so they
-                        // are marked as ready. This is necessary because the animation code needs
-                        // to know the position and size of the elements in each scenes they are in,
-                        // so [readyScenes] will be used to decide whether the transition is ready
-                        // (see isTransitionReady() below).
-                        //
-                        // We can't do that in a DisposableEffect or SideEffect because those are
-                        // run between composition and layout. LaunchedEffect could work and might
-                        // be better, but it looks like launched effects run a frame later than this
-                        // code so doing this here seems better for performance.
-                        scenesToCompose.fastForEach { readyScenes[it.key] = true }
-                    }
-                ) {
+                Box {
                     scenesToCompose.fastForEach { scene ->
                         val key = scene.key
                         key(key) {
+                            // Mark this scene as ready once it has been composed, laid out and
+                            // drawn the first time. We have to do this in a LaunchedEffect here
+                            // because DisposableEffect runs between composition and layout.
+                            LaunchedEffect(key) { readyScenes[key] = true }
                             DisposableEffect(key) { onDispose { readyScenes.remove(key) } }
 
                             scene.Content(

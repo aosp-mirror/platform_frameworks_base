@@ -2336,6 +2336,7 @@ public class AppOpsManager {
             OP_WRITE_MEDIA_VIDEO,
             OP_READ_MEDIA_IMAGES,
             OP_WRITE_MEDIA_IMAGES,
+            OP_READ_MEDIA_VISUAL_USER_SELECTED,
             // Nearby devices
             OP_BLUETOOTH_SCAN,
             OP_BLUETOOTH_CONNECT,
@@ -2376,7 +2377,6 @@ public class AppOpsManager {
             OP_MANAGE_MEDIA,
             OP_TURN_SCREEN_ON,
             OP_RUN_USER_INITIATED_JOBS,
-            OP_READ_MEDIA_VISUAL_USER_SELECTED,
             OP_FOREGROUND_SERVICE_SPECIAL_USE,
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
             OP_USE_FULL_SCREEN_INTENT

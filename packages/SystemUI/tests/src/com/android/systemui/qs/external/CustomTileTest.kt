@@ -16,12 +16,15 @@
 
 package com.android.systemui.qs.external
 
+import android.app.IUriGrantsManager
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Handler
@@ -49,6 +52,7 @@ import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -67,6 +71,8 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import java.util.Arrays
+
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -74,10 +80,8 @@ import org.mockito.MockitoAnnotations
 class CustomTileTest : SysuiTestCase() {
 
     companion object {
-        const val packageName = "test_package"
         const val className = "test_class"
-        val componentName = ComponentName(packageName, className)
-        val TILE_SPEC = CustomTile.toSpec(componentName)
+        val UID = 12345
     }
 
     @Mock private lateinit var tileHost: QSHost
@@ -94,11 +98,36 @@ class CustomTileTest : SysuiTestCase() {
     @Mock private lateinit var serviceInfo: ServiceInfo
     @Mock private lateinit var customTileStatePersister: CustomTileStatePersister
     @Mock private lateinit var uiEventLogger: QsEventLogger
+    @Mock private lateinit var ugm: IUriGrantsManager
 
     private var displayTracker = FakeDisplayTracker(mContext)
     private lateinit var customTile: CustomTile
     private lateinit var testableLooper: TestableLooper
-    private lateinit var customTileBuilder: CustomTile.Builder
+    private val packageName = context.packageName
+    private val componentName = ComponentName(packageName, className)
+    private val TILE_SPEC = CustomTile.toSpec(componentName)
+
+    private val customTileFactory = object : CustomTile.Factory {
+        override fun create(action: String, userContext: Context): CustomTile {
+            return CustomTile(
+                { tileHost },
+                uiEventLogger,
+                testableLooper.looper,
+                Handler(testableLooper.looper),
+                FalsingManagerFake(),
+                metricsLogger,
+                statusBarStateController,
+                activityStarter,
+                qsLogger,
+                action,
+                userContext,
+                customTileStatePersister,
+                tileServices,
+                displayTracker,
+                ugm,
+            )
+        }
+    }
 
     @Before
     fun setUp() {
@@ -116,24 +145,13 @@ class CustomTileTest : SysuiTestCase() {
 
         `when`(packageManager.getServiceInfo(any(ComponentName::class.java), anyInt()))
                 .thenReturn(serviceInfo)
+        `when`(packageManager.getResourcesForApplication(any<ApplicationInfo>()))
+                .thenReturn(context.resources)
+
         serviceInfo.applicationInfo = applicationInfo
 
-        customTileBuilder = CustomTile.Builder(
-                { tileHost },
-                uiEventLogger,
-                testableLooper.looper,
-                Handler(testableLooper.looper),
-                FalsingManagerFake(),
-                metricsLogger,
-                statusBarStateController,
-                activityStarter,
-                qsLogger,
-                customTileStatePersister,
-                tileServices,
-                displayTracker
-        )
 
-        customTile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        customTile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         customTile.initialize()
         testableLooper.processAllMessages()
     }
@@ -146,7 +164,7 @@ class CustomTileTest : SysuiTestCase() {
         `when`(userContext.packageManager).thenReturn(packageManager)
         `when`(userContext.userId).thenReturn(10)
 
-        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, userContext)
+        val tile = CustomTile.create(customTileFactory, TILE_SPEC, userContext)
         tile.initialize()
         testableLooper.processAllMessages()
 
@@ -156,7 +174,7 @@ class CustomTileTest : SysuiTestCase() {
     @Test
     fun testToggleableTileHasBooleanState() {
         `when`(tileServiceManager.isToggleableTile).thenReturn(true)
-        customTile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        customTile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         customTile.initialize()
         testableLooper.processAllMessages()
 
@@ -173,7 +191,7 @@ class CustomTileTest : SysuiTestCase() {
     @Test
     fun testValueUpdatedInBooleanTile() {
         `when`(tileServiceManager.isToggleableTile).thenReturn(true)
-        customTile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        customTile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         customTile.initialize()
         testableLooper.processAllMessages()
 
@@ -219,7 +237,7 @@ class CustomTileTest : SysuiTestCase() {
         val t = Tile().apply {
             state = Tile.STATE_INACTIVE
         }
-        customTile.updateTileState(t)
+        customTile.updateTileState(t, UID)
         testableLooper.processAllMessages()
 
         verify(customTileStatePersister, never()).persistState(any(), any())
@@ -243,7 +261,7 @@ class CustomTileTest : SysuiTestCase() {
         `when`(tileServiceManager.isActiveTile).thenReturn(true)
         `when`(customTileStatePersister
                 .readState(TileServiceKey(componentName, customTile.user))).thenReturn(t)
-        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        val tile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         tile.initialize()
         testableLooper.processAllMessages()
 
@@ -281,11 +299,11 @@ class CustomTileTest : SysuiTestCase() {
         }
         `when`(tileServiceManager.isActiveTile).thenReturn(true)
 
-        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        val tile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         tile.initialize()
         testableLooper.processAllMessages()
 
-        tile.updateTileState(t)
+        tile.updateTileState(t, UID)
 
         testableLooper.processAllMessages()
 
@@ -297,13 +315,13 @@ class CustomTileTest : SysuiTestCase() {
     fun testAvailableBeforeInitialization() {
         `when`(packageManager.getApplicationInfo(anyString(), anyInt()))
                 .thenThrow(PackageManager.NameNotFoundException())
-        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        val tile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         assertTrue(tile.isAvailable)
     }
 
     @Test
     fun testNotAvailableAfterInitializationWithoutIcon() {
-        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        val tile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         reset(tileHost)
         tile.initialize()
         testableLooper.processAllMessages()
@@ -315,7 +333,7 @@ class CustomTileTest : SysuiTestCase() {
     fun testInvalidPendingIntentDoesNotStartActivity() {
         val pi = mock(PendingIntent::class.java)
         `when`(pi.isActivity).thenReturn(false)
-        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        val tile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
 
         assertThrows(IllegalArgumentException::class.java) {
             tile.qsTile.activityLaunchForClick = pi
@@ -333,7 +351,7 @@ class CustomTileTest : SysuiTestCase() {
     fun testValidPendingIntentWithNoClickDoesNotStartActivity() {
         val pi = mock(PendingIntent::class.java)
         `when`(pi.isActivity).thenReturn(true)
-        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        val tile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         tile.qsTile.activityLaunchForClick = pi
 
         testableLooper.processAllMessages()
@@ -347,7 +365,7 @@ class CustomTileTest : SysuiTestCase() {
     fun testValidPendingIntentStartsActivity() {
         val pi = mock(PendingIntent::class.java)
         `when`(pi.isActivity).thenReturn(true)
-        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        val tile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         tile.qsTile.activityLaunchForClick = pi
 
         tile.handleClick(mock(LaunchableFrameLayout::class.java))
@@ -363,7 +381,7 @@ class CustomTileTest : SysuiTestCase() {
     fun testActiveTileListensOnceAfterCreated() {
         `when`(tileServiceManager.isActiveTile).thenReturn(true)
 
-        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        val tile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         tile.initialize()
         tile.postStale()
         testableLooper.processAllMessages()
@@ -376,7 +394,7 @@ class CustomTileTest : SysuiTestCase() {
     fun testActiveTileDoesntListenAfterFirstTime() {
         `when`(tileServiceManager.isActiveTile).thenReturn(true)
 
-        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        val tile = CustomTile.create(customTileFactory, TILE_SPEC, mContext)
         tile.initialize()
         // Make sure we have an icon in the tile because we don't have a default icon
         // This should not be overridden by the retrieved tile that has null icon.
@@ -424,19 +442,128 @@ class CustomTileTest : SysuiTestCase() {
         // Set the tile to listening and apply the tile (unmodified)
         customTile.handleSetListening(true)
         testableLooper.processAllMessages()
-        customTile.updateTileState(tile)
+        customTile.updateTileState(tile, UID)
         customTile.refreshState()
         testableLooper.processAllMessages()
 
         assertThat(customTile.state.label).isEqualTo(label2)
     }
 
-    private fun copyTileUsingParcel(t: Tile): Tile {
-        val parcel = Parcel.obtain()
-        parcel.setDataPosition(0)
-        t.writeToParcel(parcel, 0)
-        parcel.setDataPosition(0)
+    @Test
+    fun uriIconLoadSuccess_correctIcon() {
+        val size = 100
+        val icon = mock(Icon::class.java)
+        val drawable = context.getDrawable(R.drawable.cloud)!!
+        whenever(icon.loadDrawable(any())).thenReturn(drawable)
+        whenever(icon.loadDrawableCheckingUriGrant(
+            any(),
+            eq(ugm),
+            anyInt(),
+            anyString())
+        ).thenReturn(drawable)
 
-        return Tile.CREATOR.createFromParcel(parcel)
+        serviceInfo.icon = R.drawable.android
+
+        customTile.handleSetListening(true)
+        testableLooper.processAllMessages()
+        customTile.handleSetListening(false)
+        testableLooper.processAllMessages()
+
+        val tile = copyTileUsingParcel(customTile.qsTile)
+        tile.icon = icon
+
+        customTile.updateTileState(tile, UID)
+
+        customTile.refreshState()
+        testableLooper.processAllMessages()
+
+        verify(icon).loadDrawableCheckingUriGrant(context, ugm, UID, packageName)
+
+        assertThat(
+                areDrawablesEqual(
+                        customTile.state.iconSupplier.get().getDrawable(context),
+                        drawable,
+                        size
+                )
+        ).isTrue()
     }
+
+    @Test
+    fun uriIconLoadFailsWithoutGrant_defaultIcon() {
+        val size = 100
+        val drawable = context.getDrawable(R.drawable.cloud)!!
+        val icon = mock(Icon::class.java)
+        whenever(icon.loadDrawable(any())).thenReturn(drawable)
+        whenever(icon.loadDrawableCheckingUriGrant(
+            any(),
+            eq(ugm),
+            anyInt(),
+            anyString())
+        ).thenReturn(null)
+
+        // Give it an icon to prevent issues
+        serviceInfo.icon = R.drawable.android
+
+        customTile.handleSetListening(true)
+        testableLooper.processAllMessages()
+        customTile.handleSetListening(false)
+        testableLooper.processAllMessages()
+
+        val tile = copyTileUsingParcel(customTile.qsTile)
+        tile.icon = icon
+
+        customTile.updateTileState(tile, UID)
+
+        customTile.refreshState()
+        testableLooper.processAllMessages()
+
+        verify(icon).loadDrawableCheckingUriGrant(context, ugm, UID, packageName)
+
+        assertThat(
+                areDrawablesEqual(
+                        customTile.state.iconSupplier.get().getDrawable(context),
+                        context.getDrawable(R.drawable.android)!!,
+                        size
+                )
+        ).isTrue()
+    }
+}
+
+private fun areDrawablesEqual(drawable1: Drawable, drawable2: Drawable, size: Int = 24): Boolean {
+    val bm1 = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val bm2 = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+
+    val canvas1 = Canvas(bm1)
+    val canvas2 = Canvas(bm2)
+
+    drawable1.setBounds(0, 0, size, size)
+    drawable2.setBounds(0, 0, size, size)
+
+    drawable1.draw(canvas1)
+    drawable2.draw(canvas2)
+
+    return equalBitmaps(bm1, bm2).also {
+        bm1.recycle()
+        bm2.recycle()
+    }
+}
+
+private fun equalBitmaps(a: Bitmap, b: Bitmap): Boolean {
+    if (a.width != b.width || a.height != b.height) return false
+    val w = a.width
+    val h = a.height
+    val aPix = IntArray(w * h)
+    val bPix = IntArray(w * h)
+    a.getPixels(aPix, 0, w, 0, 0, w, h)
+    b.getPixels(bPix, 0, w, 0, 0, w, h)
+    return Arrays.equals(aPix, bPix)
+}
+
+private fun copyTileUsingParcel(t: Tile): Tile {
+    val parcel = Parcel.obtain()
+    parcel.setDataPosition(0)
+    t.writeToParcel(parcel, 0)
+    parcel.setDataPosition(0)
+
+    return Tile.CREATOR.createFromParcel(parcel)
 }

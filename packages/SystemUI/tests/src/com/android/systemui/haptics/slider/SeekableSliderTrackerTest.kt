@@ -158,8 +158,8 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         var progress = 0.5f
         sliderEventProducer.sendEvent(SliderEvent(SliderEventType.STARTED_TRACKING_TOUCH, progress))
 
-        // GIVEN a progress event due to a touch on the slider track at threshold
-        progress += config.jumpThreshold
+        // GIVEN a progress event due to a touch on the slider track beyond threshold
+        progress += (config.jumpThreshold + 0.01f)
         sliderEventProducer.sendEvent(
             SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_USER, progress)
         )
@@ -191,7 +191,6 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         // THEN the tracker moves to the jump-track location selected state
         assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.JUMP_BOOKEND_SELECTED)
         assertThat(mSeekableSliderTracker.isWaiting).isFalse()
-        verify(sliderStateListener).onUpperBookend()
         verifyNoMoreInteractions(sliderStateListener)
     }
 
@@ -214,7 +213,6 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         // THEN the tracker moves to the JUMP_TRACK_LOCATION_SELECTED state
         assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.JUMP_BOOKEND_SELECTED)
         assertThat(mSeekableSliderTracker.isWaiting).isFalse()
-        verify(sliderStateListener).onLowerBookend()
         verifyNoMoreInteractions(sliderStateListener)
     }
 

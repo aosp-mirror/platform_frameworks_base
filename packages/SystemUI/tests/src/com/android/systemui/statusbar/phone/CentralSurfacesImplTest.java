@@ -165,7 +165,6 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
-import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -295,7 +294,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     @Mock private BrightnessSliderController.Factory mBrightnessSliderFactory;
     @Mock private WallpaperController mWallpaperController;
-    @Mock private OngoingCallController mOngoingCallController;
     @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock private LockscreenShadeTransitionController mLockscreenTransitionController;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
@@ -535,7 +533,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mBrightnessSliderFactory,
                 mScreenOffAnimationController,
                 mWallpaperController,
-                mOngoingCallController,
                 mStatusBarHideIconsForBouncerManager,
                 mLockscreenTransitionController,
                 mFeatureFlags,

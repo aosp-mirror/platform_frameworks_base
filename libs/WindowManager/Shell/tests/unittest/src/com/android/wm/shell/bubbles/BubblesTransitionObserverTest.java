@@ -38,7 +38,7 @@ import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.TransitionInfoBuilder;
+import com.android.wm.shell.transition.TransitionInfoBuilder;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -67,7 +67,7 @@ public class ToastUI implements CoreStartable, CommandQueue.Callbacks {
     private final ToastLogger mToastLogger;
     @Nullable private ToastPresenter mPresenter;
     @Nullable private ITransientNotificationCallback mCallback;
-    private ToastOutAnimatorListener mToastOutAnimatorListener;
+    @VisibleForTesting ToastOutAnimatorListener mToastOutAnimatorListener;
 
     @VisibleForTesting SystemUIToast mToast;
     private int mOrientation = ORIENTATION_PORTRAIT;
@@ -172,7 +172,7 @@ public class ToastUI implements CoreStartable, CommandQueue.Callbacks {
         if (mToast.getOutAnimation() != null) {
             Animator animator = mToast.getOutAnimation();
             mToastOutAnimatorListener = new ToastOutAnimatorListener(mPresenter, mCallback,
-                    runnable);
+                    runnable, animator);
             animator.addListener(mToastOutAnimatorListener);
             animator.start();
         } else {
@@ -211,14 +211,17 @@ public class ToastUI implements CoreStartable, CommandQueue.Callbacks {
         final ToastPresenter mPrevPresenter;
         final ITransientNotificationCallback mPrevCallback;
         @Nullable Runnable mShowNextToastRunnable;
+        @NonNull private final Animator mAnimator;
 
         ToastOutAnimatorListener(
                 @NonNull ToastPresenter presenter,
                 @NonNull ITransientNotificationCallback callback,
-                @Nullable Runnable runnable) {
+                @Nullable Runnable runnable,
+                @NonNull Animator animator) {
             mPrevPresenter = presenter;
             mPrevCallback = callback;
             mShowNextToastRunnable = runnable;
+            mAnimator = animator;
         }
 
         void setShowNextToastRunnable(Runnable runnable) {
@@ -231,6 +234,8 @@ public class ToastUI implements CoreStartable, CommandQueue.Callbacks {
             if (mShowNextToastRunnable != null) {
                 mShowNextToastRunnable.run();
             }
+            mAnimator.removeListener(this);
+            mShowNextToastRunnable = null;
             mToastOutAnimatorListener = null;
         }
     }

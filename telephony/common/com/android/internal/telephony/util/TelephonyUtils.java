@@ -274,6 +274,10 @@ public final class TelephonyUtils {
 
             SubscriptionManager subscriptionManager = context.getSystemService(
                     SubscriptionManager.class);
+            if (!subscriptionManager.isActiveSubscriptionId(subId)) {
+                Log.e(LOG_TAG, "Tried to send message with an inactive subscription " + subId);
+                return;
+            }
             UserHandle associatedUserHandle = subscriptionManager.getSubscriptionUserHandle(subId);
             UserManager um = context.getSystemService(UserManager.class);
 

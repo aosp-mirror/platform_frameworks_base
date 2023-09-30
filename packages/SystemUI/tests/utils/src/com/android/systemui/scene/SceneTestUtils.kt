@@ -34,6 +34,9 @@ import com.android.systemui.common.ui.data.repository.FakeConfigurationRepositor
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
+import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
@@ -73,16 +76,10 @@ class SceneTestUtils(
     val testScope = TestScope(testDispatcher)
     val featureFlags = FakeFeatureFlagsClassic().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
     val sceneContainerFlags = FakeSceneContainerFlags().apply { enabled = true }
-    private val userRepository: UserRepository by lazy {
-        FakeUserRepository().apply {
-            val users = listOf(UserInfo(/* id=  */ 0, "name", /* flags= */ 0))
-            setUserInfos(users)
-            runBlocking { setSelectedUserInfo(users.first()) }
-        }
-    }
-
+    val deviceEntryRepository: FakeDeviceEntryRepository by lazy { FakeDeviceEntryRepository() }
     val authenticationRepository: FakeAuthenticationRepository by lazy {
         FakeAuthenticationRepository(
+            deviceEntryRepository = deviceEntryRepository,
             currentTime = { testScope.currentTime },
         )
     }
@@ -102,6 +99,14 @@ class SceneTestUtils(
         FakeCommunalWidgetRepository()
     }
     val powerRepository: FakePowerRepository by lazy { FakePowerRepository() }
+
+    private val userRepository: UserRepository by lazy {
+        FakeUserRepository().apply {
+            val users = listOf(UserInfo(/* id=  */ 0, "name", /* flags= */ 0))
+            setUserInfos(users)
+            runBlocking { setSelectedUserInfo(users.first()) }
+        }
+    }
 
     private val context = test.context
 
@@ -145,31 +150,41 @@ class SceneTestUtils(
         )
     }
 
-    fun authenticationRepository(): FakeAuthenticationRepository {
-        return authenticationRepository
+    fun deviceEntryInteractor(
+        repository: DeviceEntryRepository = deviceEntryRepository,
+        authenticationInteractor: AuthenticationInteractor,
+        sceneInteractor: SceneInteractor,
+    ): DeviceEntryInteractor {
+        return DeviceEntryInteractor(
+            applicationScope = applicationScope(),
+            repository = repository,
+            authenticationInteractor = authenticationInteractor,
+            sceneInteractor = sceneInteractor,
+        )
     }
 
     fun authenticationInteractor(
-        repository: AuthenticationRepository,
-        sceneInteractor: SceneInteractor = sceneInteractor(),
+        repository: AuthenticationRepository = authenticationRepository,
     ): AuthenticationInteractor {
         return AuthenticationInteractor(
             applicationScope = applicationScope(),
             repository = repository,
             backgroundDispatcher = testDispatcher,
             userRepository = userRepository,
-            keyguardRepository = keyguardRepository,
-            sceneInteractor = sceneInteractor,
+            deviceEntryRepository = deviceEntryRepository,
             clock = mock { whenever(elapsedRealtime()).thenAnswer { testScope.currentTime } }
         )
     }
 
-    fun keyguardInteractor(repository: KeyguardRepository): KeyguardInteractor {
+    fun keyguardInteractor(
+        repository: KeyguardRepository = keyguardRepository
+    ): KeyguardInteractor {
         return KeyguardInteractor(
             repository = repository,
             commandQueue = FakeCommandQueue(),
             featureFlags = featureFlags,
             sceneContainerFlags = sceneContainerFlags,
+            deviceEntryRepository = FakeDeviceEntryRepository(),
             bouncerRepository = FakeKeyguardBouncerRepository(),
             configurationRepository = FakeConfigurationRepository(),
             shadeRepository = FakeShadeRepository(),
@@ -185,6 +200,7 @@ class SceneTestUtils(
     }
 
     fun bouncerInteractor(
+        deviceEntryInteractor: DeviceEntryInteractor,
         authenticationInteractor: AuthenticationInteractor,
         sceneInteractor: SceneInteractor,
     ): BouncerInteractor {
@@ -192,6 +208,7 @@ class SceneTestUtils(
             applicationScope = applicationScope(),
             applicationContext = context,
             repository = BouncerRepository(),
+            deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
             flags = sceneContainerFlags,

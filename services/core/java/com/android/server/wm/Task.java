@@ -1162,11 +1162,17 @@ class Task extends TaskFragment {
                 forAllActivities(oldParentTask::cleanUpActivityReferences);
             }
 
-            if (oldParent.inPinnedWindowingMode()
-                    && (newParent == null || !newParent.inPinnedWindowingMode())) {
-                // Notify if a task from the root pinned task is being removed
-                // (or moved depending on the mode).
-                mRootWindowContainer.notifyActivityPipModeChanged(this, null);
+            if (newParent == null || !newParent.inPinnedWindowingMode()) {
+                if (oldParent.inPinnedWindowingMode()) {
+                    // Notify if a task from the root pinned task is being removed
+                    // (or moved depending on the mode).
+                    mRootWindowContainer.notifyActivityPipModeChanged(this, null);
+                } else if (inPinnedWindowingMode()) {
+                    // The task in pinned mode is removed, even though the old parent was not pinned
+                    // The task was most likely force killed or crashed
+                    Slog.e(TAG, "Pinned task is removed t=" + this);
+                    mRootWindowContainer.notifyActivityPipModeChanged(this, null);
+                }
             }
         }
 

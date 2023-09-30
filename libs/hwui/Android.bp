@@ -143,6 +143,7 @@ cc_defaults {
                 "libcrypto",
                 "libsync",
                 "libui",
+                "aconfig_text_flags_c_lib",
             ],
             static_libs: [
                 "libEGL_blobCache",
@@ -712,11 +713,13 @@ cc_test {
     ],
 
     static_libs: [
+        "libflagtest",
         "libgmock",
         "libhwui_static",
     ],
     shared_libs: [
         "libmemunreachable",
+        "server_configurable_flags",
     ],
     srcs: [
         "tests/unit/main.cpp",
@@ -756,6 +759,7 @@ cc_test {
         "tests/unit/TestUtilsTests.cpp",
         "tests/unit/ThreadBaseTests.cpp",
         "tests/unit/TypefaceTests.cpp",
+        "tests/unit/UnderlineTest.cpp",
         "tests/unit/VectorDrawableTests.cpp",
         "tests/unit/WebViewFunctorManagerTests.cpp",
     ],

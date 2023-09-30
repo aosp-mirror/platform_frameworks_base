@@ -22,22 +22,34 @@ import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentCom
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentModule.END_SIDE_CONTENT
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentModule.START_SIDE_CONTENT
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope
+import com.android.systemui.util.ListenerSet
 import com.android.systemui.util.boundsOnScreen
 import javax.inject.Inject
 import javax.inject.Named
 
-/** Provides various bounds within the status bar. */
+/**
+ * Provides the bounds of the **content** on each side of the status bar.
+ *
+ * This is distinct from [StatusBarContentInsetsProvider], which provides the bounds of full status
+ * bar after accounting for system insets.
+ */
 @StatusBarFragmentScope
 class StatusBarBoundsProvider
 @Inject
 constructor(
-    private val changeListeners: Set<@JvmSuppressWildcards BoundsChangeListener>,
     @Named(START_SIDE_CONTENT) private val startSideContent: View,
     @Named(END_SIDE_CONTENT) private val endSideContent: View,
 ) : StatusBarFragmentComponent.Startable {
 
     interface BoundsChangeListener {
-        fun onStatusBarBoundsChanged()
+        fun onStatusBarBoundsChanged(bounds: BoundsPair)
+    }
+
+    private val changeListeners = ListenerSet<BoundsChangeListener>()
+
+    fun addChangeListener(listener: BoundsChangeListener) {
+        changeListeners.addIfAbsent(listener)
+        listener.onStatusBarBoundsChanged(previousBounds)
     }
 
     private var previousBounds =
@@ -48,7 +60,7 @@ constructor(
             val newBounds = BoundsPair(start = visibleStartSideBounds, end = visibleEndSideBounds)
             if (previousBounds != newBounds) {
                 previousBounds = newBounds
-                changeListeners.forEach { it.onStatusBarBoundsChanged() }
+                changeListeners.forEach { it.onStatusBarBoundsChanged(newBounds) }
             }
         }
 
@@ -89,4 +101,10 @@ constructor(
         get() = startSideContent.boundsOnScreen
 }
 
-private data class BoundsPair(val start: Rect, val end: Rect)
+/**
+ * Stores bounds of the status content.
+ *
+ * @property start the bounds of the status bar content on the start side (clock & notif icons).
+ * @property end the bounds of the status bar content on the end side (system icons & battery).
+ */
+data class BoundsPair(val start: Rect, val end: Rect)

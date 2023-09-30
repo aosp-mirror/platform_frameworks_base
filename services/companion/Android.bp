@@ -19,7 +19,10 @@ filegroup {
 java_library_static {
     name: "services.companion",
     defaults: ["platform_service_defaults"],
-    srcs: [":services.companion-sources"],
+    srcs: [
+        ":services.companion-sources",
+        ":VirtualCamera-aidl-sources",
+    ],
     libs: [
         "app-compat-annotations",
         "services.core",
@@ -28,4 +31,12 @@ java_library_static {
         "ukey2_jni",
         "virtualdevice_flags_lib",
     ],
+}
+
+filegroup {
+    name: "VirtualCamera-aidl-sources",
+    srcs: [
+        "java/com/android/server/companion/virtual/camera/*.aidl",
+    ],
+    path: "java",
 }

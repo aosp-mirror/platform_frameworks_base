@@ -363,6 +363,8 @@ filegroup {
         "tests/src/com/android/systemui/qs/pipeline/data/**/*Test.kt",
         "tests/src/com/android/systemui/qs/pipeline/domain/**/*Test.kt",
         "tests/src/com/android/systemui/qs/pipeline/shared/TileSpecTest.kt",
+        "tests/src/com/android/systemui/qs/tiles/base/**/*.kt",
+        "tests/src/com/android/systemui/qs/tiles/viewmodel/**/*.kt",
     ],
     path: "tests/src",
 }

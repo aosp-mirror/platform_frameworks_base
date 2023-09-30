@@ -1226,7 +1226,6 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // GIVEN the keyguard is showing locked
             keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
-            keyguardRepository.setKeyguardUnlocked(false)
             runCurrent()
             shadeRepository.setShadeModel(
                 ShadeModel(

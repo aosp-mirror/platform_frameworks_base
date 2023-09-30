@@ -39,3 +39,8 @@ java_sdk_library {
         ],
     },
 }
+
+platform_compat_config {
+    name: "framework-location-compat-config",
+    src: ":framework-location",
+}

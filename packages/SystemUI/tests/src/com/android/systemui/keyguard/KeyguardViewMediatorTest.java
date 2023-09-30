@@ -104,6 +104,7 @@ import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeWindowLogger;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -185,6 +186,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock SysuiColorExtractor mColorExtractor;
     private @Mock AuthController mAuthController;
     private @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
+    private @Mock ShadeInteractor mShadeInteractor;
     private @Mock ShadeWindowLogger mShadeWindowLogger;
     private @Captor ArgumentCaptor<KeyguardStateController.Callback>
             mKeyguardStateControllerCallback;
@@ -249,6 +251,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mScreenOffAnimationController,
                 mAuthController,
                 mShadeExpansionStateManager,
+                () -> mShadeInteractor,
                 mShadeWindowLogger);
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);

@@ -4348,7 +4348,7 @@ public class SubscriptionManager {
      * {code true} if there are no subscriptions on device
      * else {@code false} if subscription is not associated with user.
      *
-     * @throws IllegalArgumentException if subscription is invalid.
+     * @throws IllegalArgumentException if subscription doesn't exist.
      * @throws SecurityException if the caller doesn't have permissions required.
      *
      * @hide

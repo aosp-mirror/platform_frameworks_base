@@ -32,7 +32,7 @@ class NotificationShadeWindowState(
     @JvmField var keyguardNeedsInput: Boolean = false,
     @JvmField var panelVisible: Boolean = false,
     /** shade panel is expanded (expansion fraction > 0) */
-    @JvmField var panelExpanded: Boolean = false,
+    @JvmField var shadeOrQsExpanded: Boolean = false,
     @JvmField var notificationShadeFocusable: Boolean = false,
     @JvmField var bouncerShowing: Boolean = false,
     @JvmField var keyguardFadingAway: Boolean = false,
@@ -70,7 +70,7 @@ class NotificationShadeWindowState(
             keyguardOccluded.toString(),
             keyguardNeedsInput.toString(),
             panelVisible.toString(),
-            panelExpanded.toString(),
+            shadeOrQsExpanded.toString(),
             notificationShadeFocusable.toString(),
             bouncerShowing.toString(),
             keyguardFadingAway.toString(),
@@ -137,7 +137,7 @@ class NotificationShadeWindowState(
                 this.keyguardOccluded = keyguardOccluded
                 this.keyguardNeedsInput = keyguardNeedsInput
                 this.panelVisible = panelVisible
-                this.panelExpanded = panelExpanded
+                this.shadeOrQsExpanded = panelExpanded
                 this.notificationShadeFocusable = notificationShadeFocusable
                 this.bouncerShowing = bouncerShowing
                 this.keyguardFadingAway = keyguardFadingAway

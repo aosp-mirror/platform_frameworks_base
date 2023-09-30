@@ -26,22 +26,16 @@ import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
-import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
-import com.android.systemui.statusbar.phone.SystemBarAttributesListener;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.IntoSet;
-import dagger.multibindings.Multibinds;
 
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Named;
 
@@ -159,14 +153,4 @@ public interface StatusBarFragmentModule {
     static HeadsUpStatusBarView providesHeasdUpStatusBarView(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.heads_up_status_bar_view);
     }
-
-    /** */
-    @Multibinds
-    Set<StatusBarBoundsProvider.BoundsChangeListener> boundsChangeListeners();
-
-    /** */
-    @Binds
-    @IntoSet
-    StatusBarBoundsProvider.BoundsChangeListener sysBarAttrsListenerAsBoundsListener(
-            SystemBarAttributesListener systemBarAttributesListener);
 }

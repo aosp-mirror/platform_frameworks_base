@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.virtual.audio.VirtualAudioDevice;
+import android.companion.virtual.camera.VirtualCamera;
+import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.content.ComponentName;
 import android.content.Context;
@@ -336,6 +338,11 @@ public class VirtualDeviceInternal {
                     executor, callback, () -> mVirtualAudioDevice = null);
         }
         return mVirtualAudioDevice;
+    }
+
+    @NonNull
+    VirtualCamera createVirtualCamera(@NonNull VirtualCameraConfig config) {
+        return new VirtualCamera(mVirtualDevice, config);
     }
 
     @NonNull

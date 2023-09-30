@@ -19,16 +19,11 @@ package com.android.wm.shell.flicker.service.splitscreen.platinum
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import android.tools.device.flicker.rules.FlickerServiceRule
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.EnterSplitScreenByDragFromAllApps
-import org.junit.Rule
 import org.junit.Test
 
 open class EnterSplitScreenByDragFromAllAppsGesturalNavLandscape :
     EnterSplitScreenByDragFromAllApps(Rotation.ROTATION_90) {
-    @get:Rule
-    val flickerServiceRule = FlickerServiceRule(enabled = true, failTestOnFlicker = false)
-
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test

@@ -24,14 +24,15 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider.BoundsChangeListener
+import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.any
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -60,8 +61,9 @@ class StatusBarBoundsProviderTest : SysuiTestCase() {
         startSideContent = spy(FrameLayout(context)).apply { setBoundsOnScreen(START_SIDE_BOUNDS) }
         endSideContent = spy(FrameLayout(context)).apply { setBoundsOnScreen(END_SIDE_BOUNDS) }
 
-        boundsProvider =
-            StatusBarBoundsProvider(setOf(boundsChangeListener), startSideContent, endSideContent)
+        boundsProvider = StatusBarBoundsProvider(startSideContent, endSideContent)
+        boundsProvider.addChangeListener(boundsChangeListener)
+        reset(boundsChangeListener)
     }
 
     @Test
@@ -81,7 +83,7 @@ class StatusBarBoundsProviderTest : SysuiTestCase() {
 
         startSideContent.setBoundsOnScreen(newBounds)
 
-        verify(boundsChangeListener).onStatusBarBoundsChanged()
+        verify(boundsChangeListener).onStatusBarBoundsChanged(any())
     }
 
     @Test
@@ -90,7 +92,7 @@ class StatusBarBoundsProviderTest : SysuiTestCase() {
 
         startSideContent.setBoundsOnScreen(newBounds)
 
-        verify(boundsChangeListener, never()).onStatusBarBoundsChanged()
+        verify(boundsChangeListener, never()).onStatusBarBoundsChanged(any())
     }
 
     @Test
@@ -101,7 +103,7 @@ class StatusBarBoundsProviderTest : SysuiTestCase() {
 
         startSideContent.setBoundsOnScreen(newBounds)
 
-        verify(boundsChangeListener, never()).onStatusBarBoundsChanged()
+        verify(boundsChangeListener, never()).onStatusBarBoundsChanged(any())
     }
 
     @Test
@@ -111,7 +113,7 @@ class StatusBarBoundsProviderTest : SysuiTestCase() {
 
         startSideContent.layout(newBounds)
 
-        verify(boundsChangeListener, never()).onStatusBarBoundsChanged()
+        verify(boundsChangeListener, never()).onStatusBarBoundsChanged(any())
     }
 
     @Test
@@ -121,7 +123,7 @@ class StatusBarBoundsProviderTest : SysuiTestCase() {
 
         endSideContent.setBoundsOnScreen(newBounds)
 
-        verify(boundsChangeListener).onStatusBarBoundsChanged()
+        verify(boundsChangeListener).onStatusBarBoundsChanged(any())
     }
 
     @Test
@@ -130,7 +132,7 @@ class StatusBarBoundsProviderTest : SysuiTestCase() {
 
         endSideContent.setBoundsOnScreen(newBounds)
 
-        verify(boundsChangeListener, never()).onStatusBarBoundsChanged()
+        verify(boundsChangeListener, never()).onStatusBarBoundsChanged(any())
     }
 
     @Test
@@ -141,7 +143,7 @@ class StatusBarBoundsProviderTest : SysuiTestCase() {
 
         endSideContent.setBoundsOnScreen(newBounds)
 
-        verify(boundsChangeListener, never()).onStatusBarBoundsChanged()
+        verify(boundsChangeListener, never()).onStatusBarBoundsChanged(any())
     }
 
     @Test
@@ -151,7 +153,7 @@ class StatusBarBoundsProviderTest : SysuiTestCase() {
 
         endSideContent.layout(newBounds)
 
-        verify(boundsChangeListener, never()).onStatusBarBoundsChanged()
+        verify(boundsChangeListener, never()).onStatusBarBoundsChanged(any())
     }
 }
 

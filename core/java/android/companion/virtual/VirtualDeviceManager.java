@@ -33,6 +33,8 @@ import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
 import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback;
+import android.companion.virtual.camera.VirtualCamera;
+import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.content.ComponentName;
@@ -848,6 +850,24 @@ public final class VirtualDeviceManager {
                 @Nullable AudioConfigurationChangeCallback callback) {
             Objects.requireNonNull(display, "display must not be null");
             return mVirtualDeviceInternal.createVirtualAudioDevice(display, executor, callback);
+        }
+
+        /**
+         * Creates a new virtual camera. If a virtual camera was already created, it will be closed.
+         *
+         * @param config camera config.
+         * @return newly created camera;
+         * @hide
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        @FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
+        public VirtualCamera createVirtualCamera(@NonNull VirtualCameraConfig config) {
+            if (!Flags.virtualCamera()) {
+                throw new UnsupportedOperationException(
+                        "Flag is not enabled: %s".formatted(Flags.FLAG_VIRTUAL_CAMERA));
+            }
+            return mVirtualDeviceInternal.createVirtualCamera(Objects.requireNonNull(config));
         }
 
         /**

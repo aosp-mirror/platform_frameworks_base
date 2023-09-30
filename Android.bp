@@ -525,6 +525,7 @@ java_library {
     required: [
         "framework-minus-apex",
         "framework-platform-compat-config",
+        "framework-location-compat-config",
         "services-platform-compat-config",
         "icu4j-platform-compat-config",
         "TeleService-platform-compat-config",

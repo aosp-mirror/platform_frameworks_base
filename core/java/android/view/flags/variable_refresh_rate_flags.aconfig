@@ -13,3 +13,10 @@ flag {
     description: "Feature flag for toolkit to set frame rate"
     bug: "293512962"
 }
+
+flag {
+    name: "expected_presentation_time_api"
+    namespace: "toolkit"
+    description: "Feature flag for using expected presentation time of the Choreographer"
+    bug: "278730197"
+}

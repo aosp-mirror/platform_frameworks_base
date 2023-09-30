@@ -1328,6 +1328,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final String AUTOFILL_HINT_PASSWORD_AUTO = "passwordAuto";
 
     /**
+     * Hint indicating that the developer intends to fill this view with output from
+     * CredentialManager.
+     *
+     * @hide
+     */
+    public static final String AUTOFILL_HINT_CREDENTIAL_MANAGER = "credential";
+
+    /**
      * Hints for the autofill services that describes the content of the view.
      */
     private @Nullable String[] mAutofillHints;
@@ -32627,6 +32635,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)
      * @param enabled whether auto handwriting initiation is enabled for this view.
      * @attr ref android.R.styleable#View_autoHandwritingEnabled
+     * @see EditorInfo#setStylusHandwritingEnabled(boolean)
      */
     public void setAutoHandwritingEnabled(boolean enabled) {
         if (enabled) {

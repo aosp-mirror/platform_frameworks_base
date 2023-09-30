@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_BIOMETRIC;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_EXTENDED_ACCESS;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_NONE_SECURITY;
@@ -68,8 +69,6 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.res.R;
-import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor;
 import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate;
 import com.android.systemui.biometrics.SideFpsController;
 import com.android.systemui.biometrics.SideFpsUiRequestSource;
@@ -77,6 +76,7 @@ import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
@@ -84,6 +84,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -420,7 +421,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 }
             };
     private final UserInteractor mUserInteractor;
-    private final Provider<AuthenticationInteractor> mAuthenticationInteractor;
+    private final Provider<DeviceEntryInteractor> mDeviceEntryInteractor;
     private final Provider<JavaAdapter> mJavaAdapter;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final Lazy<PrimaryBouncerInteractor> mPrimaryBouncerInteractor;
@@ -457,7 +458,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             FaceAuthAccessibilityDelegate faceAuthAccessibilityDelegate,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             Lazy<PrimaryBouncerInteractor> primaryBouncerInteractor,
-            Provider<AuthenticationInteractor> authenticationInteractor
+            Provider<DeviceEntryInteractor> deviceEntryInteractor
     ) {
         super(view);
         view.setAccessibilityDelegate(faceAuthAccessibilityDelegate);
@@ -487,7 +488,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
         mBouncerMessageInteractor = bouncerMessageInteractor;
         mUserInteractor = userInteractor;
-        mAuthenticationInteractor = authenticationInteractor;
+        mDeviceEntryInteractor = deviceEntryInteractor;
         mJavaAdapter = javaAdapter;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mDeviceProvisionedController = deviceProvisionedController;
@@ -519,9 +520,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             // When the scene framework says that the lockscreen has been dismissed, dismiss the
             // keyguard here, revealing the underlying app or launcher:
             mSceneTransitionCollectionJob = mJavaAdapter.get().alwaysCollectFlow(
-                mAuthenticationInteractor.get().isLockscreenDismissed(),
-                isLockscreenDismissed -> {
-                    if (isLockscreenDismissed) {
+                mDeviceEntryInteractor.get().isDeviceEntered(),
+                    isDeviceEntered -> {
+                    if (isDeviceEntered) {
                         final int selectedUserId = mUserInteractor.getSelectedUserId();
                         showNextSecurityScreenOrFinish(
                             /* authenticated= */ true,
@@ -1081,15 +1082,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
      * one side).
      */
     private boolean canUseOneHandedBouncer() {
-        switch(mCurrentSecurityMode) {
-            case PIN:
-            case Pattern:
-            case SimPin:
-            case SimPuk:
-                return getResources().getBoolean(R.bool.can_use_one_handed_bouncer);
-            default:
-                return false;
-        }
+        return switch (mCurrentSecurityMode) {
+            case PIN, Pattern, SimPin, SimPuk -> getResources().getBoolean(
+                    R.bool.can_use_one_handed_bouncer);
+            default -> false;
+        };
     }
 
     private boolean canDisplayUserSwitcher() {

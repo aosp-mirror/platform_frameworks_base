@@ -47,13 +47,16 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
-    private val authenticationInteractor =
-        utils.authenticationInteractor(
-            repository = utils.authenticationRepository(),
-        )
+    private val authenticationInteractor = utils.authenticationInteractor()
     private val sceneInteractor = utils.sceneInteractor()
+    private val deviceEntryInteractor =
+        utils.deviceEntryInteractor(
+            authenticationInteractor = authenticationInteractor,
+            sceneInteractor = utils.sceneInteractor(),
+        )
     private val bouncerInteractor =
         utils.bouncerInteractor(
+            deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
         )
@@ -378,7 +381,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
     private fun TestScope.lockDeviceAndOpenPatternBouncer() {
         utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pattern)
-        utils.authenticationRepository.setUnlocked(false)
+        utils.deviceEntryRepository.setUnlocked(false)
         sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
         sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
         assertThat(collectLastValue(sceneInteractor.desiredScene).invoke())

@@ -125,6 +125,8 @@ public class BiometricLoggerTest {
                 eq(DEFAULT_MODALITY), eq(DEFAULT_ACTION), eq(DEFAULT_CLIENT), anyBoolean(),
                 anyLong(), anyInt(), eq(requireConfirmation),
                 eq(targetUserId), any());
+
+        verify(mAuthenticationStatsCollector).authenticate(eq(targetUserId), eq(authenticated));
     }
 
     @Test
