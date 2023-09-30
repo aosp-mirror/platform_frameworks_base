@@ -72,7 +72,7 @@
     <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"PIN кд же мнжа изи мнен клпусн ачңыз"</string>
     <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Срсөз же мнжа изи мнен клпусн ачңз"</string>
     <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Грфиклык ачкч же мнжа изи менн клпусн ачңз"</string>
-    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Кошумча коопсуздук үчүн түзмөк жумуш саясатына ылайык кулпуланган"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Кошумча коопсуздук үчүн түзмөк жумуш эрежеси боюнча кулпуланган"</string>
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Бекем кулпулангандан кийин PIN код талап кылынат"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Бекем кулпулангандан кийин сырсөз талап кылынат"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Бекем кулпулангандан кийн грфикалык ачкыч талп клынт"</string>
