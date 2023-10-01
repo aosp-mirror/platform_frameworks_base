@@ -135,7 +135,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private val bouncerInteractor =
         utils.bouncerInteractor(
-            deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
         )
@@ -234,7 +233,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             ShadeSceneViewModel(
                 applicationScope = testScope.backgroundScope,
                 deviceEntryInteractor = deviceEntryInteractor,
-                bouncerInteractor = bouncerInteractor,
                 shadeHeaderViewModel = shadeHeaderViewModel,
             )
 
@@ -648,6 +646,9 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
         emulateUserDrivenTransition(SceneKey.Bouncer)
         enterPin()
+        // This repository state is not changed by the AuthInteractor, it relies on
+        // KeyguardStateController.
+        utils.deviceEntryRepository.setUnlocked(true)
         emulateUiSceneTransition(
             expectedVisible = false,
         )

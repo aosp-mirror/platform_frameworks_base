@@ -45,7 +45,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -66,6 +68,12 @@ interface AuthenticationRepository {
      * [hintedPinLength].
      */
     val isAutoConfirmFeatureEnabled: StateFlow<Boolean>
+
+    /**
+     * Emits the result whenever a PIN/Pattern/Password security challenge is attempted by the user
+     * in order to unlock the device.
+     */
+    val authenticationChallengeResult: SharedFlow<Boolean>
 
     /**
      * The exact length a PIN should be for us to enable PIN length hinting.
@@ -164,6 +172,7 @@ constructor(
             initialValue = false,
             getFreshValue = lockPatternUtils::isAutoPinConfirmEnabled,
         )
+    override val authenticationChallengeResult = MutableSharedFlow<Boolean>()
 
     override val hintedPinLength: Int = 6
 
@@ -224,6 +233,7 @@ constructor(
             } else {
                 lockPatternUtils.reportFailedPasswordAttempt(selectedUserId)
             }
+            authenticationChallengeResult.emit(isSuccessful)
         }
     }
 

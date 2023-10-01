@@ -96,12 +96,6 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             ShadeSceneViewModel(
                 applicationScope = testScope.backgroundScope,
                 deviceEntryInteractor = deviceEntryInteractor,
-                bouncerInteractor =
-                    utils.bouncerInteractor(
-                        deviceEntryInteractor = deviceEntryInteractor,
-                        authenticationInteractor = authenticationInteractor,
-                        sceneInteractor = sceneInteractor,
-                    ),
                 shadeHeaderViewModel = shadeHeaderViewModel,
             )
     }

@@ -39,6 +39,10 @@ class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
         return isInsecureLockscreenEnabled
     }
 
+    override fun reportSuccessfulAuthentication() {
+        _isUnlocked.value = true
+    }
+
     fun setUnlocked(isUnlocked: Boolean) {
         _isUnlocked.value = isUnlocked
     }

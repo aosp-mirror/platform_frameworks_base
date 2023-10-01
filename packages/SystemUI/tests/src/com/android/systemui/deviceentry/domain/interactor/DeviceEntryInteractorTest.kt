@@ -278,10 +278,66 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun showOrUnlockDevice_notLocked_switchesToGoneScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            switchToScene(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.deviceEntryRepository.setUnlocked(true)
+            runCurrent()
+
+            underTest.attemptDeviceEntry()
+
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+        }
+
+    @Test
+    fun showOrUnlockDevice_authMethodNotSecure_switchesToGoneScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            switchToScene(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+
+            underTest.attemptDeviceEntry()
+
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+        }
+
+    @Test
+    fun showOrUnlockDevice_authMethodSwipe_switchesToGoneScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            switchToScene(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+
+            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+
+            underTest.attemptDeviceEntry()
+
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+        }
+
+    @Test
     fun isBypassEnabled_disabledInRepository_false() =
         testScope.runTest {
             utils.deviceEntryRepository.setBypassEnabled(false)
             assertThat(underTest.isBypassEnabled.value).isFalse()
+        }
+
+    @Test
+    fun successfulAuthenticationChallengeAttempt_updatedIsUnlockedState() =
+        testScope.runTest {
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            assertThat(isUnlocked).isFalse()
+
+            utils.authenticationRepository.reportAuthenticationAttempt(true)
+
+            assertThat(isUnlocked).isTrue()
         }
 
     private fun switchToScene(sceneKey: SceneKey) {

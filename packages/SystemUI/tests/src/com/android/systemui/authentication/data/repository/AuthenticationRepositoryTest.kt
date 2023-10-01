@@ -127,6 +127,22 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
             assertThat(values.last()).isTrue()
         }
 
+    @Test
+    fun reportAuthenticationAttempt_emitsAuthenticationChallengeResult() =
+        testScope.runTest {
+            val authenticationChallengeResults by
+                collectValues(underTest.authenticationChallengeResult)
+
+            runCurrent()
+            underTest.reportAuthenticationAttempt(true)
+            runCurrent()
+            underTest.reportAuthenticationAttempt(false)
+            runCurrent()
+            underTest.reportAuthenticationAttempt(true)
+
+            assertThat(authenticationChallengeResults).isEqualTo(listOf(true, false, true))
+        }
+
     private fun setSecurityModeAndDispatchBroadcast(
         securityMode: KeyguardSecurityModel.SecurityMode,
     ) {

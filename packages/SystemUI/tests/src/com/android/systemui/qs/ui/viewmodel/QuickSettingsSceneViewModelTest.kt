@@ -90,13 +90,8 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
         underTest =
             QuickSettingsSceneViewModel(
-                bouncerInteractor =
-                    utils.bouncerInteractor(
-                        deviceEntryInteractor =
-                            utils.deviceEntryInteractor(
-                                authenticationInteractor = authenticationInteractor,
-                                sceneInteractor = sceneInteractor,
-                            ),
+                deviceEntryInteractor =
+                    utils.deviceEntryInteractor(
                         authenticationInteractor = authenticationInteractor,
                         sceneInteractor = sceneInteractor,
                     ),

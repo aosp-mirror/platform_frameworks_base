@@ -211,7 +211,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun tryAutoConfirm_withAutoConfirmPinAndShorterPin_returnsNullAndHasNoEffect() =
+    fun tryAutoConfirm_withAutoConfirmPinAndShorterPin_returnsNull() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             val isThrottled by collectLastValue(underTest.isThrottled)
@@ -234,7 +234,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun tryAutoConfirm_withAutoConfirmWrongPinCorrectLength_returnsFalseAndDoesNotUnlockDevice() =
+    fun tryAutoConfirm_withAutoConfirmWrongPinCorrectLength_returnsFalse() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             utils.authenticationRepository.apply {
@@ -250,12 +250,10 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.FAILED)
-            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
-            assertThat(isUnlocked).isFalse()
         }
 
     @Test
-    fun tryAutoConfirm_withAutoConfirmLongerPin_returnsFalseAndDoesNotUnlockDevice() =
+    fun tryAutoConfirm_withAutoConfirmLongerPin_returnsFalse() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             utils.authenticationRepository.apply {
@@ -271,12 +269,10 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.FAILED)
-            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
-            assertThat(isUnlocked).isFalse()
         }
 
     @Test
-    fun tryAutoConfirm_withAutoConfirmCorrectPin_returnsTrueAndUnlocksDevice() =
+    fun tryAutoConfirm_withAutoConfirmCorrectPin_returnsTrue() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             utils.authenticationRepository.apply {
@@ -292,12 +288,10 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
-            assertThat(isUnlocked).isTrue()
         }
 
     @Test
-    fun tryAutoConfirm_withAutoConfirmCorrectPinButDuringThrottling_returnsNullAndHasNoEffects() =
+    fun tryAutoConfirm_withAutoConfirmCorrectPinButDuringThrottling_returnsNull() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
@@ -321,7 +315,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun tryAutoConfirm_withoutAutoConfirmButCorrectPin_returnsNullAndHasNoEffects() =
+    fun tryAutoConfirm_withoutAutoConfirmButCorrectPin_returnsNull() =
         testScope.runTest {
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
@@ -334,12 +328,10 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
-            assertThat(isUnlocked).isFalse()
         }
 
     @Test
-    fun tryAutoConfirm_withoutCorrectPassword_returnsNullAndHasNoEffects() =
+    fun tryAutoConfirm_withoutCorrectPassword_returnsNull() =
         testScope.runTest {
             utils.authenticationRepository.setAuthenticationMethod(
                 DataLayerAuthenticationMethodModel.Password
@@ -347,40 +339,29 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
             assertThat(underTest.authenticate("password".toList(), tryAutoConfirm = true))
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
-            assertThat(isUnlocked).isFalse()
         }
 
     @Test
     fun throttling() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
             val throttling by collectLastValue(underTest.throttling)
             val isThrottled by collectLastValue(underTest.isThrottled)
             utils.authenticationRepository.setAuthenticationMethod(
                 DataLayerAuthenticationMethodModel.Pin
             )
             underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
-            assertThat(isUnlocked).isTrue()
-            assertThat(isThrottled).isFalse()
-            assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
-
-            utils.deviceEntryRepository.setUnlocked(false)
-            assertThat(isUnlocked).isFalse()
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
 
             // Make many wrong attempts, but just shy of what's needed to get throttled:
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING - 1) {
                 underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
-                assertThat(isUnlocked).isFalse()
                 assertThat(isThrottled).isFalse()
                 assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
             }
 
             // Make one more wrong attempt, leading to throttling:
             underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
-            assertThat(isUnlocked).isFalse()
             assertThat(isThrottled).isTrue()
             assertThat(throttling)
                 .isEqualTo(
@@ -394,7 +375,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             // Correct PIN, but throttled, so doesn't attempt it:
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(isUnlocked).isFalse()
             assertThat(isThrottled).isTrue()
             assertThat(throttling)
                 .isEqualTo(
@@ -427,7 +407,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
             // Move the clock forward one more second, to completely finish the throttling period:
             advanceTimeBy(1000)
-            assertThat(isUnlocked).isFalse()
             assertThat(isThrottled).isFalse()
             assertThat(throttling)
                 .isEqualTo(
@@ -441,7 +420,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             // Correct PIN and no longer throttled so unlocks successfully:
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(isUnlocked).isTrue()
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
         }

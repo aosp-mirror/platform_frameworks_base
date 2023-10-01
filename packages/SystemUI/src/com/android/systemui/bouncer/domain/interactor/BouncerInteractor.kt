@@ -26,7 +26,6 @@ import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
@@ -51,7 +50,6 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val applicationContext: Context,
     private val repository: BouncerRepository,
-    private val deviceEntryInteractor: DeviceEntryInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
     private val sceneInteractor: SceneInteractor,
     flags: SceneContainerFlags,
@@ -142,32 +140,6 @@ constructor(
     }
 
     /**
-     * Either shows the bouncer or unlocks the device, if the bouncer doesn't need to be shown.
-     *
-     * @param message An optional message to show to the user in the bouncer.
-     */
-    fun showOrUnlockDevice(
-        message: String? = null,
-    ) {
-        applicationScope.launch {
-            if (deviceEntryInteractor.isAuthenticationRequired()) {
-                repository.setMessage(
-                    message ?: promptMessage(authenticationInteractor.getAuthenticationMethod())
-                )
-                sceneInteractor.changeScene(
-                    scene = SceneModel(SceneKey.Bouncer),
-                    loggingReason = "request to unlock device while authentication required",
-                )
-            } else {
-                sceneInteractor.changeScene(
-                    scene = SceneModel(SceneKey.Gone),
-                    loggingReason = "request to unlock device while authentication isn't required",
-                )
-            }
-        }
-    }
-
-    /**
      * Resets the user-facing message back to the default according to the current authentication
      * method.
      */
@@ -212,17 +184,11 @@ constructor(
         return applicationScope
             .async {
                 val authResult = authenticationInteractor.authenticate(input, tryAutoConfirm)
-                when (authResult) {
-                    // Authentication succeeded.
-                    AuthenticationResult.SUCCEEDED ->
-                        sceneInteractor.changeScene(
-                            scene = SceneModel(SceneKey.Gone),
-                            loggingReason = "successful authentication",
-                        )
-                    // Authentication failed.
-                    AuthenticationResult.FAILED -> showErrorMessage()
-                    // Authentication skipped.
-                    AuthenticationResult.SKIPPED -> if (!tryAutoConfirm) showErrorMessage()
+                if (
+                    authResult == AuthenticationResult.FAILED ||
+                        (authResult == AuthenticationResult.SKIPPED && !tryAutoConfirm)
+                ) {
+                    showErrorMessage()
                 }
                 authResult
             }

@@ -96,6 +96,17 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun reportSuccessfulAuthentication_shouldUpdateIsUnlocked() =
+        testScope.runTest {
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            assertThat(isUnlocked).isFalse()
+
+            underTest.reportSuccessfulAuthentication()
+
+            assertThat(isUnlocked).isTrue()
+        }
+
+    @Test
     fun isBypassEnabled_disabledInController() =
         testScope.runTest {
             whenever(keyguardBypassController.isBypassEnabled).thenAnswer { false }

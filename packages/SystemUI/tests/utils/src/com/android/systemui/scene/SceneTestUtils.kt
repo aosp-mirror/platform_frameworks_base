@@ -110,7 +110,6 @@ class SceneTestUtils(
     val deviceEntryRepository: FakeDeviceEntryRepository by lazy { FakeDeviceEntryRepository() }
     val authenticationRepository: FakeAuthenticationRepository by lazy {
         FakeAuthenticationRepository(
-            deviceEntryRepository = deviceEntryRepository,
             currentTime = { testScope.currentTime },
         )
     }
@@ -181,6 +180,7 @@ class SceneTestUtils(
             sceneInteractor = sceneInteractor,
             deviceEntryFaceAuthRepository = faceAuthRepository,
             trustRepository = trustRepository,
+            flags = FakeSceneContainerFlags(enabled = true)
         )
     }
 
@@ -221,7 +221,6 @@ class SceneTestUtils(
     }
 
     fun bouncerInteractor(
-        deviceEntryInteractor: DeviceEntryInteractor,
         authenticationInteractor: AuthenticationInteractor,
         sceneInteractor: SceneInteractor,
     ): BouncerInteractor {
@@ -229,7 +228,6 @@ class SceneTestUtils(
             applicationScope = applicationScope(),
             applicationContext = context,
             repository = BouncerRepository(featureFlags),
-            deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
             flags = sceneContainerFlags,

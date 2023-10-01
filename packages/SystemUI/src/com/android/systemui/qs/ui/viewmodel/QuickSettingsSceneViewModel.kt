@@ -16,8 +16,8 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
-import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import javax.inject.Inject
 
@@ -26,11 +26,9 @@ import javax.inject.Inject
 class QuickSettingsSceneViewModel
 @Inject
 constructor(
-    private val bouncerInteractor: BouncerInteractor,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
 ) {
     /** Notifies that some content in quick settings was clicked. */
-    fun onContentClicked() {
-        bouncerInteractor.showOrUnlockDevice()
-    }
+    fun onContentClicked() = deviceEntryInteractor.attemptDeviceEntry()
 }

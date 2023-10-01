@@ -49,14 +49,8 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     private val testScope = utils.testScope
     private val authenticationInteractor = utils.authenticationInteractor()
     private val sceneInteractor = utils.sceneInteractor()
-    private val deviceEntryInteractor =
-        utils.deviceEntryInteractor(
-            authenticationInteractor = authenticationInteractor,
-            sceneInteractor = utils.sceneInteractor(),
-        )
     private val bouncerInteractor =
         utils.bouncerInteractor(
-            deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
         )
@@ -120,7 +114,8 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onDragEnd_whenCorrect() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val authResult by
+                collectLastValue(authenticationInteractor.authenticationChallengeResult)
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)
             lockDeviceAndOpenPatternBouncer()
@@ -150,7 +145,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onDragEnd()
 
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+            assertThat(authResult).isTrue()
         }
 
     @Test
@@ -344,7 +339,8 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onDragEnd_correctAfterWrong() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val authResult by
+                collectLastValue(authenticationInteractor.authenticationChallengeResult)
             val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)
@@ -356,14 +352,14 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
             assertThat(message?.text).isEqualTo(WRONG_PATTERN)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            assertThat(authResult).isFalse()
 
             // Enter the correct pattern:
             CORRECT_PATTERN.forEach(::dragToCoordinate)
 
             underTest.onDragEnd()
 
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+            assertThat(authResult).isTrue()
         }
 
     private fun dragOverCoordinates(vararg coordinatesDragged: Point) {

@@ -42,8 +42,8 @@ import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthRippleController;
-import com.android.systemui.bouncer.domain.interactor.BouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.doze.util.BurnInHelperKt;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -78,7 +78,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
     protected MockitoSession mStaticMockSession;
 
     protected final SceneTestUtils mSceneTestUtils = new SceneTestUtils(this);
-    protected @Mock BouncerInteractor mBouncerInteractor;
+    protected @Mock DeviceEntryInteractor mDeviceEntryInteractor;
     protected @Mock LockIconView mLockIconView;
     protected @Mock AnimatedStateListDrawable mIconDrawable;
     protected @Mock Context mContext;
@@ -176,7 +176,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 mFeatureFlags,
                 mPrimaryBouncerInteractor,
                 mContext,
-                () -> mBouncerInteractor,
+                () -> mDeviceEntryInteractor,
                 mSceneTestUtils.getSceneContainerFlags()
         );
     }

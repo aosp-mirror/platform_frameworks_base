@@ -1,5 +1,6 @@
 package com.android.systemui.deviceentry.data.repository
 
+import android.util.Log
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -15,9 +16,12 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
@@ -39,6 +43,9 @@ interface DeviceEntryRepository {
      * `None` or `Swipe`).
      */
     suspend fun isInsecureLockscreenEnabled(): Boolean
+
+    /** Report successful authentication for device entry. */
+    fun reportSuccessfulAuthentication()
 
     /**
      * Whether lockscreen bypass is enabled. When enabled, the lockscreen will be automatically
@@ -67,7 +74,9 @@ constructor(
     keyguardStateController: KeyguardStateController,
 ) : DeviceEntryRepository {
 
-    override val isUnlocked =
+    private val _isUnlocked = MutableStateFlow(false)
+
+    private val isUnlockedReportedByLegacyKeyguard =
         conflatedCallbackFlow {
                 val callback =
                     object : KeyguardStateController.Callback {
@@ -99,17 +108,25 @@ constructor(
                 awaitClose { keyguardStateController.removeCallback(callback) }
             }
             .distinctUntilChanged()
+            .onEach { _isUnlocked.value = it }
             .stateIn(
                 applicationScope,
                 SharingStarted.Eagerly,
                 initialValue = false,
             )
 
+    override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
+
     override suspend fun isInsecureLockscreenEnabled(): Boolean {
         return withContext(backgroundDispatcher) {
             val selectedUserId = userRepository.getSelectedUserInfo().id
             !lockPatternUtils.isLockScreenDisabled(selectedUserId)
         }
+    }
+
+    override fun reportSuccessfulAuthentication() {
+        Log.d(TAG, "Successful authentication reported.")
+        _isUnlocked.value = true
     }
 
     override val isBypassEnabled: StateFlow<Boolean> =

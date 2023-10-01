@@ -381,7 +381,7 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
 
         // THEN show primary bouncer via keyguard view controller, not scene container
         verify(mKeyguardViewController).showPrimaryBouncer(anyBoolean());
-        verify(mBouncerInteractor, never()).showOrUnlockDevice(any());
+        verify(mDeviceEntryInteractor, never()).attemptDeviceEntry();
     }
 
     @Test
@@ -395,7 +395,7 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
 
         // THEN show primary bouncer
         verify(mKeyguardViewController, never()).showPrimaryBouncer(anyBoolean());
-        verify(mBouncerInteractor).showOrUnlockDevice(any());
+        verify(mDeviceEntryInteractor).attemptDeviceEntry();
     }
 
     @Test
@@ -408,6 +408,7 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
         mUnderTest.onLongPress();
 
         // THEN don't show primary bouncer
-        verify(mBouncerInteractor, never()).showOrUnlockDevice(any());
+        verify(mDeviceEntryInteractor, never()).attemptDeviceEntry();
+        verify(mKeyguardViewController, never()).showPrimaryBouncer(anyBoolean());
     }
 }

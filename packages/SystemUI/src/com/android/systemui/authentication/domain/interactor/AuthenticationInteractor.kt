@@ -16,7 +16,6 @@
 
 package com.android.systemui.authentication.domain.interactor
 
-import com.android.app.tracing.TraceUtils.Companion.async
 import com.android.app.tracing.TraceUtils.Companion.withContext
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
@@ -40,6 +39,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -47,7 +47,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Hosts application business logic related to user authentication.
@@ -142,6 +141,13 @@ constructor(
 
     /** Whether the pattern should be visible for the currently-selected user. */
     val isPatternVisible: StateFlow<Boolean> = repository.isPatternVisible
+
+    /**
+     * Emits the outcome (successful or unsuccessful) whenever a PIN/Pattern/Password security
+     * challenge is attempted by the user in order to unlock the device.
+     */
+    val authenticationChallengeResult: SharedFlow<Boolean> =
+        repository.authenticationChallengeResult
 
     private var throttlingCountdownJob: Job? = null
 
