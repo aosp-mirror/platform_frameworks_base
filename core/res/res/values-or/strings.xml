@@ -802,11 +802,11 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ୟୁଜର ଆକ୍ସନ ବିନା ପୂର୍ବରୁ ଇନଷ୍ଟଲ କରାଯାଇଥିବା ଆପକୁ ଅପଡେଟ କରିବା ପାଇଁ ଏହା ହୋଲ୍ଡରକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ପାସ୍‌ୱର୍ଡ ନିୟମାବଳୀ ସେଟ୍ କରନ୍ତୁ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ଲକ୍‍ ସ୍କ୍ରୀନ୍‍ ପାସ୍‌ୱର୍ଡ ଓ PINରେ ଅନୁମୋଦିତ ଦୀର୍ଘତା ଓ ବର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ।"</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"ସ୍କ୍ରୀନ୍-ଅନଲକ୍ କରିବା ଉଦ୍ୟମ ନୀରିକ୍ଷଣ କରନ୍ତୁ"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"ସ୍କ୍ରିନ-ଅନଲକ କରିବା ଉଦ୍ୟମ ନୀରିକ୍ଷଣ କରିବା"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ସ୍କ୍ରୀନ୍‍ ଅନଲକ୍‍ କରିବାବେଳେ ଟାଇପ୍‍ କରିଥିବା ଭୁଲ ପାସୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ ଏବଂ ଟାବଲେଟ୍‍କୁ ଲକ୍‍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସୱର୍ଡ ଟାଇପ୍‍ କରାଯାଇଥାଏ, ତେବେ ଟାବଲେଟ୍‍ର ସମସ୍ତ ଡାଟା ଲିଭାଇଦିଏ।"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ସ୍କ୍ରିନ୍ ଅନ୍‌ଲକ୍ କରିବା ସମୟରେ ଟାଇପ୍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱାର୍ଡଗୁଡ଼ିକର ସଂଖ୍ୟାକୁ ନିରୀକ୍ଷଣ କରନ୍ତୁ ଏବଂ ଆପଣଙ୍କର Android TV ଡିଭାଇସ୍‌କୁ ଲକ୍ କରନ୍ତୁ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱାର୍ଡ ଟାଇପ୍ କରାଯାଇଥାଏ, ତେବେ ଆପଣଙ୍କ Android TV ଡିଭାଇସ୍‌ର ସମସ୍ତ ଡାଟା ଲିଭାଇ ଦିଅନ୍ତୁ।"</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ସ୍କ୍ରିନ ଅନଲକ କରିବା ସମୟରେ ଟାଇପ କରାଯାଇଥିବା ଭୁଲ ପାସୱାର୍ଡର ସଂଖ୍ୟାକୁ ମନିଟର କରନ୍ତୁ ଏବଂ ଇନଫୋଟେନମେଣ୍ଟ ସିଷ୍ଟମକୁ ଲକ କରନ୍ତୁ କିମ୍ବା ଯଦି ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପାସୱାର୍ଡ ଟାଇପ କରାଯାଇଥାଏ ତେବେ ଇନଫୋଟେନମେଣ୍ଟ ସିଷ୍ଟମର ସମସ୍ତ ଡାଟା ଖାଲି କରନ୍ତୁ।"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ସ୍କ୍ରୀନ୍‍ ଅନଲକ୍‍ କରିବାବେଳେ ଟାଇପ୍‍ କରିଥିବା ଭୁଲ ପାସୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ ଏବଂ ଫୋନ୍‍କୁ ଲକ୍‍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସୱର୍ଡ ଟାଇପ୍‍ କରାଯାଇଥାଏ, ତେବେ ଫୋନ୍‍ର ସମସ୍ତ ଡାଟା ଲିଭାଇଦିଏ।"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ଟାଇପ କରାଯାଇଥିବା ଭୁଲ ପାସୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ। ସ୍କ୍ରିନ ଅନଲକ କରିବାବେଳେ ଏବଂ ଫୋନକୁ ଲକ କରିବା ସମୟରେ ଯଦି ଅନେକ ଭୁଲ ପାସୱର୍ଡ ଟାଇପ କରାଯାଇଥାଏ, ତେବେ ଫୋନର ସମସ୍ତ ଡାଟା ଡିଲିଟ କରେ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ସ୍କ୍ରୀନ୍‍ ଅନଲକ୍‍ କରିବାବେଳେ ଟାଇପ୍‍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ ଏବଂ ଟାବଲେଟ୍‍କୁ ଲକ୍‍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱର୍ଡ ଟାଇପ୍‍ କରାଯାଇଥାଏ, ତେବେ ସମସ୍ତ ଡାଟା ଲିଭାଇଦିଏ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ସ୍କ୍ରିନ୍ ଅନ୍‌ଲକ୍ କରିବା ସମୟରେ ଟାଇପ୍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱାର୍ଡଗୁଡ଼ିକର ସଂଖ୍ୟାକୁ ନିରୀକ୍ଷଣ କରନ୍ତୁ ଏବଂ ଆପଣଙ୍କର Android TV ଡିଭାଇସ୍‌କୁ ଲକ୍ କରନ୍ତୁ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱାର୍ଡ ଟାଇପ୍ କରାଯାଇଥାଏ, ତେବେ ସମସ୍ତ ଡାଟା ଲିଭାଇ ଦିଅନ୍ତୁ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ସ୍କ୍ରିନ ଅନଲକ କରିବା ସମୟରେ ଟାଇପ କରାଯାଇଥିବା ଭୁଲ ପାସୱାର୍ଡର ସଂଖ୍ୟାକୁ ମନିଟର କରନ୍ତୁ ଏବଂ ଇନଫୋଟେନମେଣ୍ଟ ସିଷ୍ଟମକୁ ଲକ କରନ୍ତୁ କିମ୍ବା ଯଦି ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପାସୱାର୍ଡ ଟାଇପ କରାଯାଇଥାଏ ତେବେ ଏହି ପ୍ରୋଫାଇଲର ସମସ୍ତ ଡାଟା ଖାଲି କରନ୍ତୁ।"</string>
@@ -819,7 +819,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ସେଟିଙ୍ଗ କରାଇ ଟାବ୍‍ଲେଟ୍‍ର ଡାଟା ଲିଭାଇଥାଏ।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ଏକ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍ କରି ବିନା ଚେତାବନୀରେ ଆପଣଙ୍କର Android TV ଡିଭାଇସ୍‌ର ଡାଟା ଲିଭାନ୍ତୁ।"</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ଏକ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ କରି ବିନା ଚେତାବନୀରେ ଇନଫୋଟେନମେଣ୍ଟ ସିଷ୍ଟମର ଡାଟା ଖାଲି କରନ୍ତୁ।"</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍ କରି ଫୋନ୍‍ର ଡାଟା ଲିଭାଇଥାଏ।"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ କରି ଫୋନର ଡାଟା ଲିଭାଇଥାଏ।"</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"ପ୍ରୋଫାଇଲ ଡାଟା ଖାଲି କରନ୍ତୁ"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ୟୁଜର୍‍ ଡାଟା ଲିଭାନ୍ତୁ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ବିନା ଚେତାବନୀରେ ଏହି ଟାବଲେଟରେ ଥିବା ଏହି ୟୁଜରଙ୍କ ଡାଟା ଲିଭାଇ ଦିଅନ୍ତୁ।"</string>
@@ -2096,7 +2096,7 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ନିୟମିତ ମୋଡ୍‍ ସୂଚନା ବିଜ୍ଞପ୍ତି"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ବେଟେରୀ ସେଭର ଚାଲୁ କରାଯାଇଛି"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ବ୍ୟାଟେରୀ ଲାଇଫ ବଢ଼ାଇବା ପାଇଁ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କମ୍ କରିବା"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ବ୍ୟାଟେରୀ ସେଭର୍"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ବେଟେରୀ ସେଭର"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ବ୍ୟାଟେରୀ ସେଭର୍ ବନ୍ଦ ଅଛି"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ଫୋନରେ ଯଥେଷ୍ଟ ଚାର୍ଜ ଅଛି। ଫିଚରଗୁଡ଼ିକ ଆଉ ପ୍ରତିବନ୍ଧିତ ନୁହେଁ।"</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ଟାବଲେଟରେ ଯଥେଷ୍ଟ ଚାର୍ଜ ଅଛି। ଫିଚରଗୁଡ଼ିକ ଆଉ ପ୍ରତିବନ୍ଧିତ ନୁହେଁ।"</string>

@@ -1591,9 +1591,9 @@
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Vous avez dépassé votre limite définie de <xliff:g id="SIZE">%s</xliff:g>"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Données en arrière-plan limitées"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Appuyez pour suppr. restriction."</string>
-    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Conso données mobiles élevée"</string>
+    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Conso élevée des données mobiles"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Vos applications ont utilisé plus de données que d\'habitude"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> a utilisé plus de données que d\'habitude"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"L\'application <xliff:g id="APP">%s</xliff:g> a utilisé plus de données que d\'habitude"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Certificat de sécurité"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"Ce certificat est valide."</string>
     <string name="issued_to" msgid="5975877665505297662">"Délivré à :"</string>
