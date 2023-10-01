@@ -208,6 +208,13 @@ flag {
 }
 
 flag {
+    name: "compose_bouncer"
+    namespace: "systemui"
+    description: "Use the new compose bouncer in SystemUI"
+    bug: "310005730"
+}
+
+flag {
    name: "media_in_scene_container"
    namespace: "systemui"
    description: "Enable media in the scene container framework"

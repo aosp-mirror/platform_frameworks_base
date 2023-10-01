@@ -22,6 +22,8 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
+import com.android.systemui.bouncer.ui.BouncerDialogFactory
+import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -86,6 +88,13 @@ interface BaseComposeFacade {
     fun createCommunalView(
         context: Context,
         viewModel: BaseCommunalViewModel,
+    ): View
+
+    /** Create a [View] to represent the [BouncerViewModel]. */
+    fun createBouncer(
+        context: Context,
+        viewModel: BouncerViewModel,
+        dialogFactory: BouncerDialogFactory,
     ): View
 
     /** Creates a container that hosts the communal UI and handles gesture transitions. */

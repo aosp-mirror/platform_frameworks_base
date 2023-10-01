@@ -81,6 +81,7 @@ import com.android.compose.animation.scene.transitions
 import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
+import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout
 import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
@@ -822,10 +823,6 @@ private fun UserSwitcherDropdownMenu(
             }
         }
     }
-}
-
-interface BouncerDialogFactory {
-    operator fun invoke(): AlertDialog
 }
 
 /**
