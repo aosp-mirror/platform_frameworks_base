@@ -216,6 +216,29 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun isKeyguardUnlocked() =
+        testScope.runTest {
+            whenever(keyguardStateController.isUnlocked).thenReturn(false)
+            val isKeyguardUnlocked by collectLastValue(underTest.isKeyguardUnlocked)
+
+            runCurrent()
+            assertThat(isKeyguardUnlocked).isFalse()
+
+            val captor = argumentCaptor<KeyguardStateController.Callback>()
+            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
+
+            whenever(keyguardStateController.isUnlocked).thenReturn(true)
+            captor.value.onUnlockedChanged()
+            runCurrent()
+            assertThat(isKeyguardUnlocked).isTrue()
+
+            whenever(keyguardStateController.isUnlocked).thenReturn(false)
+            captor.value.onKeyguardShowingChanged()
+            runCurrent()
+            assertThat(isKeyguardUnlocked).isFalse()
+        }
+
+    @Test
     fun isDozing() =
         testScope.runTest {
             underTest.setIsDozing(true)
