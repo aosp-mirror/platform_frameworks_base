@@ -336,6 +336,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
+import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -541,6 +542,12 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @VisibleForTesting
     boolean mSkipActivityRelaunchWhenDocking;
+
+    /** Device default insets types provided non-decor insets. */
+    final int mDecorTypes;
+
+    /** Device default insets types shall be excluded from config app sizes. */
+    final int mConfigTypes;
 
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
@@ -1185,6 +1192,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
         mSkipActivityRelaunchWhenDocking = context.getResources()
                 .getBoolean(R.bool.config_skipActivityRelaunchWhenDocking);
+        final boolean isScreenSizeDecoupledFromStatusBarAndCutout = context.getResources()
+                .getBoolean(R.bool.config_decoupleStatusBarAndDisplayCutoutFromScreenSize)
+                && Flags.closeToSquareConfigIncludesStatusBar();
+        if (!isScreenSizeDecoupledFromStatusBarAndCutout) {
+            mDecorTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.navigationBars();
+            mConfigTypes = WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars();
+        } else {
+            mDecorTypes = WindowInsets.Type.navigationBars();
+            mConfigTypes = WindowInsets.Type.navigationBars();
+        }
 
         mLetterboxConfiguration = new LetterboxConfiguration(
                 // Using SysUI context to have access to Material colors extracted from Wallpaper.
@@ -7319,6 +7336,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /** This is used when there's no app info available and shall return the system default.*/
     void getStableInsetsLocked(int displayId, Rect outInsets) {
         outInsets.setEmpty();
         final DisplayContent dc = mRoot.getDisplayContent(displayId);

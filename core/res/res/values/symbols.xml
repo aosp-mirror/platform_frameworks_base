@@ -1732,6 +1732,7 @@
   <java-symbol type="bool" name="config_enableLockScreenRotation" />
   <java-symbol type="bool" name="config_remoteInsetsControllerControlsSystemBars" />
   <java-symbol type="bool" name="config_remoteInsetsControllerSystemBarsCanBeShownByUserAction" />
+  <java-symbol type="bool" name="config_decoupleStatusBarAndDisplayCutoutFromScreenSize" />
   <java-symbol type="bool" name="config_lidControlsScreenLock" />
   <java-symbol type="bool" name="config_lidControlsSleep" />
   <java-symbol type="bool" name="config_lockDayNightMode" />
