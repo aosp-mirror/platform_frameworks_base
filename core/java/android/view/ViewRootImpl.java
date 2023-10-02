@@ -7542,6 +7542,15 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Returns whether this view is currently handling a pointer event.
+     *
+     * @hide
+     */
+    public boolean isHandlingPointerEvent() {
+        return mAttachInfo.mHandlingPointerEvent;
+    }
+
     private void resetPointerIcon(MotionEvent event) {
         mPointerIconType = null;
         mResolvedPointerIcon = null;

@@ -224,6 +224,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
          * @param running {@code true} if there is any animation running; {@code false} otherwise.
          */
         default void notifyAnimationRunningStateChanged(boolean running) {}
+
+        /** @see ViewRootImpl#isHandlingPointerEvent */
+        default boolean isHandlingPointerEvent() {
+            return false;
+        }
     }
 
     private static final String TAG = "InsetsController";
@@ -1063,7 +1068,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if ((types & ime()) != 0) {
             statsToken = ImeTracker.forLogging().onRequestShow(null /* component */,
                     Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
-                    SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API);
+                    SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API,
+                    mHost.isHandlingPointerEvent() /* fromUser */);
         }
 
         show(types, false /* fromIme */, statsToken);
@@ -1168,7 +1174,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if ((types & ime()) != 0) {
             statsToken = ImeTracker.forLogging().onRequestHide(null /* component */,
                     Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
+                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API,
+                    mHost.isHandlingPointerEvent() /* fromUser */);
         }
 
         hide(types, false /* fromIme */, statsToken);
