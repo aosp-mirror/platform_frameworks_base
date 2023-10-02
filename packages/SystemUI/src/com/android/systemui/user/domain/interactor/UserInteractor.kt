@@ -641,6 +641,11 @@ constructor(
     }
 
     private fun restartSecondaryService(@UserIdInt userId: Int) {
+        // Do not start service for user that is marked for deletion.
+        if (!manager.aliveUsers.map { it.id }.contains(userId)) {
+            return
+        }
+
         val intent = Intent(applicationContext, SystemUISecondaryUserService::class.java)
         // Disconnect from the old secondary user's service
         val secondaryUserId = repository.secondaryUserId
@@ -654,6 +659,7 @@ constructor(
 
         // Connect to the new secondary user's service (purely to ensure that a persistent
         // SystemUI application is created for that user)
+
         if (userId != Process.myUserHandle().identifier) {
             applicationContext.startServiceAsUser(
                 intent,
