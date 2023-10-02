@@ -58,7 +58,6 @@ import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -190,7 +189,7 @@ final class InstallRequest {
 
     // addForInit
     InstallRequest(ParsedPackage parsedPackage, int parseFlags, int scanFlags,
-            @Nullable UserHandle user, ScanResult scanResult) {
+            @Nullable UserHandle user, ScanResult scanResult, PackageSetting disabledPs) {
         if (user != null) {
             mUserId = user.getIdentifier();
         } else {
@@ -206,6 +205,7 @@ final class InstallRequest {
         mPackageMetrics = null; // No logging from this code path
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
+        mDisabledPs = disabledPs;
     }
 
     @Nullable

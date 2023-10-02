@@ -340,6 +340,10 @@ public class SystemConfig {
     // A map of preloaded package names and the path to its app metadata file path.
     private final ArrayMap<String, String> mAppMetadataFilePaths = new ArrayMap<>();
 
+    // A set of pre-installed package names that requires strict signature verification once
+    // updated to avoid cached/potentially tampered results.
+    private final Set<String> mPreinstallPackagesWithStrictSignatureCheck = new ArraySet<>();
+
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
      * value maps actor name to package name.
@@ -540,6 +544,10 @@ public class SystemConfig {
 
     public ArrayMap<String, String> getAppMetadataFilePaths() {
         return mAppMetadataFilePaths;
+    }
+
+    public Set<String> getPreinstallPackagesWithStrictSignatureCheck() {
+        return mPreinstallPackagesWithStrictSignatureCheck;
     }
 
     /**
@@ -1483,6 +1491,17 @@ public class SystemConfig {
                                     + " at " + parser.getPositionDescription());
                         } else {
                             mAppMetadataFilePaths.put(packageName, path);
+                        }
+                    } break;
+                    case "require-strict-signature": {
+                        if (android.security.Flags.extendVbChainToUpdatedApk()) {
+                            String packageName = parser.getAttributeValue(null, "package");
+                            if (TextUtils.isEmpty(packageName)) {
+                                Slog.w(TAG, "<" + name + "> without valid package in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                            } else {
+                                mPreinstallPackagesWithStrictSignatureCheck.add(packageName);
+                            }
                         }
                     } break;
                     default: {
