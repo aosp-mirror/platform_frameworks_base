@@ -194,6 +194,8 @@
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"পরিবর্তে ফিঙ্গারপ্রিন্ট ব্যবহার করুন"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"\'ফেস আনলক\' উপলভ্য নেই"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ব্লুটুথ সংযুক্ত হয়েছে৷"</string>
+    <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"ব্লুটুথ ডিভাইসের আইকন"</string>
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="4188853273831773436">"ব্লুটুথ ডিভাইসের সেটিংস গিয়ার"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ব্যাটারি কত শতাংশ আছে তা জানা যায়নি।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>এ সংযুক্ত হয়ে আছে।"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> এর সাথে সংযুক্ত৷"</string>
@@ -246,6 +248,12 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"বিরক্ত করবে না"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ব্লুটুথ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"চেনা কোনও ডিভাইস নেই"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="6869579539763980182">"কানেক্ট করার জন্য কোনও ডিভাইসে ট্যাপ করুন"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"নতুন ডিভাইস পেয়ার করুন"</string>
+    <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"সব দেখুন"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"ব্লুটুথ ব্যবহার করুন"</string>
+    <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"কানেক্ট করা আছে"</string>
+    <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"সেভ করা আছে"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"চার্জ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"অডিও"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"হেডসেট"</string>
@@ -1143,7 +1151,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet অ্যাপ, শর্টকাট হিসেবে যোগ করতে, অ্যাপ ইনস্টল করা আছে কিনা তা ভালভাবে দেখে নিন"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet অ্যাপ, শর্টকাট হিসেবে যোগ করতে, অন্তত একটি কার্ড যোগ করা হয়েছে কিনা তা ভালভাবে দেখে নিন"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home অ্যাপ, শর্টকাট হিসেবে যোগ করতে, অ্যাপ ইনস্টল করা আছে কিনা তা ভালভাবে দেখে নিন"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• অন্তত একটি ডিভাইস উপলভ্য আছে"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• কমপক্ষে একটি ডিভাইস বা ডিভাইস প্যানেল উপলভ্য আছে"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"নোট নেওয়ার শর্টকাট ব্যবহার করতে, ডিফল্ট কোনও নোট অ্যাপ বেছে নিন"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"অ্যাপ বেছে নিন"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"শর্টকাট টাচ করে ধরে রাখুন"</string>
@@ -1175,7 +1183,10 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"\'সেটিংস\' থেকে ডিফল্ট নোট নেওয়ার অ্যাপ সেট করুন"</string>
     <string name="install_app" msgid="5066668100199613936">"অ্যাপ ইনস্টল করুন"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"এক্সটার্নাল ডিসপ্লে আয়না?"</string>
-    <string name="enable_display" msgid="8308309634883321977">"ডিসপ্লে চালু করুন"</string>
+    <!-- no translation found for mirror_display (2515262008898122928) -->
+    <skip />
+    <!-- no translation found for dismiss_dialog (2195508495854675882) -->
+    <skip />
     <string name="privacy_dialog_title" msgid="7839968133469098311">"মাইক্রোফোন ও ক্যামেরা"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"সম্প্রতি ব্যবহার করা অ্যাপ"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"সাম্প্রতিক অ্যাক্সেস দেখুন"</string>
