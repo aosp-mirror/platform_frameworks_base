@@ -150,6 +150,13 @@ class TransitionController {
     final ArrayList<ActivityRecord> mValidateActivityCompat = new ArrayList<>();
 
     /**
+     * List of display areas which were last sent as "closing"-type and haven't yet had a
+     * corresponding "opening"-type transition. A mismatch here is usually related to issues in
+     * keyguard unlock.
+     */
+    final ArrayList<DisplayArea> mValidateDisplayVis = new ArrayList<>();
+
+    /**
      * Currently playing transitions (in the order they were started). When finished, records are
      * removed from this list.
      */
@@ -933,6 +940,15 @@ class TransitionController {
             ar.getSyncTransaction().setPosition(ar.getSurfaceControl(), tmpPos.x, tmpPos.y);
         }
         mValidateActivityCompat.clear();
+        for (int i = 0; i < mValidateDisplayVis.size(); ++i) {
+            final DisplayArea da = mValidateDisplayVis.get(i);
+            if (!da.isAttached() || da.getSurfaceControl() == null) continue;
+            if (da.isVisibleRequested()) {
+                Slog.e(TAG, "DisplayArea became visible outside of a transition: " + da);
+                da.getSyncTransaction().show(da.getSurfaceControl());
+            }
+        }
+        mValidateDisplayVis.clear();
     }
 
     /**
