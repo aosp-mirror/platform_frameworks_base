@@ -451,6 +451,14 @@ For a MidiDeviceInfo, you can query the defaultProtocol.</p>
 int defaultProtocol = info.getDefaultProtocol();
 </pre>
 
+<p>To register for callbacks when MIDI 2.0 devices are added or removed, use
+MidiManager.TRANSPORT_UNIVERSAL_MIDI_PACKETS as the transport.</p>
+
+<pre class=prettyprint>
+midiManager.registerDeviceCallback(
+        MidiManager.TRANSPORT_UNIVERSAL_MIDI_PACKETS, executor, callback);
+</pre>
+
 <h1 id=creating_a_midi_2_0_virtual_device_service>Creating a MIDI 2.0 Virtual Device Service</h1>
 
 
