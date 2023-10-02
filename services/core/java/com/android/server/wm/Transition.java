@@ -1527,6 +1527,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mTargetDisplays.add(dc);
         }
 
+        for (int i = 0; i < mTargets.size(); ++i) {
+            final DisplayArea da = mTargets.get(i).mContainer.asDisplayArea();
+            if (da == null) continue;
+            if (da.isVisibleRequested()) {
+                mController.mValidateDisplayVis.remove(da);
+            } else {
+                // In case something accidentally hides a displayarea and nothing shows it again.
+                mController.mValidateDisplayVis.add(da);
+            }
+        }
+
         if (mOverrideOptions != null) {
             info.setAnimationOptions(mOverrideOptions);
             if (mOverrideOptions.getType() == ANIM_OPEN_CROSS_PROFILE_APPS) {
