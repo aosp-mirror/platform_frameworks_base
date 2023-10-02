@@ -39,6 +39,7 @@ import android.service.autofill.SaveRequest
 import android.service.credentials.CredentialProviderService
 import android.util.Log
 import android.view.autofill.AutofillId
+import org.json.JSONException
 import android.widget.inline.InlinePresentationSpec
 import androidx.autofill.inline.v1.InlineSuggestionUi
 import com.android.credentialmanager.GetFlowUtils
@@ -56,10 +57,8 @@ class CredentialAutofillService : AutofillService() {
         private const val SYS_PROVIDER_REQ_KEY = "isSystemProviderRequired"
         private const val CRED_OPTIONS_KEY = "credentialOptions"
         private const val TYPE_KEY = "type"
+        private const val REQ_TYPE_KEY = "get"
     }
-
-    private val credentialManager: CredentialManager =
-            getSystemService(Context.CREDENTIAL_SERVICE) as CredentialManager
 
     override fun onFillRequest(
             request: FillRequest,
@@ -73,9 +72,12 @@ class CredentialAutofillService : AutofillService() {
 
         val getCredRequest: GetCredentialRequest? = getCredManRequest(structure)
         if (getCredRequest == null) {
+            Log.i(TAG, "No credential manager request found")
             callback.onFailure("No credential manager request found")
             return
         }
+        val credentialManager: CredentialManager =
+                getSystemService(Context.CREDENTIAL_SERVICE) as CredentialManager
 
         val outcome = object : OutcomeReceiver<GetCandidateCredentialsResponse,
                 GetCandidateCredentialsException> {
@@ -244,8 +246,12 @@ class CredentialAutofillService : AutofillService() {
 
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
         for (credentialHint in credentialHints) {
-            convertJsonToCredentialOption(credentialHint, autofillId)
-                    .let { credentialOptions.addAll(it) }
+            try {
+                convertJsonToCredentialOption(credentialHint, autofillId)
+                        .let { credentialOptions.addAll(it) }
+            } catch (e: JSONException) {
+                Log.i(TAG, "Exception while parsing response: " + e.message)
+            }
         }
         return credentialOptions
     }
@@ -257,7 +263,8 @@ class CredentialAutofillService : AutofillService() {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
 
         val json = JSONObject(jsonString)
-        val options = json.getJSONArray(CRED_OPTIONS_KEY)
+        val jsonGet = json.getJSONObject(REQ_TYPE_KEY)
+        val options = jsonGet.getJSONArray(CRED_OPTIONS_KEY)
         for (i in 0 until options.length()) {
             val option = options.getJSONObject(i)
             val candidateBundle = convertJsonToBundle(option.getJSONObject(CANDIDATE_DATA_KEY))
