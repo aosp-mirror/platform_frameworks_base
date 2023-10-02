@@ -30,11 +30,16 @@ import javax.inject.Inject
 class StatusBarNotificationActivityStarterLogger @Inject constructor(
     @NotifInteractionLog private val buffer: LogBuffer
 ) {
-    fun logStartingActivityFromClick(entry: NotificationEntry) {
+    fun logStartingActivityFromClick(entry: NotificationEntry, isHeadsUpState: Boolean,
+                                     isKeyguardVisible: Boolean, isPanelExpanded: Boolean) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
+            bool1 = isHeadsUpState
+            bool2 = isKeyguardVisible
+            bool3 = isPanelExpanded
         }, {
-            "(1/5) onNotificationClicked: $str1"
+            "(1/5) onNotificationClicked: $str1 isHeadsUpState: $bool1 " +
+                    "isKeyguardVisible: $bool2 isPanelExpanded: $bool3"
         })
     }
 

@@ -213,7 +213,9 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
      */
     @Override
     public void onNotificationClicked(NotificationEntry entry, ExpandableNotificationRow row) {
-        mLogger.logStartingActivityFromClick(entry);
+        mLogger.logStartingActivityFromClick(entry, row.isHeadsUpState(),
+                mKeyguardStateController.isVisible(),
+                mNotificationShadeWindowController.getPanelExpanded());
 
         if (mRemoteInputManager.isRemoteInputActive(entry)) {
             // We have an active remote input typed and the user clicked on the notification.
