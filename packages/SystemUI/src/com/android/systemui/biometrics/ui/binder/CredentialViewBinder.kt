@@ -2,6 +2,7 @@ package com.android.systemui.biometrics.ui.binder
 
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
