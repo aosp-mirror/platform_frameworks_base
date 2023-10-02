@@ -39,8 +39,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -49,9 +51,11 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateSharedFloatAsState
 import com.android.settingslib.Utils
-import com.android.systemui.res.R
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
+import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
+import com.android.systemui.res.R
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
@@ -97,38 +101,100 @@ fun SceneScope.CollapsedShadeHeader(
     val useExpandedFormat by
         remember(formatProgress) { derivedStateOf { formatProgress.value > 0.5f } }
 
-    Row(
-        modifier =
-            modifier
-                .element(ShadeHeader.Elements.CollapsedContent)
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = ShadeHeader.Dimensions.CollapsedHeight),
-    ) {
-        AndroidView(
-            factory = { context ->
-                Clock(ContextThemeWrapper(context, R.style.TextAppearance_QS_Status), null)
-            },
-            modifier = Modifier.align(Alignment.CenterVertically),
-        )
-        Spacer(modifier = Modifier.width(5.dp))
-        VariableDayDate(
-            viewModel = viewModel,
-            modifier = Modifier.widthIn(max = 90.dp).align(Alignment.CenterVertically),
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        SystemIconContainer {
-            StatusIcons(
-                viewModel = viewModel,
-                createTintedIconManager = createTintedIconManager,
-                statusBarIconController = statusBarIconController,
-                useExpandedFormat = useExpandedFormat,
-                modifier = Modifier.align(Alignment.CenterVertically).padding(end = 6.dp),
-            )
-            BatteryIcon(
-                createBatteryMeterViewController = createBatteryMeterViewController,
-                useExpandedFormat = useExpandedFormat,
-                modifier = Modifier.align(Alignment.CenterVertically),
-            )
+    val cutoutWidth = LocalDisplayCutout.current.width()
+    val cutoutLocation = LocalDisplayCutout.current.location
+
+    // This layout assumes it is globally positioned at (0, 0) and is the
+    // same size as the screen.
+    Layout(
+        modifier = modifier.element(ShadeHeader.Elements.CollapsedContent),
+        contents =
+            listOf(
+                {
+                    Row {
+                        AndroidView(
+                            factory = { context ->
+                                Clock(
+                                    ContextThemeWrapper(context, R.style.TextAppearance_QS_Status),
+                                    null
+                                )
+                            },
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        VariableDayDate(
+                            viewModel = viewModel,
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                        )
+                    }
+                },
+                {
+                    Row(horizontalArrangement = Arrangement.End) {
+                        SystemIconContainer {
+                            StatusIcons(
+                                viewModel = viewModel,
+                                createTintedIconManager = createTintedIconManager,
+                                statusBarIconController = statusBarIconController,
+                                useExpandedFormat = useExpandedFormat,
+                                modifier =
+                                    Modifier.align(Alignment.CenterVertically)
+                                        .padding(end = 6.dp)
+                                        .weight(1f, fill = false)
+                            )
+                            BatteryIcon(
+                                createBatteryMeterViewController = createBatteryMeterViewController,
+                                useExpandedFormat = useExpandedFormat,
+                                modifier = Modifier.align(Alignment.CenterVertically),
+                            )
+                        }
+                    }
+                },
+            ),
+    ) { measurables, constraints ->
+        check(constraints.hasBoundedWidth)
+        check(measurables.size == 2)
+        check(measurables[0].size == 1)
+        check(measurables[1].size == 1)
+
+        val screenWidth = constraints.maxWidth
+        val cutoutWidthPx = cutoutWidth.roundToPx()
+        val height = ShadeHeader.Dimensions.CollapsedHeight.roundToPx()
+        val childConstraints = Constraints.fixed((screenWidth - cutoutWidthPx) / 2, height)
+
+        val startMeasurable = measurables[0][0]
+        val endMeasurable = measurables[1][0]
+
+        val startPlaceable = startMeasurable.measure(childConstraints)
+        val endPlaceable = endMeasurable.measure(childConstraints)
+
+        layout(screenWidth, height) {
+            when (cutoutLocation) {
+                CutoutLocation.NONE,
+                CutoutLocation.RIGHT -> {
+                    startPlaceable.placeRelative(x = 0, y = 0)
+                    endPlaceable.placeRelative(
+                        x = startPlaceable.width,
+                        y = 0,
+                    )
+                }
+                CutoutLocation.CENTER -> {
+                    startPlaceable.placeRelative(x = 0, y = 0)
+                    endPlaceable.placeRelative(
+                        x = startPlaceable.width + cutoutWidthPx,
+                        y = 0,
+                    )
+                }
+                CutoutLocation.LEFT -> {
+                    startPlaceable.placeRelative(
+                        x = cutoutWidthPx,
+                        y = 0,
+                    )
+                    endPlaceable.placeRelative(
+                        x = startPlaceable.width + cutoutWidthPx,
+                        y = 0,
+                    )
+                }
+            }
         }
     }
 }
@@ -201,7 +267,10 @@ fun SceneScope.ExpandedShadeHeader(
                     createTintedIconManager = createTintedIconManager,
                     statusBarIconController = statusBarIconController,
                     useExpandedFormat = useExpandedFormat,
-                    modifier = Modifier.align(Alignment.CenterVertically).padding(end = 6.dp),
+                    modifier =
+                        Modifier.align(Alignment.CenterVertically)
+                            .padding(end = 6.dp)
+                            .weight(1f, fill = false),
                 )
                 BatteryIcon(
                     useExpandedFormat = useExpandedFormat,

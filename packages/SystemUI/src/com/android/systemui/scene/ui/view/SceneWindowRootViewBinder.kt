@@ -19,6 +19,7 @@ package com.android.systemui.scene.ui.view
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
@@ -27,14 +28,15 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.res.R
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import java.time.Instant
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 object SceneWindowRootViewBinder {
@@ -43,6 +45,7 @@ object SceneWindowRootViewBinder {
     fun bind(
         view: ViewGroup,
         viewModel: SceneContainerViewModel,
+        windowInsets: StateFlow<WindowInsets?>,
         containerConfig: SceneContainerConfig,
         scenes: Set<Scene>,
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
@@ -77,8 +80,10 @@ object SceneWindowRootViewBinder {
 
                     view.addView(
                         ComposeFacade.createSceneContainerView(
+                            scope = this,
                             context = view.context,
                             viewModel = viewModel,
+                            windowInsets = windowInsets,
                             sceneByKey = sortedSceneByKey,
                         )
                     )
