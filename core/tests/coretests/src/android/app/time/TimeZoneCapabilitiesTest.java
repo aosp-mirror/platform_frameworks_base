@@ -27,6 +27,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -36,6 +37,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class TimeZoneCapabilitiesTest {
 
     private static final UserHandle TEST_USER_HANDLE = UserHandle.of(12345);
