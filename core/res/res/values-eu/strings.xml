@@ -501,10 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Pribilegioa duen edo sistemakoa den aplikazio honek edonoiz erabil dezake kamera argazkiak ateratzeko eta bideoak grabatzeko. Halaber, android.permission.CAMERA baimena izan behar du aplikazioak."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"eman jakinarazpenak jasotzeko baimena aplikazioari edo zerbitzuari kamerak ireki edo ixten direnean."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Kamera ireki edo itxi dela (eta zer aplikaziorekin) dioten jakinarazpenak jaso ditzake aplikazio honek."</string>
-    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
-    <skip />
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Eman interfaze grafikorik gabeko sistema-erabiltzaile gisa kamera erabiltzeko baimena aplikazio edo zerbitzu bati."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Aplikazio honek interfaze grafikorik gabeko sistema-erabiltzaile gisa erabil dezake kamera."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolatu dardara"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Bibragailua kontrolatzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Dardara-egoera erabiltzeko baimena ematen die aplikazioei."</string>
@@ -1571,7 +1569,7 @@
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Maius"</string>
     <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Sartu"</string>
     <string name="activitychooserview_choose_application" msgid="3500574466367891463">"Aukeratu aplikazio bat"</string>
-    <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Ezin izan da <xliff:g id="APPLICATION_NAME">%s</xliff:g> abiarazi"</string>
+    <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Ezin izan da exekutatu <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Partekatu hauekin"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Partekatu <xliff:g id="APPLICATION_NAME">%s</xliff:g> aplikazioarekin"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Lerratze-euskarria. Ukitu eta eutsi."</string>
@@ -1619,7 +1617,7 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Aukeratu jarduera"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Partekatu hauekin:"</string>
     <string name="sending" msgid="206925243621664438">"Bidaltzen…"</string>
-    <string name="launchBrowserDefault" msgid="6328349989932924119">"Arakatzailea abiarazi nahi duzu?"</string>
+    <string name="launchBrowserDefault" msgid="6328349989932924119">"Arakatzailea exekutatu nahi duzu?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Deia onartu nahi duzu?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Beti"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Behin soilik"</string>

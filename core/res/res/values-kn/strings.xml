@@ -196,7 +196,7 @@
     <string name="country_detector" msgid="7023275114706088854">"ಕಂಟ್ರಿ ಡಿಟೆಕ್ಟರ್"</string>
     <string name="location_service" msgid="2439187616018455546">"ಸ್ಥಳ ಸೇವೆ"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS ಸೇವೆ"</string>
-    <string name="sensor_notification_service" msgid="7474531979178682676">"ಸೆನ್ಸರ್ ಅಧಿಸೂಚನೆ ಸೇವೆ"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"ಸೆನ್ಸರ್ ನೋಟಿಫಿಕೇಶನ್‌ ಸೇವೆ"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ಟ್ವಿಲೈಟ್ ಸೇವೆ"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS ಸಮಯದ ಅಪ್‌ಡೇಟ್ ಸೇವೆ"</string>
     <string name="device_policy_manager_service" msgid="5085762851388850332">"ಸಾಧನ ನೀತಿ ನಿರ್ವಾಹಕ ಸೇವೆ"</string>
