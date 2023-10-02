@@ -32649,7 +32649,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Return whether the View allows automatic handwriting initiation. Returns true if automatic
-     * handwriting initiation is enabled, and verse visa.
+     * handwriting initiation is enabled, and vice versa.
      * @see #setAutoHandwritingEnabled(boolean)
      */
     public boolean isAutoHandwritingEnabled() {
