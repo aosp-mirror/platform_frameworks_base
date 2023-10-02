@@ -28,6 +28,7 @@ import static android.os.ParcelFileDescriptor.MODE_CREATE;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
+import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
@@ -74,6 +75,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
+import android.multiuser.Flags;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.FileObserver;
@@ -114,6 +116,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -132,6 +135,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -746,6 +750,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private final Context mContext;
+    private final AtomicBoolean mIsInitialBinding = new AtomicBoolean(true);
+    private final ServiceThread mHandlerThread;
     private final WindowManagerInternal mWindowManagerInternal;
     private final PackageManagerInternal mPackageManagerInternal;
     private final IPackageManager mIPackageManager;
@@ -1619,6 +1625,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     public WallpaperManagerService(Context context) {
         if (DEBUG) Slog.v(TAG, "WallpaperService startup");
         mContext = context;
+        if (Flags.bindWallpaperServiceOnItsOwnThreadDuringAUserSwitch()) {
+            mHandlerThread = new ServiceThread(TAG, THREAD_PRIORITY_FOREGROUND, true /*allowIo*/);
+            mHandlerThread.start();
+        } else {
+            mHandlerThread = null;
+        }
         mShuttingDown = false;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
@@ -3652,7 +3664,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     com.android.internal.R.bool.config_wallpaperTopApp)) {
                 bindFlags |= Context.BIND_SCHEDULE_LIKE_TOP_APP;
             }
-            boolean bindSuccess = mContext.bindServiceAsUser(intent, newConn, bindFlags,
+            Handler handler = Flags.bindWallpaperServiceOnItsOwnThreadDuringAUserSwitch()
+                    && !mIsInitialBinding.compareAndSet(true, false)
+                    ? mHandlerThread.getThreadHandler() : mContext.getMainThreadHandler();
+            boolean bindSuccess = mContext.bindServiceAsUser(intent, newConn, bindFlags, handler,
                     new UserHandle(serviceUserId));
             if (!bindSuccess) {
                 String msg = "Unable to bind service: " + componentName;
