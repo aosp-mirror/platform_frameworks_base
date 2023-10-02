@@ -430,6 +430,9 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Sets whether user switcher is enabled. */
     public void setKeyguardUserSwitcherEnabled(boolean enabled) {
+        if (isMigrationEnabled()) {
+            return;
+        }
         mView.setKeyguardUserSwitcherEnabled(enabled);
     }
 

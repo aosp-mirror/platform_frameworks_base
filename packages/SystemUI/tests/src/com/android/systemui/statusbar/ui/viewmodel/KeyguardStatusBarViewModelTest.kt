@@ -26,9 +26,10 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository
+import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -61,12 +62,17 @@ class KeyguardStatusBarViewModelTest : SysuiTestCase() {
         ) {
             sceneTestUtils.sceneInteractor()
         }
+    private val keyguardStatusBarInteractor =
+        KeyguardStatusBarInteractor(
+            FakeKeyguardStatusBarRepository(),
+        )
     private val batteryController = mock<BatteryController>()
 
     private val underTest =
         KeyguardStatusBarViewModel(
             testScope.backgroundScope,
             keyguardInteractor,
+            keyguardStatusBarInteractor,
             batteryController,
         )
 

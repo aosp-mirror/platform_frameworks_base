@@ -62,12 +62,13 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.SceneTestUtils;
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
 import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository;
+import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -154,7 +155,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     public void setup() throws Exception {
         mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, false);
         mShadeViewStateProvider = new TestShadeViewStateProvider();
-        mShadeViewStateProvider = new TestShadeViewStateProvider();
 
         MockitoAnnotations.initMocks(this);
 
@@ -174,6 +174,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 new KeyguardStatusBarViewModel(
                         mTestScope.getBackgroundScope(),
                         mKeyguardInteractor,
+                        new KeyguardStatusBarInteractor(new FakeKeyguardStatusBarRepository()),
                         mBatteryController);
 
         allowTestableLooperAsMainThread();

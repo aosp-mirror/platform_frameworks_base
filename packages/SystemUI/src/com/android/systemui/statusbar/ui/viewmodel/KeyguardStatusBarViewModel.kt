@@ -21,6 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import javax.inject.Inject
@@ -46,6 +47,7 @@ class KeyguardStatusBarViewModel
 constructor(
     @Application scope: CoroutineScope,
     keyguardInteractor: KeyguardInteractor,
+    keyguardStatusBarInteractor: KeyguardStatusBarInteractor,
     batteryController: BatteryController,
 ) {
     /** True if this view should be visible and false otherwise. */
@@ -75,4 +77,8 @@ constructor(
         batteryController.addCallback(callback)
         awaitClose { batteryController.removeCallback(callback) }
     }
+
+    /** True if we can show the user switcher on keyguard and false otherwise. */
+    val isKeyguardUserSwitcherEnabled: Flow<Boolean> =
+        keyguardStatusBarInteractor.isKeyguardUserSwitcherEnabled
 }

@@ -378,7 +378,11 @@ public class KeyguardStatusBarView extends RelativeLayout {
         }
     }
 
-    void setKeyguardUserSwitcherEnabled(boolean enabled) {
+    /**
+     * Should only be called from {@link KeyguardStatusBarViewController} or
+     * {@link com.android.systemui.statusbar.ui.binder.KeyguardStatusBarViewBinder}.
+     */
+    public void setKeyguardUserSwitcherEnabled(boolean enabled) {
         mKeyguardUserSwitcherEnabled = enabled;
     }
 

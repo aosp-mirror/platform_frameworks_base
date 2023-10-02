@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,17 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package com.android.systemui.user.data.repository
 
-import dagger.Binds
-import dagger.Module
+import com.android.systemui.qs.footer.data.model.UserSwitcherStatusModel
+import kotlinx.coroutines.flow.MutableStateFlow
 
-@Module
-interface UserRepositoryModule {
-    @Binds fun bindRepository(impl: UserRepositoryImpl): UserRepository
-
-    @Binds fun userSwitcherRepository(impl: UserSwitcherRepositoryImpl): UserSwitcherRepository
+class FakeUserSwitcherRepository : UserSwitcherRepository {
+    override val isEnabled = MutableStateFlow(false)
+    override val userSwitcherStatus =
+        MutableStateFlow<UserSwitcherStatusModel>(UserSwitcherStatusModel.Disabled)
 }
