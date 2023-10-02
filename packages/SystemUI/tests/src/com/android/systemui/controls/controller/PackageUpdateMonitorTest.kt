@@ -60,7 +60,7 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
 
         underTest.startMonitoring()
         // There are two receivers registered
-        verify(context, times(2))
+        verify(context, times(1))
             .registerReceiverAsUser(any(), eq(USER), any(), eq(null), eq(bgHandler))
         verify(packageManager).registerPackageMonitorCallback(any(), eq(USER.getIdentifier()))
         // context will be used to get PackageManager, the test should clear invocations
