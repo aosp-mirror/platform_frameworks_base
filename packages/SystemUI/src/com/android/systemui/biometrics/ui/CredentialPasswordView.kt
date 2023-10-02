@@ -2,11 +2,11 @@ package com.android.systemui.biometrics.ui
 
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.graphics.Insets
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.View
 import android.view.WindowInsets
-import android.view.WindowInsets.Type.ime
 import android.view.accessibility.AccessibilityManager
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -41,7 +41,10 @@ class CredentialPasswordView(context: Context, attrs: AttributeSet?) :
     }
 
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        val imeBottomInset = insets.getInsets(ime()).bottom
+        val statusBarInsets: Insets = insets.getInsets(WindowInsets.Type.statusBars())
+        val keyboardInsets: Insets = insets.getInsets(WindowInsets.Type.ime())
+        val navigationInsets: Insets = insets.getInsets(WindowInsets.Type.navigationBars())
+        val imeBottomInset = keyboardInsets.bottom
         if (bottomInset != imeBottomInset) {
             val titleView: TextView? = findViewById(R.id.title)
             if (titleView != null) {
@@ -61,8 +64,14 @@ class CredentialPasswordView(context: Context, attrs: AttributeSet?) :
                 }
             }
         }
-        setPadding(paddingLeft, paddingTop, paddingRight, imeBottomInset)
-        return insets.inset(0, 0, 0, imeBottomInset)
+
+        setPadding(
+            0,
+            statusBarInsets.top,
+            0,
+            if (keyboardInsets.bottom == 0) navigationInsets.bottom else keyboardInsets.bottom
+        )
+        return WindowInsets.CONSUMED
     }
 }
 
