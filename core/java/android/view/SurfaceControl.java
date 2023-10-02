@@ -1790,7 +1790,7 @@ public final class SurfaceControl implements Parcelable {
         public float yDpi;
 
         // Some modes have peak refresh rate lower than the panel vsync rate.
-        public float refreshRate;
+        public float peakRefreshRate;
         // Fixed rate of vsync deadlines for the panel.
         // This can be higher then the peak refresh rate for some panel technologies
         // See: VrrConfig.aidl
@@ -1814,7 +1814,7 @@ public final class SurfaceControl implements Parcelable {
                     + ", height=" + height
                     + ", xDpi=" + xDpi
                     + ", yDpi=" + yDpi
-                    + ", refreshRate=" + refreshRate
+                    + ", peakRefreshRate=" + peakRefreshRate
                     + ", vsyncRate=" + vsyncRate
                     + ", appVsyncOffsetNanos=" + appVsyncOffsetNanos
                     + ", presentationDeadlineNanos=" + presentationDeadlineNanos
@@ -1832,7 +1832,7 @@ public final class SurfaceControl implements Parcelable {
                     && height == that.height
                     && Float.compare(that.xDpi, xDpi) == 0
                     && Float.compare(that.yDpi, yDpi) == 0
-                    && Float.compare(that.refreshRate, refreshRate) == 0
+                    && Float.compare(that.peakRefreshRate, peakRefreshRate) == 0
                     && Float.compare(that.vsyncRate, vsyncRate) == 0
                     && appVsyncOffsetNanos == that.appVsyncOffsetNanos
                     && presentationDeadlineNanos == that.presentationDeadlineNanos
@@ -1842,7 +1842,7 @@ public final class SurfaceControl implements Parcelable {
 
         @Override
         public int hashCode() {
-            return Objects.hash(id, width, height, xDpi, yDpi, refreshRate, vsyncRate,
+            return Objects.hash(id, width, height, xDpi, yDpi, peakRefreshRate, vsyncRate,
                     appVsyncOffsetNanos, presentationDeadlineNanos, group,
                     Arrays.hashCode(supportedHdrTypes));
         }

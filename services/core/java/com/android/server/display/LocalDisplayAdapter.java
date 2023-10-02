@@ -22,9 +22,8 @@ import static android.view.Display.Mode.INVALID_MODE_ID;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.res.Resources;
-import android.hardware.display.DisplayManagerInternal;
-import android.hardware.display.DisplayManagerInternal.DisplayOffloader;
 import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloader;
 import android.hardware.sidekick.SidekickInternal;
 import android.os.Build;
 import android.os.Handler;
@@ -312,10 +311,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     SurfaceControl.DisplayMode other = displayModes[j];
                     boolean isAlternative = j != i && other.width == mode.width
                             && other.height == mode.height
-                            && other.refreshRate != mode.refreshRate
+                            && other.peakRefreshRate != mode.peakRefreshRate
                             && other.group == mode.group;
                     if (isAlternative) {
-                        alternativeRefreshRates.add(displayModes[j].refreshRate);
+                        alternativeRefreshRates.add(displayModes[j].peakRefreshRate);
                     }
                 }
                 Collections.sort(alternativeRefreshRates);
@@ -1353,7 +1352,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         DisplayModeRecord(SurfaceControl.DisplayMode mode,
                 float[] alternativeRefreshRates) {
-            mMode = createMode(mode.width, mode.height, mode.refreshRate,
+            mMode = createMode(mode.width, mode.height, mode.peakRefreshRate, mode.vsyncRate,
                     alternativeRefreshRates, mode.supportedHdrTypes);
         }
 
@@ -1368,7 +1367,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return mMode.getPhysicalWidth() == mode.width
                     && mMode.getPhysicalHeight() == mode.height
                     && Float.floatToIntBits(mMode.getRefreshRate())
-                    == Float.floatToIntBits(mode.refreshRate);
+                            == Float.floatToIntBits(mode.peakRefreshRate)
+                    && Float.floatToIntBits(mMode.getVsyncRate())
+                            == Float.floatToIntBits(mode.vsyncRate);
         }
 
         public String toString() {
