@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard;
 
-import static android.os.PowerManager.WAKE_REASON_WAKE_MOTION;
 import static android.provider.Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_TIMEOUT;
@@ -635,29 +634,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     @Test
-    public void lockAfterSpecifiedAfterDreamStarted() {
-        int currentUserId = 99;
-        int userSpecificTimeout = 5999;
-        KeyguardUpdateMonitor.setCurrentUser(currentUserId);
-
-        // set mDeviceInteractive to true
-        mViewMediator.onStartedWakingUp(WAKE_REASON_WAKE_MOTION, false);
-        mFeatureFlags.set(Flags.LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING, false);
-        when(mLockPatternUtils.isSecure(currentUserId)).thenReturn(true);
-        when(mDevicePolicyManager.getMaximumTimeToLock(null, currentUserId)).thenReturn(0L);
-        when(mSecureSettings.getIntForUser(LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
-                KEYGUARD_LOCK_AFTER_DELAY_DEFAULT, currentUserId)).thenReturn(userSpecificTimeout);
-        mSystemClock.setElapsedRealtime(0L);
-        ArgumentCaptor<PendingIntent> pendingIntent = ArgumentCaptor.forClass(PendingIntent.class);
-
-        mViewMediator.onDreamingStarted();
-
-        verify(mAlarmManager).setExactAndAllowWhileIdle(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
-                eq(Long.valueOf(userSpecificTimeout)), pendingIntent.capture());
-        assertEquals(DELAYED_KEYGUARD_ACTION, pendingIntent.getValue().getIntent().getAction());
-    }
-
-    @Test
     public void testHideSurfaceBehindKeyguardMarksKeyguardNotGoingAway() {
         mViewMediator.hideSurfaceBehindKeyguard();
 
@@ -1023,7 +999,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.setShowingLocked(false);
         when(mKeyguardStateController.isShowing()).thenReturn(false);
 
-        mFeatureFlags.set(Flags.LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING, false);
         mViewMediator.onDreamingStarted();
         assertFalse(mViewMediator.isShowingAndNotOccluded());
     }
@@ -1034,7 +1009,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.setShowingLocked(true);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
 
-        mFeatureFlags.set(Flags.LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING, true);
         mViewMediator.onDreamingStarted();
         assertTrue(mViewMediator.isShowingAndNotOccluded());
     }
