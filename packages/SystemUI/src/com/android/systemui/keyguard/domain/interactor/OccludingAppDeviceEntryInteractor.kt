@@ -96,11 +96,15 @@ constructor(
         if (featureFlags.isEnabled(Flags.FP_LISTEN_OCCLUDING_APPS)) {
             scope.launch {
                 // On fingerprint success when the screen is on, go to the home screen
-                fingerprintUnlockSuccessEvents.sample(powerInteractor.isInteractive).collect {
-                    if (it) {
+                fingerprintUnlockSuccessEvents.sample(
+                    combine(powerInteractor.isInteractive, keyguardInteractor.isDreaming, ::Pair),
+                )
+                .collect { (interactive, dreaming) ->
+                    if (interactive && !dreaming) {
                         goToHomeScreen()
                     }
-                    // don't go to the home screen if the authentication is from AOD/dozing/off
+                    // don't go to the home screen if the authentication is from
+                    // AOD/dozing/off/dreaming
                 }
             }
 
