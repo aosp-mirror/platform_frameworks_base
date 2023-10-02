@@ -30,7 +30,8 @@ import java.util.Arrays;
 
 class DisplayManagerShellCommand extends ShellCommand {
     private static final String TAG = "DisplayManagerShellCommand";
-    private static final String NOTIFICATION_TYPES = "on-hotplug-error";
+    private static final String NOTIFICATION_TYPES =
+            "on-hotplug-error, on-link-training-failure, on-cable-dp-incapable";
 
     private final DisplayManagerService mService;
     private final DisplayManagerFlags mFlags;
@@ -192,6 +193,12 @@ class DisplayManagerShellCommand extends ShellCommand {
         switch(notificationType) {
             case "on-hotplug-error":
                 mService.getDisplayNotificationManager().onHotplugConnectionError();
+                break;
+            case "on-link-training-failure":
+                mService.getDisplayNotificationManager().onDisplayPortLinkTrainingFailure();
+                break;
+            case "on-cable-dp-incapable":
+                mService.getDisplayNotificationManager().onCableNotCapableDisplayPort();
                 break;
             default:
                 getErrPrintWriter().println(
