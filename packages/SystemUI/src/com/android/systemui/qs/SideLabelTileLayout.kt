@@ -19,7 +19,7 @@ package com.android.systemui.qs
 import android.content.Context
 import android.util.AttributeSet
 import com.android.systemui.flags.Flags
-import com.android.systemui.flags.ViewRefactorFlag
+import com.android.systemui.flags.RefactorFlag
 import com.android.systemui.res.R
 
 open class SideLabelTileLayout(
@@ -27,8 +27,8 @@ open class SideLabelTileLayout(
     attrs: AttributeSet?
 ) : TileLayout(context, attrs) {
 
-    private final val isSmallLandscapeLockscreenEnabled =
-            ViewRefactorFlag(flag = Flags.LOCKSCREEN_ENABLE_LANDSCAPE).isEnabled
+    private val isSmallLandscapeLockscreenEnabled =
+            RefactorFlag.forView(Flags.LOCKSCREEN_ENABLE_LANDSCAPE).isEnabled
 
     override fun updateResources(): Boolean {
         return super.updateResources().also {

@@ -36,16 +36,16 @@ import com.android.app.animation.Interpolators;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.settingslib.Utils;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.ViewRefactorFlag;
+import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -109,7 +109,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
     private final ArrayList<Rect> mTintAreas = new ArrayList<>();
     private final Context mContext;
 
-    private final ViewRefactorFlag mShelfRefactor;
+    private final RefactorFlag mShelfRefactor;
 
     private final boolean mNewAodTransition;
 
@@ -150,7 +150,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mStatusBarStateController = statusBarStateController;
-        mShelfRefactor = new ViewRefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
+        mShelfRefactor = new RefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
         mNewAodTransition = featureFlags.isEnabled(NEW_AOD_TRANSITION);
         mStatusBarStateController.addCallback(this);
         mMediaManager = notificationMediaManager;

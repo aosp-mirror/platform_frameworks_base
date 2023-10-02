@@ -34,7 +34,7 @@ import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.flags.ViewRefactorFlag
+import com.android.systemui.flags.RefactorFlag
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationListener
@@ -99,7 +99,7 @@ constructor(
 
     private val contrastColorUtil: ContrastColorUtil = ContrastColorUtil.getInstance(context)
     private val updateStatusBarIcons = Runnable { updateStatusBarIcons() }
-    private val shelfRefactor = ViewRefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR)
+    private val shelfRefactor = RefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR)
     private val tintAreas = ArrayList<Rect>()
 
     private var iconSize = 0
