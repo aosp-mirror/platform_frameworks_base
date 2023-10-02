@@ -42,6 +42,12 @@ class WallpaperWindowToken extends WindowToken {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WallpaperWindowToken" : TAG_WM;
 
     private boolean mShowWhenLocked = false;
+    float mWallpaperX = -1;
+    float mWallpaperY = -1;
+    float mWallpaperXStep = -1;
+    float mWallpaperYStep = -1;
+    int mWallpaperDisplayOffsetX = Integer.MIN_VALUE;
+    int mWallpaperDisplayOffsetY = Integer.MIN_VALUE;
 
     WallpaperWindowToken(WindowManagerService service, IBinder token, boolean explicit,
             DisplayContent dc, boolean ownerCanManageAppTokens) {
