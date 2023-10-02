@@ -567,6 +567,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private float mShadowDy;
     private int mShadowColor;
 
+    private int mLastOrientation;
+
     private boolean mPreDrawRegistered;
     private boolean mPreDrawListenerDetached;
 
@@ -1193,6 +1195,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
         mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
         mJustificationMode = Layout.JUSTIFICATION_MODE_NONE;
+        mLastOrientation = getResources().getConfiguration().orientation;
 
         final Resources.Theme theme = context.getTheme();
 
@@ -4591,6 +4594,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mFontWeightAdjustment = newConfig.fontWeightAdjustment;
             setTypeface(getTypeface());
         }
+
+        InputMethodManager imm = getInputMethodManager();
+        // if orientation changed and this TextView is currently served.
+        if (mLastOrientation != newConfig.orientation
+                && imm != null && imm.hasActiveInputConnection(this)) {
+            // EditorInfo.internalImeOptions are out of date.
+            imm.restartInput(this);
+        }
+        mLastOrientation = newConfig.orientation;
     }
 
     /**
