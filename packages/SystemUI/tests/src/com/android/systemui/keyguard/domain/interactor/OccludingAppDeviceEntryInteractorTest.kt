@@ -181,6 +181,18 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun fingerprintSuccess_dreaming_doesNotGoToHomeScreen() =
+        testScope.runTest {
+            givenOnOccludingApp(true)
+            keyguardRepository.setDreaming(true)
+            fingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+            verifyNeverGoToHomeScreen()
+        }
+
+    @Test
     fun fingerprintSuccess_notOnOccludingApp_doesNotGoToHomeScreen() =
         testScope.runTest {
             givenOnOccludingApp(false)
@@ -315,6 +327,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
         powerRepository.setInteractive(true)
         keyguardRepository.setKeyguardOccluded(isOnOccludingApp)
         keyguardRepository.setKeyguardShowing(isOnOccludingApp)
+        keyguardRepository.setDreaming(false)
         bouncerRepository.setPrimaryShow(!isOnOccludingApp)
         bouncerRepository.setAlternateVisible(!isOnOccludingApp)
     }
