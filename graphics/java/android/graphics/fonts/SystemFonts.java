@@ -121,7 +121,8 @@ public final class SystemFonts {
 
 
         final FontFamily defaultFamily = defaultFonts.isEmpty() ? null : createFontFamily(
-                defaultFonts, languageTags, variant, false, cache);
+                defaultFonts, languageTags, variant, xmlFamily.getVariableFontFamilyType(), false,
+                cache);
         // Insert family into fallback map.
         for (int i = 0; i < fallbackMap.size(); i++) {
             final String name = fallbackMap.keyAt(i);
@@ -138,8 +139,8 @@ public final class SystemFonts {
                     familyListSet.familyList.add(defaultFamily);
                 }
             } else {
-                final FontFamily family = createFontFamily(fallback, languageTags, variant, false,
-                        cache);
+                final FontFamily family = createFontFamily(fallback, languageTags, variant,
+                        xmlFamily.getVariableFontFamilyType(), false, cache);
                 if (family != null) {
                     familyListSet.familyList.add(family);
                 } else if (defaultFamily != null) {
@@ -155,6 +156,7 @@ public final class SystemFonts {
             @NonNull List<FontConfig.Font> fonts,
             @NonNull String languageTags,
             @FontConfig.FontFamily.Variant int variant,
+            int varFamilyType,
             boolean isDefaultFallback,
             @NonNull Map<String, ByteBuffer> cache) {
         if (fonts.size() == 0) {
@@ -196,7 +198,7 @@ public final class SystemFonts {
             }
         }
         return b == null ? null : b.build(languageTags, variant, false /* isCustomFallback */,
-                isDefaultFallback, FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
+                isDefaultFallback, varFamilyType);
     }
 
     private static void appendNamedFamilyList(@NonNull FontConfig.NamedFamilyList namedFamilyList,
@@ -210,6 +212,7 @@ public final class SystemFonts {
             final FontFamily family = createFontFamily(
                     xmlFamily.getFontList(),
                     xmlFamily.getLocaleList().toLanguageTags(), xmlFamily.getVariant(),
+                    xmlFamily.getVariableFontFamilyType(),
                     true, // named family is always default
                     bufferCache);
             if (family == null) {
@@ -291,6 +294,7 @@ public final class SystemFonts {
             int configVersion
     ) {
         try {
+            Log.i(TAG, "Loading font config from " + fontsXml);
             return FontListParser.parse(fontsXml, systemFontDir, oemXml, productFontDir,
                                                 updatableFontMap, lastModifiedDate, configVersion);
         } catch (IOException e) {

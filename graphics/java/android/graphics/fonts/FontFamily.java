@@ -18,7 +18,10 @@ package android.graphics.fonts;
 
 import static com.android.text.flags.Flags.FLAG_DEPRECATE_FONTS_XML;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +35,7 @@ import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
+import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -184,31 +188,58 @@ public final class FontFamily {
         }
 
         /**
+         * A special variable font family type that indicates `analyzeAndResolveVariableType` could
+         * not be identified the variable font family type.
+         *
          * @see #buildVariableFamily()
          * @hide
          */
         public static final int VARIABLE_FONT_FAMILY_TYPE_UNKNOWN = -1;
 
         /**
+         * A variable font family type that indicates no variable font family can be used.
+         *
+         * The font family is used as bundle of static fonts.
          * @see #buildVariableFamily()
          * @hide
          */
         public static final int VARIABLE_FONT_FAMILY_TYPE_NONE = 0;
         /**
+         * A variable font family type that indicates single font file can be used for multiple
+         * weight. For the italic style, fake italic may be applied.
+         *
          * @see #buildVariableFamily()
          * @hide
          */
         public static final int VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY = 1;
         /**
+         * A variable font family type that indicates single font file can be used for multiple
+         * weight and italic.
+         *
          * @see #buildVariableFamily()
          * @hide
          */
         public static final int VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL = 2;
         /**
+         * A variable font family type that indicates two font files are included in the family:
+         * one can be used for upright with various weights, the other one can be used for italic
+         * with various weights.
+         *
          * @see #buildVariableFamily()
          * @hide
          */
         public static final int VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT = 3;
+
+        /** @hide */
+        @Retention(SOURCE)
+        @IntDef(prefix = { "VARIABLE_FONT_FAMILY_TYPE_" }, value = {
+                VARIABLE_FONT_FAMILY_TYPE_UNKNOWN,
+                VARIABLE_FONT_FAMILY_TYPE_NONE,
+                VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY,
+                VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL,
+                VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT
+        })
+        public @interface VariableFontFamilyType {}
 
         /**
          * The registered italic axis used for adjusting requested style.
@@ -222,7 +253,9 @@ public final class FontFamily {
          */
         private static final int TAG_wght = 0x77676874;  // w(0x77), g(0x67), h(0x68), t(0x74)
 
-        private static int analyzeAndResolveVariableType(ArrayList<Font> fonts) {
+        /** @hide */
+        public static @VariableFontFamilyType int analyzeAndResolveVariableType(
+                ArrayList<Font> fonts) {
             if (fonts.size() > 2) {
                 return VARIABLE_FONT_FAMILY_TYPE_UNKNOWN;
             }
