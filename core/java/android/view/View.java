@@ -26,6 +26,8 @@ import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ER
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_UNKNOWN;
 import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH;
 import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH_ERROR_CODE;
+import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+import static android.view.flags.Flags.viewVelocityApi;
 
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
@@ -40,6 +42,7 @@ import android.annotation.AttrRes;
 import android.annotation.CallSuper;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
@@ -5498,6 +5501,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     @Nullable
     private ViewTranslationCallback mViewTranslationCallback;
+
+    private float mFrameContentVelocity = 0;
 
     @Nullable
 
@@ -24099,6 +24104,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void draw(@NonNull Canvas canvas) {
         final int privateFlags = mPrivateFlags;
         mPrivateFlags = (privateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
+        mFrameContentVelocity = 0;
 
         /*
          * Draw traversal performs several drawing steps which must be executed
@@ -32978,5 +32984,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
           return mAttachInfo.getRootSurfaceControl();
         }
         return null;
+    }
+
+    /**
+     * Set the current velocity of the View, we only track positive value.
+     * We will use the velocity information to adjust the frame rate when applicable.
+     * For example, we could potentially lower the frame rate when
+     * the velocity of a fling gesture becomes slower.
+     * Note that this is only valid till the next drawn frame.
+     *
+     * @param pixelsPerSecond how many pixels move per second.
+     */
+    @FlaggedApi(FLAG_VIEW_VELOCITY_API)
+    public void setFrameContentVelocity(float pixelsPerSecond) {
+        if (viewVelocityApi()) {
+            mFrameContentVelocity = Math.abs(pixelsPerSecond);
+        }
+    }
+
+    /**
+     * Get the current velocity of the View.
+     * The value should always be greater than or equal to 0.
+     * Note that this is only valid till the next drawn frame.
+     *
+     * @return 0 by default, or value passed to {@link #setFrameContentVelocity(float)}.
+     */
+    @FlaggedApi(FLAG_VIEW_VELOCITY_API)
+    public float getFrameContentVelocity() {
+        if (viewVelocityApi()) {
+            return mFrameContentVelocity;
+        }
+        return 0;
     }
 }
