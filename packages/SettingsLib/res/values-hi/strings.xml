@@ -157,6 +157,8 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"वाई-फ़ाई की दो पट्टी मिल रही हैं."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"वाई-फ़ाई की एक पट्टी मिल रही है."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"पूरे वाई-फ़ाई सिग्नल मिल रहे हैं."</string>
+    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
+    <skip />
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"खुला नेटवर्क"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"सुरक्षित नेटवर्क"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
@@ -517,8 +519,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"रजिस्टर नहीं है"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"मौजूद नहीं है"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"एमएसी पता रैंडम पर सेट है"</string>
-    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
-    <skip />
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 डिवाइस को कनेक्ट किया गया}one{# डिवाइस को कनेक्ट किया गया}other{# डिवाइसों को कनेक्ट किया गया}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ज़्यादा समय."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"कम समय."</string>
     <string name="cancel" msgid="5665114069455378395">"रद्द करें"</string>

@@ -157,6 +157,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wifi two bars."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wifi three bars."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Wifi signal full."</string>
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"Connected to your device."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Open network"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Secure network"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
@@ -517,8 +518,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Not registered"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Unavailable"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC is randomized"</string>
-    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
-    <skip />
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 device connected}other{# devices connected}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"More time."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Less time."</string>
     <string name="cancel" msgid="5665114069455378395">"Cancel"</string>
