@@ -115,7 +115,7 @@ object Flags {
     // TODO(b/292213543): Tracking Bug
     @JvmField
     val NOTIFICATION_GROUP_EXPANSION_CHANGE =
-            unreleasedFlag("notification_group_expansion_change")
+            unreleasedFlag("notification_group_expansion_change", teamfood = true)
 
     // TODO(b/301955929)
     @JvmField
@@ -805,7 +805,7 @@ object Flags {
 
     /** Enable haptic slider component in the brightness slider */
     @JvmField
-    val HAPTIC_BRIGHTNESS_SLIDER = unreleasedFlag("haptic_brightness_slider")
+    val HAPTIC_BRIGHTNESS_SLIDER = unreleasedFlag("haptic_brightness_slider", teamfood = true)
 
     // TODO(b/287205379): Tracking bug
     @JvmField

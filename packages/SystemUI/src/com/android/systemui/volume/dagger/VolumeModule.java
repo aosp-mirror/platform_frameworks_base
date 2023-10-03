@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.volume.CsdWarningDialog;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
@@ -64,8 +63,7 @@ public interface VolumeModule {
             CsdWarningDialog.Factory csdFactory,
             DevicePostureController devicePostureController,
             DumpManager dumpManager,
-            FeatureFlags featureFlags,
-            SecureSettings secureSettings) {
+            FeatureFlags featureFlags) {
         VolumeDialogImpl impl = new VolumeDialogImpl(
                 context,
                 volumeDialogController,
@@ -81,8 +79,7 @@ public interface VolumeModule {
                 devicePostureController,
                 Looper.getMainLooper(),
                 dumpManager,
-                featureFlags,
-                secureSettings);
+                featureFlags);
         impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
         impl.setAutomute(true);
         impl.setSilentMode(false);

@@ -6,3 +6,10 @@ flag {
     description: "Save guest and device policy global restrictions on the SYSTEM user's XML file."
     bug: "301067944"
 }
+
+flag {
+    name: "bind_wallpaper_service_on_its_own_thread_during_a_user_switch"
+    namespace: "multiuser"
+    description: "Bind wallpaper service on its own thread instead of system_server's main handler during a user switch."
+    bug: "302100344"
+}
