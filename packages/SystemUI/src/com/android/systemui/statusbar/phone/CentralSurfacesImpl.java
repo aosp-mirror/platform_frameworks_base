@@ -3200,7 +3200,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     // down on the lockscreen), clear notification LED, vibration,
                     // ringing.
                     // Other transitions are covered in WindowRootViewVisibilityInteractor.
-                    if (mVisible && (newState == StatusBarState.SHADE_LOCKED
+                    if (mWindowRootViewVisibilityInteractor.isLockscreenOrShadeVisible().getValue()
+                            && (newState == StatusBarState.SHADE_LOCKED
                             || mStatusBarStateController.goingToFullShade())) {
                         clearNotificationEffects();
                     }
