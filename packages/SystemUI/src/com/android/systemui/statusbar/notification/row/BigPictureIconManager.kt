@@ -24,6 +24,7 @@ import android.graphics.drawable.Icon
 import android.util.Dumpable
 import android.util.Log
 import android.util.Size
+import androidx.annotation.MainThread
 import com.android.internal.R
 import com.android.internal.widget.NotificationDrawableConsumer
 import com.android.internal.widget.NotificationIconManager
@@ -33,7 +34,9 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.graphics.ImageLoader
 import com.android.systemui.statusbar.notification.row.BigPictureIconManager.DrawableState.Empty
 import com.android.systemui.statusbar.notification.row.BigPictureIconManager.DrawableState.FullImage
+import com.android.systemui.statusbar.notification.row.BigPictureIconManager.DrawableState.Initial
 import com.android.systemui.statusbar.notification.row.BigPictureIconManager.DrawableState.PlaceHolder
+import com.android.systemui.util.Assert
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.min
@@ -67,7 +70,7 @@ constructor(
 
     private var lastLoadingJob: Job? = null
     private var drawableConsumer: NotificationDrawableConsumer? = null
-    private var displayedState: DrawableState = Empty(null)
+    private var displayedState: DrawableState = Initial
     private var viewShown = false
 
     private var maxWidth = getMaxWidth()
@@ -90,7 +93,6 @@ constructor(
             this.lastLoadingJob =
                 when {
                     skipLazyLoading(state.icon) -> null
-                    state is Empty && shown -> state.icon?.let(::startLoadingJob)
                     state is PlaceHolder && shown -> startLoadingJob(state.icon)
                     state is FullImage && !shown ->
                         startFreeImageJob(state.icon, state.drawableSize)
@@ -121,14 +123,12 @@ constructor(
         }
 
         this.drawableConsumer = drawableConsumer
-        this.displayedState = Empty(icon)
         this.lastLoadingJob?.cancel()
 
-        val drawable = loadImageOrPlaceHolderSync(icon)
-
+        val drawableAndState = loadImageOrPlaceHolderSync(icon)
         log("icon updated")
 
-        return Runnable { drawableConsumer.setImageDrawable(drawable) }
+        return Runnable { applyDrawableAndState(drawableAndState) }
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>?) {
@@ -136,7 +136,7 @@ constructor(
     }
 
     @WorkerThread
-    private fun loadImageOrPlaceHolderSync(icon: Icon?): Drawable? {
+    private fun loadImageOrPlaceHolderSync(icon: Icon?): Pair<Drawable, DrawableState>? {
         icon ?: return null
 
         if (viewShown || skipLazyLoading(icon)) {
@@ -147,10 +147,10 @@ constructor(
     }
 
     @WorkerThread
-    private fun loadImageSync(icon: Icon): Drawable? {
-        return imageLoader.loadDrawableSync(icon, context, maxWidth, maxHeight)?.also { drawable ->
+    private fun loadImageSync(icon: Icon): Pair<Drawable, DrawableState>? {
+        return imageLoader.loadDrawableSync(icon, context, maxWidth, maxHeight)?.let { drawable ->
             checkPlaceHolderSizeForDrawable(this.displayedState, drawable)
-            this.displayedState = FullImage(icon, drawable.intrinsicSize)
+            Pair(drawable, FullImage(icon, drawable.intrinsicSize))
         }
     }
 
@@ -173,32 +173,39 @@ constructor(
     }
 
     @WorkerThread
-    private fun loadPlaceHolderSync(icon: Icon): Drawable? {
+    private fun loadPlaceHolderSync(icon: Icon): Pair<Drawable, DrawableState>? {
         return imageLoader
             .loadSizeSync(icon, context)
             ?.resizeToMax(maxWidth, maxHeight) // match the dimensions of the fully loaded drawable
-            ?.let { size -> createPlaceHolder(size) }
-            ?.also { drawable -> this.displayedState = PlaceHolder(icon, drawable.intrinsicSize) }
+            ?.let { size -> createPlaceHolder(icon, size) }
+    }
+
+    @MainThread
+    private fun applyDrawableAndState(drawableAndState: Pair<Drawable, DrawableState>?) {
+        Assert.isMainThread()
+        drawableConsumer?.setImageDrawable(drawableAndState?.first)
+        displayedState = drawableAndState?.second ?: Empty
     }
 
     private fun startLoadingJob(icon: Icon): Job =
         scope.launch {
-            val drawable = withContext(bgDispatcher) { loadImageSync(icon) }
-            withContext(mainDispatcher) { drawableConsumer?.setImageDrawable(drawable) }
-            log("image loaded")
+            val drawableAndState = withContext(bgDispatcher) { loadImageSync(icon) }
+            withContext(mainDispatcher) { applyDrawableAndState(drawableAndState) }
+            log("full image loaded")
         }
 
     private fun startFreeImageJob(icon: Icon, drawableSize: Size): Job =
         scope.launch {
             delay(FREE_IMAGE_DELAY_MS)
-            val drawable = createPlaceHolder(drawableSize)
-            displayedState = PlaceHolder(icon, drawable.intrinsicSize)
-            withContext(mainDispatcher) { drawableConsumer?.setImageDrawable(drawable) }
+            val drawableAndState = createPlaceHolder(icon, drawableSize)
+            withContext(mainDispatcher) { applyDrawableAndState(drawableAndState) }
             log("placeholder loaded")
         }
 
-    private fun createPlaceHolder(size: Size): Drawable {
-        return PlaceHolderDrawable(width = size.width, height = size.height)
+    private fun createPlaceHolder(icon: Icon, size: Size): Pair<Drawable, DrawableState> {
+        val drawable = PlaceHolderDrawable(width = size.width, height = size.height)
+        val state = PlaceHolder(icon, drawable.intrinsicSize)
+        return Pair(drawable, state)
     }
 
     private fun isLowRam(): Boolean {
@@ -246,7 +253,8 @@ constructor(
         "{ state:$displayedState, hasConsumer:${drawableConsumer != null}, viewShown:$viewShown}"
 
     private sealed class DrawableState(open val icon: Icon?) {
-        data class Empty(override val icon: Icon?) : DrawableState(icon)
+        data object Initial : DrawableState(null)
+        data object Empty : DrawableState(null)
         data class PlaceHolder(override val icon: Icon, val drawableSize: Size) :
             DrawableState(icon)
         data class FullImage(override val icon: Icon, val drawableSize: Size) : DrawableState(icon)

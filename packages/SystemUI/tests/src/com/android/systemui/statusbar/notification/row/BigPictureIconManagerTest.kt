@@ -21,6 +21,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.net.Uri
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.NotificationDrawableConsumer
 import com.android.systemui.res.R
@@ -35,10 +36,11 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.reset
+import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 
@@ -46,6 +48,7 @@ private const val FREE_IMAGE_DELAY_MS = 4000L
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWithLooper
 @RunWith(AndroidTestingRunner::class)
 class BigPictureIconManagerTest : SysuiTestCase() {
 
@@ -77,6 +80,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        allowTestableLooperAsMainThread()
         iconManager =
             BigPictureIconManager(
                 context,
@@ -85,6 +89,11 @@ class BigPictureIconManagerTest : SysuiTestCase() {
                 mainDispatcher = testDispatcher,
                 bgDispatcher = testDispatcher
             )
+    }
+
+    @After
+    fun tearDown() {
+        disallowTestableLooperAsMainThread()
     }
 
     @Test
@@ -137,7 +146,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             // GIVEN a consumer is set
             val otherConsumer: NotificationDrawableConsumer = mock()
             iconManager.updateIcon(mockConsumer, supportedIcon).run()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN a new consumer is set
             iconManager.updateIcon(otherConsumer, unsupportedIcon).run()
@@ -151,7 +160,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
         testScope.runTest {
             // GIVEN an icon is set
             iconManager.updateIcon(mockConsumer, supportedIcon).run()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN a new icon is set
             iconManager.updateIcon(mockConsumer, unsupportedIcon).run()
@@ -170,7 +179,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             // AND the view is shown
             iconManager.onViewShown(true)
             runCurrent()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
             // WHEN the icon is set again
             iconManager.updateIcon(mockConsumer, supportedIcon).run()
 
@@ -188,7 +197,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             // AND the view is shown
             iconManager.onViewShown(true)
             runCurrent()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN a new icon is set
             iconManager.updateIcon(mockConsumer, supportedIcon).run()
@@ -242,7 +251,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
         testScope.runTest {
             // GIVEN placeholder is showing
             iconManager.updateIcon(mockConsumer, supportedIcon).run()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN the view is shown
             iconManager.onViewShown(true)
@@ -261,7 +270,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             iconManager.updateIcon(mockConsumer, supportedIcon).run()
             iconManager.onViewShown(true)
             runCurrent()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN the view goes off the screen
             iconManager.onViewShown(false)
@@ -282,7 +291,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             iconManager.updateIcon(mockConsumer, supportedIcon).run()
             iconManager.onViewShown(true)
             runCurrent()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN the onViewShown is toggled
             iconManager.onViewShown(false)
@@ -301,7 +310,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
         testScope.runTest {
             // GIVEN full image is showing for an unsupported icon
             iconManager.updateIcon(mockConsumer, unsupportedIcon).run()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN the view is shown
             iconManager.onViewShown(true)
@@ -316,7 +325,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
         testScope.runTest {
             // GIVEN null is set for the icon
             iconManager.updateIcon(mockConsumer, null).run()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN the view is shown
             iconManager.onViewShown(true)
@@ -334,7 +343,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             // AND the view is shown
             iconManager.onViewShown(true)
             runCurrent()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN the view goes off the screen
             iconManager.onViewShown(false)
@@ -351,7 +360,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
         testScope.runTest {
             // GIVEN placeholder image is showing
             iconManager.updateIcon(mockConsumer, supportedIcon).run()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN the view is hidden
             iconManager.onViewShown(false)
@@ -370,7 +379,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             iconManager.updateIcon(mockConsumer, supportedIcon).run()
             iconManager.onViewShown(true)
             runCurrent()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN view shown called again
             iconManager.onViewShown(true)
@@ -388,7 +397,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             iconManager.onViewShown(false)
             advanceTimeBy(FREE_IMAGE_DELAY_MS)
             runCurrent()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
 
             // WHEN the view is hidden again
             iconManager.onViewShown(false)
@@ -407,7 +416,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             iconManager.updateIcon(mockConsumer, supportedIcon).run()
             iconManager.onViewShown(true)
             runCurrent()
-            reset(mockConsumer)
+            clearInvocations(mockConsumer)
             // AND the view has just gone off the screen
             iconManager.onViewShown(false)
 
