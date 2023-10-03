@@ -28,6 +28,7 @@ import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -342,6 +343,24 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
             underTest.onFinished()
 
             assertThat(isFinishRequested.last()).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isFinishRequested_finishesWhenUserButtonIsClicked() =
+        testScope.runTest {
+            setUsers(count = 2)
+            val isFinishRequested = mutableListOf<Boolean>()
+            val job =
+                launch(testDispatcher) { underTest.isFinishRequested.toList(isFinishRequested) }
+
+            val userViewModels = collectLastValue(underTest.users)
+            assertThat(isFinishRequested.last()).isFalse()
+
+            userViewModels.invoke()?.firstOrNull()?.onClicked?.invoke()
+
+            assertThat(isFinishRequested.last()).isTrue()
 
             job.cancel()
         }
