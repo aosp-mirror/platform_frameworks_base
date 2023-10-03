@@ -484,7 +484,6 @@ public final class NfcAdapter {
     /**
      * A callback to be invoked when the system successfully delivers your {@link NdefMessage}
      * to another device.
-     * @see #setOnNdefPushCompleteCallback
      * @deprecated this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
@@ -496,7 +495,6 @@ public final class NfcAdapter {
          * <p>This callback is usually made on a binder thread (not the UI thread).
          *
          * @param event {@link NfcEvent} with the {@link NfcEvent#nfcAdapter} field set
-         * @see #setNdefPushMessageCallback
          */
         public void onNdefPushComplete(NfcEvent event);
     }
@@ -504,11 +502,11 @@ public final class NfcAdapter {
     /**
      * A callback to be invoked when another NFC device capable of NDEF push (Android Beam)
      * is within range.
-     * <p>Implement this interface and pass it to {@link
+     * <p>Implement this interface and pass it to {@code
      * NfcAdapter#setNdefPushMessageCallback setNdefPushMessageCallback()} in order to create an
      * {@link NdefMessage} at the moment that another device is within range for NFC. Using this
      * callback allows you to create a message with data that might vary based on the
-     * content currently visible to the user. Alternatively, you can call {@link
+     * content currently visible to the user. Alternatively, you can call {@code
      * #setNdefPushMessage setNdefPushMessage()} if the {@link NdefMessage} always contains the
      * same data.
      * @deprecated this feature is removed. File sharing can work using other technology like
