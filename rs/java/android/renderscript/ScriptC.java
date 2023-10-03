@@ -16,12 +16,9 @@
 
 package android.renderscript;
 
-import android.app.compat.CompatChanges;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
 import android.content.res.Resources;
-import android.util.Slog;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -36,15 +33,6 @@ import java.io.InputStream;
 @Deprecated
 public class ScriptC extends Script {
     private static final String TAG = "ScriptC";
-
-    /**
-     * In targetSdkVersion 35 and above, Renderscript's ScriptC stops being supported
-     * and an exception is thrown when the class is instantiated.
-     * In targetSdkVersion 34 and below, Renderscript's ScriptC still works.
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = 35)
-    private static final long RENDERSCRIPT_SCRIPTC_DEPRECATION_CHANGE_ID = 297019750L;
 
     /**
      * Only intended for use by the generated derived classes.
@@ -101,20 +89,7 @@ public class ScriptC extends Script {
         setID(id);
     }
 
-    private static void throwExceptionIfSDKTooHigh() {
-        String message =
-                "ScriptC scripts are not supported when targeting an API Level >= 35. Please refer "
-                    + "to https://developer.android.com/guide/topics/renderscript/migration-guide "
-                    + "for proposed alternatives.";
-        Slog.w(TAG, message);
-        if (CompatChanges.isChangeEnabled(RENDERSCRIPT_SCRIPTC_DEPRECATION_CHANGE_ID)) {
-            throw new UnsupportedOperationException(message);
-        }
-    }
-
-    private static synchronized long internalCreate(
-            RenderScript rs, Resources resources, int resourceID) {
-        throwExceptionIfSDKTooHigh();
+    private static synchronized long internalCreate(RenderScript rs, Resources resources, int resourceID) {
         byte[] pgm;
         int pgmLength;
         InputStream is = resources.openRawResource(resourceID);
@@ -150,7 +125,6 @@ public class ScriptC extends Script {
     }
 
     private static synchronized long internalStringCreate(RenderScript rs, String resName, byte[] bitcode) {
-        throwExceptionIfSDKTooHigh();
         //        Log.v(TAG, "Create script for resource = " + resName);
         return rs.nScriptCCreate(resName, RenderScript.getCachePath(), bitcode, bitcode.length);
     }
