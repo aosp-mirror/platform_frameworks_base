@@ -22,7 +22,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.res.Resources
 import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.os.Bundle
@@ -38,7 +37,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isInvisible
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
-import com.android.systemui.res.R
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -62,6 +60,7 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessage
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.shared.clocks.DefaultClockController
@@ -410,15 +409,52 @@ constructor(
 
     private fun setUpClock(parentView: ViewGroup) {
         largeClockHostView =
-            if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW))
+            if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
                 parentView.requireViewById<FrameLayout>(R.id.lockscreen_clock_view_large)
-            else createLargeClockHostView()
+            } else {
+                val hostView = FrameLayout(context)
+                hostView.layoutParams =
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                    )
+                parentView.addView(hostView)
+                hostView
+            }
         largeClockHostView.isInvisible = true
 
         smallClockHostView =
-            if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW))
+            if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
                 parentView.requireViewById<FrameLayout>(R.id.lockscreen_clock_view)
-            else createSmallClockHostView(parentView.resources)
+            } else {
+                val resources = parentView.resources
+                val hostView = FrameLayout(context)
+                val layoutParams =
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        resources.getDimensionPixelSize(
+                            com.android.systemui.customization.R.dimen.small_clock_height
+                        )
+                    )
+                layoutParams.topMargin =
+                    KeyguardPreviewSmartspaceViewModel.getStatusBarHeight(resources) +
+                        resources.getDimensionPixelSize(
+                            com.android.systemui.customization.R.dimen.small_clock_padding_top
+                        )
+                hostView.layoutParams = layoutParams
+
+                hostView.setPaddingRelative(
+                    resources.getDimensionPixelSize(
+                        com.android.systemui.customization.R.dimen.clock_padding_start
+                    ),
+                    0,
+                    0,
+                    0
+                )
+                hostView.clipChildren = false
+                parentView.addView(hostView)
+                hostView
+            }
         smallClockHostView.isInvisible = true
 
         // TODO (b/283465254): Move the listeners to KeyguardClockRepository
@@ -473,44 +509,6 @@ constructor(
         )
 
         onClockChanged()
-    }
-
-    private fun createLargeClockHostView(): FrameLayout {
-        val hostView = FrameLayout(context)
-        hostView.layoutParams =
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT,
-            )
-        return hostView
-    }
-
-    private fun createSmallClockHostView(resources: Resources): FrameLayout {
-        val hostView = FrameLayout(context)
-        val layoutParams =
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                resources.getDimensionPixelSize(
-                    com.android.systemui.customization.R.dimen.small_clock_height
-                )
-            )
-        layoutParams.topMargin =
-            KeyguardPreviewSmartspaceViewModel.getStatusBarHeight(resources) +
-                resources.getDimensionPixelSize(
-                    com.android.systemui.customization.R.dimen.small_clock_padding_top
-                )
-        hostView.layoutParams = layoutParams
-
-        hostView.setPaddingRelative(
-            resources.getDimensionPixelSize(
-                com.android.systemui.customization.R.dimen.clock_padding_start
-            ),
-            0,
-            0,
-            0
-        )
-        hostView.clipChildren = false
-        return hostView
     }
 
     private fun onClockChanged() {
