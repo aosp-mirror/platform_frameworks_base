@@ -165,6 +165,7 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
         // When a settings change has occurred to the small clock, make sure the view is adjusted
         reset(mView);
+        when(mView.getResources()).thenReturn(mResources);
         observer.onChange(true);
         mExecutor.runAllReady();
         verify(mView).switchToClock(KeyguardClockSwitch.SMALL, /* animate */ true);
