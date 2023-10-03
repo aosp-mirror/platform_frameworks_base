@@ -479,7 +479,8 @@ public final class Bitmap implements Parcelable {
          * This configuration may be useful when using opaque bitmaps
          * that do not require high color fidelity.
          *
-         * <p>Use this formula to pack into 16 bits:</p>
+         * <p>When accessing directly via #copyPixelsFromBuffer or #copyPixelsToBuffer,
+         *    use this formula to pack into 16 bits:</p>
          * <pre class="prettyprint">
          * short color = (R & 0x1f) << 11 | (G & 0x3f) << 5 | (B & 0x1f);
          * </pre>
@@ -516,7 +517,8 @@ public final class Bitmap implements Parcelable {
          * This configuration is very flexible and offers the best
          * quality. It should be used whenever possible.
          *
-         * <p>Use this formula to pack into 32 bits:</p>
+         * <p>When accessing directly via #copyPixelsFromBuffer or #copyPixelsToBuffer,
+         *    use this formula to pack into 32 bits:</p>
          * <pre class="prettyprint">
          * int color = (A & 0xff) << 24 | (B & 0xff) << 16 | (G & 0xff) << 8 | (R & 0xff);
          * </pre>
@@ -531,7 +533,8 @@ public final class Bitmap implements Parcelable {
          * This configuration is particularly suited for wide-gamut and
          * HDR content.
          *
-         * <p>Use this formula to pack into 64 bits:</p>
+         * <p>When accessing directly via #copyPixelsFromBuffer or #copyPixelsToBuffer,
+         *    use this formula to pack into 64 bits:</p>
          * <pre class="prettyprint">
          * long color = (A & 0xffff) << 48 | (B & 0xffff) << 32 | (G & 0xffff) << 16 | (R & 0xffff);
          * </pre>
@@ -556,7 +559,8 @@ public final class Bitmap implements Parcelable {
          * blending, such that the memory cost is the same as ARGB_8888 while enabling higher color
          * precision.
          *
-         * <p>Use this formula to pack into 32 bits:</p>
+         * <p>When accessing directly via #copyPixelsFromBuffer or #copyPixelsToBuffer,
+         *  use this formula to pack into 32 bits:</p>
          * <pre class="prettyprint">
          * int color = (A & 0x3) << 30 | (B & 0x3ff) << 20 | (G & 0x3ff) << 10 | (R & 0x3ff);
          * </pre>
