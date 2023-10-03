@@ -479,6 +479,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Animate the keyguard status bar in. */
     public void animateKeyguardStatusBarIn() {
+        if (isMigrationEnabled()) {
+            return;
+        }
+
         mLogger.log(TAG, LogLevel.DEBUG, "animating status bar in");
         if (mDisableStateTracker.isDisabled()) {
             // If our view is disabled, don't allow us to animate in.
@@ -495,6 +499,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Animate the keyguard status bar out. */
     public void animateKeyguardStatusBarOut(long startDelay, long duration) {
+        if (isMigrationEnabled()) {
+            return;
+        }
+
         mLogger.log(TAG, LogLevel.DEBUG, "animating status bar out");
         ValueAnimator anim = ValueAnimator.ofFloat(mView.getAlpha(), 0f);
         anim.addUpdateListener(mAnimatorUpdateListener);
