@@ -4659,24 +4659,24 @@ public class AudioManager {
         Objects.requireNonNull(afr);
         Objects.requireNonNull(clientFakeId);
         int status;
-        try {
-            status = getService().requestAudioFocusForTest(afr.getAudioAttributes(),
-                    afr.getFocusGain(),
-                    mICallBack,
-                    mAudioFocusDispatcher,
-                    clientFakeId, "com.android.test.fakeclient",
-                    afr.getFlags() | AudioManager.AUDIOFOCUS_FLAG_TEST,
-                    clientFakeUid, clientTargetSdk);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        if (status != AudioManager.AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY) {
-            // default path with no external focus policy
-            return status;
-        }
-
         BlockingFocusResultReceiver focusReceiver;
         synchronized (mFocusRequestsLock) {
+            try {
+                status = getService().requestAudioFocusForTest(afr.getAudioAttributes(),
+                        afr.getFocusGain(),
+                        mICallBack,
+                        mAudioFocusDispatcher,
+                        clientFakeId, "com.android.test.fakeclient",
+                        afr.getFlags() | AudioManager.AUDIOFOCUS_FLAG_TEST,
+                        clientFakeUid, clientTargetSdk);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            if (status != AudioManager.AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY) {
+                // default path with no external focus policy
+                return status;
+            }
+
             focusReceiver = addClientIdToFocusReceiverLocked(clientFakeId);
         }
 
