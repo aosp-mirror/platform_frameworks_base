@@ -42,6 +42,7 @@ import android.os.FileUtils;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.vibrator.Flags;
 import android.os.vibrator.persistence.VibrationXmlParser;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
@@ -607,7 +608,7 @@ public class RingtoneManager {
 
         Ringtone ringtone;
         Uri positionUri = getRingtoneUri(position);
-        if (Ringtone.useRingtoneV2()) {
+        if (Flags.hapticsCustomizationRingtoneV2Enabled()) {
             mPreviousRingtone = new Ringtone.Builder(
                     mContext, mMediaType, getDefaultAudioAttributes(mType))
                     .setUri(positionUri)
@@ -953,7 +954,7 @@ public class RingtoneManager {
      * @return A {@link Ringtone} for the given URI, or null.
      */
     public static Ringtone getRingtone(final Context context, Uri ringtoneUri) {
-        if (Ringtone.useRingtoneV2()) {
+        if (Flags.hapticsCustomizationRingtoneV2Enabled()) {
             return new Ringtone.Builder(
                     context, Ringtone.MEDIA_SOUND, getDefaultAudioAttributes(-1))
                     .setUri(ringtoneUri)
@@ -970,7 +971,7 @@ public class RingtoneManager {
             @Nullable VolumeShaper.Configuration volumeShaperConfig,
             AudioAttributes audioAttributes) {
         // TODO: move caller(s) away from this method: inline the builder call.
-        if (Ringtone.useRingtoneV2()) {
+        if (Flags.hapticsCustomizationRingtoneV2Enabled()) {
             return new Ringtone.Builder(context, Ringtone.MEDIA_SOUND, audioAttributes)
                     .setUri(ringtoneUri)
                     .setVolumeShaperConfig(volumeShaperConfig)
