@@ -58,7 +58,7 @@ public class WindowlessWindowManager implements IWindowSession {
         SurfaceControl mLeash;
         Rect mFrame;
         Rect mAttachedFrame;
-        IBinder mFocusGrantToken;
+        IBinder mInputTransferToken;
 
         State(SurfaceControl sc, WindowManager.LayoutParams p, int displayId, IWindow client,
                 SurfaceControl leash, Rect frame) {
@@ -89,7 +89,7 @@ public class WindowlessWindowManager implements IWindowSession {
     private final Configuration mConfiguration;
     private final IWindowSession mRealWm;
     private final IBinder mHostInputToken;
-    private final IBinder mFocusGrantToken = new Binder();
+    private final IBinder mInputTransferToken = new Binder();
     private InsetsState mInsetsState;
     private final ClientWindowFrames mTmpFrames = new ClientWindowFrames();
     private final MergedConfiguration mTmpConfig = new MergedConfiguration();
@@ -109,17 +109,17 @@ public class WindowlessWindowManager implements IWindowSession {
         mConfiguration.setTo(configuration);
     }
 
-    IBinder getFocusGrantToken(IBinder window) {
+    IBinder getInputTransferToken(IBinder window) {
         synchronized (this) {
             // This can only happen if someone requested the focusGrantToken before setView was
             // called for the SCVH. In that case, use the root focusGrantToken since this will be
             // the same token sent to WMS for the root window once setView is called.
             if (mStateForWindow.isEmpty()) {
-                return mFocusGrantToken;
+                return mInputTransferToken;
             }
             State state = mStateForWindow.get(window);
             if (state != null) {
-                return state.mFocusGrantToken;
+                return state.mInputTransferToken;
             }
         }
 
@@ -207,9 +207,9 @@ public class WindowlessWindowManager implements IWindowSession {
             // Give the first window the mFocusGrantToken since that's the token the host can use
             // to give focus to the embedded.
             if (mStateForWindow.isEmpty()) {
-                state.mFocusGrantToken = mFocusGrantToken;
+                state.mInputTransferToken = mInputTransferToken;
             } else {
-                state.mFocusGrantToken = new Binder();
+                state.mInputTransferToken = new Binder();
             }
 
             mStateForWindow.put(window.asBinder(), state);
@@ -230,12 +230,13 @@ public class WindowlessWindowManager implements IWindowSession {
                             new SurfaceControl(sc, "WindowlessWindowManager.addToDisplay"),
                             window, mHostInputToken, attrs.flags, attrs.privateFlags,
                             attrs.inputFeatures, attrs.type,
-                            attrs.token, state.mFocusGrantToken, attrs.getTitle().toString(),
+                            attrs.token, state.mInputTransferToken, attrs.getTitle().toString(),
                             outInputChannel);
                 } else {
                     mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, attrs.flags,
                             attrs.privateFlags, attrs.inputFeatures, attrs.type, attrs.token,
-                            state.mFocusGrantToken, attrs.getTitle().toString(), outInputChannel);
+                            state.mInputTransferToken, attrs.getTitle().toString(),
+                            outInputChannel);
                 }
                 state.mInputChannelToken =
                         outInputChannel != null ? outInputChannel.getToken() : null;

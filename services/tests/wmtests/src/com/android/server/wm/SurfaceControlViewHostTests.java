@@ -138,11 +138,11 @@ public class SurfaceControlViewHostTests {
         IWindow window = IWindow.Stub.asInterface(mActivity.mSurfaceView.getWindowToken());
 
         WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
-                mScvh1.getFocusGrantToken(), true);
+                mScvh1.getInputTransferToken(), true);
         assertTrue("Failed to gain focus for view1", waitForWindowFocus(mView1, true));
 
         WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
-                mScvh2.getFocusGrantToken(), true);
+                mScvh2.getInputTransferToken(), true);
         assertTrue("Failed to gain focus for view2", waitForWindowFocus(mView2, true));
     }
 
