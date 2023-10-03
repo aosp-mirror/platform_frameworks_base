@@ -39,6 +39,7 @@ aconfig_srcjars = [
     ":android.multiuser.flags-aconfig-java{.generated_srcjars}",
     ":android.app.flags-aconfig-java{.generated_srcjars}",
     ":android.credentials.flags-aconfig-java{.generated_srcjars}",
+    ":android.view.contentprotection.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -367,5 +368,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.credentials.flags-aconfig-java",
     aconfig_declarations: "android.credentials.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Content Protection
+aconfig_declarations {
+    name: "android.view.contentprotection.flags-aconfig",
+    package: "android.view.contentprotection.flags",
+    srcs: ["core/java/android/view/contentprotection/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.view.contentprotection.flags-aconfig-java",
+    aconfig_declarations: "android.view.contentprotection.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
