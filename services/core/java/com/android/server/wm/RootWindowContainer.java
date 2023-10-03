@@ -2297,19 +2297,36 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      *
      * @param app    The app that crashed.
      * @param reason Reason to perform this action.
-     * @return The task id that was finished in this root task, or INVALID_TASK_ID if none was
-     * finished.
+     * @return The finished task which was on top or visible, otherwise {@code null} if the crashed
+     *         app doesn't have activity in visible task.
      */
-    int finishTopCrashedActivities(WindowProcessController app, String reason) {
+    @Nullable
+    Task finishTopCrashedActivities(WindowProcessController app, String reason) {
         Task focusedRootTask = getTopDisplayFocusedRootTask();
         final Task[] finishedTask = new Task[1];
         forAllRootTasks(rootTask -> {
+            final boolean recordTopOrVisible = finishedTask[0] == null
+                    && (focusedRootTask == rootTask || rootTask.isVisibleRequested());
             final Task t = rootTask.finishTopCrashedActivityLocked(app, reason);
-            if (rootTask == focusedRootTask || finishedTask[0] == null) {
+            if (recordTopOrVisible) {
                 finishedTask[0] = t;
             }
         });
-        return finishedTask[0] != null ? finishedTask[0].mTaskId : INVALID_TASK_ID;
+        return finishedTask[0];
+    }
+
+    void ensureVisibilityOnVisibleActivityDiedOrCrashed(String reason) {
+        final Task topTask = getTopDisplayFocusedRootTask();
+        if (topTask != null && topTask.topRunningActivity(true /* focusableOnly */) == null) {
+            // Move the next focusable task to front.
+            topTask.adjustFocusToNextFocusableTask(reason);
+        }
+        if (!resumeFocusedTasksTopActivities()) {
+            // It may be nothing to resume because there are pausing activities or all the top
+            // activities are resumed. Then it still needs to make sure all visible activities are
+            // running in case the tasks were reordered or there are non-top visible activities.
+            ensureActivitiesVisible(null /* starting */, 0 /* configChanges */, !PRESERVE_WINDOWS);
+        }
     }
 
     boolean resumeFocusedTasksTopActivities() {
