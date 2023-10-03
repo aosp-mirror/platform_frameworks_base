@@ -36,12 +36,12 @@ import android.util.proto.ProtoOutputStream
 import android.view.InputDevice
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodSubtype
-import androidx.test.core.R
 import androidx.test.core.app.ApplicationProvider
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.os.KeyboardConfiguredProto
 import com.android.internal.util.FrameworkStatsLog
 import com.android.modules.utils.testing.ExtendedMockitoRule
+import com.android.test.input.R
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
