@@ -26,9 +26,17 @@ import static org.junit.Assert.assertThrows;
 
 import android.app.time.DetectorStatusTypes.DetectionAlgorithmStatus;
 import android.app.time.DetectorStatusTypes.DetectorStatus;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+@Presubmit
 public class DetectorStatusTypesTest {
 
     @Test

@@ -21,7 +21,9 @@ import static android.app.timezonedetector.ShellCommandTestSupport.createShellCo
 import static org.junit.Assert.assertEquals;
 
 import android.os.ShellCommand;
+import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
@@ -33,6 +35,8 @@ import org.junit.runner.RunWith;
  * <p>See also {@link android.app.time.cts.UnixEpochTimeTest} for SDK methods.
  */
 @RunWith(AndroidJUnit4.class)
+@SmallTest
+@Presubmit
 public class UnixEpochTimeTest {
 
     @Test(expected = IllegalArgumentException.class)

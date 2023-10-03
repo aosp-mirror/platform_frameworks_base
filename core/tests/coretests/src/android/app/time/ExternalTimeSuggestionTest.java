@@ -21,13 +21,21 @@ import static android.app.timezonedetector.ShellCommandTestSupport.createShellCo
 import static org.junit.Assert.assertEquals;
 
 import android.os.ShellCommand;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for non-SDK methods on {@link ExternalTimeSuggestion}.
  * Also see {@link android.app.time.cts.ExternalTimeSuggestionTest}
  */
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+@Presubmit
 public class ExternalTimeSuggestionTest {
 
     @Test(expected = IllegalArgumentException.class)

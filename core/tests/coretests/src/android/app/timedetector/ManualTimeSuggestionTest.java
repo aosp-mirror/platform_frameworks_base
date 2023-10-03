@@ -25,9 +25,17 @@ import static org.junit.Assert.assertNotEquals;
 
 import android.app.time.UnixEpochTime;
 import android.os.ShellCommand;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+@Presubmit
 public class ManualTimeSuggestionTest {
 
     private static final UnixEpochTime ARBITRARY_TIME = new UnixEpochTime(1111L, 2222L);

@@ -25,8 +25,17 @@ import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
 
 import static org.junit.Assert.assertNotEquals;
 
-import org.junit.Test;
+import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+@Presubmit
 public class TimeZoneDetectorStatusTest {
 
     private static final TelephonyTimeZoneAlgorithmStatus ARBITRARY_TELEPHONY_ALGORITHM_STATUS =

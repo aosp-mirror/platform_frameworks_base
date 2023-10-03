@@ -26,8 +26,11 @@ import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_U
 
 import static org.junit.Assert.assertEquals;
 
+import android.platform.test.annotations.Presubmit;
 import android.service.timezone.TimeZoneProviderStatus.DependencyStatus;
 import android.service.timezone.TimeZoneProviderStatus.OperationStatus;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +44,8 @@ import junitparams.Parameters;
 
 /** Non-SDK tests. See CTS for SDK API tests. */
 @RunWith(JUnitParamsRunner.class)
+@SmallTest
+@Presubmit
 public class TimeZoneProviderStatusTest {
 
     @Test
