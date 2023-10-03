@@ -16,22 +16,22 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="backup_confirm_title" msgid="827563724209303345">"Fuld backup"</string>
+    <string name="backup_confirm_title" msgid="827563724209303345">"Fuld sikkerhedskopiering"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Fuld genoprettelse"</string>
-    <string name="backup_confirm_text" msgid="1878021282758896593">"Der er anmodet om en fuld backup af alle data til en tilsluttet computer. Vil du tillade dette?\n\nHvis du ikke har anmodet om backup, skal du ikke tillade denne handling."</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Der er anmodet om en fuld sikkerhedskopiering af alle data til en tilsluttet computer. Vil du tillade dette?\n\nHvis du ikke har anmodet om sikkerhedskopiering, skal du ikke tillade denne handling."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Sikkerhedskopiér mine data"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Undlad at sikkerhedskopiere"</string>
-    <string name="restore_confirm_text" msgid="7499866728030461776">"Der er anmodet om en fuld backup af alle data til en tilsluttet stationær computer. Vil du tillade dette?\n\nHvis du ikke har anmodet om backup, skal du ikke tillade denne handling."</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"Der er anmodet om en fuld sikkerhedskopiering af alle data til en tilsluttet stationær computer. Vil du tillade dette?\n\nHvis du ikke har anmodet om sikkerhedskopiering, skal du ikke tillade denne handling."</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Gendan mine data"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Gendan ikke"</string>
-    <string name="current_password_text" msgid="8268189555578298067">"Angiv din aktuelle adgangskode til backup nedenfor:"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Angiv din aktuelle adgangskode til sikkerhedskopiering nedenfor:"</string>
     <string name="device_encryption_restore_text" msgid="1570864916855208992">"Angiv adgangskoden til kryptering for din enhed nedenfor."</string>
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Angiv adgangskoden til kryptering for din enhed nedenfor. Denne bliver også brugt til at kryptere sikkerhedskopien af arkivet."</string>
-    <string name="backup_enc_password_text" msgid="4981585714795233099">"Angiv en adgangskode, som skal bruges til kryptering af alle dine sikkerhedsdata. Hvis dette felt er tomt, bruges din aktuelle adgangskode til backup:"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Angiv en adgangskode, som skal bruges til kryptering af alle dine sikkerhedsdata. Hvis dette felt er tomt, bruges din aktuelle adgangskode til sikkerhedskopiering:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Hvis du ønsker at kryptere sikkerhedsdataene, skal du indtaste en adgangskode nedenfor:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Hvis gendannelsesdataene er krypteret, skal du angive adgangskoden nedenfor:"</string>
-    <string name="toast_backup_started" msgid="550354281452756121">"Backup begynder..."</string>
-    <string name="toast_backup_ended" msgid="3818080769548726424">"Backup er færdig"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"Sikkerhedskopiering begynder..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Sikkerhedskopiering er færdig"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"Gendannelse begynder..."</string>
     <string name="toast_restore_ended" msgid="1764041639199696132">"Gendannelse afsluttet"</string>
     <string name="toast_timeout" msgid="5276598587087626877">"Handling fik timeout"</string>
