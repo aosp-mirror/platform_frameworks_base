@@ -190,6 +190,24 @@ constructor(
     fun logOnSimStateChanged() {
         buffer.log(TAG, LogLevel.INFO, "onSimStateChanged")
     }
+
+    fun logPrioritizedNetworkAvailable(netId: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { int1 = netId },
+            { "Found prioritized network (nedId=$int1)" },
+        )
+    }
+
+    fun logPrioritizedNetworkLost(netId: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { int1 = netId },
+            { "Lost prioritized network (nedId=$int1)" },
+        )
+    }
 }
 
 private const val TAG = "MobileInputLog"

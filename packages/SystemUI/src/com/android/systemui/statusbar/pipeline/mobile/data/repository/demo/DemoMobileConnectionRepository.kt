@@ -191,6 +191,8 @@ class DemoMobileConnectionRepository(
 
     override val isAllowedDuringAirplaneMode = MutableStateFlow(false)
 
+    override val hasPrioritizedNetworkCapabilities = MutableStateFlow(false)
+
     /**
      * Process a new demo mobile event. Note that [resolvedNetworkType] must be passed in separately
      * from the event, due to the requirement to reverse the mobile mappings lookup in the top-level
@@ -225,6 +227,7 @@ class DemoMobileConnectionRepository(
         _resolvedNetworkType.value = resolvedNetworkType
 
         isAllowedDuringAirplaneMode.value = false
+        hasPrioritizedNetworkCapabilities.value = event.slice
     }
 
     fun processCarrierMergedEvent(event: FakeWifiEventModel.CarrierMerged) {
@@ -250,6 +253,7 @@ class DemoMobileConnectionRepository(
         _isGsm.value = false
         _carrierNetworkChangeActive.value = false
         isAllowedDuringAirplaneMode.value = true
+        hasPrioritizedNetworkCapabilities.value = false
     }
 
     companion object {
