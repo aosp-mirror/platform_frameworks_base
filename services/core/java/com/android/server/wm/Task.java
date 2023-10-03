@@ -488,10 +488,6 @@ class Task extends TaskFragment {
 
     private boolean mForceShowForAllUsers;
 
-    /** When set, will force the task to report as invisible. */
-    static final int FLAG_FORCE_HIDDEN_FOR_PINNED_TASK = 1;
-    static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
-    private int mForceHiddenFlags = 0;
     private boolean mForceTranslucent = false;
 
     // The display category name for this task.
@@ -4492,20 +4488,13 @@ class Task extends TaskFragment {
      * Sets/unsets the forced-hidden state flag for this task depending on {@param set}.
      * @return Whether the force hidden state changed
      */
-    boolean setForceHidden(int flags, boolean set) {
-        int newFlags = mForceHiddenFlags;
-        if (set) {
-            newFlags |= flags;
-        } else {
-            newFlags &= ~flags;
-        }
-        if (mForceHiddenFlags == newFlags) {
-            return false;
-        }
-
+    @Override
+    boolean setForceHidden(@FlagForceHidden int flags, boolean set) {
         final boolean wasHidden = isForceHidden();
         final boolean wasVisible = isVisible();
-        mForceHiddenFlags = newFlags;
+        if (!super.setForceHidden(flags, set)) {
+            return false;
+        }
         final boolean nowHidden = isForceHidden();
         if (wasHidden != nowHidden) {
             final String reason = "setForceHidden";
@@ -4534,11 +4523,6 @@ class Task extends TaskFragment {
      */
     public boolean isAlwaysOnTopWhenVisible() {
         return super.isAlwaysOnTop();
-    }
-
-    @Override
-    protected boolean isForceHidden() {
-        return mForceHiddenFlags != 0;
     }
 
     boolean isForceHiddenForPinnedTask() {
