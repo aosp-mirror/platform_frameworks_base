@@ -25,7 +25,8 @@ object ProdBubbleProperties : BubbleProperties {
     private var _isBubbleBarEnabled =
             SystemProperties.getBoolean("persist.wm.debug.bubble_bar", false)
 
-    override val isBubbleBarEnabled = _isBubbleBarEnabled
+    override val isBubbleBarEnabled
+        get() = _isBubbleBarEnabled
 
     override fun refresh() {
         _isBubbleBarEnabled = SystemProperties.getBoolean("persist.wm.debug.bubble_bar", false)
