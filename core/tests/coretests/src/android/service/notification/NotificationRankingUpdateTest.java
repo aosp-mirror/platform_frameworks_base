@@ -39,7 +39,9 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
+import android.os.Bundle;
 import android.os.Parcel;
+import android.os.SharedMemory;
 import android.testing.TestableContext;
 
 import androidx.test.InstrumentationRegistry;
@@ -387,8 +389,13 @@ public class NotificationRankingUpdateTest {
         Assert.assertEquals(comment, a.getSmartReplies(), b.getSmartReplies());
         Assert.assertEquals(comment, a.canBubble(), b.canBubble());
         Assert.assertEquals(comment, a.isConversation(), b.isConversation());
-        Assert.assertEquals(comment, a.getConversationShortcutInfo().getId(),
-                b.getConversationShortcutInfo().getId());
+        if (a.getConversationShortcutInfo() != null && b.getConversationShortcutInfo() != null) {
+            Assert.assertEquals(comment, a.getConversationShortcutInfo().getId(),
+                    b.getConversationShortcutInfo().getId());
+        } else {
+            // One or both must be null, so we can check for equality.
+            Assert.assertEquals(a.getConversationShortcutInfo(), b.getConversationShortcutInfo());
+        }
         assertActionsEqual(a.getSmartActions(), b.getSmartActions());
         Assert.assertEquals(a.getProposedImportance(), b.getProposedImportance());
         Assert.assertEquals(a.hasSensitiveContent(), b.hasSensitiveContent());
@@ -428,8 +435,13 @@ public class NotificationRankingUpdateTest {
         SystemUiSystemPropertiesFlags.TEST_RESOLVER = null;
     }
 
-    public NotificationListenerService.Ranking createTestRanking(String key, int rank) {
+    /**
+     * Creates a mostly empty Test Ranking object with the specified key, rank, and smartActions.
+     */
+    public NotificationListenerService.Ranking createEmptyTestRanking(
+            String key, int rank, ArrayList<Notification.Action> actions) {
         NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
+
         ranking.populate(
                 /* key= */ key,
                 /* rank= */ rank,
@@ -447,7 +459,7 @@ public class NotificationRankingUpdateTest {
                 /* hidden= */ false,
                 /* lastAudiblyAlertedMs= */ -1,
                 /* noisy= */ false,
-                /* smartActions= */ null,
+                /* smartActions= */ actions,
                 /* smartReplies= */ null,
                 /* canBubble= */ false,
                 /* isTextChanged= */ false,
@@ -461,110 +473,26 @@ public class NotificationRankingUpdateTest {
         return ranking;
     }
 
-    @Test
-    public void testRankingUpdate_rankingConstructor() {
-        NotificationListenerService.Ranking ranking = createTestRanking(TEST_KEY, 123);
-        NotificationRankingUpdate rankingUpdate = new NotificationRankingUpdate(
-                new NotificationListenerService.Ranking[]{ranking});
-
-        NotificationListenerService.RankingMap retrievedRankings = rankingUpdate.getRankingMap();
-        NotificationListenerService.Ranking retrievedRanking =
-                new NotificationListenerService.Ranking();
-        assertTrue(retrievedRankings.getRanking(TEST_KEY, retrievedRanking));
-        assertEquals(123, retrievedRanking.getRank());
-    }
-
-    @Test
-    public void testRankingUpdate_parcelConstructor() {
-        NotificationListenerService.Ranking ranking = createTestRanking(TEST_KEY, 123);
-        NotificationRankingUpdate rankingUpdate = new NotificationRankingUpdate(
-                new NotificationListenerService.Ranking[]{ranking});
-
-        Parcel parceledRankingUpdate = Parcel.obtain();
-        rankingUpdate.writeToParcel(parceledRankingUpdate, 0);
-        parceledRankingUpdate.setDataPosition(0);
-
-        NotificationRankingUpdate retrievedRankingUpdate = new NotificationRankingUpdate(
-                parceledRankingUpdate);
-
-        NotificationListenerService.RankingMap retrievedRankings =
-                retrievedRankingUpdate.getRankingMap();
-        assertNotNull(retrievedRankings);
-        // The rankingUpdate file descriptor is only non-null in the new path.
-        if (SystemUiSystemPropertiesFlags.getResolver().isEnabled(
-                SystemUiSystemPropertiesFlags.NotificationFlags.RANKING_UPDATE_ASHMEM)) {
-            assertTrue(retrievedRankingUpdate.isFdNotNullAndClosed());
-        }
-        NotificationListenerService.Ranking retrievedRanking =
-                new NotificationListenerService.Ranking();
-        assertTrue(retrievedRankings.getRanking(TEST_KEY, retrievedRanking));
-        assertEquals(123, retrievedRanking.getRank());
-        assertTrue(retrievedRankingUpdate.equals(rankingUpdate));
-        parceledRankingUpdate.recycle();
-    }
-
-    @Test
-    public void testRankingUpdate_emptyParcelInCheck() {
-        NotificationListenerService.Ranking ranking = createTestRanking(TEST_KEY, 123);
-        NotificationRankingUpdate rankingUpdate = new NotificationRankingUpdate(
-                new NotificationListenerService.Ranking[]{ranking});
-
-        Parcel parceledRankingUpdate = Parcel.obtain();
-        rankingUpdate.writeToParcel(parceledRankingUpdate, 0);
-
-        // This will fail to read the parceledRankingUpdate, because the data position hasn't
-        // been reset, so it'll find no data to read.
-        NotificationRankingUpdate retrievedRankingUpdate = new NotificationRankingUpdate(
-                parceledRankingUpdate);
-        assertNull(retrievedRankingUpdate.getRankingMap());
-    }
-
-    @Test
-    public void testRankingUpdate_describeContents() {
-        NotificationListenerService.Ranking ranking = createTestRanking(TEST_KEY, 123);
-        NotificationRankingUpdate rankingUpdate = new NotificationRankingUpdate(
-                new NotificationListenerService.Ranking[]{ranking});
-        assertEquals(0, rankingUpdate.describeContents());
-    }
-
-    @Test
-    public void testRankingUpdate_equals() {
-        NotificationListenerService.Ranking ranking = createTestRanking(TEST_KEY, 123);
-        NotificationRankingUpdate rankingUpdate = new NotificationRankingUpdate(
-                new NotificationListenerService.Ranking[]{ranking});
-        // Reflexive equality.
-        assertTrue(rankingUpdate.equals(rankingUpdate));
-        // Null or wrong class inequality.
-        assertFalse(rankingUpdate.equals(null));
-        assertFalse(rankingUpdate.equals(ranking));
-
-        // Different ranking contents inequality.
-        NotificationListenerService.Ranking ranking2 = createTestRanking(TEST_KEY, 456);
-        NotificationRankingUpdate rankingUpdate2 = new NotificationRankingUpdate(
-                new NotificationListenerService.Ranking[]{ranking2});
-        assertFalse(rankingUpdate.equals(rankingUpdate2));
-
-        // Same ranking contents equality.
-        ranking2 = createTestRanking(TEST_KEY, 123);
-        rankingUpdate2 = new NotificationRankingUpdate(
-                new NotificationListenerService.Ranking[]{ranking2});
-        assertTrue(rankingUpdate.equals(rankingUpdate2));
-    }
-
     // Tests parceling of NotificationRankingUpdate, and by extension, RankingMap and Ranking.
     @Test
-    public void testRankingUpdate_parcel_legacy() {
+    public void testRankingUpdate_parcel() {
         NotificationRankingUpdate nru = generateUpdate(getContext());
         Parcel parcel = Parcel.obtain();
         nru.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
         NotificationRankingUpdate nru1 = NotificationRankingUpdate.CREATOR.createFromParcel(parcel);
+        // The rankingUpdate file descriptor is only non-null in the new path.
+        if (SystemUiSystemPropertiesFlags.getResolver().isEnabled(
+                SystemUiSystemPropertiesFlags.NotificationFlags.RANKING_UPDATE_ASHMEM)) {
+            assertTrue(nru1.isFdNotNullAndClosed());
+        }
         detailedAssertEquals(nru, nru1);
+        parcel.recycle();
     }
 
     // Tests parceling of RankingMap and RankingMap.equals
     @Test
-    public void testRankingMap_parcel_legacy() {
+    public void testRankingMap_parcel() {
         NotificationListenerService.RankingMap rmap = generateUpdate(getContext()).getRankingMap();
         Parcel parcel = Parcel.obtain();
         rmap.writeToParcel(parcel, 0);
@@ -574,11 +502,12 @@ public class NotificationRankingUpdateTest {
 
         detailedAssertEquals(rmap, rmap1);
         Assert.assertEquals(rmap, rmap1);
+        parcel.recycle();
     }
 
     // Tests parceling of Ranking and Ranking.equals
     @Test
-    public void testRanking_parcel_legacy() {
+    public void testRanking_parcel() {
         NotificationListenerService.Ranking ranking =
                 generateUpdate(getContext()).getRankingMap().getRawRankingObject(mKeys[0]);
         Parcel parcel = Parcel.obtain();
@@ -588,6 +517,7 @@ public class NotificationRankingUpdateTest {
                 new NotificationListenerService.Ranking(parcel);
         detailedAssertEquals("rankings differ: ", ranking, ranking1);
         Assert.assertEquals(ranking, ranking1);
+        parcel.recycle();
     }
 
     // Tests NotificationRankingUpdate.equals(), and by extension, RankingMap and Ranking.
@@ -630,4 +560,145 @@ public class NotificationRankingUpdateTest {
         assertNotEquals(nru, nru2);
     }
 
+    @Test
+    public void testRankingUpdate_rankingConstructor() {
+        NotificationRankingUpdate nru = generateUpdate(getContext());
+        NotificationRankingUpdate constructedNru = new NotificationRankingUpdate(
+                new NotificationListenerService.Ranking[]{
+                        nru.getRankingMap().getRawRankingObject(mKeys[0]),
+                        nru.getRankingMap().getRawRankingObject(mKeys[1]),
+                        nru.getRankingMap().getRawRankingObject(mKeys[2]),
+                        nru.getRankingMap().getRawRankingObject(mKeys[3]),
+                        nru.getRankingMap().getRawRankingObject(mKeys[4])
+                });
+
+        detailedAssertEquals(nru, constructedNru);
+    }
+
+    @Test
+    public void testRankingUpdate_emptyParcelInCheck() {
+        NotificationRankingUpdate rankingUpdate = generateUpdate(getContext());
+        Parcel parceledRankingUpdate = Parcel.obtain();
+        rankingUpdate.writeToParcel(parceledRankingUpdate, 0);
+
+        // This will fail to read the parceledRankingUpdate, because the data position hasn't
+        // been reset, so it'll find no data to read.
+        NotificationRankingUpdate retrievedRankingUpdate = new NotificationRankingUpdate(
+                parceledRankingUpdate);
+        assertNull(retrievedRankingUpdate.getRankingMap());
+        parceledRankingUpdate.recycle();
+    }
+
+    @Test
+    public void testRankingUpdate_describeContents() {
+        NotificationRankingUpdate rankingUpdate = generateUpdate(getContext());
+        assertEquals(0, rankingUpdate.describeContents());
+    }
+
+    @Test
+    public void testRankingUpdate_equals() {
+        NotificationListenerService.Ranking ranking = createEmptyTestRanking(TEST_KEY, 123, null);
+        NotificationRankingUpdate rankingUpdate = new NotificationRankingUpdate(
+                new NotificationListenerService.Ranking[]{ranking});
+        // Reflexive equality, including handling nulls properly
+        detailedAssertEquals(rankingUpdate, rankingUpdate);
+        // Null or wrong class inequality
+        assertFalse(rankingUpdate.equals(null));
+        assertFalse(rankingUpdate.equals(ranking));
+
+        // Different rank inequality
+        NotificationListenerService.Ranking ranking2 = createEmptyTestRanking(TEST_KEY, 456, null);
+        NotificationRankingUpdate rankingUpdate2 = new NotificationRankingUpdate(
+                new NotificationListenerService.Ranking[]{ranking2});
+        assertFalse(rankingUpdate.equals(rankingUpdate2));
+
+        // Different key inequality
+        ranking2 = createEmptyTestRanking(TEST_KEY + "DIFFERENT", 123, null);
+        rankingUpdate2 = new NotificationRankingUpdate(
+                new NotificationListenerService.Ranking[]{ranking2});
+        assertFalse(rankingUpdate.equals(rankingUpdate2));
+    }
+
+    @Test
+    public void testRankingUpdate_writesSmartActionToParcel() {
+        if (!mRankingUpdateAshmem) {
+            return;
+        }
+        ArrayList<Notification.Action> actions = new ArrayList<>();
+        PendingIntent intent = PendingIntent.getBroadcast(
+                getContext(),
+                0 /*requestCode*/,
+                new Intent("ACTION_" + TEST_KEY),
+                PendingIntent.FLAG_IMMUTABLE /*flags*/);
+        actions.add(new Notification.Action.Builder(null /*icon*/, TEST_KEY, intent).build());
+
+        NotificationListenerService.Ranking ranking =
+                createEmptyTestRanking(TEST_KEY, 123, actions);
+        NotificationRankingUpdate rankingUpdate = new NotificationRankingUpdate(
+                new NotificationListenerService.Ranking[]{ranking});
+
+        Parcel parcel = Parcel.obtain();
+        rankingUpdate.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        SharedMemory fd = parcel.readParcelable(getClass().getClassLoader(), SharedMemory.class);
+        Bundle smartActionsBundle = parcel.readBundle(getClass().getClassLoader());
+
+        // Assert the file descriptor is valid
+        assertNotNull(fd);
+        assertFalse(fd.getFd() == -1);
+
+        // Assert that the smart action is in the parcel
+        assertNotNull(smartActionsBundle);
+        ArrayList<Notification.Action> recoveredActions =
+                smartActionsBundle.getParcelableArrayList(TEST_KEY, Notification.Action.class);
+        assertNotNull(recoveredActions);
+        assertEquals(actions.size(), recoveredActions.size());
+        assertEquals(actions.get(0).title.toString(), recoveredActions.get(0).title.toString());
+        parcel.recycle();
+    }
+
+    @Test
+    public void testRankingUpdate_handlesEmptySmartActionList() {
+        if (!mRankingUpdateAshmem) {
+            return;
+        }
+        ArrayList<Notification.Action> actions = new ArrayList<>();
+        NotificationListenerService.Ranking ranking =
+                createEmptyTestRanking(TEST_KEY, 123, actions);
+        NotificationRankingUpdate rankingUpdate = new NotificationRankingUpdate(
+                new NotificationListenerService.Ranking[]{ranking});
+
+        Parcel parcel = Parcel.obtain();
+        rankingUpdate.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        // Ensure that despite an empty actions list, we can still unparcel the update.
+        NotificationRankingUpdate newRankingUpdate = new NotificationRankingUpdate(parcel);
+        assertNotNull(newRankingUpdate);
+        assertNotNull(newRankingUpdate.getRankingMap());
+        detailedAssertEquals(rankingUpdate, newRankingUpdate);
+        parcel.recycle();
+    }
+
+    @Test
+    public void testRankingUpdate_handlesNullSmartActionList() {
+        if (!mRankingUpdateAshmem) {
+            return;
+        }
+        NotificationListenerService.Ranking ranking =
+                createEmptyTestRanking(TEST_KEY, 123, null);
+        NotificationRankingUpdate rankingUpdate = new NotificationRankingUpdate(
+                new NotificationListenerService.Ranking[]{ranking});
+
+        Parcel parcel = Parcel.obtain();
+        rankingUpdate.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        // Ensure that despite an empty actions list, we can still unparcel the update.
+        NotificationRankingUpdate newRankingUpdate = new NotificationRankingUpdate(parcel);
+        assertNotNull(newRankingUpdate);
+        assertNotNull(newRankingUpdate.getRankingMap());
+        detailedAssertEquals(rankingUpdate, newRankingUpdate);
+        parcel.recycle();
+    }
 }
