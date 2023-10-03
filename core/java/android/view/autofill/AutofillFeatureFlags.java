@@ -255,6 +255,16 @@ public class AutofillFeatureFlags {
 
     // END AUTOFILL PCC CLASSIFICATION FLAGS
 
+    /**
+     * Define the max input length for autofill to show suggesiton UI
+     *
+     * E.g. if flag is set to 3, autofill will only show suggestions when user inputs less than 3
+     * characters
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_MAX_INPUT_LENGTH_FOR_AUTOFILL =
+            "max_input_length_for_autofill";
 
     /**
      * Sets a value of delay time to show up the inline tooltip view.
@@ -295,6 +305,10 @@ public class AutofillFeatureFlags {
             DEFAULT_AFAA_SHOULD_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE = true;
     // END AUTOFILL FOR ALL APPS DEFAULTS
 
+    /**
+     * @hide
+     */
+    public static final int DEFAULT_MAX_INPUT_LENGTH_FOR_AUTOFILL = 3;
     private AutofillFeatureFlags() {};
 
     /**
