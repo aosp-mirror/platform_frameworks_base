@@ -1361,6 +1361,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         final int index = task.mChildren.indexOf(topTaskFragment);
                         task.mChildren.remove(taskFragment);
                         task.mChildren.add(index, taskFragment);
+                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
                     }
                 }
                 break;
