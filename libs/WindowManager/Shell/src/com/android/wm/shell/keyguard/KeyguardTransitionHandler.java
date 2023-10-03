@@ -159,9 +159,15 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull TransitionFinishCallback finishCallback) {
+
+        if (remoteHandler == null) {
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    "missing handler for keyguard %s transition", description);
+            return false;
+        }
+
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "start keyguard %s transition, info = %s", description, info);
-
         try {
             mStartedTransitions.put(transition,
                     new StartedTransition(info, finishTransaction, remoteHandler));
