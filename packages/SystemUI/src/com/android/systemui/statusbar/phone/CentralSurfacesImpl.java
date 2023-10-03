@@ -236,6 +236,8 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -246,8 +248,6 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-
-import dagger.Lazy;
 
 /**
  * A class handling initialization and coordination between some of the key central surfaces in
@@ -1087,11 +1087,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      */    @VisibleForTesting
     void initShadeVisibilityListener() {
         mShadeController.setVisibilityListener(new ShadeController.ShadeVisibilityListener() {
-            @Override
-            public void visibilityChanged(boolean visible) {
-                onShadeVisibilityChanged(visible);
-            }
-
             @Override
             public void expandedVisibleChanged(boolean expandedVisible) {
                 if (expandedVisible) {
@@ -2913,8 +2908,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     protected boolean mDeviceInteractive;
 
-    protected boolean mVisible;
-
     protected DevicePolicyManager mDevicePolicyManager;
     private final PowerManager mPowerManager;
     protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -3030,16 +3023,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         };
         mActivityStarter.dismissKeyguardThenExecute(onDismissAction, /* cancel= */ null,
                 afterKeyguardGone);
-    }
-
-    private void onShadeVisibilityChanged(boolean visible) {
-        if (mVisible != visible) {
-            mVisible = visible;
-            if (visible) {
-                DejankUtils.notifyRendererOfExpensiveFrame(
-                        getNotificationShadeWindowView(), "onShadeVisibilityChanged");
-            }
-        }
     }
 
     private void clearNotificationEffects() {

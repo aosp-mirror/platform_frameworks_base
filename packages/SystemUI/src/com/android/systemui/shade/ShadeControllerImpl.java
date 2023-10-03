@@ -24,6 +24,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.systemui.DejankUtils;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -75,6 +76,7 @@ public final class ShadeControllerImpl implements ShadeController {
     private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
     private boolean mExpandedVisible;
+    private boolean mLockscreenOrShadeVisible;
 
     private NotificationPresenter mPresenter;
     private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
@@ -399,8 +401,19 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     private void notifyVisibilityChanged(boolean visible) {
-        mShadeVisibilityListener.visibilityChanged(visible);
         mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(visible);
+        if (mLockscreenOrShadeVisible != visible) {
+            mLockscreenOrShadeVisible = visible;
+            if (visible) {
+                // It would be best if this could be done as a side effect of listening to the
+                // [WindowRootViewVisibilityInteractor.isLockscreenOrShadeVisible] flow inside
+                // NotificationShadeWindowViewController. However, there's no guarantee that the
+                // flow will emit in the same frame as when the visibility changed, and we want the
+                // DejankUtils to be notified immediately, so we do it immediately here.
+                DejankUtils.notifyRendererOfExpensiveFrame(
+                        getNotificationShadeWindowView(), "onShadeVisibilityChanged");
+            }
+        }
     }
 
     private void notifyExpandedVisibleChanged(boolean expandedVisible) {

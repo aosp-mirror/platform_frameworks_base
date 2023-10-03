@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper.RunWithLooper
 import android.view.Display
 import android.view.WindowManager
 import androidx.test.filters.SmallTest
@@ -53,6 +54,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
+@RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class ShadeControllerImplTest : SysuiTestCase() {
     private val executor = FakeExecutor(FakeSystemClock())
