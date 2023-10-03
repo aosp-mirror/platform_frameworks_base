@@ -1,12 +1,7 @@
 {
-  "postsubmit": [
+  "presubmit": [
     {
       "name": "FsVerityTest"
-    },
-    // nextgen test only runs during postsubmit.
-    {
-      "name": "FsVerityTest",
-      "keywords": ["nextgen"]
     }
   ]
 }
