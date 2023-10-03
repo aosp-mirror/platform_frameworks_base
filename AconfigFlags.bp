@@ -40,6 +40,7 @@ aconfig_srcjars = [
     ":android.app.flags-aconfig-java{.generated_srcjars}",
     ":android.credentials.flags-aconfig-java{.generated_srcjars}",
     ":android.view.contentprotection.flags-aconfig-java{.generated_srcjars}",
+    ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -381,5 +382,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.view.contentprotection.flags-aconfig-java",
     aconfig_declarations: "android.view.contentprotection.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Voice
+aconfig_declarations {
+    name: "android.service.voice.flags-aconfig",
+    package: "android.service.voice.flags",
+    srcs: ["core/java/android/service/voice/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.service.voice.flags-aconfig-java",
+    aconfig_declarations: "android.service.voice.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
