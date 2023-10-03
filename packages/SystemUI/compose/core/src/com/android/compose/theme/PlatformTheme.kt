@@ -29,6 +29,8 @@ import com.android.compose.theme.typography.TypefaceNames
 import com.android.compose.theme.typography.TypefaceTokens
 import com.android.compose.theme.typography.TypographyTokens
 import com.android.compose.theme.typography.platformTypography
+import com.android.compose.windowsizeclass.LocalWindowSizeClass
+import com.android.compose.windowsizeclass.calculateWindowSizeClass
 
 /** The Material 3 theme that should wrap all Platform Composables. */
 @Composable
@@ -51,10 +53,12 @@ fun PlatformTheme(
         remember(typefaceNames) {
             platformTypography(TypographyTokens(TypeScaleTokens(TypefaceTokens(typefaceNames))))
         }
+    val windowSizeClass = calculateWindowSizeClass()
 
     MaterialTheme(colorScheme, typography = typography) {
         CompositionLocalProvider(
             LocalAndroidColorScheme provides androidColorScheme,
+            LocalWindowSizeClass provides windowSizeClass,
         ) {
             content()
         }
