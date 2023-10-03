@@ -42,6 +42,13 @@ sealed class ObservableTransitionState {
          * scene, this value will remain true after the pointer is no longer touching the screen and
          * will be true in any transition created to animate back to the original position.
          */
-        val isUserInputDriven: Boolean,
+        val isInitiatedByUserInput: Boolean,
+
+        /**
+         * Whether user input is currently driving the transition. For example, if a user is
+         * dragging a pointer, this emits true. Once they lift their finger, this emits false while
+         * the transition completes/settles.
+         */
+        val isUserInputOngoing: Flow<Boolean>,
     ) : ObservableTransitionState()
 }
