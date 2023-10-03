@@ -24,7 +24,9 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_BOTTOM_OF_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
+import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_TOP_OF_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
@@ -1404,6 +1406,24 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 taskFragment.setIsolatedNav(isolatedNav);
                 break;
             }
+            case OP_TYPE_REORDER_TO_BOTTOM_OF_TASK: {
+                final Task task = taskFragment.getTask();
+                if (task != null) {
+                    task.mChildren.remove(taskFragment);
+                    task.mChildren.add(0, taskFragment);
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
+                break;
+            }
+            case OP_TYPE_REORDER_TO_TOP_OF_TASK: {
+                final Task task = taskFragment.getTask();
+                if (task != null) {
+                    task.mChildren.remove(taskFragment);
+                    task.mChildren.add(taskFragment);
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
+                break;
+            }
         }
         return effects;
     }
@@ -1428,6 +1448,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         if (!validateTaskFragment(taskFragment, opType, errorCallbackToken, organizer)) {
+            return false;
+        }
+
+        if ((opType == OP_TYPE_REORDER_TO_BOTTOM_OF_TASK
+                || opType == OP_TYPE_REORDER_TO_TOP_OF_TASK)
+                && !mTaskFragmentOrganizerController.isSystemOrganizer(organizer.asBinder())) {
+            final Throwable exception = new SecurityException(
+                    "Only a system organizer can perform OP_TYPE_REORDER_TO_BOTTOM_OF_TASK or "
+                            + "OP_TYPE_REORDER_TO_TOP_OF_TASK."
+            );
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
+                    opType, exception);
             return false;
         }
 
