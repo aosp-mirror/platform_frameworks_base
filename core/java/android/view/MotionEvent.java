@@ -2197,6 +2197,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             float xOffset, float yOffset, float xPrecision, float yPrecision,
             long downTimeNanos, long eventTimeNanos,
             int pointerCount, PointerProperties[] pointerIds, PointerCoords[] pointerCoords) {
+        if (action == ACTION_CANCEL) {
+            flags |= FLAG_CANCELED;
+        }
         mNativePtr = nativeInitialize(mNativePtr, deviceId, source, displayId, action, flags,
                 edgeFlags, metaState, buttonState, classification, xOffset, yOffset,
                 xPrecision, yPrecision, downTimeNanos, eventTimeNanos, pointerCount, pointerIds,
@@ -2385,6 +2388,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public final void setTainted(boolean tainted) {
         final int flags = getFlags();
         nativeSetFlags(mNativePtr, tainted ? flags | FLAG_TAINTED : flags & ~FLAG_TAINTED);
+    }
+
+    private void setCanceled(boolean canceled) {
+        final int flags = getFlags();
+        nativeSetFlags(mNativePtr, canceled ? flags | FLAG_CANCELED : flags & ~FLAG_CANCELED);
     }
 
     /** @hide */
@@ -3510,6 +3518,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Sets this event's action.
      */
     public final void setAction(int action) {
+        final int actionMasked = action & ACTION_MASK;
+        if (actionMasked == ACTION_CANCEL) {
+            setCanceled(true);
+        } else if (actionMasked == ACTION_POINTER_UP) {
+            // Do nothing - we don't know what the real intent here is
+        } else {
+            setCanceled(false);
+        }
         nativeSetAction(mNativePtr, action);
     }
 
@@ -4157,6 +4173,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     /** @hide */
     @Override
     public final void cancel() {
+        setCanceled(true);
         setAction(ACTION_CANCEL);
     }
 
