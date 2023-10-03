@@ -48,13 +48,12 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealM
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
-import static com.google.common.truth.Truth.assertWithMessage;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -176,52 +175,6 @@ public class SplitControllerTest {
     }
 
     @Test
-    public void testGetTopActiveContainer() {
-        final TaskContainer taskContainer = createTestTaskContainer();
-        // tf1 has no running activity so is not active.
-        final TaskFragmentContainer tf1 = new TaskFragmentContainer(null /* activity */,
-                new Intent(), taskContainer, mSplitController, null /* pairedPrimaryContainer */);
-        // tf2 has running activity so is active.
-        final TaskFragmentContainer tf2 = mock(TaskFragmentContainer.class);
-        doReturn(1).when(tf2).getRunningActivityCount();
-        taskContainer.addTaskFragmentContainer(tf2);
-        // tf3 is finished so is not active.
-        final TaskFragmentContainer tf3 = mock(TaskFragmentContainer.class);
-        doReturn(true).when(tf3).isFinished();
-        doReturn(false).when(tf3).isWaitingActivityAppear();
-        taskContainer.addTaskFragmentContainer(tf3);
-        mSplitController.mTaskContainers.put(TASK_ID, taskContainer);
-
-        assertWithMessage("Must return tf2 because tf3 is not active.")
-                .that(mSplitController.getTopActiveContainer(TASK_ID)).isEqualTo(tf2);
-
-        taskContainer.removeTaskFragmentContainer(tf3);
-
-        assertWithMessage("Must return tf2 because tf2 has running activity.")
-                .that(mSplitController.getTopActiveContainer(TASK_ID)).isEqualTo(tf2);
-
-        taskContainer.removeTaskFragmentContainer(tf2);
-
-        assertWithMessage("Must return tf because we are waiting for tf1 to appear.")
-                .that(mSplitController.getTopActiveContainer(TASK_ID)).isEqualTo(tf1);
-
-        final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
-        doReturn(new ArrayList<>()).when(info).getActivities();
-        doReturn(true).when(info).isEmpty();
-        tf1.setInfo(mTransaction, info);
-
-        assertWithMessage("Must return tf because we are waiting for tf1 to become non-empty after"
-                + " creation.")
-                .that(mSplitController.getTopActiveContainer(TASK_ID)).isEqualTo(tf1);
-
-        doReturn(false).when(info).isEmpty();
-        tf1.setInfo(mTransaction, info);
-
-        assertWithMessage("Must return null because tf1 becomes empty.")
-                .that(mSplitController.getTopActiveContainer(TASK_ID)).isNull();
-    }
-
-    @Test
     public void testOnTaskFragmentVanished() {
         final TaskFragmentContainer tf = mSplitController.newContainer(mActivity, TASK_ID);
         doReturn(tf.getTaskFragmentToken()).when(mInfo).getFragmentToken();
@@ -306,7 +259,9 @@ public class SplitControllerTest {
 
         mSplitController.updateContainer(mTransaction, tf);
 
-        verify(mSplitController, never()).getTopActiveContainer(TASK_ID);
+        TaskContainer taskContainer = tf.getTaskContainer();
+        spyOn(taskContainer);
+        verify(taskContainer, never()).getTopNonFinishingTaskFragmentContainer();
 
         // Verify if tf is not in split, dismissPlaceholderIfNecessary won't be called.
         doReturn(false).when(mSplitController).shouldContainerBeExpanded(tf);
@@ -321,7 +276,7 @@ public class SplitControllerTest {
         doReturn(tf).when(splitContainer).getSecondaryContainer();
         doReturn(createTestTaskContainer()).when(splitContainer).getTaskContainer();
         doReturn(createSplitRule(mActivity, mActivity)).when(splitContainer).getSplitRule();
-        final TaskContainer taskContainer = mSplitController.getTaskContainer(TASK_ID);
+        taskContainer = mSplitController.getTaskContainer(TASK_ID);
         taskContainer.addSplitContainer(splitContainer);
         // Add a mock SplitContainer on top of splitContainer
         final SplitContainer splitContainer2 = mock(SplitContainer.class);
@@ -1569,9 +1524,9 @@ public class SplitControllerTest {
         addSplitTaskFragments(primaryActivity, thirdActivity);
 
         // Ensure another SplitContainer is added and the pinned TaskFragment still on top
-        assertTrue(taskContainer.getSplitContainers().size() == splitContainerCount + +1);
-        assertTrue(mSplitController.getTopActiveContainer(TASK_ID).getTopNonFinishingActivity()
-                == secondaryActivity);
+        assertEquals(taskContainer.getSplitContainers().size(), splitContainerCount + +1);
+        assertSame(taskContainer.getTopNonFinishingTaskFragmentContainer()
+                .getTopNonFinishingActivity(), secondaryActivity);
     }
 
     /** Creates a mock activity in the organizer process. */
