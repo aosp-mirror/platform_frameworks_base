@@ -99,6 +99,8 @@ class BouncerViewModel(
                 initialValue = emptyList(),
             )
 
+    val isUserSwitcherVisible: Boolean = bouncerInteractor.isUserSwitcherVisible
+
     private val isInputEnabled: StateFlow<Boolean> =
         bouncerInteractor.isThrottled
             .map { !it }

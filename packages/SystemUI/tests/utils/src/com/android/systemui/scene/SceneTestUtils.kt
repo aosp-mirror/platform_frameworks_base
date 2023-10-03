@@ -82,7 +82,11 @@ class SceneTestUtils(
 ) {
     val testDispatcher = StandardTestDispatcher()
     val testScope = TestScope(testDispatcher)
-    val featureFlags = FakeFeatureFlagsClassic().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
+    val featureFlags =
+        FakeFeatureFlagsClassic().apply {
+            set(Flags.FACE_AUTH_REFACTOR, false)
+            set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+        }
     val sceneContainerFlags = FakeSceneContainerFlags().apply { enabled = true }
     val deviceEntryRepository: FakeDeviceEntryRepository by lazy { FakeDeviceEntryRepository() }
     val authenticationRepository: FakeAuthenticationRepository by lazy {
@@ -215,7 +219,7 @@ class SceneTestUtils(
         return BouncerInteractor(
             applicationScope = applicationScope(),
             applicationContext = context,
-            repository = BouncerRepository(),
+            repository = BouncerRepository(featureFlags),
             deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
