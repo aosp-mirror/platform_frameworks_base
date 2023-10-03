@@ -166,7 +166,8 @@ class PatternBouncerViewModel(
             interactor.onFalseUserInput()
         }
 
-        tryAuthenticate()
+        clearInput()
+        tryAuthenticate(input = pattern)
     }
 
     override fun clearInput() {
