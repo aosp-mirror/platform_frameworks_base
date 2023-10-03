@@ -34,7 +34,10 @@ class FakeConfigurationRepository @Inject constructor() : ConfigurationRepositor
     private val _scaleForResolution = MutableStateFlow(1f)
     override val scaleForResolution: Flow<Float> = _scaleForResolution.asStateFlow()
 
-    suspend fun onAnyConfigurationChange() {
+    private val pixelSizes = mutableMapOf<Int, MutableStateFlow<Int>>()
+    private val colors = mutableMapOf<Int, MutableStateFlow<Int>>()
+
+    fun onAnyConfigurationChange() {
         _onAnyConfigurationChange.tryEmit(Unit)
     }
 
@@ -42,12 +45,12 @@ class FakeConfigurationRepository @Inject constructor() : ConfigurationRepositor
         _scaleForResolution.value = scale
     }
 
-    override fun getResolutionScale(): Float {
-        return _scaleForResolution.value
-    }
+    override fun getResolutionScale(): Float = _scaleForResolution.value
 
-    override fun getDimensionPixelSize(id: Int): Int {
-        return 0
+    override fun getDimensionPixelSize(id: Int): Int = pixelSizes[id]?.value ?: 0
+
+    fun setDimensionPixelSize(id: Int, pixelSize: Int) {
+        pixelSizes.getOrPut(id) { MutableStateFlow(pixelSize) }.value = pixelSize
     }
 }
 

@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
 package com.android.systemui.common.ui.data.repository
 
 import android.content.Context
 import android.content.res.Configuration
 import android.view.DisplayInfo
+import androidx.annotation.DimenRes
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.wrapper.DisplayUtilsWrapper
+import dagger.Binds
+import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,7 +52,6 @@ interface ConfigurationRepository {
     fun getDimensionPixelSize(id: Int): Int
 }
 
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class ConfigurationRepositoryImpl
 @Inject
@@ -119,7 +122,12 @@ constructor(
         return 1f
     }
 
-    override fun getDimensionPixelSize(id: Int): Int {
+    override fun getDimensionPixelSize(@DimenRes id: Int): Int {
         return context.resources.getDimensionPixelSize(id)
     }
+}
+
+@Module
+interface ConfigurationRepositoryModule {
+    @Binds fun bindImpl(impl: ConfigurationRepositoryImpl): ConfigurationRepository
 }
