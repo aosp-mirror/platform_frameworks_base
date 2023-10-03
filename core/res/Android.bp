@@ -104,6 +104,7 @@ genrule {
 
 android_app {
     name: "framework-res",
+    use_resource_processor: false,
     sdk_version: "core_platform",
     certificate: "platform",
 
