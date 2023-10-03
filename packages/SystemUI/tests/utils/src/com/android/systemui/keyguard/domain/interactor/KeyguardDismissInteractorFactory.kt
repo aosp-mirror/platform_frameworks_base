@@ -39,8 +39,7 @@ import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
-import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
@@ -103,14 +102,10 @@ object KeyguardDismissInteractorFactory {
                 FakeSystemClock(),
                 keyguardUpdateMonitor,
             )
-        val powerInteractor =
-            PowerInteractor(
-                powerRepository,
-                keyguardRepository,
-                mock(FalsingCollector::class.java),
-                mock(ScreenOffAnimationController::class.java),
-                mock(StatusBarStateController::class.java),
-            )
+        val powerInteractorWithDeps =
+                PowerInteractorFactory.create(
+                        repository = powerRepository,
+                )
         val userInteractor =
             UserInteractor(
                 applicationContext = context,
@@ -153,7 +148,7 @@ object KeyguardDismissInteractorFactory {
                     keyguardRepository,
                     primaryBouncerInteractor,
                     alternateBouncerInteractor,
-                    powerInteractor,
+                    powerInteractorWithDeps.powerInteractor,
                     userInteractor,
                 ),
         )

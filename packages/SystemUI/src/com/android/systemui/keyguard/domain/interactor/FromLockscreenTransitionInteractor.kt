@@ -28,14 +28,11 @@ import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
 import com.android.systemui.keyguard.shared.model.StatusBarState.KEYGUARD
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
-import java.util.UUID
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -43,6 +40,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import java.util.UUID
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @SysUISingleton
 class FromLockscreenTransitionInteractor
@@ -54,6 +54,7 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val flags: FeatureFlags,
     private val shadeRepository: ShadeRepository,
+    private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.LOCKSCREEN,
@@ -335,7 +336,7 @@ constructor(
 
     private fun listenForLockscreenToAodOrDozing() {
         scope.launch {
-            keyguardInteractor.wakefulnessModel
+            powerInteractor.isAsleep
                 .sample(
                     combine(
                         transitionInteractor.startedKeyguardTransitionStep,
@@ -344,11 +345,8 @@ constructor(
                     ),
                     ::toTriple
                 )
-                .collect { (wakefulnessState, lastStartedStep, isAodAvailable) ->
-                    if (
-                        lastStartedStep.to == KeyguardState.LOCKSCREEN &&
-                            wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP
-                    ) {
+                .collect { (isAsleep, lastStartedStep, isAodAvailable) ->
+                    if (lastStartedStep.to == KeyguardState.LOCKSCREEN && isAsleep) {
                         startTransitionTo(
                             if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
                         )

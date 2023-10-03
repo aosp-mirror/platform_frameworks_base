@@ -18,7 +18,7 @@ package com.android.systemui.shade
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.power.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView
@@ -293,7 +293,7 @@ interface ShadeViewController {
          */
         @JvmStatic
         fun getFalsingThresholdFactor(wakefulness: WakefulnessModel): Float {
-            return if (wakefulness.isDeviceInteractiveFromTapOrGesture()) 1.5f else 1.0f
+            return if (wakefulness.isAwakeFromTapOrGesture()) 1.5f else 1.0f
         }
 
         const val WAKEUP_ANIMATION_DELAY_MS = 250

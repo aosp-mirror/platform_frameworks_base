@@ -26,9 +26,10 @@ import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealEffect
 import junit.framework.Assert.assertEquals
@@ -50,6 +51,8 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class LightRevealScrimRepositoryTest : SysuiTestCase() {
     private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
+    private lateinit var powerRepository: FakePowerRepository
+    private lateinit var powerInteractor: PowerInteractor
     private lateinit var underTest: LightRevealScrimRepositoryImpl
 
     @get:Rule val animatorTestRule = AnimatorTestRule()
@@ -58,7 +61,16 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         fakeKeyguardRepository = FakeKeyguardRepository()
-        underTest = LightRevealScrimRepositoryImpl(fakeKeyguardRepository, context)
+        powerRepository = FakePowerRepository()
+        powerInteractor = PowerInteractorFactory.create(
+                repository = powerRepository
+        ).powerInteractor
+
+        underTest = LightRevealScrimRepositoryImpl(
+                fakeKeyguardRepository,
+                context,
+                powerInteractor,
+        )
     }
 
     @Test
@@ -66,13 +78,7 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
         val values = mutableListOf<LightRevealEffect>()
         val job = launch { underTest.revealEffect.collect { values.add(it) } }
 
-        fakeKeyguardRepository.setWakefulnessModel(
-            WakefulnessModel(
-                WakefulnessState.STARTING_TO_WAKE,
-                WakeSleepReason.OTHER,
-                WakeSleepReason.OTHER
-            )
-        )
+        powerInteractor.setAwakeForTest()
         // We should initially emit the default reveal effect.
         runCurrent()
         values.assertEffectsMatchPredicates({ it == DEFAULT_REVEAL_EFFECT })

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.shared.model
+package com.android.systemui.power.shared.model
 
 import android.os.PowerManager
 

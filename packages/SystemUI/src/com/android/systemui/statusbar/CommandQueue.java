@@ -69,6 +69,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.GcUtils;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.dump.DumpHandler;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
@@ -79,6 +80,8 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+
+import dagger.Lazy;
 
 /**
  * This class takes the functions from IStatusBar that come in on
@@ -195,6 +198,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private final DisplayTracker mDisplayTracker;
     private final @Nullable CommandRegistry mRegistry;
     private final @Nullable DumpHandler mDumpHandler;
+    private final @Nullable Lazy<PowerInteractor> mPowerInteractor;
 
     /**
      * These methods are called back on the main thread.
@@ -512,14 +516,15 @@ public class CommandQueue extends IStatusBar.Stub implements
 
     @VisibleForTesting
     public CommandQueue(Context context, DisplayTracker displayTracker) {
-        this(context, displayTracker, null, null);
+        this(context, displayTracker, null, null, null);
     }
 
     public CommandQueue(
             Context context,
             DisplayTracker displayTracker,
             CommandRegistry registry,
-            DumpHandler dumpHandler
+            DumpHandler dumpHandler,
+            Lazy<PowerInteractor> powerInteractor
     ) {
         mDisplayTracker = displayTracker;
         mRegistry = registry;
@@ -539,6 +544,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         }, new HandlerExecutor(mHandler));
         // We always have default display.
         setDisabled(mDisplayTracker.getDefaultDisplayId(), DISABLE_NONE, DISABLE2_NONE);
+        mPowerInteractor = powerInteractor;
     }
 
     // TODO(b/118592525): add multi-display support if needed.
@@ -879,6 +885,10 @@ public class CommandQueue extends IStatusBar.Stub implements
     @Override
     public void onCameraLaunchGestureDetected(int source) {
         synchronized (mLock) {
+            if (mPowerInteractor != null) {
+                mPowerInteractor.get().onCameraLaunchGestureDetected();
+            }
+
             mHandler.removeMessages(MSG_CAMERA_LAUNCH_GESTURE);
             mHandler.obtainMessage(MSG_CAMERA_LAUNCH_GESTURE, source, 0).sendToTarget();
         }

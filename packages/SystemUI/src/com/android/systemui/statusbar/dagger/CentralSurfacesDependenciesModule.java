@@ -184,9 +184,10 @@ public interface CentralSurfacesDependenciesModule {
             Context context,
             DisplayTracker displayTracker,
             CommandRegistry registry,
-            DumpHandler dumpHandler
+            DumpHandler dumpHandler,
+            Lazy<PowerInteractor> powerInteractor
     ) {
-        return new CommandQueue(context, displayTracker, registry, dumpHandler);
+        return new CommandQueue(context, displayTracker, registry, dumpHandler, powerInteractor);
     }
 
     /**

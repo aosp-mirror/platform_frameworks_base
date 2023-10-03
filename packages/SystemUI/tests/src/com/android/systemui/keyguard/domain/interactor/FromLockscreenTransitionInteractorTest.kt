@@ -23,6 +23,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import dagger.Lazy
 import junit.framework.Assert.assertEquals
@@ -60,6 +61,7 @@ class FromLockscreenTransitionInteractorTest : KeyguardTransitionInteractorTestC
                 keyguardInteractor = super.keyguardInteractor,
                 flags = FakeFeatureFlags(),
                 shadeRepository = FakeShadeRepository(),
+                powerInteractor = PowerInteractorFactory.create().powerInteractor,
             )
     }
 

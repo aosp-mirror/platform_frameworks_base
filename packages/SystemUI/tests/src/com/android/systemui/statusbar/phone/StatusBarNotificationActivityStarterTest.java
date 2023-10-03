@@ -67,12 +67,12 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.data.repository.FakePowerRepository;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeViewController;
@@ -212,12 +212,11 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 UserHandle.of(ActivityManager.getCurrentUser()));
 
         mPowerRepository = new FakePowerRepository();
-        mPowerInteractor = new PowerInteractor(
+        mPowerInteractor = PowerInteractorFactory.create(
                 mPowerRepository,
-                new FakeKeyguardRepository(),
                 new FalsingCollectorFake(),
                 mScreenOffAnimationController,
-                mStatusBarStateController);
+                mStatusBarStateController).getPowerInteractor();
 
         HeadsUpManagerPhone headsUpManager = mock(HeadsUpManagerPhone.class);
         NotificationLaunchAnimatorControllerProvider notificationAnimationProvider =

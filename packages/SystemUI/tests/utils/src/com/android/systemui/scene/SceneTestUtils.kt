@@ -43,10 +43,8 @@ import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
@@ -83,21 +81,12 @@ class SceneTestUtils(
             currentTime = { testScope.currentTime },
         )
     }
-    val keyguardRepository: FakeKeyguardRepository by lazy {
-        FakeKeyguardRepository().apply {
-            setWakefulnessModel(
-                WakefulnessModel(
-                    WakefulnessState.AWAKE,
-                    WakeSleepReason.OTHER,
-                    WakeSleepReason.OTHER,
-                )
-            )
-        }
-    }
+
     val communalRepository: FakeCommunalRepository by lazy { FakeCommunalRepository() }
     private val communalWidgetRepository: FakeCommunalWidgetRepository by lazy {
         FakeCommunalWidgetRepository()
     }
+    val keyguardRepository: FakeKeyguardRepository by lazy { FakeKeyguardRepository() }
     val powerRepository: FakePowerRepository by lazy { FakePowerRepository() }
 
     private val userRepository: UserRepository by lazy {
@@ -189,6 +178,7 @@ class SceneTestUtils(
             configurationRepository = FakeConfigurationRepository(),
             shadeRepository = FakeShadeRepository(),
             sceneInteractorProvider = { sceneInteractor() },
+            powerInteractor = PowerInteractorFactory.create().powerInteractor,
         )
     }
 

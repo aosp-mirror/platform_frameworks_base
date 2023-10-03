@@ -24,10 +24,12 @@ import com.android.systemui.authentication.data.repository.FakeAuthenticationRep
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.model.SysUiState
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.SceneTestUtils.Companion.toDataLayer
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.model.ObservableTransitionState
@@ -158,6 +160,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         utils.keyguardInteractor(
             repository = keyguardRepository,
         )
+    private val powerInteractor = PowerInteractorFactory.create().powerInteractor
 
     private var bouncerSceneJob: Job? = null
 
@@ -197,6 +200,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 displayId = displayTracker.defaultDisplayId,
                 sceneLogger = mock(),
                 falsingCollector = utils.falsingCollector(),
+                powerInteractor = powerInteractor,
             )
         startable.start()
 
@@ -571,18 +575,12 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     /** Changes device wakefulness state from asleep to awake, going through intermediary states. */
     private fun TestScope.wakeUpDevice() {
-        val wakefulnessModel = keyguardRepository.wakefulness.value
+        val wakefulnessModel = powerInteractor.detailedWakefulness.value
         assertWithMessage("Cannot wake up device as it's already awake!")
-            .that(wakefulnessModel.isStartingToWakeOrAwake())
+            .that(wakefulnessModel.isAwake())
             .isFalse()
 
-        keyguardRepository.setWakefulnessModel(
-            wakefulnessModel.copy(state = WakefulnessState.STARTING_TO_WAKE)
-        )
-        runCurrent()
-        keyguardRepository.setWakefulnessModel(
-            wakefulnessModel.copy(state = WakefulnessState.AWAKE)
-        )
+        powerInteractor.setAwakeForTest()
         runCurrent()
     }
 
@@ -590,18 +588,12 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private suspend fun TestScope.putDeviceToSleep(
         instantlyLockDevice: Boolean = true,
     ) {
-        val wakefulnessModel = keyguardRepository.wakefulness.value
+        val wakefulnessModel = powerInteractor.detailedWakefulness.value
         assertWithMessage("Cannot put device to sleep as it's already asleep!")
-            .that(wakefulnessModel.isStartingToWakeOrAwake())
+            .that(wakefulnessModel.isAwake())
             .isTrue()
 
-        keyguardRepository.setWakefulnessModel(
-            wakefulnessModel.copy(state = WakefulnessState.STARTING_TO_SLEEP)
-        )
-        runCurrent()
-        keyguardRepository.setWakefulnessModel(
-            wakefulnessModel.copy(state = WakefulnessState.ASLEEP)
-        )
+        powerInteractor.setAsleepForTest()
         runCurrent()
 
         if (instantlyLockDevice) {

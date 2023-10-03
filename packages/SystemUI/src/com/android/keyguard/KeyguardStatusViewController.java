@@ -55,9 +55,9 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
-import com.android.systemui.keyguard.shared.model.ScreenModel;
-import com.android.systemui.keyguard.shared.model.ScreenState;
+import com.android.systemui.power.shared.model.ScreenPowerState;
 import com.android.systemui.plugins.ClockController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -68,12 +68,12 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
-import kotlin.coroutines.CoroutineContext;
-import kotlin.coroutines.EmptyCoroutineContext;
-
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
+
+import kotlin.coroutines.CoroutineContext;
+import kotlin.coroutines.EmptyCoroutineContext;
 
 /**
  * Injectable controller for {@link KeyguardStatusView}.
@@ -101,6 +101,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final Rect mClipBounds = new Rect();
     private final KeyguardInteractor mKeyguardInteractor;
+    private final PowerInteractor mPowerInteractor;
 
     private Boolean mSplitShadeEnabled = false;
     private Boolean mStatusViewCentered = true;
@@ -134,7 +135,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             FeatureFlags featureFlags,
             InteractionJankMonitor interactionJankMonitor,
             KeyguardInteractor keyguardInteractor,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            PowerInteractor powerInteractor) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
@@ -147,6 +149,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mFeatureFlags = featureFlags;
         mDumpManager = dumpManager;
         mKeyguardInteractor = keyguardInteractor;
+        mPowerInteractor = powerInteractor;
     }
 
     @Override
@@ -207,9 +210,9 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                         dozeTimeTick();
                 }, context);
 
-        collectFlow(mView, mKeyguardInteractor.getScreenModel(),
-                (ScreenModel model) -> {
-                    if (model.getState() == ScreenState.SCREEN_TURNING_ON) {
+        collectFlow(mView, mPowerInteractor.getScreenPowerState(),
+                (ScreenPowerState powerState) -> {
+                    if (powerState == ScreenPowerState.SCREEN_TURNING_ON) {
                         dozeTimeTick();
                     }
                 }, context);

@@ -21,6 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.init.NotificationsController
@@ -42,6 +43,7 @@ constructor(
     private val windowRootViewVisibilityRepository: WindowRootViewVisibilityRepository,
     private val keyguardRepository: KeyguardRepository,
     private val headsUpManager: HeadsUpManager,
+    private val powerInteractor: PowerInteractor,
 ) : CoreStartable {
 
     private var notificationPresenter: NotificationPresenter? = null
@@ -67,9 +69,9 @@ constructor(
     val isLockscreenOrShadeVisibleAndInteractive: StateFlow<Boolean> =
         combine(
                 isLockscreenOrShadeVisible,
-                keyguardRepository.wakefulness,
-            ) { isKeyguardAodOrShadeVisible, wakefulness ->
-                isKeyguardAodOrShadeVisible && wakefulness.isDeviceInteractive()
+                powerInteractor.isAwake,
+            ) { isKeyguardAodOrShadeVisible, isAwake ->
+                isKeyguardAodOrShadeVisible && isAwake
             }
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 

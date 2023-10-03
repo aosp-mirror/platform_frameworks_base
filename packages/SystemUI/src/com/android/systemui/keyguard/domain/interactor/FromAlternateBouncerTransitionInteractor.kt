@@ -21,17 +21,17 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.sample
 import com.android.wm.shell.animation.Interpolators
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @SysUISingleton
 class FromAlternateBouncerTransitionInteractor
@@ -41,6 +41,7 @@ constructor(
     override val transitionInteractor: KeyguardTransitionInteractor,
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
+    private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.ALTERNATE_BOUNCER,
@@ -64,7 +65,7 @@ constructor(
                     combine(
                         keyguardInteractor.primaryBouncerShowing,
                         transitionInteractor.startedKeyguardTransitionStep,
-                        keyguardInteractor.wakefulnessModel,
+                        powerInteractor.isAwake,
                         keyguardInteractor.isAodAvailable,
                         ::toQuad
                     ),
@@ -75,7 +76,7 @@ constructor(
                         isAlternateBouncerShowing,
                         isPrimaryBouncerShowing,
                         lastStartedTransitionStep,
-                        wakefulnessState,
+                        isAwake,
                         isAodAvailable) ->
                     if (
                         !isAlternateBouncerShowing &&
@@ -83,10 +84,7 @@ constructor(
                             lastStartedTransitionStep.to == KeyguardState.ALTERNATE_BOUNCER
                     ) {
                         val to =
-                            if (
-                                wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP ||
-                                    wakefulnessState.state == WakefulnessState.ASLEEP
-                            ) {
+                            if (!isAwake) {
                                 if (isAodAvailable) {
                                     KeyguardState.AOD
                                 } else {
