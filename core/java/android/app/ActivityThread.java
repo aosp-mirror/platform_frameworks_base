@@ -36,6 +36,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
 import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
@@ -100,6 +101,7 @@ import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.ResourcesImpl;
 import android.content.res.loader.ResourcesLoader;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
@@ -292,6 +294,7 @@ public final class ActivityThread extends ClientTransactionHandler
     public static final boolean DEBUG_MEMORY_TRIM = false;
     private static final boolean DEBUG_PROVIDER = false;
     public static final boolean DEBUG_ORDER = false;
+    private static final boolean DEBUG_APP_INFO = true;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     /**
      * The delay to release the provider when it has no more references. It reduces the number of
@@ -6435,9 +6438,34 @@ public final class ActivityThread extends ClientTransactionHandler
             resApk.updateApplicationInfo(ai, oldPaths);
         }
 
+        ResourcesImpl beforeImpl = getApplication().getResources().getImpl();
+
         synchronized (mResourcesManager) {
             // Update all affected Resources objects to use new ResourcesImpl
             mResourcesManager.applyAllPendingAppInfoUpdates();
+        }
+
+        ResourcesImpl afterImpl = getApplication().getResources().getImpl();
+
+        if ((beforeImpl != afterImpl) && !Arrays.equals(beforeImpl.getAssets().getApkAssets(),
+                afterImpl.getAssets().getApkAssets())) {
+            List<String> beforeAssets = Arrays.asList(beforeImpl.getAssets().getApkPaths());
+            List<String> afterAssets = Arrays.asList(afterImpl.getAssets().getApkPaths());
+
+            List<String> onlyBefore = new ArrayList<>(beforeAssets);
+            onlyBefore.removeAll(afterAssets);
+            List<String> onlyAfter = new ArrayList<>(afterAssets);
+            onlyAfter.removeAll(beforeAssets);
+
+            Slog.i(TAG, "ApplicationInfo updating for " + ai.packageName + ", new timestamp: "
+                    + ai.createTimestamp + "\nassets removed: " + onlyBefore + "\nassets added: "
+                    + onlyAfter);
+
+            if (DEBUG_APP_INFO) {
+                Slog.v(TAG, "ApplicationInfo updating for " + ai.packageName
+                        + ", assets before change: " + beforeAssets + "\n assets after change: "
+                        + afterAssets);
+            }
         }
     }
 
