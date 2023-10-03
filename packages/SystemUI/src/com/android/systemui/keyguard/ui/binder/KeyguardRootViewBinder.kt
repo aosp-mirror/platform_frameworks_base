@@ -23,7 +23,6 @@ import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
-import com.android.systemui.res.R
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
@@ -32,12 +31,15 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.plugins.ClockController
+import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
+import javax.inject.Provider
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -57,6 +59,7 @@ object KeyguardRootViewBinder {
         chipbarCoordinator: ChipbarCoordinator,
         keyguardStateController: KeyguardStateController,
         shadeInteractor: ShadeInteractor,
+        clockControllerProvider: Provider<ClockController>?,
     ): DisposableHandle {
         val disposableHandle =
             view.repeatWhenAttached {
@@ -83,10 +86,37 @@ object KeyguardRootViewBinder {
 
                     if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
                         launch {
-                            viewModel.translationY.collect {
-                                val statusView =
-                                    view.requireViewById<View>(R.id.keyguard_status_view)
-                                statusView.translationY = it
+                            viewModel.translationY.collect { y ->
+                                val burnInLayer = view.requireViewById<View>(R.id.burn_in_layer)
+                                burnInLayer.translationY = y
+                            }
+                        }
+                    }
+
+                    if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+                        launch {
+                            viewModel.translationX.collect { x ->
+                                val burnInLayer = view.requireViewById<View>(R.id.burn_in_layer)
+                                burnInLayer.translationX = x
+                            }
+                        }
+                    }
+
+                    if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+                        launch {
+                            viewModel.scale.collect { (scale, scaleClockOnly) ->
+                                if (scaleClockOnly) {
+                                    val largeClock =
+                                        view.findViewById<View?>(R.id.lockscreen_clock_view_large)
+                                    largeClock?.let {
+                                        it.scaleX = scale
+                                        it.scaleY = scale
+                                    }
+                                } else {
+                                    val burnInLayer = view.requireViewById<View>(R.id.burn_in_layer)
+                                    burnInLayer.scaleX = scale
+                                    burnInLayer.scaleY = scale
+                                }
                             }
                         }
                     }
@@ -141,6 +171,7 @@ object KeyguardRootViewBinder {
                     }
                 }
             }
+        viewModel.clockControllerProvider = clockControllerProvider
 
         onLayoutChangeListener = OnLayoutChange(viewModel)
         view.addOnLayoutChangeListener(onLayoutChangeListener)

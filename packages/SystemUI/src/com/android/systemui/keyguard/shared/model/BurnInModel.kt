@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.doze.util
+package com.android.systemui.keyguard.shared.model
 
-import javax.inject.Inject
-
-/** Injectable wrapper around `BurnInHelper` functions */
-class BurnInHelperWrapper @Inject constructor() {
-
-    fun burnInOffset(amplitude: Int, xAxis: Boolean): Int {
-        return getBurnInOffset(amplitude, xAxis)
-    }
-
-    fun burnInProgressOffset(): Float {
-        return getBurnInProgressOffset()
-    }
-
-    fun burnInScale(): Float {
-        return getBurnInScale()
-    }
-}
+/** Clock burn-in translation/scaling data */
+data class BurnInModel(
+    val translationX: Int = 0,
+    val translationY: Int = 0,
+    val scale: Float = 0f,
+    val scaleClockOnly: Boolean = false,
+)
