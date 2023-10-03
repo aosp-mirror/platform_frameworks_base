@@ -62,6 +62,18 @@ public final class TextFlags {
     };
 
     /**
+     * List of the default values of the text flags.
+     *
+     * The order must be the same to the TEXT_ACONFIG_FLAGS.
+     */
+    public static final boolean[] TEXT_ACONFIG_DEFAULT_VALUE = {
+            Flags.deprecateFontsXml(),
+            Flags.noBreakNoHyphenationSpan(),
+            Flags.phraseStrictFallback(),
+            Flags.useBoundsForWidth(),
+    };
+
+    /**
      * Get a key for the feature flag.
      */
     public static String getKeyForFlag(@NonNull String flag) {

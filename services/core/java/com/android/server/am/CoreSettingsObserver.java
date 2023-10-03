@@ -175,13 +175,15 @@ final class CoreSettingsObserver extends ContentObserver {
                 TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT));
 
         // Register all text aconfig flags.
-        for (String flag : TextFlags.TEXT_ACONFIGS_FLAGS) {
+        for (int i = 0; i < TextFlags.TEXT_ACONFIGS_FLAGS.length; i++) {
+            final String flag = TextFlags.TEXT_ACONFIGS_FLAGS[i];
+            final boolean defaultValue = TextFlags.TEXT_ACONFIG_DEFAULT_VALUE[i];
             sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
                     TextFlags.NAMESPACE,
                     flag,
                     TextFlags.getKeyForFlag(flag),
                     boolean.class,
-                    false));  // All aconfig flags are false by default.
+                    defaultValue));
         }
         // add other device configs here...
     }
