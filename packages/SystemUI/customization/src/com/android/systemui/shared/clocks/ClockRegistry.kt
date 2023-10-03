@@ -509,7 +509,6 @@ open class ClockRegistry(
 
     private var isQueued = AtomicBoolean(false)
     fun verifyLoadedProviders() {
-        Log.i(TAG, Thread.currentThread().getStackTrace().toString())
         val shouldSchedule = isQueued.compareAndSet(false, true)
         if (!shouldSchedule) {
             logger.tryLog(
