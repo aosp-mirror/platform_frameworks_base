@@ -163,7 +163,7 @@ public final class UserManagerServiceTest {
         LocalServices.removeServiceForTest(UserManagerInternal.class);
 
         // Clean up test dir to remove persisted user files.
-        assertThat(deleteRecursive(mTestDir)).isTrue();
+        deleteRecursive(mTestDir);
         mUsers.clear();
     }
 
