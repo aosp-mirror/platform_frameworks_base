@@ -2262,5 +2262,8 @@ public class BubblesTest extends SysuiTestCase {
         public boolean isBubbleBarEnabled() {
             return mIsBubbleBarEnabled;
         }
+
+        @Override
+        public void refresh() {}
     }
 }
