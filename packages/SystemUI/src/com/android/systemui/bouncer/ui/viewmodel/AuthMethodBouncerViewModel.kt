@@ -17,7 +17,6 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.annotation.StringRes
-import android.util.Log
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
@@ -105,9 +104,7 @@ sealed class AuthMethodBouncerViewModel(
      */
     protected fun tryAuthenticate(useAutoConfirm: Boolean = false) {
         viewModelScope.launch {
-            Log.d("Danny", "tryAuthenticate(useAutoConfirm=$useAutoConfirm)")
             val authenticationResult = interactor.authenticate(getInput(), useAutoConfirm)
-            Log.d("Danny", "result = $authenticationResult")
             if (authenticationResult == AuthenticationResult.SKIPPED && useAutoConfirm) {
                 return@launch
             }

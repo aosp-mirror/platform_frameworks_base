@@ -19,7 +19,6 @@ package com.android.systemui.scene
 import android.content.pm.UserInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import android.util.Log
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
@@ -220,7 +219,6 @@ class SceneTestUtils(
         authenticationInteractor: AuthenticationInteractor,
         users: List<UserViewModel> = createUsers(),
     ): BouncerViewModel {
-        Log.d("ALE", "users=$users")
         return BouncerViewModel(
             applicationContext = context,
             applicationScope = applicationScope(),
