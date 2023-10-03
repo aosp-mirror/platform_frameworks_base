@@ -122,7 +122,8 @@ class SwipeToSceneTest {
         assertThat(transition.toScene).isEqualTo(TestScenes.SceneB)
         assertThat(transition.currentScene).isEqualTo(TestScenes.SceneA)
         assertThat(transition.progress).isEqualTo(55.dp / LayoutWidth)
-        assertThat(transition.isUserInputDriven).isTrue()
+        assertThat(transition.isInitiatedByUserInput).isTrue()
+        assertThat(transition.isUserInputOngoing).isTrue()
 
         // Release the finger. We should now be animating back to A (currentScene = SceneA) given
         // that 55dp < positional threshold.
@@ -134,7 +135,8 @@ class SwipeToSceneTest {
         assertThat(transition.toScene).isEqualTo(TestScenes.SceneB)
         assertThat(transition.currentScene).isEqualTo(TestScenes.SceneA)
         assertThat(transition.progress).isEqualTo(55.dp / LayoutWidth)
-        assertThat(transition.isUserInputDriven).isTrue()
+        assertThat(transition.isInitiatedByUserInput).isTrue()
+        assertThat(transition.isUserInputOngoing).isFalse()
 
         // Wait for the animation to finish. We should now be in scene A.
         rule.waitForIdle()
@@ -156,7 +158,8 @@ class SwipeToSceneTest {
         assertThat(transition.toScene).isEqualTo(TestScenes.SceneC)
         assertThat(transition.currentScene).isEqualTo(TestScenes.SceneA)
         assertThat(transition.progress).isEqualTo(56.dp / LayoutHeight)
-        assertThat(transition.isUserInputDriven).isTrue()
+        assertThat(transition.isInitiatedByUserInput).isTrue()
+        assertThat(transition.isUserInputOngoing).isTrue()
 
         // Release the finger. We should now be animating to C (currentScene = SceneC) given
         // that 56dp >= positional threshold.
@@ -168,7 +171,8 @@ class SwipeToSceneTest {
         assertThat(transition.toScene).isEqualTo(TestScenes.SceneC)
         assertThat(transition.currentScene).isEqualTo(TestScenes.SceneC)
         assertThat(transition.progress).isEqualTo(56.dp / LayoutHeight)
-        assertThat(transition.isUserInputDriven).isTrue()
+        assertThat(transition.isInitiatedByUserInput).isTrue()
+        assertThat(transition.isUserInputOngoing).isFalse()
 
         // Wait for the animation to finish. We should now be in scene C.
         rule.waitForIdle()

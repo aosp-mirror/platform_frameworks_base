@@ -812,6 +812,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Bouncer,
                     flowOf(.5f),
                     false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer, null), "reason")
@@ -827,7 +828,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Bouncer,
                     SceneKey.Gone,
                     flowOf(.5f),
-                    false
+                    false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")
@@ -844,7 +846,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Gone,
                     SceneKey.Bouncer,
                     flowOf(.5f),
-                    false
+                    false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer, null), "reason")
@@ -862,7 +865,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Bouncer,
                     SceneKey.Gone,
                     flowOf(.5f),
-                    false
+                    false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")
@@ -878,6 +882,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Lockscreen,
                     flowOf(.5f),
                     false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen, null), "reason")
@@ -895,6 +900,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Gone,
                     flowOf(.5f),
                     false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")

@@ -86,7 +86,8 @@ class SceneInteractorTest : SysuiTestCase() {
                     fromScene = SceneKey.Lockscreen,
                     toScene = SceneKey.Shade,
                     progress = progress,
-                    isUserInputDriven = false,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
                 )
             assertThat(reflectedTransitionState).isEqualTo(transitionState.value)
 
@@ -124,7 +125,8 @@ class SceneInteractorTest : SysuiTestCase() {
                     fromScene = underTest.desiredScene.value.key,
                     toScene = SceneKey.Shade,
                     progress = progress,
-                    isUserInputDriven = false,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
                 )
             assertThat(transitionTo).isEqualTo(SceneKey.Shade)
 
@@ -161,7 +163,8 @@ class SceneInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Gone,
                         toScene = SceneKey.Lockscreen,
                         progress = flowOf(0.5f),
-                        isUserInputDriven = false,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
                     )
                 )
             val transitioning by
@@ -180,7 +183,8 @@ class SceneInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Shade,
                         toScene = SceneKey.QuickSettings,
                         progress = flowOf(0.5f),
-                        isUserInputDriven = false,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
                     )
                 )
             underTest.setTransitionState(transitionState)
@@ -197,7 +201,8 @@ class SceneInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Shade,
                         toScene = SceneKey.Lockscreen,
                         progress = flowOf(0.5f),
-                        isUserInputDriven = false,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
                     )
                 )
             val transitioning by
@@ -225,7 +230,8 @@ class SceneInteractorTest : SysuiTestCase() {
                     fromScene = SceneKey.Shade,
                     toScene = SceneKey.Lockscreen,
                     progress = flowOf(0.5f),
-                    isUserInputDriven = false,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
                 )
             assertThat(transitioning).isTrue()
 

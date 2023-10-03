@@ -51,6 +51,7 @@ import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -462,7 +463,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 fromScene = getCurrentSceneInUi(),
                 toScene = to.key,
                 progress = progressFlow,
-                isUserInputDriven = false,
+                isInitiatedByUserInput = false,
+                isUserInputOngoing = flowOf(false),
             )
         runCurrent()
 

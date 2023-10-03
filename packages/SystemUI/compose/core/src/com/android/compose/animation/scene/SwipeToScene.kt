@@ -66,7 +66,7 @@ internal fun Modifier.swipeToScene(
     // swipe in the other direction.
     val startDragImmediately =
         state == transition &&
-            transition.isAnimatingOffset &&
+            !transition.isUserInputOngoing &&
             !currentScene.shouldEnableSwipes(orientation.opposite())
 
     // The velocity threshold at which the intent of the user is to swipe up or down. It is the same
@@ -126,7 +126,7 @@ private class SwipeTransition(initialScene: Scene) : TransitionState.Transition 
 
     override val progress: Float
         get() {
-            val offset = if (isAnimatingOffset) offsetAnimatable.value else dragOffset
+            val offset = if (isUserInputOngoing) dragOffset else offsetAnimatable.value
             if (distance == 0f) {
                 // This can happen only if fromScene == toScene.
                 error(
@@ -137,15 +137,14 @@ private class SwipeTransition(initialScene: Scene) : TransitionState.Transition 
             return offset / distance
         }
 
-    override val isUserInputDriven = true
+    override val isInitiatedByUserInput = true
+
+    var _isUserInputOngoing by mutableStateOf(false)
+    override val isUserInputOngoing: Boolean
+        get() = _isUserInputOngoing
 
     /** The current offset caused by the drag gesture. */
     var dragOffset by mutableFloatStateOf(0f)
-
-    /**
-     * Whether the offset is animated (the user lifted their finger) or if it is driven by gesture.
-     */
-    var isAnimatingOffset by mutableStateOf(false)
 
     /** The animatable used to animate the offset once the user lifted its finger. */
     val offsetAnimatable = Animatable(0f, visibilityThreshold = OffsetVisibilityThreshold)
@@ -209,9 +208,11 @@ private fun onDragStarted(
     transition: SwipeTransition,
     orientation: Orientation,
 ) {
+    transition._isUserInputOngoing = true
+
     if (layoutImpl.state.transitionState == transition) {
         // This [transition] was already driving the animation: simply take over it.
-        if (transition.isAnimatingOffset) {
+        if (!transition.isUserInputOngoing) {
             // Stop animating and start from where the current offset. Setting the animation job to
             // `null` will effectively cancel the animation.
             transition.stopOffsetAnimation()
@@ -456,30 +457,29 @@ private fun CoroutineScope.animateOffset(
 ) {
     transition.startOffsetAnimation {
         launch {
-                if (!transition.isAnimatingOffset) {
-                    transition.offsetAnimatable.snapTo(transition.dragOffset)
-                }
-                transition.isAnimatingOffset = true
-
-                transition.offsetAnimatable.animateTo(
-                    targetOffset,
-                    // TODO(b/290184746): Make this spring spec configurable.
-                    spring(
-                        stiffness = Spring.StiffnessMediumLow,
-                        visibilityThreshold = OffsetVisibilityThreshold
-                    ),
-                    initialVelocity = initialVelocity,
-                )
-
-                // Now that the animation is done, the state should be idle. Note that if the state
-                // was changed since this animation started, some external code changed it and we
-                // shouldn't do anything here. Note also that this job will be cancelled in the case
-                // where the user intercepts this swipe.
-                if (layoutImpl.state.transitionState == transition) {
-                    layoutImpl.state.transitionState = TransitionState.Idle(targetScene)
-                }
+            if (transition.isUserInputOngoing) {
+                transition.offsetAnimatable.snapTo(transition.dragOffset)
             }
-            .also { it.invokeOnCompletion { transition.isAnimatingOffset = false } }
+            transition._isUserInputOngoing = false
+
+            transition.offsetAnimatable.animateTo(
+                targetOffset,
+                // TODO(b/290184746): Make this spring spec configurable.
+                spring(
+                    stiffness = Spring.StiffnessMediumLow,
+                    visibilityThreshold = OffsetVisibilityThreshold
+                ),
+                initialVelocity = initialVelocity,
+            )
+
+            // Now that the animation is done, the state should be idle. Note that if the state
+            // was changed since this animation started, some external code changed it and we
+            // shouldn't do anything here. Note also that this job will be cancelled in the case
+            // where the user intercepts this swipe.
+            if (layoutImpl.state.transitionState == transition) {
+                layoutImpl.state.transitionState = TransitionState.Idle(targetScene)
+            }
+        }
     }
 }
 
