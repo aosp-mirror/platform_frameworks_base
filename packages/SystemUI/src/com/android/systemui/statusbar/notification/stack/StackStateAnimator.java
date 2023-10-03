@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -346,15 +349,13 @@ public class StackStateAnimator {
             ArrayList<NotificationStackScrollLayout.AnimationEvent> animationEvents) {
         boolean needsCustomAnimation = false;
         for (NotificationStackScrollLayout.AnimationEvent event : animationEvents) {
-            final ExpandableView changingView = (ExpandableView) event.mChangingView;
+            final ExpandableView changingView = event.mChangingView;
             boolean loggable = false;
             boolean isHeadsUp = false;
-            boolean isGroupChild = false;
             String key = null;
             if (changingView instanceof ExpandableNotificationRow && mLogger != null) {
                 loggable = true;
                 isHeadsUp = ((ExpandableNotificationRow) changingView).isHeadsUp();
-                isGroupChild = changingView.isChildInGroup();
                 key = ((ExpandableNotificationRow) changingView).getEntry().getKey();
             }
             if (event.animationType ==
@@ -374,7 +375,11 @@ public class StackStateAnimator {
 
             } else if (event.animationType ==
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE) {
-                if (changingView.getVisibility() != View.VISIBLE) {
+                int changingViewVisibility = changingView.getVisibility();
+                if (loggable) {
+                    mLogger.processAnimationEventsRemoval(key, changingViewVisibility, isHeadsUp);
+                }
+                if (changingViewVisibility != View.VISIBLE) {
                     changingView.removeFromTransientContainer();
                     continue;
                 }
@@ -410,15 +415,20 @@ public class StackStateAnimator {
                     translationDirection = Math.max(Math.min(translationDirection, 1.0f),-1.0f);
 
                 }
-                Runnable postAnimation = () -> {
-                    changingView.setInRemovalAnimation(false);
-                    changingView.removeFromTransientContainer();
-                };
-                Runnable startAnimation = ()-> {
-                    changingView.setInRemovalAnimation(true);
-                };
+                Runnable postAnimation;
+                Runnable startAnimation;
                 if (loggable) {
                     String finalKey = key;
+                    final boolean finalIsHeadsHp = isHeadsUp;
+                    startAnimation = () -> {
+                        mLogger.animationStart(finalKey, "ANIMATION_TYPE_REMOVE", finalIsHeadsHp);
+                        changingView.setInRemovalAnimation(true);
+                    };
+                    postAnimation = () -> {
+                        mLogger.animationEnd(finalKey, "ANIMATION_TYPE_REMOVE", finalIsHeadsHp);
+                        changingView.setInRemovalAnimation(false);
+                        changingView.removeFromTransientContainer();
+                    };
                     if (isHeadsUp) {
                         mLogger.logHUNViewDisappearingWithRemoveEvent(key);
                         postAnimation = () -> {
@@ -426,14 +436,15 @@ public class StackStateAnimator {
                             mLogger.disappearAnimationEnded(finalKey);
                             changingView.removeFromTransientContainer();
                         };
-                    } else if (isGroupChild) {
-                        mLogger.groupChildRemovalEventProcessed(key);
-                        postAnimation = () -> {
-                            changingView.setInRemovalAnimation(false);
-                            mLogger.groupChildRemovalAnimationEnded(finalKey);
-                            changingView.removeFromTransientContainer();
-                        };
                     }
+                } else {
+                    startAnimation = ()-> {
+                        changingView.setInRemovalAnimation(true);
+                    };
+                    postAnimation = () -> {
+                        changingView.setInRemovalAnimation(false);
+                        changingView.removeFromTransientContainer();
+                    };
                 }
                 changingView.performRemoveAnimation(ANIMATION_DURATION_APPEAR_DISAPPEAR,
                         0 /* delay */, translationDirection, false /* isHeadsUpAppear */,
@@ -441,7 +452,11 @@ public class StackStateAnimator {
                 needsCustomAnimation = true;
             } else if (event.animationType ==
                 NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
-                if (mHostLayout.isFullySwipedOut(changingView)) {
+                boolean isFullySwipedOut = mHostLayout.isFullySwipedOut(changingView);
+                if (loggable) {
+                    mLogger.processAnimationEventsRemoveSwipeOut(key, isFullySwipedOut, isHeadsUp);
+                }
+                if (isFullySwipedOut) {
                     changingView.removeFromTransientContainer();
                 }
             } else if (event.animationType == NotificationStackScrollLayout
@@ -472,10 +487,8 @@ public class StackStateAnimator {
                 }
 
                 mTmpState.applyToView(changingView);
-            } else if (event.animationType == NotificationStackScrollLayout
-                            .AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR
-                    || event.animationType == NotificationStackScrollLayout
-                            .AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK) {
+            } else if (event.animationType == ANIMATION_TYPE_HEADS_UP_DISAPPEAR
+                    || event.animationType == ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK) {
                 mHeadsUpDisappearChildren.add(changingView);
                 Runnable endRunnable = null;
                 if (changingView.getParent() == null) {
@@ -499,24 +512,38 @@ public class StackStateAnimator {
                     // We need to add the global animation listener, since once no animations are
                     // running anymore, the panel will instantly hide itself. We need to wait until
                     // the animation is fully finished for this though.
-                    Runnable tmpEndRunnable = endRunnable;
-                    Runnable postAnimation = () -> {
-                        changingView.setInRemovalAnimation(false);
-                        if (tmpEndRunnable != null) {
-                            tmpEndRunnable.run();
-                        }
-                    };
-                    Runnable startAnimation = () -> {
-                        changingView.setInRemovalAnimation(true);
-                    };
+                    final Runnable tmpEndRunnable = endRunnable;
+                    Runnable postAnimation;
+                    Runnable startAnimation;
                     if (loggable) {
                         mLogger.logHUNViewDisappearing(key);
-
-                        Runnable tmpPostAnimation = postAnimation;
                         String finalKey1 = key;
+                        final boolean finalIsHeadsUp = isHeadsUp;
+                        final String type =
+                                event.animationType == ANIMATION_TYPE_HEADS_UP_DISAPPEAR
+                                        ? "ANIMATION_TYPE_HEADS_UP_DISAPPEAR"
+                                        : "ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK";
+                        startAnimation = () -> {
+                            mLogger.animationStart(finalKey1, type, finalIsHeadsUp);
+                            changingView.setInRemovalAnimation(true);
+                        };
                         postAnimation = () -> {
                             mLogger.disappearAnimationEnded(finalKey1);
-                            tmpPostAnimation.run();
+                            mLogger.animationEnd(finalKey1, type, finalIsHeadsUp);
+                            changingView.setInRemovalAnimation(false);
+                            if (tmpEndRunnable != null) {
+                                tmpEndRunnable.run();
+                            }
+                        };
+                    } else {
+                        postAnimation = () -> {
+                            changingView.setInRemovalAnimation(false);
+                            if (tmpEndRunnable != null) {
+                                tmpEndRunnable.run();
+                            }
+                        };
+                        startAnimation = () -> {
+                            changingView.setInRemovalAnimation(true);
                         };
                     }
                     long removeAnimationDelay = changingView.performRemoveAnimation(
