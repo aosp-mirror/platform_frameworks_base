@@ -2946,9 +2946,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             } else {
                 Log.d(TAG, "Hiding keyguard while occluded. Just hide the keyguard view and exit.");
 
-                mKeyguardViewControllerLazy.get().hide(
-                        mSystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
-                        mHideAnimation.getDuration());
+                if (!mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                    mKeyguardViewControllerLazy.get().hide(
+                            mSystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
+                            mHideAnimation.getDuration());
+                }
+
                 onKeyguardExitFinished();
             }
 
