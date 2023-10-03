@@ -17,6 +17,9 @@
 package com.android.systemui.scene
 
 import android.content.pm.UserInfo
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.util.Log
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
@@ -30,6 +33,7 @@ import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
@@ -51,12 +55,17 @@ import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
+import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.user.ui.viewmodel.UserActionViewModel
+import com.android.systemui.user.ui.viewmodel.UserViewModel
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -209,7 +218,9 @@ class SceneTestUtils(
     fun bouncerViewModel(
         bouncerInteractor: BouncerInteractor,
         authenticationInteractor: AuthenticationInteractor,
+        users: List<UserViewModel> = createUsers(),
     ): BouncerViewModel {
+        Log.d("ALE", "users=$users")
         return BouncerViewModel(
             applicationContext = context,
             applicationScope = applicationScope(),
@@ -217,6 +228,13 @@ class SceneTestUtils(
             bouncerInteractor = bouncerInteractor,
             authenticationInteractor = authenticationInteractor,
             flags = sceneContainerFlags,
+            selectedUser = flowOf(users.first { it.isSelectionMarkerVisible }),
+            users = flowOf(users),
+            userSwitcherMenu = flowOf(createMenuActions()),
+            telephonyInteractor =
+                TelephonyInteractor(
+                    repository = FakeTelephonyRepository(),
+                ),
         )
     }
 
@@ -230,6 +248,43 @@ class SceneTestUtils(
 
     private fun applicationScope(): CoroutineScope {
         return testScope.backgroundScope
+    }
+
+    private fun createUsers(
+        count: Int = 3,
+        selectedIndex: Int = 0,
+    ): List<UserViewModel> {
+        check(selectedIndex in 0 until count)
+
+        return buildList {
+            repeat(count) { index ->
+                add(
+                    UserViewModel(
+                        viewKey = index,
+                        name = Text.Loaded("name_$index"),
+                        image = BitmapDrawable(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)),
+                        isSelectionMarkerVisible = index == selectedIndex,
+                        alpha = 1f,
+                        onClicked = {},
+                    )
+                )
+            }
+        }
+    }
+
+    private fun createMenuActions(): List<UserActionViewModel> {
+        return buildList {
+            repeat(3) { index ->
+                add(
+                    UserActionViewModel(
+                        viewKey = index.toLong(),
+                        iconResourceId = 0,
+                        textResourceId = 0,
+                        onClicked = {},
+                    )
+                )
+            }
+        }
     }
 
     companion object {

@@ -28,7 +28,11 @@ import kotlinx.coroutines.flow.Flow
 class TelephonyInteractor
 @Inject
 constructor(
-    repository: TelephonyRepository,
+    private val repository: TelephonyRepository,
 ) {
     @Annotation.CallState val callState: Flow<Int> = repository.callState
+
+    /** Whether the device has a radio that can be used for telephony. */
+    val hasTelephonyRadio: Boolean
+        get() = repository.hasTelephonyRadio
 }

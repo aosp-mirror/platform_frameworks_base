@@ -17,19 +17,29 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
+import android.graphics.Bitmap
+import androidx.core.graphics.drawable.toBitmap
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import javax.inject.Inject
+import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
+import com.android.systemui.user.ui.viewmodel.UserActionViewModel
+import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
+import com.android.systemui.user.ui.viewmodel.UserViewModel
+import dagger.Module
+import dagger.Provides
 import kotlin.math.ceil
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -42,17 +52,53 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input on bouncer UIs. */
-@SysUISingleton
-class BouncerViewModel
-@Inject
-constructor(
+class BouncerViewModel(
     @Application private val applicationContext: Context,
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val bouncerInteractor: BouncerInteractor,
     authenticationInteractor: AuthenticationInteractor,
     flags: SceneContainerFlags,
+    private val telephonyInteractor: TelephonyInteractor,
+    selectedUser: Flow<UserViewModel>,
+    users: Flow<List<UserViewModel>>,
+    userSwitcherMenu: Flow<List<UserActionViewModel>>,
 ) {
+    val selectedUserImage: StateFlow<Bitmap?> =
+        selectedUser
+            .map { it.image.toBitmap() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = null,
+            )
+
+    val userSwitcherDropdown: StateFlow<List<UserSwitcherDropdownItemViewModel>> =
+        combine(
+                users,
+                userSwitcherMenu,
+            ) { users, actions ->
+                users.map { user ->
+                    UserSwitcherDropdownItemViewModel(
+                        icon = Icon.Loaded(user.image, contentDescription = null),
+                        text = user.name,
+                        onClick = user.onClicked ?: {},
+                    )
+                } +
+                    actions.map { action ->
+                        UserSwitcherDropdownItemViewModel(
+                            icon = Icon.Resource(action.iconResourceId, contentDescription = null),
+                            text = Text.Resource(action.textResourceId),
+                            onClick = action.onClicked,
+                        )
+                    }
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = emptyList(),
+            )
+
     private val isInputEnabled: StateFlow<Boolean> =
         bouncerInteractor.isThrottled
             .map { !it }
@@ -101,6 +147,9 @@ constructor(
                         isThrottled = bouncerInteractor.isThrottled.value,
                     ),
             )
+
+    val isEmergencyButtonVisible: Boolean
+        get() = telephonyInteractor.hasTelephonyRadio
 
     init {
         if (flags.isEnabled()) {
@@ -200,4 +249,40 @@ constructor(
          */
         val isUpdateAnimated: Boolean,
     )
+
+    data class UserSwitcherDropdownItemViewModel(
+        val icon: Icon,
+        val text: Text,
+        val onClick: () -> Unit,
+    )
+}
+
+@Module
+object BouncerViewModelModule {
+
+    @Provides
+    @SysUISingleton
+    fun viewModel(
+        @Application applicationContext: Context,
+        @Application applicationScope: CoroutineScope,
+        @Main mainDispatcher: CoroutineDispatcher,
+        bouncerInteractor: BouncerInteractor,
+        authenticationInteractor: AuthenticationInteractor,
+        flags: SceneContainerFlags,
+        telephonyInteractor: TelephonyInteractor,
+        userSwitcherViewModel: UserSwitcherViewModel,
+    ): BouncerViewModel {
+        return BouncerViewModel(
+            applicationContext = applicationContext,
+            applicationScope = applicationScope,
+            mainDispatcher = mainDispatcher,
+            bouncerInteractor = bouncerInteractor,
+            authenticationInteractor = authenticationInteractor,
+            flags = flags,
+            telephonyInteractor = telephonyInteractor,
+            selectedUser = userSwitcherViewModel.selectedUser,
+            users = userSwitcherViewModel.users,
+            userSwitcherMenu = userSwitcherViewModel.menu,
+        )
+    }
 }
