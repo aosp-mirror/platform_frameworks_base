@@ -20764,7 +20764,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param canvas the canvas on which the background will be drawn
      */
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@Nullable Canvas canvas) {
     }
 
     /*
