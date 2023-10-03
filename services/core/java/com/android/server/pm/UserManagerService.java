@@ -81,6 +81,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.Flags;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IProgressListener;
@@ -1332,29 +1333,49 @@ public class UserManagerService extends IUserManager.Stub {
                 && user.profileGroupId == profile.profileGroupId);
     }
 
-    private void broadcastProfileAvailabilityChanges(UserHandle profileHandle,
-            UserHandle parentHandle, boolean inQuietMode) {
+    private Intent buildProfileAvailabilityIntent(UserInfo profile, boolean enableQuietMode,
+            boolean useManagedActions) {
         Intent intent = new Intent();
-        if (inQuietMode) {
-            intent.setAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        } else {
-            intent.setAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+        intent.setAction(getAvailabilityIntentAction(enableQuietMode, useManagedActions));
+        intent.putExtra(Intent.EXTRA_QUIET_MODE, enableQuietMode);
+        intent.putExtra(Intent.EXTRA_USER, profile.getUserHandle());
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, profile.getUserHandle().getIdentifier());
+        intent.addFlags(
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        return intent;
+    }
+
+    private String getAvailabilityIntentAction(boolean enableQuietMode, boolean useManagedActions) {
+        return useManagedActions ?
+                enableQuietMode ?
+                        Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE
+                        : Intent.ACTION_MANAGED_PROFILE_AVAILABLE
+                : enableQuietMode ?
+                        Intent.ACTION_PROFILE_UNAVAILABLE
+                        : Intent.ACTION_PROFILE_AVAILABLE;
+    }
+
+    private void broadcastProfileAvailabilityChanges(UserInfo profileInfo,
+            UserHandle parentHandle, boolean enableQuietMode, boolean useManagedActions) {
+        Intent availabilityIntent = buildProfileAvailabilityIntent(profileInfo, enableQuietMode,
+                useManagedActions);
+        if (profileInfo.isManagedProfile()) {
+            getDevicePolicyManagerInternal().broadcastIntentToManifestReceivers(
+                    availabilityIntent, parentHandle, /* requiresPermission= */ true);
         }
-        intent.putExtra(Intent.EXTRA_QUIET_MODE, inQuietMode);
-        intent.putExtra(Intent.EXTRA_USER, profileHandle);
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
-        getDevicePolicyManagerInternal().broadcastIntentToManifestReceivers(
-                intent, parentHandle, /* requiresPermission= */ true);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        // TODO(b/302708423): Restrict the apps that can receive these intents in case of a private
+        //  profile.
         final Bundle options = new BroadcastOptions()
                 .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                 .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
                 // Both actions use single namespace because only the final state matters.
                 .setDeliveryGroupMatchingKey(
-                        Intent.ACTION_MANAGED_PROFILE_AVAILABLE /* namespace */,
-                        String.valueOf(profileHandle.getIdentifier()) /* key */)
+                        useManagedActions ? Intent.ACTION_MANAGED_PROFILE_AVAILABLE
+                                : Intent.ACTION_PROFILE_AVAILABLE,
+                        String.valueOf(profileInfo.getUserHandle().getIdentifier()) /* key */)
                 .toBundle();
-        mContext.sendBroadcastAsUser(intent, parentHandle, /* receiverPermission= */ null, options);
+        mContext.sendBroadcastAsUser(availabilityIntent, parentHandle, /* receiverPermission= */
+                null, options);
     }
 
     @Override
@@ -1481,7 +1502,7 @@ public class UserManagerService extends IUserManager.Stub {
             profile = getUserInfoLU(userId);
             parent = getProfileParentLU(userId);
 
-            if (profile == null || !profile.isManagedProfile()) {
+            if (profile == null || !profile.isProfile()) {
                 throw new IllegalArgumentException("User " + userId + " is not a profile");
             }
             if (profile.isQuietModeEnabled() == enableQuietMode) {
@@ -1534,8 +1555,17 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         logQuietModeEnabled(userId, enableQuietMode, callingPackage);
-        broadcastProfileAvailabilityChanges(profile.getUserHandle(), parent.getUserHandle(),
-                enableQuietMode);
+
+        // Broadcast generic intents for all profiles
+        if (Flags.allowPrivateProfile()) {
+            broadcastProfileAvailabilityChanges(profile, parent.getUserHandle(),
+                    enableQuietMode, false);
+        }
+        // Broadcast Managed profile availability intents too for managed profiles.
+        if (profile.isManagedProfile()){
+            broadcastProfileAvailabilityChanges(profile, parent.getUserHandle(),
+                     enableQuietMode, true);
+        }
     }
 
     private void setAppOpsRestrictedForQuietMode(@UserIdInt int userId, boolean restrict) {
@@ -1582,7 +1612,7 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mUsersLock) {
                 info = getUserInfoLU(userId);
             }
-            if (info == null || !info.isManagedProfile()) {
+            if (info == null || !info.isProfile()) {
                 return false;
             }
             return info.isQuietModeEnabled();
