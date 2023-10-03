@@ -879,7 +879,7 @@ class TransitionController {
         // It is usually a no-op but make sure that the metric consumer is removed.
         mTransitionMetricsReporter.reportAnimationStart(record.getToken(), 0 /* startTime */);
         // It is a no-op if the transition did not change the display.
-        mAtm.endLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
+        mAtm.endPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
         if (!mPlayingTransitions.contains(record)) {
             Slog.e(TAG, "Trying to finish a non-playing transition " + record);
             return;
