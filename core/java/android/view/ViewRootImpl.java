@@ -3858,7 +3858,8 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingTransitions.clear();
             }
 
-            handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction);
+            handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction,
+                    "view not visible");
         } else if (cancelAndRedraw) {
             mLastPerformTraversalsSkipDrawReason = cancelDueToPreDrawListener
                 ? "predraw_" + mAttachInfo.mTreeObserver.getLastDispatchOnPreDrawCanceledReason()
@@ -3873,7 +3874,8 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingTransitions.clear();
             }
             if (!performDraw(mActiveSurfaceSyncGroup)) {
-                handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction);
+                handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction,
+                        mLastPerformDrawSkippedReason);
             }
         }
 
@@ -4665,6 +4667,10 @@ public final class ViewRootImpl implements ViewParent,
 
                 return didProduceBuffer -> {
                     if (!didProduceBuffer) {
+                        Trace.instant(Trace.TRACE_TAG_VIEW,
+                                "Transaction not synced due to no frame drawn-" + mTag);
+                        Log.d(mTag, "Pending transaction will not be applied in sync with a draw "
+                                + "because there was nothing new to draw");
                         mBlastBufferQueue.applyPendingTransactions(frame);
                     }
                 };
@@ -4687,8 +4693,7 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
-        final boolean fullRedrawNeeded =
-                mFullRedrawNeeded || surfaceSyncGroup != null || mHasPendingTransactions;
+        final boolean fullRedrawNeeded = mFullRedrawNeeded || surfaceSyncGroup != null;
         mFullRedrawNeeded = false;
 
         mIsDrawing = true;
@@ -4748,7 +4753,8 @@ public final class ViewRootImpl implements ViewParent,
             if (mSurfaceHolder != null && mSurface.isValid()) {
                 usingAsyncReport = true;
                 SurfaceCallbackHelper sch = new SurfaceCallbackHelper(() -> {
-                    handleSyncRequestWhenNoAsyncDraw(surfaceSyncGroup, pendingTransaction);
+                    handleSyncRequestWhenNoAsyncDraw(surfaceSyncGroup, pendingTransaction,
+                            "SurfaceHolder");
                 });
 
                 SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
@@ -4762,7 +4768,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (!usingAsyncReport) {
-            handleSyncRequestWhenNoAsyncDraw(surfaceSyncGroup, pendingTransaction);
+            handleSyncRequestWhenNoAsyncDraw(surfaceSyncGroup, pendingTransaction,
+                    "no async report");
         }
 
         if (mPerformContentCapture) {
@@ -4772,13 +4779,19 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void handleSyncRequestWhenNoAsyncDraw(SurfaceSyncGroup surfaceSyncGroup,
-            @Nullable Transaction pendingTransaction) {
+            @Nullable Transaction pendingTransaction, String logReason) {
         if (surfaceSyncGroup != null) {
             if (pendingTransaction != null) {
                 surfaceSyncGroup.addTransaction(pendingTransaction);
             }
             surfaceSyncGroup.markSyncReady();
         } else if (pendingTransaction != null) {
+            Trace.instant(Trace.TRACE_TAG_VIEW,
+                    "Transaction not synced due to " + logReason + "-" + mTag);
+            if (DEBUG_BLAST) {
+                Log.d(mTag, "Pending transaction will not be applied in sync with a draw due to "
+                        + logReason);
+            }
             pendingTransaction.apply();
         }
     }
@@ -8993,7 +9006,8 @@ public final class ViewRootImpl implements ViewParent,
             mAdded = false;
             AnimationHandler.removeRequestor(this);
         }
-        handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction);
+        handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction,
+                "shutting down VRI");
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
 
@@ -11362,15 +11376,15 @@ public final class ViewRootImpl implements ViewParent,
     @Override
     public boolean applyTransactionOnDraw(@NonNull SurfaceControl.Transaction t) {
         if (mRemoved || !isHardwareEnabled()) {
+            Trace.instant(Trace.TRACE_TAG_VIEW, "applyTransactionOnDraw applyImmediately-" + mTag);
+            Log.d(mTag, "applyTransactionOnDraw: Applying transaction immediately");
             t.apply();
         } else {
+            Trace.instant(Trace.TRACE_TAG_VIEW, "applyTransactionOnDraw-" + mTag);
             // Copy and clear the passed in transaction for thread safety. The new transaction is
             // accessed on the render thread.
             mPendingTransaction.merge(t);
             mHasPendingTransactions = true;
-            // Schedule the traversal to ensure there's an attempt to draw a frame and apply the
-            // pending transactions. This is also where the registerFrameCallback will be scheduled.
-            scheduleTraversals();
         }
         return true;
     }
