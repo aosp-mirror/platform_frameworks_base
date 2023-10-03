@@ -23,19 +23,27 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import android.app.compat.CompatChanges;
 import android.hardware.broadcastradio.AmFmBandRange;
 import android.hardware.broadcastradio.AmFmRegionConfig;
+import android.hardware.broadcastradio.ConfigFlag;
 import android.hardware.broadcastradio.DabTableEntry;
 import android.hardware.broadcastradio.IdentifierType;
+import android.hardware.broadcastradio.Metadata;
 import android.hardware.broadcastradio.ProgramIdentifier;
 import android.hardware.broadcastradio.ProgramInfo;
 import android.hardware.broadcastradio.Properties;
 import android.hardware.broadcastradio.Result;
 import android.hardware.broadcastradio.VendorKeyValue;
 import android.hardware.radio.Announcement;
+import android.hardware.radio.Flags;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.ServiceSpecificException;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
@@ -82,6 +90,10 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     private static final long TEST_DAB_ENSEMBLE_VALUE = 0x1001;
     private static final long TEST_DAB_FREQUENCY_VALUE = 220_352;
     private static final long TEST_FM_FREQUENCY_VALUE = 92_100;
+    private static final long TEST_HD_FREQUENCY_VALUE = 95_300;
+    private static final long TEST_HD_STATION_ID_EXT_VALUE = 0x100000001L
+            | (TEST_HD_FREQUENCY_VALUE << 36);
+    private static final long TEST_HD_LOCATION_VALUE = 0x89CC8E06CCB9ECL;
     private static final long TEST_VENDOR_ID_VALUE = 9_901;
 
     private static final ProgramSelector.Identifier TEST_DAB_SID_EXT_ID =
@@ -112,6 +124,14 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     private static final ProgramSelector TEST_FM_SELECTOR =
             AidlTestUtils.makeFmSelector(TEST_FM_FREQUENCY_VALUE);
 
+    private static final ProgramSelector.Identifier TEST_HD_STATION_EXT_ID =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT,
+                    TEST_HD_STATION_ID_EXT_VALUE);
+
+    private static final ProgramIdentifier TEST_HAL_HD_STATION_LOCATION_ID =
+            AidlTestUtils.makeHalIdentifier(IdentifierType.HD_STATION_LOCATION,
+                    TEST_HD_LOCATION_VALUE);
+
     private static final UniqueProgramIdentifier TEST_DAB_UNIQUE_ID = new UniqueProgramIdentifier(
             TEST_DAB_SELECTOR);
 
@@ -127,8 +147,19 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
             ConversionUtils.announcementFromHalAnnouncement(
                     AidlTestUtils.makeAnnouncement(TEST_ENABLED_TYPE, TEST_ANNOUNCEMENT_FREQUENCY));
 
+    private static final String TEST_SONG_TITLE = "titleTest";
+    private static final int TEST_ALBUM_ART = 2;
+    private static final int TEST_HD_SUBCHANNELS = 1;
+
+    private static final Metadata TEST_HAL_SONG_TITLE = Metadata.songTitle(TEST_SONG_TITLE);
+    private static final Metadata TEST_HAL_ALBUM_ART = Metadata.albumArt(TEST_ALBUM_ART);
+    private static final Metadata TEST_HAL_HD_SUBCHANNELS = Metadata.hdSubChannelsAvailable(
+            TEST_HD_SUBCHANNELS);
+
     @Rule
     public final Expect expect = Expect.create();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
@@ -152,15 +183,27 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void isAtLeastU_withTSdkVersion_returnsFalse() {
+    public void isAtLeastU_withLowerSdkVersion_returnsFalse() {
         expect.withMessage("Target SDK version of T")
                 .that(ConversionUtils.isAtLeastU(T_APP_UID)).isFalse();
     }
 
     @Test
-    public void isAtLeastU_withCurrentSdkVersion_returnsTrue() {
+    public void isAtLeastU_withUSdkVersion_returnsTrue() {
         expect.withMessage("Target SDK version of U")
                 .that(ConversionUtils.isAtLeastU(U_APP_UID)).isTrue();
+    }
+
+    @Test
+    public void isAtLeastV_withLowerSdkVersion_returnsFalse() {
+        expect.withMessage("Target SDK version U lower than V")
+                .that(ConversionUtils.isAtLeastV(U_APP_UID)).isFalse();
+    }
+
+    @Test
+    public void isAtLeastV_withVSdkVersion_returnsTrue() {
+        expect.withMessage("Target SDK version of V not lower than V")
+                .that(ConversionUtils.isAtLeastV(V_APP_UID)).isTrue();
     }
 
     @Test
@@ -274,11 +317,44 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
+    public void identifierToHalProgramIdentifier_withFlagEnabled() {
+        ProgramSelector.Identifier hdLocationId = createHdStationLocationIdWithFlagEnabled();
+        ProgramIdentifier halHdLocationId =
+                ConversionUtils.identifierToHalProgramIdentifier(hdLocationId);
+
+        expect.withMessage("Converted HD location identifier for HAL").that(halHdLocationId)
+                .isEqualTo(TEST_HAL_HD_STATION_LOCATION_ID);
+    }
+
+    @Test
     public void identifierFromHalProgramIdentifier_withDabId() {
         ProgramSelector.Identifier dabId =
                 ConversionUtils.identifierFromHalProgramIdentifier(TEST_HAL_DAB_SID_EXT_ID);
 
         expect.withMessage("Converted DAB identifier").that(dabId).isEqualTo(TEST_DAB_SID_EXT_ID);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
+    public void identifierFromHalProgramIdentifier_withFlagEnabled() {
+        ProgramSelector.Identifier hdLocationIdExpected =
+                createHdStationLocationIdWithFlagEnabled();
+        ProgramSelector.Identifier hdLocationId =
+                ConversionUtils.identifierFromHalProgramIdentifier(TEST_HAL_HD_STATION_LOCATION_ID);
+
+        expect.withMessage("Converted HD location identifier").that(hdLocationId)
+                .isEqualTo(hdLocationIdExpected);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_HD_RADIO_IMPROVED)
+    public void identifierFromHalProgramIdentifier_withFlagDisabled_returnsNull() {
+        ProgramSelector.Identifier hdLocationId =
+                ConversionUtils.identifierFromHalProgramIdentifier(TEST_HAL_HD_STATION_LOCATION_ID);
+
+        expect.withMessage("Null HD location identifier with feature flag disabled")
+                .that(hdLocationId).isNull();
     }
 
     @Test
@@ -349,10 +425,20 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void programSelectorMeetsSdkVersionRequirement_withLowerVersionId_returnsFalse() {
-        expect.withMessage("Selector %s without required SDK version", TEST_DAB_SELECTOR)
-                .that(ConversionUtils.programSelectorMeetsSdkVersionRequirement(TEST_DAB_SELECTOR,
-                        T_APP_UID)).isFalse();
+    public void programSelectorMeetsSdkVersionRequirement_withLowerVersionPrimaryId_returnsFalse() {
+        expect.withMessage("Selector %s with primary id requiring higher-version SDK version",
+                        TEST_DAB_SELECTOR).that(ConversionUtils
+                .programSelectorMeetsSdkVersionRequirement(TEST_DAB_SELECTOR, T_APP_UID)).isFalse();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
+    public void programSelectorMeetsSdkVersionRequirement_withLowerVersionSecondaryId() {
+        ProgramSelector hdSelector = createHdSelectorWithFlagEnabled();
+
+        expect.withMessage("Selector %s with secondary id requiring higher-version SDK version",
+                hdSelector).that(ConversionUtils.programSelectorMeetsSdkVersionRequirement(
+                        hdSelector, U_APP_UID)).isFalse();
     }
 
     @Test
@@ -360,6 +446,16 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
         expect.withMessage("Selector %s with required SDK version", TEST_FM_SELECTOR)
                 .that(ConversionUtils.programSelectorMeetsSdkVersionRequirement(TEST_FM_SELECTOR,
                         T_APP_UID)).isTrue();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
+    public void programSelectorMeetsSdkVersionRequirement_withRequiredVersionAndFlagEnabled() {
+        ProgramSelector hdSelector = createHdSelectorWithFlagEnabled();
+
+        expect.withMessage("Selector %s with required SDK version and feature flag enabled",
+                hdSelector).that(ConversionUtils.programSelectorMeetsSdkVersionRequirement(
+                        hdSelector, V_APP_UID)).isTrue();
     }
 
     @Test
@@ -451,6 +547,79 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
                 .that(ANNOUNCEMENT.getVendorInfo()).isEmpty();
     }
 
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
+    public void configFlagMeetsSdkVersionRequirement_withRequiredSdkVersionAndFlagEnabled() {
+        int halForceAmAnalogFlag = ConfigFlag.FORCE_ANALOG_FM;
+
+        expect.withMessage("Force Analog FM flag with required SDK version and feature flag"
+                        + " enabled").that(ConversionUtils.configFlagMeetsSdkVersionRequirement(
+                                halForceAmAnalogFlag, V_APP_UID)).isTrue();
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_HD_RADIO_IMPROVED)
+    public void configFlagMeetsSdkVersionRequirement_withRequiredSdkVersionAndFlagDisabled() {
+        int halForceAmAnalogFlag = ConfigFlag.FORCE_ANALOG_FM;
+
+        expect.withMessage("Force Analog FM with required SDK version and with feature flag"
+                        + " disabled").that(ConversionUtils.configFlagMeetsSdkVersionRequirement(
+                                halForceAmAnalogFlag, V_APP_UID)).isFalse();
+    }
+
+    @Test
+    public void configFlagMeetsSdkVersionRequirement_withLowerSdkVersion() {
+        int halForceAmAnalogFlag = ConfigFlag.FORCE_ANALOG_FM;
+
+        expect.withMessage("Force Analog FM without required SDK version")
+                .that(ConversionUtils.configFlagMeetsSdkVersionRequirement(halForceAmAnalogFlag,
+                        U_APP_UID)).isFalse();
+    }
+
+    @Test
+    public void configFlagMeetsSdkVersionRequirement_withFConfigFlagWithoutSdkVersionRequired() {
+        int halForceAmAnalogFlag = ConfigFlag.FORCE_DIGITAL;
+
+        expect.withMessage("Force digital config flag")
+                .that(ConversionUtils.configFlagMeetsSdkVersionRequirement(halForceAmAnalogFlag,
+                        T_APP_UID)).isTrue();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
+    public void radioMetadataFromHalMetadata_withFlagEnabled() {
+        RadioMetadata convertedMetadata = ConversionUtils.radioMetadataFromHalMetadata(
+                new Metadata[]{TEST_HAL_SONG_TITLE, TEST_HAL_HD_SUBCHANNELS, TEST_HAL_ALBUM_ART});
+
+        expect.withMessage("Metadata with flag enabled").that(convertedMetadata.size())
+                .isEqualTo(3);
+        expect.withMessage("Song title with flag enabled")
+                .that(convertedMetadata.getString(RadioMetadata.METADATA_KEY_TITLE))
+                .isEqualTo(TEST_SONG_TITLE);
+        expect.withMessage("Album art with flag enabled")
+                .that(convertedMetadata.getInt(RadioMetadata.METADATA_KEY_ART))
+                .isEqualTo(TEST_ALBUM_ART);
+        expect.withMessage("HD sub-channels with flag enabled")
+                .that(convertedMetadata.getInt(RadioMetadata
+                        .METADATA_KEY_HD_SUBCHANNELS_AVAILABLE)).isEqualTo(TEST_HD_SUBCHANNELS);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_HD_RADIO_IMPROVED)
+    public void radioMetadataFromHalMetadata_withFlagDisabled() {
+        RadioMetadata convertedMetadata = ConversionUtils.radioMetadataFromHalMetadata(
+                new Metadata[]{TEST_HAL_SONG_TITLE, TEST_HAL_HD_SUBCHANNELS, TEST_HAL_ALBUM_ART});
+
+        expect.withMessage("Metadata with flag disabled").that(convertedMetadata.size())
+                .isEqualTo(2);
+        expect.withMessage("Song title with flag disabled")
+                .that(convertedMetadata.getString(RadioMetadata.METADATA_KEY_TITLE))
+                .isEqualTo(TEST_SONG_TITLE);
+        expect.withMessage("Album art with flag disabled")
+                .that(convertedMetadata.getInt(RadioMetadata.METADATA_KEY_ART))
+                .isEqualTo(TEST_ALBUM_ART);
+    }
+
     private static RadioManager.ModuleProperties convertToModuleProperties() {
         AmFmRegionConfig amFmConfig = createAmFmRegionConfig();
         DabTableEntry[] dabTableEntries = new DabTableEntry[]{
@@ -498,5 +667,16 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
                 AidlTestUtils.makeVendorKeyValue(VENDOR_INFO_KEY_1, VENDOR_INFO_VALUE_1),
                 AidlTestUtils.makeVendorKeyValue(VENDOR_INFO_KEY_2, VENDOR_INFO_VALUE_2)};
         return halProperties;
+    }
+
+    private ProgramSelector.Identifier createHdStationLocationIdWithFlagEnabled() {
+        return new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_HD_STATION_LOCATION,
+                TEST_HD_LOCATION_VALUE);
+    }
+
+    private ProgramSelector createHdSelectorWithFlagEnabled() {
+        return new ProgramSelector(ProgramSelector.PROGRAM_TYPE_FM_HD, TEST_HD_STATION_EXT_ID,
+                new ProgramSelector.Identifier[]{createHdStationLocationIdWithFlagEnabled()},
+                /* vendorIds= */ null);
     }
 }
