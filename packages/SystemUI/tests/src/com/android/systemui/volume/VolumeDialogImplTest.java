@@ -42,7 +42,6 @@ import android.app.KeyguardManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Log;
@@ -71,7 +70,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
-import com.android.systemui.util.settings.FakeSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -136,8 +134,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     private FakeFeatureFlags mFeatureFlags;
     private int mLongestHideShowAnimationDuration = 250;
 
-    private FakeSettings mSecureSettings;
-
     @Rule
     public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
 
@@ -166,8 +162,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         mFeatureFlags = new FakeFeatureFlags();
 
-        mSecureSettings = new FakeSettings();
-
         mDialog = new VolumeDialogImpl(
                 getContext(),
                 mVolumeDialogController,
@@ -183,8 +177,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mPostureController,
                 mTestableLooper.getLooper(),
                 mDumpManager,
-                mFeatureFlags,
-                mSecureSettings);
+                mFeatureFlags);
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
@@ -247,18 +240,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 VolumeDialogImpl.DIALOG_TIMEOUT_MILLIS,
                 AccessibilityManager.FLAG_CONTENT_CONTROLS);
     }
-
-    @Test
-    public void testSetTimeoutValue_ComputeTimeout() {
-        mSecureSettings.putInt(Settings.Secure.VOLUME_DIALOG_DISMISS_TIMEOUT, 7000);
-        Mockito.reset(mAccessibilityMgr);
-        mDialog.init(0, null);
-        mDialog.rescheduleTimeoutH();
-        verify(mAccessibilityMgr).getRecommendedTimeoutMillis(
-                7000,
-                AccessibilityManager.FLAG_CONTENT_CONTROLS);
-    }
-
 
     @Test
     public void testComputeTimeout_tooltip() {

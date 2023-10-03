@@ -27,13 +27,12 @@ import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.UserHandle;
 import android.provider.Settings;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.internal.R;
+import com.android.internal.foldables.FoldLockSettingAvailabilityProvider;
 import com.android.internal.util.SettingsWrapper;
 
 import org.junit.Before;
@@ -48,9 +47,9 @@ public class FoldSettingProviderTest {
     @Mock
     private Context mContext;
     @Mock
-    private Resources mResources;
-    @Mock
     private SettingsWrapper mSettingsWrapper;
+    @Mock
+    private FoldLockSettingAvailabilityProvider mFoldLockSettingAvailabilityProvider;
     private ContentResolver mContentResolver;
     private FoldSettingProvider mFoldSettingProvider;
 
@@ -61,17 +60,18 @@ public class FoldSettingProviderTest {
         mContentResolver =
                 InstrumentationRegistry.getInstrumentation().getContext().getContentResolver();
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
-        when(mContext.getResources()).thenReturn(mResources);
         setFoldLockBehaviorAvailability(true);
 
-        mFoldSettingProvider = new FoldSettingProvider(mContext, mSettingsWrapper);
+        mFoldSettingProvider = new FoldSettingProvider(mContext, mSettingsWrapper,
+                mFoldLockSettingAvailabilityProvider);
     }
 
     @Test
     public void foldSettingNotAvailable_returnDefaultSetting() {
         setFoldLockBehaviorAvailability(false);
         setFoldLockBehaviorSettingValue(SETTING_VALUE_STAY_AWAKE_ON_FOLD);
-        mFoldSettingProvider = new FoldSettingProvider(mContext, mSettingsWrapper);
+        mFoldSettingProvider = new FoldSettingProvider(mContext, mSettingsWrapper,
+                mFoldLockSettingAvailabilityProvider);
 
         boolean shouldSelectiveStayAwakeOnFold =
                 mFoldSettingProvider.shouldSelectiveStayAwakeOnFold();
@@ -83,7 +83,8 @@ public class FoldSettingProviderTest {
     public void foldSettingNotAvailable_notReturnStayAwakeOnFoldTrue() {
         setFoldLockBehaviorAvailability(false);
         setFoldLockBehaviorSettingValue(SETTING_VALUE_STAY_AWAKE_ON_FOLD);
-        mFoldSettingProvider = new FoldSettingProvider(mContext, mSettingsWrapper);
+        mFoldSettingProvider = new FoldSettingProvider(mContext, mSettingsWrapper,
+                mFoldLockSettingAvailabilityProvider);
 
         boolean shouldStayAwakeOnFold = mFoldSettingProvider.shouldStayAwakeOnFold();
 
@@ -94,7 +95,8 @@ public class FoldSettingProviderTest {
     public void foldSettingNotAvailable_notReturnSleepOnFoldTrue() {
         setFoldLockBehaviorAvailability(false);
         setFoldLockBehaviorSettingValue(SETTING_VALUE_SLEEP_ON_FOLD);
-        mFoldSettingProvider = new FoldSettingProvider(mContext, mSettingsWrapper);
+        mFoldSettingProvider = new FoldSettingProvider(mContext, mSettingsWrapper,
+                mFoldLockSettingAvailabilityProvider);
 
         boolean shouldSleepOnFold = mFoldSettingProvider.shouldSleepOnFold();
 
@@ -131,7 +133,7 @@ public class FoldSettingProviderTest {
     }
 
     private void setFoldLockBehaviorAvailability(boolean isFoldLockBehaviorEnabled) {
-        when(mResources.getBoolean(R.bool.config_fold_lock_behavior)).thenReturn(
+        when(mFoldLockSettingAvailabilityProvider.isFoldLockBehaviorAvailable()).thenReturn(
                 isFoldLockBehaviorEnabled);
     }
 

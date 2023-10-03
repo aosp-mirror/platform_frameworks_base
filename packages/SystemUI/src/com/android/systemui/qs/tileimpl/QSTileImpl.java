@@ -83,7 +83,7 @@ import java.util.ArrayList;
  */
 public abstract class QSTileImpl<TState extends State> implements QSTile, LifecycleOwner, Dumpable {
     protected final String TAG = "Tile." + getClass().getSimpleName();
-    protected static final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
+    protected final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
 
     private static final long DEFAULT_STALE_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;
     protected static final Object ARG_SHOW_TRANSIENT_ENABLING = new Object();

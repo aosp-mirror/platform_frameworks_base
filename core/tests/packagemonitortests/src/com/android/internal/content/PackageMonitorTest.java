@@ -17,6 +17,7 @@
 package com.android.internal.content;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -67,7 +68,7 @@ public class PackageMonitorTest {
 
         spyPackageMonitor.register(mMockContext, UserHandle.ALL, mMockHandler);
         assertThat(spyPackageMonitor.getRegisteredHandler()).isEqualTo(mMockHandler);
-        verify(mMockContext, times(2)).registerReceiverAsUser(any(), eq(UserHandle.ALL), any(),
+        verify(mMockContext, times(1)).registerReceiverAsUser(any(), eq(UserHandle.ALL), any(),
                 eq(null), eq(mMockHandler));
 
         assertThrows(IllegalStateException.class,
@@ -134,19 +135,6 @@ public class PackageMonitorTest {
         verify(spyPackageMonitor, times(1)).onBeginPackageChanges();
         verify(spyPackageMonitor, times(1)).onPackagesUnsuspended(eq(packageList));
         verify(spyPackageMonitor, times(1)).onSomePackagesChanged();
-        verify(spyPackageMonitor, times(1)).onFinishPackageChanges();
-    }
-
-    @Test
-    public void testPackageMonitorDoHandlePackageEventUserStop() throws Exception {
-        PackageMonitor spyPackageMonitor = spy(new TestPackageMonitor());
-
-        Intent intent = new Intent(Intent.ACTION_USER_STOPPED);
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, FAKE_USER_ID);
-        spyPackageMonitor.doHandlePackageEvent(intent);
-
-        verify(spyPackageMonitor, times(1)).onBeginPackageChanges();
-        verify(spyPackageMonitor, times(1)).onHandleUserStop(eq(intent), eq(FAKE_USER_ID));
         verify(spyPackageMonitor, times(1)).onFinishPackageChanges();
     }
 
