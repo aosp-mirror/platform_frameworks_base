@@ -317,7 +317,8 @@ public class BubbleController implements ConfigurationChangeListener,
         mBubbleIconFactory = new BubbleIconFactory(context,
                 context.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                 context.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
-                context.getResources().getColor(R.color.important_conversation),
+                context.getResources().getColor(
+                        com.android.launcher3.icons.R.color.important_conversation),
                 context.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.importance_ring_stroke_width));
         mDisplayController = displayController;
@@ -949,7 +950,8 @@ public class BubbleController implements ConfigurationChangeListener,
         mBubbleIconFactory = new BubbleIconFactory(mContext,
                 mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                 mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
-                mContext.getResources().getColor(R.color.important_conversation),
+                mContext.getResources().getColor(
+                        com.android.launcher3.icons.R.color.important_conversation),
                 mContext.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.importance_ring_stroke_width));
 
@@ -988,7 +990,8 @@ public class BubbleController implements ConfigurationChangeListener,
                 mBubbleIconFactory = new BubbleIconFactory(mContext,
                         mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                         mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
-                        mContext.getResources().getColor(R.color.important_conversation),
+                        mContext.getResources().getColor(
+                                com.android.launcher3.icons.R.color.important_conversation),
                         mContext.getResources().getDimensionPixelSize(
                                 com.android.internal.R.dimen.importance_ring_stroke_width));
                 mStackView.onDisplaySizeChanged();

@@ -113,7 +113,7 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
                 context,
                 res.getDimensionPixelSize(R.dimen.bubble_size),
                 res.getDimensionPixelSize(R.dimen.bubble_badge_size),
-                res.getColor(R.color.important_conversation),
+                res.getColor(com.android.launcher3.icons.R.color.important_conversation),
                 res.getDimensionPixelSize(com.android.internal.R.dimen.importance_ring_stroke_width)
             )
 
