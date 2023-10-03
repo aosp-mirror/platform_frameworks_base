@@ -501,10 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"આ વિશેષાધિકૃત અથવા સિસ્ટમ ઍપ કોઈપણ સમયે સિસ્ટમ કૅમેરાનો ઉપયોગ કરીને ફોટા લઈ અને વીડિયો રેકૉર્ડ કરી શકે છે. ઍપ દ્વારા આયોજિત કરવા માટે android.permission.CAMERAની પરવાનગી પણ જરૂરી છે"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"કૅમેરા ડિવાઇસ ચાલુ કે બંધ થવા વિશે કૉલબૅક પ્રાપ્ત કરવાની ઍપ્લિકેશન કે સેવાને મંજૂરી આપો."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"જ્યારે કોઈ કૅમેરા ડિવાઇસ (કયા ઍપ્લિકેશન વડે) ખોલવા કે બંધ કરવામાં આવે, ત્યારે આ ઍપ કૉલબૅક પ્રાપ્ત કરી શકે છે."</string>
-    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
-    <skip />
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"ઍપ્લિકેશન અથવા સેવાને અમાનવ સિસ્ટમ વપરાશકર્તા તરીકે કૅમેરા ઍક્સેસ કરવાની મંજૂરી આપો."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"આ ઍપ અમાનવ સિસ્ટમ વપરાશકર્તા તરીકે કૅમેરા ઍક્સેસ કરી શકે છે."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"વાઇબ્રેશન નિયંત્રિત કરો"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"એપ્લિકેશનને વાઇબ્રેટરને નિયંત્રિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ઍપને વાઇબ્રેટર સ્થિતિને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>

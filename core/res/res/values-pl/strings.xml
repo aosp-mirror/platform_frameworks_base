@@ -503,10 +503,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ta aplikacja systemowa z podwyższonymi uprawnieniami może w dowolnym momencie robić zdjęcia i nagrywać filmy przy użyciu aparatu systemowego. Wymaga przyznania uprawnień android.permission.CAMERA również aplikacji."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Zezwól na dostęp aplikacji lub usługi na otrzymywanie wywoływania zwrotnego o urządzeniach z aparatem, kiedy są one uruchamiane lub zamykane."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ta aplikacja może otrzymywać wywołania zwrotne, kiedy urządzenie z aparatem jest uruchamiane (przez jaką aplikację) albo zamykane."</string>
-    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
-    <skip />
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Zezwól na dostęp aplikacji lub usługi do aparatu jako użytkownik systemowy bez interfejsu graficznego."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Ta aplikacja może korzystać z aparatu jako użytkownik systemowy bez interfejsu graficznego."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"sterowanie wibracjami"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Pozwala aplikacji na sterowanie wibracjami."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Zezwala aplikacji na dostęp do stanu wibracji"</string>
@@ -677,7 +675,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona odcisku palca"</string>
     <string name="device_unlock_notification_name" msgid="2632928999862915709">"Odblokowywanie urządzenia"</string>
     <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Wypróbuj inną metodę odblokowywania"</string>
-    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Jeśli odcisk palca nie jest rozpoznawany, ponieważ przykładowo masz mokre palce, użyj funkcji rozpoznawania twarzy"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Jeśli odcisk palca nie jest rozpoznawany, bo przykładowo masz mokre palce, użyj funkcji rozpoznawania twarzy"</string>
     <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Jeśli twarz nie jest rozpoznawana, na przykład z powodu słabego oświetlenia, użyj funkcji odblokowywania odciskiem palca"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Rozpoznawanie twarzy"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem z rozpoznawaniem twarzy"</string>

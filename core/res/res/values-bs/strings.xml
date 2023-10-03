@@ -502,8 +502,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ova povlaštena ili sistemska aplikacija u svakom trenutku može snimati fotografije i videozapise pomoću kamere sistema. Aplikacija također mora imati odobrenje android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Dozvoliti aplikaciji ili usluzi da prima povratne pozive o otvaranju ili zatvaranju kamera."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ova aplikacija može primati povratne pozive kada se otvara ili zatvara bilo koji uređaj s kamerom (putem neke aplikacije)."</string>
-    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Dopustite aplikaciji ili usluzi da pristupi kameri kao korisnik sustava bez grafičkog korisničkog sučelja."</string>
-    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Ova aplikacija može pristupiti kameri kao korisnik sustava bez grafičkog korisničkog sučelja."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Dozvolite aplikaciji ili usluzi da pristupa kameri kao korisnik sistema bez grafičkog korisničkog interfejsa."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Aplikacija može pristupati kameri kao korisnik sistema bez grafičkog korisničkog interfejsa."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrola vibracije"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Dozvoljava aplikaciji upravljanje vibracijom."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Dozvoljava aplikaciji pristup stanju vibracije."</string>
@@ -673,7 +673,7 @@
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Nešto nije uredu. Pokušajte ponovo."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona za otisak prsta"</string>
     <string name="device_unlock_notification_name" msgid="2632928999862915709">"Otključavanje uređaja"</string>
-    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Pokušajte s drugim načinom zaključavanja"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Pokušajte s drugim načinom otključavanja"</string>
     <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Koristite otključavanje licem kada se vaš otisak prsta ne prepozna, naprimjer kada su vam prsti mokri"</string>
     <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Koristite otključavanje otiskom prsta kada se vaše lice ne prepozna, naprimjer kada nema dovoljno svjetla"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Otključavanje licem"</string>

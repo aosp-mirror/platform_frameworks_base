@@ -501,10 +501,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ky aplikacion sistemi ose i privilegjuar mund të nxjerrë fotografi dhe të regjistrojë video duke përdorur një kamerë në çdo moment. Kërkon që autorizimi i android.permission.CAMERA të mbahet edhe nga aplikacioni"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Lejo që një aplikacion ose shërbim të marrë telefonata mbrapsht për pajisjet e kamerës që hapen ose mbyllen."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ky aplikacion mund të marrë telefonata mbrapsht kur hapet ose mbyllet një pajisje e kamerës (nga një aplikacion)."</string>
-    <!-- no translation found for permlab_cameraHeadlessSystemUser (680194666834500050) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraHeadlessSystemUser (6963163319710996412) -->
-    <skip />
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Lejo një aplikacion ose shërbim të ketë qasje te kamera si \"Përdorues i sistemit pa kokë\"."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Ky aplikacion mund të ketë qasje te kamera si \"Përdorues i sistemit pa kokë\"."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrollo dridhjen"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lejon aplikacionin të kontrollojë dridhësin."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Lejon që aplikacioni të ketë qasje te gjendja e dridhësit."</string>
