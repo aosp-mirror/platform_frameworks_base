@@ -357,4 +357,6 @@ interface IWindowSession {
     boolean cancelDraw(IWindow window);
 
     boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow);
+
+    boolean transferHostTouchGestureToEmbedded(IWindow hostWindow, IBinder transferTouchToken);
 }

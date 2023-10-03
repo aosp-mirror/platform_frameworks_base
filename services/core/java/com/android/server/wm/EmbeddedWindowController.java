@@ -150,8 +150,8 @@ class EmbeddedWindowController {
 
         /**
          * A unique token associated with the embedded window that can be used by the host window
-         * to request focus transfer to the embedded. This is not the input token since we don't
-         * want to give clients access to each others input token.
+         * to request focus transfer and gesture transfer to the embedded. This is not the input
+         * token since we don't want to give clients access to each others input token.
          */
         private final IBinder mInputTransferToken;
 

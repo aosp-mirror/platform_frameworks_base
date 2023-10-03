@@ -656,6 +656,14 @@ public class WindowlessWindowManager implements IWindowSession {
         return false;
     }
 
+    @Override
+    public boolean transferHostTouchGestureToEmbedded(IWindow hostWindow,
+            IBinder embeddedInputToken) {
+        Log.e(TAG, "Received request to transferHostTouchGestureToEmbedded on"
+                + " WindowlessWindowManager. We shouldn't get here!");
+        return false;
+    }
+
     void setParentInterface(@Nullable ISurfaceControlViewHostParent parentInterface) {
         IBinder oldInterface = mParentInterface == null ? null : mParentInterface.asBinder();
         IBinder newInterface = parentInterface == null ? null : parentInterface.asBinder();

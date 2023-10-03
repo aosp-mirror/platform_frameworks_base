@@ -287,7 +287,8 @@ public class SurfaceControlViewHost {
         }
 
         /**
-         * Returns an input token used which can be used to request focus on the embedded surface.
+         * Returns an input token used which can be used to request focus on the embedded surface
+         * or to transfer touch gesture to the embedded surface.
          *
          * @hide
          */
@@ -526,7 +527,8 @@ public class SurfaceControlViewHost {
     }
 
     /**
-     * Returns an input token used which can be used to request focus on the embedded surface.
+     * Returns an input token used which can be used to request focus on the embedded surface
+     * or to transfer touch gesture to the embedded surface.
      *
      * @hide
      */

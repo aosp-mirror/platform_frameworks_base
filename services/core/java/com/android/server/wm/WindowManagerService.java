@@ -8960,6 +8960,43 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    boolean transferHostTouchGestureToEmbedded(Session session, IWindow hostWindow,
+            IBinder inputTransferToken) {
+        final IBinder hostInputChannel, embeddedInputChannel;
+        synchronized (mGlobalLock) {
+            final WindowState hostWindowState = windowForClientLocked(session, hostWindow, false);
+            if (hostWindowState == null) {
+                Slog.w(TAG, "Attempt to transfer touch gesture with invalid host window");
+                return false;
+            }
+
+            final EmbeddedWindowController.EmbeddedWindow ew =
+                    mEmbeddedWindowController.getByInputTransferToken(inputTransferToken);
+            if (ew == null || ew.mHostWindowState == null) {
+                Slog.w(TAG, "Attempt to transfer touch gesture to non-existent embedded window");
+                return false;
+            }
+            if (ew.mHostWindowState.mClient.asBinder() != hostWindow.asBinder()) {
+                Slog.w(TAG, "Attempt to transfer touch gesture to embedded window not associated"
+                        + " with host window");
+                return false;
+            }
+            embeddedInputChannel = ew.getInputChannelToken();
+            if (embeddedInputChannel == null) {
+                Slog.w(TAG, "Attempt to transfer touch focus from embedded window with no input"
+                        + " channel");
+                return false;
+            }
+            hostInputChannel = hostWindowState.mInputChannelToken;
+            if (hostInputChannel == null) {
+                Slog.w(TAG,
+                        "Attempt to transfer touch focus to a host window with no input channel");
+                return false;
+            }
+            return mInputManager.transferTouchFocus(hostInputChannel, embeddedInputChannel);
+        }
+    }
+
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
             int displayId, SurfaceControl surface, String name,
             InputApplicationHandle applicationHandle, int flags,
