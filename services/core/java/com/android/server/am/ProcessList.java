@@ -281,8 +281,8 @@ public final class ProcessList {
     // don't have an oom adj assigned by the system).
     public static final int NATIVE_ADJ = -1000;
 
-    // Memory pages are 4K.
-    static final int PAGE_SIZE = 4 * 1024;
+    // Memory page size.
+    static final int PAGE_SIZE = (int) Os.sysconf(OsConstants._SC_PAGESIZE);
 
     // Activity manager's version of an undefined schedule group
     static final int SCHED_GROUP_UNDEFINED = Integer.MIN_VALUE;
