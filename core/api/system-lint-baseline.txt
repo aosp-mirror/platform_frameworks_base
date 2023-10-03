@@ -19,8 +19,12 @@ ListenerLast: android.telephony.satellite.SatelliteManager#stopSatelliteTransmis
     Listeners should always be at end of argument list (method `stopSatelliteTransmissionUpdates`)
 ListenerLast: android.telephony.satellite.SatelliteManager#stopSatelliteTransmissionUpdates(android.telephony.satellite.SatelliteTransmissionUpdateCallback, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>) parameter #2:
     Listeners should always be at end of argument list (method `stopSatelliteTransmissionUpdates`)
-
-
+MissingGetterMatchingBuilder: android.service.voice.HotwordTrainingData.Builder#addTrainingAudio(android.service.voice.HotwordTrainingAudio):
+    android.service.voice.HotwordTrainingData does not declare a `getTrainingAudios()` method matching method android.service.voice.HotwordTrainingData.Builder.addTrainingAudio(android.service.voice.HotwordTrainingAudio)
+MissingGetterMatchingBuilder: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallViaAudioProcessing(boolean):
+    android.telecom.CallScreeningService.CallResponse does not declare a `shouldScreenCallViaAudioProcessing()` method matching method android.telecom.CallScreeningService.CallResponse.Builder.setShouldScreenCallViaAudioProcessing(boolean)
+MissingGetterMatchingBuilder: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
+    android.telephony.mbms.DownloadRequest does not declare a `getServiceId()` method matching method android.telephony.mbms.DownloadRequest.Builder.setServiceId(String)
 MissingNullability: android.media.soundtrigger.SoundTriggerDetectionService#onUnbind(android.content.Intent) parameter #0:
     Missing nullability on parameter `intent` in method `onUnbind`
 MissingNullability: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context) parameter #0:
@@ -327,8 +331,12 @@ UnflaggedApi: android.service.voice.HotwordTrainingData#describeContents():
     New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.describeContents()
 UnflaggedApi: android.service.voice.HotwordTrainingData#getMaxTrainingDataSize():
     New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.getMaxTrainingDataSize()
+UnflaggedApi: android.service.voice.HotwordTrainingData#getMaxTrainingDataBytes():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.getMaxTrainingDataBytes()
 UnflaggedApi: android.service.voice.HotwordTrainingData#getTimeoutStage():
     New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.getTimeoutStage()
+UnflaggedApi: android.service.voice.HotwordTrainingData#getTrainingAudioList():
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.getTrainingAudioList()
 UnflaggedApi: android.service.voice.HotwordTrainingData#getTrainingAudios():
     New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.getTrainingAudios()
 UnflaggedApi: android.service.voice.HotwordTrainingData#writeToParcel(android.os.Parcel, int):
@@ -343,6 +351,8 @@ UnflaggedApi: android.service.voice.HotwordTrainingData.Builder#build():
     New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.Builder.build()
 UnflaggedApi: android.service.voice.HotwordTrainingData.Builder#setTimeoutStage(int):
     New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.Builder.setTimeoutStage(int)
+UnflaggedApi: android.service.voice.HotwordTrainingData.Builder#setTrainingAudioList(java.util.List<android.service.voice.HotwordTrainingAudio>):
+    New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.Builder.setTrainingAudioList(java.util.List<android.service.voice.HotwordTrainingAudio>)
 UnflaggedApi: android.service.voice.HotwordTrainingData.Builder#setTrainingAudios(java.util.List<android.service.voice.HotwordTrainingAudio>):
     New API must be flagged with @FlaggedApi: method android.service.voice.HotwordTrainingData.Builder.setTrainingAudios(java.util.List<android.service.voice.HotwordTrainingAudio>)
 UnflaggedApi: android.telecom.StreamingCall#EXTRA_CALL_ID:
