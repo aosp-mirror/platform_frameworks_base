@@ -104,16 +104,6 @@ interface INetworkManagementService
     void setIPv6AddrGenMode(String iface, int mode);
 
     /**
-     * Add the specified route to the interface.
-     */
-    void addRoute(int netId, in RouteInfo route);
-
-    /**
-     * Remove the specified route from the interface.
-     */
-    void removeRoute(int netId, in RouteInfo route);
-
-    /**
      * Shuts down the service
      */
     @EnforcePermission("SHUTDOWN")
