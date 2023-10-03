@@ -216,7 +216,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         try {
             final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
             mWm.mTaskSnapshotController.createSnapshot(mAppWindow.mActivityRecord.getTask(),
-                    1f /* scaleFraction */, PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
+                    1f /* scaleFraction */, new Rect() /* crop */, builder);
         } catch (NullPointerException e) {
             fail("There should be no exception when calling createTaskSnapshot");
         }
@@ -238,7 +238,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             spyOn(builder);
             mWm.mTaskSnapshotController.createSnapshot(
                     mAppWindow.mActivityRecord.getTask(), 1f /* scaleFraction */,
-                    PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
+                    new Rect() /* crop */, builder);
             // Verify the builder should includes IME surface.
             verify(builder).setHasImeSurface(eq(true));
             builder.setColorSpace(ColorSpace.get(ColorSpace.Named.SRGB));
@@ -261,7 +261,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final TaskSnapshot.Builder builder =
                 new TaskSnapshot.Builder();
         boolean success = mWm.mTaskSnapshotController.prepareTaskSnapshot(
-                mAppWindow.mActivityRecord.getTask(), builder);
+                mAppWindow.mActivityRecord.getTask(), builder) != null;
 
         assertTrue(success);
         // The pixel format should be selected automatically.
@@ -270,7 +270,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         // Snapshot should not be taken while the rotation of activity and task are different.
         doReturn(true).when(mAppWindow.mActivityRecord).hasFixedRotationTransform();
         success = mWm.mTaskSnapshotController.prepareTaskSnapshot(
-                mAppWindow.mActivityRecord.getTask(), builder);
+                mAppWindow.mActivityRecord.getTask(), builder) != null;
 
         assertFalse(success);
     }

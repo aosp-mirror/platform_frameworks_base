@@ -150,6 +150,20 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         }
     }
 
+    /**
+     * The attributes of task snapshot are based on task configuration. But sometimes the
+     * configuration may have been changed during a transition, so supply the ChangeInfo that
+     * stored the previous appearance of the closing task.
+     */
+    void recordSnapshot(Task task, Transition.ChangeInfo changeInfo) {
+        mCurrentChangeInfo = changeInfo;
+        try {
+            recordSnapshot(task);
+        } finally {
+            mCurrentChangeInfo = null;
+        }
+    }
+
     TaskSnapshot recordSnapshot(Task task) {
         final TaskSnapshot snapshot = recordSnapshotInner(task);
         if (snapshot != null && !task.isActivityTypeHome()) {
