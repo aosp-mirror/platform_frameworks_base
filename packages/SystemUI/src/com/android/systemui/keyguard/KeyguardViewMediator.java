@@ -2832,7 +2832,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             // playing in-window animations for this particular unlock since a previous unlock might
             // have changed the Launcher state.
             if (mWakeAndUnlocking
-                    && mKeyguardUnlockAnimationControllerLazy.get().isNexusLauncherUnderneath()) {
+                    && mKeyguardUnlockAnimationControllerLazy.get()
+                            .isSupportedLauncherUnderneath()) {
                 flags |= KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
             }
 
@@ -3289,7 +3290,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             // of the in-window animations are reflected. This is needed even if we're not actually
             // playing in-window animations for this particular unlock since a previous unlock might
             // have changed the Launcher state.
-            if (mKeyguardUnlockAnimationControllerLazy.get().isNexusLauncherUnderneath()) {
+            if (mKeyguardUnlockAnimationControllerLazy.get().isSupportedLauncherUnderneath()) {
                 flags |= KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
             }
 
