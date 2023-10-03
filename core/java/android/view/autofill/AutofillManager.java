@@ -3443,7 +3443,7 @@ public final class AutofillManager {
             return false;
         }
         for (String hint : hints) {
-            if (hint.equals(View.AUTOFILL_HINT_CREDENTIAL_MANAGER)) {
+            if (Objects.equals(hint, View.AUTOFILL_HINT_CREDENTIAL_MANAGER)) {
                 return true;
             }
         }
