@@ -325,6 +325,7 @@ constructor(
                             addAction(Intent.ACTION_USER_SWITCHED)
                             addAction(Intent.ACTION_USER_STOPPED)
                             addAction(Intent.ACTION_USER_UNLOCKED)
+                            addAction(Intent.ACTION_LOCALE_CHANGED)
                         },
                     user = UserHandle.SYSTEM,
                     map = { intent, _ -> intent },
@@ -615,6 +616,7 @@ constructor(
     ) {
         val shouldRefreshAllUsers =
             when (intent.action) {
+                Intent.ACTION_LOCALE_CHANGED -> true
                 Intent.ACTION_USER_SWITCHED -> {
                     dismissDialog()
                     val selectedUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1)

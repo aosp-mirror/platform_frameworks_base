@@ -132,6 +132,7 @@ open class UserTrackerImpl internal constructor(
         setUserIdInternal(startingUser)
 
         val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_LOCALE_CHANGED)
             addAction(Intent.ACTION_USER_INFO_CHANGED)
             // These get called when a managed profile goes in or out of quiet mode.
             addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
@@ -149,6 +150,7 @@ open class UserTrackerImpl internal constructor(
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
+            Intent.ACTION_LOCALE_CHANGED,
             Intent.ACTION_USER_INFO_CHANGED,
             Intent.ACTION_MANAGED_PROFILE_AVAILABLE,
             Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE,

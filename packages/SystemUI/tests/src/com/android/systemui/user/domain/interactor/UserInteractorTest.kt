@@ -732,6 +732,26 @@ class UserInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun localeChanged_refreshUsers() {
+        createUserInteractor()
+        testScope.runTest {
+            val userInfos = createUserInfos(count = 2, includeGuest = false)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            runCurrent()
+            val refreshUsersCallCount = userRepository.refreshUsersCallCount
+
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                spyContext,
+                Intent(Intent.ACTION_LOCALE_CHANGED)
+            )
+            runCurrent()
+
+            assertThat(userRepository.refreshUsersCallCount).isEqualTo(refreshUsersCallCount + 1)
+        }
+    }
+
+    @Test
     fun nonSystemUserUnlockedBroadcast_doNotRefreshUsers() {
         createUserInteractor()
         testScope.runTest {
