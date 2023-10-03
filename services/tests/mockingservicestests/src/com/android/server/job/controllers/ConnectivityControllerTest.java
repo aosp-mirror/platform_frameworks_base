@@ -34,6 +34,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.job.Flags.FLAG_RELAX_PREFETCH_CONNECTIVITY_CONSTRAINT_ONLY_ON_CHARGER;
 import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
 import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
@@ -66,6 +67,7 @@ import android.net.NetworkPolicyManager;
 import android.os.Build;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.telephony.CellSignalStrength;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyCallback;
@@ -79,6 +81,7 @@ import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -106,6 +109,9 @@ public class ConnectivityControllerTest {
     private JobSchedulerService mService;
     @Mock
     private PackageManager mPackageManager;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private Constants mConstants;
 
@@ -898,7 +904,8 @@ public class ConnectivityControllerTest {
             assertTrue(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
         }
 
-        // Metered network is only when prefetching, late, and in opportunistic quota
+        // Metered network is only when prefetching, charging*, late, and in opportunistic quota
+        // *Charging only when the flag is enabled
         {
             final Network net = mock(Network.class);
             final NetworkCapabilities caps = createCapabilitiesBuilder()
@@ -910,10 +917,27 @@ public class ConnectivityControllerTest {
             assertFalse(controller.isSatisfied(latePrefetch, net, caps, mConstants));
             assertFalse(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
             assertFalse(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
+            mSetFlagsRule.disableFlags(FLAG_RELAX_PREFETCH_CONNECTIVITY_CONSTRAINT_ONLY_ON_CHARGER);
+            when(mService.isBatteryCharging()).thenReturn(false);
 
             when(mNetPolicyManagerInternal.getSubscriptionOpportunisticQuota(
                     any(), eq(NetworkPolicyManagerInternal.QUOTA_TYPE_JOBS)))
                     .thenReturn(9876543210L);
+            assertTrue(controller.isSatisfied(latePrefetch, net, caps, mConstants));
+            // Only relax restrictions when we at least know the estimated download bytes.
+            assertFalse(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
+            assertTrue(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
+
+            mSetFlagsRule.enableFlags(FLAG_RELAX_PREFETCH_CONNECTIVITY_CONSTRAINT_ONLY_ON_CHARGER);
+            when(mNetPolicyManagerInternal.getSubscriptionOpportunisticQuota(
+                    any(), eq(NetworkPolicyManagerInternal.QUOTA_TYPE_JOBS)))
+                    .thenReturn(9876543210L);
+            assertFalse(controller.isSatisfied(latePrefetch, net, caps, mConstants));
+            // Only relax restrictions when we at least know the estimated download bytes.
+            assertFalse(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
+            assertFalse(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
+
+            when(mService.isBatteryCharging()).thenReturn(true);
             assertTrue(controller.isSatisfied(latePrefetch, net, caps, mConstants));
             // Only relax restrictions when we at least know the estimated download bytes.
             assertFalse(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
