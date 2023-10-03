@@ -79,11 +79,13 @@ import com.android.wm.shell.recents.RecentsTransitionStateListener;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionRegionListener;
 
+import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -97,6 +99,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private final DesktopModeWindowDecoration.Factory mDesktopModeWindowDecorFactory;
     private final ActivityTaskManager mActivityTaskManager;
+    private final ShellCommandHandler mShellCommandHandler;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final ShellController mShellController;
     private final Context mContext;
@@ -134,6 +137,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Handler mainHandler,
             Choreographer mainChoreographer,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             ShellController shellController,
@@ -148,6 +152,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mainHandler,
                 mainChoreographer,
                 shellInit,
+                shellCommandHandler,
                 taskOrganizer,
                 displayController,
                 shellController,
@@ -167,6 +172,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Handler mainHandler,
             Choreographer mainChoreographer,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             ShellController shellController,
@@ -189,7 +195,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mTransitions = transitions;
         mDesktopTasksController = desktopTasksController;
         mRecentsTransitionHandler = recentsTransitionHandler;
-
+        mShellCommandHandler = shellCommandHandler;
         mDesktopModeWindowDecorFactory = desktopModeWindowDecorFactory;
         mInputMonitorFactory = inputMonitorFactory;
         mTransactionFactory = transactionFactory;
@@ -206,6 +212,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 onRecentsTransitionStarted(transition);
             }
         });
+        mShellCommandHandler.addDumpCallback(this::dump, this);
     }
 
     @Override
@@ -591,6 +598,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mInputMonitor = null;
             }
             super.dispose();
+        }
+
+        @Override
+        public String toString() {
+            return "EventReceiver"
+                    + "{"
+                    + "tasksOnDisplay="
+                    + mTasksOnDisplay
+                    + "}";
         }
 
         private void incrementTaskNumber() {
@@ -979,6 +995,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private boolean isTaskInSplitScreen(int taskId) {
         return mSplitScreenController != null
                 && mSplitScreenController.isTaskInSplitScreen(taskId);
+    }
+
+    private void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + "DesktopModeWindowDecorViewModel");
+        pw.println(innerPrefix + "DesktopModeStatus=" + DesktopModeStatus.isEnabled());
+        pw.println(innerPrefix + "mTransitionDragActive=" + mTransitionDragActive);
+        pw.println(innerPrefix + "mEventReceiversByDisplay=" + mEventReceiversByDisplay);
+        pw.println(innerPrefix + "mWindowDecorByTaskId=" + mWindowDecorByTaskId);
     }
 
     private class DragStartListenerImpl
