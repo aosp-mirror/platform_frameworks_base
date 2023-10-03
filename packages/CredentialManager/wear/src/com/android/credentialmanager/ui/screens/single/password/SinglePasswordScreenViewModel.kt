@@ -17,10 +17,6 @@
 package com.android.credentialmanager.ui.screens.single.password
 
 import android.content.Intent
-import android.credentials.ui.BaseDialogResult
-import android.credentials.ui.ProviderPendingIntentResponse
-import android.credentials.ui.UserSelectionDialogResult
-import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.MainThread
@@ -30,10 +26,11 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.android.credentialmanager.CredentialSelectorApp
-import com.android.credentialmanager.IS_AUTO_SELECTED_KEY
 import com.android.credentialmanager.TAG
+import com.android.credentialmanager.ktx.getIntentSenderRequest
 import com.android.credentialmanager.model.Password
 import com.android.credentialmanager.model.Request
+import com.android.credentialmanager.repository.PasswordRepository
 import com.android.credentialmanager.repository.RequestRepository
 import com.android.credentialmanager.ui.model.PasswordUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +40,7 @@ import kotlinx.coroutines.launch
 
 class SinglePasswordScreenViewModel(
     private val requestRepository: RequestRepository,
+    private val passwordRepository: PasswordRepository,
 ) : ViewModel() {
 
     private var initializeCalled = false
@@ -87,15 +85,8 @@ class SinglePasswordScreenViewModel(
     }
 
     fun onOKClick() {
-        // TODO: b/301206470 move this code to shared module
-        val entryIntent = password.entry.frameworkExtrasIntent
-        entryIntent?.putExtra(IS_AUTO_SELECTED_KEY, false)
-        val intentSenderRequest = IntentSenderRequest.Builder(
-            pendingIntent = password.passwordCredentialEntry.pendingIntent
-        ).setFillInIntent(entryIntent).build()
-
         _uiState.value = SinglePasswordScreenUiState.PasswordSelected(
-            intentSenderRequest = intentSenderRequest
+            intentSenderRequest = password.getIntentSenderRequest()
         )
     }
 
@@ -103,25 +94,16 @@ class SinglePasswordScreenViewModel(
         resultCode: Int? = null,
         resultData: Intent? = null,
     ) {
-        // TODO: b/301206470 move this code to shared module
-        Log.d(TAG, "credential selected: {provider=${password.providerId}" +
-            ", key=${password.entry.key}, subkey=${password.entry.subkey}}")
+        viewModelScope.launch {
+            passwordRepository.selectPassword(
+                password = password,
+                request = requestGet,
+                resultCode = resultCode,
+                resultData = resultData
+            )
 
-        val userSelectionDialogResult = UserSelectionDialogResult(
-            requestGet.token,
-            password.providerId,
-            password.entry.key,
-            password.entry.subkey,
-            if (resultCode != null) ProviderPendingIntentResponse(resultCode, resultData) else null
-        )
-        val resultDataBundle = Bundle()
-        UserSelectionDialogResult.addToBundle(userSelectionDialogResult, resultDataBundle)
-        requestGet.resultReceiver?.send(
-            BaseDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION,
-            resultDataBundle
-        )
-
-        _uiState.value = SinglePasswordScreenUiState.Completed
+            _uiState.value = SinglePasswordScreenUiState.Completed
+        }
     }
 
     companion object {
@@ -135,6 +117,7 @@ class SinglePasswordScreenViewModel(
 
                 return SinglePasswordScreenViewModel(
                     requestRepository = (application as CredentialSelectorApp).requestRepository,
+                    passwordRepository = application.passwordRepository,
                 ) as T
             }
         }

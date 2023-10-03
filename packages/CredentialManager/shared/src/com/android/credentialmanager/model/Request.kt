@@ -37,7 +37,6 @@ sealed class Request {
      * Request to close the app, displaying a message to the user.
      */
     data class Cancel(
-        val showCancellationUi: Boolean,
         val appName: String
     ) : Request()
 

@@ -35,6 +35,7 @@ import com.android.credentialmanager.activity.StartBalIntentSenderForResultContr
 import com.android.credentialmanager.ui.components.DialogButtonsRow
 import com.android.credentialmanager.ui.components.PasswordRow
 import com.android.credentialmanager.ui.components.SignInHeader
+import com.android.credentialmanager.ui.model.PasswordUiModel
 import com.android.credentialmanager.ui.screens.single.SingleAccountScreen
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
@@ -59,9 +60,8 @@ fun SinglePasswordScreen(
         }
 
         is SinglePasswordScreenUiState.Loaded -> {
-            val model = state.passwordUiModel
             SinglePasswordScreen(
-                email = model.email,
+                passwordUiModel = state.passwordUiModel,
                 onCancelClick = viewModel::onCancelClick,
                 onOKClick = viewModel::onOKClick,
                 columnState = columnState,
@@ -98,7 +98,7 @@ fun SinglePasswordScreen(
 
 @Composable
 fun SinglePasswordScreen(
-    email: String,
+    passwordUiModel: PasswordUiModel,
     onCancelClick: () -> Unit,
     onOKClick: () -> Unit,
     columnState: ScalingLazyColumnState,
@@ -113,7 +113,7 @@ fun SinglePasswordScreen(
         },
         accountContent = {
             PasswordRow(
-                email = email,
+                email = passwordUiModel.email,
                 modifier = Modifier.padding(top = 10.dp),
             )
         },
@@ -134,7 +134,7 @@ fun SinglePasswordScreen(
 @Composable
 fun SinglePasswordScreenPreview() {
     SinglePasswordScreen(
-        email = "beckett_bakery@gmail.com",
+        passwordUiModel = PasswordUiModel(email = "beckett_bakery@gmail.com"),
         onCancelClick = {},
         onOKClick = {},
         columnState = belowTimeTextPreview(),
