@@ -70,12 +70,12 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"برخاست کریں"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے اپنی محفوظ کردہ پاس کی استعمال کریں؟"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے آپ کا محفوظ کردہ پاس ورڈ استعمال کریں؟"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے اپنے سائن ان کی اسناد کا استعمال کرنا؟"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے آپ کی سائن ان تفصیلات استعمال کریں؟"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے سائن ان کے اختیارات کو غیر مقفل کریں؟"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے ایک محفوظ کردہ پاس کی منتخب کریں"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے ایک محفوظ کردہ پاس ورڈ منتخب کریں"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے محفوظ کردہ سائن ان منتخب کریں"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے سائن ان کی اسناد کا انتخاب کرنا"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے سائن ان منتخب کریں"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے ایک اختیار منتخب کریں؟"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> پر اس معلومات کا استعمال کریں؟"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"دوسرے طریقے سے سائن ان کریں"</string>
