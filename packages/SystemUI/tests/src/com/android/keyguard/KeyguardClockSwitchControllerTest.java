@@ -153,6 +153,9 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mResources.getInteger(R.integer.keyguard_date_weather_view_invisibility))
                 .thenReturn(View.INVISIBLE);
 
+        when(mResources.getInteger(com.android.internal.R.integer.config_doublelineClockDefault))
+                .thenReturn(1);
+
         when(mView.findViewById(R.id.lockscreen_clock_view_large)).thenReturn(mLargeClockFrame);
         when(mView.findViewById(R.id.lockscreen_clock_view)).thenReturn(mSmallClockFrame);
         when(mSmallClockView.getContext()).thenReturn(getContext());
@@ -318,6 +321,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         // When a settings change has occurred to the small clock, make sure the view is adjusted
         reset(mView);
+        when(mView.getResources()).thenReturn(mResources);
         observer.onChange(true);
         mExecutor.runAllReady();
         verify(mView).switchToClock(KeyguardClockSwitch.SMALL, /* animate */ true);
