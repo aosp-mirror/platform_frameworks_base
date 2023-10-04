@@ -196,7 +196,7 @@ object MobileIconBinder {
                 visibilityState.value = state
             }
 
-            override fun onIconTintChanged(newTint: Int) {
+            override fun onIconTintChanged(newTint: Int, contrastTint: Int) {
                 iconTint.value = newTint
             }
 

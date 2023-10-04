@@ -371,7 +371,8 @@ private fun StatusIcons(
             val iconContainer = StatusIconContainer(context, null)
             val iconManager = createTintedIconManager(iconContainer, StatusBarLocation.QS)
             iconManager.setTint(
-                Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
+                Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary),
+                Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimaryInverse),
             )
             statusBarIconController.addIconGroup(iconManager)
 

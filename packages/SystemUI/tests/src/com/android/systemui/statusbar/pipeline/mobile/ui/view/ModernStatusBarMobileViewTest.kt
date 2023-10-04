@@ -24,9 +24,9 @@ import android.testing.ViewUtils
 import android.view.View
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
@@ -246,7 +246,8 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         val color = 0x12345678
-        view.onDarkChanged(arrayListOf(), 1.0f, color)
+        val contrast = 0x12344321
+        view.onDarkChangedWithContrast(arrayListOf(), color, contrast)
         testableLooper.processAllMessages()
 
         assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))
@@ -267,7 +268,8 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         val color = 0x23456789
-        view.setStaticDrawableColor(color)
+        val contrast = 0x12344321
+        view.setStaticDrawableColor(color, contrast)
         testableLooper.processAllMessages()
 
         assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))
