@@ -242,6 +242,40 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun animatesRootOnly() {
+        setUpRootWithChildren()
+
+        val success = ViewHierarchyAnimator.animate(
+                rootView,
+                animateChildren = false
+        )
+        // Change all bounds.
+        rootView.measure(
+                View.MeasureSpec.makeMeasureSpec(180, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+        )
+        rootView.layout(10 /* l */, 20 /* t */, 200 /* r */, 120 /* b */)
+
+        assertTrue(success)
+        assertNotNull(rootView.getTag(R.id.tag_animator))
+        assertNull(rootView.getChildAt(0).getTag(R.id.tag_animator))
+        assertNull(rootView.getChildAt(1).getTag(R.id.tag_animator))
+        // The initial values for the root view should be those of the previous layout, while the
+        // children views should be at the final values from the beginning.
+        checkBounds(rootView, l = 0, t = 0, r = 200, b = 100)
+        checkBounds(rootView.getChildAt(0), l = 0, t = 0, r = 90, b = 100)
+        checkBounds(rootView.getChildAt(1), l = 90, t = 0, r = 180, b = 100)
+        endAnimation(rootView)
+        assertNull(rootView.getTag(R.id.tag_animator))
+        assertNull(rootView.getChildAt(0).getTag(R.id.tag_animator))
+        assertNull(rootView.getChildAt(1).getTag(R.id.tag_animator))
+        // The end values should be those of the latest layout.
+        checkBounds(rootView, l = 10, t = 20, r = 200, b = 120)
+        checkBounds(rootView.getChildAt(0), l = 0, t = 0, r = 90, b = 100)
+        checkBounds(rootView.getChildAt(1), l = 90, t = 0, r = 180, b = 100)
+    }
+
+    @Test
     fun animatesInvisibleViews() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
         rootView.visibility = View.INVISIBLE
