@@ -10383,8 +10383,8 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanResults(@NonNull android.os.WorkSource, int);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanStarted(@NonNull android.os.WorkSource, boolean);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanStopped(@NonNull android.os.WorkSource, boolean);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void reportBluetoothOff(int, int, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void reportBluetoothOn(int, int, @NonNull String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void reportBluetoothOff(int, int, @NonNull String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void reportBluetoothOn(int, int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockAcquiredFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockReleasedFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportMobileRadioPowerState(boolean, int);
