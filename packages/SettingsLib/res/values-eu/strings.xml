@@ -366,7 +366,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Araztu GPU gainidazketa"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Desgaitu HW gainjartzeak"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Erabili beti GPUa pantaila-muntaietarako"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"Simulatu kolore-eremua"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"Simulatu kolore-espazioa"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Gaitu OpenGL aztarnak"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desgaitu USB bidez audioa bideratzeko aukera"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Desgaitu USB bidezko audio-gailuetara automatikoki bideratzeko aukera"</string>
@@ -440,7 +440,7 @@
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Erabili sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desgaituta"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Ikusmen-monokromia"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Daltonismoa (gorri-berdeak)"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomalia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalia (urdin-horia)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koloreen zuzenketa"</string>

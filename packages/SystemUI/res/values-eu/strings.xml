@@ -666,8 +666,8 @@
     <string name="group_system_go_back" msgid="8838454003680364227">"Atzera: itzuli aurreko egoerara (atzera egiteko botoia)"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"Atzitu hasierako pantaila"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Ikusi irekitako aplikazioen ikuspegi orokorra"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Joan azken aplikazioetako batetik bestera (aurrera)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Joan azken aplikazioetako batetik bestera (atzera)"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Joan azkenaldian erabilitako aplikazio batetik bestera (aurrera)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"Joan azkenaldian erabilitako aplikazio batetik bestera (atzera)"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Atzitu aplikazio guztien zerrenda eta bilatu (adibidez, bilatzeko aukeraren edo Exekutatzeko tresna aplikazioaren bidez)"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Ezkutatu eta erakutsi (berriro) zereginen barra"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"Atzitu sistemaren ezarpenak"</string>
