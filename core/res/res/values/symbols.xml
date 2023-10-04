@@ -3702,6 +3702,10 @@
   <java-symbol type="id" name="autofill_dataset_list"/>
   <java-symbol type="id" name="autofill_dataset_picker"/>
   <java-symbol type="id" name="autofill_dataset_title" />
+  <java-symbol type="id" name="autofill_sheet_divider"/>
+  <java-symbol type="id" name="autofill_sheet_scroll_view"/>
+  <java-symbol type="id" name="autofill_sheet_scroll_view_space"/>
+
   <java-symbol type="id" name="autofill_save_custom_subtitle" />
   <java-symbol type="id" name="autofill_save_icon" />
   <java-symbol type="id" name="autofill_save_no" />
