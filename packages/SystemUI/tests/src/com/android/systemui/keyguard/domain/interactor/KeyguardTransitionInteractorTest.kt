@@ -230,4 +230,432 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
         assertThat(startedSteps).isEqualTo(listOf(0f, 0.5f, 1f, 1f, 0.5f, 0f))
     }
+
+    @Test
+    fun isInTransitionToState() = testScope.runTest {
+        val results by collectValues(underTest.isInTransitionToState(GONE))
+
+        sendSteps(
+                TransitionStep(AOD, DOZING, 0f, STARTED),
+                TransitionStep(AOD, DOZING, 0.5f, RUNNING),
+                TransitionStep(AOD, DOZING, 1f, FINISHED),
+        )
+
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, STARTED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, FINISHED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(GONE, DOZING, 0f, STARTED),
+                TransitionStep(GONE, DOZING, 0f, RUNNING),
+                TransitionStep(GONE, DOZING, 1f, FINISHED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, STARTED),
+                TransitionStep(DOZING, GONE, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+                true,
+        ))
+    }
+
+    @Test
+    fun isInTransitionFromState() = testScope.runTest {
+        val results by collectValues(underTest.isInTransitionFromState(DOZING))
+
+        sendSteps(
+                TransitionStep(AOD, DOZING, 0f, STARTED),
+                TransitionStep(AOD, DOZING, 0.5f, RUNNING),
+                TransitionStep(AOD, DOZING, 1f, FINISHED),
+        )
+
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, STARTED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, FINISHED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(GONE, DOZING, 0f, STARTED),
+                TransitionStep(GONE, DOZING, 0f, RUNNING),
+                TransitionStep(GONE, DOZING, 1f, FINISHED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, STARTED),
+                TransitionStep(DOZING, GONE, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+                true,
+        ))
+    }
+
+    @Test
+    fun isInTransitionFromStateWhere() = testScope.runTest {
+        val results by collectValues(underTest.isInTransitionFromStateWhere {
+            it == DOZING
+        })
+
+        sendSteps(
+                TransitionStep(AOD, DOZING, 0f, STARTED),
+                TransitionStep(AOD, DOZING, 0.5f, RUNNING),
+                TransitionStep(AOD, DOZING, 1f, FINISHED),
+        )
+
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, STARTED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, FINISHED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(GONE, DOZING, 0f, STARTED),
+                TransitionStep(GONE, DOZING, 0f, RUNNING),
+                TransitionStep(GONE, DOZING, 1f, FINISHED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, STARTED),
+                TransitionStep(DOZING, GONE, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+                true,
+        ))
+    }
+
+    @Test
+    fun isInTransitionWhere() = testScope.runTest {
+        val results by collectValues(underTest.isInTransitionWhere(
+            fromStatePredicate = { it == DOZING },
+            toStatePredicate = { it == GONE },
+        ))
+
+        sendSteps(
+                TransitionStep(AOD, DOZING, 0f, STARTED),
+                TransitionStep(AOD, DOZING, 0.5f, RUNNING),
+                TransitionStep(AOD, DOZING, 1f, FINISHED),
+        )
+
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, STARTED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, FINISHED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(GONE, DOZING, 0f, STARTED),
+                TransitionStep(GONE, DOZING, 0f, RUNNING),
+                TransitionStep(GONE, DOZING, 1f, FINISHED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, STARTED),
+                TransitionStep(DOZING, GONE, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+                true,
+        ))
+    }
+
+    @Test
+    fun isFinishedInStateWhere() = testScope.runTest {
+        val results by collectValues(underTest.isFinishedInStateWhere { it == GONE } )
+
+        sendSteps(
+                TransitionStep(AOD, DOZING, 0f, STARTED),
+                TransitionStep(AOD, DOZING, 0.5f, RUNNING),
+                TransitionStep(AOD, DOZING, 1f, FINISHED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false, // Finished in DOZING, not GONE.
+        ))
+
+        sendSteps(TransitionStep(DOZING, GONE, 0f, STARTED))
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+        ))
+
+        sendSteps(TransitionStep(DOZING, GONE, 0f, RUNNING))
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+        ))
+
+        sendSteps(TransitionStep(DOZING, GONE, 1f, FINISHED))
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(
+                TransitionStep(GONE, DOZING, 0f, STARTED),
+                TransitionStep(GONE, DOZING, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(TransitionStep(GONE, DOZING, 1f, FINISHED))
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, STARTED),
+                TransitionStep(DOZING, GONE, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(TransitionStep(DOZING, GONE, 1f, FINISHED))
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+                true,
+        ))
+    }
+
+    @Test
+    fun isFinishedInState() = testScope.runTest {
+        val results by collectValues(underTest.isFinishedInState(GONE))
+
+        sendSteps(
+                TransitionStep(AOD, DOZING, 0f, STARTED),
+                TransitionStep(AOD, DOZING, 0.5f, RUNNING),
+                TransitionStep(AOD, DOZING, 1f, FINISHED),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false, // Finished in DOZING, not GONE.
+        ))
+
+        sendSteps(TransitionStep(DOZING, GONE, 0f, STARTED))
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+        ))
+
+        sendSteps(TransitionStep(DOZING, GONE, 0f, RUNNING))
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+        ))
+
+        sendSteps(TransitionStep(DOZING, GONE, 1f, FINISHED))
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(
+                TransitionStep(GONE, DOZING, 0f, STARTED),
+                TransitionStep(GONE, DOZING, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+        ))
+
+        sendSteps(TransitionStep(GONE, DOZING, 1f, FINISHED))
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(
+                TransitionStep(DOZING, GONE, 0f, STARTED),
+                TransitionStep(DOZING, GONE, 0f, RUNNING),
+        )
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+        ))
+
+        sendSteps(TransitionStep(DOZING, GONE, 1f, FINISHED))
+
+        assertThat(results).isEqualTo(listOf(
+                false,
+                true,
+                false,
+                true,
+        ))
+    }
+
+    private suspend fun sendSteps(vararg steps: TransitionStep) {
+        steps.forEach {
+            repository.sendTransitionStep(it)
+            testScope.runCurrent()
+        }
+    }
 }

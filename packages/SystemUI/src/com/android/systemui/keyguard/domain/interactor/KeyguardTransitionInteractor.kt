@@ -34,16 +34,17 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
 /** Encapsulates business-logic related to the keyguard transitions. */
 @SysUISingleton
@@ -176,18 +177,17 @@ constructor(
             .map { step -> step.to }
             .stateIn(scope, SharingStarted.Eagerly, LOCKSCREEN)
 
-
     /**
      * Whether we're currently in a transition to a new [KeyguardState] and haven't yet completed
      * it.
      */
     val isInTransitionToAnyState =
-            combine(
-                    startedKeyguardTransitionStep,
-                    finishedKeyguardState,
-            ) { startedStep, finishedState ->
-                startedStep.to != finishedState
-            }
+        combine(
+            startedKeyguardTransitionStep,
+            finishedKeyguardState,
+        ) { startedStep, finishedState ->
+            startedStep.to != finishedState
+        }
 
     /**
      * The amount of transition into or out of the given [KeyguardState].
@@ -236,14 +236,9 @@ constructor(
 
     /** Whether we're in a transition to the given [KeyguardState], but haven't yet completed it. */
     fun isInTransitionToState(
-            state: KeyguardState,
+        state: KeyguardState,
     ): Flow<Boolean> {
-        return combine(
-                startedKeyguardTransitionStep,
-                finishedKeyguardState,
-        ) { startedStep, finishedState ->
-            startedStep.to == state && finishedState != state
-        }
+        return isInTransitionToStateWhere { it == state }
     }
 
     /**
@@ -251,28 +246,18 @@ constructor(
      * haven't yet completed it.
      */
     fun isInTransitionToStateWhere(
-            stateMatcher: (KeyguardState) -> Boolean,
+        stateMatcher: (KeyguardState) -> Boolean,
     ): Flow<Boolean> {
-        return combine(
-                startedKeyguardTransitionStep,
-                finishedKeyguardState,
-        ) { startedStep, finishedState ->
-            stateMatcher(startedStep.to) && finishedState != startedStep.from
-        }
+        return isInTransitionWhere(fromStatePredicate = { true }, toStatePredicate = stateMatcher)
     }
 
     /**
      * Whether we're in a transition out of the given [KeyguardState], but haven't yet completed it.
      */
     fun isInTransitionFromState(
-            state: KeyguardState,
+        state: KeyguardState,
     ): Flow<Boolean> {
-        return combine(
-                startedKeyguardTransitionStep,
-                finishedKeyguardState,
-        ) { startedStep, finishedState ->
-            startedStep.from == state && finishedState != state
-        }
+        return isInTransitionFromStateWhere { it == state }
     }
 
     /**
@@ -280,14 +265,9 @@ constructor(
      * haven't yet completed it.
      */
     fun isInTransitionFromStateWhere(
-            stateMatcher: (KeyguardState) -> Boolean,
+        stateMatcher: (KeyguardState) -> Boolean,
     ): Flow<Boolean> {
-        return combine(
-                startedKeyguardTransitionStep,
-                finishedKeyguardState,
-        ) { startedStep, finishedState ->
-            stateMatcher(startedStep.from) && finishedState != startedStep.from
-        }
+        return isInTransitionWhere(fromStatePredicate = stateMatcher, toStatePredicate = { true })
     }
 
     /**
@@ -299,26 +279,23 @@ constructor(
         toStatePredicate: (KeyguardState) -> Boolean,
     ): Flow<Boolean> {
         return combine(
-            startedKeyguardTransitionStep,
-            finishedKeyguardState,
-        ) { startedStep, finishedState ->
-            fromStatePredicate(startedStep.from)
-                    && toStatePredicate(startedStep.to)
-                    && finishedState != startedStep.from
-        }
+                startedKeyguardTransitionStep,
+                finishedKeyguardState,
+            ) { startedStep, finishedState ->
+                fromStatePredicate(startedStep.from) &&
+                    toStatePredicate(startedStep.to) &&
+                    finishedState != startedStep.to
+            }
+            .distinctUntilChanged()
     }
 
-    /**
-     * Whether we've FINISHED a transition to a state that matches the given predicate.
-     */
+    /** Whether we've FINISHED a transition to a state that matches the given predicate. */
     fun isFinishedInStateWhere(stateMatcher: (KeyguardState) -> Boolean): Flow<Boolean> {
-        return finishedKeyguardState.map { stateMatcher(it) }
+        return finishedKeyguardState.map { stateMatcher(it) }.distinctUntilChanged()
     }
 
-    /**
-     * Whether we've FINISHED a transition to a state that matches the given predicate.
-     */
-    fun isFinishedInState(state: KeyguardState) : Flow<Boolean> {
-        return finishedKeyguardState.map { it == state }
+    /** Whether we've FINISHED a transition to a state that matches the given predicate. */
+    fun isFinishedInState(state: KeyguardState): Flow<Boolean> {
+        return finishedKeyguardState.map { it == state }.distinctUntilChanged()
     }
 }
