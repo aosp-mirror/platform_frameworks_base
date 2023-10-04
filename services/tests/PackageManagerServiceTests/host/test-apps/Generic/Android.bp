@@ -66,3 +66,13 @@ android_test_helper_app {
         "src/**/*.kt",
     ],
 }
+
+android_test_helper_app {
+    name: "PackageManagerTestAppVersion2AltKey",
+    manifest: "AndroidManifestVersion2.xml",
+    srcs: [
+        "src/**/*.kt",
+    ],
+    certificate: ":FrameworksServicesTests_keyset_A_cert",
+    v4_signature: true,
+}
