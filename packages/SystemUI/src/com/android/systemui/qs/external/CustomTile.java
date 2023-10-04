@@ -72,7 +72,8 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 
-public class CustomTile extends QSTileImpl<State> implements TileChangeListener {
+public class CustomTile extends QSTileImpl<State> implements TileChangeListener,
+        CustomTileInterface {
     public static final String PREFIX = "custom(";
 
     private static final long CUSTOM_STALE_TIMEOUT = DateUtils.HOUR_IN_MILLIS;
@@ -181,7 +182,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private void updateDefaultTileAndIcon() {
         try {
             PackageManager pm = mUserContext.getPackageManager();
-            int flags = PackageManager.MATCH_DIRECT_BOOT_UNAWARE | PackageManager.MATCH_DIRECT_BOOT_AWARE;
+            int flags = PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                    | PackageManager.MATCH_DIRECT_BOOT_AWARE;
             if (isSystemApp(pm)) {
                 flags |= PackageManager.MATCH_DISABLED_COMPONENTS;
             }
@@ -213,7 +215,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
      * Compare two icons, only works for resources.
      */
     private boolean iconEquals(@Nullable android.graphics.drawable.Icon icon1,
-                               @Nullable android.graphics.drawable.Icon icon2) {
+            @Nullable android.graphics.drawable.Icon icon2) {
         if (icon1 == icon2) {
             return true;
         }
@@ -252,10 +254,12 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         }
     }
 
+    @Override
     public int getUser() {
         return mUser;
     }
 
+    @Override
     public ComponentName getComponent() {
         return mComponent;
     }
@@ -265,6 +269,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         return super.populate(logMaker).setComponentName(mComponent);
     }
 
+    @Override
     public Tile getQsTile() {
         // TODO(b/191145007) Move to background thread safely
         updateDefaultTileAndIcon();
@@ -276,6 +281,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
      *
      * @param tile tile populated with state to apply
      */
+    @Override
     public void updateTileState(Tile tile, int appUid) {
         mServiceUid = appUid;
         // This comes from a binder call IQSService.updateQsTile
@@ -310,10 +316,12 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mTile.setState(tile.getState());
     }
 
+    @Override
     public void onDialogShown() {
         mIsShowingDialog = true;
     }
 
+    @Override
     public void onDialogHidden() {
         mIsShowingDialog = false;
         try {
@@ -507,6 +515,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         return mComponent.getPackageName();
     }
 
+    @Override
     public void startUnlockAndRun() {
         mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
             try {
@@ -518,8 +527,10 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     /**
      * Starts an {@link android.app.Activity}
+     *
      * @param pendingIntent A PendingIntent for an Activity to be launched immediately.
      */
+    @Override
     public void startActivityAndCollapse(PendingIntent pendingIntent) {
         if (!pendingIntent.isActivity()) {
             Log.i(TAG, "Intent not for activity.");
