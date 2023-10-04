@@ -31,8 +31,15 @@ class FakeTelephonyRepository @Inject constructor() : TelephonyRepository {
     private val _callState = MutableStateFlow(0)
     override val callState: Flow<Int> = _callState.asStateFlow()
 
+    override var hasTelephonyRadio: Boolean = true
+        private set
+
     fun setCallState(value: Int) {
         _callState.value = value
+    }
+
+    fun setHasRadio(hasRadio: Boolean) {
+        this.hasTelephonyRadio = hasRadio
     }
 }
 

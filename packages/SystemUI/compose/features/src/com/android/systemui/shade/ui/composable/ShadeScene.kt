@@ -63,6 +63,7 @@ object Shade {
 
     object Dimensions {
         val ScrimCornerSize = 32.dp
+        val HorizontalPadding = 16.dp
     }
 
     object Shapes {
@@ -138,7 +139,11 @@ private fun SceneScope.ShadeScene(
             modifier =
                 Modifier.fillMaxSize()
                     .clickable(onClick = { viewModel.onContentClicked() })
-                    .padding(start = 16.dp, end = 16.dp, bottom = 48.dp)
+                    .padding(
+                        start = Shade.Dimensions.HorizontalPadding,
+                        end = Shade.Dimensions.HorizontalPadding,
+                        bottom = 48.dp
+                    )
         ) {
             CollapsedShadeHeader(
                 viewModel = viewModel.shadeHeaderViewModel,

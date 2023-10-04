@@ -29,7 +29,7 @@ fun Intent.parse(
     packageManager: PackageManager,
     previousIntent: Intent? = null,
 ): Request {
-    this.toRequestClose(packageManager, previousIntent)?.let { closeRequest ->
+    this.toRequestClose(previousIntent)?.let { closeRequest ->
         return closeRequest
     }
 

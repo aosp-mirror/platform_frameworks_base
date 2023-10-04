@@ -194,6 +194,8 @@
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Nota fingrafar í staðinn"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Andlitskenni ekki í boði"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth tengt."</string>
+    <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Tákn Bluetooth-tækis"</string>
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="4188853273831773436">"Tannhjólstákn fyrir stillingar Bluetooth-tækis"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Staða rafhlöðu óþekkt."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Tengt við <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Tengt við <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -246,6 +248,12 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ónáðið ekki"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Engin pöruð tæki til staðar"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="6869579539763980182">"Ýttu á tæki til að tengja"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Para nýtt tæki"</string>
+    <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Sjá allt"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"Nota Bluetooth"</string>
+    <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Tengt"</string>
+    <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Vistað"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> rafhlöðuhleðsla"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Hljóð"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Höfuðtól"</string>
@@ -1143,7 +1151,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Til að bæta Veskisforritinu við sem flýtileið skaltu ganga úr skugga um að forritið sé uppsett"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Til að bæta Veskisforritinu við sem flýtileið skaltu ganga úr skugga um að hafa bætt að minnsta kosti einu korti við"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Til að bæta Home-forritinu við sem flýtileið skaltu ganga úr skugga um að forritið sé uppsett"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Að minnsta kosti eitt tæki er tiltækt"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Að minnsta kosti eitt tæki eða tækjasvæði tiltækt"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Veldu sjálfgefið glósuforrit til að nota flýtileið fyrir glósugerð"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Velja forrit"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Haltu flýtilyklinum inni"</string>
@@ -1175,7 +1183,10 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Stilltu sjálfgefið glósuforrit í stillingunum"</string>
     <string name="install_app" msgid="5066668100199613936">"Setja upp forrit"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Spegla yfir á ytri skjá?"</string>
-    <string name="enable_display" msgid="8308309634883321977">"Virkja skjá"</string>
+    <!-- no translation found for mirror_display (2515262008898122928) -->
+    <skip />
+    <!-- no translation found for dismiss_dialog (2195508495854675882) -->
+    <skip />
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Hljóðnemi og myndavél"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Nýlega notað af forriti"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Sjá nýlegan aðgang"</string>

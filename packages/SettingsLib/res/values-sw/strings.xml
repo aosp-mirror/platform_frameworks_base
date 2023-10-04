@@ -157,6 +157,8 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Vipima mtandao viwili vya Wifi."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Vipima mtandao vitatu vya Wifi."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Nguvu kamili ya mtandao wa Wifi."</string>
+    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
+    <skip />
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Mtandao unaotumiwa na mtu yeyote"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Mtandao salama"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Mfumo wa Uendeshaji wa Android"</string>
@@ -517,8 +519,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Haijasajiliwa"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Hamna"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Imechagua anwani ya MAC kwa nasibu"</string>
-    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
-    <skip />
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{Kifaa 1 kimeunganishwa}other{Vifaa # vimeunganishwa}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Muda zaidi."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Muda kidogo."</string>
     <string name="cancel" msgid="5665114069455378395">"Ghairi"</string>

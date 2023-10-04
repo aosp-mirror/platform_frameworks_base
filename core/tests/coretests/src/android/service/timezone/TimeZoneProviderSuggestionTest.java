@@ -22,11 +22,20 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Collections;
 
 /** Tests for non-API methods */
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+@Presubmit
 public class TimeZoneProviderSuggestionTest {
 
     @Test

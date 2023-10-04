@@ -67,8 +67,6 @@ open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) :
 
     override val defaultTeardown: FlickerBuilder.() -> Unit = {
         teardown {
-            // close gracefully so that onActivityUnpinned() can be called before force exit
-            pipApp.closePipWindow(wmHelper)
             pipApp.exit(wmHelper)
         }
     }

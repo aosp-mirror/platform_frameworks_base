@@ -456,6 +456,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                         currentUser);
             } catch (IOException | IllegalStateException e) {
                 Log.e(TAG, "Error saving screen recording: " + e.getMessage());
+                e.printStackTrace();
                 showErrorToast(R.string.screenrecord_save_error);
                 mNotificationManager.cancelAsUser(null, mNotificationId, currentUser);
             }

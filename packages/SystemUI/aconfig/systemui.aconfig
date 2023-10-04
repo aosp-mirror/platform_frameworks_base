@@ -6,3 +6,10 @@ flag {
     description: "An Example Flag"
     bug: "292511372"
 }
+
+flag {
+    name: "sysui_teamfood"
+    namespace: "systemui"
+    description: "Enables all the sysui classic flags that are marked as being in teamfood"
+    bug: "302578396"
+}

@@ -157,6 +157,8 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"ವೈಫೈ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"ವೈಫೈ ಮೂರು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"ವೈಫೈ ಸಿಗ್ನಲ್‌‌ ಪೂರ್ತಿ ಇದೆ."</string>
+    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
+    <skip />
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"ನೆಟ್‌ವರ್ಕ್‌ ತೆರೆಯಿರಿ"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"ಸುರಕ್ಷಿತ ನೆಟ್‌ವರ್ಕ್"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
@@ -322,7 +324,7 @@
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ನಕಲಿಸಲು, ನೋಟಿಫಿಕೇಶನ್ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆ್ಯಪ್‍ಗಳನ್ನು ಇನ್‍ಸ್ಟಾಲ್ ಮಾಡಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸಬೇಕೆ?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ನಕಲಿಸಲು, ಅಧಿಸೂಚನೆ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ಕಾಪಿ ಮಾಡಲು, ನೋಟಿಫಿಕೇಶನ್‌ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"ನೀವು ಹಿಂದೆ ಅಧಿಕೃತಗೊಳಿಸಿದ ಎಲ್ಲ ಕಂಪ್ಯೂಟರ್‌ಗಳಿಂದ USB ಡೀಬಗ್‌ಗೆ ಪ್ರವೇಶವನ್ನು ರದ್ದುಗೊಳಿಸುವುದೇ?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"ಅಭಿವೃದ್ಧಿಯ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ಈ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅಭಿವೃದ್ಧಿಯ ಬಳಕೆಗೆ ಮಾತ್ರ. ಅವುಗಳು ನಿಮ್ಮ ಸಾಧನ ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್‌‌ಗಳಿಗೆ ಧಕ್ಕೆ ಮಾಡಬಹುದು ಅಥವಾ ಅವು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದಿರುವಂತೆ ಮಾಡಬಹುದು."</string>
@@ -517,8 +519,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC ಯಾದೃಚ್ಛಿಕವಾಗಿದೆ"</string>
-    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
-    <skip />
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 ಸಾಧನವನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ}one{# ಸಾಧನಗಳನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ}other{# ಸಾಧನಗಳನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ಹೆಚ್ಚು ಸಮಯ."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ಕಡಿಮೆ ಸಮಯ."</string>
     <string name="cancel" msgid="5665114069455378395">"ರದ್ದುಮಾಡಿ"</string>

@@ -27,6 +27,7 @@ import com.android.systemui.assist.AssistManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.statusbar.CommandQueue
@@ -80,6 +81,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
             WindowRootViewVisibilityRepository(iStatusBarService, executor),
             FakeKeyguardRepository(),
             headsUpManager,
+            PowerInteractorFactory.create().powerInteractor,
         )
     }
 

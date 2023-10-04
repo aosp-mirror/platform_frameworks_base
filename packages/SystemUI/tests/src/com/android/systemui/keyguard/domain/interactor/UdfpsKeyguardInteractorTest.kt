@@ -30,9 +30,9 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.util.mockito.argumentCaptor
@@ -68,6 +68,7 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
     private lateinit var burnInInteractor: BurnInInteractor
     private lateinit var shadeRepository: FakeShadeRepository
     private lateinit var keyguardInteractor: KeyguardInteractor
+    private lateinit var powerInteractor: PowerInteractor
 
     @Mock private lateinit var burnInHelper: BurnInHelperWrapper
     @Mock private lateinit var dialogManager: SystemUIDialogManager
@@ -99,6 +100,7 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
                 configRepository,
                 keyguardInteractor
             )
+        powerInteractor = PowerInteractorFactory.create().powerInteractor
 
         underTest =
             UdfpsKeyguardInteractor(
@@ -217,12 +219,6 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
         bouncerRepository.setAlternateVisible(false)
         keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
         bouncerRepository.setPrimaryShow(false)
-        keyguardRepository.setWakefulnessModel(
-            WakefulnessModel(
-                WakefulnessState.AWAKE,
-                WakeSleepReason.POWER_BUTTON,
-                WakeSleepReason.POWER_BUTTON,
-            )
-        )
+        powerInteractor.setAwakeForTest()
     }
 }

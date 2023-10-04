@@ -23,7 +23,6 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import android.tools.common.flicker.subject.region.RegionTraceSubject
 import android.tools.device.helpers.WindowUtils
 import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.filters.RequiresDevice
@@ -87,8 +86,6 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
                 pipApp.enableAutoEnterForPipActivity()
             }
             teardown {
-                // close gracefully so that onActivityUnpinned() can be called before force exit
-                pipApp.closePipWindow(wmHelper)
                 pipApp.exit(wmHelper)
                 secondAppForSplitScreen.exit(wmHelper)
             }

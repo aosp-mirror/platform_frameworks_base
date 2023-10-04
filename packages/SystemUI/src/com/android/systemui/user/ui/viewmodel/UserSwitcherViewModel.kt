@@ -17,10 +17,10 @@
 
 package com.android.systemui.user.ui.viewmodel
 
-import com.android.systemui.res.R
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.drawable.CircularDrawable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.res.R
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
@@ -41,6 +41,10 @@ constructor(
     private val userInteractor: UserInteractor,
     private val guestUserInteractor: GuestUserInteractor,
 ) {
+
+    /** The currently selected user. */
+    val selectedUser: Flow<UserViewModel> =
+        userInteractor.selectedUser.map { user -> toViewModel(user) }
 
     /** On-device users. */
     val users: Flow<List<UserViewModel>> =

@@ -157,6 +157,8 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi dua baris"</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi tiga baris."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Sinyal Wi-Fi penuh."</string>
+    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
+    <skip />
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Jaringan terbuka"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Jaringan aman"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"OS Android"</string>
@@ -456,7 +458,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Akan bertahan kira-kira sampai <xliff:g id="TIME">%1$s</xliff:g> berdasarkan penggunaan Anda"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Akan bertahan kira-kira sampai pukul <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Akan bertahan kira-kira sampai pukul <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hingga <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hingga pukul <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Baterai mungkin habis pada pukul <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Tersisa kurang dari <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Tersisa kurang dari <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -517,8 +519,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Tidak terdaftar"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Tidak tersedia"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC diacak"</string>
-    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
-    <skip />
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 perangkat terhubung}other{# perangkat terhubung}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Lebih lama."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Lebih cepat."</string>
     <string name="cancel" msgid="5665114069455378395">"Batal"</string>

@@ -43,6 +43,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.never;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -58,6 +59,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.LocaleList;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
@@ -380,12 +382,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // The top app should not change while sleeping.
         assertEquals(topActivity.app, mAtm.mInternal.getTopApp());
 
-        mAtm.startLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY
                 | ActivityTaskManagerService.POWER_MODE_REASON_UNKNOWN_VISIBILITY);
         assertEquals(ActivityManager.PROCESS_STATE_TOP, mAtm.mInternal.getTopProcessState());
         // Because there is no unknown visibility record, the state will be restored if other
         // reasons are all done.
-        mAtm.endLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
         assertEquals(ActivityManager.PROCESS_STATE_TOP_SLEEPING,
                 mAtm.mInternal.getTopProcessState());
 
@@ -407,6 +409,37 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         mAtm.updateSleepIfNeededLocked();
 
         assertTopNonSleeping.accept(homeActivity);
+    }
+
+    @Test
+    public void testSetPowerMode() {
+        // Depends on the mocked power manager set in SystemServicesTestRule#setUpLocalServices.
+        mAtm.onInitPowerManagement();
+
+        // Apply different power modes according to the reasons.
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_LAUNCH, true);
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_DISPLAY_CHANGE, true);
+
+        // If there is unknown visibility launching app, the launch power mode won't be canceled
+        // even if REASON_START_ACTIVITY is cleared.
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_UNKNOWN_VISIBILITY);
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(mock(ActivityRecord.class));
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        verify(mWm.mPowerManagerInternal, never()).setPowerMode(
+                PowerManagerInternal.MODE_LAUNCH, false);
+
+        mDisplayContent.mUnknownAppVisibilityController.clear();
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_LAUNCH, false);
+
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_DISPLAY_CHANGE, false);
     }
 
     @Test

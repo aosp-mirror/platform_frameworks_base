@@ -521,11 +521,8 @@ public class PackageManagerServiceUtils {
     }
 
     /**
-     * Make sure the updated priv app is signed with the same key as the original APK file on the
-     * /system partition.
-     *
-     * <p>The rationale is that {@code disabledPkg} is a PackageSetting backed by xml files in /data
-     * and is not tamperproof.
+     * Verifies the updated system app has a signature that is consistent with the pre-installed
+     * version or the signing lineage.
      */
     private static boolean matchSignatureInSystem(@NonNull String packageName,
             @NonNull SigningDetails signingDetails, PackageSetting disabledPkgSetting) {
@@ -559,17 +556,12 @@ public class PackageManagerServiceUtils {
                         == FSVERITY_ENABLED;
     }
 
-    /** Returns true to force apk verification if the package is considered privileged. */
-    static boolean isApkVerificationForced(@Nullable PackageSetting ps) {
-        // TODO(b/154310064): re-enable.
-        return false;
-    }
-
     /**
      * Verifies that signatures match.
      * @returns {@code true} if the compat signatures were matched; otherwise, {@code false}.
      * @throws PackageManagerException if the signatures did not match.
      */
+    @SuppressWarnings("ReferenceEquality")
     public static boolean verifySignatures(PackageSetting pkgSetting,
             @Nullable SharedUserSetting sharedUserSetting,
             PackageSetting disabledPkgSetting, SigningDetails parsedSignatures,
@@ -578,13 +570,23 @@ public class PackageManagerServiceUtils {
         final String packageName = pkgSetting.getPackageName();
         boolean compatMatch = false;
         if (pkgSetting.getSigningDetails().getSignatures() != null) {
-            // Already existing package. Make sure signatures match
+            // For an already existing package, make sure the parsed signatures from the package
+            // match the one in PackageSetting.
             boolean match = parsedSignatures.checkCapability(
                     pkgSetting.getSigningDetails(),
                     SigningDetails.CertCapabilities.INSTALLED_DATA)
                             || pkgSetting.getSigningDetails().checkCapability(
                                     parsedSignatures,
                                     SigningDetails.CertCapabilities.ROLLBACK);
+            // Also make sure the parsed signatures are consistent with the disabled package
+            // setting, if any. The additional UNKNOWN check is because disabled package settings
+            // may not have SigningDetails currently, and we don't want to cause an uninstall.
+            if (android.security.Flags.extendVbChainToUpdatedApk()
+                    && match && disabledPkgSetting != null
+                    && disabledPkgSetting.getSigningDetails() != SigningDetails.UNKNOWN) {
+                match = matchSignatureInSystem(packageName, parsedSignatures, disabledPkgSetting);
+            }
+
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(packageName, pkgSetting.getSignatures(),
                         parsedSignatures);
@@ -601,11 +603,6 @@ public class PackageManagerServiceUtils {
                                         parsedSignatures,
                                         pkgSetting.getSigningDetails(),
                                         SigningDetails.CertCapabilities.ROLLBACK);
-            }
-
-            if (!match && isApkVerificationForced(disabledPkgSetting)) {
-                match = matchSignatureInSystem(packageName, pkgSetting.getSigningDetails(),
-                        disabledPkgSetting);
             }
 
             if (!match && isRollback) {

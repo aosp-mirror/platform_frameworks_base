@@ -75,6 +75,7 @@ import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.settings.UserContextProvider;
@@ -170,7 +171,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mTestScope.getBackgroundScope(),
                 new WindowRootViewVisibilityRepository(mBarService, mExecutor),
                 new FakeKeyguardRepository(),
-                mHeadsUpManagerPhone);
+                mHeadsUpManagerPhone,
+                PowerInteractorFactory.create().getPowerInteractor());
 
         mGutsManager = new NotificationGutsManager(
                 mContext,

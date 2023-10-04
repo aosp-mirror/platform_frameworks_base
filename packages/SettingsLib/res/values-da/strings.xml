@@ -157,6 +157,8 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi har to bjælker."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi har tre bjælker."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Wi-Fi har fuldt signal."</string>
+    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
+    <skip />
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Åbent netværk"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Sikkert netværk"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
@@ -403,9 +405,9 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Tillad, at alle aktiviteter kan tilpasses flere vinduer uafhængigt af manifestværdier"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktivér vinduer i frit format"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktivér understøttelse af eksperimentelle vinduer i frit format"</string>
-    <string name="local_backup_password_title" msgid="4631017948933578709">"Kode til lokal backup"</string>
+    <string name="local_backup_password_title" msgid="4631017948933578709">"Kode til lokal sikkerhedskopi"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Lokale komplette backups er i øjeblikket ikke beskyttet"</string>
-    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tryk for at skifte eller fjerne adgangskoden til fuld lokal backup"</string>
+    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tryk for at skifte eller fjerne adgangskoden til fuld lokal sikkerhedskopiering"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Ny adgangskode til sikkerhedskopi er angivet"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"Ny adgangskode og bekræftelse matcher ikke"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"Fejl ved angivelse af adgangskode til sikkerhedskopi"</string>
@@ -517,8 +519,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Ikke registreret"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Utilgængelig"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC-adressen er tilfældig"</string>
-    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
-    <skip />
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 enhed er forbundet}one{# enhed er forbundet}other{# enheder er forbundet}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mere tid."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mindre tid."</string>
     <string name="cancel" msgid="5665114069455378395">"Annuller"</string>

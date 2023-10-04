@@ -66,7 +66,6 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.ViewRefactorFlag;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
@@ -76,6 +75,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -181,7 +181,7 @@ public class NotificationStackScrollLayoutController {
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
-    private final KeyguardInteractor mKeyguardInteractor;
+    private final PowerInteractor mPowerInteractor;
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final SectionHeaderController mSilentHeaderController;
@@ -575,7 +575,7 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public float getFalsingThresholdFactor() {
                     return ShadeViewController.getFalsingThresholdFactor(
-                            mKeyguardInteractor.getWakefulnessModel().getValue());
+                            mPowerInteractor.getDetailedWakefulness().getValue());
                 }
 
                 @Override
@@ -640,7 +640,7 @@ public class NotificationStackScrollLayoutController {
             SysuiStatusBarStateController statusBarStateController,
             KeyguardMediaController keyguardMediaController,
             KeyguardBypassController keyguardBypassController,
-            KeyguardInteractor keyguardInteractor,
+            PowerInteractor powerInteractor,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             KeyguardTransitionRepository keyguardTransitionRepo,
             ZenModeController zenModeController,
@@ -692,7 +692,7 @@ public class NotificationStackScrollLayoutController {
         mStatusBarStateController = statusBarStateController;
         mKeyguardMediaController = keyguardMediaController;
         mKeyguardBypassController = keyguardBypassController;
-        mKeyguardInteractor = keyguardInteractor;
+        mPowerInteractor = powerInteractor;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mZenModeController = zenModeController;
         mLockscreenUserManager = lockscreenUserManager;

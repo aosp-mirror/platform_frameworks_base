@@ -31,9 +31,6 @@ fun Intent.toRequestCancel(packageManager: PackageManager): Request.Cancel? =
             Log.d(TAG, "Received UI cancel request with an invalid package name.")
             null
         } else {
-            Request.Cancel(
-                showCancellationUi = cancelUiRequest.shouldShowCancellationUi(),
-                appName = appLabel
-            )
+            Request.Cancel(appName = appLabel)
         }
     }

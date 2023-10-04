@@ -27,21 +27,60 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.power.shared.model.ScreenPowerState
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessModel
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.util.time.SystemClock
-import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
 /** Defines interface for classes that act as source of truth for power-related data. */
 interface PowerRepository {
     /** Whether the device is interactive. Starts with the current state. */
     val isInteractive: Flow<Boolean>
 
+    /**
+     * Whether the device is awake or asleep. [WakefulnessState.AWAKE] means the screen is fully
+     * powered on, and the user can interact with the device. [WakefulnessState.ASLEEP] means the
+     * screen is either off, or in low-power always-on-display mode - in either case, the user
+     * cannot interact with the device and will need to wake it up somehow if they wish to do so.
+     */
+    val wakefulness: StateFlow<WakefulnessModel>
+
+    /**
+     * The physical on/off state of the display. [ScreenPowerState.SCREEN_OFF] means the display is
+     * unpowered and nothing is visible. [ScreenPowerState.SCREEN_ON] means the display is either
+     * fully powered on, or it's in low-power always-on-display (AOD) mode showing the time and
+     * other info.
+     *
+     * YOU PROBABLY DO NOT WANT TO USE THIS STATE. Almost all System UI use cases for screen state
+     * expect that the screen would be considered "off" if we're on AOD, which is not the case for
+     * [screenPowerState]. Consider [wakefulness] instead.
+     */
+    val screenPowerState: StateFlow<ScreenPowerState>
+
     /** Wakes up the device. */
     fun wakeUp(why: String, @PowerManager.WakeReason wakeReason: Int)
 
     /** Notifies the power repository that a user touch happened. */
     fun userTouch()
+
+    /** Updates the wakefulness state, keeping previous values by default. */
+    fun updateWakefulness(
+            rawState: WakefulnessState = wakefulness.value.internalWakefulnessState,
+            lastWakeReason: WakeSleepReason = wakefulness.value.lastWakeReason,
+            lastSleepReason: WakeSleepReason = wakefulness.value.lastSleepReason,
+            powerButtonLaunchGestureTriggered: Boolean =
+            wakefulness.value.powerButtonLaunchGestureTriggered,
+    )
+
+    /** Updates the screen power state. */
+    fun setScreenPowerState(state: ScreenPowerState)
 }
 
 @SysUISingleton
@@ -76,6 +115,31 @@ constructor(
         send()
 
         awaitClose { dispatcher.unregisterReceiver(receiver) }
+    }
+
+    private val _wakefulness = MutableStateFlow(WakefulnessModel())
+    override val wakefulness = _wakefulness.asStateFlow()
+
+    override fun updateWakefulness(
+            rawState: WakefulnessState,
+            lastWakeReason: WakeSleepReason,
+            lastSleepReason: WakeSleepReason,
+            powerButtonLaunchGestureTriggered: Boolean,
+    ) {
+        _wakefulness.value =
+            WakefulnessModel(
+                rawState,
+                lastWakeReason,
+                lastSleepReason,
+                powerButtonLaunchGestureTriggered,
+            )
+    }
+
+    private val _screenPowerState = MutableStateFlow(ScreenPowerState.SCREEN_OFF)
+    override val screenPowerState = _screenPowerState.asStateFlow()
+
+    override fun setScreenPowerState(state: ScreenPowerState) {
+        _screenPowerState.value = state
     }
 
     override fun wakeUp(why: String, wakeReason: Int) {

@@ -38,7 +38,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isInvisible
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
-import com.android.systemui.res.R
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -62,6 +61,7 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessage
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.shared.clocks.DefaultClockController
@@ -320,6 +320,7 @@ constructor(
                 chipbarCoordinator,
                 keyguardStateController,
                 shadeInteractor,
+                null, // clock provider only needed for burn in
             )
         )
         rootView.addView(

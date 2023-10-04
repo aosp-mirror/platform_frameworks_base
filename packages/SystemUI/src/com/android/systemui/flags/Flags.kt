@@ -817,7 +817,13 @@ object Flags {
     val BLUETOOTH_QS_TILE_DIALOG = unreleasedFlag("bluetooth_qs_tile_dialog", teamfood = true)
 
     // TODO(b/300995746): Tracking Bug
-    /** Enable communal hub features. */
+    /** A resource flag for whether the communal service is enabled. */
     @JvmField
-    val COMMUNAL_HUB = resourceBooleanFlag(R.bool.config_communalServiceEnabled, "communal_hub")
+    val COMMUNAL_SERVICE_ENABLED = resourceBooleanFlag(R.bool.config_communalServiceEnabled,
+        "communal_service_enabled")
+
+    // TODO(b/303131306): Tracking Bug
+    /** Whether communal hub features are enabled. */
+    @JvmField
+    val COMMUNAL_HUB = unreleasedFlag("communal_hub")
 }

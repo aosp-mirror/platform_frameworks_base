@@ -16,10 +16,16 @@
 
 package com.android.systemui.bouncer.ui
 
+import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModelModule
 import dagger.Binds
 import dagger.Module
 
-@Module
+@Module(
+    includes =
+        [
+            BouncerViewModelModule::class,
+        ],
+)
 interface BouncerViewModule {
     /** Binds BouncerView to BouncerViewImpl and makes it injectable. */
     @Binds fun bindBouncerView(bouncerViewImpl: BouncerViewImpl): BouncerView

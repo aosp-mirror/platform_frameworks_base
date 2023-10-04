@@ -39,10 +39,18 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import android.app.time.LocationTimeZoneAlgorithmStatus.ProviderStatus;
+import android.platform.test.annotations.Presubmit;
 import android.service.timezone.TimeZoneProviderStatus;
 
-import org.junit.Test;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+@Presubmit
 public class LocationTimeZoneAlgorithmStatusTest {
 
     private static final TimeZoneProviderStatus ARBITRARY_PROVIDER_RUNNING_STATUS =

@@ -30,7 +30,6 @@ import com.android.app.animation.Interpolators
 import com.android.internal.statusbar.StatusBarIcon
 import com.android.internal.util.ContrastColorUtil
 import com.android.settingslib.Utils
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
@@ -39,6 +38,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.flags.ViewRefactorFlag
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.NotificationListener
 import com.android.systemui.statusbar.NotificationMediaManager
@@ -104,6 +104,7 @@ constructor(
     private val contrastColorUtil: ContrastColorUtil = ContrastColorUtil.getInstance(context)
     private val updateStatusBarIcons = Runnable { updateStatusBarIcons() }
     private val shelfRefactor = ViewRefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR)
+    private val statusViewMigrated = featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)
     private val tintAreas = ArrayList<Rect>()
 
     private var iconSize = 0
@@ -275,7 +276,9 @@ constructor(
             return
         }
         if (screenOffAnimationController.shouldAnimateAodIcons()) {
-            aodIcons!!.translationY = -aodIconAppearTranslation.toFloat()
+            if (!statusViewMigrated) {
+                aodIcons!!.translationY = -aodIconAppearTranslation.toFloat()
+            }
             aodIcons!!.alpha = 0f
             animateInAodIconTranslation()
             aodIcons!!
@@ -286,7 +289,9 @@ constructor(
                 .start()
         } else {
             aodIcons!!.alpha = 1.0f
-            aodIcons!!.translationY = 0f
+            if (!statusViewMigrated) {
+                aodIcons!!.translationY = 0f
+            }
         }
     }
 
@@ -598,12 +603,14 @@ constructor(
     }
 
     private fun animateInAodIconTranslation() {
-        aodIcons!!
-            .animate()
-            .setInterpolator(Interpolators.DECELERATE_QUINT)
-            .translationY(0f)
-            .setDuration(AOD_ICONS_APPEAR_DURATION)
-            .start()
+        if (!statusViewMigrated) {
+            aodIcons!!
+                .animate()
+                .setInterpolator(Interpolators.DECELERATE_QUINT)
+                .translationY(0f)
+                .setDuration(AOD_ICONS_APPEAR_DURATION)
+                .start()
+        }
     }
 
     private fun reloadAodColor() {
@@ -670,7 +677,9 @@ constructor(
                 }
             } else {
                 aodIcons!!.alpha = 1.0f
-                aodIcons!!.translationY = 0f
+                if (!statusViewMigrated) {
+                    aodIcons!!.translationY = 0f
+                }
                 aodIcons!!.visibility = if (visible) View.VISIBLE else View.INVISIBLE
             }
         }

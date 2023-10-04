@@ -22,9 +22,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.init.NotificationsController
@@ -57,6 +57,7 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
     private val headsUpManager = mock<HeadsUpManager>()
     private val notificationPresenter = mock<NotificationPresenter>()
     private val notificationsController = mock<NotificationsController>()
+    private val powerInteractor = PowerInteractorFactory.create().powerInteractor
 
     private val underTest =
         WindowRootViewVisibilityInteractor(
@@ -64,6 +65,7 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
                 windowRootViewVisibilityRepository,
                 keyguardRepository,
                 headsUpManager,
+                powerInteractor,
             )
             .apply { setUp(notificationPresenter, notificationsController) }
 
@@ -96,7 +98,7 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
     fun isLockscreenOrShadeVisibleAndInteractive_notVisible_false() =
         testScope.runTest {
             val actual by collectLastValue(underTest.isLockscreenOrShadeVisibleAndInteractive)
-            setWakefulness(WakefulnessState.AWAKE)
+            powerInteractor.setAwakeForTest()
 
             underTest.setIsLockscreenOrShadeVisible(false)
 
@@ -109,7 +111,7 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
             val actual by collectLastValue(underTest.isLockscreenOrShadeVisibleAndInteractive)
             underTest.setIsLockscreenOrShadeVisible(true)
 
-            setWakefulness(WakefulnessState.ASLEEP)
+            powerInteractor.setAsleepForTest()
 
             assertThat(actual).isFalse()
         }
@@ -120,7 +122,7 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
             val actual by collectLastValue(underTest.isLockscreenOrShadeVisibleAndInteractive)
 
             underTest.setIsLockscreenOrShadeVisible(true)
-            setWakefulness(WakefulnessState.AWAKE)
+            powerInteractor.setAwakeForTest()
 
             assertThat(actual).isTrue()
         }
@@ -131,20 +133,20 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
             val actual by collectLastValue(underTest.isLockscreenOrShadeVisibleAndInteractive)
 
             underTest.setIsLockscreenOrShadeVisible(true)
-            setWakefulness(WakefulnessState.STARTING_TO_WAKE)
+            powerInteractor.setAwakeForTest()
 
             assertThat(actual).isTrue()
         }
 
     @Test
-    fun isLockscreenOrShadeVisibleAndInteractive_visibleAndStartingToSleep_true() =
+    fun isLockscreenOrShadeVisibleAndStartingToSleep_false() =
         testScope.runTest {
             val actual by collectLastValue(underTest.isLockscreenOrShadeVisibleAndInteractive)
 
             underTest.setIsLockscreenOrShadeVisible(true)
-            setWakefulness(WakefulnessState.STARTING_TO_SLEEP)
+            powerInteractor.setAsleepForTest()
 
-            assertThat(actual).isTrue()
+            assertThat(actual).isFalse()
         }
 
     @Test
@@ -334,13 +336,8 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
 
     private fun makeLockscreenShadeVisible() {
         underTest.setIsLockscreenOrShadeVisible(true)
-        setWakefulness(WakefulnessState.AWAKE)
+        powerInteractor.setAwakeForTest()
         testScope.runCurrent()
         executor.runAllReady()
-    }
-
-    private fun setWakefulness(state: WakefulnessState) {
-        val model = WakefulnessModel(state, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
-        keyguardRepository.setWakefulnessModel(model)
     }
 }

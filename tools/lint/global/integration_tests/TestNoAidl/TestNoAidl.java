@@ -11,19 +11,20 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
-package com.android.systemui.keyguard.shared.model
 
-import com.android.systemui.keyguard.ScreenLifecycle
+package com.google.android.lint.integration_tests;
 
-/** Model device screen lifecycle states. */
-data class ScreenModel(
-    val state: ScreenState,
-) {
-    companion object {
-        fun fromScreenLifecycle(screenLifecycle: ScreenLifecycle): ScreenModel {
-            return ScreenModel(ScreenState.fromScreenLifecycleInt(screenLifecycle.getScreenState()))
-        }
+import android.annotation.EnforcePermission;
+
+/**
+ * A class that use the annotation but does not rely on AIDL.
+ */
+class TestNoAidl {
+
+    @EnforcePermission("INTERNET")
+    void myMethod() {
     }
+
 }

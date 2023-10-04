@@ -16,7 +16,6 @@
 
 package android.service.voice;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -34,7 +33,7 @@ import java.util.List;
  * Contains training data related to hotword detection service.
  *
  * <p>The constructed object's size must be within
- * {@link HotwordTrainingData#getMaxTrainingDataSize()} or an
+ * {@link HotwordTrainingData#getMaxTrainingDataBytes()} or an
  * {@link IllegalArgumentException} will be thrown on construction. Size of the object is calculated
  * by converting object to a {@link Parcel} and using the {@link Parcel#dataSize()}.
  *
@@ -49,63 +48,26 @@ import java.util.List;
         genToString = true)
 @SystemApi
 public final class HotwordTrainingData implements Parcelable {
-    /** Max size for hotword training data. */
-    public static int getMaxTrainingDataSize() {
+    /** Max size for hotword training data in bytes. */
+    public static int getMaxTrainingDataBytes() {
         return 1024 * 1024; // 1 MB;
     }
 
     /** The list containing hotword audio that is useful for training. */
     @NonNull
     @DataClass.PluralOf("trainingAudio")
-    private final List<HotwordTrainingAudio> mTrainingAudios;
+    private final List<HotwordTrainingAudio> mTrainingAudioList;
 
-    private static List<HotwordTrainingAudio> defaultTrainingAudios() {
+    private static List<HotwordTrainingAudio> defaultTrainingAudioList() {
         return Collections.emptyList();
     }
 
-    /** Timeout stage is unknown. */
-    public static final int TIMEOUT_STAGE_UNKNOWN = 0;
-
-    /**
-     * Timeout stage value that represents that the model timed out very early while detecting
-     * hotword.
-     */
-    public static final int TIMEOUT_STAGE_VERY_EARLY = 1;
-
-    /**
-     * Timeout stage value that represents that the model timed out early while detecting
-     * hotword.
-     */
-    public static final int TIMEOUT_STAGE_EARLY = 2;
-
-    /**
-     * Timeout stage value that represents that the model timed out in the middle while detecting
-     * hotword.
-     */
-    public static final int TIMEOUT_STAGE_MIDDLE = 3;
-
-    /**
-     * Timeout stage value that represents that the model timed out late while detecting
-     * hotword.
-     */
-    public static final int TIMEOUT_STAGE_LATE = 4;
-
-    /** @hide */
-    @IntDef(prefix = {"TIMEOUT_STAGE"}, value = {
-            TIMEOUT_STAGE_UNKNOWN,
-            TIMEOUT_STAGE_VERY_EARLY,
-            TIMEOUT_STAGE_EARLY,
-            TIMEOUT_STAGE_MIDDLE,
-            TIMEOUT_STAGE_LATE,
-    })
-    @interface HotwordTimeoutStage {}
-
-    /** Stage when timeout occurred. */
-    @HotwordTimeoutStage
+    /** App-defined stage when hotword model timed-out while running.
+     * <p> Returns 0 if unset. */
     private final int mTimeoutStage;
 
     private static int defaultTimeoutStage() {
-        return TIMEOUT_STAGE_UNKNOWN;
+        return 0;
     }
 
     private void onConstructed() {
@@ -115,10 +77,10 @@ public final class HotwordTrainingData implements Parcelable {
         int dataSizeBytes = parcel.dataSize();
         parcel.recycle();
         Preconditions.checkArgument(
-                dataSizeBytes < getMaxTrainingDataSize(),
+                dataSizeBytes < getMaxTrainingDataBytes(),
                 TextUtils.formatSimple(
-                        "Hotword training data of size %s exceeds size limit of %s!",
-                        dataSizeBytes, getMaxTrainingDataSize()));
+                        "Hotword training data of size %s exceeds size limit of %s bytes!",
+                        dataSizeBytes, getMaxTrainingDataBytes()));
     }
 
 
@@ -136,46 +98,14 @@ public final class HotwordTrainingData implements Parcelable {
     //@formatter:off
 
 
-    /** @hide */
-    @IntDef(prefix = "TIMEOUT_STAGE_", value = {
-        TIMEOUT_STAGE_UNKNOWN,
-        TIMEOUT_STAGE_VERY_EARLY,
-        TIMEOUT_STAGE_EARLY,
-        TIMEOUT_STAGE_MIDDLE,
-        TIMEOUT_STAGE_LATE
-    })
-    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE)
-    @DataClass.Generated.Member
-    public @interface TimeoutStage {}
-
-    /** @hide */
-    @DataClass.Generated.Member
-    public static String timeoutStageToString(@TimeoutStage int value) {
-        switch (value) {
-            case TIMEOUT_STAGE_UNKNOWN:
-                    return "TIMEOUT_STAGE_UNKNOWN";
-            case TIMEOUT_STAGE_VERY_EARLY:
-                    return "TIMEOUT_STAGE_VERY_EARLY";
-            case TIMEOUT_STAGE_EARLY:
-                    return "TIMEOUT_STAGE_EARLY";
-            case TIMEOUT_STAGE_MIDDLE:
-                    return "TIMEOUT_STAGE_MIDDLE";
-            case TIMEOUT_STAGE_LATE:
-                    return "TIMEOUT_STAGE_LATE";
-            default: return Integer.toHexString(value);
-        }
-    }
-
     @DataClass.Generated.Member
     /* package-private */ HotwordTrainingData(
-            @NonNull List<HotwordTrainingAudio> trainingAudios,
-            @HotwordTimeoutStage int timeoutStage) {
-        this.mTrainingAudios = trainingAudios;
+            @NonNull List<HotwordTrainingAudio> trainingAudioList,
+            int timeoutStage) {
+        this.mTrainingAudioList = trainingAudioList;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mTrainingAudios);
+                NonNull.class, null, mTrainingAudioList);
         this.mTimeoutStage = timeoutStage;
-        com.android.internal.util.AnnotationValidations.validate(
-                HotwordTimeoutStage.class, null, mTimeoutStage);
 
         onConstructed();
     }
@@ -184,15 +114,16 @@ public final class HotwordTrainingData implements Parcelable {
      * The list containing hotword audio that is useful for training.
      */
     @DataClass.Generated.Member
-    public @NonNull List<HotwordTrainingAudio> getTrainingAudios() {
-        return mTrainingAudios;
+    public @NonNull List<HotwordTrainingAudio> getTrainingAudioList() {
+        return mTrainingAudioList;
     }
 
     /**
-     * Stage when timeout occurred.
+     * App-defined stage when hotword model timed-out while running.
+     * <p> Returns 0 if unset.
      */
     @DataClass.Generated.Member
-    public @HotwordTimeoutStage int getTimeoutStage() {
+    public int getTimeoutStage() {
         return mTimeoutStage;
     }
 
@@ -203,7 +134,7 @@ public final class HotwordTrainingData implements Parcelable {
         // String fieldNameToString() { ... }
 
         return "HotwordTrainingData { " +
-                "trainingAudios = " + mTrainingAudios + ", " +
+                "trainingAudioList = " + mTrainingAudioList + ", " +
                 "timeoutStage = " + mTimeoutStage +
         " }";
     }
@@ -221,7 +152,7 @@ public final class HotwordTrainingData implements Parcelable {
         HotwordTrainingData that = (HotwordTrainingData) o;
         //noinspection PointlessBooleanExpression
         return true
-                && java.util.Objects.equals(mTrainingAudios, that.mTrainingAudios)
+                && java.util.Objects.equals(mTrainingAudioList, that.mTrainingAudioList)
                 && mTimeoutStage == that.mTimeoutStage;
     }
 
@@ -232,7 +163,7 @@ public final class HotwordTrainingData implements Parcelable {
         // int fieldNameHashCode() { ... }
 
         int _hash = 1;
-        _hash = 31 * _hash + java.util.Objects.hashCode(mTrainingAudios);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mTrainingAudioList);
         _hash = 31 * _hash + mTimeoutStage;
         return _hash;
     }
@@ -243,7 +174,7 @@ public final class HotwordTrainingData implements Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
-        dest.writeParcelableList(mTrainingAudios, flags);
+        dest.writeParcelableList(mTrainingAudioList, flags);
         dest.writeInt(mTimeoutStage);
     }
 
@@ -258,16 +189,14 @@ public final class HotwordTrainingData implements Parcelable {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
-        List<HotwordTrainingAudio> trainingAudios = new ArrayList<>();
-        in.readParcelableList(trainingAudios, HotwordTrainingAudio.class.getClassLoader());
+        List<HotwordTrainingAudio> trainingAudioList = new ArrayList<>();
+        in.readParcelableList(trainingAudioList, HotwordTrainingAudio.class.getClassLoader());
         int timeoutStage = in.readInt();
 
-        this.mTrainingAudios = trainingAudios;
+        this.mTrainingAudioList = trainingAudioList;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mTrainingAudios);
+                NonNull.class, null, mTrainingAudioList);
         this.mTimeoutStage = timeoutStage;
-        com.android.internal.util.AnnotationValidations.validate(
-                HotwordTimeoutStage.class, null, mTimeoutStage);
 
         onConstructed();
     }
@@ -293,8 +222,8 @@ public final class HotwordTrainingData implements Parcelable {
     @DataClass.Generated.Member
     public static final class Builder {
 
-        private @NonNull List<HotwordTrainingAudio> mTrainingAudios;
-        private @HotwordTimeoutStage int mTimeoutStage;
+        private @NonNull List<HotwordTrainingAudio> mTrainingAudioList;
+        private int mTimeoutStage;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -305,26 +234,27 @@ public final class HotwordTrainingData implements Parcelable {
          * The list containing hotword audio that is useful for training.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setTrainingAudios(@NonNull List<HotwordTrainingAudio> value) {
+        public @NonNull Builder setTrainingAudioList(@NonNull List<HotwordTrainingAudio> value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x1;
-            mTrainingAudios = value;
+            mTrainingAudioList = value;
             return this;
         }
 
-        /** @see #setTrainingAudios */
+        /** @see #setTrainingAudioList */
         @DataClass.Generated.Member
         public @NonNull Builder addTrainingAudio(@NonNull HotwordTrainingAudio value) {
-            if (mTrainingAudios == null) setTrainingAudios(new ArrayList<>());
-            mTrainingAudios.add(value);
+            if (mTrainingAudioList == null) setTrainingAudioList(new ArrayList<>());
+            mTrainingAudioList.add(value);
             return this;
         }
 
         /**
-         * Stage when timeout occurred.
+         * App-defined stage when hotword model timed-out while running.
+         * <p> Returns 0 if unset.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setTimeoutStage(@HotwordTimeoutStage int value) {
+        public @NonNull Builder setTimeoutStage(int value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x2;
             mTimeoutStage = value;
@@ -337,13 +267,13 @@ public final class HotwordTrainingData implements Parcelable {
             mBuilderFieldsSet |= 0x4; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x1) == 0) {
-                mTrainingAudios = defaultTrainingAudios();
+                mTrainingAudioList = defaultTrainingAudioList();
             }
             if ((mBuilderFieldsSet & 0x2) == 0) {
                 mTimeoutStage = defaultTimeoutStage();
             }
             HotwordTrainingData o = new HotwordTrainingData(
-                    mTrainingAudios,
+                    mTrainingAudioList,
                     mTimeoutStage);
             return o;
         }
@@ -357,10 +287,10 @@ public final class HotwordTrainingData implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1693313864628L,
+            time = 1696092128091L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordTrainingData.java",
-            inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"trainingAudio\") java.util.List<android.service.voice.HotwordTrainingAudio> mTrainingAudios\npublic static final  int TIMEOUT_STAGE_UNKNOWN\npublic static final  int TIMEOUT_STAGE_VERY_EARLY\npublic static final  int TIMEOUT_STAGE_EARLY\npublic static final  int TIMEOUT_STAGE_MIDDLE\npublic static final  int TIMEOUT_STAGE_LATE\nprivate final @android.service.voice.HotwordTrainingData.HotwordTimeoutStage int mTimeoutStage\npublic static  int getMaxTrainingDataSize()\nprivate static  java.util.List<android.service.voice.HotwordTrainingAudio> defaultTrainingAudios()\nprivate static  int defaultTimeoutStage()\nprivate  void onConstructed()\nclass HotwordTrainingData extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"trainingAudio\") java.util.List<android.service.voice.HotwordTrainingAudio> mTrainingAudioList\nprivate final  int mTimeoutStage\npublic static  int getMaxTrainingDataBytes()\nprivate static  java.util.List<android.service.voice.HotwordTrainingAudio> defaultTrainingAudioList()\nprivate static  int defaultTimeoutStage()\nprivate  void onConstructed()\nclass HotwordTrainingData extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

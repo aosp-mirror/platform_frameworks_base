@@ -17,5 +17,5 @@ class CommunalRepositoryImpl
 constructor(
     featureFlags: FeatureFlagsClassic,
 ) : CommunalRepository {
-    override val isCommunalEnabled = featureFlags.isEnabled(Flags.COMMUNAL_HUB)
+    override val isCommunalEnabled = featureFlags.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED)
 }

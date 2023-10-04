@@ -22,6 +22,12 @@ import android.os.SystemProperties
 object ProdBubbleProperties : BubbleProperties {
 
     // TODO(b/256873975) Should use proper flag when available to shell/launcher
-    override val isBubbleBarEnabled =
-        SystemProperties.getBoolean("persist.wm.debug.bubble_bar", false)
+    private var _isBubbleBarEnabled =
+            SystemProperties.getBoolean("persist.wm.debug.bubble_bar", false)
+
+    override val isBubbleBarEnabled = _isBubbleBarEnabled
+
+    override fun refresh() {
+        _isBubbleBarEnabled = SystemProperties.getBoolean("persist.wm.debug.bubble_bar", false)
+    }
 }

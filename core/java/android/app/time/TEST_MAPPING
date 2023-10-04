@@ -8,5 +8,38 @@
         }
       ]
     }
+  ],
+  // TODO(b/182461754): Change to "presubmit" when go/test-mapping-slo-guide allows.
+  "postsubmit": [
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "android.app.timedetector."
+        },
+        {
+          "include-filter": "android.app.timezonedetector."
+        }
+      ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.timezonedetector."
+        },
+        {
+          "include-filter": "com.android.server.timedetector."
+        }
+      ]
+    },
+    {
+      "name": "CtsTimeTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
   ]
 }

@@ -512,6 +512,7 @@ public class BubbleController implements ConfigurationChangeListener,
      * <p>If bubble bar is supported, bubble views will be updated to switch to bar mode.
      */
     public void registerBubbleStateListener(Bubbles.BubbleStateListener listener) {
+        mBubbleProperties.refresh();
         if (canShowAsBubbleBar() && listener != null) {
             // Only set the listener if we can show the bubble bar.
             mBubbleStateListener = listener;
@@ -529,6 +530,7 @@ public class BubbleController implements ConfigurationChangeListener,
      * will be updated accordingly.
      */
     public void unregisterBubbleStateListener() {
+        mBubbleProperties.refresh();
         if (mBubbleStateListener != null) {
             mBubbleStateListener = null;
             setUpBubbleViewsForMode();

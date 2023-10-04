@@ -544,11 +544,6 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      */
     public boolean compileLayouts(@NonNull PackageStateInternal ps, @NonNull AndroidPackage pkg) {
         try {
-            final String packageName = pkg.getPackageName();
-            final String apkPath = pkg.getSplits().get(0).getPath();
-            // TODO(b/143971007): Use a cross-user directory
-            File dataDir = PackageInfoUtils.getDataDir(ps, UserHandle.myUserId());
-            final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
             if (ps.isPrivileged() || pkg.isUseEmbeddedDex()
                     || pkg.isDefaultToDeviceProtectedStorage()) {
                 // Privileged apps prefer to load trusted code so they don't use compiled views.
@@ -558,6 +553,14 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                 // selinux permissions required for writing to user_de.
                 return false;
             }
+            final String packageName = pkg.getPackageName();
+            final String apkPath = pkg.getSplits().get(0).getPath();
+            final File dataDir = PackageInfoUtils.getDataDir(ps, UserHandle.myUserId());
+            if (dataDir == null) {
+                // The app is not installed on the target user and doesn't have a data dir
+                return false;
+            }
+            final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
             Log.i("PackageManager", "Compiling layouts in " + packageName + " (" + apkPath +
                     ") to " + outDexFile);
             final long callingId = Binder.clearCallingIdentity();
