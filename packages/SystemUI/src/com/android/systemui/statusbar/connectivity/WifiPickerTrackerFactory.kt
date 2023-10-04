@@ -23,8 +23,8 @@ import android.os.Handler
 import android.os.SimpleClock
 import androidx.lifecycle.Lifecycle
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.util.concurrency.ThreadFactory
 import com.android.systemui.util.time.SystemClock
 import com.android.wifitrackerlib.WifiPickerTracker
 import com.android.wifitrackerlib.WifiPickerTracker.WifiPickerTrackerCallback
@@ -46,7 +46,7 @@ constructor(
     private val connectivityManager: ConnectivityManager,
     private val systemClock: SystemClock,
     @Main private val mainHandler: Handler,
-    @Background private val workerHandler: Handler,
+    private val threadFactory: ThreadFactory,
 ) {
     private val clock: Clock =
         object : SimpleClock(ZoneOffset.UTC) {
@@ -60,11 +60,13 @@ constructor(
     /**
      * Creates a [WifiPickerTracker] instance.
      *
+     * @param name a name to identify the worker thread used for [WifiPickerTracker] operations.
      * @return a new [WifiPickerTracker] or null if [WifiManager] is null.
      */
     fun create(
         lifecycle: Lifecycle,
         listener: WifiPickerTrackerCallback,
+        name: String,
     ): WifiPickerTracker? {
         return if (wifiManager == null) {
             null
@@ -75,7 +77,10 @@ constructor(
                 wifiManager,
                 connectivityManager,
                 mainHandler,
-                workerHandler,
+                // WifiPickerTracker can take tens of seconds to finish operations, so it can't use
+                // the default background handler (it would block all other background operations).
+                // Use a custom handler instead.
+                threadFactory.buildHandlerOnNewThread("WifiPickerTracker-$name"),
                 clock,
                 MAX_SCAN_AGE_MILLIS,
                 SCAN_INTERVAL_MILLIS,
