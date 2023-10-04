@@ -323,6 +323,8 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     public void onDestroy() {
         mCommandQueue.removeCallback(this);
         mStatusBarStateController.removeCallback(this);
+        mQSPanelController.destroy();
+        mQuickQSPanelController.destroy();
         if (mListening) {
             setListening(false);
         }
