@@ -138,7 +138,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
-import com.android.systemui.power.shared.model.WakefulnessModel;
 import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
@@ -162,9 +161,10 @@ import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.power.shared.model.WakefulnessModel;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.data.repository.ShadeRepository;
-import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
@@ -200,7 +200,6 @@ import com.android.systemui.statusbar.phone.BounceInterpolator;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
@@ -217,6 +216,7 @@ import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
@@ -362,7 +362,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private boolean mIsLaunchAnimationRunning;
     private float mOverExpansion;
     private CentralSurfaces mCentralSurfaces;
-    private HeadsUpManagerPhone mHeadsUpManager;
+    private HeadsUpManager mHeadsUpManager;
     private float mExpandedHeight = 0;
     /** The current squish amount for the predictive back animation */
     private float mCurrentBackProgress = 0.0f;
@@ -3025,7 +3025,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return headsUpVisible || isExpanded() || mBouncerShowing;
     }
 
-    private void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
+    private void setHeadsUpManager(HeadsUpManager headsUpManager) {
         mHeadsUpManager = headsUpManager;
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpTouchHelper = new HeadsUpTouchHelper(
@@ -3507,7 +3507,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             GestureRecorder recorder,
             Runnable hideExpandedRunnable,
             NotificationShelfController notificationShelfController,
-            HeadsUpManagerPhone headsUpManager) {
+            HeadsUpManager headsUpManager) {
         setHeadsUpManager(headsUpManager);
         // TODO(b/254859580): this can be injected.
         mCentralSurfaces = centralSurfaces;
@@ -3554,10 +3554,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @Override
     public void removeOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
         mView.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
-    }
-
-    String getHeaderDebugInfo() {
-        return "USER " + mHeadsUpManager.getUser();
     }
 
     @Override

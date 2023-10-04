@@ -34,8 +34,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.EventLogTags;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -47,7 +47,8 @@ import java.io.PrintWriter;
  * A manager which handles heads up notifications which is a special mode where
  * they simply peek from the top of the screen.
  */
-public abstract class HeadsUpManager extends AlertingNotificationManager {
+public abstract class BaseHeadsUpManager extends AlertingNotificationManager implements
+        HeadsUpManager {
     private static final String TAG = "HeadsUpManager";
     private static final String SETTING_HEADS_UP_SNOOZE_LENGTH_MS = "heads_up_snooze_length_ms";
 
@@ -81,7 +82,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         }
     }
 
-    public HeadsUpManager(@NonNull final Context context,
+    public BaseHeadsUpManager(@NonNull final Context context,
             HeadsUpManagerLogger logger,
             @Main Handler handler,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
@@ -131,6 +132,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         mListeners.remove(listener);
     }
 
+    /** Updates the notification with the given key. */
     public void updateNotification(@NonNull String key, boolean alert) {
         super.updateNotification(key, alert);
         HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
@@ -146,7 +148,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
             // the NotificationEntry into AlertingNotificationManager's mAlertEntries map.
             return hasFullScreenIntent(entry);
         }
-        return hasFullScreenIntent(entry) && !headsUpEntry.wasUnpinned;
+        return hasFullScreenIntent(entry) && !headsUpEntry.mWasUnpinned;
     }
 
     protected boolean hasFullScreenIntent(@NonNull NotificationEntry entry) {
@@ -154,11 +156,11 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     }
 
     protected void setEntryPinned(
-            @NonNull HeadsUpManager.HeadsUpEntry headsUpEntry, boolean isPinned) {
+            @NonNull BaseHeadsUpManager.HeadsUpEntry headsUpEntry, boolean isPinned) {
         mLogger.logSetEntryPinned(headsUpEntry.mEntry, isPinned);
         NotificationEntry entry = headsUpEntry.mEntry;
         if (!isPinned) {
-            headsUpEntry.wasUnpinned = true;
+            headsUpEntry.mWasUnpinned = true;
         }
         if (entry.isRowPinned() != isPinned) {
             entry.setRowPinned(isPinned);
@@ -292,10 +294,12 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         mUser = user;
     }
 
+    /** Returns the ID of the current user. */
     public int getUser() {
         return  mUser;
     }
 
+    @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("HeadsUpManager state:");
         dumpInternal(pw, args);
@@ -309,9 +313,9 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         for (AlertEntry entry: mAlertEntries.values()) {
             pw.print("  HeadsUpEntry="); pw.println(entry.mEntry);
         }
-        int N = mSnoozedPackages.size();
-        pw.println("  snoozed packages: " + N);
-        for (int i = 0; i < N; i++) {
+        int n = mSnoozedPackages.size();
+        pw.println("  snoozed packages: " + n);
+        for (int i = 0; i < n; i++) {
             pw.print("    "); pw.print(mSnoozedPackages.valueAt(i));
             pw.print(", "); pw.println(mSnoozedPackages.keyAt(i));
         }
@@ -399,20 +403,20 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      *
      * @param entry the entry that might be indirectly removed by the user's action
      *
-     * @see com.android.systemui.statusbar.notification.collection.coordinator.HeadsUpCoordinator#mActionPressListener
+     * @see HeadsUpCoordinator#mActionPressListener
      * @see #canRemoveImmediately(String)
      */
     public void setUserActionMayIndirectlyRemove(@NonNull NotificationEntry entry) {
         HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.getKey());
         if (headsUpEntry != null) {
-            headsUpEntry.userActionMayIndirectlyRemove = true;
+            headsUpEntry.mUserActionMayIndirectlyRemove = true;
         }
     }
 
     @Override
     public boolean canRemoveImmediately(@NonNull String key) {
         HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
-        if (headsUpEntry != null && headsUpEntry.userActionMayIndirectlyRemove) {
+        if (headsUpEntry != null && headsUpEntry.mUserActionMayIndirectlyRemove) {
             return true;
         }
         return super.canRemoveImmediately(key);
@@ -422,9 +426,6 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     @Override
     protected HeadsUpEntry createAlertEntry() {
         return new HeadsUpEntry();
-    }
-
-    public void onDensityOrFontScaleChanged() {
     }
 
     /**
@@ -445,16 +446,16 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      * lifecycle automatically when created.
      */
     protected class HeadsUpEntry extends AlertEntry {
-        public boolean remoteInputActive;
-        public boolean userActionMayIndirectlyRemove;
+        public boolean mRemoteInputActive;
+        public boolean mUserActionMayIndirectlyRemove;
 
-        protected boolean expanded;
-        protected boolean wasUnpinned;
+        protected boolean mExpanded;
+        protected boolean mWasUnpinned;
 
         @Override
         public boolean isSticky() {
-            return (mEntry.isRowPinned() && expanded)
-                    || remoteInputActive
+            return (mEntry.isRowPinned() && mExpanded)
+                    || mRemoteInputActive
                     || hasFullScreenIntent(mEntry);
         }
 
@@ -490,9 +491,9 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
                 return 1;
             }
 
-            if (remoteInputActive && !headsUpEntry.remoteInputActive) {
+            if (mRemoteInputActive && !headsUpEntry.mRemoteInputActive) {
                 return -1;
-            } else if (!remoteInputActive && headsUpEntry.remoteInputActive) {
+            } else if (!mRemoteInputActive && headsUpEntry.mRemoteInputActive) {
                 return 1;
             }
 
@@ -500,14 +501,14 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         }
 
         public void setExpanded(boolean expanded) {
-            this.expanded = expanded;
+            this.mExpanded = expanded;
         }
 
         @Override
         public void reset() {
             super.reset();
-            expanded = false;
-            remoteInputActive = false;
+            mExpanded = false;
+            mRemoteInputActive = false;
         }
 
         @Override

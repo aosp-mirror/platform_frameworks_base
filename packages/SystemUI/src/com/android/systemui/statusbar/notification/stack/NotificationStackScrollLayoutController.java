@@ -118,7 +118,6 @@ import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -127,6 +126,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -156,7 +156,7 @@ public class NotificationStackScrollLayoutController {
     private final NotificationGutsManager mNotificationGutsManager;
     private final NotificationsController mNotificationsController;
     private final NotificationVisibilityProvider mVisibilityProvider;
-    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final HeadsUpManager mHeadsUpManager;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
     private final TunerService mTunerService;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -631,7 +631,7 @@ public class NotificationStackScrollLayoutController {
             NotificationGutsManager notificationGutsManager,
             NotificationsController notificationsController,
             NotificationVisibilityProvider visibilityProvider,
-            HeadsUpManagerPhone headsUpManager,
+            HeadsUpManager headsUpManager,
             NotificationRoundnessManager notificationRoundnessManager,
             TunerService tunerService,
             DeviceProvisionedController deviceProvisionedController,

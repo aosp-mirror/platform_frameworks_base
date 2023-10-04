@@ -31,15 +31,16 @@ import android.view.WindowInsets;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.ScreenDecorations;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
@@ -58,7 +59,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private static final String TAG = "TouchableRegionManager";
 
     private final Context mContext;
-    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final HeadsUpManager mHeadsUpManager;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
@@ -80,7 +81,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             Context context,
             NotificationShadeWindowController notificationShadeWindowController,
             ConfigurationController configurationController,
-            HeadsUpManagerPhone headsUpManager,
+            HeadsUpManager headsUpManager,
             ShadeExpansionStateManager shadeExpansionStateManager,
             Provider<SceneInteractor> sceneInteractor,
             Provider<JavaAdapter> javaAdapter,

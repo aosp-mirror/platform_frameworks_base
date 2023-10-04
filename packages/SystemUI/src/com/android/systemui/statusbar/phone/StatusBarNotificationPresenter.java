@@ -31,11 +31,11 @@ import android.view.View;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.InitController;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeViewController;
@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
@@ -76,7 +77,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     private final NotificationMediaManager mMediaManager;
     private final NotificationGutsManager mGutsManager;
     private final ShadeViewController mNotificationPanel;
-    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final HeadsUpManager mHeadsUpManager;
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
     private final NotificationsInteractor mNotificationsInteractor;
@@ -98,7 +99,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
             Context context,
             ShadeViewController panel,
             QuickSettingsController quickSettingsController,
-            HeadsUpManagerPhone headsUp,
+            HeadsUpManager headsUp,
             NotificationShadeWindowView statusBarWindow,
             ActivityStarter activityStarter,
             NotificationStackScrollLayoutController stackScrollerController,
