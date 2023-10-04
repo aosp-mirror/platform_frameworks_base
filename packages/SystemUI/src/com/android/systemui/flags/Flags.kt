@@ -40,8 +40,8 @@ object Flags {
 
     // 100 - notification
     // TODO(b/297792660): Tracking Bug
-    val ADD_TRANSIENT_HUN_IN_STACK_STATE_ANIMATOR =
-        unreleasedFlag("add_transient_hun_in_stack_state_animator", teamfood = false)
+    @JvmField val UNCLEARED_TRANSIENT_HUN_FIX =
+        unreleasedFlag("uncleared_transient_hun_fix", teamfood = false)
 
     // TODO(b/298308067): Tracking Bug
     @JvmField val SWIPE_UNCLEARED_TRANSIENT_VIEW_FIX =
