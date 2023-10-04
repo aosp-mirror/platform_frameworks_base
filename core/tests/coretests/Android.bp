@@ -64,6 +64,7 @@ android_test {
         "servicestests-utils",
         "device-time-shell-utils",
         "testables",
+        "com.android.text.flags-aconfig-java",
     ],
 
     libs: [

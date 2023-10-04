@@ -336,7 +336,8 @@ public final class UpdatableFontDirTest {
             return new FontConfig(Collections.emptyList(),
                     Collections.emptyList(),
                     Collections.singletonList(new FontConfig.NamedFamilyList(
-                            Collections.singletonList(family), "sans-serif")), 0, 1);
+                            Collections.singletonList(family), "sans-serif")),
+                    Collections.emptyList(), 0, 1);
         };
 
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
@@ -499,7 +500,8 @@ public final class UpdatableFontDirTest {
                     Collections.emptyList(),
                     Collections.emptyList(),
                     Collections.singletonList(new FontConfig.NamedFamilyList(
-                            Collections.singletonList(family), "sans-serif")), 0, 1);
+                            Collections.singletonList(family), "sans-serif")),
+                    Collections.emptyList(), 0, 1);
         });
         dir.loadFontFileMap();
 
@@ -651,7 +653,8 @@ public final class UpdatableFontDirTest {
                     FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
             return new FontConfig(Collections.emptyList(), Collections.emptyList(),
                     Collections.singletonList(new FontConfig.NamedFamilyList(
-                            Collections.singletonList(family), "sans-serif")), 0, 1);
+                            Collections.singletonList(family), "sans-serif")),
+                    Collections.emptyList(), 0, 1);
         });
         dir.loadFontFileMap();
 
