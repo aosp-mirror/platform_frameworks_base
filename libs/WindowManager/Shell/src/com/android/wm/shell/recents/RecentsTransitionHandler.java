@@ -922,19 +922,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 if (toHome) wct.reorder(mRecentsTask, true /* toTop */);
                 else wct.restoreTransientOrder(mRecentsTask);
             }
-            if (!toHome
-                    // If a recents gesture starts on the 3p launcher, then the 3p launcher is the
-                    // live tile (pausing app). If the gesture is "cancelled" we need to return to
-                    // 3p launcher instead of "task-switching" away from it.
-                    && (!mWillFinishToHome || mPausingSeparateHome)
-                    && mPausingTasks != null && mState == STATE_NORMAL) {
-                if (mPausingSeparateHome) {
-                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                            "  returning to 3p home");
-                } else {
-                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                            "  returning to app");
-                }
+            if (!toHome && !mWillFinishToHome && mPausingTasks != null && mState == STATE_NORMAL) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION, "  returning to app");
                 // The gesture is returning to the pausing-task(s) rather than continuing with
                 // recents, so end the transition by moving the app back to the top (and also
                 // re-showing it's task).
@@ -966,6 +955,15 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     wct.restoreTransientOrder(mRecentsTask);
                 }
             } else {
+                if (mPausingSeparateHome) {
+                    if (mOpeningTasks.isEmpty()) {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "  recents occluded 3p home");
+                    } else {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "  switch task by recents on 3p home");
+                    }
+                }
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION, "  normal finish");
                 // The general case: committing to recents, going home, or switching tasks.
                 for (int i = 0; i < mOpeningTasks.size(); ++i) {
