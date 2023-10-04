@@ -33,6 +33,8 @@ func runCombinedApisTestCase(t *testing.T, tc bp2build.Bp2buildTestCase) {
 	t.Helper()
 	runCombinedApisTestCaseWithRegistrationCtxFunc(t, tc, func(ctx android.RegistrationContext) {
 		ctx.RegisterModuleType("java_defaults", java.DefaultsFactory)
+		ctx.RegisterModuleType("java_sdk_library", java.SdkLibraryFactory)
+		ctx.RegisterModuleType("filegroup", android.FileGroupFactory)
 	})
 }
 
@@ -44,6 +46,33 @@ func TestCombinedApisGeneral(t *testing.T) {
     bootclasspath: ["bcp"],
     system_server_classpath: ["ssc"],
 }
+
+java_sdk_library {
+		name: "bcp",
+		srcs: ["a.java", "b.java"],
+		shared_library: false,
+}
+java_sdk_library {
+		name: "ssc",
+		srcs: ["a.java", "b.java"],
+		shared_library: false,
+}
+filegroup {
+    name: "non-updatable-current.txt",
+    srcs: ["current.txt"],
+}
+filegroup {
+    name: "non-updatable-system-current.txt",
+    srcs: ["system-current.txt"],
+}
+filegroup {
+    name: "non-updatable-module-lib-current.txt",
+    srcs: ["system-removed.txt"],
+}
+filegroup {
+    name: "non-updatable-system-server-current.txt",
+    srcs: ["system-lint-baseline.txt"],
+}
 `,
 		Filesystem: map[string]string{
 			"a/Android.bp": `
@@ -51,27 +80,35 @@ func TestCombinedApisGeneral(t *testing.T) {
 				name: "android.jar_defaults",
 			}
 			`,
+			"api/current.txt":        "",
+			"api/removed.txt":        "",
+			"api/system-current.txt": "",
+			"api/system-removed.txt": "",
+			"api/test-current.txt":   "",
+			"api/test-removed.txt":   "",
 		},
+		StubbedBuildDefinitions:    []string{"bcp", "ssc", "non-updatable-current.txt", "non-updatable-system-current.txt", "non-updatable-module-lib-current.txt", "non-updatable-system-server-current.txt"},
+		ExpectedHandcraftedModules: []string{"foo-current.txt", "foo-system-current.txt", "foo-module-lib-current.txt", "foo-system-server-current.txt"},
 		ExpectedBazelTargets: []string{
 			bp2build.MakeBazelTargetNoRestrictions("merged_txts", "foo-current.txt", bp2build.AttrNameToString{
 				"scope": `"public"`,
-				"base":  `":non-updatable-current.txt__BP2BUILD__MISSING__DEP"`,
-				"deps":  `[":bcp__BP2BUILD__MISSING__DEP"]`,
+				"base":  `":non-updatable-current.txt"`,
+				"deps":  `[":bcp"]`,
 			}),
 			bp2build.MakeBazelTargetNoRestrictions("merged_txts", "foo-system-current.txt", bp2build.AttrNameToString{
 				"scope": `"system"`,
-				"base":  `":non-updatable-system-current.txt__BP2BUILD__MISSING__DEP"`,
-				"deps":  `[":bcp__BP2BUILD__MISSING__DEP"]`,
+				"base":  `":non-updatable-system-current.txt"`,
+				"deps":  `[":bcp"]`,
 			}),
 			bp2build.MakeBazelTargetNoRestrictions("merged_txts", "foo-module-lib-current.txt", bp2build.AttrNameToString{
 				"scope": `"module-lib"`,
-				"base":  `":non-updatable-module-lib-current.txt__BP2BUILD__MISSING__DEP"`,
-				"deps":  `[":bcp__BP2BUILD__MISSING__DEP"]`,
+				"base":  `":non-updatable-module-lib-current.txt"`,
+				"deps":  `[":bcp"]`,
 			}),
 			bp2build.MakeBazelTargetNoRestrictions("merged_txts", "foo-system-server-current.txt", bp2build.AttrNameToString{
 				"scope": `"system-server"`,
-				"base":  `":non-updatable-system-server-current.txt__BP2BUILD__MISSING__DEP"`,
-				"deps":  `[":ssc__BP2BUILD__MISSING__DEP"]`,
+				"base":  `":non-updatable-system-server-current.txt"`,
+				"deps":  `[":ssc"]`,
 			}),
 		},
 	})
