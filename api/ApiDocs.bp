@@ -209,6 +209,7 @@ doc_defaults {
     custom_template: "droiddoc-templates-sdk",
     resourcesdir: "docs/html/reference/images/",
     resourcesoutdir: "reference/android/images/",
+    lint_baseline: "javadoc-lint-baseline",
     hdf: [
         "dac true",
         "sdk.codename O",
