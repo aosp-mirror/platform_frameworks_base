@@ -31,6 +31,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -154,7 +155,8 @@ public class SystemPerformanceHinterTests {
                 eq(FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_CATEGORY_HIGH));
+                eq(FRAME_RATE_CATEGORY_HIGH),
+                eq(false));
         verify(mTransaction).applyAsyncUnsafe();
     }
 
@@ -171,7 +173,8 @@ public class SystemPerformanceHinterTests {
                 eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_CATEGORY_DEFAULT));
+                eq(FRAME_RATE_CATEGORY_DEFAULT),
+                eq(false));
         verify(mTransaction).applyAsyncUnsafe();
     }
 
@@ -241,7 +244,8 @@ public class SystemPerformanceHinterTests {
                 eq(FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_CATEGORY_HIGH));
+                eq(FRAME_RATE_CATEGORY_HIGH),
+                eq(false));
         verify(mTransaction).setEarlyWakeupStart();
         verify(mTransaction).applyAsyncUnsafe();
         verify(mAdpfSession).sendHint(eq(CPU_LOAD_UP));
@@ -261,7 +265,8 @@ public class SystemPerformanceHinterTests {
                 eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_CATEGORY_DEFAULT));
+                eq(FRAME_RATE_CATEGORY_DEFAULT),
+                eq(false));
         verify(mTransaction).setEarlyWakeupEnd();
         verify(mTransaction).applyAsyncUnsafe();
         verify(mAdpfSession).sendHint(eq(CPU_LOAD_RESET));
@@ -281,7 +286,8 @@ public class SystemPerformanceHinterTests {
                     eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
             verify(mTransaction).setFrameRateCategory(
                     eq(mDefaultDisplayRoot),
-                    eq(FRAME_RATE_CATEGORY_DEFAULT));
+                    eq(FRAME_RATE_CATEGORY_DEFAULT),
+                    eq(false));
             verify(mTransaction).setEarlyWakeupEnd();
             verify(mTransaction).applyAsyncUnsafe();
             verify(mAdpfSession).sendHint(eq(CPU_LOAD_RESET));
@@ -299,7 +305,8 @@ public class SystemPerformanceHinterTests {
                 eq(FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_CATEGORY_HIGH));
+                eq(FRAME_RATE_CATEGORY_HIGH),
+                eq(false));
         verify(mTransaction).setEarlyWakeupStart();
         verify(mTransaction).applyAsyncUnsafe();
         verify(mAdpfSession).sendHint(eq(CPU_LOAD_UP));
@@ -310,7 +317,7 @@ public class SystemPerformanceHinterTests {
                 mHinter.startSession(HINT_ALL, DEFAULT_DISPLAY_ID, TEST_OTHER_REASON);
         // Verify we never call SF and perf manager since session1 is already running
         verify(mTransaction, never()).setFrameRateSelectionStrategy(any(), anyInt());
-        verify(mTransaction, never()).setFrameRateCategory(any(), anyInt());
+        verify(mTransaction, never()).setFrameRateCategory(any(), anyInt(), anyBoolean());
         verify(mTransaction, never()).setEarlyWakeupEnd();
         verify(mTransaction, never()).applyAsyncUnsafe();
         verify(mAdpfSession, never()).sendHint(anyInt());
@@ -318,7 +325,7 @@ public class SystemPerformanceHinterTests {
         session2.close();
         // Verify we have not cleaned up because session1 is still running
         verify(mTransaction, never()).setFrameRateSelectionStrategy(any(), anyInt());
-        verify(mTransaction, never()).setFrameRateCategory(any(), anyInt());
+        verify(mTransaction, never()).setFrameRateCategory(any(), anyInt(), anyBoolean());
         verify(mTransaction, never()).setEarlyWakeupEnd();
         verify(mTransaction, never()).applyAsyncUnsafe();
         verify(mAdpfSession, never()).sendHint(anyInt());
@@ -330,7 +337,8 @@ public class SystemPerformanceHinterTests {
                 eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_CATEGORY_DEFAULT));
+                eq(FRAME_RATE_CATEGORY_DEFAULT),
+                eq(false));
         verify(mTransaction).setEarlyWakeupEnd();
         verify(mTransaction).applyAsyncUnsafe();
         verify(mAdpfSession).sendHint(eq(CPU_LOAD_RESET));
@@ -348,7 +356,8 @@ public class SystemPerformanceHinterTests {
                 eq(FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_CATEGORY_HIGH));
+                eq(FRAME_RATE_CATEGORY_HIGH),
+                eq(false));
         verify(mTransaction).setEarlyWakeupStart();
         verify(mTransaction).applyAsyncUnsafe();
         verify(mAdpfSession).sendHint(eq(CPU_LOAD_UP));
@@ -363,7 +372,8 @@ public class SystemPerformanceHinterTests {
                 eq(FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN));
         verify(mTransaction).setFrameRateCategory(
                 eq(mSecondaryDisplayRoot),
-                eq(FRAME_RATE_CATEGORY_HIGH));
+                eq(FRAME_RATE_CATEGORY_HIGH),
+                eq(false));
         verify(mTransaction, never()).setEarlyWakeupStart();
         verify(mTransaction).applyAsyncUnsafe();
         verify(mAdpfSession, never()).sendHint(anyInt());
@@ -378,13 +388,15 @@ public class SystemPerformanceHinterTests {
                 eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_CATEGORY_DEFAULT));
+                eq(FRAME_RATE_CATEGORY_DEFAULT),
+                eq(false));
         verify(mTransaction, never()).setFrameRateSelectionStrategy(
                 eq(mSecondaryDisplayRoot),
                 anyInt());
         verify(mTransaction, never()).setFrameRateCategory(
                 eq(mSecondaryDisplayRoot),
-                anyInt());
+                anyInt(),
+                eq(false));
         verify(mTransaction, never()).setEarlyWakeupEnd();
         verify(mTransaction).applyAsyncUnsafe();
         verify(mAdpfSession, never()).sendHint(anyInt());
@@ -401,7 +413,8 @@ public class SystemPerformanceHinterTests {
                 eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
         verify(mTransaction).setFrameRateCategory(
                 eq(mSecondaryDisplayRoot),
-                eq(FRAME_RATE_CATEGORY_DEFAULT));
+                eq(FRAME_RATE_CATEGORY_DEFAULT),
+                eq(false));
         verify(mTransaction).setEarlyWakeupEnd();
         verify(mTransaction).applyAsyncUnsafe();
         verify(mAdpfSession).sendHint(eq(CPU_LOAD_RESET));
