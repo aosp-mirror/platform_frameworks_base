@@ -74,7 +74,8 @@ constructor(
                 repository.isUnlocked,
                 authenticationInteractor.authenticationMethod,
             ) { isUnlocked, authenticationMethod ->
-                !authenticationMethod.isSecure || isUnlocked
+                (!authenticationMethod.isSecure || isUnlocked) &&
+                    authenticationMethod != AuthenticationMethodModel.Sim
             }
             .stateIn(
                 scope = applicationScope,
