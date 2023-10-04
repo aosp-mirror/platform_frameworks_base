@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene.data.repository
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
@@ -24,9 +25,11 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class WindowRootViewVisibilityRepositoryTest : SysuiTestCase() {
     private val iStatusBarService = mock<IStatusBarService>()
     private val executor = FakeExecutor(FakeSystemClock())

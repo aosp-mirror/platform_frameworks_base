@@ -1,5 +1,6 @@
 package com.android.systemui.shade.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -20,11 +21,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class ShadeHeaderViewModelTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope

@@ -19,6 +19,7 @@
 package com.android.systemui.scene.domain.startable
 
 import android.view.Display
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
@@ -45,14 +46,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class SceneContainerStartableTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)

@@ -1,6 +1,7 @@
 package com.android.systemui.deviceentry.data.repository
 
 import android.content.pm.UserInfo
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
@@ -19,14 +20,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class DeviceEntryRepositoryTest : SysuiTestCase() {
 
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
