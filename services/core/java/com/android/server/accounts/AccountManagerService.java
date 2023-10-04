@@ -4854,7 +4854,6 @@ public class AccountManagerService
             if (accountType == null) throw new IllegalArgumentException("accountType is null");
             mAccounts = accounts;
             mStripAuthTokenFromResult = stripAuthTokenFromResult;
-            mResponse = response;
             mAccountType = accountType;
             mExpectActivityLaunch = expectActivityLaunch;
             mCreationTime = SystemClock.elapsedRealtime();
@@ -4868,8 +4867,8 @@ public class AccountManagerService
             if (response != null) {
                 try {
                     response.asBinder().linkToDeath(this, 0 /* flags */);
+                    mResponse = response;
                 } catch (RemoteException e) {
-                    mResponse = null;
                     binderDied();
                 }
             }

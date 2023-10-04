@@ -269,6 +269,10 @@ public class FastDataInput implements DataInput, Closeable {
 
             return s;
         } else {
+            if (ref >= mStringRefs.length) {
+                throw new IOException("Invalid interned string reference " + ref + " for "
+                        + mStringRefs.length + " interned strings");
+            }
             return mStringRefs[ref];
         }
     }

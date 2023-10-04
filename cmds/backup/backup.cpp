@@ -75,7 +75,7 @@ static int perform_list(const char* filename)
                 size_t dataSize;
                 err = reader.ReadEntityHeader(&key, &dataSize);
                 if (err == 0) {
-                    printf("   entity: %s (%zu bytes)\n", key.string(), dataSize);
+                    printf("   entity: %s (%zu bytes)\n", key.c_str(), dataSize);
                 } else {
                     printf("   Error reading entity header\n");
                 }

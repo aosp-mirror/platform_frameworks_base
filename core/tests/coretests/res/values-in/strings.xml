@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Used in ResourcesLocaleTest. -->
+    <string name="locale_test_res_2">Pengujian IN</string>
+</resources>

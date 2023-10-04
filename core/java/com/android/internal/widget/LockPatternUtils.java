@@ -986,7 +986,7 @@ public class LockPatternUtils {
      */
     @UnsupportedAppUsage
     public boolean isVisiblePatternEnabled(int userId) {
-        return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, false, userId);
+        return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, true, userId);
     }
 
     /**
@@ -1019,13 +1019,6 @@ public class LockPatternUtils {
      */
     public boolean isPinEnhancedPrivacyEverChosen(int userId) {
         return getString(LOCK_PIN_ENHANCED_PRIVACY, userId) != null;
-    }
-
-    /**
-     * Set whether the visible password is enabled for cryptkeeper screen.
-     */
-    public void setVisiblePasswordEnabled(boolean enabled, int userId) {
-        // No longer does anything.
     }
 
     /**

@@ -186,6 +186,8 @@ public class Binder implements IBinder {
     /**
      * Get the binder transaction observer for this process.
      *
+     * TODO(b/299356196): only applies to Java code, not C++/Rust
+     *
      * @hide
      */
     public static void setObserver(@Nullable BinderInternal.Observer observer) {
@@ -202,6 +204,8 @@ public class Binder implements IBinder {
      * that require a result must be sent as {@link IBinder#FLAG_ONEWAY} calls
      * which deliver results through a callback interface.
      *
+     * TODO(b/299355525): only applies to Java code, not C++/Rust
+     *
      * @hide
      */
     public static void setWarnOnBlocking(boolean warnOnBlocking) {
@@ -217,6 +221,8 @@ public class Binder implements IBinder {
      * upgraded. In particular, this <em>must never</em> be called for
      * interfaces hosted by package that could be upgraded or replaced,
      * otherwise you risk system instability if that remote interface wedges.
+     *
+     * TODO(b/299355525): only applies to Java code, not C++/Rust
      *
      * @hide
      */
@@ -943,16 +949,19 @@ public class Binder implements IBinder {
      * @hide
      */
     @VisibleForTesting
-    public final @NonNull String getTransactionTraceName(int transactionCode) {
+    public final @Nullable String getTransactionTraceName(int transactionCode) {
+        final boolean isInterfaceUserDefined = getMaxTransactionId() == 0;
         if (mTransactionTraceNames == null) {
-            final int highestId = Math.min(getMaxTransactionId(), TRANSACTION_TRACE_NAME_ID_LIMIT);
+            final int highestId = isInterfaceUserDefined ? TRANSACTION_TRACE_NAME_ID_LIMIT
+                    : Math.min(getMaxTransactionId(), TRANSACTION_TRACE_NAME_ID_LIMIT);
             mSimpleDescriptor = getSimpleDescriptor();
             mTransactionTraceNames = new AtomicReferenceArray(highestId + 1);
         }
 
-        final int index = transactionCode - FIRST_CALL_TRANSACTION;
-        if (index < 0 || index >= mTransactionTraceNames.length()) {
-            return mSimpleDescriptor + "#" + transactionCode;
+        final int index = isInterfaceUserDefined
+                ? transactionCode : transactionCode - FIRST_CALL_TRANSACTION;
+        if (index >= mTransactionTraceNames.length() || index < 0) {
+            return null;
         }
 
         String transactionTraceName = mTransactionTraceNames.getAcquire(index);
@@ -1304,6 +1313,8 @@ public class Binder implements IBinder {
             int callingUid) {
         // Make sure the observer won't change while processing a transaction.
         final BinderInternal.Observer observer = sObserver;
+
+        // TODO(b/299356196): observer should also observe transactions in native code
         final CallSession callSession =
                 observer != null ? observer.callStarted(this, code, UNSET_WORKSOURCE) : null;
         // Theoretically, we should call transact, which will call onTransact,
@@ -1317,18 +1328,8 @@ public class Binder implements IBinder {
         final boolean hasFullyQualifiedName = getMaxTransactionId() > 0;
         final String transactionTraceName;
 
-        if (tagEnabled && hasFullyQualifiedName) {
+        if (tagEnabled) {
             // If tracing enabled and we have a fully qualified name, fetch the name
-            transactionTraceName = getTransactionTraceName(code);
-        } else if (tagEnabled && isStackTrackingEnabled()) {
-            // If tracing is enabled and we *don't* have a fully qualified name, fetch the
-            // 'best effort' name only for stack tracking. This works around noticeable perf impact
-            // on low latency binder calls (<100us). The tracing call itself is between (1-10us) and
-            // the perf impact can be quite noticeable while benchmarking such binder calls.
-            // The primary culprits are ContentProviders and Cursors which convenienty don't
-            // autogenerate their AIDL and hence will not have a fully qualified name.
-            //
-            // TODO(b/253426478): Relax this constraint after a more robust fix
             transactionTraceName = getTransactionTraceName(code);
         } else {
             transactionTraceName = null;
@@ -1336,7 +1337,7 @@ public class Binder implements IBinder {
 
         final boolean tracingEnabled = tagEnabled && transactionTraceName != null;
         try {
-            // TODO - this logic should not be in Java - it should be in native
+            // TODO(b/299356201) - this logic should not be in Java - it should be in native
             // code in libbinder so that it works for all binder users.
             final BinderCallHeavyHitterWatcher heavyHitterWatcher = sHeavyHitterWatcher;
             if (heavyHitterWatcher != null && callingUid != -1) {
@@ -1347,9 +1348,9 @@ public class Binder implements IBinder {
                 Trace.traceBegin(Trace.TRACE_TAG_AIDL, transactionTraceName);
             }
 
-            // TODO - this logic should not be in Java - it should be in native
-            // code in libbinder so that it works for all binder users. Further,
-            // this should not re-use flags.
+            // TODO(b/299353919) - this logic should not be in Java - it should be
+            // in native code in libbinder so that it works for all binder users.
+            // Further, this should not re-use flags.
             if ((flags & FLAG_COLLECT_NOTED_APP_OPS) != 0 && callingUid != -1) {
                 AppOpsManager.startNotedAppOpsCollection(callingUid);
                 try {

@@ -65,8 +65,8 @@ import java.util.function.Supplier;
  */
 public class SystemSettingsHelper extends SettingsHelper {
 
-    private static final String LOCATION_PACKAGE_BLACKLIST = "locationPackagePrefixBlacklist";
-    private static final String LOCATION_PACKAGE_WHITELIST = "locationPackagePrefixWhitelist";
+    private static final String LOCATION_PACKAGE_DENYLIST = "locationPackagePrefixBlacklist";
+    private static final String LOCATION_PACKAGE_ALLOWLIST = "locationPackagePrefixWhitelist";
 
     private static final long DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS = 30 * 60 * 1000;
     private static final long DEFAULT_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS =
@@ -93,9 +93,9 @@ public class SystemSettingsHelper extends SettingsHelper {
         mGnssMeasurementFullTracking = new BooleanGlobalSetting(context,
                 ENABLE_GNSS_RAW_MEAS_FULL_TRACKING, FgThread.getHandler());
         mLocationPackageBlacklist = new StringListCachedSecureSetting(context,
-                LOCATION_PACKAGE_BLACKLIST, FgThread.getHandler());
+                LOCATION_PACKAGE_DENYLIST, FgThread.getHandler());
         mLocationPackageWhitelist = new StringListCachedSecureSetting(context,
-                LOCATION_PACKAGE_WHITELIST, FgThread.getHandler());
+                LOCATION_PACKAGE_ALLOWLIST, FgThread.getHandler());
         mBackgroundThrottlePackageWhitelist = new StringSetCachedGlobalSetting(context,
                 LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
                 () -> SystemConfig.getInstance().getAllowUnthrottledLocation(),

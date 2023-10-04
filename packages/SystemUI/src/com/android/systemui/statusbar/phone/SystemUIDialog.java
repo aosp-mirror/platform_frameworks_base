@@ -415,7 +415,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         // We first look for the background on the dialogContentWithBackground added by
         // DialogLaunchAnimator. If it's not there, we use the background of the DecorView.
         View viewWithBackground = decorView.findViewByPredicate(
-                view -> view.getTag(R.id.tag_dialog_background) != null);
+                view -> view.getTag(
+                        com.android.systemui.animation.R.id.tag_dialog_background) != null);
         Drawable background = viewWithBackground != null ? viewWithBackground.getBackground()
                 : decorView.getBackground();
         Insets insets = background != null ? background.getOpticalInsets() : Insets.NONE;

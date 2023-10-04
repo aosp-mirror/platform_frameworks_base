@@ -167,8 +167,8 @@ void JNIOnInfoListener::onInfo(const DrmInfoEvent& event) {
     jint uniqueId = event.getUniqueId();
     jint type = event.getType();
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jstring message = env->NewStringUTF(event.getMessage().string());
-    ALOGV("JNIOnInfoListener::onInfo => %d | %d | %s", uniqueId, type, event.getMessage().string());
+    jstring message = env->NewStringUTF(event.getMessage().c_str());
+    ALOGV("JNIOnInfoListener::onInfo => %d | %d | %s", uniqueId, type, event.getMessage().c_str());
 
     env->CallStaticVoidMethod(
             mClass,
@@ -273,15 +273,15 @@ static jobject android_drm_DrmManagerClient_getConstraintsFromContent(
                 const char* value = pConstraints->getAsByteArray(&key);
                 if (NULL != value) {
                     ScopedLocalRef<jbyteArray> dataArray(env, env->NewByteArray(strlen(value)));
-                    ScopedLocalRef<jstring> keyString(env, env->NewStringUTF(key.string()));
+                    ScopedLocalRef<jstring> keyString(env, env->NewStringUTF(key.c_str()));
                     env->SetByteArrayRegion(dataArray.get(), 0, strlen(value), (jbyte*)value);
                     env->CallVoidMethod(constraints, ContentValues_putByteArray,
                                         keyString.get(), dataArray.get());
                 }
             } else {
                 String8 value = pConstraints->get(key);
-                ScopedLocalRef<jstring> keyString(env, env->NewStringUTF(key.string()));
-                ScopedLocalRef<jstring> valueString(env, env->NewStringUTF(value.string()));
+                ScopedLocalRef<jstring> keyString(env, env->NewStringUTF(key.c_str()));
+                ScopedLocalRef<jstring> valueString(env, env->NewStringUTF(value.c_str()));
                 env->CallVoidMethod(constraints, ContentValues_putString,
                                     keyString.get(), valueString.get());
             }
@@ -320,8 +320,8 @@ static jobject android_drm_DrmManagerClient_getMetadataFromContent(
                     // insert the entry<constraintKey, constraintValue>
                     // to newly created java object
                     String8 value = pMetadata->get(key);
-                    ScopedLocalRef<jstring> keyString(env, env->NewStringUTF(key.string()));
-                    ScopedLocalRef<jstring> valueString(env, env->NewStringUTF(value.string()));
+                    ScopedLocalRef<jstring> keyString(env, env->NewStringUTF(key.c_str()));
+                    ScopedLocalRef<jstring> valueString(env, env->NewStringUTF(value.c_str()));
                     env->CallVoidMethod(metadata, ContentValues_putString,
                                         keyString.get(), valueString.get());
                 }
@@ -357,19 +357,19 @@ static jobjectArray android_drm_DrmManagerClient_getAllSupportInfo(
 
         env->CallVoidMethod(
             drmSupportInfo, env->GetMethodID(clazz, "setDescription", "(Ljava/lang/String;)V"),
-            env->NewStringUTF(info.getDescription().string()));
+            env->NewStringUTF(info.getDescription().c_str()));
 
         DrmSupportInfo::MimeTypeIterator iterator = info.getMimeTypeIterator();
         while (iterator.hasNext()) {
             String8  value = iterator.next();
-            env->CallVoidMethod(drmSupportInfo, addMimeTypeId, env->NewStringUTF(value.string()));
+            env->CallVoidMethod(drmSupportInfo, addMimeTypeId, env->NewStringUTF(value.c_str()));
         }
 
         DrmSupportInfo::FileSuffixIterator it = info.getFileSuffixIterator();
         while (it.hasNext()) {
             String8 value = it.next();
             env->CallVoidMethod(
-                drmSupportInfo, addFileSuffixId, env->NewStringUTF(value.string()));
+                drmSupportInfo, addFileSuffixId, env->NewStringUTF(value.c_str()));
         }
 
         env->SetObjectArrayElement(array, i, drmSupportInfo);
@@ -459,7 +459,7 @@ static jobject android_drm_DrmManagerClient_processDrmInfo(
 
         String8 keyString = Utility::getStringValue(env, key.get());
         String8 valueString = Utility::getStringValue(env, valString.get());
-        ALOGV("Key: %s | Value: %s", keyString.string(), valueString.string());
+        ALOGV("Key: %s | Value: %s", keyString.c_str(), valueString.c_str());
 
         drmInfo.put(keyString, valueString);
     }
@@ -488,15 +488,15 @@ static jobject android_drm_DrmManagerClient_processDrmInfo(
         jmethodID constructorId
             = env->GetMethodID(clazz, "<init>", "([BLjava/lang/String;Ljava/lang/String;)V");
         jobject processedData = env->NewObject(clazz, constructorId, dataArray,
-                    env->NewStringUTF((drmInfo.get(DrmInfoRequest::ACCOUNT_ID)).string()),
-                    env->NewStringUTF((drmInfo.get(DrmInfoRequest::SUBSCRIPTION_ID)).string()));
+                    env->NewStringUTF((drmInfo.get(DrmInfoRequest::ACCOUNT_ID)).c_str()),
+                    env->NewStringUTF((drmInfo.get(DrmInfoRequest::SUBSCRIPTION_ID)).c_str()));
 
         constructorId
             = env->GetMethodID(localRef,
                 "<init>", "(IILandroid/drm/ProcessedData;Ljava/lang/String;)V");
 
         drmInfoStatus = env->NewObject(localRef, constructorId, statusCode, infoType,
-                processedData, env->NewStringUTF(pDrmInfoStatus->mimeType.string()));
+                processedData, env->NewStringUTF(pDrmInfoStatus->mimeType.c_str()));
     }
 
     delete[] mData; mData = NULL;
@@ -533,7 +533,7 @@ static jobject android_drm_DrmManagerClient_acquireDrmInfo(
 
         String8 keyString = Utility::getStringValue(env, key.get());
         String8 valueString = Utility::getStringValue(env, value.get());
-        ALOGV("Key: %s | Value: %s", keyString.string(), valueString.string());
+        ALOGV("Key: %s | Value: %s", keyString.c_str(), valueString.c_str());
 
         drmInfoReq.put(keyString, valueString);
     }
@@ -554,7 +554,7 @@ static jobject android_drm_DrmManagerClient_acquireDrmInfo(
             drmInfoObject
                 = env->NewObject(localRef,
                     env->GetMethodID(localRef, "<init>", "(I[BLjava/lang/String;)V"),
-                    mInfoType, dataArray, env->NewStringUTF(pDrmInfo->getMimeType().string()));
+                    mInfoType, dataArray, env->NewStringUTF(pDrmInfo->getMimeType().c_str()));
 
             DrmInfo::KeyIterator it = pDrmInfo->keyIterator();
             jmethodID putMethodId
@@ -563,8 +563,8 @@ static jobject android_drm_DrmManagerClient_acquireDrmInfo(
             while (it.hasNext()) {
                 String8 key = it.next();
                 String8 value = pDrmInfo->get(key);
-                ScopedLocalRef<jstring> keyString(env, env->NewStringUTF(key.string()));
-                ScopedLocalRef<jstring> valueString(env, env->NewStringUTF(value.string()));
+                ScopedLocalRef<jstring> keyString(env, env->NewStringUTF(key.c_str()));
+                ScopedLocalRef<jstring> valueString(env, env->NewStringUTF(value.c_str()));
                 env->CallVoidMethod(drmInfoObject, putMethodId,
                     keyString.get(), valueString.get());
             }
@@ -602,7 +602,7 @@ static jstring android_drm_DrmManagerClient_getOriginalMimeType(
             ->getOriginalMimeType(uniqueId,
                                   Utility::getStringValue(env, path), fd);
     ALOGV("getOriginalMimeType Exit");
-    return env->NewStringUTF(mimeType.string());
+    return env->NewStringUTF(mimeType.c_str());
 }
 
 static jint android_drm_DrmManagerClient_checkRightsStatus(

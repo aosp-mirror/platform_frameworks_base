@@ -1741,6 +1741,7 @@ public class Vpn {
                 .setBypassableVpn(bypassable)
                 .setVpnRequiresValidation(mConfig.requiresInternetValidation)
                 .setLocalRoutesExcludedForVpn(mConfig.excludeLocalRoutes)
+                .setLegacyExtraInfo("VPN:" + mPackage)
                 .build();
 
         capsBuilder.setOwnerUid(mOwnerUID);
@@ -3066,7 +3067,8 @@ public class Vpn {
          * <p>This variable controls the retry delay, and is reset when the VPN pass network
          * validation.
          */
-        private int mValidationFailRetryCount = 0;
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+        int mValidationFailRetryCount = 0;
 
         /**
          * The number of attempts since the last successful connection.
@@ -3296,13 +3298,6 @@ public class Vpn {
                         }
                         agentConnect(this::onValidationStatus);
                         return; // Link properties are already sent.
-                    } else {
-                        // Underlying networks also set in agentConnect()
-                        doSetUnderlyingNetworks(networkAgent, Collections.singletonList(network));
-                        mNetworkCapabilities =
-                                new NetworkCapabilities.Builder(mNetworkCapabilities)
-                                        .setUnderlyingNetworks(Collections.singletonList(network))
-                                        .build();
                     }
 
                     lp = makeLinkProperties(); // Accesses VPN instance fields; must be locked
@@ -3346,7 +3341,7 @@ public class Vpn {
                 // Transforms do not need to be persisted; the IkeSession will keep
                 // them alive for us
                 mIpSecManager.applyTunnelModeTransform(mTunnelIface, direction, transform);
-            } catch (IOException e) {
+            } catch (IOException | IllegalArgumentException e) {
                 Log.d(TAG, "Transform application failed for token " + token, e);
                 onSessionLost(token, e);
             }
@@ -3384,8 +3379,6 @@ public class Vpn {
 
                     final LinkProperties oldLp = makeLinkProperties();
 
-                    final boolean underlyingNetworkHasChanged =
-                            !Arrays.equals(mConfig.underlyingNetworks, new Network[]{network});
                     mConfig.underlyingNetworks = new Network[] {network};
                     mConfig.mtu = calculateVpnMtu();
 
@@ -3417,18 +3410,9 @@ public class Vpn {
                                     removed.getAddress(), removed.getPrefixLength());
                         }
                     } else {
-                        // Put below 3 updates into else block is because agentConnect() will do
-                        // those things, so there is no need to do the redundant work.
+                        // Put below update into else block is because agentConnect() will do
+                        // the same things, so there is no need to do the redundant work.
                         if (!newLp.equals(oldLp)) doSendLinkProperties(mNetworkAgent, newLp);
-                        if (underlyingNetworkHasChanged) {
-                            mNetworkCapabilities =
-                                    new NetworkCapabilities.Builder(mNetworkCapabilities)
-                                            .setUnderlyingNetworks(
-                                                    Collections.singletonList(network))
-                                            .build();
-                            doSetUnderlyingNetworks(mNetworkAgent,
-                                    Collections.singletonList(network));
-                        }
                     }
                 }
 
@@ -3440,7 +3424,7 @@ public class Vpn {
                         mTunnelIface, IpSecManager.DIRECTION_IN, inTransform);
                 mIpSecManager.applyTunnelModeTransform(
                         mTunnelIface, IpSecManager.DIRECTION_OUT, outTransform);
-            } catch (IOException e) {
+            } catch (IOException | IllegalArgumentException e) {
                 Log.d(TAG, "Transform application failed for token " + token, e);
                 onSessionLost(token, e);
             }
@@ -3554,8 +3538,26 @@ public class Vpn {
          */
         private void startOrMigrateIkeSession(@Nullable Network underlyingNetwork) {
             if (underlyingNetwork == null) {
+                // For null underlyingNetwork case, there will not be a NetworkAgent available so
+                // no underlying network update is necessary here. Note that updating
+                // mNetworkCapabilities here would also be reasonable, but it will be updated next
+                // time the VPN connects anyway.
                 Log.d(TAG, "There is no active network for starting an IKE session");
                 return;
+            }
+
+            final List<Network> networks = Collections.singletonList(underlyingNetwork);
+            // Update network capabilities if underlying network is changed.
+            if (!networks.equals(mNetworkCapabilities.getUnderlyingNetworks())) {
+                mNetworkCapabilities =
+                        new NetworkCapabilities.Builder(mNetworkCapabilities)
+                                .setUnderlyingNetworks(networks)
+                                .build();
+                // No NetworkAgent case happens when Vpn tries to start a new VPN. The underlying
+                // network update will be done later with NetworkAgent connected event.
+                if (mNetworkAgent != null) {
+                    doSetUnderlyingNetworks(mNetworkAgent, networks);
+                }
             }
 
             if (maybeMigrateIkeSessionAndUpdateVpnTransportInfo(underlyingNetwork)) return;
@@ -3896,6 +3898,18 @@ public class Vpn {
             } else {
                 // Skip other invalid status if the scheduled recovery exists.
                 if (mScheduledHandleDataStallFuture != null) return;
+
+                // Trigger network validation on the underlying network to possibly cause system
+                // switch default network or try recover if the current default network is broken.
+                //
+                // For the same underlying network, the first validation result should clarify if
+                // it's caused by broken underlying network. So only perform underlying network
+                // re-evaluation after first validation failure to prevent extra network resource
+                // costs on sending probes.
+                if (mValidationFailRetryCount == 0) {
+                    mConnectivityManager.reportNetworkConnectivity(
+                            mActiveNetwork, false /* hasConnectivity */);
+                }
 
                 if (mValidationFailRetryCount < MAX_MOBIKE_RECOVERY_ATTEMPT) {
                     Log.d(TAG, "Validation failed");

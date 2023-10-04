@@ -392,9 +392,9 @@ public class IntentSender implements Parcelable {
     }
 
     /** @hide */
-    public IntentSender(IIntentSender target, IBinder whitelistToken) {
+    public IntentSender(IIntentSender target, IBinder allowlistToken) {
         mTarget = target;
-        mWhitelistToken = whitelistToken;
+        mWhitelistToken = allowlistToken;
     }
 
     /** @hide */

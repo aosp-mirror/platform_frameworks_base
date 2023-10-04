@@ -1747,8 +1747,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             if (!ss.dynamic) continue;
             mDynamic.put(stream, true);
             if (findRow(stream) == null) {
-                addRow(stream, R.drawable.ic_volume_remote, R.drawable.ic_volume_remote_mute, true,
-                        false, true);
+                addRow(stream,
+                        com.android.settingslib.R.drawable.ic_volume_remote,
+                        com.android.settingslib.R.drawable.ic_volume_remote_mute,
+                        true, false, true);
             }
         }
 

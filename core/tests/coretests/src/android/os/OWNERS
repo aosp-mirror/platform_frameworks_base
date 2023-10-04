@@ -6,3 +6,6 @@ per-file *Vibrat*.java = file:/services/core/java/com/android/server/vibrator/OW
 
 # Power
 per-file PowerManager*.java = michaelwr@google.com, santoscordon@google.com
+
+# PerformanceHintManager
+per-file PerformanceHintManagerTest.java = file:/ADPF_OWNERS

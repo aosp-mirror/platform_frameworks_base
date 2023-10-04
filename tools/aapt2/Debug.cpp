@@ -445,7 +445,7 @@ void Debug::DumpResStringPool(const android::ResStringPool* pool, text::Printer*
   const size_t NS = pool->size();
   for (size_t s=0; s<NS; s++) {
     auto str = pool->string8ObjectAt(s);
-    printer->Print(StringPrintf("String #%zd : %s\n", s, str.has_value() ? str->string() : ""));
+    printer->Print(StringPrintf("String #%zd : %s\n", s, str.has_value() ? str->c_str() : ""));
   }
 }
 

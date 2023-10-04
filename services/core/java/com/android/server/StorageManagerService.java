@@ -266,17 +266,17 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public void onUserUnlocking(@NonNull TargetUser user) {
-            mStorageManagerService.onUnlockUser(user.getUserIdentifier());
+            mStorageManagerService.onUserUnlocking(user.getUserIdentifier());
         }
 
         @Override
         public void onUserStopped(@NonNull TargetUser user) {
-            mStorageManagerService.onCleanupUser(user.getUserIdentifier());
+            mStorageManagerService.onUserStopped(user.getUserIdentifier());
         }
 
         @Override
         public void onUserStopping(@NonNull TargetUser user) {
-            mStorageManagerService.onStopUser(user.getUserIdentifier());
+            mStorageManagerService.onUserStopping(user.getUserIdentifier());
         }
 
         @Override
@@ -736,6 +736,7 @@ class StorageManagerService extends IStorageManager.Stub
     private static final int H_VOLUME_STATE_CHANGED = 15;
     private static final int H_CLOUD_MEDIA_PROVIDER_CHANGED = 16;
     private static final int H_SECURE_KEYGUARD_STATE_CHANGED = 17;
+    private static final int H_REMOUNT_VOLUMES_ON_MOVE = 18;
 
     class StorageManagerServiceHandler extends Handler {
         public StorageManagerServiceHandler(Looper looper) {
@@ -881,6 +882,10 @@ class StorageManagerService extends IStorageManager.Stub
                     } catch (Exception e) {
                         Slog.wtf(TAG, e);
                     }
+                    break;
+                }
+                case H_REMOUNT_VOLUMES_ON_MOVE: {
+                    remountVolumesForRunningUsersOnMove();
                     break;
                 }
             }
@@ -1242,8 +1247,8 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void onUnlockUser(int userId) {
-        Slog.d(TAG, "onUnlockUser " + userId);
+    private void onUserUnlocking(int userId) {
+        Slog.d(TAG, "onUserUnlocking " + userId);
 
         if (userId != UserHandle.USER_SYSTEM) {
             // Check if this user shares media with another user
@@ -1306,8 +1311,8 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void onCleanupUser(int userId) {
-        Slog.d(TAG, "onCleanupUser " + userId);
+    private void onUserStopped(int userId) {
+        Slog.d(TAG, "onUserStopped " + userId);
 
         try {
             mVold.onUserStopped(userId);
@@ -1321,8 +1326,8 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void onStopUser(int userId) {
-        Slog.i(TAG, "onStopUser " + userId);
+    private void onUserStopping(int userId) {
+        Slog.i(TAG, "onUserStopping " + userId);
         try {
             mStorageSessionController.onUserStopping(userId);
         } catch (Exception e) {
@@ -1357,9 +1362,72 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    /**
+     * This method checks if the volume is public and the volume is visible and the volume it is
+     * trying to mount doesn't have the same mount user id as the current user being maintained by
+     * StorageManagerService and change the mount Id. The checks are same as
+     * {@link StorageManagerService#maybeRemountVolumes(int)}
+     * @param VolumeInfo object to consider for changing the mountId
+     */
+    private void updateVolumeMountIdIfRequired(VolumeInfo vol) {
+        synchronized (mLock) {
+            if (!vol.isPrimary() && vol.isVisible() && vol.getMountUserId() != mCurrentUserId) {
+                vol.mountUserId = mCurrentUserId;
+            }
+        }
+    }
+
+    /**
+     * This method informs vold and storaged that the user has stopped and started whenever move
+     * storage is performed. This ensures that the correct emulated volumes are mounted for the
+     * users other than the current user. This solves an edge case wherein the correct emulated
+     * volumes are not mounted, this will cause the media data to be still stored on internal
+     * storage whereas the data should be stored in the adopted primary storage. This method stops
+     * the users at vold first which will remove the old volumes which and starts the users at vold
+     * which will reattach the correct volumes. This does not performs a full reset as full reset
+     * clears every state from vold and SMS {@link #resetIfRebootedAndConnected} which is expensive
+     * and causes instability.
+     */
+    private void remountVolumesForRunningUsersOnMove() {
+        // Do not want to hold the lock for long
+        final List<Integer> unlockedUsers = new ArrayList<>();
+        synchronized (mLock) {
+            for (int userId : mSystemUnlockedUsers) {
+                if (userId == mCurrentUserId) continue;
+                unlockedUsers.add(userId);
+            }
+        }
+        for (Integer userId : unlockedUsers) {
+            try {
+                mVold.onUserStopped(userId);
+                mStoraged.onUserStopped(userId);
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+            }
+        }
+        for (Integer userId : unlockedUsers) {
+            try {
+                mVold.onUserStarted(userId);
+                mStoraged.onUserStarted(userId);
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+            }
+        }
+    }
+
     private boolean supportsBlockCheckpoint() throws RemoteException {
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         return mVold.supportsBlockCheckpoint();
+    }
+
+    private void prepareUserStorageForMoveInternal(String fromVolumeUuid, String toVolumeUuid,
+            List<UserInfo> users) throws Exception {
+
+        final int flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
+        for (UserInfo user : users) {
+            prepareUserStorageInternal(fromVolumeUuid, user.id, user.serialNumber, flags);
+            prepareUserStorageInternal(toVolumeUuid, user.id, user.serialNumber, flags);
+        }
     }
 
     @Override
@@ -1468,13 +1536,14 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         @Override
-        public void onVolumeStateChanged(String volId, final int newState) {
+        public void onVolumeStateChanged(String volId, final int newState, final int userId) {
             synchronized (mLock) {
                 final VolumeInfo vol = mVolumes.get(volId);
                 if (vol != null) {
                     final int oldState = vol.state;
                     vol.state = newState;
                     final VolumeInfo vInfo = new VolumeInfo(vol);
+                    vInfo.mountUserId = userId;
                     final SomeArgs args = SomeArgs.obtain();
                     args.arg1 = vInfo;
                     args.argi1 = oldState;
@@ -1719,6 +1788,23 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void onVolumeStateChangedAsync(VolumeInfo vol, int oldState, int newState) {
+        if (newState == VolumeInfo.STATE_MOUNTED) {
+            // Private volumes can be unmounted and re-mounted even after a user has
+            // been unlocked; on devices that support encryption keys tied to the filesystem,
+            // this requires setting up the keys again.
+            try {
+                prepareUserStorageIfNeeded(vol);
+            } catch (Exception e) {
+                // Unusable partition, unmount.
+                try {
+                    mVold.unmount(vol.id);
+                } catch (Exception ee) {
+                    Slog.wtf(TAG, ee);
+                }
+                return;
+            }
+        }
+
         synchronized (mLock) {
             // Remember that we saw this volume so we're ready to accept user
             // metadata, or so we can annoy them when a private volume is ejected
@@ -1742,13 +1828,6 @@ class StorageManagerService extends IStorageManager.Stub
                 rec.lastSeenMillis = System.currentTimeMillis();
                 writeSettingsLocked();
             }
-        }
-
-        if (newState == VolumeInfo.STATE_MOUNTED) {
-            // Private volumes can be unmounted and re-mounted even after a user has
-            // been unlocked; on devices that support encryption keys tied to the filesystem,
-            // this requires setting up the keys again.
-            prepareUserStorageIfNeeded(vol);
         }
 
         // This is a blocking call to Storage Service which needs to process volume state changed
@@ -1871,6 +1950,7 @@ class StorageManagerService extends IStorageManager.Stub
 
             mPrimaryStorageUuid = mMoveTargetUuid;
             writeSettingsLocked();
+            mHandler.obtainMessage(H_REMOUNT_VOLUMES_ON_MOVE).sendToTarget();
         }
 
         if (PackageManager.isMoveStatusFinished(status)) {
@@ -2322,7 +2402,7 @@ class StorageManagerService extends IStorageManager.Stub
         if (isMountDisallowed(vol)) {
             throw new SecurityException("Mounting " + volId + " restricted by policy");
         }
-
+        updateVolumeMountIdIfRequired(vol);
         mount(vol);
     }
 
@@ -2960,6 +3040,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         final VolumeInfo from;
         final VolumeInfo to;
+        final List<UserInfo> users;
 
         synchronized (mLock) {
             if (Objects.equals(mPrimaryStorageUuid, volumeUuid)) {
@@ -2973,7 +3054,7 @@ class StorageManagerService extends IStorageManager.Stub
             mMoveTargetUuid = volumeUuid;
 
             // We need all the users unlocked to move their primary storage
-            final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+            users = mContext.getSystemService(UserManager.class).getUsers();
             for (UserInfo user : users) {
                 if (StorageManager.isFileEncrypted() && !isUserKeyUnlocked(user.id)) {
                     Slog.w(TAG, "Failing move due to locked user " + user.id);
@@ -3007,6 +3088,19 @@ class StorageManagerService extends IStorageManager.Stub
                     return;
                 }
             }
+        }
+
+        // Prepare the storage before move, this is required to unlock adoptable storage (as the
+        // keys are tied to prepare user data step) & also is required for the destination files to
+        // end up with the correct SELinux labels and encryption policies for directories
+        try {
+            prepareUserStorageForMoveInternal(mPrimaryStorageUuid, volumeUuid, users);
+        } catch (Exception e) {
+            Slog.w(TAG, "Failing move due to failure on prepare user data", e);
+            synchronized (mLock) {
+                onMoveStatusLocked(PackageManager.MOVE_FAILED_INTERNAL_ERROR);
+            }
+            return;
         }
 
         try {
@@ -3339,7 +3433,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void prepareUserStorageIfNeeded(VolumeInfo vol) {
+    private void prepareUserStorageIfNeeded(VolumeInfo vol) throws Exception {
         if (vol.type != VolumeInfo.TYPE_PRIVATE) {
             return;
         }
@@ -3366,11 +3460,15 @@ class StorageManagerService extends IStorageManager.Stub
     public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
-        prepareUserStorageInternal(volumeUuid, userId, serialNumber, flags);
+        try {
+            prepareUserStorageInternal(volumeUuid, userId, serialNumber, flags);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void prepareUserStorageInternal(String volumeUuid, int userId, int serialNumber,
-            int flags) {
+            int flags) throws Exception {
         try {
             mVold.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
             // After preparing user storage, we should check if we should mount data mirror again,
@@ -3397,7 +3495,7 @@ class StorageManagerService extends IStorageManager.Stub
                         + "; device may be insecure!");
                 return;
             }
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -4994,5 +5092,16 @@ class StorageManagerService extends IStorageManager.Stub
             mCloudProviderChangeListeners.add(listener);
             mHandler.obtainMessage(H_CLOUD_MEDIA_PROVIDER_CHANGED, listener);
         }
+
+        @Override
+        public void prepareUserStorageForMove(String fromVolumeUuid, String toVolumeUuid,
+                List<UserInfo> users) {
+            try {
+                prepareUserStorageForMoveInternal(fromVolumeUuid, toVolumeUuid, users);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 }

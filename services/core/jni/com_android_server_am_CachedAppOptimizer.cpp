@@ -51,6 +51,9 @@ using android::base::WriteStringToFile;
 using android::meminfo::ProcMemInfo;
 using namespace android::meminfo;
 
+static const size_t kPageSize = getpagesize();
+static const size_t kPageMask = ~(kPageSize - 1);
+
 #define COMPACT_ACTION_FILE_FLAG 1
 #define COMPACT_ACTION_ANON_FLAG 2
 
@@ -61,7 +64,7 @@ using android::base::unique_fd;
 #define ASYNC_RECEIVED_WHILE_FROZEN (2)
 #define TXNS_PENDING_WHILE_FROZEN (4)
 
-#define MAX_RW_COUNT (INT_MAX & PAGE_MASK)
+#define MAX_RW_COUNT (INT_MAX & kPageMask)
 
 // Defines the maximum amount of VMAs we can send per process_madvise syscall.
 // Currently this is set to UIO_MAXIOV which is the maximum segments allowed by
@@ -249,7 +252,7 @@ int madviseVmasFromBatch(unique_fd& pidfd, VmaBatch& batch, int madviseType,
     } else if (bytesProcessedInSend < batch.totalBytes) {
         // Partially processed the bytes requested
         // skip last page which is where it failed.
-        bytesProcessedInSend += PAGE_SIZE;
+        bytesProcessedInSend += kPageSize;
     }
     bytesProcessedInSend = consumeBytes(batch, bytesProcessedInSend);
 

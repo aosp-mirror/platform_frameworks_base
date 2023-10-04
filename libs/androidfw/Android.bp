@@ -80,7 +80,10 @@ cc_library {
     export_include_dirs: ["include"],
     export_shared_lib_headers: ["libz"],
     static_libs: ["libincfs-utils"],
-    whole_static_libs: ["libincfs-utils"],
+    whole_static_libs: [
+        "libandroidfw_pathutils",
+        "libincfs-utils",
+    ],
     export_static_lib_headers: ["libincfs-utils"],
     target: {
         android: {
@@ -130,6 +133,28 @@ cc_library {
     sanitize: {
         blocklist: "libandroidfw_blocklist.txt",
     },
+}
+
+cc_library_static {
+    name: "libandroidfw_pathutils",
+    defaults: ["libandroidfw_defaults"],
+    host_supported: true,
+    export_include_dirs: ["include_pathutils"],
+    srcs: [
+        "PathUtils.cpp",
+    ],
+    shared_libs: [
+        "libutils",
+    ],
+    target: {
+        windows: {
+            enabled: true,
+        },
+    },
+    visibility: [
+        ":__subpackages__",
+        "//frameworks/base/tools/aapt",
+    ],
 }
 
 common_test_libs = [

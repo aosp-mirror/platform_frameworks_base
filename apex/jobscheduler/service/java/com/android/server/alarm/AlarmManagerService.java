@@ -713,7 +713,7 @@ public class AlarmManagerService extends SystemService {
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
         private static final long DEFAULT_MAX_INTERVAL = 365 * INTERVAL_DAY;
         private static final long DEFAULT_MIN_WINDOW = 10 * 60 * 1000;
-        private static final long DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION = 10 * 1000;
+        private static final long DEFAULT_ALLOW_WHILE_IDLE_ALLOWLIST_DURATION = 10 * 1000;
         private static final long DEFAULT_LISTENER_TIMEOUT = 5 * 1000;
         private static final int DEFAULT_MAX_ALARMS_PER_UID = 500;
         private static final long DEFAULT_APP_STANDBY_WINDOW = 60 * 60 * 1000;  // 1 hr
@@ -768,7 +768,7 @@ public class AlarmManagerService extends SystemService {
 
         // BroadcastOptions.setTemporaryAppWhitelistDuration() to use for FLAG_ALLOW_WHILE_IDLE.
         public long ALLOW_WHILE_IDLE_WHITELIST_DURATION
-                = DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION;
+                = DEFAULT_ALLOW_WHILE_IDLE_ALLOWLIST_DURATION;
 
         // Direct alarm listener callback timeout
         public long LISTENER_TIMEOUT = DEFAULT_LISTENER_TIMEOUT;
@@ -970,7 +970,7 @@ public class AlarmManagerService extends SystemService {
                         case KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION:
                             ALLOW_WHILE_IDLE_WHITELIST_DURATION = properties.getLong(
                                     KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION,
-                                    DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION);
+                                    DEFAULT_ALLOW_WHILE_IDLE_ALLOWLIST_DURATION);
                             updateAllowWhileIdleWhitelistDurationLocked();
                             break;
                         case KEY_LISTENER_TIMEOUT:
@@ -1593,7 +1593,7 @@ public class AlarmManagerService extends SystemService {
      * Check all alarms in {@link #mPendingBackgroundAlarms} and send the ones that are not
      * restricted.
      *
-     * This is only called when the power save whitelist changes, so it's okay to be slow.
+     * This is only called when the power save allowlist changes, so it's okay to be slow.
      */
     @GuardedBy("mLock")
     void sendAllUnrestrictedPendingBackgroundAlarmsLocked() {
@@ -2235,7 +2235,7 @@ public class AlarmManagerService extends SystemService {
             }
         }
 
-        // Sanity check the recurrence interval.  This will catch people who supply
+        // Validate the recurrence interval.  This will catch people who supply
         // seconds when the API expects milliseconds, or apps trying shenanigans
         // around intentional period overflow, etc.
         final long minInterval = mConstants.MIN_INTERVAL;

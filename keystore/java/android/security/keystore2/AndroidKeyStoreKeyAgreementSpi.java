@@ -20,6 +20,7 @@ import android.hardware.security.keymint.Algorithm;
 import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.KeyPurpose;
 import android.hardware.security.keymint.Tag;
+import android.os.StrictMode;
 import android.security.KeyStoreException;
 import android.security.KeyStoreOperation;
 import android.security.keystore.KeyStoreCryptoOperation;
@@ -174,6 +175,7 @@ public class AndroidKeyStoreKeyAgreementSpi extends KeyAgreementSpi
         }
         byte[] otherPartyKeyEncoded = mOtherPartyKey.getEncoded();
 
+        StrictMode.noteSlowCall("engineGenerateSecret");
         try {
             return mOperation.finish(otherPartyKeyEncoded, null);
         } catch (KeyStoreException e) {
@@ -245,6 +247,7 @@ public class AndroidKeyStoreKeyAgreementSpi extends KeyAgreementSpi
                 Tag.PURPOSE, KeyPurpose.AGREE_KEY
         ));
 
+        StrictMode.noteDiskWrite();
         try {
             mOperation =
                     mKey.getSecurityLevel().createOperation(mKey.getKeyIdDescriptor(), parameters);

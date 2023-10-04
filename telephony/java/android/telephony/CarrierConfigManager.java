@@ -244,7 +244,8 @@ public class CarrierConfigManager {
     /**
      * Boolean indicating if the "Caller ID" item is visible in the Additional Settings menu.
      * true means visible. false means gone.
-     * @hide
+     *
+     * The default value is true.
      */
     public static final String KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL =
             "additional_settings_caller_id_visibility_bool";
@@ -252,7 +253,8 @@ public class CarrierConfigManager {
     /**
      * Boolean indicating if the "Call Waiting" item is visible in the Additional Settings menu.
      * true means visible. false means gone.
-     * @hide
+     *
+     * The default value is true.
      */
     public static final String KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL =
             "additional_settings_call_waiting_visibility_bool";
@@ -4437,12 +4439,12 @@ public class CarrierConfigManager {
      *
      * <p>Example:
      *
-     * <pre><code>
+     * <pre>{@code
      * <string-array name="carrier_service_name_array" num="2">
      *   <item value="Police"/>
      *   <item value="Ambulance"/>
      * </string-array>
-     * </code></pre>
+     * }</pre>
      */
     public static final String KEY_CARRIER_SERVICE_NAME_STRING_ARRAY = "carrier_service_name_array";
 
@@ -4456,18 +4458,18 @@ public class CarrierConfigManager {
      *
      * <ul>
      *   <li>The number of items in both the arrays are equal
-     *   <li>The item added in this key follows a specific format. Either it should be all numbers,
-     *       or "+" followed by all numbers.
+     *   <li>The item should contain dialable characters only which includes 0-9, -, *, #, (, ),
+     *       SPACE.
      * </ul>
      *
      * <p>Example:
      *
-     * <pre><code>
+     * <pre>{@code
      * <string-array name="carrier_service_number_array" num="2">
-     *   <item value="123"/>
-     *   <item value="+343"/>
+     *   <item value="*123"/>
+     *   <item value="+ (111) 111-111"/>
      * </string-array>
-     * </code></pre>
+     * }</pre>
      */
     public static final String KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY =
         "carrier_service_number_array";
@@ -9898,5 +9900,39 @@ public class CarrierConfigManager {
             throw new IllegalStateException("Telephony registry service is null");
         }
         trm.removeCarrierConfigChangedListener(listener);
+    }
+
+    /**
+     * Get subset of specified carrier configuration if available or empty bundle, without throwing
+     * {@link RuntimeException} to caller.
+     *
+     * <p>This is a system internally used only utility to reduce the repetitive logic.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}, or the calling app
+     * has carrier privileges on the specified subscription (see
+     * {@link TelephonyManager#hasCarrierPrivileges()}).
+     *
+     * @param context Context used to get the CarrierConfigManager service.
+     * @param subId The subscription ID to get the config from.
+     * @param keys The config keys the client is interested in.
+     * @return Config bundle with key/value for the specified keys or empty bundle when failed
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            "carrier privileges",
+    })
+    @NonNull
+    public static PersistableBundle getCarrierConfigSubset(
+            @NonNull Context context, int subId, @NonNull String... keys) {
+        PersistableBundle configs = null;
+        CarrierConfigManager ccm = context.getSystemService(CarrierConfigManager.class);
+        try {
+            configs = ccm.getConfigForSubId(subId, keys);
+        } catch (RuntimeException exception) {
+            Rlog.w(TAG, "CarrierConfigLoader is not available.");
+        }
+        return configs != null ? configs : new PersistableBundle();
     }
 }

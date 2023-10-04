@@ -319,7 +319,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             drawable = new CircleFramedDrawable(mCurrentUser.picture, avatarSize);
         }
 
-        Drawable bg = mContext.getDrawable(R.drawable.user_avatar_bg);
+        Drawable bg = mContext.getDrawable(com.android.settingslib.R.drawable.user_avatar_bg);
         drawable = new LayerDrawable(new Drawable[]{bg, drawable});
         return drawable;
     }

@@ -12037,6 +12037,7 @@ package android.content.pm {
     field public static final String FEATURE_TELEPHONY_RADIO_ACCESS = "android.hardware.telephony.radio.access";
     field public static final String FEATURE_TELEPHONY_SUBSCRIPTION = "android.hardware.telephony.subscription";
     field @Deprecated public static final String FEATURE_TELEVISION = "android.hardware.type.television";
+    field public static final String FEATURE_THREAD_NETWORK = "android.hardware.thread_network";
     field public static final String FEATURE_TOUCHSCREEN = "android.hardware.touchscreen";
     field public static final String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
     field public static final String FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT = "android.hardware.touchscreen.multitouch.distinct";
@@ -31969,7 +31970,7 @@ package android.os {
     method public boolean isInteractive();
     method public boolean isLowPowerStandbyEnabled();
     method public boolean isPowerSaveMode();
-    method public boolean isRebootingUserspaceSupported();
+    method @Deprecated public boolean isRebootingUserspaceSupported();
     method @Deprecated public boolean isScreenOn();
     method public boolean isSustainedPerformanceModeSupported();
     method public boolean isWakeLockLevelSupported(int);
@@ -32370,6 +32371,7 @@ package android.os {
     field public static final String DISALLOW_MICROPHONE_TOGGLE = "disallow_microphone_toggle";
     field public static final String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
     field public static final String DISALLOW_MOUNT_PHYSICAL_MEDIA = "no_physical_media";
+    field public static final String DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO = "no_near_field_communication_radio";
     field public static final String DISALLOW_NETWORK_RESET = "no_network_reset";
     field public static final String DISALLOW_OUTGOING_BEAM = "no_outgoing_beam";
     field public static final String DISALLOW_OUTGOING_CALLS = "no_outgoing_calls";
@@ -37933,6 +37935,7 @@ package android.security.keystore {
     method @Nullable public java.util.Date getKeyValidityStart();
     method @NonNull public String getKeystoreAlias();
     method public int getMaxUsageCount();
+    method @FlaggedApi("MGF1_DIGEST_SETTER") @NonNull public java.util.Set<java.lang.String> getMgf1Digests();
     method public int getPurposes();
     method @NonNull public String[] getSignaturePaddings();
     method public int getUserAuthenticationType();
@@ -37940,6 +37943,7 @@ package android.security.keystore {
     method public boolean isDevicePropertiesAttestationIncluded();
     method @NonNull public boolean isDigestsSpecified();
     method public boolean isInvalidatedByBiometricEnrollment();
+    method @FlaggedApi("MGF1_DIGEST_SETTER") @NonNull public boolean isMgf1DigestsSpecified();
     method public boolean isRandomizedEncryptionRequired();
     method public boolean isStrongBoxBacked();
     method public boolean isUnlockedDeviceRequired();
@@ -37971,6 +37975,7 @@ package android.security.keystore {
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityForOriginationEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityStart(java.util.Date);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setMaxUsageCount(int);
+    method @FlaggedApi("MGF1_DIGEST_SETTER") @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setMgf1Digests(@Nullable java.lang.String...);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setRandomizedEncryptionRequired(boolean);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setSignaturePaddings(java.lang.String...);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setUnlockedDeviceRequired(boolean);
@@ -38075,12 +38080,14 @@ package android.security.keystore {
     method @Nullable public java.util.Date getKeyValidityForOriginationEnd();
     method @Nullable public java.util.Date getKeyValidityStart();
     method public int getMaxUsageCount();
+    method @FlaggedApi("MGF1_DIGEST_SETTER") @NonNull public java.util.Set<java.lang.String> getMgf1Digests();
     method public int getPurposes();
     method @NonNull public String[] getSignaturePaddings();
     method public int getUserAuthenticationType();
     method public int getUserAuthenticationValidityDurationSeconds();
     method public boolean isDigestsSpecified();
     method public boolean isInvalidatedByBiometricEnrollment();
+    method @FlaggedApi("MGF1_DIGEST_SETTER") @NonNull public boolean isMgf1DigestsSpecified();
     method public boolean isRandomizedEncryptionRequired();
     method public boolean isUnlockedDeviceRequired();
     method public boolean isUserAuthenticationRequired();
@@ -38102,6 +38109,7 @@ package android.security.keystore {
     method @NonNull public android.security.keystore.KeyProtection.Builder setKeyValidityForOriginationEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyProtection.Builder setKeyValidityStart(java.util.Date);
     method @NonNull public android.security.keystore.KeyProtection.Builder setMaxUsageCount(int);
+    method @FlaggedApi("MGF1_DIGEST_SETTER") @NonNull public android.security.keystore.KeyProtection.Builder setMgf1Digests(@Nullable java.lang.String...);
     method @NonNull public android.security.keystore.KeyProtection.Builder setRandomizedEncryptionRequired(boolean);
     method @NonNull public android.security.keystore.KeyProtection.Builder setSignaturePaddings(java.lang.String...);
     method @NonNull public android.security.keystore.KeyProtection.Builder setUnlockedDeviceRequired(boolean);
@@ -41313,6 +41321,8 @@ package android.telephony {
     field public static final String KEY_5G_NR_SSRSRQ_THRESHOLDS_INT_ARRAY = "5g_nr_ssrsrq_thresholds_int_array";
     field public static final String KEY_5G_NR_SSSINR_THRESHOLDS_INT_ARRAY = "5g_nr_sssinr_thresholds_int_array";
     field public static final String KEY_ADDITIONAL_CALL_SETTING_BOOL = "additional_call_setting_bool";
+    field public static final String KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL = "additional_settings_caller_id_visibility_bool";
+    field public static final String KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL = "additional_settings_call_waiting_visibility_bool";
     field public static final String KEY_ALLOW_ADDING_APNS_BOOL = "allow_adding_apns_bool";
     field public static final String KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL = "allow_add_call_during_video_call";
     field public static final String KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL = "allow_emergency_numbers_in_call_log_bool";
@@ -42929,9 +42939,9 @@ package android.telephony {
     field public static final int BAND_UNKNOWN = 0; // 0x0
     field public static final int CELL_BANDWIDTH_UNKNOWN = 0; // 0x0
     field public static final int CHANNEL_NUMBER_UNKNOWN = 2147483647; // 0x7fffffff
-    field public static final int CONNECTION_PRIMARY_SERVING = 1; // 0x1
-    field public static final int CONNECTION_SECONDARY_SERVING = 2; // 0x2
-    field public static final int CONNECTION_UNKNOWN = -1; // 0xffffffff
+    field @Deprecated public static final int CONNECTION_PRIMARY_SERVING = 1; // 0x1
+    field @Deprecated public static final int CONNECTION_SECONDARY_SERVING = 2; // 0x2
+    field @Deprecated public static final int CONNECTION_UNKNOWN = -1; // 0xffffffff
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhysicalChannelConfig> CREATOR;
     field public static final int FREQUENCY_UNKNOWN = -1; // 0xffffffff
     field public static final int PHYSICAL_CELL_ID_MAXIMUM_VALUE = 1007; // 0x3ef

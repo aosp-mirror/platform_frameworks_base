@@ -76,7 +76,7 @@ readNextHeader_native(JNIEnv* env, jobject clazz, jlong r, jobject entity)
             return err < 0 ? err : -1;
         }
         // TODO: Set the fields in the entity object
-        jstring keyStr = env->NewStringUTF(key.string());
+        jstring keyStr = env->NewStringUTF(key.c_str());
         env->SetObjectField(entity, s_keyField, keyStr);
         env->SetIntField(entity, s_dataSizeField, dataSize);
         return 0;

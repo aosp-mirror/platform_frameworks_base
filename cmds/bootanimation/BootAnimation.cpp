@@ -17,6 +17,7 @@
 #define LOG_NDEBUG 0
 #define LOG_TAG "BootAnimation"
 
+#include <filesystem>
 #include <vector>
 
 #include <stdint.h>
@@ -690,7 +691,7 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
 
 bool BootAnimation::preloadAnimation() {
     findBootAnimationFile();
-    if (!mZipFileName.isEmpty()) {
+    if (!mZipFileName.empty()) {
         mAnimation = loadAnimation(mZipFileName);
         return (mAnimation != nullptr);
     }
@@ -820,7 +821,7 @@ bool BootAnimation::threadLoop() {
 
     // We have no bootanimation file, so we use the stock android logo
     // animation.
-    if (mZipFileName.isEmpty()) {
+    if (mZipFileName.empty()) {
         ALOGD("No animation file");
         result = android();
     } else {
@@ -1011,7 +1012,7 @@ static bool readFile(ZipFileRO* zip, const char* name, String8& outString) {
         return false;
     }
 
-    outString.setTo((char const*)entryMap->getDataPtr(), entryMap->getDataLength());
+    outString = String8((char const*)entryMap->getDataPtr(), entryMap->getDataLength());
     delete entryMap;
     return true;
 }
@@ -1136,7 +1137,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
     if (!readFile(animation.zip, "desc.txt", desString)) {
         return false;
     }
-    char const* s = desString.string();
+    char const* s = desString.c_str();
     std::string dynamicColoringPartName = "";
     bool postDynamicColoring = false;
 
@@ -1145,7 +1146,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
         const char* endl = strstr(s, "\n");
         if (endl == nullptr) break;
         String8 line(s, endl - s);
-        const char* l = line.string();
+        const char* l = line.c_str();
         int fps = 0;
         int width = 0;
         int height = 0;
@@ -1271,10 +1272,10 @@ bool BootAnimation::preloadZip(Animation& animation) {
             continue;
         }
 
-        const String8 entryName(name);
-        const String8 path(entryName.getPathDir());
-        const String8 leaf(entryName.getPathLeaf());
-        if (leaf.size() > 0) {
+        const std::filesystem::path entryName(name);
+        const std::filesystem::path path(entryName.parent_path());
+        const std::filesystem::path leaf(entryName.filename());
+        if (!leaf.empty()) {
             if (entryName == CLOCK_FONT_ZIP_NAME) {
                 FileMap* map = zip->createEntryFileMap(entry);
                 if (map) {
@@ -1292,7 +1293,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
             }
 
             for (size_t j = 0; j < pcount; j++) {
-                if (path == animation.parts[j].path) {
+                if (path.string() == animation.parts[j].path.c_str()) {
                     uint16_t method;
                     // supports only stored png files
                     if (zip->getEntryInfo(entry, &method, nullptr, nullptr, nullptr, nullptr, nullptr)) {
@@ -1305,11 +1306,11 @@ bool BootAnimation::preloadZip(Animation& animation) {
                                     part.audioData = (uint8_t *)map->getDataPtr();
                                     part.audioLength = map->getDataLength();
                                 } else if (leaf == "trim.txt") {
-                                    part.trimData.setTo((char const*)map->getDataPtr(),
+                                    part.trimData = String8((char const*)map->getDataPtr(),
                                                         map->getDataLength());
                                 } else {
                                     Animation::Frame frame;
-                                    frame.name = leaf;
+                                    frame.name = leaf.c_str();
                                     frame.map = map;
                                     frame.trimWidth = animation.width;
                                     frame.trimHeight = animation.height;
@@ -1329,7 +1330,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
 
     // If there is trimData present, override the positioning defaults.
     for (Animation::Part& part : animation.parts) {
-        const char* trimDataStr = part.trimData.string();
+        const char* trimDataStr = part.trimData.c_str();
         for (size_t frameIdx = 0; frameIdx < part.frames.size(); frameIdx++) {
             const char* endl = strstr(trimDataStr, "\n");
             // No more trimData for this part.
@@ -1337,7 +1338,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
                 break;
             }
             String8 line(trimDataStr, endl - trimDataStr);
-            const char* lineStr = line.string();
+            const char* lineStr = line.c_str();
             trimDataStr = ++endl;
             int width = 0, height = 0, x = 0, y = 0;
             if (sscanf(lineStr, "%dx%d+%d+%d", &width, &height, &x, &y) == 4) {
@@ -1395,7 +1396,7 @@ bool BootAnimation::movie() {
     if (!exts) {
         glGetError();
     } else {
-        gl_extensions.setTo(exts);
+        gl_extensions = exts;
         if ((gl_extensions.find("GL_ARB_texture_non_power_of_two") != -1) ||
             (gl_extensions.find("GL_OES_texture_npot") != -1)) {
             mUseNpotTextures = true;
@@ -1525,6 +1526,7 @@ bool BootAnimation::playAnimation(const Animation& animation) {
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         // Handle animation package
         if (part.animation != nullptr) {
@@ -1564,7 +1566,7 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     1.0f);
 
             ALOGD("Playing files = %s/%s, Requested repeat = %d, playUntilComplete = %s",
-                    animation.fileName.string(), part.path.string(), part.count,
+                    animation.fileName.c_str(), part.path.c_str(), part.count,
                     part.playUntilComplete ? "true" : "false");
 
             // For the last animation, if we have progress indicator from
@@ -1601,8 +1603,10 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 if (r > 0) {
                     glBindTexture(GL_TEXTURE_2D, frame.tid);
                 } else {
-                    glGenTextures(1, &frame.tid);
-                    glBindTexture(GL_TEXTURE_2D, frame.tid);
+                    if (part.count != 1) {
+                        glGenTextures(1, &frame.tid);
+                        glBindTexture(GL_TEXTURE_2D, frame.tid);
+                    }
                     int w, h;
                     // Set decoding option to alpha unpremultiplied so that the R, G, B channels
                     // of transparent pixels are preserved.
@@ -1783,17 +1787,17 @@ void BootAnimation::releaseAnimation(Animation* animation) const {
 BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn) {
     if (mLoadedFiles.indexOf(fn) >= 0) {
         SLOGE("File \"%s\" is already loaded. Cyclic ref is not allowed",
-            fn.string());
+            fn.c_str());
         return nullptr;
     }
-    ZipFileRO *zip = ZipFileRO::open(fn);
+    ZipFileRO *zip = ZipFileRO::open(fn.c_str());
     if (zip == nullptr) {
         SLOGE("Failed to open animation zip \"%s\": %s",
-            fn.string(), strerror(errno));
+            fn.c_str(), strerror(errno));
         return nullptr;
     }
 
-    ALOGD("%s is loaded successfully", fn.string());
+    ALOGD("%s is loaded successfully", fn.c_str());
 
     Animation *animation =  new Animation;
     animation->fileName = fn;

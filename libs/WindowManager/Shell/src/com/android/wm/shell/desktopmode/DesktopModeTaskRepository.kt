@@ -173,7 +173,6 @@ class DesktopModeTaskRepository {
         /**
          * Called when the active tasks change in desktop mode.
          */
-        @JvmDefault
         fun onActiveTasksChanged() {}
     }
 
@@ -184,7 +183,6 @@ class DesktopModeTaskRepository {
         /**
          * Called when the desktop starts or stops showing freeform tasks.
          */
-        @JvmDefault
         fun onVisibilityChanged(hasVisibleFreeformTasks: Boolean) {}
     }
 }

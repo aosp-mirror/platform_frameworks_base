@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -362,7 +363,7 @@ public class ApexManagerTest {
 
         File apex = extractResource("test.apex_rebootless_v1", "test.rebootless_apex_v1.apex");
         PackageManagerException e = expectThrows(PackageManagerException.class,
-                () -> mApexManager.installPackage(apex, mPackageParser2));
+                () -> mApexManager.installPackage(apex, mPackageParser2, /* force= */ false));
         assertThat(e).hasMessageThat().contains("It is forbidden to install new APEX packages");
     }
 
@@ -378,10 +379,11 @@ public class ApexManagerTest {
         File finalApex = extractResource("test.rebootles_apex_v2", "test.rebootless_apex_v2.apex");
         ApexInfo newApexInfo = createApexInfo("test.apex_rebootless", 2, /* isActive= */ true,
                 /* isFactory= */ false, finalApex);
-        when(mApexService.installAndActivatePackage(anyString())).thenReturn(newApexInfo);
+        when(mApexService.installAndActivatePackage(anyString(), anyBoolean())).thenReturn(
+                newApexInfo);
 
         File installedApex = extractResource("installed", "test.rebootless_apex_v2.apex");
-        mApexManager.installPackage(installedApex, mPackageParser2);
+        mApexManager.installPackage(installedApex, mPackageParser2, /* force= */ false);
 
         PackageInfo newInfo = mApexManager.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_ACTIVE_PACKAGE);
@@ -416,10 +418,11 @@ public class ApexManagerTest {
         File finalApex = extractResource("test.rebootles_apex_v2", "test.rebootless_apex_v2.apex");
         ApexInfo newApexInfo = createApexInfo("test.apex_rebootless", 2, /* isActive= */ true,
                 /* isFactory= */ false, finalApex);
-        when(mApexService.installAndActivatePackage(anyString())).thenReturn(newApexInfo);
+        when(mApexService.installAndActivatePackage(anyString(), anyBoolean())).thenReturn(
+                newApexInfo);
 
         File installedApex = extractResource("installed", "test.rebootless_apex_v2.apex");
-        mApexManager.installPackage(installedApex, mPackageParser2);
+        mApexManager.installPackage(installedApex, mPackageParser2, /* force= */ false);
 
         PackageInfo newInfo = mApexManager.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_ACTIVE_PACKAGE);
@@ -447,13 +450,14 @@ public class ApexManagerTest {
         mApexManager.scanApexPackagesTraced(mPackageParser2,
                 ParallelPackageParser.makeExecutorService());
 
-        when(mApexService.installAndActivatePackage(anyString())).thenThrow(
+        when(mApexService.installAndActivatePackage(anyString(), anyBoolean())).thenThrow(
                 new RuntimeException("install failed :("));
 
         File installedApex = extractResource("test.apex_rebootless_v1",
                 "test.rebootless_apex_v1.apex");
         assertThrows(PackageManagerException.class,
-                () -> mApexManager.installPackage(installedApex, mPackageParser2));
+                () -> mApexManager.installPackage(installedApex, mPackageParser2, /* force= */
+                        false));
     }
 
     @Test
@@ -468,7 +472,8 @@ public class ApexManagerTest {
         File installedApex = extractResource("shim_different_certificate",
                 "com.android.apex.cts.shim.v2_different_certificate.apex");
         PackageManagerException e = expectThrows(PackageManagerException.class,
-                () -> mApexManager.installPackage(installedApex, mPackageParser2));
+                () -> mApexManager.installPackage(installedApex, mPackageParser2, /* force= */
+                        false));
         assertThat(e).hasMessageThat().contains("APK container signature of ");
         assertThat(e).hasMessageThat().contains(
                 "is not compatible with currently installed on device");
@@ -486,7 +491,8 @@ public class ApexManagerTest {
         File installedApex = extractResource("shim_unsigned_apk_container",
                 "com.android.apex.cts.shim.v2_unsigned_apk_container.apex");
         PackageManagerException e = expectThrows(PackageManagerException.class,
-                () -> mApexManager.installPackage(installedApex, mPackageParser2));
+                () -> mApexManager.installPackage(installedApex, mPackageParser2, /* force= */
+                        false));
         assertThat(e).hasMessageThat().contains("Failed to collect certificates from ");
     }
 

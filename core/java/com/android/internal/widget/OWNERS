@@ -21,3 +21,6 @@ per-file ImageFloatingTextView.java = file:/services/core/java/com/android/serve
 per-file ObservableTextView.java = file:/services/core/java/com/android/server/notification/OWNERS
 per-file RemeasuringLinearLayout.java = file:/services/core/java/com/android/server/notification/OWNERS
 per-file ViewClippingUtil.java = file:/services/core/java/com/android/server/notification/OWNERS
+
+# Appwidget related
+per-file *RemoteViews* = file:/services/appwidget/java/com/android/server/appwidget/OWNERS

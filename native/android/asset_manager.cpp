@@ -118,7 +118,7 @@ const char* AAssetDir_getNextFileName(AAssetDir* assetDir)
     // the string to return and advance the iterator for next time.
     if (index < max) {
         assetDir->mCachedFileName = assetDir->mAssetDir->getFileName(index);
-        returnName = assetDir->mCachedFileName.string();
+        returnName = assetDir->mCachedFileName.c_str();
         index++;
     }
 
@@ -134,7 +134,7 @@ void AAssetDir_rewind(AAssetDir* assetDir)
 const char* AAssetDir_getFileName(AAssetDir* assetDir, int index)
 {
     assetDir->mCachedFileName = assetDir->mAssetDir->getFileName(index);
-    return assetDir->mCachedFileName.string();
+    return assetDir->mCachedFileName.c_str();
 }
 
 void AAssetDir_close(AAssetDir* assetDir)

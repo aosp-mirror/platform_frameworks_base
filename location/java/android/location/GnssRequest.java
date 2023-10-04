@@ -41,7 +41,7 @@ public final class GnssRequest implements Parcelable {
      *
      * <p>If true, GNSS chipset switches off duty cycling. In such a mode, no clock
      * discontinuities are expected, and when supported, carrier phase should be continuous in
-     * good signal conditions. All non-blacklisted, healthy constellations, satellites and
+     * good signal conditions. All non-denylisted, healthy constellations, satellites and
      * frequency bands that the chipset supports must be reported in this mode. The GNSS chipset
      * is allowed to consume more power in this mode. If false, GNSS chipset optimizes power via
      * duty cycling, constellations and frequency limits, etc.
@@ -138,7 +138,7 @@ public final class GnssRequest implements Parcelable {
          *
          * <p>If true, GNSS chipset switches off duty cycling. In such a mode, no clock
          * discontinuities are expected, and when supported, carrier phase should be continuous in
-         * good signal conditions. All non-blacklisted, healthy constellations, satellites and
+         * good signal conditions. All non-denylisted, healthy constellations, satellites and
          * frequency bands that the chipset supports must be reported in this mode. The GNSS chipset
          * is allowed to consume more power in this mode. If false, GNSS chipset optimizes power via
          * duty cycling, constellations and frequency limits, etc.

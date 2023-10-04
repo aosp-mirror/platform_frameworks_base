@@ -1240,7 +1240,8 @@ public final class AudioFormat implements Parcelable {
          *    {@link AudioFormat#CHANNEL_OUT_SIDE_RIGHT}.
          *    <p> For a valid {@link AudioTrack} channel position mask,
          *    the following conditions apply:
-         *    <br> (1) at most eight channel positions may be used;
+         *    <br> (1) at most {@link AudioSystem#OUT_CHANNEL_COUNT_MAX} channel positions may be
+         *    used;
          *    <br> (2) right/left pairs should be matched.
          *    <p> For input or {@link AudioRecord}, the mask should be
          *    {@link AudioFormat#CHANNEL_IN_MONO} or

@@ -460,7 +460,7 @@ private fun LottieAnimationView.addOverlayDynamicColor(
             for (key in listOf(".blue600", ".blue400")) {
                 addValueCallback(KeyPath(key, "**"), LottieProperty.COLOR_FILTER) {
                     PorterDuffColorFilter(
-                        context.getColor(R.color.settingslib_color_blue400),
+                        context.getColor(com.android.settingslib.R.color.settingslib_color_blue400),
                         PorterDuff.Mode.SRC_ATOP
                     )
                 }

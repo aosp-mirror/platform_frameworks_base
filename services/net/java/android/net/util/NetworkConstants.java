@@ -52,7 +52,6 @@ public final class NetworkConstants {
     public static final int IPV6_ADDR_BITS = 128;
     public static final int IPV6_ADDR_LEN = 16;
     public static final int IPV6_MIN_MTU = 1280;
-    public static final int RFC7421_PREFIX_LENGTH = 64;
 
     /**
      * ICMP common (v4/v6) constants.

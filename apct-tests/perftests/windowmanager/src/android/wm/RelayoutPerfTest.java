@@ -111,7 +111,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         stopProfiling();
     }
 
-    /** A dummy view to get IWindow. */
+    /** A placeholder view to get IWindow. */
     private static class ContentView extends LinearLayout {
         ContentView(Context context) {
             super(context);

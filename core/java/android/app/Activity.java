@@ -1996,7 +1996,7 @@ public class Activity extends ContextThemeWrapper
      * indicator that the activity became active and ready to receive input. This sometimes could
      * also be a transit state toward another resting state. For instance, an activity may be
      * relaunched to {@link #onPause} due to configuration changes and the activity was visible,
-     * but wasn’t the top-most activity of an activity task. {@link #onResume} is guaranteed to be
+     * but wasn't the top-most activity of an activity task. {@link #onResume} is guaranteed to be
      * called before {@link #onPause} in this case which honors the activity lifecycle policy and
      * the activity eventually rests in {@link #onPause}.
      *
@@ -2215,9 +2215,9 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>An activity can never receive a new intent in the resumed state. You can count on
      * {@link #onResume} being called after this method, though not necessarily immediately after
-     * the completion this callback. If the activity was resumed, it will be paused and new intent
-     * will be delivered, followed by {@link #onResume}. If the activity wasn't in the resumed
-     * state, then new intent can be delivered immediately, with {@link #onResume()} called
+     * the completion of this callback. If the activity was resumed, it will be paused and new
+     * intent will be delivered, followed by {@link #onResume}. If the activity wasn't in the
+     * resumed state, then new intent can be delivered immediately, with {@link #onResume()} called
      * sometime later when activity becomes active again.
      *
      * <p>Note that {@link #getIntent} still returns the original Intent.  You
@@ -8637,6 +8637,7 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @UnsupportedAppUsage
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public final boolean isResumed() {
         return mResumed;
     }
