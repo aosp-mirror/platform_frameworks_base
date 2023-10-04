@@ -5556,8 +5556,7 @@ public class Activity extends ContextThemeWrapper
      *                    reported to {@link #onRequestPermissionsResult}.
      *                    Should be >= 0.
      * @param deviceId The app is requesting permissions for this device. The primary/physical
-     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and {@link
-     *                 android.companion.virtual.VirtualDeviceManager.VirtualDevice virtual devices}
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
      *                 are assigned unique device Ids.
      *
      * @throws IllegalArgumentException if requestCode is negative.
@@ -5634,8 +5633,7 @@ public class Activity extends ContextThemeWrapper
      *                     {@link android.content.pm.PackageManager#PERMISSION_GRANTED} or
      *                     {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
      * @param deviceId The deviceId for which permissions were requested. The primary/physical
-     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and {@link
-     *                 android.companion.virtual.VirtualDeviceManager.VirtualDevice virtual devices}
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
      *                 are assigned unique device Ids.
      *
      * @see #requestPermissions
@@ -5664,8 +5662,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param permission A permission your app wants to request.
      * @param deviceId The app is requesting permissions for this device. The primary/physical
-     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and {@link
-     *                 android.companion.virtual.VirtualDeviceManager.VirtualDevice virtual devices}
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
      *                 are assigned unique device Ids.
      * @return Whether you should show permission rationale UI.
      *
