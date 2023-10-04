@@ -53,7 +53,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.mockito.Mockito;
 
@@ -73,8 +72,8 @@ public abstract class SysuiTestCase {
     private Handler mHandler;
 
     // set the lowest order so it's the outermost rule
-    @ClassRule(order = Integer.MIN_VALUE)
-    public static AndroidXAnimatorIsolationRule mAndroidXAnimatorIsolationRule =
+    @Rule(order = Integer.MIN_VALUE)
+    public AndroidXAnimatorIsolationRule mAndroidXAnimatorIsolationRule =
             new AndroidXAnimatorIsolationRule();
 
     @Rule
