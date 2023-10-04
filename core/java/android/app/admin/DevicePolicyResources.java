@@ -1214,6 +1214,12 @@ public final class DevicePolicyResources {
             public static final String AUTO_SYNC_WORK_DATA = PREFIX + "AUTO_SYNC_WORK_DATA";
 
             /**
+             * Text for toggle to enable auto-sycing private data
+             */
+            public static final String AUTO_SYNC_PRIVATE_DATA = PREFIX
+                    + "AUTO_SYNC_PRIVATE_DATA";
+
+            /**
              * Summary for "More security settings" section when a work profile is on the device.
              */
             public static final String MORE_SECURITY_SETTINGS_WORK_PROFILE_SUMMARY = PREFIX
