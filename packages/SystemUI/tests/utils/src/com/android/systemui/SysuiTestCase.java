@@ -38,16 +38,12 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.FakeBroadcastDispatcher;
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger;
-import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 import org.junit.After;
@@ -128,19 +124,7 @@ public abstract class SysuiTestCase {
         // reference and are never sent to the Context. This will also prevent a real
         // BroadcastDispatcher from actually registering receivers.
         mDependency.injectTestDependency(BroadcastDispatcher.class, mFakeBroadcastDispatcher);
-        // A lot of tests get the FalsingManager, often via several layers of indirection.
-        // None of them actually need it.
-        mDependency.injectTestDependency(FalsingManager.class, new FalsingManagerFake());
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
-
-        // A lot of tests get the LocalBluetoothManager, often via several layers of indirection.
-        // None of them actually need it.
-        mDependency.injectMockDependency(LocalBluetoothManager.class);
-
-        // Notifications tests are injecting one of these, causing many classes (including
-        // KeyguardUpdateMonitor to be created (injected).
-        // TODO(b/1531701009) Clean up NotificationContentView creation to prevent this
-        mDependency.injectMockDependency(SmartReplyController.class);
 
         // Make sure that all tests on any SystemUIDialog does not crash because this dependency
         // is missing (constructing the actual one would throw).
