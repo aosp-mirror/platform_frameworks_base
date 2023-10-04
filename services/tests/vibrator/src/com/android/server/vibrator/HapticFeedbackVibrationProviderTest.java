@@ -16,6 +16,8 @@
 
 package com.android.server.vibrator;
 
+import static android.os.VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
+import static android.os.VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
 import static android.os.VibrationEffect.Composition.PRIMITIVE_CLICK;
 import static android.os.VibrationEffect.Composition.PRIMITIVE_TICK;
 import static android.os.VibrationEffect.EFFECT_TEXTURE_TICK;
@@ -24,8 +26,13 @@ import static android.view.HapticFeedbackConstants.CLOCK_TICK;
 import static android.view.HapticFeedbackConstants.CONTEXT_CLICK;
 import static android.view.HapticFeedbackConstants.SAFE_MODE_ENABLED;
 import static android.view.HapticFeedbackConstants.TEXT_HANDLE_MOVE;
+import static android.view.HapticFeedbackConstants.SCROLL_ITEM_FOCUS;
+import static android.view.HapticFeedbackConstants.SCROLL_LIMIT;
+import static android.view.HapticFeedbackConstants.SCROLL_TICK;
+
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.Mockito.when;
 
@@ -37,6 +44,7 @@ import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.util.AtomicFile;
 import android.util.SparseArray;
+import android.view.flags.FeatureFlags;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -59,23 +67,25 @@ public class HapticFeedbackVibrationProviderTest {
     private static final VibrationEffect PRIMITIVE_CLICK_EFFECT =
             VibrationEffect.startComposition().addPrimitive(PRIMITIVE_CLICK, 0.3497f).compose();
 
+    private static final int[] SCROLL_FEEDBACK_CONSTANTS =
+            new int[] {SCROLL_ITEM_FOCUS, SCROLL_LIMIT, SCROLL_TICK};
     private Context mContext = InstrumentationRegistry.getContext();
     private VibratorInfo mVibratorInfo = VibratorInfo.EMPTY_VIBRATOR_INFO;
 
     @Mock private Resources mResourcesMock;
+    @Mock private FeatureFlags mViewFeatureFlags;
 
     @Test
     public void testNonExistentCustomization_useDefault() throws Exception {
         // No customization file is set.
-        HapticFeedbackVibrationProvider hapticProvider =
-                new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo);
+        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         assertThat(hapticProvider.getVibrationForHapticFeedback(CONTEXT_CLICK))
                 .isEqualTo(VibrationEffect.get(EFFECT_TICK));
 
         // The customization file specifies no customization.
         setupCustomizationFile("<haptic-feedback-constants></haptic-feedback-constants>");
-        hapticProvider = new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo);
+        hapticProvider = createProviderWithDefaultCustomizations();
 
         assertThat(hapticProvider.getVibrationForHapticFeedback(CONTEXT_CLICK))
                 .isEqualTo(VibrationEffect.get(EFFECT_TICK));
@@ -84,8 +94,7 @@ public class HapticFeedbackVibrationProviderTest {
     @Test
     public void testExceptionParsingCustomizations_useDefault() throws Exception {
         setupCustomizationFile("<bad-xml></bad-xml>");
-        HapticFeedbackVibrationProvider hapticProvider =
-                new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo);
+        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         assertThat(hapticProvider.getVibrationForHapticFeedback(CONTEXT_CLICK))
                 .isEqualTo(VibrationEffect.get(EFFECT_TICK));
@@ -97,8 +106,7 @@ public class HapticFeedbackVibrationProviderTest {
         SparseArray<VibrationEffect> customizations = new SparseArray<>();
         customizations.put(CONTEXT_CLICK, PRIMITIVE_CLICK_EFFECT);
 
-        HapticFeedbackVibrationProvider hapticProvider =
-                new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo, customizations);
+        HapticFeedbackVibrationProvider hapticProvider = createProvider(customizations);
 
         // The override for `CONTEXT_CLICK` is used.
         assertThat(hapticProvider.getVibrationForHapticFeedback(CONTEXT_CLICK))
@@ -118,8 +126,7 @@ public class HapticFeedbackVibrationProviderTest {
                 + "</haptic-feedback-constants>";
         setupCustomizationFile(xml);
 
-        HapticFeedbackVibrationProvider hapticProvider =
-                new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo);
+        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         // The override for `CONTEXT_CLICK` is not used because the vibration is not supported.
         assertThat(hapticProvider.getVibrationForHapticFeedback(CONTEXT_CLICK))
@@ -137,15 +144,12 @@ public class HapticFeedbackVibrationProviderTest {
         customizations.put(TEXT_HANDLE_MOVE, PRIMITIVE_CLICK_EFFECT);
 
         // Test with a customization available for `TEXT_HANDLE_MOVE`.
-        HapticFeedbackVibrationProvider hapticProvider =
-                new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo, customizations);
+        HapticFeedbackVibrationProvider hapticProvider = createProvider(customizations);
 
         assertThat(hapticProvider.getVibrationForHapticFeedback(TEXT_HANDLE_MOVE)).isNull();
 
         // Test with no customization available for `TEXT_HANDLE_MOVE`.
-        hapticProvider =
-                new HapticFeedbackVibrationProvider(
-                        mResourcesMock, mVibratorInfo, /* hapticCustomizations= */ null);
+        hapticProvider = createProvider(/* customizations= */ null);
 
         assertThat(hapticProvider.getVibrationForHapticFeedback(TEXT_HANDLE_MOVE)).isNull();
     }
@@ -158,16 +162,13 @@ public class HapticFeedbackVibrationProviderTest {
         customizations.put(TEXT_HANDLE_MOVE, PRIMITIVE_CLICK_EFFECT);
 
         // Test with a customization available for `TEXT_HANDLE_MOVE`.
-        HapticFeedbackVibrationProvider hapticProvider =
-                new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo, customizations);
+        HapticFeedbackVibrationProvider hapticProvider = createProvider(customizations);
 
         assertThat(hapticProvider.getVibrationForHapticFeedback(TEXT_HANDLE_MOVE))
                 .isEqualTo(PRIMITIVE_CLICK_EFFECT);
 
         // Test with no customization available for `TEXT_HANDLE_MOVE`.
-        hapticProvider =
-                new HapticFeedbackVibrationProvider(
-                        mResourcesMock, mVibratorInfo, /* hapticCustomizations= */ null);
+        hapticProvider = createProvider(/* customizations= */ null);
 
         assertThat(hapticProvider.getVibrationForHapticFeedback(TEXT_HANDLE_MOVE))
                 .isEqualTo(VibrationEffect.get(EFFECT_TEXTURE_TICK));
@@ -181,15 +182,13 @@ public class HapticFeedbackVibrationProviderTest {
         SparseArray<VibrationEffect> customizations = new SparseArray<>();
         customizations.put(SAFE_MODE_ENABLED, PRIMITIVE_CLICK_EFFECT);
 
-        HapticFeedbackVibrationProvider hapticProvider =
-                new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo, customizations);
+        HapticFeedbackVibrationProvider hapticProvider = createProvider(customizations);
 
         assertThat(hapticProvider.getVibrationForHapticFeedback(SAFE_MODE_ENABLED))
                 .isEqualTo(PRIMITIVE_CLICK_EFFECT);
 
         mockSafeModeEnabledVibration(null);
-        hapticProvider =
-                new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo, customizations);
+        hapticProvider = createProvider(customizations);
 
         assertThat(hapticProvider.getVibrationForHapticFeedback(SAFE_MODE_ENABLED))
                 .isEqualTo(PRIMITIVE_CLICK_EFFECT);
@@ -199,9 +198,7 @@ public class HapticFeedbackVibrationProviderTest {
     public void testNoValidCustomizationPresentForSafeModeEnabled_resourceBasedVibrationUsed()
                 throws Exception {
         mockSafeModeEnabledVibration(10, 20, 30, 40);
-        HapticFeedbackVibrationProvider hapticProvider =
-                new HapticFeedbackVibrationProvider(
-                        mResourcesMock, mVibratorInfo, /* hapticCustomizations= */ null);
+        HapticFeedbackVibrationProvider hapticProvider = createProvider(/* customizations= */ null);
 
         assertThat(hapticProvider.getVibrationForHapticFeedback(SAFE_MODE_ENABLED))
                 .isEqualTo(VibrationEffect.createWaveform(new long[] {10, 20, 30, 40}, -1));
@@ -211,35 +208,65 @@ public class HapticFeedbackVibrationProviderTest {
     public void testNoValidCustomizationAndResourcePresentForSafeModeEnabled_noVibrationUsed()
                 throws Exception {
         mockSafeModeEnabledVibration(null);
-        HapticFeedbackVibrationProvider hapticProvider =
-                new HapticFeedbackVibrationProvider(
-                        mResourcesMock, mVibratorInfo, /* hapticCustomizations= */ null);
+        HapticFeedbackVibrationProvider hapticProvider = createProvider(/* customizations= */ null);
 
         assertThat(hapticProvider.getVibrationForHapticFeedback(SAFE_MODE_ENABLED)).isNull();
     }
 
     @Test
     public void testVibrationAttribute_forNotBypassingIntensitySettings() {
-        HapticFeedbackVibrationProvider hapticProvider =
-                new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo);
+        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
                 SAFE_MODE_ENABLED, /* bypassVibrationIntensitySetting= */ false);
 
-        assertThat(attrs.getFlags() & VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
-                .isEqualTo(0);
+        assertThat(attrs.isFlagSet(FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)).isFalse();
     }
 
     @Test
     public void testVibrationAttribute_forByassingIntensitySettings() {
-        HapticFeedbackVibrationProvider hapticProvider =
-                new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo);
+        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
                 SAFE_MODE_ENABLED, /* bypassVibrationIntensitySetting= */ true);
 
-        assertThat(attrs.getFlags() & VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
-                .isNotEqualTo(0);
+        assertThat(attrs.isFlagSet(FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)).isTrue();
+    }
+
+    @Test
+    public void testVibrationAttribute_scrollFeedback_scrollApiFlagOn_bypassInterruptPolicy() {
+        when(mViewFeatureFlags.scrollFeedbackApi()).thenReturn(true);
+        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
+
+        for (int effectId : SCROLL_FEEDBACK_CONSTANTS) {
+            VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
+                    effectId, /* bypassVibrationIntensitySetting= */ false);
+            assertWithMessage("Expected FLAG_BYPASS_INTERRUPTION_POLICY for effect " + effectId)
+                   .that(attrs.isFlagSet(FLAG_BYPASS_INTERRUPTION_POLICY)).isTrue();
+        }
+    }
+
+    @Test
+    public void testVibrationAttribute_scrollFeedback_scrollApiFlagOff_noBypassInterruptPolicy() {
+        when(mViewFeatureFlags.scrollFeedbackApi()).thenReturn(false);
+        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
+
+        for (int effectId : SCROLL_FEEDBACK_CONSTANTS) {
+            VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
+                    effectId, /* bypassVibrationIntensitySetting= */ false);
+            assertWithMessage("Expected no FLAG_BYPASS_INTERRUPTION_POLICY for effect " + effectId)
+                   .that(attrs.isFlagSet(FLAG_BYPASS_INTERRUPTION_POLICY)).isFalse();
+        }
+    }
+
+    private HapticFeedbackVibrationProvider createProviderWithDefaultCustomizations() {
+        return createProvider(/* customizations= */ null);
+    }
+
+    private HapticFeedbackVibrationProvider createProvider(
+            SparseArray<VibrationEffect> customizations) {
+        return new HapticFeedbackVibrationProvider(
+            mResourcesMock, mVibratorInfo, customizations, mViewFeatureFlags);
     }
 
     private void mockVibratorPrimitiveSupport(int... supportedPrimitives) {

@@ -25,6 +25,8 @@ import android.os.VibratorInfo;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.HapticFeedbackConstants;
+import android.view.flags.FeatureFlags;
+import android.view.flags.FeatureFlagsImpl;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -54,6 +56,7 @@ public final class HapticFeedbackVibrationProvider {
     // If present and valid, a vibration here will be used for an effect.
     // Otherwise, the system's default vibration will be used.
     @Nullable private final SparseArray<VibrationEffect> mHapticCustomizations;
+    private final FeatureFlags mViewFeatureFlags;
 
     /** @hide */
     public HapticFeedbackVibrationProvider(Resources res, Vibrator vibrator) {
@@ -62,14 +65,16 @@ public final class HapticFeedbackVibrationProvider {
 
     /** @hide */
     public HapticFeedbackVibrationProvider(Resources res, VibratorInfo vibratorInfo) {
-        this(res, vibratorInfo, loadHapticCustomizations(res, vibratorInfo));
+        this(res, vibratorInfo, loadHapticCustomizations(res, vibratorInfo),
+                new FeatureFlagsImpl());
     }
 
     /** @hide */
     @VisibleForTesting HapticFeedbackVibrationProvider(
             Resources res,
             VibratorInfo vibratorInfo,
-            @Nullable SparseArray<VibrationEffect> hapticCustomizations) {
+            @Nullable SparseArray<VibrationEffect> hapticCustomizations,
+            FeatureFlags viewFeatureFlags) {
         mVibratorInfo = vibratorInfo;
         mHapticTextHandleEnabled = res.getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
@@ -78,6 +83,7 @@ public final class HapticFeedbackVibrationProvider {
             hapticCustomizations = null;
         }
         mHapticCustomizations = hapticCustomizations;
+        mViewFeatureFlags = viewFeatureFlags;
 
         mSafeModeEnabledVibrationEffect =
                 effectHasCustomization(HapticFeedbackConstants.SAFE_MODE_ENABLED)
@@ -201,12 +207,16 @@ public final class HapticFeedbackVibrationProvider {
             default:
                 attrs = TOUCH_VIBRATION_ATTRIBUTES;
         }
+
+        int flags = 0;
         if (bypassVibrationIntensitySetting) {
-            attrs = new VibrationAttributes.Builder(attrs)
-                    .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
-                    .build();
+            flags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
         }
-        return attrs;
+        if (shouldBypassInterruptionPolicy(effectId, mViewFeatureFlags)) {
+            flags |= VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
+        }
+
+        return flags == 0 ? attrs : new VibrationAttributes.Builder(attrs).setFlags(flags).build();
     }
 
     /** Dumps relevant state. */
@@ -293,6 +303,21 @@ public final class HapticFeedbackVibrationProvider {
         } catch (IOException | HapticFeedbackCustomization.CustomizationParserException e) {
             Slog.e(TAG, "Unable to load haptic customizations.", e);
             return null;
+        }
+    }
+
+    private static boolean shouldBypassInterruptionPolicy(
+            int effectId, FeatureFlags viewFeatureFlags) {
+        switch (effectId) {
+            case HapticFeedbackConstants.SCROLL_TICK:
+            case HapticFeedbackConstants.SCROLL_ITEM_FOCUS:
+            case HapticFeedbackConstants.SCROLL_LIMIT:
+                // The SCROLL_* constants should bypass interruption filter, so that scroll haptics
+                // can play regardless of focus modes like DND. Guard this behavior by the feature
+                // flag controlling the general scroll feedback APIs.
+                return viewFeatureFlags.scrollFeedbackApi();
+            default:
+                return false;
         }
     }
 }

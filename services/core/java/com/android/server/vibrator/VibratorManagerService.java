@@ -448,6 +448,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             String reason, IBinder token) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate, reason = " + reason);
         try {
+            attrs = fixupVibrationAttributes(attrs, effect);
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.VIBRATE, "vibrate");
             return vibrateInternal(uid, displayId, opPkg, effect, attrs, reason, token);
@@ -457,7 +458,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     HalVibration vibrateWithoutPermissionCheck(int uid, int displayId, String opPkg,
-            @NonNull CombinedVibration effect, @Nullable VibrationAttributes attrs,
+            @NonNull CombinedVibration effect, @NonNull VibrationAttributes attrs,
             String reason, IBinder token) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate no perm check, reason = " + reason);
         try {
@@ -468,7 +469,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     private HalVibration vibrateInternal(int uid, int displayId, String opPkg,
-            @NonNull CombinedVibration effect, @Nullable VibrationAttributes attrs,
+            @NonNull CombinedVibration effect, @NonNull VibrationAttributes attrs,
             String reason, IBinder token) {
         if (token == null) {
             Slog.e(TAG, "token must not be null");
@@ -478,7 +479,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         if (!isEffectValid(effect)) {
             return null;
         }
-        attrs = fixupVibrationAttributes(attrs, effect);
         // Create Vibration.Stats as close to the received request as possible, for tracking.
         HalVibration vib = new HalVibration(token, effect,
                 new Vibration.CallerInfo(attrs, uid, displayId, opPkg, reason));
