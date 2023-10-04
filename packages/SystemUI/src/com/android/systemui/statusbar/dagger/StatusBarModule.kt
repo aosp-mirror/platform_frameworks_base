@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.dagger
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.statusbar.core.StatusBarInitializer
+import com.android.systemui.statusbar.data.repository.KeyguardStatusBarRepository
+import com.android.systemui.statusbar.data.repository.KeyguardStatusBarRepositoryImpl
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepository
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryImpl
 import com.android.systemui.statusbar.phone.LightBarController
@@ -47,6 +49,11 @@ abstract class StatusBarModule {
     @IntoMap
     @ClassKey(StatusBarModeRepositoryImpl::class)
     abstract fun bindStatusBarModeRepositoryStart(impl: StatusBarModeRepositoryImpl): CoreStartable
+
+    @Binds
+    abstract fun bindKeyguardStatusBarRepository(
+        impl: KeyguardStatusBarRepositoryImpl
+    ): KeyguardStatusBarRepository
 
     @Binds
     @IntoMap

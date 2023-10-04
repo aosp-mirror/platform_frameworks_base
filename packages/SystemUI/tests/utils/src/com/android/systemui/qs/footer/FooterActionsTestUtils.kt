@@ -36,8 +36,6 @@ import com.android.systemui.qs.FgsManagerController
 import com.android.systemui.qs.QSSecurityFooterUtils
 import com.android.systemui.qs.footer.data.repository.ForegroundServicesRepository
 import com.android.systemui.qs.footer.data.repository.ForegroundServicesRepositoryImpl
-import com.android.systemui.qs.footer.data.repository.UserSwitcherRepository
-import com.android.systemui.qs.footer.data.repository.UserSwitcherRepositoryImpl
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractor
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractorImpl
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -51,6 +49,8 @@ import com.android.systemui.statusbar.policy.FakeUserInfoController
 import com.android.systemui.statusbar.policy.SecurityController
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.UserSwitcherController
+import com.android.systemui.user.data.repository.UserSwitcherRepository
+import com.android.systemui.user.data.repository.UserSwitcherRepositoryImpl
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.FakeSettings
