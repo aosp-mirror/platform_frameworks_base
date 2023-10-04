@@ -541,6 +541,13 @@ public class NotificationManagerService extends SystemService {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S_V2)
     private static final long NOTIFICATION_LOG_ASSISTANT_CANCEL = 195579280L;
 
+    /**
+     * NO_CLEAR flag will be set for any media notification.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long ENFORCE_NO_CLEAR_FLAG_ON_MEDIA_NOTIFICATION = 264179692L;
+
     private static final Duration POST_WAKE_LOCK_TIMEOUT = Duration.ofSeconds(30);
 
     private IActivityManager mAm;
@@ -7188,6 +7195,12 @@ public class NotificationManagerService extends SystemService {
                     Slog.w(TAG, "Package " + pkg + ": Use of setRemotePlayback requires the "
                             + "MEDIA_CONTENT_CONTROL permission");
                 }
+            }
+
+            // Enforce NO_CLEAR flag on MediaStyle notification for apps with targetSdk >= V.
+            if (CompatChanges.isChangeEnabled(ENFORCE_NO_CLEAR_FLAG_ON_MEDIA_NOTIFICATION,
+                    notificationUid)) {
+                notification.flags |= Notification.FLAG_NO_CLEAR;
             }
         }
 
