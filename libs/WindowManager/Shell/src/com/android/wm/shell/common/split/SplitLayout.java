@@ -67,6 +67,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.InteractionJankMonitorUtils;
+import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 
@@ -484,7 +485,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /** Updates divide position and split bounds base on the ratio within root bounds. */
-    public void setDivideRatio(@SnapPosition int snapPosition) {
+    public void setDivideRatio(@PersistentSnapPosition int snapPosition) {
         final DividerSnapAlgorithm.SnapTarget snapTarget = mDividerSnapAlgorithm.findSnapTarget(
                 snapPosition);
 
