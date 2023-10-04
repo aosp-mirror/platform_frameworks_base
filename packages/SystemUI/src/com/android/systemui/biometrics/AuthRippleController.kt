@@ -328,7 +328,10 @@ class AuthRippleController @Inject constructor(
     private val udfpsControllerCallback =
         object : UdfpsController.Callback {
             override fun onFingerDown() {
-                showDwellRipple()
+                // only show dwell ripple for device entry
+                if (keyguardUpdateMonitor.isFingerprintDetectionRunning) {
+                    showDwellRipple()
+                }
             }
 
             override fun onFingerUp() {
