@@ -522,7 +522,8 @@ public class RescueParty {
         Exception res = null;
         final ContentResolver resolver = context.getContentResolver();
         try {
-            Settings.Global.resetToDefaultsAsUser(resolver, null, mode, UserHandle.USER_SYSTEM);
+            Settings.Global.resetToDefaultsAsUser(resolver, null, mode,
+                UserHandle.SYSTEM.getIdentifier());
         } catch (Exception e) {
             res = new RuntimeException("Failed to reset global settings", e);
         }
@@ -779,12 +780,13 @@ public class RescueParty {
     }
 
     private static int[] getAllUserIds() {
-        int[] userIds = { UserHandle.USER_SYSTEM };
+        int systemUserId = UserHandle.SYSTEM.getIdentifier();
+        int[] userIds = { systemUserId };
         try {
             for (File file : FileUtils.listFilesOrEmpty(Environment.getDataSystemDeDirectory())) {
                 try {
                     final int userId = Integer.parseInt(file.getName());
-                    if (userId != UserHandle.USER_SYSTEM) {
+                    if (userId != systemUserId) {
                         userIds = ArrayUtils.appendInt(userIds, userId);
                     }
                 } catch (NumberFormatException ignored) {
