@@ -1172,6 +1172,12 @@ public final class DevicePolicyResources {
             public static final String WORK_CATEGORY_HEADER = PREFIX + "WORK_CATEGORY_HEADER";
 
             /**
+             * Header for items under the private user
+             */
+            public static final String PRIVATE_CATEGORY_HEADER =
+                    PREFIX + "PRIVATE_CATEGORY_HEADER";
+
+            /**
              * Header for items under the personal user
              */
             public static final String PERSONAL_CATEGORY_HEADER =
