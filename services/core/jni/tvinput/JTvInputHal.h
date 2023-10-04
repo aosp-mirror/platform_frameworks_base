@@ -54,6 +54,7 @@ using ::aidl::android::hardware::tv::input::TvMessageEventType;
 
 using AidlAudioDevice = ::aidl::android::media::audio::common::AudioDevice;
 using AidlAudioDeviceAddress = ::aidl::android::media::audio::common::AudioDeviceAddress;
+using AidlAudioDeviceDescription = ::aidl::android::media::audio::common::AudioDeviceDescription;
 using AidlAudioDeviceType = ::aidl::android::media::audio::common::AudioDeviceType;
 using AidlITvInput = ::aidl::android::hardware::tv::input::ITvInput;
 using AidlNativeHandle = ::aidl::android::hardware::common::NativeHandle;
