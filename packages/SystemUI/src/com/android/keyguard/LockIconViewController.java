@@ -28,6 +28,7 @@ import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLE
 import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -56,7 +57,6 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.biometrics.UdfpsController;
@@ -72,6 +72,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -253,6 +254,7 @@ public class LockIconViewController implements Dumpable {
     }
 
     /** Sets the LockIconView to the controller and rebinds any that depend on it. */
+    @SuppressLint("ClickableViewAccessibility")
     public void setLockIconView(LockIconView lockIconView) {
         mView = lockIconView;
         mView.setImageDrawable(mIcon);
@@ -302,6 +304,8 @@ public class LockIconViewController implements Dumpable {
         if (lockIconView.isAttachedToWindow()) {
             registerCallbacks();
         }
+
+        lockIconView.setOnTouchListener((view, motionEvent) -> onTouchEvent(motionEvent));
     }
 
     private void registerCallbacks() {
@@ -622,19 +626,18 @@ public class LockIconViewController implements Dumpable {
     };
 
     /**
-     * Handles the touch if it is within the lock icon view and {@link #isActionable()} is true.
+     * Handles the touch if {@link #isActionable()} is true.
      * Subsequently, will trigger {@link #onLongPress()} if a touch is continuously in the lock icon
      * area for {@link #mLongPressTimeout} ms.
      *
      * Touch speed debouncing mimics logic from the velocity tracker in {@link UdfpsController}.
      */
-    public boolean onTouchEvent(MotionEvent event, Runnable onGestureDetectedRunnable) {
-        if (!onInterceptTouchEvent(event)) {
+    private boolean onTouchEvent(MotionEvent event) {
+        if (!actionableDownEventStartedOnView(event)) {
             cancelTouches();
             return false;
         }
 
-        mOnGestureDetectedRunnable = onGestureDetectedRunnable;
         switch(event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_HOVER_ENTER:
@@ -687,12 +690,8 @@ public class LockIconViewController implements Dumpable {
         return true;
     }
 
-    /**
-     * Intercepts the touch if the onDown event and current event are within this lock icon view's
-     * bounds.
-     */
-    public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (!inLockIconArea(event) || !isActionable()) {
+    private boolean actionableDownEventStartedOnView(MotionEvent event) {
+        if (!isActionable()) {
             return false;
         }
 
@@ -716,9 +715,6 @@ public class LockIconViewController implements Dumpable {
             mAuthRippleController.showUnlockRipple(FINGERPRINT);
         }
         updateVisibility();
-        if (mOnGestureDetectedRunnable != null) {
-            mOnGestureDetectedRunnable.run();
-        }
 
         // play device entry haptic (consistent with UDFPS controller longpress)
         vibrateOnLongPress();
@@ -736,12 +732,6 @@ public class LockIconViewController implements Dumpable {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
-    }
-
-    private boolean inLockIconArea(MotionEvent event) {
-        mView.getHitRect(mSensorTouchLocation);
-        return mSensorTouchLocation.contains((int) event.getX(), (int) event.getY())
-                && mView.getVisibility() == View.VISIBLE;
     }
 
     private boolean isActionable() {
@@ -820,6 +810,19 @@ public class LockIconViewController implements Dumpable {
             updateUdfpsConfig();
         }
     };
+
+    /**
+     * Whether the lock icon will handle a touch while dozing.
+     */
+    public boolean willHandleTouchWhileDozing(MotionEvent event) {
+        // is in lock icon area
+        mView.getHitRect(mSensorTouchLocation);
+        final boolean inLockIconArea =
+                mSensorTouchLocation.contains((int) event.getX(), (int) event.getY())
+                        && mView.getVisibility() == View.VISIBLE;
+
+        return inLockIconArea && actionableDownEventStartedOnView(event);
+    }
 
     private final View.OnClickListener mA11yClickListener = v -> onLongPress();
 

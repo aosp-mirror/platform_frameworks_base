@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -68,6 +69,7 @@ public class LockIconView extends FrameLayout implements Dumpable {
     private boolean mUseBackground = false;
     private float mDozeAmount = 0f;
 
+    @SuppressLint("ClickableViewAccessibility")
     public LockIconView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mSensorRect = new RectF();
