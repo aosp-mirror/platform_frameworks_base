@@ -163,6 +163,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mFeatureFlags.setDefault(Flags.SENSITIVE_REVEAL_ANIM);
         mFeatureFlags.setDefault(Flags.ANIMATED_NOTIFICATION_SHADE_INSETS);
         mFeatureFlags.setDefault(Flags.NOTIFICATION_SHELF_REFACTOR);
+        mFeatureFlags.setDefault(Flags.NEW_AOD_TRANSITION);
 
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);
@@ -247,25 +248,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateStackHeight_withDozeAmount_whenDozeChanging() {
-        final float dozeAmount = 0.5f;
-        mAmbientState.setDozeAmount(dozeAmount);
-
-        final float endHeight = 8f;
-        final float expansionFraction = 1f;
-        float expected = MathUtils.lerp(
-                endHeight * StackScrollAlgorithm.START_FRACTION,
-                endHeight, dozeAmount);
-
-        mStackScroller.updateStackHeight(endHeight, expansionFraction);
-        assertThat(mAmbientState.getStackHeight()).isEqualTo(expected);
-    }
-
-    @Test
     public void testUpdateStackHeight_withExpansionAmount_whenDozeNotChanging() {
-        final float dozeAmount = 1f;
-        mAmbientState.setDozeAmount(dozeAmount);
-
         final float endHeight = 8f;
         final float expansionFraction = 0.5f;
         final float expected = MathUtils.lerp(
