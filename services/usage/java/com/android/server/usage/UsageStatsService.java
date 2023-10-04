@@ -2587,11 +2587,12 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void reportChooserSelection(@NonNull String packageName, int userId,
                 @NonNull String contentType, String[] annotations, @NonNull String action) {
-            // A valid package name, content type, and action must be provided for these events
-            Objects.requireNonNull(packageName);
-            Objects.requireNonNull(contentType);
-            Objects.requireNonNull(action);
-            if (contentType.isBlank() || action.isBlank()) {
+            if (packageName == null) {
+                throw new IllegalArgumentException("Package selection must not be null.");
+            }
+            // A valid contentType and action must be provided for chooser selection events.
+            if (contentType == null || contentType.isBlank()
+                    || action == null || action.isBlank()) {
                 return;
             }
 
