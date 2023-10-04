@@ -472,6 +472,10 @@ package android.speech.tts {
 
 package android.telephony {
 
+  public class CarrierConfigManager {
+    field @Deprecated public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";
+  }
+
   public class NetworkScan {
     method @Deprecated public void stop() throws android.os.RemoteException;
   }
