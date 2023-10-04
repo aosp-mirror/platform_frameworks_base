@@ -127,7 +127,8 @@ public class StackStateAnimator {
             ArrayList<NotificationStackScrollLayout.AnimationEvent> mAnimationEvents,
             long additionalDelay) {
 
-        processAnimationEvents(mAnimationEvents);
+        // Animation events might generate custom animations, which are started async
+        boolean anyCustomAnimationCreated = processAnimationEvents(mAnimationEvents);
 
         int childCount = mHostLayout.getChildCount();
         mAnimationFilter.applyCombination(mNewEvents);
@@ -150,8 +151,8 @@ public class StackStateAnimator {
             initAnimationProperties(child, viewState, animationStaggerCount);
             viewState.animateTo(child, mAnimationProperties);
         }
-        if (!isRunning()) {
-            // no child has preformed any animation, lets finish
+        if (!isRunning() && !anyCustomAnimationCreated) {
+            // no child has performed any animation or is about to animate, lets finish
             onAnimationFinished();
         }
         mHeadsUpAppearChildren.clear();
@@ -335,12 +336,15 @@ public class StackStateAnimator {
     }
 
     /**
-     * Process the animationEvents for a new animation
+     * Process the animationEvents for a new animation. Here is the place to do something custom,
+     * like to modify the ViewState or to create a custom animation for an event.
      *
      *  @param animationEvents the animation events for the animation to perform
+     * @return true if any custom animation was created
      */
-    private void processAnimationEvents(
+    private boolean processAnimationEvents(
             ArrayList<NotificationStackScrollLayout.AnimationEvent> animationEvents) {
+        boolean needsCustomAnimation = false;
         for (NotificationStackScrollLayout.AnimationEvent event : animationEvents) {
             final ExpandableView changingView = (ExpandableView) event.mChangingView;
             boolean loggable = false;
@@ -425,7 +429,8 @@ public class StackStateAnimator {
                 }
                 changingView.performRemoveAnimation(ANIMATION_DURATION_APPEAR_DISAPPEAR,
                         0 /* delay */, translationDirection, false /* isHeadsUpAppear */,
-                        postAnimation, null);
+                        postAnimation, getGlobalAnimationFinishedListener());
+                needsCustomAnimation = true;
             } else if (event.animationType ==
                 NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
                 if (mHostLayout.isFullySwipedOut(changingView)) {
@@ -479,7 +484,6 @@ public class StackStateAnimator {
                         needsAnimation = false;
                     }
                 }
-
                 if (needsAnimation) {
                     // We need to add the global animation listener, since once no animations are
                     // running anymore, the panel will instantly hide itself. We need to wait until
@@ -503,9 +507,11 @@ public class StackStateAnimator {
                 } else if (endRunnable != null) {
                     endRunnable.run();
                 }
+                needsCustomAnimation |= needsAnimation;
             }
             mNewEvents.add(event);
         }
+        return needsCustomAnimation;
     }
 
     public void animateOverScrollToAmount(float targetAmount, final boolean onTop,
