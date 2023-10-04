@@ -5664,6 +5664,37 @@ public final class Settings {
         public static final String SHOW_ROTARY_INPUT = "show_rotary_input";
 
         /**
+         * The screen backlight brightness for automatic mode.
+         *
+         * <p>Value should be one of:
+         *      <ul>
+         *        <li>SCREEN_BRIGHTNESS_AUTOMATIC_BRIGHT
+         *        <li>SCREEN_BRIGHTNESS_AUTOMATIC_NORMAL
+         *        <li>SCREEN_BRIGHTNESS_AUTOMATIC_DIM
+         *      </ul>
+         * @hide
+         */
+        public static final String SCREEN_BRIGHTNESS_FOR_ALS = "screen_brightness_for_als";
+
+        /**
+         * SCREEN_BRIGHTNESS_FOR_ALS value for automatic bright.
+         * @hide
+         */
+        public static final int SCREEN_BRIGHTNESS_AUTOMATIC_BRIGHT = 1;
+
+        /**
+         * SCREEN_BRIGHTNESS_FOR_ALS value for automatic normal.
+         * @hide
+         */
+        public static final int SCREEN_BRIGHTNESS_AUTOMATIC_NORMAL = 2;
+
+        /**
+         * SCREEN_BRIGHTNESS_FOR_ALS value for automatic dim.
+         * @hide
+         */
+        public static final int SCREEN_BRIGHTNESS_AUTOMATIC_DIM = 3;
+
+        /**
          * Log raw orientation data from
          * {@link com.android.server.policy.WindowOrientationListener} for use with the
          * orientationplot.py tool.
