@@ -3543,9 +3543,9 @@ public abstract class AccessibilityService extends Service {
      * @param executor Executor on which to run the callback.
      * @param callback The callback invoked when attaching the overlay has succeeded or failed. The
      *     callback is a {@link java.util.function.IntConsumer} of the result status code.
-     * @see OVERLAY_RESULT_SUCCESS
-     * @see OVERLAY_RESULT_INVALID
-     * @see OVERLAY_RESULT_INTERNAL_ERROR
+     * @see #OVERLAY_RESULT_SUCCESS
+     * @see #OVERLAY_RESULT_INVALID
+     * @see #OVERLAY_RESULT_INTERNAL_ERROR
      */
     public void attachAccessibilityOverlayToDisplay(
             int displayId,
@@ -3619,9 +3619,9 @@ public abstract class AccessibilityService extends Service {
      * @param executor Executor on which to run the callback.
      * @param callback The callback invoked when attaching the overlay has succeeded or failed. The
      *     callback is a {@link java.util.function.IntConsumer} of the result status code.
-     * @see OVERLAY_RESULT_SUCCESS
-     * @see OVERLAY_RESULT_INVALID
-     * @see OVERLAY_RESULT_INTERNAL_ERROR
+     * @see #OVERLAY_RESULT_SUCCESS
+     * @see #OVERLAY_RESULT_INVALID
+     * @see #OVERLAY_RESULT_INTERNAL_ERROR
      */
     public void attachAccessibilityOverlayToWindow(
             int accessibilityWindowId,
