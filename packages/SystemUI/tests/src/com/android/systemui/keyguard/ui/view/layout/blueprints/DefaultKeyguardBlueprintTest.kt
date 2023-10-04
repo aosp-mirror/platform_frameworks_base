@@ -27,6 +27,7 @@ import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialInd
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.keyguard.ui.view.layout.items.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
@@ -37,6 +38,7 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopu
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
+import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import com.android.systemui.util.mockito.whenever
 import org.junit.Before
@@ -67,6 +69,8 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Mock private lateinit var aodNotificationIconsSection: AodNotificationIconsSection
     @Mock private lateinit var aodBurnInSection: AodBurnInSection
     @Mock private lateinit var communalTutorialIndicatorSection: CommunalTutorialIndicatorSection
+    @Mock private lateinit var clockSection: ClockSection
+    @Mock private lateinit var smartspaceSection: SmartspaceSection
 
     @Before
     fun setup() {
@@ -86,6 +90,8 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 aodNotificationIconsSection,
                 aodBurnInSection,
                 communalTutorialIndicatorSection,
+                clockSection,
+                smartspaceSection,
             )
     }
 

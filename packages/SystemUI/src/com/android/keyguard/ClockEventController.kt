@@ -27,9 +27,9 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -63,7 +63,6 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.TimeZone
@@ -150,25 +149,24 @@ constructor(
                         var pastVisibility: Int? = null
                         override fun onViewAttachedToWindow(view: View) {
                             value.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
-                            if (view != null) {
-                                smallClockFrame = view.parent as FrameLayout
-                                smallClockFrame?.let {frame ->
-                                    pastVisibility = frame.visibility
-                                    onGlobalLayoutListener = OnGlobalLayoutListener {
-                                        val currentVisibility = frame.visibility
-                                        if (pastVisibility != currentVisibility) {
-                                            pastVisibility = currentVisibility
-                                            // when small clock  visible,
-                                            // recalculate bounds and sample
-                                            if (currentVisibility == View.VISIBLE) {
-                                                smallRegionSampler?.stopRegionSampler()
-                                                smallRegionSampler?.startRegionSampler()
-                                            }
+                            // Match the asing for view.parent's layout classes.
+                            smallClockFrame = view.parent as ViewGroup
+                            smallClockFrame?.let { frame ->
+                                pastVisibility = frame.visibility
+                                onGlobalLayoutListener = OnGlobalLayoutListener {
+                                    val currentVisibility = frame.visibility
+                                    if (pastVisibility != currentVisibility) {
+                                        pastVisibility = currentVisibility
+                                        // when small clock is visible,
+                                        // recalculate bounds and sample
+                                        if (currentVisibility == View.VISIBLE) {
+                                            smallRegionSampler?.stopRegionSampler()
+                                            smallRegionSampler?.startRegionSampler()
                                         }
                                     }
-                                    frame.viewTreeObserver
-                                            .addOnGlobalLayoutListener(onGlobalLayoutListener)
                                 }
+                                frame.viewTreeObserver
+                                        .addOnGlobalLayoutListener(onGlobalLayoutListener)
                             }
                         }
 
@@ -197,7 +195,7 @@ constructor(
     var smallClockOnAttachStateChangeListener: OnAttachStateChangeListener? = null
     @VisibleForTesting
     var largeClockOnAttachStateChangeListener: OnAttachStateChangeListener? = null
-    private var smallClockFrame: FrameLayout? = null
+    private var smallClockFrame: ViewGroup? = null
     private var onGlobalLayoutListener: OnGlobalLayoutListener? = null
 
     private var isDozing = false

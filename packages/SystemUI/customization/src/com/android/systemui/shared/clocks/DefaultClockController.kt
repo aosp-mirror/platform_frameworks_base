@@ -33,6 +33,7 @@ import com.android.systemui.plugins.ClockFaceConfig
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.ClockSettings
+import com.android.systemui.plugins.DefaultClockFaceLayout
 import com.android.systemui.plugins.WeatherData
 import java.io.PrintWriter
 import java.util.Locale
@@ -114,6 +115,7 @@ class DefaultClockController(
         protected var targetRegion: Rect? = null
 
         override val config = ClockFaceConfig()
+        override val layout = DefaultClockFaceLayout(view)
 
         override var messageBuffer: MessageBuffer?
             get() = view.messageBuffer
@@ -184,6 +186,7 @@ class DefaultClockController(
         view: AnimatableClockView,
         seedColor: Int?,
     ) : DefaultClockFaceController(view, seedColor) {
+        override val layout = DefaultClockFaceLayout(view)
         override val config =
             ClockFaceConfig(hasCustomPositionUpdatedAnimation = hasStepClockAnimation)
 

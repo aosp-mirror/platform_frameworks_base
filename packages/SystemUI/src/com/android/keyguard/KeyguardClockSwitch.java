@@ -453,7 +453,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         // TODO: b/305022530
-        if (mClock.getConfig().getId().equals("DIGITAL_CLOCK_METRO")) {
+        if (mClock != null && mClock.getConfig().getId().equals("DIGITAL_CLOCK_METRO")) {
             mClock.getEvents().onColorPaletteChanged(mContext.getResources());
         }
 
@@ -461,7 +461,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
             post(() -> updateClockTargetRegions());
         }
 
-        if (mSmartspace != null && mSmartspaceTop != mSmartspace.getTop()) {
+        if (mSmartspace != null && mSmartspaceTop != mSmartspace.getTop()
+                && mDisplayedClockSize != null) {
             mSmartspaceTop = mSmartspace.getTop();
             post(() -> updateClockViews(mDisplayedClockSize == LARGE, mAnimateOnLayout));
         }
