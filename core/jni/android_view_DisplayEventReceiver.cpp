@@ -227,7 +227,7 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak, jobject
     if (status) {
         String8 message;
         message.appendFormat("Failed to initialize display event receiver.  status=%d", status);
-        jniThrowRuntimeException(env, message.string());
+        jniThrowRuntimeException(env, message.c_str());
         return 0;
     }
 
@@ -249,7 +249,7 @@ static void nativeScheduleVsync(JNIEnv* env, jclass clazz, jlong receiverPtr) {
     if (status) {
         String8 message;
         message.appendFormat("Failed to schedule next vertical sync pulse.  status=%d", status);
-        jniThrowRuntimeException(env, message.string());
+        jniThrowRuntimeException(env, message.c_str());
     }
 }
 

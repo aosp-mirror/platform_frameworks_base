@@ -4400,7 +4400,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param drawingPosition the drawing order position.
      * @return the container position of a child for this drawing order position.
      *
-     * @see #getChildDrawingOrder(int, int)}
+     * @see #getChildDrawingOrder(int, int)
      */
     public final int getChildDrawingOrder(int drawingPosition) {
         return getChildDrawingOrder(getChildCount(), drawingPosition);

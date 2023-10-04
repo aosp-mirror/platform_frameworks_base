@@ -1561,6 +1561,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK = 0x01000000;
 
+    /**
+     * Flag parameter for {@link #installPackage} to force a non-staged update of an APEX. This is
+     * a development-only feature and should not be used on end user devices.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FORCE_NON_STAGED_APEX_UPDATE = 0x02000000;
+
     /** @hide */
     @IntDef(flag = true, value = {
             DONT_KILL_APP,
@@ -3444,6 +3452,14 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_SUBSCRIPTION =
             "android.hardware.telephony.subscription";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device is capable of communicating with other devices via
+     * <a href="https://www.threadgroup.org">Thread</a> networking protocol.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_THREAD_NETWORK = "android.hardware.thread_network";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and

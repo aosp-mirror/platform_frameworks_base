@@ -1150,7 +1150,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                     }
                     drawable.setTint(iconColor);
 
-                    Drawable bg = context.getDrawable(R.drawable.user_avatar_bg);
+                    Drawable bg = context.getDrawable(
+                            com.android.settingslib.R.drawable.user_avatar_bg);
                     bg.setTintBlendMode(BlendMode.DST);
                     bg.setTint(Utils.getColorAttrDefaultColor(context,
                                 com.android.internal.R.attr.colorSurfaceVariant));

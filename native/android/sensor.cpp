@@ -304,12 +304,12 @@ int ASensorEventQueue_requestAdditionalInfoEvents(ASensorEventQueue* queue, bool
 
 const char* ASensor_getName(ASensor const* sensor) {
     RETURN_IF_SENSOR_IS_NULL(nullptr);
-    return static_cast<Sensor const*>(sensor)->getName().string();
+    return static_cast<Sensor const*>(sensor)->getName().c_str();
 }
 
 const char* ASensor_getVendor(ASensor const* sensor) {
     RETURN_IF_SENSOR_IS_NULL(nullptr);
-    return static_cast<Sensor const*>(sensor)->getVendor().string();
+    return static_cast<Sensor const*>(sensor)->getVendor().c_str();
 }
 
 int ASensor_getType(ASensor const* sensor) {
@@ -339,7 +339,7 @@ int ASensor_getFifoReservedEventCount(ASensor const* sensor) {
 
 const char* ASensor_getStringType(ASensor const* sensor) {
     RETURN_IF_SENSOR_IS_NULL(nullptr);
-    return static_cast<Sensor const*>(sensor)->getStringType().string();
+    return static_cast<Sensor const*>(sensor)->getStringType().c_str();
 }
 
 int ASensor_getReportingMode(ASensor const* sensor) {

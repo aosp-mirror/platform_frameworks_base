@@ -99,8 +99,7 @@ void generate(const KeyedVector<String8, Vector<SplitDescription> >& splits, con
         }
         masterRule = Rule::simplify(masterRule);
         fprintf(stdout, "  {\n    \"path\": \"%s\",\n    \"rules\": %s\n  }",
-                splits.keyAt(i).string(),
-                masterRule->toJson(2).string());
+                splits.keyAt(i).c_str(), masterRule->toJson(2).c_str());
     }
     fprintf(stdout, "\n]\n");
 }
@@ -158,25 +157,23 @@ static bool getAppInfo(const String8& path, AppInfo& outInfo) {
         const char16_t* name = xml.getElementName(&len);
         String16 name16(name, len);
         if (name16 == kManifestTag) {
-            ssize_t idx = xml.indexOfAttribute(
-                    kAndroidNamespace.string(), kAndroidNamespace.size(),
-                    kVersionCodeAttr.string(), kVersionCodeAttr.size());
+            ssize_t idx = xml.indexOfAttribute(kAndroidNamespace.c_str(), kAndroidNamespace.size(),
+                                               kVersionCodeAttr.c_str(), kVersionCodeAttr.size());
             if (idx >= 0) {
                 outInfo.versionCode = xml.getAttributeData(idx);
             }
 
         } else if (name16 == kApplicationTag) {
-            ssize_t idx = xml.indexOfAttribute(
-                    kAndroidNamespace.string(), kAndroidNamespace.size(),
-                    kMultiArchAttr.string(), kMultiArchAttr.size());
+            ssize_t idx = xml.indexOfAttribute(kAndroidNamespace.c_str(), kAndroidNamespace.size(),
+                                               kMultiArchAttr.c_str(), kMultiArchAttr.size());
             if (idx >= 0) {
                 outInfo.multiArch = xml.getAttributeData(idx) != 0;
             }
 
         } else if (name16 == kUsesSdkTag) {
-            ssize_t idx = xml.indexOfAttribute(
-                    kAndroidNamespace.string(), kAndroidNamespace.size(),
-                    kMinSdkVersionAttr.string(), kMinSdkVersionAttr.size());
+            ssize_t idx =
+                    xml.indexOfAttribute(kAndroidNamespace.c_str(), kAndroidNamespace.size(),
+                                         kMinSdkVersionAttr.c_str(), kMinSdkVersionAttr.size());
             if (idx >= 0) {
                 uint16_t type = xml.getAttributeDataType(idx);
                 if (type >= Res_value::TYPE_FIRST_INT && type <= Res_value::TYPE_LAST_INT) {
@@ -187,10 +184,10 @@ static bool getAppInfo(const String8& path, AppInfo& outInfo) {
                         fprintf(stderr, "warning: failed to retrieve android:minSdkVersion.\n");
                     } else {
                         char *endPtr;
-                        int minSdk = strtol(minSdk8->string(), &endPtr, 10);
-                        if (endPtr != minSdk8->string() + minSdk8->size()) {
+                        int minSdk = strtol(minSdk8->c_str(), &endPtr, 10);
+                        if (endPtr != minSdk8->c_str() + minSdk8->size()) {
                             fprintf(stderr, "warning: failed to parse android:minSdkVersion '%s'\n",
-                                    minSdk8->string());
+                                    minSdk8->c_str());
                         } else {
                             outInfo.minSdkVersion = minSdk;
                         }
@@ -232,7 +229,7 @@ static Vector<SplitDescription> extractSplitDescriptionsFromApk(const String8& p
             splits.add();
             Vector<String8> parts = AaptUtil::splitAndLowerCase(dir->getFileName(i), '-');
             if (parseAbi(parts, 0, &splits.editTop()) < 0) {
-                fprintf(stderr, "Malformed library %s\n", dir->getFileName(i).string());
+                fprintf(stderr, "Malformed library %s\n", dir->getFileName(i).c_str());
                 splits.pop();
             }
         }
@@ -260,7 +257,7 @@ static int main(int argc, char** argv) {
                 usage();
                 return 1;
             }
-            targetConfigStr.setTo(*argv);
+            targetConfigStr = *argv;
         } else if (arg == "--split") {
             argc--;
             argv++;
@@ -284,14 +281,14 @@ static int main(int argc, char** argv) {
                 usage();
                 return 1;
             }
-            baseApkPath.setTo(*argv);
+            baseApkPath = *argv;
         } else if (arg == "--generate") {
             generateFlag = true;
         } else if (arg == "--help") {
             help();
             return 0;
         } else {
-            fprintf(stderr, "error: unknown argument '%s'.\n", arg.string());
+            fprintf(stderr, "error: unknown argument '%s'.\n", arg.c_str());
             usage();
             return 1;
         }
@@ -313,15 +310,14 @@ static int main(int argc, char** argv) {
     // Find out some details about the base APK.
     AppInfo baseAppInfo;
     if (!getAppInfo(baseApkPath, baseAppInfo)) {
-        fprintf(stderr, "error: unable to read base APK: '%s'.\n", baseApkPath.string());
+        fprintf(stderr, "error: unable to read base APK: '%s'.\n", baseApkPath.c_str());
         return 1;
     }
 
     SplitDescription targetSplit;
     if (!generateFlag) {
         if (!SplitDescription::parse(targetConfigStr, &targetSplit)) {
-            fprintf(stderr, "error: invalid --target config: '%s'.\n",
-                    targetConfigStr.string());
+            fprintf(stderr, "error: invalid --target config: '%s'.\n", targetConfigStr.c_str());
             usage();
             return 1;
         }
@@ -341,7 +337,7 @@ static int main(int argc, char** argv) {
         Vector<SplitDescription> splits = extractSplitDescriptionsFromApk(splitApkPaths[i]);
         if (splits.isEmpty()) {
             fprintf(stderr, "error: invalid --split path: '%s'. No splits found.\n",
-                    splitApkPaths[i].string());
+                    splitApkPaths[i].c_str());
             usage();
             return 1;
         }
@@ -364,7 +360,7 @@ static int main(int argc, char** argv) {
         const size_t matchingSplitApkPathCount = matchingSplitPaths.size();
         for (size_t i = 0; i < matchingSplitApkPathCount; i++) {
             if (matchingSplitPaths[i] != baseApkPath) {
-                fprintf(stdout, "%s\n", matchingSplitPaths[i].string());
+                fprintf(stdout, "%s\n", matchingSplitPaths[i].c_str());
             }
         }
     } else {

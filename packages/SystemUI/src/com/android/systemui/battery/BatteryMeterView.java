@@ -106,7 +106,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         TypedArray atts = context.obtainStyledAttributes(attrs, R.styleable.BatteryMeterView,
                 defStyle, 0);
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
-                context.getColor(R.color.meter_background_color));
+                context.getColor(com.android.settingslib.R.color.meter_background_color));
         mPercentageStyleId = atts.getResourceId(R.styleable.BatteryMeterView_textAppearance, 0);
         mDrawable = new AccessorizedBatteryDrawable(context, frameColor);
         atts.recycle();

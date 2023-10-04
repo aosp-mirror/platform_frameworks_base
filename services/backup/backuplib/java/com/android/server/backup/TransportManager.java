@@ -706,6 +706,9 @@ public class TransportManager {
         try {
             String transportName = transport.name();
             String transportDirName = transport.transportDirName();
+            if (transportName == null || transportDirName == null) {
+                return BackupManager.ERROR_TRANSPORT_INVALID;
+            }
             registerTransport(transportComponent, transport);
             // If registerTransport() hasn't thrown...
             Slog.d(TAG, "Transport " + transportString + " registered");

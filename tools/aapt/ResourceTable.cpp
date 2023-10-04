@@ -11,8 +11,10 @@
 #include "ResourceFilter.h"
 #include "ResourceIdCache.h"
 #include "SdkConstants.h"
+#include "Utils.h"
 
 #include <algorithm>
+#include <androidfw/PathUtils.h>
 #include <androidfw/ResourceTypes.h>
 #include <utils/ByteOrder.h>
 #include <utils/TypeHelpers.h>
@@ -82,7 +84,7 @@ status_t compileXmlFile(const Bundle* bundle,
         sp<AaptDir> resDir = assets->getDirs().valueFor(String8("res"));
         sp<AaptDir> dir = resDir->getDirs().valueFor(target->getGroupEntry().toDirName(
                 target->getResourceType()));
-        dir->removeFile(target->getPath().getPathLeaf());
+        dir->removeFile(getPathLeaf(target->getPath()));
         return NO_ERROR;
     }
 
@@ -361,10 +363,10 @@ static status_t compileAttribute(const sp<AaptFile>& in,
     ssize_t typeIdx = block.indexOfAttribute(NULL, "format");
     if (typeIdx >= 0) {
         String16 typeStr = String16(block.getAttributeStringValue(typeIdx, &len));
-        attr.type = parse_flags(typeStr.string(), typeStr.size(), gFormatFlags);
+        attr.type = parse_flags(typeStr.c_str(), typeStr.size(), gFormatFlags);
         if (attr.type == 0) {
             attr.sourcePos.error("Tag <attr> 'format' attribute value \"%s\" not valid\n",
-                    String8(typeStr).string());
+                    String8(typeStr).c_str());
             attr.hasErrors = true;
         }
         attr.createIfNeeded(outTable);
@@ -374,14 +376,14 @@ static status_t compileAttribute(const sp<AaptFile>& in,
         attr.createIfNeeded(outTable);
     }
 
-    //printf("Attribute %s: type=0x%08x\n", String8(attr.ident).string(), attr.type);
+    //printf("Attribute %s: type=0x%08x\n", String8(attr.ident).c_str(), attr.type);
 
     ssize_t minIdx = block.indexOfAttribute(NULL, "min");
     if (minIdx >= 0) {
         String16 val = String16(block.getAttributeStringValue(minIdx, &len));
-        if (!ResTable::stringToInt(val.string(), val.size(), NULL)) {
+        if (!ResTable::stringToInt(val.c_str(), val.size(), NULL)) {
             attr.sourcePos.error("Tag <attr> 'min' attribute must be a number, not \"%s\"\n",
-                    String8(val).string());
+                    String8(val).c_str());
             attr.hasErrors = true;
         }
         attr.createIfNeeded(outTable);
@@ -397,9 +399,9 @@ static status_t compileAttribute(const sp<AaptFile>& in,
     ssize_t maxIdx = block.indexOfAttribute(NULL, "max");
     if (maxIdx >= 0) {
         String16 val = String16(block.getAttributeStringValue(maxIdx, &len));
-        if (!ResTable::stringToInt(val.string(), val.size(), NULL)) {
+        if (!ResTable::stringToInt(val.c_str(), val.size(), NULL)) {
             attr.sourcePos.error("Tag <attr> 'max' attribute must be a number, not \"%s\"\n",
-                    String8(val).string());
+                    String8(val).c_str());
             attr.hasErrors = true;
         }
         attr.createIfNeeded(outTable);
@@ -422,7 +424,7 @@ static status_t compileAttribute(const sp<AaptFile>& in,
         uint32_t l10n_required = parse_flags(str, len, l10nRequiredFlags, &error);
         if (error) {
             attr.sourcePos.error("Tag <attr> 'localization' attribute value \"%s\" not valid\n",
-                    String8(str).string());
+                    String8(str).c_str());
             attr.hasErrors = true;
         }
         attr.createIfNeeded(outTable);
@@ -442,14 +444,14 @@ static status_t compileAttribute(const sp<AaptFile>& in,
     while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
         if (code == ResXMLTree::START_TAG) {
             uint32_t localType = 0;
-            if (strcmp16(block.getElementName(&len), enum16.string()) == 0) {
+            if (strcmp16(block.getElementName(&len), enum16.c_str()) == 0) {
                 localType = ResTable_map::TYPE_ENUM;
-            } else if (strcmp16(block.getElementName(&len), flag16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), flag16.c_str()) == 0) {
                 localType = ResTable_map::TYPE_FLAGS;
             } else {
                 SourcePos(in->getPrintableSource(), block.getLineNumber())
                         .error("Tag <%s> can not appear inside <attr>, only <enum> or <flag>\n",
-                        String8(block.getElementName(&len)).string());
+                        String8(block.getElementName(&len)).c_str());
                 return UNKNOWN_ERROR;
             }
 
@@ -505,11 +507,11 @@ static status_t compileAttribute(const sp<AaptFile>& in,
                         .error("A 'value' attribute is required for <enum> or <flag>\n");
                 attr.hasErrors = true;
             }
-            if (!attr.hasErrors && !ResTable::stringToInt(value.string(), value.size(), NULL)) {
+            if (!attr.hasErrors && !ResTable::stringToInt(value.c_str(), value.size(), NULL)) {
                 SourcePos(in->getPrintableSource(), block.getLineNumber())
                         .error("Tag <enum> or <flag> 'value' attribute must be a number,"
                         " not \"%s\"\n",
-                        String8(value).string());
+                        String8(value).c_str());
                 attr.hasErrors = true;
             }
 
@@ -546,21 +548,21 @@ static status_t compileAttribute(const sp<AaptFile>& in,
                 }
             }
         } else if (code == ResXMLTree::END_TAG) {
-            if (strcmp16(block.getElementName(&len), attr16.string()) == 0) {
+            if (strcmp16(block.getElementName(&len), attr16.c_str()) == 0) {
                 break;
             }
             if ((attr.type&ResTable_map::TYPE_ENUM) != 0) {
-                if (strcmp16(block.getElementName(&len), enum16.string()) != 0) {
+                if (strcmp16(block.getElementName(&len), enum16.c_str()) != 0) {
                     SourcePos(in->getPrintableSource(), block.getLineNumber())
                             .error("Found tag </%s> where </enum> is expected\n",
-                            String8(block.getElementName(&len)).string());
+                            String8(block.getElementName(&len)).c_str());
                     return UNKNOWN_ERROR;
                 }
             } else {
-                if (strcmp16(block.getElementName(&len), flag16.string()) != 0) {
+                if (strcmp16(block.getElementName(&len), flag16.c_str()) != 0) {
                     SourcePos(in->getPrintableSource(), block.getLineNumber())
                             .error("Found tag </%s> where </flag> is expected\n",
-                            String8(block.getElementName(&len)).string());
+                            String8(block.getElementName(&len)).c_str());
                     return UNKNOWN_ERROR;
                 }
             }
@@ -606,7 +608,7 @@ status_t parseAndAddBag(Bundle* bundle,
 
     String16 str;
     Vector<StringPool::entry_style_span> spans;
-    err = parseStyledString(bundle, in->getPrintableSource().string(),
+    err = parseStyledString(bundle, in->getPrintableSource().c_str(),
                             block, item16, &str, &spans, isFormatted,
                             pseudolocalize);
     if (err != NO_ERROR) {
@@ -619,10 +621,10 @@ status_t parseAndAddBag(Bundle* bundle,
                 config.language[0], config.language[1],
                 config.country[0], config.country[1],
                 config.orientation, config.density,
-                String8(parentIdent).string(),
-                String8(ident).string(),
-                String8(itemIdent).string(),
-                String8(str).string());
+                String8(parentIdent).c_str(),
+                String8(ident).c_str(),
+                String8(itemIdent).c_str(),
+                String8(str).c_str());
     }
 
     err = outTable->addBag(SourcePos(in->getPrintableSource(), block->getLineNumber()),
@@ -636,8 +638,8 @@ status_t parseAndAddBag(Bundle* bundle,
  * haystack, false otherwise.
  */
 bool isInProductList(const String16& needle, const String16& haystack) {
-    const char16_t *needle2 = needle.string();
-    const char16_t *haystack2 = haystack.string();
+    const char16_t *needle2 = needle.c_str();
+    const char16_t *haystack2 = haystack.c_str();
     size_t needlesize = needle.size();
 
     while (*haystack2 != '\0') {
@@ -703,7 +705,7 @@ status_t parseAndAddEntry(Bundle* bundle,
 
     String16 str;
     Vector<StringPool::entry_style_span> spans;
-    err = parseStyledString(bundle, in->getPrintableSource().string(), block,
+    err = parseStyledString(bundle, in->getPrintableSource().c_str(), block,
                             curTag, &str, curIsStyled ? &spans : NULL,
                             isFormatted, pseudolocalize);
 
@@ -730,7 +732,7 @@ status_t parseAndAddEntry(Bundle* bundle,
          */
 
         if (bundleProduct[0] == '\0') {
-            if (strcmp16(String16("default").string(), product.string()) != 0) {
+            if (strcmp16(String16("default").c_str(), product.c_str()) != 0) {
                 /*
                  * This string has a product other than 'default'. Do not add it,
                  * but record it so that if we do not see the same string with
@@ -750,7 +752,7 @@ status_t parseAndAddEntry(Bundle* bundle,
 
             if (isInProductList(product, String16(bundleProduct))) {
                 ;
-            } else if (strcmp16(String16("default").string(), product.string()) == 0 &&
+            } else if (strcmp16(String16("default").c_str(), product.c_str()) == 0 &&
                        !outTable->hasBagOrEntry(myPackage, curType, ident, config)) {
                 ;
             } else {
@@ -764,7 +766,7 @@ status_t parseAndAddEntry(Bundle* bundle,
                 config.language[0], config.language[1],
                 config.country[0], config.country[1],
                 config.orientation, config.density,
-                String8(ident).string(), String8(str).string());
+                String8(ident).c_str(), String8(str).c_str());
     }
 
     err = outTable->addEntry(SourcePos(in->getPrintableSource(), block->getLineNumber()),
@@ -847,7 +849,7 @@ status_t compileResourceFile(Bundle* bundle,
     bool hasErrors = false;
 
     bool fileIsTranslatable = true;
-    if (strstr(in->getPrintableSource().string(), "donottranslate") != NULL) {
+    if (strstr(in->getPrintableSource().c_str(), "donottranslate") != NULL) {
         fileIsTranslatable = false;
     }
 
@@ -869,9 +871,9 @@ status_t compileResourceFile(Bundle* bundle,
                 "No start tag found\n");
         return UNKNOWN_ERROR;
     }
-    if (strcmp16(block.getElementName(&len), resources16.string()) != 0) {
+    if (strcmp16(block.getElementName(&len), resources16.c_str()) != 0) {
         SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
-                "Invalid start tag %s\n", String8(block.getElementName(&len)).string());
+                "Invalid start tag %s\n", String8(block.getElementName(&len)).c_str());
         return UNKNOWN_ERROR;
     }
 
@@ -900,7 +902,7 @@ status_t compileResourceFile(Bundle* bundle,
         SourcePos(in->getPrintableSource(), 0).warning(
                 "Resource file %s is skipped as pseudolocalization"
                 " was done automatically.",
-                in->getPrintableSource().string());
+                in->getPrintableSource().c_str());
         return NO_ERROR;
     }
 
@@ -917,29 +919,29 @@ status_t compileResourceFile(Bundle* bundle,
             bool curIsFormatted = fileIsTranslatable;
             bool localHasErrors = false;
 
-            if (strcmp16(block.getElementName(&len), skip16.string()) == 0) {
+            if (strcmp16(block.getElementName(&len), skip16.c_str()) == 0) {
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT
                         && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::END_TAG) {
-                        if (strcmp16(block.getElementName(&len), skip16.string()) == 0) {
+                        if (strcmp16(block.getElementName(&len), skip16.c_str()) == 0) {
                             break;
                         }
                     }
                 }
                 continue;
 
-            } else if (strcmp16(block.getElementName(&len), eat_comment16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), eat_comment16.c_str()) == 0) {
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT
                         && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::END_TAG) {
-                        if (strcmp16(block.getElementName(&len), eat_comment16.string()) == 0) {
+                        if (strcmp16(block.getElementName(&len), eat_comment16.c_str()) == 0) {
                             break;
                         }
                     }
                 }
                 continue;
 
-            } else if (strcmp16(block.getElementName(&len), public16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), public16.c_str()) == 0) {
                 SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
             
                 String16 type;
@@ -965,7 +967,7 @@ status_t compileResourceFile(Bundle* bundle,
                     Res_value identValue;
                     if (!ResTable::stringToInt(identStr, len, &identValue)) {
                         srcPos.error("Given 'id' attribute is not an integer: %s\n",
-                                String8(block.getAttributeStringValue(identIdx, &len)).string());
+                                String8(block.getAttributeStringValue(identIdx, &len)).c_str());
                         hasErrors = localHasErrors = true;
                     } else {
                         ident = identValue.data;
@@ -1004,14 +1006,14 @@ status_t compileResourceFile(Bundle* bundle,
 
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::END_TAG) {
-                        if (strcmp16(block.getElementName(&len), public16.string()) == 0) {
+                        if (strcmp16(block.getElementName(&len), public16.c_str()) == 0) {
                             break;
                         }
                     }
                 }
                 continue;
 
-            } else if (strcmp16(block.getElementName(&len), public_padding16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), public_padding16.c_str()) == 0) {
                 SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
             
                 String16 type;
@@ -1037,7 +1039,7 @@ status_t compileResourceFile(Bundle* bundle,
                     Res_value startValue;
                     if (!ResTable::stringToInt(startStr, len, &startValue)) {
                         srcPos.error("Given 'start' attribute is not an integer: %s\n",
-                                String8(block.getAttributeStringValue(startIdx, &len)).string());
+                                String8(block.getAttributeStringValue(startIdx, &len)).c_str());
                         hasErrors = localHasErrors = true;
                     } else {
                         start = startValue.data;
@@ -1057,7 +1059,7 @@ status_t compileResourceFile(Bundle* bundle,
                     Res_value endValue;
                     if (!ResTable::stringToInt(endStr, len, &endValue)) {
                         srcPos.error("Given 'end' attribute is not an integer: %s\n",
-                                String8(block.getAttributeStringValue(endIdx, &len)).string());
+                                String8(block.getAttributeStringValue(endIdx, &len)).c_str());
                         hasErrors = localHasErrors = true;
                     } else {
                         end = endValue.data;
@@ -1114,14 +1116,14 @@ status_t compileResourceFile(Bundle* bundle,
 
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::END_TAG) {
-                        if (strcmp16(block.getElementName(&len), public_padding16.string()) == 0) {
+                        if (strcmp16(block.getElementName(&len), public_padding16.c_str()) == 0) {
                             break;
                         }
                     }
                 }
                 continue;
 
-            } else if (strcmp16(block.getElementName(&len), private_symbols16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), private_symbols16.c_str()) == 0) {
                 String16 pkg;
                 ssize_t pkgIdx = block.indexOfAttribute(NULL, "package");
                 if (pkgIdx < 0) {
@@ -1144,14 +1146,14 @@ status_t compileResourceFile(Bundle* bundle,
 
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::END_TAG) {
-                        if (strcmp16(block.getElementName(&len), private_symbols16.string()) == 0) {
+                        if (strcmp16(block.getElementName(&len), private_symbols16.c_str()) == 0) {
                             break;
                         }
                     }
                 }
                 continue;
 
-            } else if (strcmp16(block.getElementName(&len), java_symbol16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), java_symbol16.c_str()) == 0) {
                 SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
             
                 String16 type;
@@ -1186,7 +1188,7 @@ status_t compileResourceFile(Bundle* bundle,
 
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::END_TAG) {
-                        if (strcmp16(block.getElementName(&len), java_symbol16.string()) == 0) {
+                        if (strcmp16(block.getElementName(&len), java_symbol16.c_str()) == 0) {
                             break;
                         }
                     }
@@ -1194,7 +1196,7 @@ status_t compileResourceFile(Bundle* bundle,
                 continue;
 
 
-            } else if (strcmp16(block.getElementName(&len), add_resource16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), add_resource16.c_str()) == 0) {
                 SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
             
                 String16 typeName;
@@ -1217,14 +1219,14 @@ status_t compileResourceFile(Bundle* bundle,
 
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::END_TAG) {
-                        if (strcmp16(block.getElementName(&len), add_resource16.string()) == 0) {
+                        if (strcmp16(block.getElementName(&len), add_resource16.c_str()) == 0) {
                             break;
                         }
                     }
                 }
                 continue;
                 
-            } else if (strcmp16(block.getElementName(&len), declare_styleable16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), declare_styleable16.c_str()) == 0) {
                 SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
                                 
                 String16 ident;
@@ -1258,30 +1260,30 @@ status_t compileResourceFile(Bundle* bundle,
 
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::START_TAG) {
-                        if (strcmp16(block.getElementName(&len), skip16.string()) == 0) {
+                        if (strcmp16(block.getElementName(&len), skip16.c_str()) == 0) {
                             while ((code=block.next()) != ResXMLTree::END_DOCUMENT
                                    && code != ResXMLTree::BAD_DOCUMENT) {
                                 if (code == ResXMLTree::END_TAG) {
-                                    if (strcmp16(block.getElementName(&len), skip16.string()) == 0) {
+                                    if (strcmp16(block.getElementName(&len), skip16.c_str()) == 0) {
                                         break;
                                     }
                                 }
                             }
                             continue;
-                        } else if (strcmp16(block.getElementName(&len), eat_comment16.string()) == 0) {
+                        } else if (strcmp16(block.getElementName(&len), eat_comment16.c_str()) == 0) {
                             while ((code=block.next()) != ResXMLTree::END_DOCUMENT
                                    && code != ResXMLTree::BAD_DOCUMENT) {
                                 if (code == ResXMLTree::END_TAG) {
-                                    if (strcmp16(block.getElementName(&len), eat_comment16.string()) == 0) {
+                                    if (strcmp16(block.getElementName(&len), eat_comment16.c_str()) == 0) {
                                         break;
                                     }
                                 }
                             }
                             continue;
-                        } else if (strcmp16(block.getElementName(&len), attr16.string()) != 0) {
+                        } else if (strcmp16(block.getElementName(&len), attr16.c_str()) != 0) {
                             SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                                     "Tag <%s> can not appear inside <declare-styleable>, only <attr>\n",
-                                    String8(block.getElementName(&len)).string());
+                                    String8(block.getElementName(&len)).c_str());
                             return UNKNOWN_ERROR;
                         }
 
@@ -1297,30 +1299,30 @@ status_t compileResourceFile(Bundle* bundle,
                             SourcePos srcPos(String8(in->getPrintableSource()), block.getLineNumber());
                             symbols->addSymbol(String8(itemIdent), 0, srcPos);
                             symbols->appendComment(String8(itemIdent), comment, srcPos);
-                            //printf("Attribute %s comment: %s\n", String8(itemIdent).string(),
-                            //     String8(comment).string());
+                            //printf("Attribute %s comment: %s\n", String8(itemIdent).c_str(),
+                            //     String8(comment).c_str());
                         }
                     } else if (code == ResXMLTree::END_TAG) {
-                        if (strcmp16(block.getElementName(&len), declare_styleable16.string()) == 0) {
+                        if (strcmp16(block.getElementName(&len), declare_styleable16.c_str()) == 0) {
                             break;
                         }
 
                         SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                                 "Found tag </%s> where </attr> is expected\n",
-                                String8(block.getElementName(&len)).string());
+                                String8(block.getElementName(&len)).c_str());
                         return UNKNOWN_ERROR;
                     }
                 }
                 continue;
 
-            } else if (strcmp16(block.getElementName(&len), attr16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), attr16.c_str()) == 0) {
                 err = compileAttribute(in, block, myPackage, outTable, NULL);
                 if (err != NO_ERROR) {
                     hasErrors = true;
                 }
                 continue;
 
-            } else if (strcmp16(block.getElementName(&len), item16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), item16.c_str()) == 0) {
                 curTag = &item16;
                 ssize_t attri = block.indexOfAttribute(NULL, "type");
                 if (attri >= 0) {
@@ -1333,12 +1335,12 @@ status_t compileResourceFile(Bundle* bundle,
                     if (formatIdx >= 0) {
                         String16 formatStr = String16(block.getAttributeStringValue(
                                 formatIdx, &len));
-                        curFormat = parse_flags(formatStr.string(), formatStr.size(),
+                        curFormat = parse_flags(formatStr.c_str(), formatStr.size(),
                                                 gFormatFlags);
                         if (curFormat == 0) {
                             SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                                     "Tag <item> 'format' attribute value \"%s\" not valid\n",
-                                    String8(formatStr).string());
+                                    String8(formatStr).c_str());
                             hasErrors = localHasErrors = true;
                         }
                     }
@@ -1348,7 +1350,7 @@ status_t compileResourceFile(Bundle* bundle,
                     hasErrors = localHasErrors = true;
                 }
                 curIsStyled = true;
-            } else if (strcmp16(block.getElementName(&len), string16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), string16.c_str()) == 0) {
                 // Note the existence and locale of every string we process
                 char rawLocale[RESTABLE_MAX_LOCALE_LEN];
                 curParams.getBcp47Locale(rawLocale);
@@ -1361,12 +1363,12 @@ status_t compileResourceFile(Bundle* bundle,
                 for (size_t i = 0; i < n; i++) {
                     size_t length;
                     const char16_t* attr = block.getAttributeName(i, &length);
-                    if (strcmp16(attr, name16.string()) == 0) {
-                        name.setTo(block.getAttributeStringValue(i, &length));
-                    } else if (strcmp16(attr, translatable16.string()) == 0) {
-                        translatable.setTo(block.getAttributeStringValue(i, &length));
-                    } else if (strcmp16(attr, formatted16.string()) == 0) {
-                        formatted.setTo(block.getAttributeStringValue(i, &length));
+                    if (strcmp16(attr, name16.c_str()) == 0) {
+                        name = String16(block.getAttributeStringValue(i, &length));
+                    } else if (strcmp16(attr, translatable16.c_str()) == 0) {
+                        translatable = String16(block.getAttributeStringValue(i, &length));
+                    } else if (strcmp16(attr, formatted16.c_str()) == 0) {
+                        formatted = String16(block.getAttributeStringValue(i, &length));
                     }
                 }
                 
@@ -1380,8 +1382,8 @@ status_t compileResourceFile(Bundle* bundle,
                         if (locale.size() > 0) {
                             SourcePos(in->getPrintableSource(), block.getLineNumber()).warning(
                                     "string '%s' marked untranslatable but exists in locale '%s'\n",
-                                    String8(name).string(),
-                                    locale.string());
+                                    String8(name).c_str(),
+                                    locale.c_str());
                             // hasErrors = localHasErrors = true;
                         } else {
                             // Intentionally empty block:
@@ -1407,31 +1409,31 @@ status_t compileResourceFile(Bundle* bundle,
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
                 curIsStyled = true;
                 curIsPseudolocalizable = fileIsTranslatable && (translatable != false16);
-            } else if (strcmp16(block.getElementName(&len), drawable16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), drawable16.c_str()) == 0) {
                 curTag = &drawable16;
                 curType = drawable16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_COLOR;
-            } else if (strcmp16(block.getElementName(&len), color16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), color16.c_str()) == 0) {
                 curTag = &color16;
                 curType = color16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_COLOR;
-            } else if (strcmp16(block.getElementName(&len), bool16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), bool16.c_str()) == 0) {
                 curTag = &bool16;
                 curType = bool16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_BOOLEAN;
-            } else if (strcmp16(block.getElementName(&len), integer16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), integer16.c_str()) == 0) {
                 curTag = &integer16;
                 curType = integer16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_INTEGER;
-            } else if (strcmp16(block.getElementName(&len), dimen16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), dimen16.c_str()) == 0) {
                 curTag = &dimen16;
                 curType = dimen16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_DIMENSION;
-            } else if (strcmp16(block.getElementName(&len), fraction16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), fraction16.c_str()) == 0) {
                 curTag = &fraction16;
                 curType = fraction16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_FRACTION;
-            } else if (strcmp16(block.getElementName(&len), bag16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), bag16.c_str()) == 0) {
                 curTag = &bag16;
                 curIsBag = true;
                 ssize_t attri = block.indexOfAttribute(NULL, "type");
@@ -1442,16 +1444,16 @@ status_t compileResourceFile(Bundle* bundle,
                             "A 'type' attribute is required for <bag>\n");
                     hasErrors = localHasErrors = true;
                 }
-            } else if (strcmp16(block.getElementName(&len), style16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), style16.c_str()) == 0) {
                 curTag = &style16;
                 curType = style16;
                 curIsBag = true;
-            } else if (strcmp16(block.getElementName(&len), plurals16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), plurals16.c_str()) == 0) {
                 curTag = &plurals16;
                 curType = plurals16;
                 curIsBag = true;
                 curIsPseudolocalizable = fileIsTranslatable;
-            } else if (strcmp16(block.getElementName(&len), array16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), array16.c_str()) == 0) {
                 curTag = &array16;
                 curType = array16;
                 curIsBag = true;
@@ -1460,16 +1462,16 @@ status_t compileResourceFile(Bundle* bundle,
                 if (formatIdx >= 0) {
                     String16 formatStr = String16(block.getAttributeStringValue(
                             formatIdx, &len));
-                    curFormat = parse_flags(formatStr.string(), formatStr.size(),
+                    curFormat = parse_flags(formatStr.c_str(), formatStr.size(),
                                             gFormatFlags);
                     if (curFormat == 0) {
                         SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                                 "Tag <array> 'format' attribute value \"%s\" not valid\n",
-                                String8(formatStr).string());
+                                String8(formatStr).c_str());
                         hasErrors = localHasErrors = true;
                     }
                 }
-            } else if (strcmp16(block.getElementName(&len), string_array16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), string_array16.c_str()) == 0) {
                 // Check whether these strings need valid formats.
                 // (simplified form of what string16 does above)
                 bool isTranslatable = false;
@@ -1480,14 +1482,14 @@ status_t compileResourceFile(Bundle* bundle,
                 for (size_t i = 0; i < n; i++) {
                     size_t length;
                     const char16_t* attr = block.getAttributeName(i, &length);
-                    if (strcmp16(attr, formatted16.string()) == 0) {
+                    if (strcmp16(attr, formatted16.c_str()) == 0) {
                         const char16_t* value = block.getAttributeStringValue(i, &length);
-                        if (strcmp16(value, false16.string()) == 0) {
+                        if (strcmp16(value, false16.c_str()) == 0) {
                             curIsFormatted = false;
                         }
-                    } else if (strcmp16(attr, translatable16.string()) == 0) {
+                    } else if (strcmp16(attr, translatable16.c_str()) == 0) {
                         const char16_t* value = block.getAttributeStringValue(i, &length);
-                        if (strcmp16(value, false16.string()) == 0) {
+                        if (strcmp16(value, false16.c_str()) == 0) {
                             isTranslatable = false;
                         }
                     }
@@ -1499,7 +1501,7 @@ status_t compileResourceFile(Bundle* bundle,
                 curIsBag = true;
                 curIsBagReplaceOnOverwrite = true;
                 curIsPseudolocalizable = isTranslatable && fileIsTranslatable;
-            } else if (strcmp16(block.getElementName(&len), integer_array16.string()) == 0) {
+            } else if (strcmp16(block.getElementName(&len), integer_array16.c_str()) == 0) {
                 curTag = &integer_array16;
                 curType = array16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_INTEGER;
@@ -1508,7 +1510,7 @@ status_t compileResourceFile(Bundle* bundle,
             } else {
                 SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                         "Found tag %s where item is expected\n",
-                        String8(block.getElementName(&len)).string());
+                        String8(block.getElementName(&len)).c_str());
                 return UNKNOWN_ERROR;
             }
 
@@ -1519,7 +1521,7 @@ status_t compileResourceFile(Bundle* bundle,
             } else {
                 SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                         "A 'name' attribute is required for <%s>\n",
-                        String8(*curTag).string());
+                        String8(*curTag).c_str());
                 hasErrors = localHasErrors = true;
             }
 
@@ -1540,7 +1542,7 @@ status_t compileResourceFile(Bundle* bundle,
                 } else {
                     ssize_t sep = ident.findLast('.');
                     if (sep >= 0) {
-                        parentIdent.setTo(ident, sep);
+                        parentIdent = String16(ident, sep);
                     }
                 }
 
@@ -1560,11 +1562,11 @@ status_t compileResourceFile(Bundle* bundle,
                         && code != ResXMLTree::BAD_DOCUMENT) {
 
                     if (code == ResXMLTree::START_TAG) {
-                        if (strcmp16(block.getElementName(&len), item16.string()) != 0) {
+                        if (strcmp16(block.getElementName(&len), item16.c_str()) != 0) {
                             SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                                     "Tag <%s> can not appear inside <%s>, only <item>\n",
-                                    String8(block.getElementName(&len)).string(),
-                                    String8(*curTag).string());
+                                    String8(block.getElementName(&len)).c_str(),
+                                    String8(*curTag).c_str());
                             return UNKNOWN_ERROR;
                         }
 
@@ -1647,11 +1649,11 @@ status_t compileResourceFile(Bundle* bundle,
                             hasErrors = localHasErrors = true;
                         }
                     } else if (code == ResXMLTree::END_TAG) {
-                        if (strcmp16(block.getElementName(&len), curTag->string()) != 0) {
+                        if (strcmp16(block.getElementName(&len), curTag->c_str()) != 0) {
                             SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                                     "Found tag </%s> where </%s> is expected\n",
-                                    String8(block.getElementName(&len)).string(),
-                                    String8(*curTag).string());
+                                    String8(block.getElementName(&len)).c_str(),
+                                    String8(*curTag).c_str());
                             return UNKNOWN_ERROR;
                         }
                         break;
@@ -1700,9 +1702,9 @@ status_t compileResourceFile(Bundle* bundle,
 
 #if 0
             if (comment.size() > 0) {
-                printf("Comment for @%s:%s/%s: %s\n", String8(myPackage).string(),
-                       String8(curType).string(), String8(ident).string(),
-                       String8(comment).string());
+                printf("Comment for @%s:%s/%s: %s\n", String8(myPackage).c_str(),
+                       String8(curType).c_str(), String8(ident).c_str(),
+                       String8(comment).c_str());
             }
 #endif
             if (!localHasErrors) {
@@ -1710,9 +1712,9 @@ status_t compileResourceFile(Bundle* bundle,
             }
         }
         else if (code == ResXMLTree::END_TAG) {
-            if (strcmp16(block.getElementName(&len), resources16.string()) != 0) {
+            if (strcmp16(block.getElementName(&len), resources16.c_str()) != 0) {
                 SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
-                        "Unexpected end tag %s\n", String8(block.getElementName(&len)).string());
+                        "Unexpected end tag %s\n", String8(block.getElementName(&len)).c_str());
                 return UNKNOWN_ERROR;
             }
         }
@@ -1724,7 +1726,7 @@ status_t compileResourceFile(Bundle* bundle,
             }
             SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                     "Found text \"%s\" where item tag is expected\n",
-                    String8(block.getText(&len)).string());
+                    String8(block.getText(&len)).c_str());
             return UNKNOWN_ERROR;
         }
     }
@@ -1740,13 +1742,13 @@ status_t compileResourceFile(Bundle* bundle,
                 const char* bundleProduct =
                         (bundle->getProduct() == NULL) ? "" : bundle->getProduct();
                 fprintf(stderr, "In resource file %s: %s\n",
-                        in->getPrintableSource().string(),
-                        curParams.toString().string());
+                        in->getPrintableSource().c_str(),
+                        curParams.toString().c_str());
 
                 fprintf(stderr, "\t%s '%s' does not match product %s.\n"
                         "\tYou may have forgotten to include a 'default' product variant"
                         " of the resource.\n",
-                        String8(p.type).string(), String8(p.ident).string(),
+                        String8(p.type).c_str(), String8(p.ident).c_str(),
                         bundleProduct[0] == 0 ? "default" : bundleProduct);
                 return UNKNOWN_ERROR;
             }
@@ -1812,17 +1814,17 @@ status_t ResourceTable::addIncludedResources(Bundle* bundle, const sp<AaptAssets
     mTypeIdOffset = findLargestTypeIdForPackage(assets->getIncludedResources(), mAssetsPackage);
 
     const String8& featureAfter = bundle->getFeatureAfterPackage();
-    if (!featureAfter.isEmpty()) {
+    if (!featureAfter.empty()) {
         AssetManager featureAssetManager;
         if (!featureAssetManager.addAssetPath(featureAfter, NULL)) {
             fprintf(stderr, "ERROR: Feature package '%s' not found.\n",
-                    featureAfter.string());
+                    featureAfter.c_str());
             return UNKNOWN_ERROR;
         }
 
         const ResTable& featureTable = featureAssetManager.getResources(false);
         mTypeIdOffset = std::max(mTypeIdOffset,
-                findLargestTypeIdForPackage(featureTable, mAssetsPackage)); 
+                findLargestTypeIdForPackage(featureTable, mAssetsPackage));
     }
 
     return NO_ERROR;
@@ -1835,13 +1837,13 @@ status_t ResourceTable::addPublic(const SourcePos& sourcePos,
                                   const uint32_t ident)
 {
     uint32_t rid = mAssets->getIncludedResources()
-        .identifierForName(name.string(), name.size(),
-                           type.string(), type.size(),
-                           package.string(), package.size());
+        .identifierForName(name.c_str(), name.size(),
+                           type.c_str(), type.size(),
+                           package.c_str(), package.size());
     if (rid != 0) {
         sourcePos.error("Error declaring public resource %s/%s for included package %s\n",
-                String8(type).string(), String8(name).string(),
-                String8(package).string());
+                String8(type).c_str(), String8(name).c_str(),
+                String8(package).c_str());
         return UNKNOWN_ERROR;
     }
 
@@ -1864,12 +1866,12 @@ status_t ResourceTable::addEntry(const SourcePos& sourcePos,
                                  const bool overwrite)
 {
     uint32_t rid = mAssets->getIncludedResources()
-        .identifierForName(name.string(), name.size(),
-                           type.string(), type.size(),
-                           package.string(), package.size());
+        .identifierForName(name.c_str(), name.size(),
+                           type.c_str(), type.size(),
+                           package.c_str(), package.size());
     if (rid != 0) {
         sourcePos.error("Resource entry %s/%s is already defined in package %s.",
-                String8(type).string(), String8(name).string(), String8(package).string());
+                String8(type).c_str(), String8(name).c_str(), String8(package).c_str());
         return UNKNOWN_ERROR;
     }
     
@@ -1899,12 +1901,12 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
     // Check for adding entries in other packages...  for now we do
     // nothing.  We need to do the right thing here to support skinning.
     uint32_t rid = mAssets->getIncludedResources()
-    .identifierForName(name.string(), name.size(),
-                       type.string(), type.size(),
-                       package.string(), package.size());
+    .identifierForName(name.c_str(), name.size(),
+                       type.c_str(), type.size(),
+                       package.c_str(), package.size());
     if (rid != 0) {
         sourcePos.error("Resource entry %s/%s is already defined in package %s.",
-                String8(type).string(), String8(name).string(), String8(package).string());
+                String8(type).c_str(), String8(name).c_str(), String8(package).c_str());
         return UNKNOWN_ERROR;
     }
 
@@ -1921,7 +1923,7 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
         }
         if (!canAdd) {
             sourcePos.error("Resource does not already exist in overlay at '%s'; use <add-resource> to add.\n",
-                            String8(name).string());
+                            String8(name).c_str());
             return UNKNOWN_ERROR;
         }
     }
@@ -1959,9 +1961,9 @@ status_t ResourceTable::addBag(const SourcePos& sourcePos,
     // Check for adding entries in other packages...  for now we do
     // nothing.  We need to do the right thing here to support skinning.
     uint32_t rid = mAssets->getIncludedResources()
-        .identifierForName(name.string(), name.size(),
-                           type.string(), type.size(),
-                           package.string(), package.size());
+        .identifierForName(name.c_str(), name.size(),
+                           type.c_str(), type.size(),
+                           package.c_str(), package.size());
     if (rid != 0) {
         return NO_ERROR;
     }
@@ -1969,7 +1971,7 @@ status_t ResourceTable::addBag(const SourcePos& sourcePos,
 #if 0
     if (name == String16("left")) {
         printf("Adding bag left: file=%s, line=%d, type=%s\n",
-               sourcePos.file.striing(), sourcePos.line, String8(type).string());
+               sourcePos.file.striing(), sourcePos.line, String8(type).c_str());
     }
 #endif
     sp<Entry> e = getEntry(package, type, name, sourcePos, replace, params);
@@ -1996,9 +1998,9 @@ bool ResourceTable::hasBagOrEntry(const String16& package,
 {
     // First look for this in the included resources...
     uint32_t rid = mAssets->getIncludedResources()
-        .identifierForName(name.string(), name.size(),
-                           type.string(), type.size(),
-                           package.string(), package.size());
+        .identifierForName(name.c_str(), name.size(),
+                           type.c_str(), type.size(),
+                           package.c_str(), package.size());
     if (rid != 0) {
         return true;
     }
@@ -2022,9 +2024,9 @@ bool ResourceTable::hasBagOrEntry(const String16& package,
 {
     // First look for this in the included resources...
     uint32_t rid = mAssets->getIncludedResources()
-        .identifierForName(name.string(), name.size(),
-                           type.string(), type.size(),
-                           package.string(), package.size());
+        .identifierForName(name.c_str(), name.size(),
+                           type.c_str(), type.size(),
+                           package.c_str(), package.size());
     if (rid != 0) {
         return true;
     }
@@ -2051,7 +2053,7 @@ bool ResourceTable::hasBagOrEntry(const String16& ref,
                                   const String16* defPackage)
 {
     String16 package, type, name;
-    if (!ResTable::expandResourceRef(ref.string(), ref.size(), &package, &type, &name,
+    if (!ResTable::expandResourceRef(ref.c_str(), ref.size(), &package, &type, &name,
                 defType, defPackage ? defPackage:&mAssetsPackage, NULL)) {
         return false;
     }
@@ -2115,17 +2117,17 @@ bool ResourceTable::makeAttribute(const String16& package,
 
     // First look for this in the included resources...
     uint32_t rid = mAssets->getIncludedResources()
-            .identifierForName(name.string(), name.size(),
-                               attr16.string(), attr16.size(),
-                               package.string(), package.size());
+            .identifierForName(name.c_str(), name.size(),
+                               attr16.c_str(), attr16.size(),
+                               package.c_str(), package.size());
     if (rid != 0) {
-        source.error("Attribute \"%s\" has already been defined", String8(name).string());
+        source.error("Attribute \"%s\" has already been defined", String8(name).c_str());
         return false;
     }
 
     sp<ResourceTable::Entry> entry = getEntry(package, attr16, name, source, false);
     if (entry == NULL) {
-        source.error("Failed to create entry attr/%s", String8(name).string());
+        source.error("Failed to create entry attr/%s", String8(name).c_str());
         return false;
     }
 
@@ -2146,7 +2148,7 @@ bool ResourceTable::makeAttribute(const String16& package,
                 formatItem.value != formatValue16) {
             source.error("Attribute \"%s\" already defined with incompatible format.\n"
                          "%s:%d: Original attribute defined here.",
-                         String8(name).string(), formatItem.sourcePos.file.string(),
+                         String8(name).c_str(), formatItem.sourcePos.file.c_str(),
                          formatItem.sourcePos.line);
             return false;
         }
@@ -2207,9 +2209,9 @@ uint32_t ResourceTable::getResId(const String16& package,
     // First look for this in the included resources...
     uint32_t specFlags = 0;
     uint32_t rid = mAssets->getIncludedResources()
-        .identifierForName(name.string(), name.size(),
-                           type.string(), type.size(),
-                           package.string(), package.size(),
+        .identifierForName(name.c_str(), name.size(),
+                           type.c_str(), type.size(),
+                           package.c_str(), package.size(),
                            &specFlags);
     if (rid != 0) {
         if (onlyPublic && (specFlags & ResTable_typeSpec::SPEC_PUBLIC) == 0) {
@@ -2253,27 +2255,27 @@ uint32_t ResourceTable::getResId(const String16& ref,
     String16 package, type, name;
     bool refOnlyPublic = true;
     if (!ResTable::expandResourceRef(
-        ref.string(), ref.size(), &package, &type, &name,
+        ref.c_str(), ref.size(), &package, &type, &name,
         defType, defPackage ? defPackage:&mAssetsPackage,
         outErrorMsg, &refOnlyPublic)) {
         if (kIsDebug) {
-            printf("Expanding resource: ref=%s\n", String8(ref).string());
+            printf("Expanding resource: ref=%s\n", String8(ref).c_str());
             printf("Expanding resource: defType=%s\n",
-                    defType ? String8(*defType).string() : "NULL");
+                    defType ? String8(*defType).c_str() : "NULL");
             printf("Expanding resource: defPackage=%s\n",
-                    defPackage ? String8(*defPackage).string() : "NULL");
-            printf("Expanding resource: ref=%s\n", String8(ref).string());
+                    defPackage ? String8(*defPackage).c_str() : "NULL");
+            printf("Expanding resource: ref=%s\n", String8(ref).c_str());
             printf("Expanded resource: p=%s, t=%s, n=%s, res=0\n",
-                    String8(package).string(), String8(type).string(),
-                    String8(name).string());
+                    String8(package).c_str(), String8(type).c_str(),
+                    String8(name).c_str());
         }
         return 0;
     }
     uint32_t res = getResId(package, type, name, onlyPublic && refOnlyPublic);
     if (kIsDebug) {
         printf("Expanded resource: p=%s, t=%s, n=%s, res=%d\n",
-                String8(package).string(), String8(type).string(),
-                String8(name).string(), res);
+                String8(package).c_str(), String8(type).c_str(),
+                String8(name).c_str(), res);
     }
     if (res == 0) {
         if (outErrorMsg)
@@ -2284,7 +2286,7 @@ uint32_t ResourceTable::getResId(const String16& ref,
 
 bool ResourceTable::isValidResourceName(const String16& s)
 {
-    const char16_t* p = s.string();
+    const char16_t* p = s.c_str();
     bool first = true;
     while (*p) {
         if ((*p >= 'a' && *p <= 'z')
@@ -2315,7 +2317,7 @@ bool ResourceTable::stringToValue(Res_value* outValue, StringPool* pool,
     if (style == NULL || style->size() == 0) {
         // Text is not styled so it can be any type...  let's figure it out.
         res = mAssets->getIncludedResources()
-            .stringToValue(outValue, &finalStr, str.string(), str.size(), preserveSpaces,
+            .stringToValue(outValue, &finalStr, str.c_str(), str.size(), preserveSpaces,
                             coerceType, attrID, NULL, &mAssetsPackage, this,
                            accessorCookie, attrType);
     } else {
@@ -2344,7 +2346,7 @@ bool ResourceTable::stringToValue(Res_value* outValue, StringPool* pool,
             if (kIsDebug) {
                 printf("Adding to pool string style #%zu config %s: %s\n",
                         style != NULL ? style->size() : 0U,
-                        configStr.string(), String8(finalStr).string());
+                        configStr.c_str(), String8(finalStr).c_str());
             }
             if (style != NULL && style->size() > 0) {
                 outValue->data = pool->add(finalStr, *style, configTypeName, config);
@@ -2368,8 +2370,8 @@ bool ResourceTable::stringToValue(Res_value* outValue, StringPool* pool,
 uint32_t ResourceTable::getCustomResource(
     const String16& package, const String16& type, const String16& name) const
 {
-    //printf("getCustomResource: %s %s %s\n", String8(package).string(),
-    //       String8(type).string(), String8(name).string());
+    //printf("getCustomResource: %s %s %s\n", String8(package).c_str(),
+    //       String8(type).c_str(), String8(name).c_str());
     sp<Package> p = mPackages.valueFor(package);
     if (p == NULL) return 0;
     sp<Type> t = p->getTypes().valueFor(type);
@@ -2400,7 +2402,7 @@ uint32_t ResourceTable::getCustomResourceWithCreation(
 
     if (mAssetsPackage != package) {
         mCurrentXmlPos.error("creating resource for external package %s: %s/%s.",
-                String8(package).string(), String8(type).string(), String8(name).string());
+                String8(package).c_str(), String8(type).c_str(), String8(name).c_str());
         if (package == String16("android")) {
             mCurrentXmlPos.printf("did you mean to use @+id instead of @+android:id?");
         }
@@ -2427,7 +2429,7 @@ bool ResourceTable::getAttributeType(uint32_t attrID, uint32_t* outType)
     Res_value value;
     if (getItemValue(attrID, ResTable_map::ATTR_TYPE, &value)) {
         //printf("getAttributeType #%08x (%s): #%08x\n", attrID,
-        //       String8(getEntry(attrID)->getName()).string(), value.data);
+        //       String8(getEntry(attrID)->getName()).c_str(), value.data);
         *outType = value.data;
         return true;
     }
@@ -2481,7 +2483,7 @@ void ResourceTable::reportError(void* accessorCookie, const char* fmt, ...)
         vsnprintf(buf, sizeof(buf), fmt, ap);
         va_end(ap);
         ac->sourcePos.error("Error: %s (at '%s' with value '%s').\n",
-                            buf, ac->attr.string(), ac->value.string());
+                            buf, ac->attr.c_str(), ac->value.c_str());
     }
 }
 
@@ -2493,7 +2495,7 @@ bool ResourceTable::getAttributeKeys(
         const size_t N = e->getBag().size();
         for (size_t i=0; i<N; i++) {
             const String16& key = e->getBag().keyAt(i);
-            if (key.size() > 0 && key.string()[0] != '^') {
+            if (key.size() > 0 && key.c_str()[0] != '^') {
                 outKeys->add(key);
             }
         }
@@ -2506,14 +2508,14 @@ bool ResourceTable::getAttributeEnum(
     uint32_t attrID, const char16_t* name, size_t nameLen,
     Res_value* outValue)
 {
-    //printf("getAttributeEnum #%08x %s\n", attrID, String8(name, nameLen).string());
+    //printf("getAttributeEnum #%08x %s\n", attrID, String8(name, nameLen).c_str());
     String16 nameStr(name, nameLen);
     sp<const Entry> e = getEntry(attrID);
     if (e != NULL) {
         const size_t N = e->getBag().size();
         for (size_t i=0; i<N; i++) {
-            //printf("Comparing %s to %s\n", String8(name, nameLen).string(),
-            //       String8(e->getBag().keyAt(i)).string());
+            //printf("Comparing %s to %s\n", String8(name, nameLen).c_str(),
+            //       String8(e->getBag().keyAt(i)).c_str());
             if (e->getBag().keyAt(i) == nameStr) {
                 return getItemValue(attrID, e->getBag().valueAt(i).bagKeyId, outValue);
             }
@@ -2529,7 +2531,7 @@ bool ResourceTable::getAttributeFlags(
     outValue->dataType = Res_value::TYPE_INT_HEX;
     outValue->data = 0;
 
-    //printf("getAttributeFlags #%08x %s\n", attrID, String8(name, nameLen).string());
+    //printf("getAttributeFlags #%08x %s\n", attrID, String8(name, nameLen).c_str());
     String16 nameStr(name, nameLen);
     sp<const Entry> e = getEntry(attrID);
     if (e != NULL) {
@@ -2546,8 +2548,8 @@ bool ResourceTable::getAttributeFlags(
             String16 nameStr(start, pos-start);
             size_t i;
             for (i=0; i<N; i++) {
-                //printf("Comparing \"%s\" to \"%s\"\n", String8(nameStr).string(),
-                //       String8(e->getBag().keyAt(i)).string());
+                //printf("Comparing \"%s\" to \"%s\"\n", String8(nameStr).c_str(),
+                //       String8(e->getBag().keyAt(i)).c_str());
                 if (e->getBag().keyAt(i) == nameStr) {
                     Res_value val;
                     bool got = getItemValue(attrID, e->getBag().valueAt(i).bagKeyId, &val);
@@ -2753,7 +2755,7 @@ status_t ResourceTable::addSymbols(const sp<AaptSymbols>& outSymbols,
                         if (mHasDefaultLocalization.find(c->getName())
                                 == mHasDefaultLocalization.end()) {
                             // printf("Skip symbol [%08x] %s\n", rid,
-                            //          String8(c->getName()).string());
+                            //          String8(c->getName()).c_str());
                             continue;
                         }
                     }
@@ -2763,7 +2765,7 @@ status_t ResourceTable::addSymbols(const sp<AaptSymbols>& outSymbols,
                     String16 comment(c->getComment());
                     typeSymbols->appendComment(String8(c->getName()), comment, c->getPos());
                     //printf("Type symbol [%08x] %s comment: %s\n", rid,
-                    //        String8(c->getName()).string(), String8(comment).string());
+                    //        String8(c->getName()).c_str(), String8(comment).c_str());
                     comment = c->getTypeComment();
                     typeSymbols->appendTypeComment(String8(c->getName()), comment);
                 }
@@ -2809,10 +2811,10 @@ ResourceTable::validateLocalizations(void)
         // Look for strings with no default localization
         if (configSrcMap.count(defaultLocale) == 0) {
             SourcePos().warning("string '%s' has no default translation.",
-                    String8(nameIter.first).string());
+                    String8(nameIter.first).c_str());
             if (mBundle->getVerbose()) {
                 for (const auto& locale : configSrcMap) {
-                    locale.second.printf("locale %s found", locale.first.string());
+                    locale.second.printf("locale %s found", locale.first.c_str());
                 }
             }
             // !!! TODO: throw an error here in some circumstances
@@ -2820,7 +2822,7 @@ ResourceTable::validateLocalizations(void)
 
         // Check that all requested localizations are present for this string
         if (mBundle->getConfigurations().size() > 0 && mBundle->getRequireLocalization()) {
-            const char* allConfigs = mBundle->getConfigurations().string();
+            const char* allConfigs = mBundle->getConfigurations().c_str();
             const char* start = allConfigs;
             const char* comma;
 
@@ -2830,10 +2832,10 @@ ResourceTable::validateLocalizations(void)
                 String8 config;
                 comma = strchr(start, ',');
                 if (comma != NULL) {
-                    config.setTo(start, comma - start);
+                    config = String8(start, comma - start);
                     start = comma + 1;
                 } else {
-                    config.setTo(start);
+                    config = start;
                 }
 
                 if (!locale.initFromFilterString(config)) {
@@ -2847,7 +2849,7 @@ ResourceTable::validateLocalizations(void)
                         // requiring a specific regional localization [e.g. de_DE] but there is an
                         // available string in the generic language localization [e.g. de];
                         // consider that string to have fulfilled the localization requirement.
-                        String8 region(config.string(), 2);
+                        String8 region(config.c_str(), 2);
                         if (configSrcMap.find(region) == configSrcMap.end() &&
                                 configSrcMap.count(defaultLocale) == 0) {
                             missingConfigs.insert(config);
@@ -2859,12 +2861,12 @@ ResourceTable::validateLocalizations(void)
             if (!missingConfigs.empty()) {
                 String8 configStr;
                 for (const auto& iter : missingConfigs) {
-                    configStr.appendFormat(" %s", iter.string());
+                    configStr.appendFormat(" %s", iter.c_str());
                 }
                 SourcePos().warning("string '%s' is missing %u required localizations:%s",
-                        String8(nameIter.first).string(),
+                        String8(nameIter.first).c_str(),
                         (unsigned int)missingConfigs.size(),
-                        configStr.string());
+                        configStr.c_str());
             }
         }
     }
@@ -3021,7 +3023,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
         header->header.type = htods(RES_TABLE_PACKAGE_TYPE);
         header->header.headerSize = htods(sizeof(*header));
         header->id = htodl(static_cast<uint32_t>(p->getAssignedId()));
-        strcpy16_htod(header->name, p->getName().string());
+        strcpy16_htod(header->name, p->getName().c_str());
 
         // Write the string blocks.
         const size_t typeStringsStart = data->getSize();
@@ -3061,7 +3063,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
             sp<Type> t = p->getTypes().valueFor(typeName);
             LOG_ALWAYS_FATAL_IF(t == NULL && typeName != String16("<empty>"),
                                 "Type name %s not found",
-                                String8(typeName).string());
+                                String8(typeName).c_str());
             if (t == NULL) {
                 continue;
             }
@@ -3251,7 +3253,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
 
             // If we're building splits, then each invocation of the flattening
             // step will have 'missing' entries. Don't warn/error for this case.
-            if (bundle->getSplitConfigurations().isEmpty()) {
+            if (bundle->getSplitConfigurations().empty()) {
                 bool missing_entry = false;
                 const char* log_prefix = bundle->getErrorOnMissingConfigEntry() ?
                         "error" : "warning";
@@ -3260,7 +3262,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                         sp<ConfigList> c = t->getOrderedConfigs().itemAt(i);
                         if (c != NULL) {
                             fprintf(stderr, "%s: no entries written for %s/%s (0x%08zx)\n", log_prefix,
-                                    String8(typeName).string(), String8(c->getName()).string(),
+                                    String8(typeName).c_str(), String8(c->getName()).c_str(),
                                     Res_MAKEID(p->getAssignedId() - 1, ti, i));
                         }
                         missing_entry = true;
@@ -3359,7 +3361,7 @@ status_t ResourceTable::flattenLibraryTable(const sp<AaptFile>& dest, const Vect
             sp<Package> libPackage = libs[i];
             if (kIsDebug) {
                 fprintf(stderr, "  Entry %s -> 0x%02x\n",
-                        String8(libPackage->getName()).string(),
+                        String8(libPackage->getName()).c_str(),
                         (uint8_t)libPackage->getAssignedId());
             }
 
@@ -3367,7 +3369,7 @@ status_t ResourceTable::flattenLibraryTable(const sp<AaptFile>& dest, const Vect
                     entryStart, sizeof(ResTable_lib_entry));
             memset(entry, 0, sizeof(*entry));
             entry->packageId = htodl(libPackage->getAssignedId());
-            strcpy16_htod(entry->packageName, libPackage->getName().string());
+            strcpy16_htod(entry->packageName, libPackage->getName().c_str());
         }
     }
     return NO_ERROR;
@@ -3435,13 +3437,13 @@ void ResourceTable::writePublicDefinitions(const String16& package, FILE* fp, bo
                         const SourcePos& pos = c->getEntries().valueAt(k)->getPos();
                         if (pos.file != "") {
                             fprintf(fp,"  <!-- Declared at %s:%d -->\n",
-                                    pos.file.string(), pos.line);
+                                    pos.file.c_str(), pos.line);
                         }
                     }
                 }
                 fprintf(fp, "  <public type=\"%s\" name=\"%s\" id=\"0x%08x\" />\n",
-                        String8(t->getName()).string(),
-                        String8(c->getName()).string(),
+                        String8(t->getName()).c_str(),
+                        String8(c->getName()).c_str(),
                         getResId(pkg, t, c->getEntryIndex()));
             }
         }
@@ -3501,8 +3503,8 @@ status_t ResourceTable::Entry::makeItABag(const SourcePos& sourcePos)
     }
     sourcePos.error("Resource entry %s is already defined as a single item.\n"
                     "%s:%d: Originally defined here.\n",
-                    String8(mName).string(),
-                    mItem.sourcePos.file.string(), mItem.sourcePos.line);
+                    String8(mName).c_str(),
+                    mItem.sourcePos.file.c_str(), mItem.sourcePos.line);
     return UNKNOWN_ERROR;
 }
 
@@ -3517,21 +3519,21 @@ status_t ResourceTable::Entry::setItem(const SourcePos& sourcePos,
     if (mType == TYPE_BAG) {
         if (mBag.size() == 0) {
             sourcePos.error("Resource entry %s is already defined as a bag.",
-                    String8(mName).string());
+                    String8(mName).c_str());
         } else {
             const Item& item(mBag.valueAt(0));
             sourcePos.error("Resource entry %s is already defined as a bag.\n"
                             "%s:%d: Originally defined here.\n",
-                            String8(mName).string(),
-                            item.sourcePos.file.string(), item.sourcePos.line);
+                            String8(mName).c_str(),
+                            item.sourcePos.file.c_str(), item.sourcePos.line);
         }
         return UNKNOWN_ERROR;
     }
     if ( (mType != TYPE_UNKNOWN) && (overwrite == false) ) {
         sourcePos.error("Resource entry %s is already defined.\n"
                         "%s:%d: Originally defined here.\n",
-                        String8(mName).string(),
-                        mItem.sourcePos.file.string(), mItem.sourcePos.line);
+                        String8(mName).c_str(),
+                        mItem.sourcePos.file.c_str(), mItem.sourcePos.line);
         return UNKNOWN_ERROR;
     }
 
@@ -3562,12 +3564,12 @@ status_t ResourceTable::Entry::addToBag(const SourcePos& sourcePos,
             const Item& item(mBag.valueAt(origKey));
             sourcePos.error("Resource entry %s already has bag item %s.\n"
                     "%s:%d: Originally defined here.\n",
-                    String8(mName).string(), String8(key).string(),
-                    item.sourcePos.file.string(), item.sourcePos.line);
+                    String8(mName).c_str(), String8(key).c_str(),
+                    item.sourcePos.file.c_str(), item.sourcePos.line);
             return UNKNOWN_ERROR;
         }
         //printf("Replacing %s with %s\n",
-        //       String8(mBag.valueFor(key).value).string(), String8(value).string());
+        //       String8(mBag.valueFor(key).value).c_str(), String8(value).c_str());
         mBag.replaceValueFor(key, item);
     }
 
@@ -3611,8 +3613,8 @@ status_t ResourceTable::Entry::generateAttributes(ResourceTable* table,
                 String16 value("false");
                 if (kIsDebug) {
                     fprintf(stderr, "Generating %s:id/%s\n",
-                            String8(package).string(),
-                            String8(key).string());
+                            String8(package).c_str(),
+                            String8(key).c_str());
                 }
                 status_t err = table->addEntry(SourcePos(String8("<generated>"), 0), package,
                                                id16, key, value);
@@ -3624,10 +3626,10 @@ status_t ResourceTable::Entry::generateAttributes(ResourceTable* table,
 
 #if 1
 //             fprintf(stderr, "ERROR: Bag attribute '%s' has not been defined.\n",
-//                     String8(key).string());
+//                     String8(key).c_str());
 //             const Item& item(mBag.valueAt(i));
 //             fprintf(stderr, "Referenced from file %s line %d\n",
-//                     item.sourcePos.file.string(), item.sourcePos.line);
+//                     item.sourcePos.file.c_str(), item.sourcePos.line);
 //             return UNKNOWN_ERROR;
 #else
             char numberStr[16];
@@ -3660,7 +3662,7 @@ status_t ResourceTable::Entry::assignResourceIds(ResourceTable* table,
             mParentId = table->getResId(mParent, &style16, NULL, &errorMsg);
             if (mParentId == 0) {
                 mPos.error("Error retrieving parent for item: %s '%s'.\n",
-                        errorMsg, String8(mParent).string());
+                        errorMsg, String8(mParent).c_str());
                 hasErrors = true;
             }
         }
@@ -3670,11 +3672,11 @@ status_t ResourceTable::Entry::assignResourceIds(ResourceTable* table,
             Item& it = mBag.editValueAt(i);
             it.bagKeyId = table->getResId(key,
                     it.isId ? &id16 : &attr16, NULL, &errorMsg);
-            //printf("Bag key of %s: #%08x\n", String8(key).string(), it.bagKeyId);
+            //printf("Bag key of %s: #%08x\n", String8(key).c_str(), it.bagKeyId);
             if (it.bagKeyId == 0) {
                 it.sourcePos.error("Error: %s: %s '%s'.\n", errorMsg,
-                        String8(it.isId ? id16 : attr16).string(),
-                        String8(key).string());
+                        String8(it.isId ? id16 : attr16).c_str(),
+                        String8(key).c_str());
                 hasErrors = true;
             }
         }
@@ -3709,7 +3711,7 @@ status_t ResourceTable::Entry::prepareFlatten(StringPool* strings, ResourceTable
         }
     } else {
         mPos.error("Error: entry %s is not a single item or a bag.\n",
-                   String8(mName).string());
+                   String8(mName).c_str());
         return UNKNOWN_ERROR;
     }
     return NO_ERROR;
@@ -3732,7 +3734,7 @@ status_t ResourceTable::Entry::remapStringValue(StringPool* strings)
         }
     } else {
         mPos.error("Error: entry %s is not a single item or a bag.\n",
-                   String8(mName).string());
+                   String8(mName).c_str());
         return UNKNOWN_ERROR;
     }
     return NO_ERROR;
@@ -3768,7 +3770,7 @@ ssize_t ResourceTable::Entry::flatten(Bundle* /* bundle */, const sp<AaptFile>& 
         par.data = htodl(it.parsedValue.data);
         #if 0
         printf("Writing item (%s): type=%d, data=0x%x, res0=0x%x\n",
-               String8(mName).string(), it.parsedValue.dataType,
+               String8(mName).c_str(), it.parsedValue.dataType,
                it.parsedValue.data, par.res0);
         #endif
         err = data->writeData(&par, it.parsedValue.size);
@@ -3852,7 +3854,7 @@ status_t ResourceTable::Type::addPublic(const SourcePos& sourcePos,
     int32_t entryIdx = Res_GETENTRY(ident);
     if (entryIdx < 0) {
         sourcePos.error("Public resource %s/%s has an invalid 0 identifier (0x%08x).\n",
-                String8(mName).string(), String8(name).string(), ident);
+                String8(mName).c_str(), String8(name).c_str(), ident);
         return UNKNOWN_ERROR;
     }
     #endif
@@ -3863,7 +3865,7 @@ status_t ResourceTable::Type::addPublic(const SourcePos& sourcePos,
         if (mPublicIndex > 0 && mPublicIndex != typeIdx) {
             sourcePos.error("Public resource %s/%s has conflicting type codes for its"
                     " public identifiers (0x%x vs 0x%x).\n",
-                    String8(mName).string(), String8(name).string(),
+                    String8(mName).c_str(), String8(name).c_str(),
                     mPublicIndex, typeIdx);
             return UNKNOWN_ERROR;
         }
@@ -3882,8 +3884,8 @@ status_t ResourceTable::Type::addPublic(const SourcePos& sourcePos,
             sourcePos.error("Public resource %s/%s has conflicting public identifiers"
                     " (0x%08x vs 0x%08x).\n"
                     "%s:%d: Originally defined here.\n",
-                    String8(mName).string(), String8(name).string(), p.ident, ident,
-                    p.sourcePos.file.string(), p.sourcePos.line);
+                    String8(mName).c_str(), String8(name).c_str(), p.ident, ident,
+                    p.sourcePos.file.c_str(), p.sourcePos.line);
             return UNKNOWN_ERROR;
         }
     }
@@ -3909,7 +3911,7 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
         if (overlay && !autoAddOverlay && mCanAddEntries.indexOf(entry) < 0) {
             sourcePos.error("Resource at %s appears in overlay but not"
                             " in the base package; use <add-resource> to add.\n",
-                            String8(entry).string());
+                            String8(entry).c_str());
             return NULL;
         }
         c = new ConfigList(entry, sourcePos);
@@ -3931,7 +3933,7 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
                 printf("New entry at %s:%d: imsi:%d/%d lang:%c%c cnt:%c%c "
                     "orien:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
                     "sw%ddp w%ddp h%ddp layout:%d\n",
-                      sourcePos.file.string(), sourcePos.line,
+                      sourcePos.file.c_str(), sourcePos.line,
                       config->mcc, config->mnc,
                       config->language[0] ? config->language[0] : '-',
                       config->language[1] ? config->language[1] : '-',
@@ -3951,7 +3953,7 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
                       config->screenLayout);
             } else {
                 printf("New entry at %s:%d: NULL config\n",
-                        sourcePos.file.string(), sourcePos.line);
+                        sourcePos.file.c_str(), sourcePos.line);
             }
         }
         e = new Entry(entry, sourcePos);
@@ -4032,11 +4034,11 @@ status_t ResourceTable::Type::applyPublicEntryOrder()
         const Public& p = mPublic.valueAt(j);
         int32_t idx = Res_GETENTRY(p.ident);
         //printf("Looking for entry \"%s\"/\"%s\" (0x%08x) in %d...\n",
-        //       String8(mName).string(), String8(name).string(), p.ident, N);
+        //       String8(mName).c_str(), String8(name).c_str(), p.ident, N);
         bool found = false;
         for (i=0; i<N; i++) {
             sp<ConfigList> e = origOrder.itemAt(i);
-            //printf("#%d: \"%s\"\n", i, String8(e->getName()).string());
+            //printf("#%d: \"%s\"\n", i, String8(e->getName()).c_str());
             if (e->getName() == name) {
                 if (idx >= (int32_t)mOrderedConfigs.size()) {
                     mOrderedConfigs.resize(idx + 1);
@@ -4056,10 +4058,10 @@ status_t ResourceTable::Type::applyPublicEntryOrder()
                     p.sourcePos.error("Multiple entry names declared for public entry"
                             " identifier 0x%x in type %s (%s vs %s).\n"
                             "%s:%d: Originally defined here.",
-                            idx+1, String8(mName).string(),
-                            String8(oe->getName()).string(),
-                            String8(name).string(),
-                            oe->getPublicSourcePos().file.string(),
+                            idx+1, String8(mName).c_str(),
+                            String8(oe->getName()).c_str(),
+                            String8(name).c_str(),
+                            oe->getPublicSourcePos().file.c_str(),
                             oe->getPublicSourcePos().line);
                     hasError = true;
                 }
@@ -4068,7 +4070,7 @@ status_t ResourceTable::Type::applyPublicEntryOrder()
 
         if (!found) {
             p.sourcePos.error("Public symbol %s/%s declared here is not defined.",
-                    String8(mName).string(), String8(name).string());
+                    String8(mName).c_str(), String8(name).c_str());
             hasError = true;
         }
     }
@@ -4189,9 +4191,9 @@ status_t ResourceTable::Package::applyPublicTypeOrder()
                 t->getFirstPublicSourcePos().error("Multiple type names declared for public type"
                         " identifier 0x%x (%s vs %s).\n"
                         "%s:%d: Originally defined here.",
-                        idx, String8(ot->getName()).string(),
-                        String8(t->getName()).string(),
-                        ot->getFirstPublicSourcePos().file.string(),
+                        idx, String8(ot->getName()).c_str(),
+                        String8(t->getName()).c_str(),
+                        ot->getFirstPublicSourcePos().file.c_str(),
                         ot->getFirstPublicSourcePos().line);
                 return UNKNOWN_ERROR;
             }
@@ -4399,8 +4401,8 @@ const ResourceTable::Item* ResourceTable::getItem(uint32_t resID, uint32_t attrI
         const Item& it = e->getBag().valueAt(i);
         if (it.bagKeyId == 0) {
             fprintf(stderr, "warning: ID not yet assigned to '%s' in bag '%s'\n",
-                    String8(e->getName()).string(),
-                    String8(e->getBag().keyAt(i)).string());
+                    String8(e->getName()).c_str(),
+                    String8(e->getBag().keyAt(i)).c_str());
         }
         if (it.bagKeyId == attrID) {
             return &it;
@@ -4427,8 +4429,8 @@ bool ResourceTable::getItemValue(
                 }
             }
             fprintf(stderr, "warning: Circular reference detected in key '%s' of bag '%s'\n",
-                    String8(e->getName()).string(),
-                    String8(e->getBag().keyAt(i)).string());
+                    String8(e->getName()).c_str(),
+                    String8(e->getBag().keyAt(i)).c_str());
             return false;
         }
         item->evaluating = true;
@@ -4436,7 +4438,7 @@ bool ResourceTable::getItemValue(
         if (kIsDebug) {
             if (res) {
                 printf("getItemValue of #%08x[#%08x] (%s): type=#%08x, data=#%08x\n",
-                       resID, attrID, String8(getEntry(resID)->getName()).string(),
+                       resID, attrID, String8(getEntry(resID)->getName()).c_str(),
                        outValue->dataType, outValue->data);
             } else {
                 printf("getItemValue of #%08x[#%08x]: failed\n",
@@ -4713,10 +4715,10 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                         entriesToAdd[i].value->getPos()
                                 .printf("using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
                                         entriesToAdd[i].key.sdkVersion,
-                                        String8(p->getName()).string(),
-                                        String8(t->getName()).string(),
-                                        String8(entriesToAdd[i].value->getName()).string(),
-                                        entriesToAdd[i].key.toString().string());
+                                        String8(p->getName()).c_str(),
+                                        String8(t->getName()).c_str(),
+                                        String8(entriesToAdd[i].value->getName()).c_str(),
+                                        entriesToAdd[i].key.toString().c_str());
                     }
 
                     sp<Entry> newEntry = t->getEntry(c->getName(),
@@ -4801,9 +4803,9 @@ bool ResourceTable::versionForCompat(const Bundle* bundle, const String16& resou
     sp<AaptFile> newFile = new AaptFile(target->getSourceFile(),
             AaptGroupEntry(newConfig), target->getResourceType());
     String8 resPath = String8::format("res/%s/%s.xml",
-            newFile->getGroupEntry().toDirName(target->getResourceType()).string(),
-            String8(resourceName).string());
-    resPath.convertToResPath();
+            newFile->getGroupEntry().toDirName(target->getResourceType()).c_str(),
+            String8(resourceName).c_str());
+    convertToResPath(resPath);
 
     // Add a resource table entry.
     addEntry(SourcePos(),
@@ -4857,7 +4859,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
 
     Vector<sp<XMLNode> > nodesToVisit;
     nodesToVisit.push(root);
-    while (!nodesToVisit.isEmpty()) {
+    while (!nodesToVisit.empty()) {
         sp<XMLNode> node = nodesToVisit.top();
         nodesToVisit.pop();
 
@@ -4893,10 +4895,10 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
                 if (bundle->getVerbose()) {
                     SourcePos(node->getFilename(), node->getStartLineNumber()).printf(
                             "removing attribute %s%s%s from <%s>",
-                            String8(attr.ns).string(),
+                            String8(attr.ns).c_str(),
                             (attr.ns.size() == 0 ? "" : ":"),
-                            String8(attr.name).string(),
-                            String8(node->getElementName()).string());
+                            String8(attr.name).c_str(),
+                            String8(node->getElementName()).c_str());
                 }
                 node->removeAttribute(i);
                 i--;
@@ -4925,19 +4927,19 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         sp<AaptFile> newFile = new AaptFile(target->getSourceFile(),
                 AaptGroupEntry(newConfig), target->getResourceType());
         String8 resPath = String8::format("res/%s/%s.xml",
-                newFile->getGroupEntry().toDirName(target->getResourceType()).string(),
-                String8(resourceName).string());
-        resPath.convertToResPath();
+                newFile->getGroupEntry().toDirName(target->getResourceType()).c_str(),
+                String8(resourceName).c_str());
+        convertToResPath(resPath);
 
         // Add a resource table entry.
         if (bundle->getVerbose()) {
             SourcePos(target->getSourceFile(), -1).printf(
                     "using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
                     newConfig.sdkVersion,
-                    mAssets->getPackage().string(),
-                    newFile->getResourceType().string(),
-                    String8(resourceName).string(),
-                    newConfig.toString().string());
+                    mAssets->getPackage().c_str(),
+                    newFile->getResourceType().c_str(),
+                    String8(resourceName).c_str(),
+                    newConfig.toString().c_str());
         }
 
         addEntry(SourcePos(),
@@ -5114,8 +5116,8 @@ status_t ResourceTable::processBundleFormatImpl(const Bundle* bundle,
         sp<XMLNode> nestedRoot = findOnlyChildElement(child);
         if (nestedRoot == NULL) {
             source.error("<%s:%s> must have exactly one child element",
-                         String8(child->getElementNamespace()).string(),
-                         String8(child->getElementName()).string());
+                         String8(child->getElementNamespace()).c_str(),
+                         String8(child->getElementName()).c_str());
             return UNKNOWN_ERROR;
         }
 
@@ -5130,7 +5132,7 @@ status_t ResourceTable::processBundleFormatImpl(const Bundle* bundle,
         // Parse the attribute name.
         const char* errorMsg = NULL;
         String16 attrPackage, attrType, attrName;
-        bool result = ResTable::expandResourceRef(attr->string.string(),
+        bool result = ResTable::expandResourceRef(attr->string.c_str(),
                                                   attr->string.size(),
                                                   &attrPackage, &attrType, &attrName,
                                                   &kAttr16, &kAssetPackage16,
@@ -5156,11 +5158,11 @@ status_t ResourceTable::processBundleFormatImpl(const Bundle* bundle,
             // This child element will be extracted into its own resource file.
             // Generate a name and path for it from its parent.
             nestedResourceName = String8::format("%s_%d",
-                        String8(resourceName).string(), suffix++);
+                        String8(resourceName).c_str(), suffix++);
             nestedResourcePath = String8::format("res/%s/%s.xml",
                         target->getGroupEntry().toDirName(target->getResourceType())
-                                               .string(),
-                        nestedResourceName.string());
+                                               .c_str(),
+                        nestedResourceName.c_str());
 
             // Lookup or create the entry for this name.
             sp<Entry> entry = getEntry(kAssetPackage16,
@@ -5187,20 +5189,20 @@ status_t ResourceTable::processBundleFormatImpl(const Bundle* bundle,
 
         if (bundle->getVerbose()) {
             source.printf("generating nested resource %s:%s/%s",
-                    mAssets->getPackage().string(), target->getResourceType().string(),
-                    nestedResourceName.string());
+                    mAssets->getPackage().c_str(), target->getResourceType().c_str(),
+                    nestedResourceName.c_str());
         }
 
         // Build the attribute reference and assign it to the parent.
         String16 nestedResourceRef = String16(String8::format("@%s:%s/%s",
-                    mAssets->getPackage().string(), target->getResourceType().string(),
-                    nestedResourceName.string()));
+                    mAssets->getPackage().c_str(), target->getResourceType().c_str(),
+                    nestedResourceName.c_str()));
 
         String16 attrNs = buildNamespace(attrPackage);
         if (parent->getAttribute(attrNs, attrName) != NULL) {
             SourcePos(parent->getFilename(), parent->getStartLineNumber())
                     .error("parent of nested resource already defines attribute '%s:%s'",
-                           String8(attrPackage).string(), String8(attrName).string());
+                           String8(attrPackage).c_str(), String8(attrName).c_str());
             return UNKNOWN_ERROR;
         }
 

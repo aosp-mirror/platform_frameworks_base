@@ -174,7 +174,7 @@ public class SubscriptionManager {
     /**
      * Key to the backup & restore data byte array in the Bundle that is returned by {@link
      * #getAllSimSpecificSettingsForBackup()} or to be pass in to {@link
-     * #restoreAllSimSpecificSettings()}.
+     * #restoreAllSimSpecificSettingsFromBackup(byte[])}.
      *
      * @hide
      */
@@ -2218,46 +2218,46 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get an array of subscription ids for specified logical SIM slot Index.
+     * Get an array of subscription ids for the specified logical SIM slot Index. The maximum size
+     * of the array is 1. This API was mistakenly designed to return multiple subscription ids,
+     * which is not possible in the current Android telephony architecture.
      *
      * @param slotIndex The logical SIM slot index.
      *
-     * @return subscription Ids or {@code null} if the given slot index is not valid or there are
-     * no active subscription in the slot. In the implementation today, there will be no more
-     * than one subscriptions per logical SIM slot.
+     * @return Subscription id of the active subscription on the specified logical SIM slot index.
+     * If SIM is absent on the slot, a single element array of {@link #INVALID_SUBSCRIPTION_ID} will
+     * be returned. {@code null} if the provided {@code slotIndex} is not valid.
      *
      * @deprecated Use {@link #getSubscriptionId(int)} instead.
      */
     @Deprecated
     @Nullable
     public int[] getSubscriptionIds(int slotIndex) {
-        int subId = getSubscriptionId(slotIndex);
-        if (!isValidSubscriptionId(subId)) {
+        if (!isValidSlotIndex(slotIndex)) {
             return null;
         }
         return new int[]{getSubscriptionId(slotIndex)};
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * Get an array of subscription ids for the specified logical SIM slot Index. The maximum size
+     * of the array is 1. This API was mistakenly designed to return multiple subscription ids,
+     * which is not possible in the current Android telephony architecture.
+     *
+     * @param slotIndex The logical SIM slot index.
+     *
+     * @return Subscription id of the active subscription on the specified logical SIM slot index.
+     * If SIM is absent on the slot, a single element array of {@link #INVALID_SUBSCRIPTION_ID} will
+     * be returned. {@code null} if the provided {@code slotIndex} is not valid.
+     *
+     * @deprecated Use {@link #getSubscriptionId(int)} instead.
+     * @hide
+     */
     public static int[] getSubId(int slotIndex) {
         if (!isValidSlotIndex(slotIndex)) {
-            logd("[getSubId]- fail");
             return null;
         }
-
-        int[] subId = null;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                subId = iSub.getSubIds(slotIndex);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return subId;
+        return new int[]{getSubscriptionId(slotIndex)};
     }
 
     /**
@@ -3628,17 +3628,10 @@ public class SubscriptionManager {
     }
 
     /**
-     * Enables or disables a subscription. This is currently used in the settings page. It will
-     * fail and return false if operation is not supported or failed.
+     * Enable or disable a subscription. This method is same as
+     * {@link #setUiccApplicationsEnabled(int, boolean)}.
      *
-     * To disable an active subscription on a physical (non-Euicc) SIM,
-     * {@link #canDisablePhysicalSubscription} needs to be true.
-     *
-     * <p>
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
-     *
-     * @param subscriptionId Subscription to be enabled or disabled. It could be a eSIM or pSIM
-     * subscription.
+     * @param subscriptionId Subscription to be enabled or disabled.
      * @param enable whether user is turning it on or off.
      *
      * @return whether the operation is successful.
@@ -3648,19 +3641,15 @@ public class SubscriptionManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setSubscriptionEnabled(int subscriptionId, boolean enable) {
-        if (VDBG) {
-            logd("setSubscriptionActivated subId= " + subscriptionId + " enable " + enable);
-        }
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                return iSub.setSubscriptionEnabled(enable, subscriptionId);
+                iSub.setUiccApplicationsEnabled(enable, subscriptionId);
             }
         } catch (RemoteException ex) {
-            // ignore it
+            return false;
         }
-
-        return false;
+        return true;
     }
 
     /**
@@ -3683,11 +3672,7 @@ public class SubscriptionManager {
             logd("setUiccApplicationsEnabled subId= " + subscriptionId + " enable " + enabled);
         }
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.setUiccApplicationsEnabled(enabled, subscriptionId);
             }
@@ -3715,11 +3700,7 @@ public class SubscriptionManager {
             logd("canDisablePhysicalSubscription");
         }
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 return iSub.canDisablePhysicalSubscription();
             }
@@ -3843,10 +3824,15 @@ public class SubscriptionManager {
     }
 
     /**
-     * DO NOT USE.
-     * This API is designed for features that are not finished at this point. Do not call this API.
+     * Get the active subscription id by logical SIM slot index.
+     *
+     * @param slotIndex The logical SIM slot index.
+     * @return The active subscription id.
+     *
+     * @throws IllegalArgumentException if the provided slot index is invalid.
+     * @throws SecurityException if callers do not hold the required permission.
+     *
      * @hide
-     * TODO b/135547512: further clean up
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -4027,39 +4013,16 @@ public class SubscriptionManager {
     }
 
     /**
-     * Called to attempt to restore the backed up sim-specific configs to device for specific sim.
-     * This will try to restore the data that was stored internally when {@link
-     * #restoreAllSimSpecificSettingsFromBackup(byte[] data)} was called during setup wizard.
-     * End result is SimInfoDB is modified to match any backed up configs for the requested
-     * inserted sim.
-     *
-     * <p>
-     * The {@link Uri} {@link #SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI} is notified if any SimInfoDB
-     * entry is updated as the result of this method call.
-     *
-     * @param iccId of the sim that a restore is requested for.
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void restoreSimSpecificSettingsForIccIdFromBackup(@NonNull String iccId) {
-        mContext.getContentResolver().call(
-                SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI,
-                RESTORE_SIM_SPECIFIC_SETTINGS_METHOD_NAME,
-                iccId, null);
-    }
-
-    /**
      * Called during setup wizard restore flow to attempt to restore the backed up sim-specific
-     * configs to device for all existing SIMs in SimInfoDB. Internally, it will store the backup
-     * data in an internal file. This file will persist on device for device's lifetime and will be
-     * used later on when a SIM is inserted to restore that specific SIM's settings by calling
-     * {@link #restoreSimSpecificSettingsForIccIdFromBackup(String iccId)}. End result is
-     * SimInfoDB is modified to match any backed up configs for the appropriate inserted SIMs.
+     * configs to device for all existing SIMs in the subscription database {@link SimInfo}.
+     * Internally, it will store the backup data in an internal file. This file will persist on
+     * device for device's lifetime and will be used later on when a SIM is inserted to restore that
+     * specific SIM's settings. End result is subscription database is modified to match any backed
+     * up configs for the appropriate inserted SIMs.
      *
      * <p>
-     * The {@link Uri} {@link #SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI} is notified if any SimInfoDB
-     * entry is updated as the result of this method call.
+     * The {@link Uri} {@link #SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI} is notified if any
+     * {@link SimInfo} entry is updated as the result of this method call.
      *
      * @param data with the sim specific configs to be backed up.
      *
@@ -4068,12 +4031,18 @@ public class SubscriptionManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void restoreAllSimSpecificSettingsFromBackup(@NonNull byte[] data) {
-        Bundle bundle = new Bundle();
-        bundle.putByteArray(KEY_SIM_SPECIFIC_SETTINGS_DATA, data);
-        mContext.getContentResolver().call(
-                SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI,
-                RESTORE_SIM_SPECIFIC_SETTINGS_METHOD_NAME,
-                null, bundle);
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                iSub.restoreAllSimSpecificSettingsFromBackup(data);
+            } else {
+                throw new IllegalStateException("subscription service unavailable.");
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
     }
 
     /**

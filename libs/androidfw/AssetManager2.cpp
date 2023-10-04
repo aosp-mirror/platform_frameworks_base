@@ -99,6 +99,13 @@ struct FindEntryResult {
   StringPoolRef entry_string_ref;
 };
 
+struct Theme::Entry {
+  uint32_t attr_res_id;
+  ApkAssetsCookie cookie;
+  uint32_t type_spec_flags;
+  Res_value value;
+};
+
 AssetManager2::AssetManager2() {
   memset(&configuration_, 0, sizeof(configuration_));
 }
@@ -890,14 +897,14 @@ std::string AssetManager2::GetLastResourceResolution() const {
     }
 
     log_stream << "\n\t" << prefix->second << ": " << apk_assets_[step.cookie]->GetDebugName();
-    if (!step.config_name.isEmpty()) {
+    if (!step.config_name.empty()) {
       log_stream << " - " << step.config_name;
     }
   }
 
   log_stream << "\nBest matching is from "
-             << (last_resolution_.best_config_name.isEmpty() ? "default"
-                                                   : last_resolution_.best_config_name)
+             << (last_resolution_.best_config_name.empty() ? "default"
+                    : last_resolution_.best_config_name.c_str())
              << " configuration of " << last_resolution_.best_package_name;
   return log_stream.str();
 }
@@ -1410,13 +1417,6 @@ Theme::Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {
 }
 
 Theme::~Theme() = default;
-
-struct Theme::Entry {
-  uint32_t attr_res_id;
-  ApkAssetsCookie cookie;
-  uint32_t type_spec_flags;
-  Res_value value;
-};
 
 namespace {
 struct ThemeEntryKeyComparer {

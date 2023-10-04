@@ -38,7 +38,7 @@ FileStream::FileStream(const int fd)
 
 FileStream::FileStream(const String8 filename)
     : mPosition(0) {
-    mFile = fopen(filename.string(), "r");
+    mFile = fopen(filename.c_str(), "r");
     if (mFile == NULL) {
         return;
     }
@@ -86,7 +86,7 @@ bool GetExifFromRawImage(
 
     if (!piex::IsRaw(stream)) {
         // Format not supported.
-        ALOGV("Format not supported: %s", filename.string());
+        ALOGV("Format not supported: %s", filename.c_str());
         return false;
     }
 
@@ -94,7 +94,7 @@ bool GetExifFromRawImage(
 
     if (err != piex::Error::kOk) {
         // The input data seems to be broken.
-        ALOGV("Raw image not detected: %s (piex error code: %d)", filename.string(), (int32_t)err);
+        ALOGV("Raw image not detected: %s (piex error code: %d)", filename.c_str(), (int32_t)err);
         return false;
     }
 

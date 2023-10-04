@@ -276,8 +276,8 @@ public final class ProcessList {
     // don't have an oom adj assigned by the system).
     public static final int NATIVE_ADJ = -1000;
 
-    // Memory pages are 4K.
-    static final int PAGE_SIZE = 4 * 1024;
+    // Memory page size.
+    static final int PAGE_SIZE = (int) Os.sysconf(OsConstants._SC_PAGESIZE);
 
     // Activity manager's version of Process.THREAD_GROUP_BACKGROUND
     static final int SCHED_GROUP_BACKGROUND = 0;
@@ -350,6 +350,7 @@ public final class ProcessList {
     static final byte LMK_UPDATE_PROPS = 7;
     static final byte LMK_KILL_OCCURRED = 8; // Msg to subscribed clients on kill occurred event
     static final byte LMK_STATE_CHANGED = 9; // Msg to subscribed clients on state changed
+    static final byte LMK_START_MONITORING = 9; // Start monitoring if delayed earlier
 
     // Low Memory Killer Daemon command codes.
     // These must be kept in sync with async_event_type definitions in lmkd.h
@@ -1483,6 +1484,15 @@ public final class ProcessList {
         return true;
     }
 
+    /**
+     * {@hide}
+     */
+    public static void startPsiMonitoringAfterBoot() {
+        ByteBuffer buf = ByteBuffer.allocate(4);
+        buf.putInt(LMK_START_MONITORING);
+        writeLmkd(buf, null);
+    }
+
     private static boolean writeLmkd(ByteBuffer buf, ByteBuffer repl) {
         if (!sLmkdConnection.isConnected()) {
             // try to connect immediately and then keep retrying
@@ -1741,6 +1751,7 @@ public final class ProcessList {
 
             if (debuggableFlag) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
+                runtimeFlags |= Zygote.DEBUG_ENABLE_PTRACE;
                 runtimeFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
                 // Also turn on CheckJNI for debuggable apps. It's quite
                 // awkward to turn on otherwise.

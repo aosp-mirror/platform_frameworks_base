@@ -10,6 +10,7 @@ per-file PowerManagerInternal.java = michaelwr@google.com, santoscordon@google.c
 # BatteryStats
 per-file *BatteryConsumer* = file:/BATTERY_STATS_OWNERS
 per-file BatteryManager* = file:/BATTERY_STATS_OWNERS
+per-file PowerMonitor* = file:/BATTERY_STATS_OWNERS
 per-file PowerComponents.java = file:/BATTERY_STATS_OWNERS
 per-file *Stats* = file:/BATTERY_STATS_OWNERS
 
@@ -76,3 +77,10 @@ per-file PatternMatcher* = file:/PACKAGE_MANAGER_OWNERS
 
 # PermissionEnforcer
 per-file PermissionEnforcer.java = tweek@google.com, brufino@google.com
+
+# ART
+per-file ArtModuleServiceManager.java = file:platform/art:/OWNERS
+
+# PerformanceHintManager
+per-file PerformanceHintManager.java = file:/ADPF_OWNERS
+

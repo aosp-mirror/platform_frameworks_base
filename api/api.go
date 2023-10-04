@@ -110,6 +110,7 @@ type defaultsProps struct {
 	Api_surface         *string
 	Api_contributions   []string
 	Defaults_visibility []string
+	Previous_api        *string
 }
 
 type Bazel_module struct {
@@ -145,7 +146,7 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	metalavaCmd := "$(location metalava)"
 	// Silence reflection warnings. See b/168689341
 	metalavaCmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
-	metalavaCmd += " --quiet --no-banner --format=v2 "
+	metalavaCmd += " --quiet merge-signatures --format=v2 "
 
 	filename := txt.TxtFilename
 	if txt.Scope != "public" {
@@ -155,7 +156,7 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	props.Name = proptools.StringPtr(ctx.ModuleName() + "-" + filename)
 	props.Tools = []string{"metalava"}
 	props.Out = []string{filename}
-	props.Cmd = proptools.StringPtr(metalavaCmd + "$(in) --api $(out)")
+	props.Cmd = proptools.StringPtr(metalavaCmd + "$(in) --out $(out)")
 	props.Srcs = append([]string{txt.BaseTxt}, createSrcs(txt.Modules, txt.ModuleTag)...)
 	props.Dists = []android.Dist{
 		{
@@ -359,6 +360,7 @@ func createApiContributionDefaults(ctx android.LoadHookContext, modules []string
 		props.Api_contributions = transformArray(
 			modules, "", fmt.Sprintf(".stubs.source%s.api.contribution", apiSuffix))
 		props.Defaults_visibility = []string{"//visibility:public"}
+		props.Previous_api = proptools.StringPtr(":android.api.public.latest")
 		ctx.CreateModule(java.DefaultsFactory, &props)
 	}
 }
@@ -427,7 +429,7 @@ type bazelCombinedApisAttributes struct {
 }
 
 // combined_apis bp2build converter
-func (a *CombinedApis) ConvertWithBp2build(ctx android.TopDownMutatorContext) {
+func (a *CombinedApis) ConvertWithBp2build(ctx android.Bp2buildMutatorContext) {
 	basePrefix := "non-updatable"
 	scopeToSuffix := map[string]string{
 		"public":        "-current.txt",

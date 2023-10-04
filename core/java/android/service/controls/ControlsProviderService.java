@@ -158,7 +158,7 @@ public abstract class ControlsProviderService extends Service {
      * The user has interacted with a Control. The action is dictated by the type of
      * {@link ControlAction} that was sent. A response can be sent via
      * {@link Consumer#accept}, with the Integer argument being one of the provided
-     * {@link ControlAction.ResponseResult}. The Integer should indicate whether the action
+     * {@link ControlAction} response results. The Integer should indicate whether the action
      * was received successfully, or if additional prompts should be presented to
      * the user. Any visual control updates should be sent via the Publisher.
 

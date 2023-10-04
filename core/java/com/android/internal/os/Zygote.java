@@ -195,6 +195,12 @@ public final class Zygote {
      */
     public static final int PROFILEABLE = 1 << 24;
 
+    /**
+     * Enable ptrace.  This is enabled on eng, if the app is debuggable, or if
+     * the persist.debug.ptrace.enabled property is set.
+     */
+    public static final int DEBUG_ENABLE_PTRACE = 1 << 25;
+
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
     /** Default external storage should be mounted. */
@@ -1015,18 +1021,36 @@ public final class Zygote {
                           "persist.debug.dalvik.vm.jdwp.enabled").equals("1");
 
     /**
+     * This will enable ptrace by default for all apps. It is OK to cache this property
+     * because we expect to reboot the system whenever this property changes
+     */
+    private static final boolean ENABLE_PTRACE = SystemProperties.get(
+                          "persist.debug.ptrace.enabled").equals("1");
+
+    /**
      * Applies debugger system properties to the zygote arguments.
      *
-     * For eng builds all apps are debuggable. On userdebug and user builds
-     * if persist.debug.dalvik.vm.jdwp.enabled is 1 all apps are
-     * debuggable. Otherwise, the debugger state is specified via the
-     * "--enable-jdwp" flag in the spawn request.
+     * For eng builds all apps are debuggable with JDWP and ptrace.
+     *
+     * On userdebug builds if persist.debug.dalvik.vm.jdwp.enabled
+     * is 1 all apps are debuggable with JDWP and ptrace. Otherwise, the
+     * debugger state is specified via the "--enable-jdwp" flag in the
+     * spawn request.
+     *
+     * On userdebug builds if persist.debug.ptrace.enabled is 1 all
+     * apps are debuggable with ptrace.
      *
      * @param args non-null; zygote spawner args
      */
     static void applyDebuggerSystemProperty(ZygoteArguments args) {
-        if (Build.IS_ENG || ENABLE_JDWP) {
+        if (Build.IS_ENG || (Build.IS_USERDEBUG && ENABLE_JDWP)) {
             args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
+            // Also enable ptrace when JDWP is enabled for consistency with
+            // before persist.debug.ptrace.enabled existed.
+            args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_PTRACE;
+        }
+        if (Build.IS_ENG || (Build.IS_USERDEBUG && ENABLE_PTRACE)) {
+            args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_PTRACE;
         }
     }
 
@@ -1049,7 +1073,8 @@ public final class Zygote {
         int peerUid = peer.getUid();
 
         if (args.mInvokeWith != null && peerUid != 0
-                && (args.mRuntimeFlags & Zygote.DEBUG_ENABLE_JDWP) == 0) {
+                && (args.mRuntimeFlags
+                    & (Zygote.DEBUG_ENABLE_JDWP | Zygote.DEBUG_ENABLE_PTRACE)) == 0) {
             throw new ZygoteSecurityException("Peer is permitted to specify an "
                 + "explicit invoke-with wrapper command only for debuggable "
                 + "applications.");

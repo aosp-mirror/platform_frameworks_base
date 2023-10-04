@@ -134,6 +134,7 @@ android_library {
         "res-keyguard",
         "res",
     ],
+    use_resource_processor: true,
     static_libs: [
         "WifiTrackerLib",
         "WindowManager-Shell",
@@ -180,7 +181,7 @@ android_library {
     ],
     manifest: "AndroidManifest.xml",
 
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
 
     plugins: ["dagger2-compiler"],
 
@@ -341,7 +342,7 @@ android_library {
         "android.test.base",
         "android.test.mock",
     ],
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
     aaptflags: [
         "--extra-packages",
         "com.android.systemui",
@@ -452,12 +453,13 @@ android_app {
     ],
     resource_dirs: [],
 
+    use_resource_processor: true,
     platform_apis: true,
     system_ext_specific: true,
     certificate: "platform",
     privileged: true,
 
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
 
     dxflags: ["--multi-dex"],
     required: [

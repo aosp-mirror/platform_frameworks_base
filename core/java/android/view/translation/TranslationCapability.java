@@ -207,7 +207,7 @@ public final class TranslationCapability implements Parcelable {
 
     /**
      * Translation flags for settings that are supported by the
-     * {@link android.service.translation.TranslationService} between the {@link TranslationSpec}s
+     * translation service between the {@link TranslationSpec}s
      * provided in this capability.
      */
     @DataClass.Generated.Member

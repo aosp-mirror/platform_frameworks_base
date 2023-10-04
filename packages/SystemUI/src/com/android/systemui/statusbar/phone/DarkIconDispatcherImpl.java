@@ -23,7 +23,6 @@ import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.widget.ImageView;
 
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 
@@ -54,8 +53,10 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
             Context context,
             LightBarTransitionsController.Factory lightBarTransitionsControllerFactory,
             DumpManager dumpManager) {
-        mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
-        mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
+        mDarkModeIconColorSingleTone = context.getColor(
+                com.android.settingslib.R.color.dark_mode_icon_color_single_tone);
+        mLightModeIconColorSingleTone = context.getColor(
+                com.android.settingslib.R.color.light_mode_icon_color_single_tone);
 
         mTransitionsController = lightBarTransitionsControllerFactory.create(this);
 

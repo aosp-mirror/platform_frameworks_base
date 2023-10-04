@@ -94,7 +94,7 @@ void PrintValue(AssetManager2* const am, const AssetManager2::SelectedValue& val
       const ResStringPool* pool = am->GetStringPoolForCookie(value.cookie);
       out->append("\"");
       if (auto str = pool->string8ObjectAt(value.data); str.ok()) {
-        out->append(*str);
+        out->append(str->c_str());
       }
     } break;
     default:

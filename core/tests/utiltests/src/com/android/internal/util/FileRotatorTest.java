@@ -366,6 +366,16 @@ public class FileRotatorTest extends AndroidTestCase {
         assertReadAll(rotate, "bar");
     }
 
+    public void testReadSorted() throws Exception {
+        write("rotator.1024-2048", "2");
+        write("rotator.2048-4096", "3");
+        write("rotator.512-1024", "1");
+
+        final FileRotator rotate = new FileRotator(
+                mBasePath, PREFIX, SECOND_IN_MILLIS, SECOND_IN_MILLIS);
+        assertReadAll(rotate, "1", "2", "3");
+    }
+
     public void testFileSystemInaccessible() throws Exception {
         File inaccessibleDir = null;
         String dirPath = getContext().getFilesDir() + File.separator + "inaccessible";
@@ -422,16 +432,7 @@ public class FileRotatorTest extends AndroidTestCase {
         }
 
         public void assertRead(String... expected) {
-            assertEquals(expected.length, mActual.size());
-
-            final ArrayList<String> actualCopy = new ArrayList<String>(mActual);
-            for (String value : expected) {
-                if (!actualCopy.remove(value)) {
-                    final String expectedString = Arrays.toString(expected);
-                    final String actualString = Arrays.toString(mActual.toArray());
-                    fail("expected: " + expectedString + " but was: " + actualString);
-                }
-            }
+            assertEquals(Arrays.asList(expected), mActual);
         }
     }
 }

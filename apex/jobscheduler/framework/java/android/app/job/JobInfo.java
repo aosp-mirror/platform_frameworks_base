@@ -360,7 +360,7 @@ public class JobInfo implements Parcelable {
 
     /**
      * Allows this job to run despite doze restrictions as long as the app is in the foreground
-     * or on the temporary whitelist
+     * or on the temporary allowlist
      * @hide
      */
     public static final int FLAG_IMPORTANT_WHILE_FOREGROUND = 1 << 1;
@@ -1803,13 +1803,13 @@ public class JobInfo implements Parcelable {
 
         /**
          * Setting this to true indicates that this job is important while the scheduling app
-         * is in the foreground or on the temporary whitelist for background restrictions.
+         * is in the foreground or on the temporary allowlist for background restrictions.
          * This means that the system will relax doze restrictions on this job during this time.
          *
          * Apps should use this flag only for short jobs that are essential for the app to function
          * properly in the foreground.
          *
-         * Note that once the scheduling app is no longer whitelisted from background restrictions
+         * Note that once the scheduling app is no longer allowlisted from background restrictions
          * and in the background, or the job failed due to unsatisfied constraints,
          * this job should be expected to behave like other jobs without this flag.
          *

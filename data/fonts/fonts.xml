@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
+    DEPRECATED: This XML file is no longer a source of the font files installed
+    in the system.
+
+    For the device vendors: please add your font configurations to the
+    platform/frameworks/base/data/font_fallback.xml and also add it to this XML
+    file as much as possible for apps that reads this XML file.
+
+    For the application developers: please stop reading this XML file and use
+    android.graphics.fonts.SystemFonts#getAvailableFonts Java API or
+    ASystemFontIterator_open NDK API for getting list of system installed
+    font files.
+
     WARNING: Parsing of this file by third-party apps is not supported. The
     file, and the font files it refers to, will be renamed and/or moved out
     from their respective location in the next Android release, and/or the

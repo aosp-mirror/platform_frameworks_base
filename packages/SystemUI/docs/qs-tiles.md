@@ -123,7 +123,7 @@ A third party tile is any Quick Settings tile that is provided by an app (that's
 
 ### API classes
 
-The classes that define the public API are in [core/java/android/service/quicksettings](core/java/android/service/quicksettings).
+The classes that define the public API are in [core/java/android/service/quicksettings](/core/java/android/service/quicksettings).
 
 #### Tile
 

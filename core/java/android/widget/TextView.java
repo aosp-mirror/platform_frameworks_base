@@ -13355,6 +13355,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final ClipDescription description =
                 getClipboardManagerForUser().getPrimaryClipDescription();
+        if (description == null) {
+            return false;
+        }
         final boolean isPlainType = description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN);
         return (isPlainType && description.isStyledText())
                 || description.hasMimeType(ClipDescription.MIMETYPE_TEXT_HTML);

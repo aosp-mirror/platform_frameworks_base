@@ -24,6 +24,7 @@ import android.hardware.security.keymint.EcCurve;
 import android.hardware.security.keymint.HardwareAuthenticatorType;
 import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.SecurityLevel;
+import android.os.StrictMode;
 import android.security.GateKeeper;
 import android.security.KeyStore2;
 import android.security.KeyStoreParameter;
@@ -36,6 +37,7 @@ import android.security.keystore.KeyProtection;
 import android.security.keystore.SecureKeyImportUnavailableException;
 import android.security.keystore.WrappedKeyEntry;
 import android.system.keystore2.AuthenticatorSpec;
+import android.system.keystore2.Authorization;
 import android.system.keystore2.Domain;
 import android.system.keystore2.IKeystoreSecurityLevel;
 import android.system.keystore2.KeyDescriptor;
@@ -163,6 +165,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         KeyDescriptor descriptor = makeKeyDescriptor(alias);
 
         try {
+            StrictMode.noteDiskRead();
             return mKeyStore.getKeyEntry(descriptor);
         } catch (android.security.KeyStoreException e) {
             if (e.getErrorCode() != ResponseCode.KEY_NOT_FOUND) {
@@ -446,6 +449,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             assertCanReplace(alias, targetDomain, mNamespace, descriptor);
 
             try {
+                StrictMode.noteDiskWrite();
                 mKeyStore.updateSubcomponents(
                         ((AndroidKeyStorePrivateKey) key).getKeyIdDescriptor(),
                         userCertBytes, chainBytes);
@@ -522,25 +526,22 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                         padding
                 ));
                 if (padding == KeymasterDefs.KM_PAD_RSA_OAEP) {
-                    if (spec.isDigestsSpecified()) {
-                        boolean hasDefaultMgf1DigestBeenAdded = false;
-                        for (String digest : spec.getDigests()) {
+                    if (spec.isMgf1DigestsSpecified()) {
+                        for (String mgf1Digest : spec.getMgf1Digests()) {
                             importArgs.add(KeyStore2ParameterUtils.makeEnum(
                                     KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
-                                    KeyProperties.Digest.toKeymaster(digest)
+                                    KeyProperties.Digest.toKeymaster(mgf1Digest)
                             ));
-                            hasDefaultMgf1DigestBeenAdded |= digest.equals(DEFAULT_MGF1_DIGEST);
                         }
+                    } else {
                         /* Because of default MGF1 digest is SHA-1. It has to be added in Key
                          * characteristics. Otherwise, crypto operations will fail with Incompatible
                          * MGF1 digest.
                          */
-                        if (!hasDefaultMgf1DigestBeenAdded) {
-                            importArgs.add(KeyStore2ParameterUtils.makeEnum(
-                                    KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
-                                    KeyProperties.Digest.toKeymaster(DEFAULT_MGF1_DIGEST)
-                            ));
-                        }
+                        importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                                KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
+                                KeyProperties.Digest.toKeymaster(DEFAULT_MGF1_DIGEST)
+                        ));
                     }
                 }
             }
@@ -596,6 +597,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                     importArgs, flags, pkcs8EncodedPrivateKeyBytes);
 
             try {
+                StrictMode.noteDiskWrite();
                 mKeyStore.updateSubcomponents(metadata.key, userCertBytes, chainBytes);
             } catch (android.security.KeyStoreException e) {
                 mKeyStore.deleteKey(metadata.key);
@@ -931,6 +933,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
         KeyEntryResponse response = null;
         try {
+            StrictMode.noteDiskRead();
             response = mKeyStore.getKeyEntry(wrappingkey);
         } catch (android.security.KeyStoreException e) {
             throw new KeyStoreException("Failed to import wrapped key. Keystore error code: "
@@ -960,7 +963,34 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             authenticatorSpecs.add(authSpec);
         }
 
+        if (parts.length > 2) {
+            @KeyProperties.EncryptionPaddingEnum int padding =
+                    KeyProperties.EncryptionPadding.toKeymaster(parts[2]);
+            if (padding == KeymasterDefs.KM_PAD_RSA_OAEP
+                    && response.metadata != null
+                    && response.metadata.authorizations != null) {
+                Authorization[] keyCharacteristics = response.metadata.authorizations;
+
+                for (Authorization authorization : keyCharacteristics) {
+                    // Add default MGF1 digest SHA-1
+                    // when wrapping key has KM_TAG_RSA_OAEP_MGF_DIGEST tag
+                    if (authorization.keyParameter.tag
+                            == KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST) {
+                        // Default MGF1 digest is SHA-1
+                        // and KeyMint only supports default MGF1 digest crypto operations
+                        // for importWrappedKey.
+                        args.add(KeyStore2ParameterUtils.makeEnum(
+                                KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
+                                KeyProperties.Digest.toKeymaster(DEFAULT_MGF1_DIGEST)
+                        ));
+                        break;
+                    }
+                }
+            }
+        }
+
         try {
+            StrictMode.noteDiskWrite();
             securityLevel.importWrappedKey(
                     wrappedKey, wrappingkey,
                     entry.getWrappedKeyBytes(),
@@ -1021,6 +1051,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
 
         try {
+            StrictMode.noteDiskWrite();
             mKeyStore.updateSubcomponents(makeKeyDescriptor(alias),
                     null /* publicCert - unused when used as pure certificate store. */,
                     encoded);
@@ -1033,6 +1064,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     public void engineDeleteEntry(String alias) throws KeyStoreException {
         KeyDescriptor descriptor = makeKeyDescriptor(alias);
         try {
+            StrictMode.noteDiskWrite();
             mKeyStore.deleteKey(descriptor);
         } catch (android.security.KeyStoreException e) {
             if (e.getErrorCode() != ResponseCode.KEY_NOT_FOUND) {
@@ -1043,6 +1075,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
     private KeyDescriptor[] getAliasesBatch(String startPastAlias) {
         try {
+            StrictMode.noteDiskRead();
             return mKeyStore.listBatch(
                     getTargetDomain(),
                     mNamespace,
@@ -1070,6 +1103,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     @Override
     public int engineSize() {
         try {
+            StrictMode.noteDiskRead();
             return mKeyStore.getNumberOfEntries(
                     getTargetDomain(),
                     mNamespace
@@ -1133,6 +1167,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
         KeyDescriptor[] keyDescriptors = null;
         try {
+            StrictMode.noteDiskRead();
             keyDescriptors = mKeyStore.list(
                     getTargetDomain(),
                     mNamespace

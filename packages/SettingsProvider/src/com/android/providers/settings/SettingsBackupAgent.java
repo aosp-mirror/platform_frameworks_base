@@ -884,7 +884,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     @VisibleForTesting
     SettingsBackupWhitelist getBackupWhitelist(Uri contentUri) {
         // Figure out the white list and redirects to the global table.  We restore anything
-        // in either the backup whitelist or the legacy-restore whitelist for this table.
+        // in either the backup allowlist or the legacy-restore allowlist for this table.
         String[] whitelist;
         Map<String, Validator> validators = null;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
@@ -1432,7 +1432,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     /**
-     * Store the whitelist of settings to be backed up and validators for them.
+     * Store the allowlist of settings to be backed up and validators for them.
      */
     @VisibleForTesting
     static class SettingsBackupWhitelist {

@@ -1527,6 +1527,31 @@ public class UserManager {
     public static final String DISALLOW_ULTRA_WIDEBAND_RADIO = "no_ultra_wideband_radio";
 
     /**
+     * This user restriction specifies if Near-fied communication is disallowed on the device. If
+     * Near-field communication is disallowed it cannot be turned on via Settings.
+     *
+     * <p>This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile on the parent profile.
+     * In both cases, the restriction applies globally on the device and will turn off the
+     * Near-field communication radio if it's currently on and prevent the radio from being turned
+     * on in the future.
+     *
+     * <p>
+     * Near-field communication (NFC) is a radio technology that allows two devices (like your phone
+     * and a payments terminal) to communicate with each other when they're close together.
+     *
+     * <p>Default is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO =
+            "no_near_field_communication_radio";
+
+    /**
      * List of key values that can be passed into the various user restriction related methods
      * in {@link UserManager} & {@link DevicePolicyManager}.
      * Note: This is slightly different from the real set of user restrictions listed in {@link
@@ -1609,6 +1634,7 @@ public class UserManager {
             DISALLOW_ADD_WIFI_CONFIG,
             DISALLOW_CELLULAR_2G,
             DISALLOW_ULTRA_WIDEBAND_RADIO,
+            DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}

@@ -131,6 +131,13 @@
 
     <string name="textview_hebrew_text">&#x05DD;&#x05DE;ab?!</string>
 
+    <!-- Used in ResourcesLocaleTest. Also defined in values-id. "id" is the new ISO code for Indonesian. -->
+    <string name="locale_test_res_1">Testing ID</string>
+    <!-- Used in ResourcesLocaleTest. Also defined in values-in. "in" is the deprecated ISO code for Indonesian. -->
+    <string name="locale_test_res_2">Testing IN</string>
+    <!-- Used in ResourcesLocaleTest. -->
+    <string name="locale_test_res_3">Testing EN</string>
+
     <!-- SizeAdaptiveLayout -->
     <string name="first">Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.</string>
     <string name="actor">Abe Lincoln</string>

@@ -52,7 +52,7 @@ static void android_content_res_ObbScanner_getObbInfo(JNIEnv* env, jobject clazz
 
     env->ReleaseStringUTFChars(file, filePath);
 
-    const char* packageNameStr = obb->getPackageName().string();
+    const char* packageNameStr = obb->getPackageName().c_str();
 
     jstring packageName = env->NewStringUTF(packageNameStr);
     if (packageName == NULL) {

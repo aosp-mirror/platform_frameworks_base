@@ -61,6 +61,15 @@
         {
             "name": "CtsVcnTestCases",
             "file_patterns": ["VcnManagementService\\.java"]
+        },
+        {
+            "name": "FrameworksNetTests",
+            "options": [
+                {
+                    "exclude-annotation": "com.android.testutils.SkipPresubmit"
+                }
+            ],
+            "file_patterns": ["VpnManagerService\\.java"]
         }
     ],
     "presubmit-large": [
@@ -78,6 +87,21 @@
                 }
             ],
             "file_patterns": ["ClipboardService\\.java"]
+        },
+        {
+            "name": "CtsHostsideNetworkTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "com.android.testutils.SkipPresubmit"
+                }
+            ],
+            "file_patterns": ["VpnManagerService\\.java"]
         }
     ],
     "postsubmit": [

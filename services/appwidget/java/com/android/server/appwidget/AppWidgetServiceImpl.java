@@ -3960,14 +3960,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.BIND_APPWIDGET, null);
             } catch (SecurityException se) {
-                if (!isCallerBindAppWidgetWhiteListedLocked(packageName)) {
+                if (!isCallerBindAppWidgetAllowListedLocked(packageName)) {
                     return false;
                 }
             }
             return true;
         }
 
-        private boolean isCallerBindAppWidgetWhiteListedLocked(String packageName) {
+        private boolean isCallerBindAppWidgetAllowListedLocked(String packageName) {
             final int userId = UserHandle.getCallingUserId();
             final int packageUid = getUidForPackage(packageName, userId);
             if (packageUid < 0) {

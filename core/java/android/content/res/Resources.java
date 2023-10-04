@@ -53,6 +53,7 @@ import android.graphics.drawable.Drawable.ConstantState;
 import android.graphics.drawable.DrawableInflater;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -131,6 +132,11 @@ public class Resources {
 
     private static final Object sSync = new Object();
     private final Object mUpdateLock = new Object();
+
+    /**
+     * Controls whether we should preload resources during zygote init.
+     */
+    private static final boolean PRELOAD_RESOURCES = true;
 
     // Used by BridgeResources in layoutlib
     @UnsupportedAppUsage
@@ -2664,6 +2670,98 @@ public class Resources {
                 loader.unregisterOnProvidersChangedCallback(this);
             }
         }
+    }
+
+    /**
+     * Load in commonly used resources, so they can be shared across processes.
+     *
+     * These tend to be a few Kbytes, but are frequently in the 20-40K range, and occasionally even
+     * larger.
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public static void preloadResources() {
+        try {
+            final Resources sysRes = Resources.getSystem();
+            sysRes.startPreloading();
+            if (PRELOAD_RESOURCES) {
+                Log.i(TAG, "Preloading resources...");
+
+                long startTime = SystemClock.uptimeMillis();
+                TypedArray ar = sysRes.obtainTypedArray(
+                        com.android.internal.R.array.preloaded_drawables);
+                int numberOfEntries = preloadDrawables(sysRes, ar);
+                ar.recycle();
+                Log.i(TAG, "...preloaded " + numberOfEntries + " resources in "
+                        + (SystemClock.uptimeMillis() - startTime) + "ms.");
+
+                startTime = SystemClock.uptimeMillis();
+                ar = sysRes.obtainTypedArray(
+                        com.android.internal.R.array.preloaded_color_state_lists);
+                numberOfEntries = preloadColorStateLists(sysRes, ar);
+                ar.recycle();
+                Log.i(TAG, "...preloaded " + numberOfEntries + " resources in "
+                        + (SystemClock.uptimeMillis() - startTime) + "ms.");
+
+                if (sysRes.getBoolean(
+                        com.android.internal.R.bool.config_freeformWindowManagement)) {
+                    startTime = SystemClock.uptimeMillis();
+                    ar = sysRes.obtainTypedArray(
+                            com.android.internal.R.array.preloaded_freeform_multi_window_drawables);
+                    numberOfEntries = preloadDrawables(sysRes, ar);
+                    ar.recycle();
+                    Log.i(TAG, "...preloaded " + numberOfEntries + " resource in "
+                            + (SystemClock.uptimeMillis() - startTime) + "ms.");
+                }
+            }
+            sysRes.finishPreloading();
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Failure preloading resources", e);
+        }
+    }
+
+    private static int preloadColorStateLists(Resources resources, TypedArray ar) {
+        final int numberOfEntries = ar.length();
+        for (int i = 0; i < numberOfEntries; i++) {
+            int id = ar.getResourceId(i, 0);
+
+            if (id != 0) {
+                if (resources.getColorStateList(id, null) == null) {
+                    throw new IllegalArgumentException(
+                            "Unable to find preloaded color resource #0x"
+                                    + Integer.toHexString(id)
+                                    + " (" + ar.getString(i) + ")");
+                }
+            }
+        }
+        return numberOfEntries;
+    }
+
+    private static int preloadDrawables(Resources resources, TypedArray ar) {
+        final int numberOfEntries = ar.length();
+        for (int i = 0; i < numberOfEntries; i++) {
+            int id = ar.getResourceId(i, 0);
+
+            if (id != 0) {
+                if (resources.getDrawable(id, null) == null) {
+                    throw new IllegalArgumentException(
+                            "Unable to find preloaded drawable resource #0x"
+                                    + Integer.toHexString(id)
+                                    + " (" + ar.getString(i) + ")");
+                }
+            }
+        }
+        return numberOfEntries;
+    }
+
+    /**
+     * Clear the cache when the framework resources packages is changed.
+     * @hide
+     */
+    @VisibleForTesting
+    public static void resetPreloadDrawableStateCache() {
+        ResourcesImpl.resetDrawableStateCache();
+        preloadResources();
     }
 
     /** @hide */

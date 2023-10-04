@@ -52,7 +52,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
         int largeClockTopMargin = parent.getResources()
                 .getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin);
         int targetHeight = parent.getResources()
-                .getDimensionPixelSize(R.dimen.large_clock_text_size) * 2;
+                .getDimensionPixelSize(
+                        com.android.systemui.customization.R.dimen.large_clock_text_size)
+                * 2;
         int top = parent.getHeight() / 2 - targetHeight / 2
                 + largeClockTopMargin / 2;
         return new Rect(
@@ -152,7 +154,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
         if (mClock != null) {
             if (mSmallClockFrame.isLaidOut()) {
                 int targetHeight =  getResources()
-                        .getDimensionPixelSize(R.dimen.small_clock_text_size);
+                        .getDimensionPixelSize(
+                            com.android.systemui.customization.R.dimen.small_clock_text_size);
                 mClock.getSmallClock().getEvents().onTargetRegionChanged(new Rect(
                         mSmallClockFrame.getLeft(),
                         mSmallClockFrame.getTop(),

@@ -424,7 +424,7 @@ public abstract class ApexManager {
     /**
      * Performs a non-staged install of the given {@code apexFile}.
      */
-    abstract void installPackage(File apexFile, PackageParser2 packageParser)
+    abstract void installPackage(File apexFile, PackageParser2 packageParser, boolean force)
             throws PackageManagerException;
 
     /**
@@ -1136,7 +1136,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        void installPackage(File apexFile, PackageParser2 packageParser)
+        void installPackage(File apexFile, PackageParser2 packageParser, boolean force)
                 throws PackageManagerException {
             try {
                 final int flags = PackageManager.GET_META_DATA
@@ -1159,7 +1159,7 @@ public abstract class ApexManager {
                 }
                 checkApexSignature(existingApexPkg, newApexPkg);
                 ApexInfo apexInfo = waitForApexService().installAndActivatePackage(
-                        apexFile.getAbsolutePath());
+                        apexFile.getAbsolutePath(), force);
                 final ParsedPackage parsedPackage2 = packageParser.parsePackage(
                         new File(apexInfo.modulePath), flags, /* useCaches= */ false);
                 final PackageInfo finalApexPkg = PackageInfoWithoutStateUtils.generate(
@@ -1505,7 +1505,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        void installPackage(File apexFile, PackageParser2 packageParser) {
+        void installPackage(File apexFile, PackageParser2 packageParser, boolean force) {
             throw new UnsupportedOperationException("APEX updates are not supported");
         }
 

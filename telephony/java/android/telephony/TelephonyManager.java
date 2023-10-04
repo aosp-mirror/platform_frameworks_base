@@ -7713,7 +7713,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Rollback modem configurations to factory default except some config which are in whitelist.
+     * Rollback modem configurations to factory default except some config which are in allowlist.
      * Used for device configuration by some carriers.
      *
      * <p>Requires Permission:
@@ -14785,7 +14785,7 @@ public class TelephonyManager {
      *
      *  1) User data is turned on, or
      *  2) APN is un-metered for this subscription, or
-     *  3) APN type is whitelisted. E.g. MMS is whitelisted if
+     *  3) APN type is allowlisted. E.g. MMS is allowlisted if
      *  {@link #MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED} is enabled.
      *
      * @param apnType Value indicating the apn type. Apn types are defined in {@link ApnSetting}.

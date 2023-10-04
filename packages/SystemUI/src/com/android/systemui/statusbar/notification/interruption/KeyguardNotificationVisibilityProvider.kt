@@ -57,7 +57,7 @@ interface KeyguardNotificationVisibilityProvider {
 object KeyguardNotificationVisibilityProviderModule
 
 @Module
-private interface KeyguardNotificationVisibilityProviderImplModule {
+interface KeyguardNotificationVisibilityProviderImplModule {
     @Binds
     fun bindImpl(impl: KeyguardNotificationVisibilityProviderImpl):
             KeyguardNotificationVisibilityProvider
@@ -69,7 +69,7 @@ private interface KeyguardNotificationVisibilityProviderImplModule {
 }
 
 @SysUISingleton
-private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
+class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
     @Main private val handler: Handler,
     private val keyguardStateController: KeyguardStateController,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
@@ -87,6 +87,7 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
 
     private val userTrackerCallback = object : UserTracker.Callback {
         override fun onUserChanged(newUser: Int, userContext: Context) {
+            readShowSilentNotificationSetting()
             if (isLockedOrLocking) {
                 // maybe public mode changed
                 notifyStateChanged("onUserSwitched")

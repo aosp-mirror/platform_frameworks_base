@@ -278,7 +278,7 @@ public class WalletActivity extends ComponentActivity implements
 
     private Drawable getHomeIndicatorDrawable() {
         Drawable drawable = getDrawable(R.drawable.ic_close);
-        drawable.setTint(getColor(R.color.material_dynamic_neutral70));
+        drawable.setTint(getColor(com.google.android.material.R.color.material_dynamic_neutral70));
         return drawable;
     }
 }
