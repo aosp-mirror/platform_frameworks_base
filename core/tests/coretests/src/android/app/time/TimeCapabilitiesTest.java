@@ -32,6 +32,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -41,6 +42,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class TimeCapabilitiesTest {
 
     private static final UserHandle TEST_USER_HANDLE = UserHandle.of(332211);

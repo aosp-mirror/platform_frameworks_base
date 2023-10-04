@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.shared.model
+package com.android.systemui.power.shared.model
 
-import com.android.systemui.keyguard.ScreenLifecycle
-
-enum class ScreenState {
+/**
+ * The power state of the display. If the screen is [SCREEN_OFF], it is unpowered, and nothing is
+ * visible including AOD.
+ */
+enum class ScreenPowerState {
     /** Screen is fully off. */
     SCREEN_OFF,
     /** Signal that the screen is turning on. */
@@ -26,17 +28,5 @@ enum class ScreenState {
     /** Screen is fully on. */
     SCREEN_ON,
     /** Signal that the screen is turning off. */
-    SCREEN_TURNING_OFF;
-
-    companion object {
-        fun fromScreenLifecycleInt(value: Int): ScreenState {
-            return when (value) {
-                ScreenLifecycle.SCREEN_OFF -> SCREEN_OFF
-                ScreenLifecycle.SCREEN_TURNING_ON -> SCREEN_TURNING_ON
-                ScreenLifecycle.SCREEN_ON -> SCREEN_ON
-                ScreenLifecycle.SCREEN_TURNING_OFF -> SCREEN_TURNING_OFF
-                else -> throw IllegalArgumentException("Invalid screen value: $value")
-            }
-        }
-    }
+    SCREEN_TURNING_OFF
 }

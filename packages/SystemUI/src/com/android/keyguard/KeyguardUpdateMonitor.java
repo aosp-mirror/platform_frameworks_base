@@ -3297,29 +3297,27 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (unlockPossible) {
             mFingerprintCancelSignal = new CancellationSignal();
 
+            final FingerprintAuthenticateOptions fingerprintAuthenticateOptions =
+                    new FingerprintAuthenticateOptions.Builder()
+                        .setUserId(userId)
+                        .build();
+            if (mFingerprintInteractiveToAuthProvider != null) {
+                fingerprintAuthenticateOptions.setVendorReason(
+                        mFingerprintInteractiveToAuthProvider.getVendorExtension(userId));
+            }
+
             if (!isUnlockingWithFingerprintAllowed()) {
                 mLogger.v("startListeningForFingerprint - detect");
                 mFpm.detectFingerprint(
                         mFingerprintCancelSignal,
                         mFingerprintDetectionCallback,
-                        new FingerprintAuthenticateOptions.Builder()
-                                .setUserId(userId)
-                                .setVendorReason(
-                                        mFingerprintInteractiveToAuthProvider.getVendorExtension(
-                                                getCurrentUser()))
-                                .build());
+                        fingerprintAuthenticateOptions);
             } else {
                 mLogger.v("startListeningForFingerprint");
                 mFpm.authenticate(null /* crypto */, mFingerprintCancelSignal,
                         mFingerprintAuthenticationCallback,
                         null /* handler */,
-                        new FingerprintAuthenticateOptions.Builder()
-                                .setUserId(userId)
-                                .setVendorReason(
-                                        mFingerprintInteractiveToAuthProvider.getVendorExtension(
-                                                getCurrentUser()))
-                                .build()
-                );
+                        fingerprintAuthenticateOptions);
             }
             setFingerprintRunningState(BIOMETRIC_STATE_RUNNING);
         }

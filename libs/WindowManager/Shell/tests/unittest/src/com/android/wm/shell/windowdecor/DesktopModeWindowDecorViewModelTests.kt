@@ -49,6 +49,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.sysui.KeyguardChangeListener
+import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -89,6 +90,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockShellExecutor: ShellExecutor
     @Mock private lateinit var mockRootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock private lateinit var mockRecentsTransitionHandler: RecentsTransitionHandler
+    @Mock private lateinit var mockShellCommandHandler: ShellCommandHandler
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
         SurfaceControl.Transaction()
@@ -105,6 +107,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockMainHandler,
                 mockMainChoreographer,
                 shellInit,
+                mockShellCommandHandler,
                 mockTaskOrganizer,
                 mockDisplayController,
                 mockShellController,

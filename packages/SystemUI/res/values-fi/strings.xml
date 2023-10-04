@@ -194,6 +194,8 @@
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Käytä sormenjälkeä"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Kasvojentunnistusavaus ei ole saatavilla"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth yhdistetty."</string>
+    <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Bluetooth-laitekuvake"</string>
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="4188853273831773436">"Bluetooth-laiteasetusten rataskuvake"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Akun varaustaso ei tiedossa."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Yhteys: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Yhdistetty kohteeseen <xliff:g id="CAST">%s</xliff:g>"</string>
@@ -246,6 +248,12 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Älä häiritse"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Laitepareja ei ole käytettävissä"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="6869579539763980182">"Yhdistä laite napauttamalla"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Muodosta uusi laitepari"</string>
+    <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Näytä kaikki"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"Käytä Bluetoothia"</string>
+    <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Yhdistetty"</string>
+    <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Tallennettu"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Akun taso <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Ääni"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -1143,7 +1151,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Jos haluat lisätä Wallet-sovelluksen pikakuvakkeena, varmista, että se on asennettuna"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Jos haluat lisätä Wallet-sovelluksen pikakuvakkeena, varmista, että lisättynä on vähintään yksi kortti"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Jos haluat lisätä Home-sovelluksen pikakuvakkeena, varmista, että se on asennettuna"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Ainakin yksi laite on käytettävissä"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Ainakin yksi laite tai laitepaneeli on käytettävissä"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Valitse muistiinpanojen tekemisen oletussovellus, jota käytetään pikakuvakkeen avulla"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Valitse sovellus"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Kosketa pikakuvaketta pitkään"</string>
@@ -1175,7 +1183,10 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Aseta oletusmuistiinpanosovellus Asetuksista"</string>
     <string name="install_app" msgid="5066668100199613936">"Asenna sovellus"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Peilataanko ulkoiselle näytölle?"</string>
-    <string name="enable_display" msgid="8308309634883321977">"Ota näyttö käyttöön"</string>
+    <!-- no translation found for mirror_display (2515262008898122928) -->
+    <skip />
+    <!-- no translation found for dismiss_dialog (2195508495854675882) -->
+    <skip />
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofoni ja kamera"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Sovellusten viimeaikainen käyttö"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Katso viimeaikainen käyttö"</string>

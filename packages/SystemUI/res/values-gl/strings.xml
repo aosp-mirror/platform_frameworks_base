@@ -194,6 +194,8 @@
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Usa a impresión dixital"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"O desbloqueo facial non está dispoñible"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth conectado"</string>
+    <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Icona do dispositivo Bluetooth"</string>
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="4188853273831773436">"Roda dentada da configuración do dispositivo Bluetooth"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Descoñécese a porcentaxe da batería."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Conectado a <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Dispositivo conectado: <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -246,6 +248,12 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Non molestar"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Non hai dispositivos vinculados dispoñibles"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="6869579539763980182">"Toca un dispositivo para conectalo"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Vincular dispositivo novo"</string>
+    <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Ver todo"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"Usar Bluetooth"</string>
+    <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Estableceuse a conexión"</string>
+    <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gardouse"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de batería"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Auriculares"</string>
@@ -277,7 +285,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversión da cor"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corrección da cor"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Tamaño do tipo de letra"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Administrar usuarios"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Usuarios"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Feito"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Pechar"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Conectado"</string>
@@ -1112,7 +1120,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Vista previa da imaxe"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"editar"</string>
     <string name="add" msgid="81036585205287996">"Engadir"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Xestionar usuarios"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Usuarios"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Esta notificación non pode arrastrarse á pantalla dividida"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"A wifi non está dispoñible"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Modo de prioridade"</string>
@@ -1143,7 +1151,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Para engadir a aplicación Wallet como atallo, asegúrate de que estea instalada"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Para engadir a aplicación Wallet como atallo, asegúrate de que se incluíse polo menos unha tarxeta"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Para engadir a aplicación Google Home como atallo, asegúrate de que estea instalada"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Ten que haber polo menos un dispositivo dispoñible"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Hai polo menos un dispositivo, ou panel de dispositivo, dispoñible"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Selecciona unha aplicación de notas predeterminada para usar o atallo de tomar notas"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Seleccionar aplicación"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantén premido o atallo"</string>
@@ -1175,7 +1183,10 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Establece a aplicación de notas predeterminada en Configuración"</string>
     <string name="install_app" msgid="5066668100199613936">"Instalar aplicación"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Queres proxectar contido nunha pantalla externa?"</string>
-    <string name="enable_display" msgid="8308309634883321977">"Activar pantalla"</string>
+    <!-- no translation found for mirror_display (2515262008898122928) -->
+    <skip />
+    <!-- no translation found for dismiss_dialog (2195508495854675882) -->
+    <skip />
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Micrófono e cámara"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Uso recente por parte de aplicacións"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Ver acceso recente"</string>

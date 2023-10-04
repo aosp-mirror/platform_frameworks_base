@@ -26,6 +26,7 @@
     },
     {
       "name": "GtsWebViewTestCases",
+      "keywords": ["internal"],
       "options": [
         {
           "exclude-annotation": "android.test.FlakyTest"
@@ -34,6 +35,7 @@
     },
     {
       "name": "GtsWebViewHostTestCases",
+      "keywords": ["internal"],
       "options": [
         {
           "exclude-annotation": "android.test.FlakyTest"

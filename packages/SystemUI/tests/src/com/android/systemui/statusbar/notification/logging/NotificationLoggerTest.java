@@ -43,9 +43,8 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
-import com.android.systemui.keyguard.shared.model.WakeSleepReason;
-import com.android.systemui.keyguard.shared.model.WakefulnessModel;
-import com.android.systemui.keyguard.shared.model.WakefulnessState;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.statusbar.NotificationListener;
@@ -109,6 +108,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
             new NotificationPanelLoggerFake();
     private final TestScope mTestScope = TestScopeProvider.getTestScope();
     private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
+    private final PowerInteractor mPowerInteractor =
+            PowerInteractorFactory.create().getPowerInteractor();
     private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
@@ -121,7 +122,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 mTestScope.getBackgroundScope(),
                 new WindowRootViewVisibilityRepository(mBarService, mUiBgExecutor),
                 mKeyguardRepository,
-                mHeadsUpManager);
+                mHeadsUpManager,
+                mPowerInteractor);
         mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
 
         mEntry = new NotificationEntryBuilder()
@@ -285,20 +287,12 @@ public class NotificationLoggerTest extends SysuiTestCase {
     }
 
     private void setStateAsleep() {
-        mKeyguardRepository.setWakefulnessModel(
-                new WakefulnessModel(
-                        WakefulnessState.ASLEEP,
-                        WakeSleepReason.OTHER,
-                        WakeSleepReason.OTHER));
+        PowerInteractor.Companion.setAsleepForTest(mPowerInteractor);
         mTestScope.getTestScheduler().runCurrent();
     }
 
     private void setStateAwake() {
-        mKeyguardRepository.setWakefulnessModel(
-                new WakefulnessModel(
-                        WakefulnessState.AWAKE,
-                        WakeSleepReason.OTHER,
-                        WakeSleepReason.OTHER));
+        PowerInteractor.Companion.setAwakeForTest(mPowerInteractor);
         mTestScope.getTestScheduler().runCurrent();
     }
 

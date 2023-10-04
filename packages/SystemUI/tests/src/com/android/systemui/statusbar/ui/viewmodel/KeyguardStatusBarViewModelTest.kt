@@ -25,8 +25,8 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.mockito.mock
@@ -44,12 +44,13 @@ class KeyguardStatusBarViewModelTest : SysuiTestCase() {
         KeyguardInteractor(
             keyguardRepository,
             mock<CommandQueue>(),
+            PowerInteractorFactory.create().powerInteractor,
             FakeFeatureFlagsClassic(),
             sceneTestUtils.sceneContainerFlags,
             sceneTestUtils.deviceEntryRepository,
             FakeKeyguardBouncerRepository(),
             FakeConfigurationRepository(),
-            FakeShadeRepository()
+            FakeShadeRepository(),
         ) {
             sceneTestUtils.sceneInteractor()
         }

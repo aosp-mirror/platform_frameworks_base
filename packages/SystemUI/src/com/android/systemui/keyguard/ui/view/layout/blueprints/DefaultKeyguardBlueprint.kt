@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.view.layout.blueprints
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
+import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
@@ -51,6 +52,7 @@ constructor(
     defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
     splitShadeGuidelines: SplitShadeGuidelines,
     aodNotificationIconsSection: AodNotificationIconsSection,
+    aodBurnInSection: AodBurnInSection,
 ) : KeyguardBlueprint {
     override val id: String = DEFAULT
 
@@ -66,6 +68,7 @@ constructor(
             defaultNotificationStackScrollLayoutSection,
             splitShadeGuidelines,
             aodNotificationIconsSection,
+            aodBurnInSection,
         )
 
     companion object {

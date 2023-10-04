@@ -187,7 +187,6 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.power.Mode;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -711,11 +710,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     static final int POWER_MODE_REASON_CHANGE_DISPLAY = 1 << 1;
     /** @see UnknownAppVisibilityController */
     static final int POWER_MODE_REASON_UNKNOWN_VISIBILITY = 1 << 2;
-    /** This can only be used by {@link #endLaunchPowerMode(int)}.*/
+    /**
+     * This can only be used by {@link #endPowerMode(int)}. Excluding UNKNOWN_VISIBILITY because
+     * that is guarded by a timeout while keyguard is locked.
+     */
     static final int POWER_MODE_REASON_ALL = (1 << 2) - 1;
 
-    /** The reasons to use {@link Mode#LAUNCH} power mode. */
-    private @PowerModeReason int mLaunchPowerModeReasons;
+    /** The reasons to apply power modes. */
+    @PowerModeReason
+    private int mPowerModeReasons;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
@@ -4657,11 +4660,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    void startLaunchPowerMode(@PowerModeReason int reason) {
-        if (mPowerManagerInternal != null) {
-            mPowerManagerInternal.setPowerMode(Mode.LAUNCH, true);
-        }
-        mLaunchPowerModeReasons |= reason;
+    void startPowerMode(@PowerModeReason int reason) {
+        final int prevReasons = mPowerModeReasons;
+        mPowerModeReasons |= reason;
         if ((reason & POWER_MODE_REASON_UNKNOWN_VISIBILITY) != 0) {
             if (mRetainPowerModeAndTopProcessState) {
                 mH.removeMessages(H.END_POWER_MODE_UNKNOWN_VISIBILITY_MSG);
@@ -4671,27 +4672,56 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     POWER_MODE_UNKNOWN_VISIBILITY_TIMEOUT_MS);
             Slog.d(TAG, "Temporarily retain top process state for launching app");
         }
+        if (mPowerManagerInternal == null) {
+            return;
+        }
+
+        // START_ACTIVITY can be used with UNKNOWN_VISIBILITY. CHANGE_DISPLAY should be used alone.
+        if ((reason & POWER_MODE_REASON_START_ACTIVITY) != 0
+                && (prevReasons & POWER_MODE_REASON_START_ACTIVITY) == 0) {
+            Trace.instant(Trace.TRACE_TAG_WINDOW_MANAGER, "StartModeLaunch");
+            mPowerManagerInternal.setPowerMode(PowerManagerInternal.MODE_LAUNCH, true);
+        } else if (reason == POWER_MODE_REASON_CHANGE_DISPLAY
+                && (prevReasons & POWER_MODE_REASON_CHANGE_DISPLAY) == 0) {
+            Trace.instant(Trace.TRACE_TAG_WINDOW_MANAGER, "StartModeDisplayChange");
+            mPowerManagerInternal.setPowerMode(PowerManagerInternal.MODE_DISPLAY_CHANGE, true);
+        }
     }
 
-    void endLaunchPowerMode(@PowerModeReason int reason) {
-        if (mLaunchPowerModeReasons == 0) return;
-        mLaunchPowerModeReasons &= ~reason;
+    void endPowerMode(@PowerModeReason int reason) {
+        if (mPowerModeReasons == 0) return;
+        final int prevReasons = mPowerModeReasons;
+        mPowerModeReasons &= ~reason;
 
-        if ((mLaunchPowerModeReasons & POWER_MODE_REASON_UNKNOWN_VISIBILITY) != 0) {
+        if ((mPowerModeReasons & POWER_MODE_REASON_UNKNOWN_VISIBILITY) != 0) {
             boolean allResolved = true;
             for (int i = mRootWindowContainer.getChildCount() - 1; i >= 0; i--) {
                 allResolved &= mRootWindowContainer.getChildAt(i).mUnknownAppVisibilityController
                         .allResolved();
             }
             if (allResolved) {
-                mLaunchPowerModeReasons &= ~POWER_MODE_REASON_UNKNOWN_VISIBILITY;
+                mPowerModeReasons &= ~POWER_MODE_REASON_UNKNOWN_VISIBILITY;
                 mRetainPowerModeAndTopProcessState = false;
                 mH.removeMessages(H.END_POWER_MODE_UNKNOWN_VISIBILITY_MSG);
             }
         }
+        if (mPowerManagerInternal == null) {
+            return;
+        }
 
-        if (mLaunchPowerModeReasons == 0 && mPowerManagerInternal != null) {
-            mPowerManagerInternal.setPowerMode(Mode.LAUNCH, false);
+        // If the launching apps have unknown visibility, only end launch power mode until the
+        // states are resolved.
+        final int endLaunchModeReasons = POWER_MODE_REASON_START_ACTIVITY
+                | POWER_MODE_REASON_UNKNOWN_VISIBILITY;
+        if ((prevReasons & endLaunchModeReasons) != 0
+                && (mPowerModeReasons & endLaunchModeReasons) == 0) {
+            Trace.instant(Trace.TRACE_TAG_WINDOW_MANAGER, "EndModeLaunch");
+            mPowerManagerInternal.setPowerMode(PowerManagerInternal.MODE_LAUNCH, false);
+        }
+        if ((prevReasons & POWER_MODE_REASON_CHANGE_DISPLAY) != 0
+                && (mPowerModeReasons & POWER_MODE_REASON_CHANGE_DISPLAY) == 0) {
+            Trace.instant(Trace.TRACE_TAG_WINDOW_MANAGER, "EndModeDisplayChange");
+            mPowerManagerInternal.setPowerMode(PowerManagerInternal.MODE_DISPLAY_CHANGE, false);
         }
     }
 
@@ -5751,7 +5781,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 case END_POWER_MODE_UNKNOWN_VISIBILITY_MSG: {
                     synchronized (mGlobalLock) {
                         mRetainPowerModeAndTopProcessState = false;
-                        endLaunchPowerMode(POWER_MODE_REASON_UNKNOWN_VISIBILITY);
+                        endPowerMode(POWER_MODE_REASON_UNKNOWN_VISIBILITY);
                         if (mTopApp != null
                                 && mTopProcessState == ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
                             // Restore the scheduling group for sleeping.

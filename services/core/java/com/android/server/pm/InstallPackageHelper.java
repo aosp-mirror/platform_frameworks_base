@@ -3728,7 +3728,7 @@ final class InstallPackageHelper {
         final ScanResult scanResult = scanResultPair.first;
         boolean shouldHideSystemApp = scanResultPair.second;
         final InstallRequest installRequest = new InstallRequest(
-                parsedPackage, parseFlags, scanFlags, user, scanResult);
+                parsedPackage, parseFlags, scanFlags, user, scanResult, disabledPkgSetting);
 
         String existingApexModuleName = null;
         synchronized (mPm.mLock) {
@@ -3962,6 +3962,7 @@ final class InstallPackageHelper {
         final String disabledPkgName = pkgAlreadyExists
                 ? pkgSetting.getPackageName() : parsedPackage.getPackageName();
         final boolean isSystemPkgUpdated;
+        final PackageSetting disabledPkgSetting;
         final boolean isUpgrade;
         synchronized (mPm.mLock) {
             isUpgrade = mPm.isDeviceUpgrading();
@@ -3975,8 +3976,7 @@ final class InstallPackageHelper {
                         + "and install it as non-updated system app.");
                 mPm.mSettings.removeDisabledSystemPackageLPw(disabledPkgName);
             }
-            final PackageSetting disabledPkgSetting =
-                    mPm.mSettings.getDisabledSystemPkgLPr(disabledPkgName);
+            disabledPkgSetting = mPm.mSettings.getDisabledSystemPkgLPr(disabledPkgName);
             isSystemPkgUpdated = disabledPkgSetting != null;
 
             if (DEBUG_INSTALL && isSystemPkgUpdated) {
@@ -4048,6 +4048,23 @@ final class InstallPackageHelper {
         // equal to the version on the /data partition. Throw an exception and use
         // the application already installed on the /data partition.
         if (scanSystemPartition && isSystemPkgUpdated && !isSystemPkgBetter) {
+            // For some updated system packages, during addForInit we want to ensure the
+            // PackageSetting has the correct SigningDetails compares to the original version on
+            // the system partition. For the check to happen later during the /data scan, update
+            // the disabled package setting per the original APK on a system partition so that it
+            // can be trusted during reconcile.
+            if (needSignatureMatchToSystem(parsedPackage.getPackageName())) {
+                final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+                final ParseResult<SigningDetails> result =
+                        ParsingPackageUtils.getSigningDetails(input, parsedPackage,
+                                false /*skipVerify*/);
+                if (result.isError()) {
+                    throw new PrepareFailure("Failed collect during scanSystemPackageLI",
+                            result.getException());
+                }
+                disabledPkgSetting.setSigningDetails(result.getResult());
+            }
+
             // In the case of a skipped package, commitReconciledScanResultLocked is not called to
             // add the object to the "live" data structures, so this is the final mutation step
             // for the package. Which means it needs to be finalized here to cache derived fields.
@@ -4065,19 +4082,16 @@ final class InstallPackageHelper {
         // Verify certificates against what was last scanned. Force re-collecting certificate in two
         // special cases:
         // 1) when scanning system, force re-collect only if system is upgrading.
-        // 2) when scanning /data, force re-collect only if the app is privileged (updated from
-        // preinstall, or treated as privileged, e.g. due to shared user ID).
+        // 2) when scanning /data, force re-collect only if the package name is allowlisted.
         final boolean forceCollect = scanSystemPartition ? isUpgrade
-                : PackageManagerServiceUtils.isApkVerificationForced(pkgSetting);
+                : pkgAlreadyExists && needSignatureMatchToSystem(pkgSetting.getPackageName());
         if (DEBUG_VERIFY && forceCollect) {
             Slog.d(TAG, "Force collect certificate of " + parsedPackage.getPackageName());
         }
 
-        // Full APK verification can be skipped during certificate collection, only if the file is
-        // in verified partition, or can be verified on access (when apk verity is enabled). In both
-        // cases, only data in Signing Block is verified instead of the whole file.
-        final boolean skipVerify = scanSystemPartition
-                || (forceCollect && canSkipForcedPackageVerification(parsedPackage));
+        // APK verification can be skipped during certificate collection, only if the file is in a
+        // verified partition.
+        final boolean skipVerify = scanSystemPartition;
         ScanPackageUtils.collectCertificatesLI(pkgSetting, parsedPackage,
                 mPm.getSettingsVersionForPackage(parsedPackage), forceCollect, skipVerify,
                 mPm.isPreNMR1Upgrade());
@@ -4196,22 +4210,15 @@ final class InstallPackageHelper {
     }
 
     /**
-     * Returns if forced apk verification can be skipped for the whole package, including splits.
+     * Returns whether the package needs a signature verification against the pre-installed version
+     * at boot.
      */
-    private boolean canSkipForcedPackageVerification(AndroidPackage pkg) {
-        if (!VerityUtils.hasFsverity(pkg.getBaseApkPath())) {
+    private boolean needSignatureMatchToSystem(String packageName) {
+        if (!android.security.Flags.extendVbChainToUpdatedApk()) {
             return false;
         }
-        // TODO: Allow base and splits to be verified individually.
-        String[] splitCodePaths = pkg.getSplitCodePaths();
-        if (!ArrayUtils.isEmpty(splitCodePaths)) {
-            for (int i = 0; i < splitCodePaths.length; i++) {
-                if (!VerityUtils.hasFsverity(splitCodePaths[i])) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return mPm.mInjector.getSystemConfig().getPreinstallPackagesWithStrictSignatureCheck()
+            .contains(packageName);
     }
 
     /**

@@ -64,6 +64,7 @@ class NotificationIconAreaControllerViewBinderWrapperImplTest : SysuiTestCase() 
                     featureFlags =
                         FakeFeatureFlagsClassicModule {
                             set(Flags.FACE_AUTH_REFACTOR, value = false)
+                            set(Flags.MIGRATE_KEYGUARD_STATUS_VIEW, value = false)
                         },
                     mocks =
                         TestMocksModule(

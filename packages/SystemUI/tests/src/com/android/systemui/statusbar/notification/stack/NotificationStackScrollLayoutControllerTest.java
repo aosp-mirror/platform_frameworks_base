@@ -57,7 +57,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
@@ -65,6 +64,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -135,7 +135,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private SysuiStatusBarStateController mSysuiStatusBarStateController;
     @Mock private KeyguardBypassController mKeyguardBypassController;
-    @Mock private KeyguardInteractor mKeyguardInteractor;
+    @Mock private PowerInteractor mPowerInteractor;
     @Mock private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock private MetricsLogger mMetricsLogger;
@@ -681,7 +681,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mSysuiStatusBarStateController,
                 mKeyguardMediaController,
                 mKeyguardBypassController,
-                mKeyguardInteractor,
+                mPowerInteractor,
                 mPrimaryBouncerInteractor,
                 mKeyguardTransitionRepo,
                 mZenModeController,

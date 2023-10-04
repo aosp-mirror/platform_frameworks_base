@@ -1,4 +1,17 @@
 {
+    "platinum-test": [
+        {
+            "name": "CtsPermissionTestCases",
+            "options": [
+                {
+                    "include-annotation": "android.platform.test.annotations.PlatinumTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ]
+        }
+    ],
     "presubmit": [
         {
             "name": "CtsPermissionTestCases",

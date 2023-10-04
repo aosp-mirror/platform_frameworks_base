@@ -1,0 +1,8 @@
+package: "android.view.contentprotection.flags"
+
+flag {
+    name: "blocklist_update_enabled"
+    namespace: "content_protection"
+    description: "If true, content protection blocklist is mutable and can be updated."
+    bug: "301658008"
+}

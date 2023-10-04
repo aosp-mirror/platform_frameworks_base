@@ -23,6 +23,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.util.mockito.mock
 import dagger.Lazy
 import junit.framework.Assert.assertEquals
@@ -61,6 +62,7 @@ class FromPrimaryBouncerTransitionInteractorTest : KeyguardTransitionInteractorT
                 keyguardInteractor = super.keyguardInteractor,
                 flags = FakeFeatureFlags(),
                 keyguardSecurityModel = mock(),
+                powerInteractor = PowerInteractorFactory.create().powerInteractor,
             )
     }
 

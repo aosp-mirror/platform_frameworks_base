@@ -32,6 +32,8 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
+import com.android.systemui.power.data.repository.FakePowerRepository;
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
@@ -61,6 +63,7 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
     @Mock protected ViewTreeObserver mViewTreeObserver;
     @Mock protected DumpManager mDumpManager;
     protected FakeKeyguardRepository mFakeKeyguardRepository;
+    protected FakePowerRepository mFakePowerRepository;
 
     protected KeyguardStatusViewController mController;
 
@@ -74,6 +77,7 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
 
         KeyguardInteractorFactory.WithDependencies deps = KeyguardInteractorFactory.create();
         mFakeKeyguardRepository = deps.getRepository();
+        mFakePowerRepository = new FakePowerRepository();
 
         mController = new KeyguardStatusViewController(
                 mKeyguardStatusView,
@@ -88,7 +92,10 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
                 mFeatureFlags,
                 mInteractionJankMonitor,
                 deps.getKeyguardInteractor(),
-                mDumpManager) {
+                mDumpManager,
+                PowerInteractorFactory.create(
+                        mFakePowerRepository
+                ).getPowerInteractor()) {
                     @Override
                     void setProperty(
                             AnimatableProperty property,

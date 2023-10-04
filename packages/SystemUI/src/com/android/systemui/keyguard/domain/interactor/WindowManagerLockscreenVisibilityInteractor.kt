@@ -128,7 +128,7 @@ constructor(
                 // even though the lastFinishedState is still GONE (lockscreenVisibility=false).
                 if (finishedState == startedStep.to) finishedState else startedStep.from
             }
-            .map(::isLockscreenVisible)
+            .map(KeyguardState::lockscreenVisibleInState)
             .distinctUntilChanged()
 
     /**
@@ -152,11 +152,7 @@ constructor(
 
     companion object {
         fun isSurfaceVisible(state: KeyguardState): Boolean {
-            return !isLockscreenVisible(state)
-        }
-
-        fun isLockscreenVisible(state: KeyguardState): Boolean {
-            return state != KeyguardState.GONE
+            return !KeyguardState.lockscreenVisibleInState(state)
         }
     }
 }

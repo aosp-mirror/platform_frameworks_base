@@ -30,10 +30,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.ui.view.WindowRootView
@@ -96,6 +96,7 @@ class BackActionInteractorTest : SysuiTestCase() {
             WindowRootViewVisibilityRepository(iStatusBarService, executor),
             keyguardRepository,
             headsUpManager,
+            powerInteractor,
         )
     }
 
@@ -111,6 +112,8 @@ class BackActionInteractorTest : SysuiTestCase() {
             )
             .apply { this.setup(qsController, shadeViewController) }
     }
+
+    private val powerInteractor = PowerInteractorFactory.create().powerInteractor
 
     @Before
     fun setUp() {
@@ -179,7 +182,7 @@ class BackActionInteractorTest : SysuiTestCase() {
     fun shadeVisibleAndDeviceAwake_callbackRegistered() {
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
-        setWakefulness(WakefulnessState.AWAKE)
+        powerInteractor.setAwakeForTest()
 
         testScope.runCurrent()
 
@@ -193,7 +196,7 @@ class BackActionInteractorTest : SysuiTestCase() {
 
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
-        setWakefulness(WakefulnessState.AWAKE)
+        powerInteractor.setAwakeForTest()
 
         testScope.runCurrent()
         // No assert necessary, just testing no crash
@@ -203,7 +206,7 @@ class BackActionInteractorTest : SysuiTestCase() {
     fun shadeNotVisible_callbackUnregistered() {
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
-        setWakefulness(WakefulnessState.AWAKE)
+        powerInteractor.setAwakeForTest()
         val callback = getBackInvokedCallback()
 
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(false)
@@ -216,10 +219,10 @@ class BackActionInteractorTest : SysuiTestCase() {
     fun deviceAsleep_callbackUnregistered() {
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
-        setWakefulness(WakefulnessState.AWAKE)
+        powerInteractor.setAwakeForTest()
         val callback = getBackInvokedCallback()
 
-        setWakefulness(WakefulnessState.ASLEEP)
+        powerInteractor.setAsleepForTest()
         testScope.runCurrent()
 
         verify(onBackInvokedDispatcher).unregisterOnBackInvokedCallback(callback)
@@ -230,7 +233,7 @@ class BackActionInteractorTest : SysuiTestCase() {
         backActionInteractor.start()
         featureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, false)
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
-        setWakefulness(WakefulnessState.AWAKE)
+        powerInteractor.setAwakeForTest()
         val callback = getBackInvokedCallback()
         whenever(statusBarKeyguardViewManager.canHandleBackPressed()).thenReturn(true)
 
@@ -244,7 +247,7 @@ class BackActionInteractorTest : SysuiTestCase() {
         featureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true)
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
-        setWakefulness(WakefulnessState.AWAKE)
+        powerInteractor.setAwakeForTest()
         val callback = getBackInvokedCallback()
         whenever(statusBarKeyguardViewManager.canHandleBackPressed()).thenReturn(true)
 
@@ -258,7 +261,7 @@ class BackActionInteractorTest : SysuiTestCase() {
         featureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true)
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
-        setWakefulness(WakefulnessState.AWAKE)
+        powerInteractor.setAwakeForTest()
 
         val callback = getBackInvokedCallback()
 
@@ -270,7 +273,7 @@ class BackActionInteractorTest : SysuiTestCase() {
         featureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true)
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
-        setWakefulness(WakefulnessState.AWAKE)
+        powerInteractor.setAwakeForTest()
         val callback = getBackInvokedCallback() as OnBackAnimationCallback
 
         whenever(shadeViewController.canBeCollapsed()).thenReturn(false)
@@ -285,7 +288,7 @@ class BackActionInteractorTest : SysuiTestCase() {
         featureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true)
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
-        setWakefulness(WakefulnessState.AWAKE)
+        powerInteractor.setAwakeForTest()
         val callback = getBackInvokedCallback() as OnBackAnimationCallback
 
         whenever(shadeViewController.canBeCollapsed()).thenReturn(true)
@@ -304,9 +307,4 @@ class BackActionInteractorTest : SysuiTestCase() {
 
     private fun createBackEvent(progress: Float): BackEvent =
         BackEvent(/* touchX= */ 0f, /* touchY= */ 0f, progress, /* swipeEdge= */ EDGE_LEFT)
-
-    private fun setWakefulness(state: WakefulnessState) {
-        val model = WakefulnessModel(state, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
-        keyguardRepository.setWakefulnessModel(model)
-    }
 }

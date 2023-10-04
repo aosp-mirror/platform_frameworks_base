@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
@@ -208,7 +209,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     public void setLockscreenClockY(int clockY) {
         if (mView.screenOffsetYPadding != clockY) {
             mView.screenOffsetYPadding = clockY;
-            mView.updateClockTargetRegions();
+            mView.post(() -> mView.updateClockTargetRegions());
         }
     }
 
@@ -557,7 +558,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private void updateDoubleLineClock() {
         mCanShowDoubleLineClock = mSecureSettings.getIntForUser(
-            Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1,
+            Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, mView.getResources()
+                .getInteger(com.android.internal.R.integer.config_doublelineClockDefault),
                 UserHandle.USER_CURRENT) != 0;
 
         if (!mCanShowDoubleLineClock) {

@@ -91,13 +91,18 @@ constructor(
 
     init {
         scope.launch {
-            // On fingerprint success when the screen is on, go to the home screen
-            fingerprintUnlockSuccessEvents.sample(powerInteractor.isInteractive).collect {
-                if (it) {
-                    goToHomeScreen()
+            // On fingerprint success when the screen is on and not dreaming, go to the home screen
+            fingerprintUnlockSuccessEvents
+                .sample(
+                    combine(powerInteractor.isInteractive, keyguardInteractor.isDreaming, ::Pair),
+                )
+                .collect { (interactive, dreaming) ->
+                    if (interactive && !dreaming) {
+                        goToHomeScreen()
+                    }
+                    // don't go to the home screen if the authentication is from
+                    // AOD/dozing/off/dreaming
                 }
-                // don't go to the home screen if the authentication is from AOD/dozing/off
-            }
         }
 
         scope.launch {

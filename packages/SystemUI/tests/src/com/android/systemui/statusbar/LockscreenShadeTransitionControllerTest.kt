@@ -9,7 +9,6 @@ import com.android.systemui.ExpandHelper
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -18,8 +17,7 @@ import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
-import com.android.systemui.power.data.repository.FakePowerRepository
-import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.shade.ShadeViewController
@@ -63,8 +61,8 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
@@ -126,14 +124,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
             sharedNotificationContainerInteractor,
             repository = FakeShadeRepository(),
         )
-    private val powerInteractor =
-        PowerInteractor(
-            FakePowerRepository(),
-            keyguardRepository,
-            FalsingCollectorFake(),
-            screenOffAnimationController = mock(),
-            statusBarStateController = mock(),
-        )
+    private val powerInteractor = PowerInteractorFactory.create().powerInteractor
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
     private val configurationController = FakeConfigurationController()

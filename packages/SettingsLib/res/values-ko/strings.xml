@@ -157,6 +157,8 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi 신호 막대가 두 개입니다."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi 신호 막대가 세 개입니다."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Wi-Fi 신호가 강합니다."</string>
+    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
+    <skip />
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"개방형 네트워크"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"보안 네트워크"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
@@ -517,8 +519,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"등록되지 않음"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"사용할 수 없음"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC가 임의 선택됨"</string>
-    <!-- no translation found for wifi_tether_connected_summary (5100712926640492336) -->
-    <skip />
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{기기 1대 연결됨}other{기기 #대 연결됨}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"시간 늘리기"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"시간 줄이기"</string>
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
@@ -552,9 +553,9 @@
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"연결된 기기"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"이 휴대전화"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"이 기기에서 재생할 수 없음"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"전환하려면 계정을 업그레이드하세요."</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"계정을 업그레이드하여 전환하기"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"여기서 다운로드한 콘텐츠를 재생할 수 없습니다."</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"광고 후에 다시 시도해 주세요."</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"광고 후에 다시 시도하기"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"기기 절전 모드 해제 후 여기에서 재생"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"기기에서 재생을 승인하지 않음"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"여기에서 이 미디어를 재생할 수 없음"</string>

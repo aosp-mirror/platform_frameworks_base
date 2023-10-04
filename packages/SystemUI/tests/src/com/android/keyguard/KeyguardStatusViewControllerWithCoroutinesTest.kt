@@ -19,8 +19,7 @@ package com.android.keyguard
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import com.android.systemui.keyguard.shared.model.ScreenModel
-import com.android.systemui.keyguard.shared.model.ScreenState
+import com.android.systemui.power.shared.model.ScreenPowerState
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -28,7 +27,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
 @RunWith(AndroidTestingRunner::class)
@@ -57,12 +55,12 @@ class KeyguardStatusViewControllerWithCoroutinesTest : KeyguardStatusViewControl
         runCurrent()
         clearInvocations(mKeyguardSliceViewController)
 
-        mFakeKeyguardRepository.setScreenModel(ScreenModel(ScreenState.SCREEN_ON))
+        mFakePowerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
         runCurrent()
         verify(mKeyguardSliceViewController, never()).refresh()
 
         // Should only be called during a 'turning on' event
-        mFakeKeyguardRepository.setScreenModel(ScreenModel(ScreenState.SCREEN_TURNING_ON))
+        mFakePowerRepository.setScreenPowerState(ScreenPowerState.SCREEN_TURNING_ON)
         runCurrent()
         verify(mKeyguardSliceViewController).refresh()
 

@@ -23,11 +23,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.back.domain.interactor.BackActionInteractor
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.media.controls.util.MediaSessionLegacyHelperWrapper
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
@@ -55,13 +56,10 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
     private val actionDownVolumeUpKeyEvent =
         KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_UP)
     private val backKeyEvent = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK)
-    private val awakeWakefulnessMode =
-        WakefulnessModel(WakefulnessState.AWAKE, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
-    private val asleepWakefulnessMode =
-        WakefulnessModel(WakefulnessState.ASLEEP, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
 
     private lateinit var keyguardInteractorWithDependencies:
         KeyguardInteractorFactory.WithDependencies
+    private lateinit var powerInteractor: PowerInteractor
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var shadeController: ShadeController
@@ -76,6 +74,8 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
         whenever(mediaSessionLegacyHelperWrapper.getHelper(any()))
             .thenReturn(mediaSessionLegacyHelper)
         keyguardInteractorWithDependencies = KeyguardInteractorFactory.create()
+        powerInteractor = PowerInteractorFactory.create().powerInteractor
+
         underTest =
             KeyguardKeyEventInteractor(
                 context,
@@ -85,6 +85,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
                 shadeController,
                 mediaSessionLegacyHelperWrapper,
                 backActionInteractor,
+                powerInteractor,
             )
     }
 
@@ -132,7 +133,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
 
     @Test
     fun dispatchKeyEvent_menuActionUp_interactiveKeyguard_collapsesShade() {
-        keyguardInteractorWithDependencies.repository.setWakefulnessModel(awakeWakefulnessMode)
+        powerInteractor.setAwakeForTest()
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
         whenever(statusBarKeyguardViewManager.shouldDismissOnMenuPressed()).thenReturn(true)
 
@@ -143,7 +144,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
 
     @Test
     fun dispatchKeyEvent_menuActionUp_interactiveShadeLocked_collapsesShade() {
-        keyguardInteractorWithDependencies.repository.setWakefulnessModel(awakeWakefulnessMode)
+        powerInteractor.setAwakeForTest()
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE_LOCKED)
         whenever(statusBarKeyguardViewManager.shouldDismissOnMenuPressed()).thenReturn(true)
 
@@ -160,7 +161,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
 
     @Test
     fun dispatchKeyEvent_menuActionUp_nonInteractiveKeyguard_neverCollapsesShade() {
-        keyguardInteractorWithDependencies.repository.setWakefulnessModel(asleepWakefulnessMode)
+        powerInteractor.setAsleepForTest()
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
         whenever(statusBarKeyguardViewManager.shouldDismissOnMenuPressed()).thenReturn(true)
 
@@ -171,7 +172,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
 
     @Test
     fun dispatchKeyEvent_spaceActionUp_interactiveKeyguard_collapsesShade() {
-        keyguardInteractorWithDependencies.repository.setWakefulnessModel(awakeWakefulnessMode)
+        powerInteractor.setAwakeForTest()
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
 
         // action down: does NOT collapse the shade

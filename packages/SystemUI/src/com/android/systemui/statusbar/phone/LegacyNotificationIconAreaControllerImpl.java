@@ -115,6 +115,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
     private int mAodIconTint;
     private boolean mAodIconsVisible;
     private boolean mShowLowPriority = true;
+    private boolean mIsStatusViewMigrated = false;
 
     @VisibleForTesting
     final NotificationListener.NotificationSettingsListener mSettingsListener =
@@ -158,7 +159,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
         mStatusBarWindowController = statusBarWindowController;
         mScreenOffAnimationController = screenOffAnimationController;
         notificationListener.addNotificationSettingsListener(mSettingsListener);
-
+        mIsStatusViewMigrated = featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW);
         initializeNotificationAreaViews(context);
         reloadAodColor();
         darkIconDispatcher.addDarkReceiver(this);
@@ -557,7 +558,9 @@ public class LegacyNotificationIconAreaControllerImpl implements
             return;
         }
         if (mScreenOffAnimationController.shouldAnimateAodIcons()) {
-            mAodIcons.setTranslationY(-mAodIconAppearTranslation);
+            if (!mIsStatusViewMigrated) {
+                mAodIcons.setTranslationY(-mAodIconAppearTranslation);
+            }
             mAodIcons.setAlpha(0);
             animateInAodIconTranslation();
             mAodIcons.animate()
@@ -567,16 +570,20 @@ public class LegacyNotificationIconAreaControllerImpl implements
                     .start();
         } else {
             mAodIcons.setAlpha(1.0f);
-            mAodIcons.setTranslationY(0);
+            if (!mIsStatusViewMigrated) {
+                mAodIcons.setTranslationY(0);
+            }
         }
     }
 
     private void animateInAodIconTranslation() {
-        mAodIcons.animate()
-                .setInterpolator(Interpolators.DECELERATE_QUINT)
-                .translationY(0)
-                .setDuration(AOD_ICONS_APPEAR_DURATION)
-                .start();
+        if (!mIsStatusViewMigrated) {
+            mAodIcons.animate()
+                    .setInterpolator(Interpolators.DECELERATE_QUINT)
+                    .translationY(0)
+                    .setDuration(AOD_ICONS_APPEAR_DURATION)
+                    .start();
+        }
     }
 
     private void reloadAodColor() {
@@ -660,7 +667,9 @@ public class LegacyNotificationIconAreaControllerImpl implements
                 }
             } else {
                 mAodIcons.setAlpha(1.0f);
-                mAodIcons.setTranslationY(0);
+                if (!mIsStatusViewMigrated) {
+                    mAodIcons.setTranslationY(0);
+                }
                 mAodIcons.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
             }
         }

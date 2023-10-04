@@ -413,7 +413,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
     fun canPerformInWindowLauncherAnimations(): Boolean {
         // TODO(b/278086361): Refactor in-window animations.
         return !featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR) &&
-                isNexusLauncherUnderneath() &&
+                isSupportedLauncherUnderneath() &&
                 // If the launcher is underneath, but we're about to launch an activity, don't do
                 // the animations since they won't be visible.
                 !notificationShadeWindowController.isLaunchingActivity &&
@@ -427,7 +427,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     private fun logInWindowAnimationConditions() {
         Log.wtf(TAG, "canPerformInWindowLauncherAnimations expected all of these to be true: ")
-        Log.wtf(TAG, "  isNexusLauncherUnderneath: ${isNexusLauncherUnderneath()}")
+        Log.wtf(TAG, "  isNexusLauncherUnderneath: ${isSupportedLauncherUnderneath()}")
         Log.wtf(TAG, "  !notificationShadeWindowController.isLaunchingActivity: " +
                 "${!notificationShadeWindowController.isLaunchingActivity}")
         Log.wtf(TAG, "  launcherUnlockController != null: ${launcherUnlockController != null}")
@@ -1050,7 +1050,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         // If our launcher isn't underneath, then we're unlocking to an app or custom launcher,
         // neither of which have a smartspace.
-        if (!isNexusLauncherUnderneath()) {
+        if (!isSupportedLauncherUnderneath()) {
             return false
         }
 
@@ -1120,11 +1120,11 @@ class KeyguardUnlockAnimationController @Inject constructor(
     }
 
     /**
-     * Return whether the Google Nexus launcher is underneath the keyguard, vs. some other
-     * launcher or an app. If so, we can communicate with it to perform in-window/shared element
-     * transitions!
+     * Return whether a launcher which supports coordinated transition is underneath the keyguard,
+     * vs. some other launcher or an app. If so, we can communicate with it to perform
+     * in-window/shared element transitions!
      */
-    fun isNexusLauncherUnderneath(): Boolean {
+    fun isSupportedLauncherUnderneath(): Boolean {
         return launcherActivityClass?.let { ActivityManagerWrapper.getInstance()
                 .runningTask?.topActivity?.className?.equals(it) }
                 ?: false

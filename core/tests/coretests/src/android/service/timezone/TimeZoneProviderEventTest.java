@@ -32,11 +32,20 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.Collections;
 
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+@Presubmit
 public class TimeZoneProviderEventTest {
 
     public static final TimeZoneProviderStatus ARBITRARY_TIME_ZONE_PROVIDER_STATUS =

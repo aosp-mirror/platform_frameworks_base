@@ -21,12 +21,14 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricSourceType
 import android.provider.Settings
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.res.R
+import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm
@@ -35,6 +37,10 @@ import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POST
 import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.tuner.TunerService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -43,6 +49,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
 
     private val mKeyguardStateController: KeyguardStateController
     private val statusBarStateController: StatusBarStateController
+    private val shadeRepository: ShadeRepository
     private val devicePostureController: DevicePostureController
     @BypassOverride private val bypassOverride: Int
     private var hasFaceFeature: Boolean
@@ -107,16 +114,18 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     @Inject
     constructor(
         context: Context,
+        @Application applicationScope: CoroutineScope,
         tunerService: TunerService,
         statusBarStateController: StatusBarStateController,
         lockscreenUserManager: NotificationLockscreenUserManager,
         keyguardStateController: KeyguardStateController,
-        shadeExpansionStateManager: ShadeExpansionStateManager,
+        shadeRepository: ShadeRepository,
         devicePostureController: DevicePostureController,
         dumpManager: DumpManager
     ) {
         this.mKeyguardStateController = keyguardStateController
         this.statusBarStateController = statusBarStateController
+        this.shadeRepository = shadeRepository
         this.devicePostureController = devicePostureController
 
         bypassOverride = context.resources.getInteger(R.integer.config_face_unlock_bypass_override)
@@ -128,6 +137,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
             return
         }
 
+
         if (configFaceAuthSupportedPosture != DEVICE_POSTURE_UNKNOWN) {
             devicePostureController.addCallback { posture ->
                 if (postureState != posture) {
@@ -137,7 +147,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
             }
         }
 
-        dumpManager.registerDumpable("KeyguardBypassController", this)
+        dumpManager.registerNormalDumpable("KeyguardBypassController", this)
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
             override fun onStateChanged(newState: Int) {
                 if (newState != StatusBarState.KEYGUARD) {
@@ -146,26 +156,35 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
             }
         })
 
-        shadeExpansionStateManager.addQsExpansionListener { isQsExpanded ->
-            val changed = qsExpanded != isQsExpanded
-            qsExpanded = isQsExpanded
-            if (changed && !isQsExpanded) {
-                maybePerformPendingUnlock()
-            }
-        }
+        listenForQsExpandedChange(applicationScope)
 
         val dismissByDefault = if (context.resources.getBoolean(
-                        com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
+                com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
+
         tunerService.addTunable({ key, _ ->
             bypassEnabled = tunerService.getValue(key, dismissByDefault) != 0
         }, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
+
         lockscreenUserManager.addUserChangedListener(
-                object : NotificationLockscreenUserManager.UserChangedListener {
-                    override fun onUserChanged(userId: Int) {
-                        pendingUnlock = null
-                    }
-                })
+            object : NotificationLockscreenUserManager.UserChangedListener {
+                override fun onUserChanged(userId: Int) {
+                    pendingUnlock = null
+                }
+            })
     }
+
+    @VisibleForTesting
+    fun listenForQsExpandedChange(scope: CoroutineScope) =
+        scope.launch {
+            shadeRepository.qsExpansion.map { it > 0f }.distinctUntilChanged()
+                .collect { isQsExpanded ->
+                    val changed = qsExpanded != isQsExpanded
+                    qsExpanded = isQsExpanded
+                    if (changed && !isQsExpanded) {
+                        maybePerformPendingUnlock()
+                    }
+                }
+        }
 
     private fun notifyListeners() = listeners.forEach { it.onBypassStateChanged(bypassEnabled) }
 

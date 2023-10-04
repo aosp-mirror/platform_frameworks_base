@@ -54,7 +54,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -278,7 +277,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             BiometricUnlockLogger biometricUnlockLogger,
             NotificationMediaManager notificationMediaManager,
             WakefulnessLifecycle wakefulnessLifecycle,
-            ScreenLifecycle screenLifecycle,
             AuthController authController,
             StatusBarStateController statusBarStateController,
             SessionTracker sessionTracker,
@@ -295,7 +293,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mLatencyTracker = latencyTracker;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
-        screenLifecycle.addObserver(mScreenObserver);
 
         mNotificationShadeWindowController = notificationShadeWindowController;
         mDozeScrimController = dozeScrimController;
@@ -850,18 +847,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     Trace.endSection();
                 }
             };
-
-    private final ScreenLifecycle.Observer mScreenObserver =
-            new ScreenLifecycle.Observer() {
-                @Override
-                public void onScreenTurnedOn() {
-                    mHasScreenTurnedOnSinceAuthenticating = true;
-                }
-            };
-
-    public boolean hasScreenTurnedOnSinceAuthenticating() {
-        return mHasScreenTurnedOnSinceAuthenticating;
-    }
 
     @Override
     public void onKeyguardBouncerStateChanged(boolean bouncerIsOrWillBeShowing) {

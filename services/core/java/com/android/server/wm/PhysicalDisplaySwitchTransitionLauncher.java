@@ -123,7 +123,7 @@ public class PhysicalDisplaySwitchTransitionLauncher {
                 displayChange);
 
         if (t != null) {
-            mDisplayContent.mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
+            mDisplayContent.mAtmService.startPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
             mTransition = t;
         }
 

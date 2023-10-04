@@ -194,6 +194,8 @@
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"שימוש בטביעת אצבע במקום זאת"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"אי אפשר לפתוח בזיהוי פנים"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"‏Bluetooth מחובר."</string>
+    <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"‏סמל של מכשיר Bluetooth"</string>
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="4188853273831773436">"‏סמל גלגל השיניים של הגדרות מכשיר Bluetooth"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"אחוז טעינת הסוללה לא ידוע."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"התבצע חיבור אל <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"מחובר אל <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -246,6 +248,12 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"נא לא להפריע"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"אין מכשירים מותאמים זמינים"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="6869579539763980182">"מקישים על המכשיר שרוצים לחבר"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"התאמה של מכשיר חדש"</string>
+    <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"הצגת הכול"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"‏שימוש ב-Bluetooth"</string>
+    <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"מחובר"</string>
+    <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"נשמר"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> סוללה"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"אודיו"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"אוזניות"</string>
@@ -1077,7 +1085,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"אין רשתות זמינות אחרות"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"אין רשתות זמינות"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"צריך להקיש על רשת כדי להתחבר"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"כדי להתחבר לרשת צריך להקיש עליה"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"צריך לבטל את הנעילה כדי להציג את הרשתות"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"בתהליך חיפוש רשתות…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"נכשל הניסיון להתחבר לרשת"</string>
@@ -1143,7 +1151,7 @@
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"‏כדי להוסיף את אפליקציית Wallet כקיצור דרך, צריך לוודא שהאפליקציה מותקנת"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"‏כדי להוסיף את אפליקציית Wallet כקיצור דרך, צריך לוודא שנוסף לפחות כרטיס אחד"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"‏כדי להוסיף את אפליקציית Home כקיצור דרך, צריך לוודא שהאפליקציה מותקנת"</string>
-    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• יש לפחות מכשיר אחד זמין"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• יש לפחות מכשיר אחד או פאנל מכשיר אחד זמינים"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"צריך לבחור אפליקציית פתקים שתיפתח כברירת מחדל כשייעשה שימוש במקש הקיצור לכתיבת פתקים"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"בחירת אפליקציה"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"מקש קיצור ללחיצה ארוכה"</string>
@@ -1175,7 +1183,10 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"צריך להגדיר את אפליקציית ברירת המחדל לפתקים ב\'הגדרות\'"</string>
     <string name="install_app" msgid="5066668100199613936">"התקנת האפליקציה"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"לשקף למסך חיצוני?"</string>
-    <string name="enable_display" msgid="8308309634883321977">"הפעלת המסך"</string>
+    <!-- no translation found for mirror_display (2515262008898122928) -->
+    <skip />
+    <!-- no translation found for dismiss_dialog (2195508495854675882) -->
+    <skip />
     <string name="privacy_dialog_title" msgid="7839968133469098311">"מיקרופון ומצלמה"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"נעשה שימוש לאחרונה באפליקציות"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"צפייה בהרשאות הגישה האחרונות"</string>

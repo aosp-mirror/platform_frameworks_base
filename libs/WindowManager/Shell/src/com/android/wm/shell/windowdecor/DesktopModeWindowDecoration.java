@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.windowingModeToString;
 
 import android.app.ActivityManager;
 import android.app.WindowConfiguration.WindowingMode;
@@ -659,6 +660,17 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     public void incrementRelayoutBlock() {
         mRelayoutBlock++;
+    }
+
+    @Override
+    public String toString() {
+        return "{"
+                + "mPositionInParent=" + mPositionInParent + ", "
+                + "mRelayoutBlock=" + mRelayoutBlock + ", "
+                + "taskId=" + mTaskInfo.taskId + ", "
+                + "windowingMode=" + windowingModeToString(mTaskInfo.getWindowingMode()) + ", "
+                + "isFocused=" + isFocused()
+                + "}";
     }
 
     static class Factory {

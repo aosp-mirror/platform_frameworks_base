@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.content.pm.UserInfo
 import android.hardware.biometrics.BiometricFaceConstants
 import android.os.Handler
+import android.os.PowerManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.FaceAuthUiEvent
@@ -50,11 +51,12 @@ import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.FakeUserRepository
@@ -90,6 +92,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
     private lateinit var fakeDeviceEntryFingerprintAuthRepository:
         FakeDeviceEntryFingerprintAuthRepository
     private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
+    private lateinit var powerInteractor: PowerInteractor
 
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig
@@ -117,6 +120,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         fakeUserRepository.setUserInfos(listOf(primaryUser, secondaryUser))
         facePropertyRepository = FakeFacePropertyRepository()
         fakeKeyguardRepository = FakeKeyguardRepository()
+        powerInteractor = PowerInteractorFactory.create().powerInteractor
         underTest =
             SystemUIKeyguardFaceAuthInteractor(
                 mContext,
@@ -154,6 +158,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 facePropertyRepository,
                 fakeKeyguardRepository,
                 faceWakeUpTriggersConfig,
+                powerInteractor,
             )
     }
 
@@ -162,13 +167,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest.start()
 
-            fakeKeyguardRepository.setWakefulnessModel(
-                WakefulnessModel(
-                    WakefulnessState.STARTING_TO_WAKE,
-                    WakeSleepReason.LID,
-                    WakeSleepReason.LID
-                )
-            )
+            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
             whenever(
                     faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LID)
                 )
@@ -210,13 +209,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest.start()
 
-            fakeKeyguardRepository.setWakefulnessModel(
-                WakefulnessModel(
-                    WakefulnessState.STARTING_TO_WAKE,
-                    WakeSleepReason.LID,
-                    WakeSleepReason.LID
-                )
-            )
+            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
             whenever(
                     faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LID)
                 )
@@ -242,13 +235,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest.start()
 
-            fakeKeyguardRepository.setWakefulnessModel(
-                WakefulnessModel(
-                    WakefulnessState.STARTING_TO_WAKE,
-                    WakeSleepReason.LIFT,
-                    WakeSleepReason.POWER_BUTTON
-                )
-            )
+            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LIFT)
             whenever(
                     faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LIFT)
                 )
@@ -271,13 +258,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest.start()
 
-            fakeKeyguardRepository.setWakefulnessModel(
-                WakefulnessModel(
-                    WakefulnessState.STARTING_TO_WAKE,
-                    WakeSleepReason.LID,
-                    WakeSleepReason.LID
-                )
-            )
+            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
             whenever(
                     faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LID)
                 )

@@ -33,8 +33,11 @@ import android.app.time.cts.shell.DeviceShellCommandExecutor;
 import android.app.time.cts.shell.TimeZoneDetectorShellHelper;
 import android.app.time.cts.shell.device.InstrumentationShellCommandExecutor;
 import android.content.Context;
+import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.compatibility.common.util.AdoptShellPermissionsRule;
 
@@ -42,11 +45,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for non-SDK methods / internal behavior related to {@link TimeManager}.
  * Also see {@link android.app.time.cts.TimeManagerTest}
  */
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+@Presubmit
 public class TimeManagerTest {
 
     /**

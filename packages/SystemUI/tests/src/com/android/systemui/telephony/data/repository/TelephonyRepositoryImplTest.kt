@@ -49,6 +49,7 @@ class TelephonyRepositoryImplTest : SysuiTestCase() {
 
         underTest =
             TelephonyRepositoryImpl(
+                applicationContext = context,
                 manager = manager,
             )
     }
