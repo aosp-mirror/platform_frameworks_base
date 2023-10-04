@@ -31,6 +31,7 @@ import android.annotation.CallSuper;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.LayoutRes;
@@ -98,6 +99,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.permission.flags.Flags;
 import android.service.voice.VoiceInteractionSession;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -5566,6 +5568,7 @@ public class Activity extends ContextThemeWrapper
      * @see #shouldShowRequestPermissionRationale
      * @see Context#DEVICE_ID_DEFAULT
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
     public final void requestPermissions(@NonNull String[] permissions, int requestCode,
             int deviceId) {
         if (requestCode < 0) {
@@ -5638,6 +5641,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #requestPermissions
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
             @NonNull int[] grantResults, int deviceId) {
         onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -5670,6 +5674,7 @@ public class Activity extends ContextThemeWrapper
      * @see #requestPermissions
      * @see #onRequestPermissionsResult
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
     public boolean shouldShowRequestPermissionRationale(@NonNull String permission, int deviceId) {
         final PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
                 : createDeviceContext(deviceId).getPackageManager();
