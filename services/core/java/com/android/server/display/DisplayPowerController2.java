@@ -82,6 +82,7 @@ import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsLi
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.state.DisplayStateController;
+import com.android.server.display.utils.DebugUtils;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceFactory;
@@ -118,8 +119,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
     private static final String SCREEN_OFF_BLOCKED_TRACE_NAME = "Screen off blocked";
 
-    private static final boolean DEBUG = false;
-
+    private static final String TAG = "DisplayPowerController2";
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.DisplayPowerController2 DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     // If true, uses the color fade on animation.
     // We might want to turn this off if we cannot get a guarantee that the screen
@@ -503,7 +506,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mWakelockController, mDisplayDeviceConfig, mHandler.getLooper(),
                 () -> updatePowerState(), mDisplayId, mSensorManager);
         mDisplayStateController = new DisplayStateController(mDisplayPowerProximityStateController);
-        mTag = "DisplayPowerController2[" + mDisplayId + "]";
+        mTag = TAG + "[" + mDisplayId + "]";
         mThermalBrightnessThrottlingDataId =
                 logicalDisplay.getDisplayInfoLocked().thermalBrightnessThrottlingDataId;
         mDisplayDevice = mLogicalDisplay.getPrimaryDisplayDeviceLocked();

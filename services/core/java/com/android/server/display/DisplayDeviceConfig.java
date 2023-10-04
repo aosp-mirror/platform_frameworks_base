@@ -77,6 +77,7 @@ import com.android.server.display.config.ThermalThrottling;
 import com.android.server.display.config.ThresholdPoint;
 import com.android.server.display.config.UsiVersion;
 import com.android.server.display.config.XmlParser;
+import com.android.server.display.utils.DebugUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -519,7 +520,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
  */
 public class DisplayDeviceConfig {
     private static final String TAG = "DisplayDeviceConfig";
-    private static final boolean DEBUG = false;
+
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.DisplayDeviceConfig DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     public static final float HIGH_BRIGHTNESS_MODE_UNSUPPORTED = Float.NaN;
 
