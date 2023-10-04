@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.content.Intent
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.tools.common.datatypes.Rect
@@ -266,6 +267,11 @@ open class PipAppHelper(instrumentation: Instrumentation) :
     /** Expand the PIP window back to full screen via intent and wait until the app is visible */
     fun exitPipToFullScreenViaIntent(wmHelper: WindowManagerStateHelper) =
         launchViaIntent(wmHelper)
+
+    fun changeAspectRatio() {
+        val intent = Intent("com.android.wm.shell.flicker.testapp.ASPECT_RATIO")
+        context.sendBroadcast(intent)
+    }
 
     fun clickEnterPipButton(wmHelper: WindowManagerStateHelper) {
         clickObject(ENTER_PIP_BUTTON_ID)
