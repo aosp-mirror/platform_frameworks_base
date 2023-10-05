@@ -495,9 +495,12 @@ public class UsageStatsService extends SystemService implements
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "loadPendingEvents");
             loadPendingEventsLocked(userId, pendingEvents);
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-            final LinkedList<Event> eventsInMem = mReportedEvents.get(userId);
-            if (eventsInMem != null) {
-                pendingEvents.addAll(eventsInMem);
+            synchronized (mReportedEvents) {
+                final LinkedList<Event> eventsInMem = mReportedEvents.get(userId);
+                if (eventsInMem != null) {
+                    pendingEvents.addAll(eventsInMem);
+                    mReportedEvents.remove(userId);
+                }
             }
             boolean needToFlush = !pendingEvents.isEmpty();
 
@@ -518,8 +521,7 @@ public class UsageStatsService extends SystemService implements
             mIoHandler.obtainMessage(MSG_HANDLE_LAUNCH_TIME_ON_USER_UNLOCK,
                     userId, 0).sendToTarget();
 
-            // Remove all the stats stored in memory and in system DE.
-            mReportedEvents.remove(userId);
+            // Remove all the stats stored in system DE.
             deleteRecursively(new File(Environment.getDataSystemDeDirectory(userId), "usagestats"));
 
             // Force a flush to disk for the current user to ensure important events are persisted.
@@ -916,6 +918,7 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    @GuardedBy({"mLock", "mReportedEvents"})
     private void persistPendingEventsLocked(int userId) {
         final LinkedList<Event> pendingEvents = mReportedEvents.get(userId);
         if (pendingEvents == null || pendingEvents.isEmpty()) {
@@ -1019,7 +1022,7 @@ public class UsageStatsService extends SystemService implements
                     + UserUsageStatsService.eventToString(event.mEventType);
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, traceTag);
         }
-        synchronized (mLock) {
+        synchronized (mReportedEvents) {
             LinkedList<Event> events = mReportedEvents.get(userId);
             if (events == null) {
                 events = new LinkedList<>();
@@ -1943,16 +1946,19 @@ public class UsageStatsService extends SystemService implements
                         idpw.println();
                     }
                 } else {
-                    final LinkedList<Event> pendingEvents = mReportedEvents.get(userId);
-                    if (pendingEvents != null && !pendingEvents.isEmpty()) {
-                        final int eventCount = pendingEvents.size();
-                        idpw.println("Pending events: count=" + eventCount);
-                        idpw.increaseIndent();
-                        for (int idx = 0; idx < eventCount; idx++) {
-                            UserUsageStatsService.printEvent(idpw, pendingEvents.get(idx), true);
+                    synchronized (mReportedEvents) {
+                        final LinkedList<Event> pendingEvents = mReportedEvents.get(userId);
+                        if (pendingEvents != null && !pendingEvents.isEmpty()) {
+                            final int eventCount = pendingEvents.size();
+                            idpw.println("Pending events: count=" + eventCount);
+                            idpw.increaseIndent();
+                            for (int idx = 0; idx < eventCount; idx++) {
+                                UserUsageStatsService.printEvent(idpw, pendingEvents.get(idx),
+                                        true);
+                            }
+                            idpw.decreaseIndent();
+                            idpw.println();
                         }
-                        idpw.decreaseIndent();
-                        idpw.println();
                     }
                 }
                 idpw.decreaseIndent();
