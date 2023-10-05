@@ -323,7 +323,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final Runnable onAnimFinish = () -> {
             if (!animations.isEmpty()) return;
             mAnimations.remove(transition);
-            info.releaseAllSurfaces();
             finishCallback.onTransitionFinished(null /* wct */);
         };
 
