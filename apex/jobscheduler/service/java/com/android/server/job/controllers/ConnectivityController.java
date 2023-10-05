@@ -22,6 +22,8 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_MET
 
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+import static com.android.server.job.Flags.FLAG_RELAX_PREFETCH_CONNECTIVITY_CONSTRAINT_ONLY_ON_CHARGER;
+import static com.android.server.job.Flags.relaxPrefetchConnectivityConstraintOnlyOnCharger;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -929,6 +931,11 @@ public final class ConnectivityController extends RestrictingController implemen
             // Need to at least know the estimated download bytes for a prefetch job.
             return false;
         }
+        if (relaxPrefetchConnectivityConstraintOnlyOnCharger()) {
+            if (!mService.isBatteryCharging()) {
+                return false;
+            }
+        }
 
         // See if we match after relaxing any unmetered request
         final NetworkCapabilities.Builder builder =
@@ -1734,6 +1741,14 @@ public final class ConnectivityController extends RestrictingController implemen
     public void dumpControllerStateLocked(IndentingPrintWriter pw,
             Predicate<JobStatus> predicate) {
         final long nowElapsed = sElapsedRealtimeClock.millis();
+
+        pw.println("Aconfig flags:");
+        pw.increaseIndent();
+        pw.print(FLAG_RELAX_PREFETCH_CONNECTIVITY_CONSTRAINT_ONLY_ON_CHARGER,
+                relaxPrefetchConnectivityConstraintOnlyOnCharger());
+        pw.println();
+        pw.decreaseIndent();
+        pw.println();
 
         if (mRequestedWhitelistJobs.size() > 0) {
             pw.print("Requested standby exceptions:");

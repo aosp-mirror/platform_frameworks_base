@@ -13,6 +13,10 @@ java_library {
     name: "service-jobscheduler",
     installable: true,
 
+    defaults: [
+        "service-jobscheduler-aconfig-libraries",
+    ],
+
     srcs: [
         "java/**/*.java",
         ":framework-jobscheduler-shared-srcs",
