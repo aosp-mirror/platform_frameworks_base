@@ -12393,6 +12393,13 @@ public final class Settings {
                 "wireless_charging_started_sound";
 
         /**
+         * Whether to auto enable reverse charging once plugged-in.
+         * @hide
+         */
+        public static final String REVERSE_CHARGING_AUTO_ON =
+                "settings_key_reverse_charging_auto_turn_on";
+
+        /**
          * URI for "wired charging started" sound.
          * @hide
          */

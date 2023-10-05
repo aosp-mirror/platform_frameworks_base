@@ -69,6 +69,7 @@ public class GlobalSettings {
         Settings.Global.PRIVATE_DNS_SPECIFIER,
         Settings.Global.SOFT_AP_TIMEOUT_ENABLED,
         Settings.Global.ZEN_DURATION,
+        Settings.Global.REVERSE_CHARGING_AUTO_ON,
         Settings.Global.CHARGING_VIBRATION_ENABLED,
         Settings.Global.AWARE_ALLOWED,
         Settings.Global.CUSTOM_BUGREPORT_HANDLER_APP,                   // moved to secure
