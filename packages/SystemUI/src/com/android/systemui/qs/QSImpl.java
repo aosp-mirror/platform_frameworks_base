@@ -199,10 +199,12 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
     }
 
+    /**
+     * This method will set up all the necessary fields. Methods from the implemented interfaces
+     * should not be called before this method returns.
+     */
     public void onComponentCreated(QSComponent qsComponent, @Nullable Bundle savedInstanceState) {
         mRootView = qsComponent.getRootView();
-
-        mCommandQueue.addCallback(this);
 
         mQSPanelController = qsComponent.getQSPanelController();
         mQuickQSPanelController = qsComponent.getQuickQSPanelController();
@@ -270,6 +272,9 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
                     mQSPanelController.getMediaHost().getHostView().setAlpha(1.0f);
                     mQSAnimator.requestAnimatorUpdate();
                 });
+
+        // This will immediately call disable, so it needs to be added after setting up the fields.
+        mCommandQueue.addCallback(this);
     }
 
     private void bindFooterActionsView(View root) {
