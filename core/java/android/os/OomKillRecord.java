@@ -15,10 +15,15 @@
  */
 package android.os;
 
+import com.android.internal.util.FrameworkStatsLog;
 
 /**
+ * Activity manager communication with kernel out-of-memory (OOM) data handling
+ * and statsd atom logging.
+ *
  * Expected data to get back from the OOM event's file.
- * Note that this should be equivalent to the struct <b>OomKill</b> inside
+ * Note that this class fields' should be equivalent to the struct
+ * <b>OomKill</b> inside
  * <pre>
  * system/memory/libmeminfo/libmemevents/include/memevents.h
  * </pre>
@@ -39,6 +44,18 @@ public final class OomKillRecord {
         this.mUid = uid;
         this.mProcessName = processName;
         this.mOomScoreAdj = oomScoreAdj;
+    }
+
+    /**
+     * Logs the event when the kernel OOM killer claims a victims to reduce
+     * memory pressure.
+     * KernelOomKillOccurred = 754
+     */
+    public void logKillOccurred() {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.KERNEL_OOM_KILL_OCCURRED,
+                mUid, mPid, mOomScoreAdj, mTimeStampInMillis,
+                mProcessName);
     }
 
     public long getTimestampMilli() {
