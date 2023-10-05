@@ -9430,7 +9430,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new IllegalArgumentException(
                             "Failed to find matching task for taskId=" + taskId);
                 }
-                taskSnapshot = mTaskSnapshotController.captureSnapshot(task, false);
+                taskSnapshot = mTaskSnapshotController.captureSnapshot(task);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
