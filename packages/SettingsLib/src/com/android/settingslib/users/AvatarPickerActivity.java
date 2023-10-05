@@ -43,6 +43,7 @@ import com.google.android.setupcompat.template.FooterBarMixin;
 import com.google.android.setupcompat.template.FooterButton;
 import com.google.android.setupdesign.GlifLayout;
 import com.google.android.setupdesign.util.ThemeHelper;
+import com.google.android.setupdesign.util.ThemeResolver;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,7 +82,14 @@ public class AvatarPickerActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.SudThemeGlifV3_DayNight);
+        boolean dayNightEnabled = ThemeHelper.isSetupWizardDayNightEnabled(this);
+        ThemeResolver themeResolver =
+                new ThemeResolver.Builder(ThemeResolver.getDefault())
+                        .setDefaultTheme(ThemeHelper.getSuwDefaultTheme(this))
+                        .setUseDayNight(true)
+                        .build();
+        int themeResId = themeResolver.resolve("", /* suppressDayNight= */ !dayNightEnabled);
+        setTheme(themeResId);
         ThemeHelper.trySetDynamicColor(this);
         setContentView(R.layout.avatar_picker);
         setUpButtons();
@@ -98,6 +106,12 @@ public class AvatarPickerActivity extends Activity {
                 new AvatarPhotoController.AvatarUiImpl(this),
                 new AvatarPhotoController.ContextInjectorImpl(this, getFileAuthority()),
                 mWaitingForActivityResult);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mAdapter.onAdapterResume();
     }
 
     private void setUpButtons() {
@@ -190,6 +204,8 @@ public class AvatarPickerActivity extends Activity {
         private final int[] mUserIconColors;
         private int mSelectedPosition = NONE;
 
+        private int mLastSelectedPosition = NONE;
+
         AvatarAdapter() {
             final boolean canTakePhoto =
                     PhotoCapabilityUtils.canTakePhoto(AvatarPickerActivity.this);
@@ -218,31 +234,42 @@ public class AvatarPickerActivity extends Activity {
             if (position == mTakePhotoPosition) {
                 viewHolder.setDrawable(getDrawable(R.drawable.avatar_take_photo_circled));
                 viewHolder.setContentDescription(getString(R.string.user_image_take_photo));
-                viewHolder.setClickListener(view -> mAvatarPhotoController.takePhoto());
 
             } else if (position == mChoosePhotoPosition) {
                 viewHolder.setDrawable(getDrawable(R.drawable.avatar_choose_photo_circled));
                 viewHolder.setContentDescription(getString(R.string.user_image_choose_photo));
-                viewHolder.setClickListener(view -> mAvatarPhotoController.choosePhoto());
 
             } else if (position >= mPreselectedImageStartPosition) {
                 int index = indexFromPosition(position);
                 viewHolder.setSelected(position == mSelectedPosition);
                 viewHolder.setDrawable(mImageDrawables.get(index));
-                if (mImageDescriptions != null) {
+                if (mImageDescriptions != null && index < mImageDescriptions.size()) {
                     viewHolder.setContentDescription(mImageDescriptions.get(index));
                 } else {
-                    viewHolder.setContentDescription(
-                            getString(R.string.default_user_icon_description));
+                    viewHolder.setContentDescription(getString(
+                            R.string.default_user_icon_description));
                 }
-                viewHolder.setClickListener(view -> {
-                    if (mSelectedPosition == position) {
-                        deselect(position);
-                    } else {
-                        select(position);
-                    }
-                });
             }
+            viewHolder.setClickListener(view -> onViewHolderSelected(position));
+        }
+
+        private void onViewHolderSelected(int position) {
+            if ((mTakePhotoPosition == position) && (mLastSelectedPosition != position)) {
+                mAvatarPhotoController.takePhoto();
+            } else if ((mChoosePhotoPosition == position) && (mLastSelectedPosition != position)) {
+                mAvatarPhotoController.choosePhoto();
+            } else {
+                if (mSelectedPosition == position) {
+                    deselect(position);
+                } else {
+                    select(position);
+                }
+            }
+            mLastSelectedPosition = position;
+        }
+
+        public void onAdapterResume() {
+            mLastSelectedPosition = NONE;
         }
 
         @Override

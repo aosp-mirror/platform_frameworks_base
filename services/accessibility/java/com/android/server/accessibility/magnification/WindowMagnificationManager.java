@@ -37,6 +37,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -45,6 +46,7 @@ import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
+import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -140,6 +142,8 @@ public class WindowMagnificationManager implements
     private boolean mMagnificationFollowTypingEnabled = true;
     @GuardedBy("mLock")
     private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
+    @GuardedBy("mLock")
+    private final SparseArray<Float> mLastActivatedScale = new SparseArray<>();
 
     private boolean mReceiverRegistered = false;
     @VisibleForTesting
@@ -526,6 +530,7 @@ public class WindowMagnificationManager implements
                 return;
             }
             magnifier.setScale(scale);
+            mLastActivatedScale.put(displayId, scale);
         }
     }
 
@@ -613,6 +618,9 @@ public class WindowMagnificationManager implements
             previousEnabled = magnifier.mEnabled;
             enabled = magnifier.enableWindowMagnificationInternal(scale, centerX, centerY,
                     animationCallback, windowPosition, id);
+            if (enabled) {
+                mLastActivatedScale.put(displayId, getScale(displayId));
+            }
         }
 
         if (enabled) {
@@ -631,7 +639,7 @@ public class WindowMagnificationManager implements
      * @param clear {@true} Clears the state of window magnification.
      * @return {@code true} if the magnification is turned to be disabled successfully
      */
-    boolean disableWindowMagnification(int displayId, boolean clear) {
+    public boolean disableWindowMagnification(int displayId, boolean clear) {
         return disableWindowMagnification(displayId, clear, STUB_ANIMATION_CALLBACK);
     }
 
@@ -696,7 +704,6 @@ public class WindowMagnificationManager implements
      * @param displayId The logical display id.
      * @return {@code true} if the window magnification is enabled.
      */
-    @VisibleForTesting
     public boolean isWindowMagnifierEnabled(int displayId) {
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
@@ -715,18 +722,24 @@ public class WindowMagnificationManager implements
      *         scale if none is available
      */
     float getPersistedScale(int displayId) {
-        return mScaleProvider.getScale(displayId);
+        return MathUtils.constrain(mScaleProvider.getScale(displayId),
+                MagnificationConstants.PERSISTED_SCALE_MIN_VALUE,
+                MagnificationScaleProvider.MAX_SCALE);
     }
 
     /**
-     * Persists the default display magnification scale to the current user's settings. Only the
-     * value of the default display is persisted in user's settings.
+     * Persists the default display magnification scale to the current user's settings
+     * <strong>if scale is >= {@link MagnificationConstants.PERSISTED_SCALE_MIN_VALUE}</strong>.
+     * We assume if the scale is < {@link MagnificationConstants.PERSISTED_SCALE_MIN_VALUE}, there
+     * will be no obvious magnification effect.
+     * Only the value of the default display is persisted in user's settings.
      */
     void persistScale(int displayId) {
         float scale = getScale(displayId);
-        if (scale != 1.0f) {
-            mScaleProvider.putScale(scale, displayId);
+        if (scale < MagnificationConstants.PERSISTED_SCALE_MIN_VALUE) {
+            return;
         }
+        mScaleProvider.putScale(scale, displayId);
     }
 
     /**
@@ -742,6 +755,15 @@ public class WindowMagnificationManager implements
                 return 1.0f;
             }
             return magnifier.getScale();
+        }
+    }
+
+    protected float getLastActivatedScale(int displayId) {
+        synchronized (mLock) {
+            if (!mLastActivatedScale.contains(displayId)) {
+                return -1.0f;
+            }
+            return mLastActivatedScale.get(displayId);
         }
     }
 
@@ -772,8 +794,10 @@ public class WindowMagnificationManager implements
      * @return {@code true} if the event was handled, {@code false} otherwise
      */
     public boolean showMagnificationButton(int displayId, int magnificationMode) {
-        return mConnectionWrapper != null && mConnectionWrapper.showMagnificationButton(
-                displayId, magnificationMode);
+        synchronized (mLock) {
+            return mConnectionWrapper != null
+                    && mConnectionWrapper.showMagnificationButton(displayId, magnificationMode);
+        }
     }
 
     /**
@@ -783,8 +807,23 @@ public class WindowMagnificationManager implements
      * @return {@code true} if the event was handled, {@code false} otherwise
      */
     public boolean removeMagnificationButton(int displayId) {
-        return mConnectionWrapper != null && mConnectionWrapper.removeMagnificationButton(
-                displayId);
+        synchronized (mLock) {
+            return mConnectionWrapper != null
+                    && mConnectionWrapper.removeMagnificationButton(displayId);
+        }
+    }
+
+    /**
+     * Requests System UI remove magnification settings panel on the specified display.
+     *
+     * @param displayId The logical display id.
+     * @return {@code true} if the event was handled, {@code false} otherwise
+     */
+    public boolean removeMagnificationSettingsPanel(int displayId) {
+        synchronized (mLock) {
+            return mConnectionWrapper != null
+                    && mConnectionWrapper.removeMagnificationSettingsPanel(displayId);
+        }
     }
 
     /**

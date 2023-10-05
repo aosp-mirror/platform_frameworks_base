@@ -16,27 +16,24 @@
 
 package android.window;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Represents an event that is sent out by the system during back navigation gesture.
- * Holds information about the touch event, swipe direction and overall progress of the gesture
- * interaction.
- *
- * @hide
+ * Object used to report back gesture progress.
+ * Holds information about the touch event, swipe direction and the animation progress that
+ * predictive back animations should seek to.
  */
-public class BackEvent implements Parcelable {
+public final class BackEvent {
     /** Indicates that the edge swipe starts from the left edge of the screen */
     public static final int EDGE_LEFT = 0;
     /** Indicates that the edge swipe starts from the right edge of the screen */
     public static final int EDGE_RIGHT = 1;
 
+    /** @hide */
     @IntDef({
             EDGE_LEFT,
             EDGE_RIGHT,
@@ -52,7 +49,7 @@ public class BackEvent implements Parcelable {
     private final int mSwipeEdge;
 
     /**
-     * Creates a new {@link BackEvent} instance.
+     * Creates a new {@link BackMotionEvent} instance.
      *
      * @param touchX Absolute X location of the touch point of this event.
      * @param touchY Absolute Y location of the touch point of this event.
@@ -64,38 +61,6 @@ public class BackEvent implements Parcelable {
         mTouchY = touchY;
         mProgress = progress;
         mSwipeEdge = swipeEdge;
-    }
-
-    private BackEvent(@NonNull Parcel in) {
-        mTouchX = in.readFloat();
-        mTouchY = in.readFloat();
-        mProgress = in.readFloat();
-        mSwipeEdge = in.readInt();
-    }
-
-    public static final Creator<BackEvent> CREATOR = new Creator<BackEvent>() {
-        @Override
-        public BackEvent createFromParcel(Parcel in) {
-            return new BackEvent(in);
-        }
-
-        @Override
-        public BackEvent[] newArray(int size) {
-            return new BackEvent[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeFloat(mTouchX);
-        dest.writeFloat(mTouchY);
-        dest.writeFloat(mProgress);
-        dest.writeInt(mSwipeEdge);
     }
 
     /**
@@ -115,19 +80,22 @@ public class BackEvent implements Parcelable {
      * In-between locations are linearly interpolated based on horizontal distance from the starting
      * edge and smooth clamped to 1 when the distance exceeds a system-wide threshold.
      */
+    @FloatRange(from = 0, to = 1)
     public float getProgress() {
         return mProgress;
     }
 
     /**
-     * Returns the absolute X location of the touch point.
+     * Returns the absolute X location of the touch point, or NaN if the event is from
+     * a button press.
      */
     public float getTouchX() {
         return mTouchX;
     }
 
     /**
-     * Returns the absolute Y location of the touch point.
+     * Returns the absolute Y location of the touch point, or NaN if the event is from
+     * a button press.
      */
     public float getTouchY() {
         return mTouchY;
@@ -136,6 +104,7 @@ public class BackEvent implements Parcelable {
     /**
      * Returns the screen edge that the swipe starts from.
      */
+    @SwipeEdge
     public int getSwipeEdge() {
         return mSwipeEdge;
     }

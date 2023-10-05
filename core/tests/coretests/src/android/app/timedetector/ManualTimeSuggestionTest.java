@@ -16,22 +16,21 @@
 
 package android.app.timedetector;
 
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
-import static android.app.timezonedetector.ParcelableTestSupport.roundTripParcelable;
+import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.time.ParcelableTestSupport.roundTripParcelable;
 import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import android.app.time.UnixEpochTime;
 import android.os.ShellCommand;
-import android.os.TimestampedValue;
 
 import org.junit.Test;
 
 public class ManualTimeSuggestionTest {
 
-    private static final TimestampedValue<Long> ARBITRARY_TIME =
-            new TimestampedValue<>(1111L, 2222L);
+    private static final UnixEpochTime ARBITRARY_TIME = new UnixEpochTime(1111L, 2222L);
 
     @Test
     public void testEquals() {
@@ -42,9 +41,9 @@ public class ManualTimeSuggestionTest {
         assertEquals(one, two);
         assertEquals(two, one);
 
-        TimestampedValue<Long> differentTime = new TimestampedValue<>(
-                ARBITRARY_TIME.getReferenceTimeMillis() + 1,
-                ARBITRARY_TIME.getValue());
+        UnixEpochTime differentTime = new UnixEpochTime(
+                ARBITRARY_TIME.getElapsedRealtimeMillis() + 1,
+                ARBITRARY_TIME.getUnixEpochTimeMillis());
         ManualTimeSuggestion three = new ManualTimeSuggestion(differentTime);
         assertNotEquals(one, three);
         assertNotEquals(three, one);
@@ -76,15 +75,15 @@ public class ManualTimeSuggestionTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseCommandLineArg_noUnixEpochTime() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321");
+                "--elapsed_realtime 54321");
         ManualTimeSuggestion.parseCommandLineArg(testShellCommand);
     }
 
     @Test
     public void testParseCommandLineArg_validSuggestion() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321 --unix_epoch_time 12345");
-        TimestampedValue<Long> timeSignal = new TimestampedValue<>(54321L, 12345L);
+                "--elapsed_realtime 54321 --unix_epoch_time 12345");
+        UnixEpochTime timeSignal = new UnixEpochTime(54321L, 12345L);
         ManualTimeSuggestion expectedSuggestion = new ManualTimeSuggestion(timeSignal);
         ManualTimeSuggestion actualSuggestion =
                 ManualTimeSuggestion.parseCommandLineArg(testShellCommand);
@@ -94,7 +93,7 @@ public class ManualTimeSuggestionTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseCommandLineArg_unknownArgument() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321 --unix_epoch_time 12345 --bad_arg 0");
+                "--elapsed_realtime 54321 --unix_epoch_time 12345 --bad_arg 0");
         ManualTimeSuggestion.parseCommandLineArg(testShellCommand);
     }
 }

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2023 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration description="Background Install Control Service integration test">
+    <option name="test-suite-tag" value="apct" />
+
+    <!-- Service is not exposed to apps. Disable SELinux for testing purpose. -->
+    <target_preparer class="com.android.tradefed.targetprep.DisableSELinuxTargetPreparer" />
+
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true" />
+        <option name="install-arg" value="-t" />
+        <option name="test-file-name" value="BackgroundInstallControlServiceTestApp.apk" />
+    </target_preparer>
+
+    <!-- Load additional APKs onto device -->
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+        <option name="cleanup" value="true" />
+        <option name="push-file"
+                key="BackgroundInstallControlMockApp1.apk"
+                value="/data/local/tmp/BackgroundInstallControlMockApp1.apk" />
+        <option name="push-file"
+                key="BackgroundInstallControlMockApp2.apk"
+                value="/data/local/tmp/BackgroundInstallControlMockApp2.apk" />
+    </target_preparer>
+
+    <test class="com.android.compatibility.common.tradefed.testtype.JarHostTest" >
+        <option name="jar" value="BackgroundInstallControlServiceHostTest.jar" />
+    </test>
+</configuration>

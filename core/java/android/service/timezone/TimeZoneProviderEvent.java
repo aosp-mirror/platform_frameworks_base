@@ -57,7 +57,7 @@ public final class TimeZoneProviderEvent implements Parcelable {
 
     /**
      * The provider was uncertain about the time zone. See {@link
-     * TimeZoneProviderService#reportUncertain()}
+     * TimeZoneProviderService#reportUncertain(TimeZoneProviderStatus)}
      */
     public static final @EventType int EVENT_TYPE_UNCERTAIN = 3;
 
@@ -66,42 +66,69 @@ public final class TimeZoneProviderEvent implements Parcelable {
     @ElapsedRealtimeLong
     private final long mCreationElapsedMillis;
 
+    // Populated when mType == EVENT_TYPE_SUGGESTION
     @Nullable
     private final TimeZoneProviderSuggestion mSuggestion;
 
+    // Populated when mType == EVENT_TYPE_PERMANENT_FAILURE
     @Nullable
     private final String mFailureCause;
+
+    // May be populated when EVENT_TYPE_SUGGESTION or EVENT_TYPE_UNCERTAIN
+    @Nullable
+    private final TimeZoneProviderStatus mTimeZoneProviderStatus;
 
     private TimeZoneProviderEvent(@EventType int type,
             @ElapsedRealtimeLong long creationElapsedMillis,
             @Nullable TimeZoneProviderSuggestion suggestion,
-            @Nullable String failureCause) {
-        mType = type;
+            @Nullable String failureCause,
+            @Nullable TimeZoneProviderStatus timeZoneProviderStatus) {
+        mType = validateEventType(type);
         mCreationElapsedMillis = creationElapsedMillis;
         mSuggestion = suggestion;
         mFailureCause = failureCause;
+        mTimeZoneProviderStatus = timeZoneProviderStatus;
+
+        // Confirm the type and the provider status agree.
+        if (mType == EVENT_TYPE_PERMANENT_FAILURE && mTimeZoneProviderStatus != null) {
+            throw new IllegalArgumentException(
+                    "Unexpected status: mType=" + mType
+                            + ", mTimeZoneProviderStatus=" + mTimeZoneProviderStatus);
+        }
     }
 
-    /** Returns a event of type {@link #EVENT_TYPE_SUGGESTION}. */
+    private static @EventType int validateEventType(@EventType int eventType) {
+        if (eventType < EVENT_TYPE_PERMANENT_FAILURE || eventType > EVENT_TYPE_UNCERTAIN) {
+            throw new IllegalArgumentException(Integer.toString(eventType));
+        }
+        return eventType;
+    }
+
+    /** Returns an event of type {@link #EVENT_TYPE_SUGGESTION}. */
     public static TimeZoneProviderEvent createSuggestionEvent(
             @ElapsedRealtimeLong long creationElapsedMillis,
-            @NonNull TimeZoneProviderSuggestion suggestion) {
+            @NonNull TimeZoneProviderSuggestion suggestion,
+            @Nullable TimeZoneProviderStatus providerStatus) {
         return new TimeZoneProviderEvent(EVENT_TYPE_SUGGESTION, creationElapsedMillis,
-                Objects.requireNonNull(suggestion), null);
+                Objects.requireNonNull(suggestion), null, providerStatus);
     }
 
-    /** Returns a event of type {@link #EVENT_TYPE_UNCERTAIN}. */
+    /** Returns an event of type {@link #EVENT_TYPE_UNCERTAIN}. */
     public static TimeZoneProviderEvent createUncertainEvent(
-            @ElapsedRealtimeLong long creationElapsedMillis) {
-        return new TimeZoneProviderEvent(EVENT_TYPE_UNCERTAIN, creationElapsedMillis, null, null);
+            @ElapsedRealtimeLong long creationElapsedMillis,
+            @Nullable TimeZoneProviderStatus timeZoneProviderStatus) {
+
+        return new TimeZoneProviderEvent(
+                EVENT_TYPE_UNCERTAIN, creationElapsedMillis, null, null,
+                timeZoneProviderStatus);
     }
 
-    /** Returns a event of type {@link #EVENT_TYPE_PERMANENT_FAILURE}. */
+    /** Returns an event of type {@link #EVENT_TYPE_PERMANENT_FAILURE}. */
     public static TimeZoneProviderEvent createPermanentFailureEvent(
             @ElapsedRealtimeLong long creationElapsedMillis,
             @NonNull String cause) {
         return new TimeZoneProviderEvent(EVENT_TYPE_PERMANENT_FAILURE, creationElapsedMillis, null,
-                Objects.requireNonNull(cause));
+                Objects.requireNonNull(cause), null);
     }
 
     /**
@@ -126,7 +153,7 @@ public final class TimeZoneProviderEvent implements Parcelable {
     }
 
     /**
-     * Returns the failure cauese. Populated when {@link #getType()} is {@link
+     * Returns the failure cause. Populated when {@link #getType()} is {@link
      * #EVENT_TYPE_PERMANENT_FAILURE}.
      */
     @Nullable
@@ -134,24 +161,34 @@ public final class TimeZoneProviderEvent implements Parcelable {
         return mFailureCause;
     }
 
-    public static final @NonNull Creator<TimeZoneProviderEvent> CREATOR =
-            new Creator<TimeZoneProviderEvent>() {
-                @Override
-                public TimeZoneProviderEvent createFromParcel(Parcel in) {
-                    int type = in.readInt();
-                    long creationElapsedMillis = in.readLong();
-                    TimeZoneProviderSuggestion suggestion =
-                            in.readParcelable(getClass().getClassLoader(), android.service.timezone.TimeZoneProviderSuggestion.class);
-                    String failureCause = in.readString8();
-                    return new TimeZoneProviderEvent(
-                            type, creationElapsedMillis, suggestion, failureCause);
-                }
+    /**
+     * Returns the status of the time zone provider.  May be populated when {@link #getType()} is
+     * {@link #EVENT_TYPE_UNCERTAIN} or {@link #EVENT_TYPE_SUGGESTION}, otherwise {@code null}.
+     */
+    @Nullable
+    public TimeZoneProviderStatus getTimeZoneProviderStatus() {
+        return mTimeZoneProviderStatus;
+    }
 
-                @Override
-                public TimeZoneProviderEvent[] newArray(int size) {
-                    return new TimeZoneProviderEvent[size];
-                }
-            };
+    public static final @NonNull Creator<TimeZoneProviderEvent> CREATOR = new Creator<>() {
+        @Override
+        public TimeZoneProviderEvent createFromParcel(Parcel in) {
+            int type = in.readInt();
+            long creationElapsedMillis = in.readLong();
+            TimeZoneProviderSuggestion suggestion = in.readParcelable(
+                    getClass().getClassLoader(), TimeZoneProviderSuggestion.class);
+            String failureCause = in.readString8();
+            TimeZoneProviderStatus status = in.readParcelable(
+                    getClass().getClassLoader(), TimeZoneProviderStatus.class);
+            return new TimeZoneProviderEvent(
+                    type, creationElapsedMillis, suggestion, failureCause, status);
+        }
+
+        @Override
+        public TimeZoneProviderEvent[] newArray(int size) {
+            return new TimeZoneProviderEvent[size];
+        }
+    };
 
     @Override
     public int describeContents() {
@@ -164,6 +201,7 @@ public final class TimeZoneProviderEvent implements Parcelable {
         parcel.writeLong(mCreationElapsedMillis);
         parcel.writeParcelable(mSuggestion, 0);
         parcel.writeString8(mFailureCause);
+        parcel.writeParcelable(mTimeZoneProviderStatus, 0);
     }
 
     @Override
@@ -173,14 +211,17 @@ public final class TimeZoneProviderEvent implements Parcelable {
                 + ", mCreationElapsedMillis=" + Duration.ofMillis(mCreationElapsedMillis).toString()
                 + ", mSuggestion=" + mSuggestion
                 + ", mFailureCause=" + mFailureCause
+                + ", mTimeZoneProviderStatus=" + mTimeZoneProviderStatus
                 + '}';
     }
 
     /**
      * Similar to {@link #equals} except this methods checks for equivalence, not equality.
-     * i.e. two {@link #EVENT_TYPE_UNCERTAIN} and {@link #EVENT_TYPE_PERMANENT_FAILURE} events are
-     * always equivalent, two {@link #EVENT_TYPE_SUGGESTION} events are equivalent if they suggest
-     * the same time zones.
+     * i.e. two {@link #EVENT_TYPE_SUGGESTION} events are equivalent if they suggest
+     * the same time zones and have the same provider status, two {@link #EVENT_TYPE_UNCERTAIN}
+     * events are equivalent if they have the same provider status, and {@link
+     * #EVENT_TYPE_PERMANENT_FAILURE} events are always equivalent (the nature of the failure is not
+     * considered).
      */
     @SuppressWarnings("ReferenceEquality")
     public boolean isEquivalentTo(@Nullable TimeZoneProviderEvent other) {
@@ -191,9 +232,10 @@ public final class TimeZoneProviderEvent implements Parcelable {
             return false;
         }
         if (mType == EVENT_TYPE_SUGGESTION) {
-            return mSuggestion.isEquivalentTo(other.getSuggestion());
+            return mSuggestion.isEquivalentTo(other.mSuggestion)
+                    && Objects.equals(mTimeZoneProviderStatus, other.mTimeZoneProviderStatus);
         }
-        return true;
+        return Objects.equals(mTimeZoneProviderStatus, other.mTimeZoneProviderStatus);
     }
 
     @Override
@@ -208,11 +250,13 @@ public final class TimeZoneProviderEvent implements Parcelable {
         return mType == that.mType
                 && mCreationElapsedMillis == that.mCreationElapsedMillis
                 && Objects.equals(mSuggestion, that.mSuggestion)
-                && Objects.equals(mFailureCause, that.mFailureCause);
+                && Objects.equals(mFailureCause, that.mFailureCause)
+                && Objects.equals(mTimeZoneProviderStatus, that.mTimeZoneProviderStatus);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mType, mCreationElapsedMillis, mSuggestion, mFailureCause);
+        return Objects.hash(mType, mCreationElapsedMillis, mSuggestion, mFailureCause,
+                mTimeZoneProviderStatus);
     }
 }

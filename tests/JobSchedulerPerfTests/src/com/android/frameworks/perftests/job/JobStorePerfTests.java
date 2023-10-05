@@ -15,7 +15,6 @@
  */
 package com.android.frameworks.perftests.job;
 
-
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.content.Context;
@@ -46,7 +45,8 @@ import java.util.List;
 public class JobStorePerfTests {
     private static final String SOURCE_PACKAGE = "com.android.frameworks.perftests.job";
     private static final int SOURCE_USER_ID = 0;
-    private static final int CALLING_UID = 10079;
+    private static final int BASE_CALLING_UID = 10079;
+    private static final int MAX_UID_COUNT = 10;
 
     private static Context sContext;
     private static File sTestDir;
@@ -65,10 +65,10 @@ public class JobStorePerfTests {
         sJobStore = JobStore.initAndGetForTesting(sContext, sTestDir);
 
         for (int i = 0; i < 50; i++) {
-            sFewJobs.add(createJobStatus("fewJobs", i));
+            sFewJobs.add(createJobStatus("fewJobs", i, BASE_CALLING_UID + (i % MAX_UID_COUNT)));
         }
         for (int i = 0; i < 500; i++) {
-            sManyJobs.add(createJobStatus("manyJobs", i));
+            sManyJobs.add(createJobStatus("manyJobs", i, BASE_CALLING_UID + (i % MAX_UID_COUNT)));
         }
     }
 
@@ -102,6 +102,64 @@ public class JobStorePerfTests {
     @Test
     public void testPersistedJobWriting_manyJobs() {
         runPersistedJobWriting(sManyJobs);
+    }
+
+    private void runPersistedJobWriting_delta(List<JobStatus> jobList,
+            List<JobStatus> jobAdditions, List<JobStatus> jobRemovals) {
+        final ManualBenchmarkState benchmarkState = mPerfManualStatusReporter.getBenchmarkState();
+
+        long elapsedTimeNs = 0;
+        while (benchmarkState.keepRunning(elapsedTimeNs)) {
+            sJobStore.clearForTesting();
+            for (JobStatus job : jobList) {
+                sJobStore.addForTesting(job);
+            }
+            sJobStore.writeStatusToDiskForTesting();
+
+            for (JobStatus job : jobAdditions) {
+                sJobStore.addForTesting(job);
+            }
+            for (JobStatus job : jobRemovals) {
+                sJobStore.removeForTesting(job);
+            }
+
+            final long startTime = SystemClock.elapsedRealtimeNanos();
+            sJobStore.writeStatusToDiskForTesting();
+            final long endTime = SystemClock.elapsedRealtimeNanos();
+            elapsedTimeNs = endTime - startTime;
+        }
+    }
+
+    @Test
+    public void testPersistedJobWriting_delta_fewJobs() {
+        List<JobStatus> additions = new ArrayList<>();
+        List<JobStatus> removals = new ArrayList<>();
+        final int numModifiedUids = MAX_UID_COUNT / 2;
+        for (int i = 0; i < sFewJobs.size() / 3; ++i) {
+            JobStatus job = createJobStatus("fewJobs", i, BASE_CALLING_UID + (i % numModifiedUids));
+            if (i % 2 == 0) {
+                additions.add(job);
+            } else {
+                removals.add(job);
+            }
+        }
+        runPersistedJobWriting_delta(sFewJobs, additions, removals);
+    }
+
+    @Test
+    public void testPersistedJobWriting_delta_manyJobs() {
+        List<JobStatus> additions = new ArrayList<>();
+        List<JobStatus> removals = new ArrayList<>();
+        final int numModifiedUids = MAX_UID_COUNT / 2;
+        for (int i = 0; i < sManyJobs.size() / 3; ++i) {
+            JobStatus job = createJobStatus("fewJobs", i, BASE_CALLING_UID + (i % numModifiedUids));
+            if (i % 2 == 0) {
+                additions.add(job);
+            } else {
+                removals.add(job);
+            }
+        }
+        runPersistedJobWriting_delta(sManyJobs, additions, removals);
     }
 
     private void runPersistedJobReading(List<JobStatus> jobList, boolean rtcIsGood) {
@@ -144,12 +202,12 @@ public class JobStorePerfTests {
         runPersistedJobReading(sManyJobs, false);
     }
 
-    private static JobStatus createJobStatus(String testTag, int jobId) {
+    private static JobStatus createJobStatus(String testTag, int jobId, int callingUid) {
         JobInfo jobInfo = new JobInfo.Builder(jobId,
                 new ComponentName(sContext, "JobStorePerfTestJobService"))
                 .setPersisted(true)
                 .build();
         return JobStatus.createFromJobInfo(
-                jobInfo, CALLING_UID, SOURCE_PACKAGE, SOURCE_USER_ID, testTag);
+                jobInfo, callingUid, SOURCE_PACKAGE, SOURCE_USER_ID, null, testTag);
     }
 }

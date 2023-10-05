@@ -20,7 +20,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
 import androidx.core.graphics.drawable.DrawableCompat
+import com.android.settingslib.Utils
 import com.android.systemui.R
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.EMERGENCY_BUTTON
 
 abstract class KeyguardSimInputView(context: Context, attrs: AttributeSet) :
     KeyguardPinBasedInputView(context, attrs) {
@@ -28,6 +30,7 @@ abstract class KeyguardSimInputView(context: Context, attrs: AttributeSet) :
     private var disableESimButton: KeyguardEsimArea? = null
 
     override fun onFinishInflate() {
+        super.onFinishInflate()
         simImageView = findViewById(R.id.keyguard_sim)
         disableESimButton = findViewById(R.id.keyguard_esim_area)
         super.onFinishInflate()
@@ -42,10 +45,7 @@ abstract class KeyguardSimInputView(context: Context, attrs: AttributeSet) :
 
     override fun reloadColors() {
         super.reloadColors()
-        val customAttrs = intArrayOf(android.R.attr.textColorSecondary)
-        val a = context.obtainStyledAttributes(customAttrs)
-        val imageColor = a.getColor(0, 0)
-        a.recycle()
+        val imageColor = Utils.getColorAttrDefaultColor(context, EMERGENCY_BUTTON)
         simImageView?.let {
             val wrappedDrawable = DrawableCompat.wrap(it.drawable)
             DrawableCompat.setTint(wrappedDrawable, imageColor)

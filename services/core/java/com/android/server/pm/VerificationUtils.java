@@ -16,7 +16,11 @@
 
 package com.android.server.pm;
 
+import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.server.pm.PackageManagerService.PACKAGE_MIME_TYPE;
+import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -24,8 +28,12 @@ import android.content.Intent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 final class VerificationUtils {
     /**
@@ -90,5 +98,65 @@ final class VerificationUtils {
 
         context.sendBroadcastAsUser(intent, user,
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
+    }
+
+    @VisibleForTesting(visibility = PACKAGE)
+    static void processVerificationResponseOnTimeout(int verificationId,
+            PackageVerificationState state, PackageVerificationResponse response,
+            PackageManagerService pms) {
+        state.setVerifierResponseOnTimeout(response.callerUid, response.code);
+        processVerificationResponse(verificationId, state, response.code, "Verification timed out",
+                pms);
+    }
+
+    @VisibleForTesting(visibility = PACKAGE)
+    static void processVerificationResponse(int verificationId, PackageVerificationState state,
+            PackageVerificationResponse response, PackageManagerService pms) {
+        state.setVerifierResponse(response.callerUid, response.code);
+        processVerificationResponse(verificationId, state, response.code, "Install not allowed",
+                pms);
+    }
+
+    private static void processVerificationResponse(int verificationId,
+            PackageVerificationState state, int verificationResult, String failureReason,
+            PackageManagerService pms) {
+        if (!state.isVerificationComplete()) {
+            return;
+        }
+
+        final VerifyingSession verifyingSession = state.getVerifyingSession();
+        final Uri originUri = verifyingSession != null ? Uri.fromFile(
+                verifyingSession.mOriginInfo.mResolvedFile) : null;
+
+        final int verificationCode =
+                state.isInstallAllowed() ? verificationResult : PackageManager.VERIFICATION_REJECT;
+
+        if (pms != null && verifyingSession != null) {
+            VerificationUtils.broadcastPackageVerified(verificationId, originUri,
+                    verificationCode, null,
+                    verifyingSession.getDataLoaderType(), verifyingSession.getUser(),
+                    pms.mContext);
+        }
+
+        if (state.isInstallAllowed()) {
+            Slog.i(TAG, "Continuing with installation of " + originUri);
+        } else {
+            String errorMsg = failureReason + " for " + originUri;
+            Slog.i(TAG, errorMsg);
+            if (verifyingSession != null) {
+                verifyingSession.setReturnCode(
+                        PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMsg);
+            }
+        }
+
+        if (pms != null && state.areAllVerificationsComplete()) {
+            pms.mPendingVerification.remove(verificationId);
+        }
+
+        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
+
+        if (verifyingSession != null) {
+            verifyingSession.handleVerificationFinished();
+        }
     }
 }

@@ -26,6 +26,7 @@
 #include "hwui/PaintFilter.h"
 
 #include <SkFontMetrics.h>
+#include <SkRRect.h>
 
 namespace android {
 

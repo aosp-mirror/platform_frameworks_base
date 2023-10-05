@@ -70,6 +70,15 @@
         <item name="android:fontWeight">700</item>
     </style>
 
+    <style name="Chipbar" />
+
+    <style name="Chipbar.Text" parent="@*android:style/TextAppearance.DeviceDefault.Notification.Title">
+        <!-- Text size should be kept in sync with the notification conversation header size. (The
+             conversation header doesn't have a defined style, so the size must be copied here.)
+             See notification_template_conversation_header.xml. -->
+        <item name="android:textSize">16sp</item>
+    </style>
+
     <style name="TextAppearance" />
 
     <style name="TextAppearance.QS">
@@ -315,10 +324,6 @@
 
         <!-- Needed for MediaRoute chooser dialog -->
         <item name="*android:isLightTheme">false</item>
-
-        <!-- Biometrics enroll color style -->
-        <item name="biometricsEnrollStyle">@style/BiometricsEnrollStyle</item>
-
     </style>
 
     <style name="Theme.SystemUI.LightWallpaper">
@@ -378,6 +383,10 @@
     </style>
 
     <style name="Theme.SystemUI.QuickSettings.BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.SystemUI.ContrastDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
@@ -760,11 +769,25 @@
     </style>
 
     <!-- Screenshots -->
+    <style name="AppClipsTrampolineActivity">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+    <style name="AppClipsActivity" parent="LongScreenshotActivity">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
     <style name="LongScreenshotActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainer</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
+        <item name="android:statusBarColor">?androidprv:attr/materialColorSurfaceContainer</item>
+        <item name="android:navigationBarColor">?androidprv:attr/materialColorSurfaceContainerHighest</item>
         <item name="android:windowActivityTransitions">true</item>
     </style>
 
@@ -874,7 +897,7 @@
         <item name="android:textColor">@color/control_primary_text</item>
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:minHeight">@dimen/control_menu_item_min_height</item>
+        <item name="android:minHeight">@dimen/control_menu_item_height</item>
     </style>
 
     <style name="Control.Spinner">
@@ -1033,7 +1056,7 @@
 
     <style name="TextAppearance.Dialog.Title" parent="@android:style/TextAppearance.DeviceDefault.Large">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">@dimen/dialog_title_text_size</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:lineHeight">32sp</item>
         <item name="android:gravity">center</item>
@@ -1159,12 +1182,6 @@
     <style name="TextAppearance.InternetDialog.Active"/>
 
     <style name="TextAppearance.InternetDialog.Secondary.Active"/>
-
-    <style name="InternetDialog.Divider">
-        <item name="android:background">?android:attr/textColorSecondary</item>
-    </style>
-
-    <style name="InternetDialog.Divider.Active"/>
 
     <style name="FgsManagerDialogTitle">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
@@ -1303,12 +1320,93 @@
         <item name="android:textSize">@dimen/broadcast_dialog_btn_text_size</item>
     </style>
 
-    <style name="BiometricsEnrollStyle">
-        <item name="biometricsEnrollIcon">@color/udfps_enroll_icon</item>
-        <item name="biometricsMovingTargetFill">@color/udfps_moving_target_fill</item>
-        <item name="biometricsMovingTargetFillError">@color/udfps_moving_target_fill_error</item>
-        <item name="biometricsEnrollProgress">@color/udfps_enroll_progress</item>
-        <item name="biometricsEnrollProgressHelp">@color/udfps_enroll_progress_help</item>
-        <item name="biometricsEnrollProgressHelpWithTalkback">@color/udfps_enroll_progress_help_with_talkback</item>
+    <!-- The style for log access consent dialog -->
+    <style name="LogAccessDialogTheme" parent="@style/Theme.SystemUI.Dialog.Alert">
+        <item name="permissionGrantButtonTopStyle">@style/PermissionGrantButtonTop</item>
+        <item name="permissionGrantButtonBottomStyle">@style/PermissionGrantButtonBottom</item>
+    </style>
+
+    <style name="AllowLogAccess">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
+    <style name="PrimaryAllowLogAccess">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
+    <style name="PermissionGrantButtonTextAppearance">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/system_neutral1_900</item>
+    </style>
+
+    <style name="PermissionGrantButtonTop"
+           parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
+        <item name="android:layout_width">332dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:background">@drawable/grant_permissions_buttons_top</item>
+    </style>
+
+    <style name="PermissionGrantButtonBottom"
+           parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
+        <item name="android:layout_width">332dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:background">@drawable/grant_permissions_buttons_bottom</item>
+    </style>
+
+    <!-- Magnification styles -->
+    <style name="TextAppearance.MagnificationSetting" />
+
+    <style name="TextAppearance.MagnificationSetting.Title">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:textColor">?androidprv:attr/textColorPrimary</item>
+        <item name="android:textSize">@dimen/magnification_setting_text_size</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="TextAppearance.MagnificationSetting.EditButton">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:textColor">?androidprv:attr/colorAccent</item>
+        <item name="android:textSize">@dimen/magnification_setting_text_size</item>
+        <item name="android:lineHeight">@dimen/magnification_setting_button_line_height</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="TextAppearance.MagnificationSetting.DoneButton">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:textColor">?androidprv:attr/textColorPrimary</item>
+        <item name="android:textSize">@dimen/magnification_setting_text_size</item>
+        <item name="android:lineHeight">@dimen/magnification_setting_button_line_height</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="ShortCutButton" parent="@android:style/Widget.Material.Button">
+        <item name="android:background">@drawable/shortcut_button_colored</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:textColor">?androidprv:attr/textColorSecondary</item>
+    </style>
+
+    <style name="ShortcutHorizontalDivider">
+        <item name="android:layout_width">120dp</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:background">?android:attr/dividerHorizontal</item>
+    </style>
+
+    <style name="ShortcutItemBackground">
+        <item name="android:background">@color/ksh_key_item_new_background</item>
+    </style>
+
+    <style name="LongPressLockScreenAnimation">
+        <item name="android:windowEnterAnimation">@anim/long_press_lock_screen_popup_enter</item>
+        <item name="android:windowExitAnimation">@anim/long_press_lock_screen_popup_exit</item>
     </style>
 </resources>

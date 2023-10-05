@@ -39,9 +39,9 @@ import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
 import androidx.annotation.BinderThread
 import androidx.annotation.UiThread
+import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
-import java.lang.IllegalArgumentException
 import kotlin.math.roundToInt
 
 private const val TAG = "ActivityLaunchAnimator"
@@ -435,8 +435,8 @@ class ActivityLaunchAnimator(
         }
 
         @BinderThread
-        override fun onAnimationCancelled(isKeyguardOccluded: Boolean) {
-            context.mainExecutor.execute { delegate.onAnimationCancelled(isKeyguardOccluded) }
+        override fun onAnimationCancelled() {
+            context.mainExecutor.execute { delegate.onAnimationCancelled() }
         }
     }
 
@@ -507,6 +507,26 @@ class ActivityLaunchAnimator(
             startAnimation(apps, nonApps, callback)
         }
 
+        private fun findRootTaskIfPossible(
+            apps: Array<out RemoteAnimationTarget>?
+        ): RemoteAnimationTarget? {
+            if (apps == null) {
+                return null
+            }
+            var candidate: RemoteAnimationTarget? = null
+            for (it in apps) {
+                if (it.mode == RemoteAnimationTarget.MODE_OPENING) {
+                    if (it.taskInfo != null && !it.hasAnimatingParent) {
+                        return it
+                    }
+                    if (candidate == null) {
+                        candidate = it
+                    }
+                }
+            }
+            return candidate
+        }
+
         private fun startAnimation(
             apps: Array<out RemoteAnimationTarget>?,
             nonApps: Array<out RemoteAnimationTarget>?,
@@ -516,8 +536,7 @@ class ActivityLaunchAnimator(
                 Log.d(TAG, "Remote animation started")
             }
 
-            val window = apps?.firstOrNull { it.mode == RemoteAnimationTarget.MODE_OPENING }
-
+            val window = findRootTaskIfPossible(apps)
             if (window == null) {
                 Log.i(TAG, "Aborting the animation as no window is opening")
                 removeTimeout()
@@ -743,7 +762,7 @@ class ActivityLaunchAnimator(
         }
 
         @UiThread
-        override fun onAnimationCancelled(isKeyguardOccluded: Boolean) {
+        override fun onAnimationCancelled() {
             if (timedOut) {
                 return
             }
@@ -753,7 +772,7 @@ class ActivityLaunchAnimator(
             removeTimeout()
 
             animation?.cancel()
-            controller.onLaunchAnimationCancelled(newKeyguardOccludedState = isKeyguardOccluded)
+            controller.onLaunchAnimationCancelled()
         }
 
         private fun IRemoteAnimationFinishedCallback.invoke() {

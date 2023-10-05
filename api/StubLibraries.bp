@@ -618,6 +618,14 @@ java_defaults {
 }
 
 java_defaults {
+    name: "android_test_frameworks_core_stubs_current_contributions",
+    api_surface: "test",
+    api_contributions: [
+        "test-api-stubs-docs-non-updatable.api.contribution",
+    ],
+}
+
+java_defaults {
     name: "android_module_lib_stubs_current_contributions",
     api_surface: "module-lib",
     api_contributions: [
@@ -681,6 +689,21 @@ java_api_library {
         "test-api-stubs-docs-non-updatable.api.contribution",
     ],
     visibility: ["//visibility:public"],
+}
+
+java_api_library {
+    name: "android_test_frameworks_core_stubs_current.from-text",
+    api_surface: "test",
+    defaults: [
+        "android_stubs_current_contributions",
+        "android_system_stubs_current_contributions",
+        "android_test_frameworks_core_stubs_current_contributions",
+        "stub-annotation-defaults",
+    ],
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+    ],
 }
 
 java_api_library {

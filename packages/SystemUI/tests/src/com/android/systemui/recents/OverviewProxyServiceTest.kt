@@ -153,7 +153,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     }
 
     @Test
-    fun `WakefulnessLifecycle - dispatchFinishedWakingUp sets SysUI flag to AWAKE`() {
+    fun wakefulnessLifecycle_dispatchFinishedWakingUpSetsSysUIflagToAWAKE() {
         // WakefulnessLifecycle is initialized to AWAKE initially, and won't emit a noop.
         wakefulnessLifecycle.dispatchFinishedGoingToSleep()
         clearInvocations(overviewProxy)
@@ -167,7 +167,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     }
 
     @Test
-    fun `WakefulnessLifecycle - dispatchStartedWakingUp sets SysUI flag to WAKING`() {
+    fun wakefulnessLifecycle_dispatchStartedWakingUpSetsSysUIflagToWAKING() {
         wakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN)
 
         verify(overviewProxy)
@@ -177,7 +177,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     }
 
     @Test
-    fun `WakefulnessLifecycle - dispatchFinishedGoingToSleep sets SysUI flag to ASLEEP`() {
+    fun wakefulnessLifecycle_dispatchFinishedGoingToSleepSetsSysUIflagToASLEEP() {
         wakefulnessLifecycle.dispatchFinishedGoingToSleep()
 
         verify(overviewProxy)
@@ -187,7 +187,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     }
 
     @Test
-    fun `WakefulnessLifecycle - dispatchStartedGoingToSleep sets SysUI flag to GOING_TO_SLEEP`() {
+    fun wakefulnessLifecycle_dispatchStartedGoingToSleepSetsSysUIflagToGOING_TO_SLEEP() {
         wakefulnessLifecycle.dispatchStartedGoingToSleep(
             PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON
         )

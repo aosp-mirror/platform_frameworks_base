@@ -18,6 +18,8 @@ package com.android.server.companion.virtual;
 
 import static android.hardware.camera2.CameraInjectionSession.InjectionStatusCallback.ERROR_INJECTION_UNSUPPORTED;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -37,6 +39,7 @@ import android.hardware.camera2.CameraInjectionSession;
 import android.hardware.camera2.CameraManager;
 import android.os.Process;
 import android.os.UserManager;
+import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
 import android.util.ArraySet;
 
@@ -57,6 +60,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class CameraAccessControllerTest {
     private static final String FRONT_CAMERA = "0";
@@ -113,6 +117,11 @@ public class CameraAccessControllerTest {
                 anyInt())).thenReturn(mOtherAppInfo);
         when(mUserManager.getAliveUsers()).thenReturn(mAliveUsers);
         mController.startObservingIfNeeded();
+    }
+
+    @Test
+    public void getUserId_returnsCorrectId() {
+        assertThat(mController.getUserId()).isEqualTo(mContext.getUserId());
     }
 
     @Test

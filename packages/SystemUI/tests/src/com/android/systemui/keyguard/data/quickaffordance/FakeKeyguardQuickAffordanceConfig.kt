@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.data.quickaffordance
 
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.animation.Expandable
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnTriggeredResult
 import kotlinx.coroutines.flow.Flow
@@ -24,9 +25,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.yield
 
 /** Fake implementation of a quick affordance data source. */
+@RoboPilotTest
 class FakeKeyguardQuickAffordanceConfig(
     override val key: String,
-    override val pickerName: String = key,
+    private val pickerName: String = key,
     override val pickerIconResourceId: Int = 0,
 ) : KeyguardQuickAffordanceConfig {
 
@@ -38,6 +40,8 @@ class FakeKeyguardQuickAffordanceConfig(
         )
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
         _lockScreenState
+
+    override fun pickerName(): String = pickerName
 
     override fun onTriggered(
         expandable: Expandable?,

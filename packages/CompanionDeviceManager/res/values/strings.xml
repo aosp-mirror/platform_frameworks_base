@@ -20,7 +20,7 @@
     <string name="app_label">Companion Device Manager</string>
 
     <!-- Title of the device association confirmation dialog. -->
-    <string name="confirmation_title">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to access your &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;</string>
+    <string name="confirmation_title">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to access &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;?</string>
 
     <!-- ================= DEVICE_PROFILE_WATCH and null profile ================= -->
 
@@ -31,15 +31,26 @@
     <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%2$s</xliff:g>&lt;/strong&gt;</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_watch">This app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts, Calendar, Call logs and Nearby devices permissions.</string>
+    <string name="summary_watch">This app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to sync info, like the name of someone calling, interact with your notifications and access your Phone, SMS, Contacts, Calendar, Call logs and Nearby devices permissions.</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile for singleDevice(type) [CHAR LIMIT=NONE] -->
+    <string name="summary_watch_single_device">This app will be allowed to sync info, like the name of someone calling, and access these permissions on your <xliff:g id="device_type" example="phone">%1$s</xliff:g></string>
+
+    <!-- ================= DEVICE_PROFILE_GLASSES ================= -->
+
+    <!-- Title of the device association confirmation dialog for glasses. -->
+    <string name="confirmation_title_glasses">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to manage &lt;strong&gt;<xliff:g id="device_name" example="Glasses">%2$s</xliff:g>&lt;/strong&gt;?</string>
+
+    <!-- The name of the "glasses" device type [CHAR LIMIT=30] -->
+    <string name="profile_name_glasses">glasses</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of GLASSES profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_glasses_multi_device">This app is needed to manage <xliff:g id="device_name" example="My Glasses">%1$s</xliff:g>. <xliff:g id="app_name" example="Glasses">%2$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts, Microphone and Nearby devices permissions.</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of GLASSES profile for singleDevice(type) [CHAR LIMIT=NONE] -->
+    <string name="summary_glasses_single_device">This app will be allowed to access these permissions on your <xliff:g id="device_type" example="phone">%1$s</xliff:g></string>
 
     <!-- ================= DEVICE_PROFILE_APP_STREAMING ================= -->
-
-    <!-- Apps permission will be granted of APP_STREAMING profile [CHAR LIMIT=30] -->
-    <string name="permission_apps">Apps</string>
-
-    <!-- Description of apps permission of APP_STREAMING profile [CHAR LIMIT=NONE] -->
-    <string name="permission_apps_summary">Stream your phone\u2019s apps</string>
 
     <!-- Confirmation for associating an application with a companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
     <string name="title_app_streaming">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to access this information from your phone</string>
@@ -48,7 +59,7 @@
     <string name="helper_title_app_streaming">Cross-device services</string>
 
     <!-- Description of the helper dialog for APP_STREAMING profile. [CHAR LIMIT=NONE] -->
-    <string name="helper_summary_app_streaming"><xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_type" example="Chromebook">%2$s</xliff:g> to stream apps between your devices</string>
+    <string name="helper_summary_app_streaming"><xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="display_name" example="Chromebook">%2$s</xliff:g> to stream apps between your devices</string>
 
     <!-- ================= DEVICE_PROFILE_AUTOMOTIVE_PROJECTION ================= -->
 
@@ -66,23 +77,19 @@
     <!-- Description of the privileges the application will get if associated with the companion device of COMPUTER profile (type) [CHAR LIMIT=NONE] -->
     <string name="summary_computer"></string>
 
-    <!-- Notification permission will be granted of COMPUTER profile [CHAR LIMIT=30] -->
-    <string name="permission_notification">Notifications</string>
-
-    <!-- Description of notification permission of COMPUTER profile [CHAR LIMIT=NONE] -->
-    <string name="permission_notification_summary">Can read all notifications, including information like contacts, messages, and photos</string>
-
-    <!-- Storage permission will be granted of COMPUTER profile [CHAR LIMIT=30] -->
-    <string name="permission_storage">Photos and media</string>
-
-    <!-- Description of storage permission of COMPUTER profile [CHAR LIMIT=NONE] -->
-    <string name="permission_storage_summary"></string>
-
     <!-- Title of the helper dialog for COMPUTER profile [CHAR LIMIT=30]. -->
     <string name="helper_title_computer">Google Play services</string>
 
     <!-- Description of the helper dialog for COMPUTER profile. [CHAR LIMIT=NONE] -->
-    <string name="helper_summary_computer"><xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_type" example="Chromebook">%2$s</xliff:g> to access your phone\u2019s photos, media, and notifications</string>
+    <string name="helper_summary_computer"><xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="display_name" example="Chromebook">%2$s</xliff:g> to access your phone\u2019s photos, media, and notifications</string>
+
+    <!-- ================= DEVICE_PROFILE_NEARBY_DEVICE_STREAMING ================= -->
+
+    <!-- Confirmation for associating an application with a companion device of NEARBY_DEVICE_STREAMING profile (type) [CHAR LIMIT=NONE] -->
+    <string name="title_nearby_device_streaming">Allow &lt;strong&gt;<xliff:g id="device_name" example="NearbyStreamer">%1$s</xliff:g>&lt;/strong&gt; to take this action?</string>
+
+    <!-- Description of the helper dialog for NEARBY_DEVICE_STREAMING profile. [CHAR LIMIT=NONE] -->
+    <string name="helper_summary_nearby_device_streaming"><xliff:g id="app_name" example="NearbyStreamerApp">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_name" example="NearbyDevice">%2$s</xliff:g> to stream apps and other system features to nearby devices</string>
 
     <!-- ================= null profile ================= -->
 
@@ -90,7 +97,10 @@
     <string name="profile_name_generic">device</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of unspecified profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_generic"></string>
+    <string name="summary_generic_single_device">This app will be able to sync info, like the name of someone calling, between your phone and <xliff:g id="device_name" example="My Watch">%1$s</xliff:g></string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of unspecified profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_generic">This app will be able to sync info, like the name of someone calling, between your phone and the chosen device</string>
 
     <!-- ================= Buttons ================= -->
 
@@ -103,20 +113,94 @@
     <!-- Back button for the helper consent dialog [CHAR LIMIT=30] -->
     <string name="consent_back">Back</string>
 
+    <!-- Expand permission in the list CHAR LIMIT=30] -->
+    <string name="permission_expand">Expand <xliff:g id="permission_type" example="Notification">%1$s</xliff:g></string>
+
+    <!-- Collapse permission int the list CHAR LIMIT=30] -->
+    <string name="permission_collapse">Collapse <xliff:g id="permission_type" example="Notification">%1$s</xliff:g></string>
+
     <!-- ================== System data transfer ==================== -->
-    <!-- Title of the permission sync confirmation dialog. [CHAR LIMIT=60] -->
-    <string name="permission_sync_confirmation_title">Transfer app permissions to your
-        watch</string>
+    <!-- Title of the permission sync confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="permission_sync_confirmation_title">Give apps on &lt;strong&gt;<xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g>&lt;/strong&gt; the same permissions as on &lt;strong&gt;<xliff:g id="primary_device_name" example="Pixel 6">%2$s</xliff:g>&lt;/strong&gt;?</string>
 
-    <!-- Text of the permission sync explanation in the confirmation dialog. [CHAR LIMIT=400] -->
-    <string name="permission_sync_summary">To make it easier to set up your watch,
-        apps installed on your watch during setup will use the same permissions as your phone.\n\n
-        These permissions may include access to your watch\u2019s microphone and location.</string>
-
-    <!--Description for vendor icon [CHAR LIMIT=30]-->
-    <string name="vendor_icon_description">App Icon</string>
+    <!-- Text of the permission sync explanation in the confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="permission_sync_summary">This may include &lt;strong&gt;Microphone&lt;/strong&gt;, &lt;strong&gt;Camera&lt;/strong&gt;, and &lt;strong&gt;Location access&lt;/strong&gt;, and other sensitive permissions on &lt;strong&gt;<xliff:g id="companion_device_name" example="My Watch">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;You can change these permissions any time in your Settings on &lt;strong&gt;<xliff:g id="companion_device_name" example="My Watch">%1$s</xliff:g>&lt;/strong&gt;.</string>
 
     <!--Description for information icon [CHAR LIMIT=30]-->
-    <string name="vendor_header_button_description">More Information Button</string>
+    <string name="vendor_header_button_description">More Information</string>
+
+    <!-- ================= Permissions ================= -->
+
+    <!-- Phone permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_phone">Phone</string>
+
+    <!-- SMS permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_sms">SMS</string>
+
+    <!-- Contacts permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_contacts">Contacts</string>
+
+    <!-- Calendar permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_calendar">Calendar</string>
+
+    <!-- Microphone permission will be granted to corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_microphone">Microphone</string>
+
+    <!-- Call logs permission will be granted to the corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_call_logs">Call logs</string>
+
+    <!-- Nearby devices' permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_nearby_devices">Nearby devices</string>
+
+    <!-- Storage permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_storage">Photos and media</string>
+
+    <!-- Notification permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_notification">Notifications</string>
+
+    <!-- Apps permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_app_streaming">Apps</string>
+
+    <!-- Nearby_device_streaming permission will be granted to the corresponding profile [CHAR LIMIT=45] -->
+    <string name="permission_nearby_device_streaming">Streaming</string>
+
+    <!-- Description of phone permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_phone_summary">Can make and manage phone calls</string>
+
+    <!-- Description of Call logs permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_call_logs_summary">Can read and write phone call log</string>
+
+    <!-- Description of SMS permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_sms_summary">Can send and view SMS messages</string>
+
+    <!-- Description of contacts permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_contacts_summary">Can access your contacts</string>
+
+    <!-- Description of calendar permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_calendar_summary">Can access your calendar</string>
+
+    <!-- Description of microphone permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_microphone_summary">Can record audio</string>
+
+    <!-- Description of nearby devices' permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_nearby_devices_summary">Can find, connect to, and determine the relative position of nearby devices</string>
+
+    <!-- Description of notification permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_notification_summary">Can read all notifications, including information like contacts, messages, and photos</string>
+
+    <!-- Description of app streaming permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_app_streaming_summary">Stream your phone\u2019s apps</string>
+
+    <!-- Description of storage permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_storage_summary"></string>
+
+    <!-- Description of nearby_device_streaming permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_nearby_device_streaming_summary">Stream apps and other system features from your phone</string>
+
+    <!-- The type of the device for phone [CHAR LIMIT=30] -->
+    <string name="device_type" product="default">phone</string>
+
+    <!-- The type of the device for tablet [CHAR LIMIT=30] -->
+    <string name="device_type" product="tablet">tablet</string>
 
 </resources>

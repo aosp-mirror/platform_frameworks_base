@@ -19,6 +19,8 @@ package com.android.systemui.statusbar
 import android.app.ActivityManager
 import android.content.res.Resources
 import android.os.SystemProperties
+import android.os.Trace
+import android.os.Trace.TRACE_TAG_APP
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import android.view.CrossWindowBlurListeners
@@ -42,8 +44,8 @@ open class BlurUtils @Inject constructor(
 ) : Dumpable {
     val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
     val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
-
     private var lastAppliedBlur = 0
+    private var earlyWakeupEnabled = false
 
     init {
         dumpManager.registerDumpable(javaClass.name, this)
@@ -71,6 +73,27 @@ open class BlurUtils @Inject constructor(
     }
 
     /**
+     * This method should be called before [applyBlur] so that, if needed, we can set the
+     * early-wakeup flag in SurfaceFlinger.
+     */
+    fun prepareBlur(viewRootImpl: ViewRootImpl?, radius: Int) {
+        if (viewRootImpl == null || !viewRootImpl.surfaceControl.isValid ||
+            !supportsBlursOnWindows() || earlyWakeupEnabled
+        ) {
+            return
+        }
+        if (lastAppliedBlur == 0 && radius != 0) {
+            Trace.asyncTraceForTrackBegin(
+                    TRACE_TAG_APP, TRACK_NAME, "eEarlyWakeup (prepareBlur)", 0)
+            earlyWakeupEnabled = true
+            createTransaction().use {
+                it.setEarlyWakeupStart()
+                it.apply()
+            }
+        }
+    }
+
+    /**
      * Applies background blurs to a {@link ViewRootImpl}.
      *
      * @param viewRootImpl The window root.
@@ -84,11 +107,20 @@ open class BlurUtils @Inject constructor(
         createTransaction().use {
             if (supportsBlursOnWindows()) {
                 it.setBackgroundBlurRadius(viewRootImpl.surfaceControl, radius)
-                if (lastAppliedBlur == 0 && radius != 0) {
+                if (!earlyWakeupEnabled && lastAppliedBlur == 0 && radius != 0) {
+                    Trace.asyncTraceForTrackBegin(
+                        TRACE_TAG_APP,
+                        TRACK_NAME,
+                        "eEarlyWakeup (applyBlur)",
+                        0
+                    )
                     it.setEarlyWakeupStart()
+                    earlyWakeupEnabled = true
                 }
-                if (lastAppliedBlur != 0 && radius == 0) {
+                if (earlyWakeupEnabled && lastAppliedBlur != 0 && radius == 0) {
                     it.setEarlyWakeupEnd()
+                    Trace.asyncTraceForTrackEnd(TRACE_TAG_APP, TRACK_NAME, 0)
+                    earlyWakeupEnabled = false
                 }
                 lastAppliedBlur = radius
             }
@@ -124,5 +156,9 @@ open class BlurUtils @Inject constructor(
             it.println("CROSS_WINDOW_BLUR_SUPPORTED: $CROSS_WINDOW_BLUR_SUPPORTED")
             it.println("isHighEndGfx: ${ActivityManager.isHighEndGfx()}")
         }
+    }
+
+    companion object {
+        const val TRACK_NAME = "BlurUtils"
     }
 }

@@ -21,6 +21,7 @@ import static android.text.Layout.HYPHENATION_FREQUENCY_NORMAL_FAST;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.text.LineBreakConfig;
 import android.os.Build;
@@ -48,7 +49,7 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
  */
 @RequiresApi(Build.VERSION_CODES.S)
 public class CollapsingCoordinatorLayout extends CoordinatorLayout {
-    private static final String TAG = "CollapsingCoordinatorLayout";
+    private static final String TAG = "CollapsingCoordinator";
     private static final float TOOLBAR_LINE_SPACING_MULTIPLIER = 1.1f;
 
     private CharSequence mToolbarTitle;
@@ -122,7 +123,7 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
                 mCollapsingToolbarLayout.setTitle(mToolbarTitle);
             }
         }
-        disableCollapsingToolbarLayoutScrollingBehavior();
+        autoSetCollapsingToolbarLayoutScrolling();
     }
 
     /**
@@ -243,7 +244,7 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
             mCollapsingToolbarLayout.findViewById(R.id.support_action_bar);
     }
 
-    private void disableCollapsingToolbarLayoutScrollingBehavior() {
+    private void autoSetCollapsingToolbarLayoutScrolling() {
         if (mAppBarLayout == null) {
             return;
         }
@@ -254,7 +255,13 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
                 new AppBarLayout.Behavior.DragCallback() {
                     @Override
                     public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
-                        return false;
+                        // Header can be scrolling while device in landscape mode and SDK > 33
+                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.TIRAMISU) {
+                            return false;
+                        } else {
+                            return appBarLayout.getResources().getConfiguration().orientation
+                                    == Configuration.ORIENTATION_LANDSCAPE;
+                        }
                     }
                 });
         params.setBehavior(behavior);

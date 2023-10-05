@@ -104,6 +104,10 @@ public class ExternalVibration implements Parcelable {
         return mAttrs;
     }
 
+    public IBinder getToken() {
+        return mToken;
+    }
+
     public VibrationAttributes getVibrationAttributes() {
         return new VibrationAttributes.Builder(mAttrs).build();
     }

@@ -17,7 +17,7 @@ package com.android.test
 
 import android.graphics.Color
 import android.graphics.Rect
-import com.android.server.wm.flicker.traces.layers.LayersTraceSubject.Companion.assertThat
+import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,7 +39,7 @@ class SharedBufferModeTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(u
             }
         }
 
-        assertThat(trace).hasFrameSequence("SurfaceView", 1..numFrames)
+        LayersTraceSubject(trace).hasFrameSequence("SurfaceView", 1..numFrames)
     }
 
     /** Submit buffers as fast as possible testing that we are not blocked when dequeuing the buffer
@@ -57,7 +57,7 @@ class SharedBufferModeTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(u
                     5000 /* ms */))
         }
 
-        assertThat(trace).hasFrameSequence("SurfaceView", numFrames..numFrames)
+        LayersTraceSubject(trace).hasFrameSequence("SurfaceView", numFrames..numFrames)
     }
 
     /** Keep overwriting the buffer without queuing buffers and check that we present the latest

@@ -165,19 +165,6 @@ public class BroadcastOptions extends ComponentOptions {
             "android:broadcast.requireCompatChangeId";
 
     /**
-     * Corresponds to {@link #setRequireCompatChange(long, boolean)}
-     */
-    private static final String KEY_REQUIRE_COMPAT_CHANGE_ENABLED =
-            "android:broadcast.requireCompatChangeEnabled";
-
-    /**
-     * Corresponds to {@link #setAlarmBroadcast(boolean)}
-     * @hide
-     */
-    public static final String KEY_ALARM_BROADCAST =
-            "android:broadcast.is_alarm";
-
-    /**
      * @hide
      * @deprecated Use {@link android.os.PowerExemptionManager#
      * TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED} instead.
@@ -362,6 +349,16 @@ public class BroadcastOptions extends ComponentOptions {
         mDeliveryGroupMatchingFilter = opts.getParcelable(KEY_DELIVERY_GROUP_MATCHING_FILTER,
                 IntentFilter.class);
         mDeferralPolicy = opts.getInt(KEY_DEFERRAL_POLICY, DEFERRAL_POLICY_DEFAULT);
+    }
+
+    /** @hide */
+    @NonNull
+    public static BroadcastOptions makeWithDeferUntilActive(boolean deferUntilActive) {
+        final BroadcastOptions opts = BroadcastOptions.makeBasic();
+        if (deferUntilActive) {
+            opts.setDeferralPolicy(DEFERRAL_POLICY_UNTIL_ACTIVE);
+        }
+        return opts;
     }
 
     /**
@@ -787,23 +784,6 @@ public class BroadcastOptions extends ComponentOptions {
         return mIdForResponseEvent;
     }
 
-    /** {@hide} */
-    @Deprecated
-    public @NonNull BroadcastOptions setDeferUntilActive(boolean shouldDefer) {
-        if (shouldDefer) {
-            setDeferralPolicy(DEFERRAL_POLICY_UNTIL_ACTIVE);
-        } else {
-            setDeferralPolicy(DEFERRAL_POLICY_NONE);
-        }
-        return this;
-    }
-
-    /** {@hide} */
-    @Deprecated
-    public boolean isDeferUntilActive() {
-        return (mDeferralPolicy == DEFERRAL_POLICY_UNTIL_ACTIVE);
-    }
-
     /**
      * Sets deferral policy for this broadcast that specifies how this broadcast
      * can be deferred for delivery at some future point.
@@ -937,6 +917,8 @@ public class BroadcastOptions extends ComponentOptions {
      * <p> If neither matching key using {@link #setDeliveryGroupMatchingKey(String, String)} nor
      * matching filter using this API is specified, then by default
      * {@link Intent#filterEquals(Intent)} will be used to identify the delivery group.
+     *
+     * @hide
      */
     @NonNull
     public BroadcastOptions setDeliveryGroupMatchingFilter(@NonNull IntentFilter matchingFilter) {
@@ -950,6 +932,7 @@ public class BroadcastOptions extends ComponentOptions {
      *
      * @return the {@link IntentFilter} object that was previously set using
      *         {@link #setDeliveryGroupMatchingFilter(IntentFilter)}.
+     * @hide
      */
     @Nullable
     public IntentFilter getDeliveryGroupMatchingFilter() {
@@ -959,6 +942,8 @@ public class BroadcastOptions extends ComponentOptions {
     /**
      * Clears the {@link IntentFilter} object that was previously set using
      * {@link #setDeliveryGroupMatchingFilter(IntentFilter)}.
+     *
+     * @hide
      */
     public void clearDeliveryGroupMatchingFilter() {
         mDeliveryGroupMatchingFilter = null;
@@ -1009,6 +994,7 @@ public class BroadcastOptions extends ComponentOptions {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BROADCAST_OPTION_INTERACTIVE)
     public @NonNull BroadcastOptions setInteractive(boolean interactive) {
         if (interactive) {
             mFlags |= FLAG_INTERACTIVE;
@@ -1025,6 +1011,7 @@ public class BroadcastOptions extends ComponentOptions {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BROADCAST_OPTION_INTERACTIVE)
     public boolean isInteractive() {
         return (mFlags & FLAG_INTERACTIVE) != 0;
     }
@@ -1071,9 +1058,9 @@ public class BroadcastOptions extends ComponentOptions {
      */
     @SystemApi
     @NonNull
-    // @Override // to narrow down the return type
+    @Override // to narrow down the return type
     public BroadcastOptions setPendingIntentBackgroundActivityStartMode(int state) {
-        // super.setPendingIntentBackgroundActivityStartMode(state);
+        super.setPendingIntentBackgroundActivityStartMode(state);
         return this;
     }
 
@@ -1085,10 +1072,9 @@ public class BroadcastOptions extends ComponentOptions {
      * @hide
      */
     @SystemApi
-    // @Override // to narrow down the return type
-    public int getPendingIntentBackgroundActivityStartMode() {
-        return 0;
-        // return super.getPendingIntentBackgroundActivityStartMode();
+    @Override // to narrow down the return type
+    public @BackgroundActivityStartMode int getPendingIntentBackgroundActivityStartMode() {
+        return super.getPendingIntentBackgroundActivityStartMode();
     }
 
     /**

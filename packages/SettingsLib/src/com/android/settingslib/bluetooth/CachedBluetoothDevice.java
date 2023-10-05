@@ -47,6 +47,7 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -76,10 +77,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private final LocalBluetoothProfileManager mProfileManager;
     private final Object mProfileLock = new Object();
     BluetoothDevice mDevice;
-    private int mDeviceSide;
-    private int mDeviceMode;
-    private long mHiSyncId;
+    private HearingAidInfo mHearingAidInfo;
     private int mGroupId;
+    private Timestamp mBondTimestamp;
 
     // Need this since there is no method for getting RSSI
     short mRssi;
@@ -159,10 +159,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mProfileManager = profileManager;
         mDevice = device;
         fillData();
-        mHiSyncId = BluetoothHearingAid.HI_SYNC_ID_INVALID;
         mGroupId = BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
         initDrawableCache();
         mUnpairing = false;
+    }
+
+    /** Clears any pending messages in the message queue. */
+    public void release() {
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     private void initDrawableCache() {
@@ -303,10 +307,11 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         synchronized (mProfileLock) {
             if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
                 for (CachedBluetoothDevice member : getMemberDevice()) {
-                    Log.d(TAG, "Disconnect the member(" + member.getAddress() + ")");
+                    Log.d(TAG, "Disconnect the member:" + member);
                     member.disconnect();
                 }
             }
+            Log.d(TAG, "Disconnect " + this);
             mDevice.disconnect();
         }
         // Disconnect  PBAP server in case its connected
@@ -351,32 +356,34 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         connectDevice();
     }
 
-    public int getDeviceSide() {
-        return mDeviceSide;
+    public HearingAidInfo getHearingAidInfo() {
+        return mHearingAidInfo;
     }
 
-    public void setDeviceSide(int side) {
-        mDeviceSide = side;
+    public void setHearingAidInfo(HearingAidInfo hearingAidInfo) {
+        mHearingAidInfo = hearingAidInfo;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} is hearing aid device
+     */
+    public boolean isHearingAidDevice() {
+        return mHearingAidInfo != null;
+    }
+
+    public int getDeviceSide() {
+        return mHearingAidInfo != null
+                ? mHearingAidInfo.getSide() : HearingAidInfo.DeviceSide.SIDE_INVALID;
     }
 
     public int getDeviceMode() {
-        return mDeviceMode;
-    }
-
-    public void setDeviceMode(int mode) {
-        mDeviceMode = mode;
+        return mHearingAidInfo != null
+                ? mHearingAidInfo.getMode() : HearingAidInfo.DeviceMode.MODE_INVALID;
     }
 
     public long getHiSyncId() {
-        return mHiSyncId;
-    }
-
-    public void setHiSyncId(long id) {
-        mHiSyncId = id;
-    }
-
-    public boolean isHearingAidDevice() {
-        return mHiSyncId != BluetoothHearingAid.HI_SYNC_ID_INVALID;
+        return mHearingAidInfo != null
+                ? mHearingAidInfo.getHiSyncId() : BluetoothHearingAid.HI_SYNC_ID_INVALID;
     }
 
     /**
@@ -436,11 +443,11 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 Log.d(TAG, "No profiles. Maybe we will connect later for device " + mDevice);
                 return;
             }
-
+            Log.d(TAG, "connect " + this);
             mDevice.connect();
             if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
                 for (CachedBluetoothDevice member : getMemberDevice()) {
-                    Log.d(TAG, "connect the member(" + member.getAddress() + ")");
+                    Log.d(TAG, "connect the member:" + member);
                     member.connect();
                 }
             }
@@ -526,7 +533,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     // TODO: do any of these need to run async on a background thread?
-    private void fillData() {
+    void fillData() {
         updateProfiles();
         fetchActiveDevices();
         migratePhonebookPermissionChoice();
@@ -801,8 +808,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         ParcelUuid[] localUuids = new ParcelUuid[uuidsList.size()];
         uuidsList.toArray(localUuids);
 
-        if (localUuids == null) return false;
-
         /*
          * Now we know if the device supports PBAP, update permissions...
          */
@@ -886,13 +891,23 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             mDevice.setPhonebookAccessPermission(BluetoothDevice.ACCESS_UNKNOWN);
             mDevice.setMessageAccessPermission(BluetoothDevice.ACCESS_UNKNOWN);
             mDevice.setSimAccessPermission(BluetoothDevice.ACCESS_UNKNOWN);
+
+            mBondTimestamp = null;
         }
 
         refresh();
 
-        if (bondState == BluetoothDevice.BOND_BONDED && mDevice.isBondingInitiatedLocally()) {
-            connect();
+        if (bondState == BluetoothDevice.BOND_BONDED) {
+            mBondTimestamp = new Timestamp(System.currentTimeMillis());
+
+            if (mDevice.isBondingInitiatedLocally()) {
+                connect();
+            }
         }
+    }
+
+    public Timestamp getBondTimestamp() {
+        return mBondTimestamp;
     }
 
     public BluetoothClass getBtClass() {
@@ -936,14 +951,15 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     @Override
     public String toString() {
-        return "CachedBluetoothDevice ("
+        return "CachedBluetoothDevice{"
                 + "anonymizedAddress="
                 + mDevice.getAnonymizedAddress()
                 + ", name="
                 + getName()
                 + ", groupId="
                 + mGroupId
-                + ")";
+                + ", member=" + mMemberDevices
+                + "}";
     }
 
     @Override
@@ -1176,15 +1192,24 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
                 // Try to show left/right information if can not get it from battery for hearing
                 // aids specifically.
-                if (mIsActiveDeviceHearingAid
+                boolean isActiveAshaHearingAid = mIsActiveDeviceHearingAid;
+                boolean isActiveLeAudioHearingAid = mIsActiveDeviceLeAudio
+                        && isConnectedHapClientDevice();
+                if ((isActiveAshaHearingAid || isActiveLeAudioHearingAid)
                         && stringRes == R.string.bluetooth_active_no_battery_level) {
+                    final Set<CachedBluetoothDevice> memberDevices = getMemberDevice();
                     final CachedBluetoothDevice subDevice = getSubDevice();
-                    if (subDevice != null && subDevice.isConnected()) {
+                    if (memberDevices.stream().anyMatch(m -> m.isConnected())) {
+                        stringRes = R.string.bluetooth_hearing_aid_left_and_right_active;
+                    } else if (subDevice != null && subDevice.isConnected()) {
                         stringRes = R.string.bluetooth_hearing_aid_left_and_right_active;
                     } else {
-                        if (mDeviceSide == HearingAidProfile.DeviceSide.SIDE_LEFT) {
+                        int deviceSide = getDeviceSide();
+                        if (deviceSide == HearingAidInfo.DeviceSide.SIDE_LEFT_AND_RIGHT) {
+                            stringRes = R.string.bluetooth_hearing_aid_left_and_right_active;
+                        } else if (deviceSide == HearingAidInfo.DeviceSide.SIDE_LEFT) {
                             stringRes = R.string.bluetooth_hearing_aid_left_active;
-                        } else if (mDeviceSide == HearingAidProfile.DeviceSide.SIDE_RIGHT) {
+                        } else if (deviceSide == HearingAidInfo.DeviceSide.SIDE_RIGHT) {
                             stringRes = R.string.bluetooth_hearing_aid_right_active;
                         } else {
                             stringRes = R.string.bluetooth_active_no_battery_level;
@@ -1387,12 +1412,38 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * @return {@code true} if {@code cachedBluetoothDevice} is Hearing Aid device
+     * @return {@code true} if {@code cachedBluetoothDevice} is ASHA hearing aid device
      */
-    public boolean isConnectedHearingAidDevice() {
+    public boolean isConnectedAshaHearingAidDevice() {
         HearingAidProfile hearingAidProfile = mProfileManager.getHearingAidProfile();
         return hearingAidProfile != null && hearingAidProfile.getConnectionStatus(mDevice) ==
                 BluetoothProfile.STATE_CONNECTED;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} is HAP device
+     */
+    public boolean isConnectedHapClientDevice() {
+        HapClientProfile hapClientProfile = mProfileManager.getHapClientProfile();
+        return hapClientProfile != null && hapClientProfile.getConnectionStatus(mDevice)
+                == BluetoothProfile.STATE_CONNECTED;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} is LeAudio hearing aid device
+     */
+    public boolean isConnectedLeAudioHearingAidDevice() {
+        return isConnectedHapClientDevice() && isConnectedLeAudioDevice();
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} is hearing aid device
+     *
+     * The device may be an ASHA hearing aid that supports {@link HearingAidProfile} or a LeAudio
+     * hearing aid that supports {@link HapClientProfile} and {@link LeAudioProfile}.
+     */
+    public boolean isConnectedHearingAidDevice() {
+        return isConnectedAshaHearingAidDevice() || isConnectedLeAudioHearingAidDevice();
     }
 
     /**
@@ -1423,17 +1474,19 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         BluetoothDevice tmpDevice = mDevice;
         final short tmpRssi = mRssi;
         final boolean tmpJustDiscovered = mJustDiscovered;
-        final int tmpDeviceSide = mDeviceSide;
+        final HearingAidInfo tmpHearingAidInfo = mHearingAidInfo;
         // Set main device from sub device
+        release();
         mDevice = mSubDevice.mDevice;
         mRssi = mSubDevice.mRssi;
         mJustDiscovered = mSubDevice.mJustDiscovered;
-        mDeviceSide = mSubDevice.mDeviceSide;
+        mHearingAidInfo = mSubDevice.mHearingAidInfo;
         // Set sub device from backup
+        mSubDevice.release();
         mSubDevice.mDevice = tmpDevice;
         mSubDevice.mRssi = tmpRssi;
         mSubDevice.mJustDiscovered = tmpJustDiscovered;
-        mSubDevice.mDeviceSide = tmpDeviceSide;
+        mSubDevice.mHearingAidInfo = tmpHearingAidInfo;
         fetchActiveDevices();
     }
 
@@ -1448,6 +1501,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * Store the member devices that are in the same coordinated set.
      */
     public void addMemberDevice(CachedBluetoothDevice memberDevice) {
+        Log.d(TAG, this + " addMemberDevice = " + memberDevice);
         mMemberDevices.add(memberDevice);
     }
 
@@ -1455,6 +1509,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * Remove a device from the member device sets.
      */
     public void removeMemberDevice(CachedBluetoothDevice memberDevice) {
+        memberDevice.release();
         mMemberDevices.remove(memberDevice);
     }
 
@@ -1472,15 +1527,18 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         final short tmpRssi = mRssi;
         final boolean tmpJustDiscovered = mJustDiscovered;
         // Set main device from sub device
+        release();
         mDevice = newMainDevice.mDevice;
         mRssi = newMainDevice.mRssi;
         mJustDiscovered = newMainDevice.mJustDiscovered;
+        fillData();
 
         // Set sub device from backup
+        newMainDevice.release();
         newMainDevice.mDevice = tmpDevice;
         newMainDevice.mRssi = tmpRssi;
         newMainDevice.mJustDiscovered = tmpJustDiscovered;
-        fetchActiveDevices();
+        newMainDevice.fillData();
     }
 
     /**

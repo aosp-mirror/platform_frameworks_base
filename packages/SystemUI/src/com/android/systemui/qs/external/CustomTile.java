@@ -59,6 +59,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -111,6 +112,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     private CustomTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             Looper backgroundLooper,
             Handler mainHandler,
             FalsingManager falsingManager,
@@ -124,7 +126,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             TileServices tileServices,
             DisplayTracker displayTracker
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mTileServices = tileServices;
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
@@ -561,6 +563,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     public static class Builder {
         final Lazy<QSHost> mQSHostLazy;
+        final QsEventLogger mUiEventLogger;
         final Looper mBackgroundLooper;
         final Handler mMainHandler;
         private final FalsingManager mFalsingManager;
@@ -578,6 +581,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         @Inject
         public Builder(
                 Lazy<QSHost> hostLazy,
+                QsEventLogger uiEventLogger,
                 @Background Looper backgroundLooper,
                 @Main Handler mainHandler,
                 FalsingManager falsingManager,
@@ -590,6 +594,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
                 DisplayTracker displayTracker
         ) {
             mQSHostLazy = hostLazy;
+            mUiEventLogger = uiEventLogger;
             mBackgroundLooper = backgroundLooper;
             mMainHandler = mainHandler;
             mFalsingManager = falsingManager;
@@ -620,6 +625,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             String action = getAction(mSpec);
             return new CustomTile(
                     mQSHostLazy.get(),
+                    mUiEventLogger,
                     mBackgroundLooper,
                     mMainHandler,
                     mFalsingManager,

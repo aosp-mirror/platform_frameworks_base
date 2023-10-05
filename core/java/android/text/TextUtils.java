@@ -70,7 +70,6 @@ import android.util.Log;
 import android.util.Printer;
 import android.view.View;
 
-import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
@@ -94,7 +93,9 @@ public class TextUtils {
     private static final String ELLIPSIS_NORMAL = "\u2026"; // HORIZONTAL ELLIPSIS (…)
     private static final String ELLIPSIS_TWO_DOTS = "\u2025"; // TWO DOT LEADER (‥)
 
-    private static final int LINE_FEED_CODE_POINT = 10;
+    /** @hide */
+    public static final int LINE_FEED_CODE_POINT = 10;
+
     private static final int NBSP_CODE_POINT = 160;
 
     /**
@@ -1232,8 +1233,8 @@ public class TextUtils {
 
     /**
      * Transforms a CharSequences to uppercase, copying the sources spans and keeping them spans as
-     * much as possible close to their relative original places. In the case the the uppercase
-     * string is identical to the sources, the source itself is returned instead of being copied.
+     * much as possible close to their relative original places. If uppercase string is identical
+     * to the sources, the source itself is returned instead of being copied.
      *
      * If copySpans is set, source must be an instance of Spanned.
      *
@@ -2332,14 +2333,33 @@ public class TextUtils {
         return trimmed;
     }
 
-    private static boolean isNewline(int codePoint) {
+    /** @hide */
+    public static boolean isNewline(int codePoint) {
         int type = Character.getType(codePoint);
         return type == Character.PARAGRAPH_SEPARATOR || type == Character.LINE_SEPARATOR
                 || codePoint == LINE_FEED_CODE_POINT;
     }
 
-    private static boolean isWhiteSpace(int codePoint) {
+    /** @hide */
+    public static boolean isWhitespace(int codePoint) {
         return Character.isWhitespace(codePoint) || codePoint == NBSP_CODE_POINT;
+    }
+
+    /** @hide */
+    public static boolean isWhitespaceExceptNewline(int codePoint) {
+        return isWhitespace(codePoint) && !isNewline(codePoint);
+    }
+
+    /** @hide */
+    public static boolean isPunctuation(int codePoint) {
+        int type = Character.getType(codePoint);
+        return type == Character.CONNECTOR_PUNCTUATION
+                || type == Character.DASH_PUNCTUATION
+                || type == Character.END_PUNCTUATION
+                || type == Character.FINAL_QUOTE_PUNCTUATION
+                || type == Character.INITIAL_QUOTE_PUNCTUATION
+                || type == Character.OTHER_PUNCTUATION
+                || type == Character.START_PUNCTUATION;
     }
 
     /** @hide */
@@ -2433,7 +2453,7 @@ public class TextUtils {
                 gettingCleaned.removeRange(offset, offset + codePointLen);
             } else if (type == Character.CONTROL && !isNewline) {
                 gettingCleaned.removeRange(offset, offset + codePointLen);
-            } else if (trim && !isWhiteSpace(codePoint)) {
+            } else if (trim && !isWhitespace(codePoint)) {
                 // This is only executed if the code point is not removed
                 if (firstNonWhiteSpace == -1) {
                     firstNonWhiteSpace = offset;

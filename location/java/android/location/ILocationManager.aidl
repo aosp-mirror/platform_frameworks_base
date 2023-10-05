@@ -59,6 +59,7 @@ interface ILocationManager
     void registerLocationPendingIntent(String provider, in LocationRequest request, in PendingIntent pendingIntent, String packageName, @nullable String attributionTag);
     void unregisterLocationPendingIntent(in PendingIntent pendingIntent);
 
+    @EnforcePermission(allOf={"LOCATION_HARDWARE", "ACCESS_FINE_LOCATION"})
     void injectLocation(in Location location);
 
     void requestListenerFlush(String provider, in ILocationListener listener, int requestCode);
@@ -113,8 +114,10 @@ interface ILocationManager
     boolean isProviderPackage(@nullable String provider, String packageName, @nullable String attributionTag);
     List<String> getProviderPackages(String provider);
 
+    @EnforcePermission("LOCATION_HARDWARE")
     void setExtraLocationControllerPackage(String packageName);
     String getExtraLocationControllerPackage();
+    @EnforcePermission("LOCATION_HARDWARE")
     void setExtraLocationControllerPackageEnabled(boolean enabled);
     boolean isExtraLocationControllerPackageEnabled();
 
@@ -125,7 +128,9 @@ interface ILocationManager
     boolean isAdasGnssLocationEnabledForUser(int userId);
     void setAdasGnssLocationEnabledForUser(boolean enabled, int userId);
 
+    @EnforcePermission("CONTROL_AUTOMOTIVE_GNSS")
     boolean isAutomotiveGnssSuspended();
+    @EnforcePermission("CONTROL_AUTOMOTIVE_GNSS")
     void setAutomotiveGnssSuspended(boolean suspended);
 
     void addTestProvider(String name, in ProviderProperties properties,

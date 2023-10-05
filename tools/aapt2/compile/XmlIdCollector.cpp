@@ -38,8 +38,9 @@ struct IdCollector : public xml::Visitor {
   using xml::Visitor::Visit;
 
   explicit IdCollector(std::vector<SourcedResourceName>* out_symbols,
-                       SourcePathDiagnostics* source_diag) : out_symbols_(out_symbols),
-                                                             source_diag_(source_diag) {}
+                       android::SourcePathDiagnostics* source_diag)
+      : out_symbols_(out_symbols), source_diag_(source_diag) {
+  }
 
   void Visit(xml::Element* element) override {
     for (xml::Attribute& attr : element->attributes) {
@@ -48,8 +49,8 @@ struct IdCollector : public xml::Visitor {
       if (ResourceUtils::ParseReference(attr.value, &name, &create, nullptr)) {
         if (create && name.type.type == ResourceType::kId) {
           if (!text::IsValidResourceEntryName(name.entry)) {
-            source_diag_->Error(DiagMessage(element->line_number)
-                                   << "id '" << name << "' has an invalid entry name");
+            source_diag_->Error(android::DiagMessage(element->line_number)
+                                << "id '" << name << "' has an invalid entry name");
           } else {
             auto iter = std::lower_bound(out_symbols_->begin(),
                                          out_symbols_->end(), name, cmp_name);
@@ -67,7 +68,7 @@ struct IdCollector : public xml::Visitor {
 
  private:
   std::vector<SourcedResourceName>* out_symbols_;
-  SourcePathDiagnostics* source_diag_;
+  android::SourcePathDiagnostics* source_diag_;
 };
 
 }  // namespace
@@ -75,7 +76,7 @@ struct IdCollector : public xml::Visitor {
 bool XmlIdCollector::Consume(IAaptContext* context, xml::XmlResource* xmlRes) {
   TRACE_CALL();
   xmlRes->file.exported_symbols.clear();
-  SourcePathDiagnostics source_diag(xmlRes->file.source, context->GetDiagnostics());
+  android::SourcePathDiagnostics source_diag(xmlRes->file.source, context->GetDiagnostics());
   IdCollector collector(&xmlRes->file.exported_symbols, &source_diag);
   xmlRes->root->Accept(&collector);
   return !source_diag.HadError();

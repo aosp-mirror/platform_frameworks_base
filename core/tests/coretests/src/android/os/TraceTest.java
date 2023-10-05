@@ -33,7 +33,21 @@ public class TraceTest extends AndroidTestCase
     private int eMethodCalls = 0;
     private int fMethodCalls = 0;
     private int gMethodCalls = 0;
-    
+
+    public void testNullStrings() {
+        Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER, null, 42);
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, null);
+
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, null, 42);
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, null, 42);
+
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, null, null, 42);
+        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, null, 42);
+
+        Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, null);
+        Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER, null, null);
+    }
+
     @SmallTest
     public void testNativeTracingFromJava()
     {

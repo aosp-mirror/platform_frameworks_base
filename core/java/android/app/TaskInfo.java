@@ -334,6 +334,12 @@ public class TaskInfo {
     public boolean isVisible;
 
     /**
+     * Whether this task is request visible.
+     * @hide
+     */
+    public boolean isVisibleRequested;
+
+    /**
      * Whether this task is sleeping due to sleeping display.
      * @hide
      */
@@ -482,6 +488,15 @@ public class TaskInfo {
     }
 
     /**
+     * @return The id of the display this task is associated with.
+     * @hide
+     */
+    @TestApi
+    public int getDisplayId() {
+        return displayId;
+    }
+
+    /**
      * Returns {@code true} if the parameters that are important for task organizers are equal
      * between this {@link TaskInfo} and {@param that}.
      * @hide
@@ -509,6 +524,7 @@ public class TaskInfo {
                 && Objects.equals(taskDescription, that.taskDescription)
                 && isFocused == that.isFocused
                 && isVisible == that.isVisible
+                && isVisibleRequested == that.isVisibleRequested
                 && isSleeping == that.isSleeping
                 && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId)
                 && parentTaskId == that.parentTaskId
@@ -582,6 +598,7 @@ public class TaskInfo {
         parentTaskId = source.readInt();
         isFocused = source.readBoolean();
         isVisible = source.readBoolean();
+        isVisibleRequested = source.readBoolean();
         isSleeping = source.readBoolean();
         topActivityInSizeCompat = source.readBoolean();
         topActivityEligibleForLetterboxEducation = source.readBoolean();
@@ -635,6 +652,7 @@ public class TaskInfo {
         dest.writeInt(parentTaskId);
         dest.writeBoolean(isFocused);
         dest.writeBoolean(isVisible);
+        dest.writeBoolean(isVisibleRequested);
         dest.writeBoolean(isSleeping);
         dest.writeBoolean(topActivityInSizeCompat);
         dest.writeBoolean(topActivityEligibleForLetterboxEducation);
@@ -678,6 +696,7 @@ public class TaskInfo {
                 + " parentTaskId=" + parentTaskId
                 + " isFocused=" + isFocused
                 + " isVisible=" + isVisible
+                + " isVisibleRequested=" + isVisibleRequested
                 + " isSleeping=" + isSleeping
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
                 + " topActivityEligibleForLetterboxEducation= "

@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -30,15 +32,17 @@ import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.SensorProps;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
-import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
+import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 
@@ -63,10 +67,12 @@ public class FaceProviderTest {
     private IFace mDaemon;
     @Mock
     private BiometricContext mBiometricContext;
+    @Mock
+    private BiometricStateCallback mBiometricStateCallback;
 
     private SensorProps[] mSensorProps;
     private LockoutResetDispatcher mLockoutResetDispatcher;
-    private TestableFaceProvider mFaceProvider;
+    private FaceProvider mFaceProvider;
 
     private static void waitForIdle() {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
@@ -91,20 +97,40 @@ public class FaceProviderTest {
 
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
 
-        mFaceProvider = new TestableFaceProvider(mDaemon, mContext, mSensorProps, TAG,
-                mLockoutResetDispatcher, mBiometricContext);
+        mFaceProvider = new FaceProvider(mContext, mBiometricStateCallback,
+                mSensorProps, TAG, mLockoutResetDispatcher, mBiometricContext,
+                mDaemon);
+    }
+
+    @Test
+    public void testAddingSensors() {
+        waitForIdle();
+
+        for (SensorProps prop : mSensorProps) {
+            final BiometricScheduler scheduler =
+                    mFaceProvider.mFaceSensors.get(prop.commonProps.sensorId)
+                            .getScheduler();
+            BaseClientMonitor currentClient = scheduler.getCurrentClient();
+
+            assertThat(currentClient).isInstanceOf(FaceInternalCleanupClient.class);
+            assertThat(currentClient.getSensorId()).isEqualTo(prop.commonProps.sensorId);
+            assertThat(currentClient.getTargetUserId()).isEqualTo(UserHandle.USER_SYSTEM);
+        }
     }
 
     @SuppressWarnings("rawtypes")
     @Test
     public void halServiceDied_resetsAllSchedulers() {
+        waitForIdle();
+
         assertEquals(mSensorProps.length, mFaceProvider.getSensorProperties().size());
 
         // Schedule N operations on each sensor
         final int numFakeOperations = 10;
         for (SensorProps prop : mSensorProps) {
             final BiometricScheduler scheduler =
-                    mFaceProvider.mSensors.get(prop.commonProps.sensorId).getScheduler();
+                    mFaceProvider.mFaceSensors.get(prop.commonProps.sensorId).getScheduler();
+            scheduler.reset();
             for (int i = 0; i < numFakeOperations; i++) {
                 final HalClientMonitor testMonitor = mock(HalClientMonitor.class);
                 when(testMonitor.getFreshDaemon()).thenReturn(new Object());
@@ -116,7 +142,7 @@ public class FaceProviderTest {
         // The right amount of pending and current operations are scheduled
         for (SensorProps prop : mSensorProps) {
             final BiometricScheduler scheduler =
-                    mFaceProvider.mSensors.get(prop.commonProps.sensorId).getScheduler();
+                    mFaceProvider.mFaceSensors.get(prop.commonProps.sensorId).getScheduler();
             assertEquals(numFakeOperations - 1, scheduler.getCurrentPendingCount());
             assertNotNull(scheduler.getCurrentClient());
         }
@@ -129,28 +155,9 @@ public class FaceProviderTest {
         // No pending operations, no current operation.
         for (SensorProps prop : mSensorProps) {
             final BiometricScheduler scheduler =
-                    mFaceProvider.mSensors.get(prop.commonProps.sensorId).getScheduler();
+                    mFaceProvider.mFaceSensors.get(prop.commonProps.sensorId).getScheduler();
             assertNull(scheduler.getCurrentClient());
             assertEquals(0, scheduler.getCurrentPendingCount());
-        }
-    }
-
-    private static class TestableFaceProvider extends FaceProvider {
-        private final IFace mDaemon;
-
-        TestableFaceProvider(@NonNull IFace daemon,
-                @NonNull Context context,
-                @NonNull SensorProps[] props,
-                @NonNull String halInstanceName,
-                @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-                @NonNull BiometricContext biometricContext) {
-            super(context, props, halInstanceName, lockoutResetDispatcher, biometricContext);
-            mDaemon = daemon;
-        }
-
-        @Override
-        synchronized IFace getHalInstance() {
-            return mDaemon;
         }
     }
 }

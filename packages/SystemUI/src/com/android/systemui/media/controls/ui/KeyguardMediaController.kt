@@ -128,6 +128,15 @@ constructor(
 
     var visibilityChangedListener: ((Boolean) -> Unit)? = null
 
+    /**
+     * Whether the doze wake up animation is delayed and we are currently waiting for it to start.
+     */
+    var isDozeWakeUpAnimationWaiting: Boolean = false
+        set(value) {
+            field = value
+            refreshMediaPosition()
+        }
+
     /** single pane media container placed at the top of the notifications list */
     var singlePaneContainer: MediaContainerView? = null
         private set
@@ -221,7 +230,13 @@ constructor(
         // by the clock. This is not the case for single-line clock though.
         // For single shade, we don't need to do it, because media is a child of NSSL, which already
         // gets hidden on AOD.
-        return !statusBarStateController.isDozing
+        // Media also has to be hidden when waking up from dozing, and the doze wake up animation is
+        // delayed and waiting to be started.
+        // This is to stay in sync with the delaying of the horizontal alignment of the rest of the
+        // keyguard container, that is also delayed until the "wait" is over.
+        // If we show media during this waiting period, the shade will still be centered, and using
+        // the entire width of the screen, and making media show fully stretched.
+        return !statusBarStateController.isDozing && !isDozeWakeUpAnimationWaiting
     }
 
     private fun showMediaPlayer() {

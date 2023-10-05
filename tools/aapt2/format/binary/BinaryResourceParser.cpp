@@ -18,19 +18,19 @@
 
 #include <algorithm>
 #include <map>
+#include <optional>
 #include <string>
-
-#include "android-base/logging.h"
-#include "android-base/macros.h"
-#include "android-base/stringprintf.h"
-#include "androidfw/ResourceTypes.h"
-#include "androidfw/TypeWrappers.h"
 
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
-#include "Source.h"
 #include "ValueVisitor.h"
+#include "android-base/logging.h"
+#include "android-base/macros.h"
+#include "android-base/stringprintf.h"
+#include "androidfw/ResourceTypes.h"
+#include "androidfw/Source.h"
+#include "androidfw/TypeWrappers.h"
 #include "format/binary/ResChunkPullParser.h"
 #include "util/Util.h"
 
@@ -50,7 +50,7 @@ static std::u16string strcpy16_dtoh(const char16_t* src, size_t len) {
   std::u16string dst;
   dst.resize(utf16_len);
   for (size_t i = 0; i < utf16_len; i++) {
-    dst[i] = util::DeviceToHost16(src[i]);
+    dst[i] = android::util::DeviceToHost16(src[i]);
   }
   return dst;
 }
@@ -87,8 +87,8 @@ class ReferenceIdToNameVisitor : public DescendingValueVisitor {
 }  // namespace
 
 BinaryResourceParser::BinaryResourceParser(IDiagnostics* diag, ResourceTable* table,
-                                           const Source& source, const void* data, size_t len,
-                                           io::IFileCollection* files)
+                                           const android::Source& source, const void* data,
+                                           size_t len, io::IFileCollection* files)
     : diag_(diag), table_(table), source_(source), data_(data), data_len_(len), files_(files) {
 }
 
@@ -96,13 +96,13 @@ bool BinaryResourceParser::Parse() {
   ResChunkPullParser parser(data_, data_len_);
 
   if (!ResChunkPullParser::IsGoodEvent(parser.Next())) {
-    diag_->Error(DiagMessage(source_) << "corrupt resources.arsc: " << parser.error());
+    diag_->Error(android::DiagMessage(source_) << "corrupt resources.arsc: " << parser.error());
     return false;
   }
 
   if (parser.chunk()->type != android::RES_TABLE_TYPE) {
-    diag_->Error(DiagMessage(source_) << StringPrintf("unknown chunk of type 0x%02x",
-                                                      static_cast<int>(parser.chunk()->type)));
+    diag_->Error(android::DiagMessage(source_) << StringPrintf(
+                     "unknown chunk of type 0x%02x", static_cast<int>(parser.chunk()->type)));
     return false;
   }
 
@@ -112,18 +112,18 @@ bool BinaryResourceParser::Parse() {
 
   if (parser.Next() != ResChunkPullParser::Event::kEndDocument) {
     if (parser.event() == ResChunkPullParser::Event::kBadDocument) {
-      diag_->Warn(DiagMessage(source_)
+      diag_->Warn(android::DiagMessage(source_)
                   << "invalid chunk trailing RES_TABLE_TYPE: " << parser.error());
     } else {
-      diag_->Warn(DiagMessage(source_)
+      diag_->Warn(android::DiagMessage(source_)
                   << StringPrintf("unexpected chunk of type 0x%02x trailing RES_TABLE_TYPE",
                                   static_cast<int>(parser.chunk()->type)));
     }
   }
 
   if (!staged_entries_to_remove_.empty()) {
-    diag_->Error(DiagMessage(source_) << "didn't find " << staged_entries_to_remove_.size()
-                                      << " original staged resources");
+    diag_->Error(android::DiagMessage(source_) << "didn't find " << staged_entries_to_remove_.size()
+                                               << " original staged resources");
     return false;
   }
 
@@ -134,20 +134,20 @@ bool BinaryResourceParser::Parse() {
 bool BinaryResourceParser::ParseTable(const ResChunk_header* chunk) {
   const ResTable_header* table_header = ConvertTo<ResTable_header>(chunk);
   if (!table_header) {
-    diag_->Error(DiagMessage(source_) << "corrupt ResTable_header chunk");
+    diag_->Error(android::DiagMessage(source_) << "corrupt ResTable_header chunk");
     return false;
   }
 
   ResChunkPullParser parser(GetChunkData(&table_header->header),
                             GetChunkDataLen(&table_header->header));
   while (ResChunkPullParser::IsGoodEvent(parser.Next())) {
-    switch (util::DeviceToHost16(parser.chunk()->type)) {
+    switch (android::util::DeviceToHost16(parser.chunk()->type)) {
       case android::RES_STRING_POOL_TYPE:
         if (value_pool_.getError() == NO_INIT) {
-          status_t err =
-              value_pool_.setTo(parser.chunk(), util::DeviceToHost32(parser.chunk()->size));
+          status_t err = value_pool_.setTo(parser.chunk(),
+                                           android::util::DeviceToHost32(parser.chunk()->size));
           if (err != NO_ERROR) {
-            diag_->Error(DiagMessage(source_)
+            diag_->Error(android::DiagMessage(source_)
                          << "corrupt string pool in ResTable: " << value_pool_.getError());
             return false;
           }
@@ -155,7 +155,7 @@ bool BinaryResourceParser::ParseTable(const ResChunk_header* chunk) {
           // Reserve some space for the strings we are going to add.
           table_->string_pool.HintWillAdd(value_pool_.size(), value_pool_.styleCount());
         } else {
-          diag_->Warn(DiagMessage(source_) << "unexpected string pool in ResTable");
+          diag_->Warn(android::DiagMessage(source_) << "unexpected string pool in ResTable");
         }
         break;
 
@@ -166,15 +166,15 @@ bool BinaryResourceParser::ParseTable(const ResChunk_header* chunk) {
         break;
 
       default:
-        diag_->Warn(DiagMessage(source_)
+        diag_->Warn(android::DiagMessage(source_)
                     << "unexpected chunk type "
-                    << static_cast<int>(util::DeviceToHost16(parser.chunk()->type)));
+                    << static_cast<int>(android::util::DeviceToHost16(parser.chunk()->type)));
         break;
     }
   }
 
   if (parser.event() == ResChunkPullParser::Event::kBadDocument) {
-    diag_->Error(DiagMessage(source_) << "corrupt resource table: " << parser.error());
+    diag_->Error(android::DiagMessage(source_) << "corrupt resource table: " << parser.error());
     return false;
   }
   return true;
@@ -185,13 +185,13 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
       sizeof(ResTable_package) - sizeof(ResTable_package::typeIdOffset);
   const ResTable_package* package_header = ConvertTo<ResTable_package, kMinPackageSize>(chunk);
   if (!package_header) {
-    diag_->Error(DiagMessage(source_) << "corrupt ResTable_package chunk");
+    diag_->Error(android::DiagMessage(source_) << "corrupt ResTable_package chunk");
     return false;
   }
 
-  uint32_t package_id = util::DeviceToHost32(package_header->id);
+  uint32_t package_id = android::util::DeviceToHost32(package_header->id);
   if (package_id > std::numeric_limits<uint8_t>::max()) {
-    diag_->Error(DiagMessage(source_) << "package ID is too big (" << package_id << ")");
+    diag_->Error(android::DiagMessage(source_) << "package ID is too big (" << package_id << ")");
     return false;
   }
 
@@ -199,9 +199,10 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
   std::u16string package_name = strcpy16_dtoh((const char16_t*)package_header->name,
                                               arraysize(package_header->name));
 
-  ResourceTablePackage* package = table_->FindOrCreatePackage(util::Utf16ToUtf8(package_name));
+  ResourceTablePackage* package =
+      table_->FindOrCreatePackage(android::util::Utf16ToUtf8(package_name));
   if (!package) {
-    diag_->Error(DiagMessage(source_)
+    diag_->Error(android::DiagMessage(source_)
                  << "incompatible package '" << package_name << "' with ID " << package_id);
     return false;
   }
@@ -214,26 +215,28 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
   ResChunkPullParser parser(GetChunkData(&package_header->header),
                             GetChunkDataLen(&package_header->header));
   while (ResChunkPullParser::IsGoodEvent(parser.Next())) {
-    switch (util::DeviceToHost16(parser.chunk()->type)) {
+    switch (android::util::DeviceToHost16(parser.chunk()->type)) {
       case android::RES_STRING_POOL_TYPE:
         if (type_pool_.getError() == NO_INIT) {
           status_t err =
-              type_pool_.setTo(parser.chunk(), util::DeviceToHost32(parser.chunk()->size));
+              type_pool_.setTo(parser.chunk(), android::util::DeviceToHost32(parser.chunk()->size));
           if (err != NO_ERROR) {
-            diag_->Error(DiagMessage(source_) << "corrupt type string pool in "
-                                              << "ResTable_package: " << type_pool_.getError());
+            diag_->Error(android::DiagMessage(source_)
+                         << "corrupt type string pool in "
+                         << "ResTable_package: " << type_pool_.getError());
             return false;
           }
         } else if (key_pool_.getError() == NO_INIT) {
           status_t err =
-              key_pool_.setTo(parser.chunk(), util::DeviceToHost32(parser.chunk()->size));
+              key_pool_.setTo(parser.chunk(), android::util::DeviceToHost32(parser.chunk()->size));
           if (err != NO_ERROR) {
-            diag_->Error(DiagMessage(source_) << "corrupt key string pool in "
-                                              << "ResTable_package: " << key_pool_.getError());
+            diag_->Error(android::DiagMessage(source_)
+                         << "corrupt key string pool in "
+                         << "ResTable_package: " << key_pool_.getError());
             return false;
           }
         } else {
-          diag_->Warn(DiagMessage(source_) << "unexpected string pool");
+          diag_->Warn(android::DiagMessage(source_) << "unexpected string pool");
         }
         break;
 
@@ -268,15 +271,15 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
         break;
 
       default:
-        diag_->Warn(DiagMessage(source_)
+        diag_->Warn(android::DiagMessage(source_)
                     << "unexpected chunk type "
-                    << static_cast<int>(util::DeviceToHost16(parser.chunk()->type)));
+                    << static_cast<int>(android::util::DeviceToHost16(parser.chunk()->type)));
         break;
     }
   }
 
   if (parser.event() == ResChunkPullParser::Event::kBadDocument) {
-    diag_->Error(DiagMessage(source_) << "corrupt ResTable_package: " << parser.error());
+    diag_->Error(android::DiagMessage(source_) << "corrupt ResTable_package: " << parser.error());
     return false;
   }
 
@@ -290,18 +293,19 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
 bool BinaryResourceParser::ParseTypeSpec(const ResourceTablePackage* package,
                                          const ResChunk_header* chunk, uint8_t package_id) {
   if (type_pool_.getError() != NO_ERROR) {
-    diag_->Error(DiagMessage(source_) << "missing type string pool");
+    diag_->Error(android::DiagMessage(source_) << "missing type string pool");
     return false;
   }
 
   const ResTable_typeSpec* type_spec = ConvertTo<ResTable_typeSpec>(chunk);
   if (!type_spec) {
-    diag_->Error(DiagMessage(source_) << "corrupt ResTable_typeSpec chunk");
+    diag_->Error(android::DiagMessage(source_) << "corrupt ResTable_typeSpec chunk");
     return false;
   }
 
   if (type_spec->id == 0) {
-    diag_->Error(DiagMessage(source_) << "ResTable_typeSpec has invalid id: " << type_spec->id);
+    diag_->Error(android::DiagMessage(source_)
+                 << "ResTable_typeSpec has invalid id: " << type_spec->id);
     return false;
   }
 
@@ -312,25 +316,26 @@ bool BinaryResourceParser::ParseTypeSpec(const ResourceTablePackage* package,
   // There can only be 2^16 entries in a type, because that is the ID
   // space for entries (EEEE) in the resource ID 0xPPTTEEEE.
   if (entry_count > std::numeric_limits<uint16_t>::max()) {
-    diag_->Error(DiagMessage(source_)
+    diag_->Error(android::DiagMessage(source_)
                  << "ResTable_typeSpec has too many entries (" << entry_count << ")");
     return false;
   }
 
-  const size_t data_size = util::DeviceToHost32(type_spec->header.size) -
-                           util::DeviceToHost16(type_spec->header.headerSize);
+  const size_t data_size = android::util::DeviceToHost32(type_spec->header.size) -
+                           android::util::DeviceToHost16(type_spec->header.headerSize);
   if (entry_count * sizeof(uint32_t) > data_size) {
-    diag_->Error(DiagMessage(source_) << "ResTable_typeSpec too small to hold entries.");
+    diag_->Error(android::DiagMessage(source_) << "ResTable_typeSpec too small to hold entries.");
     return false;
   }
 
   // Record the type_spec_flags for later. We don't know resource names yet, and we need those
   // to mark resources as overlayable.
   const uint32_t* type_spec_flags = reinterpret_cast<const uint32_t*>(
-      reinterpret_cast<uintptr_t>(type_spec) + util::DeviceToHost16(type_spec->header.headerSize));
+      reinterpret_cast<uintptr_t>(type_spec) +
+      android::util::DeviceToHost16(type_spec->header.headerSize));
   for (size_t i = 0; i < entry_count; i++) {
     ResourceId id(package_id, type_spec->id, static_cast<size_t>(i));
-    entry_type_spec_flags_[id] = util::DeviceToHost32(type_spec_flags[i]);
+    entry_type_spec_flags_[id] = android::util::DeviceToHost32(type_spec_flags[i]);
   }
   return true;
 }
@@ -338,12 +343,12 @@ bool BinaryResourceParser::ParseTypeSpec(const ResourceTablePackage* package,
 bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
                                      const ResChunk_header* chunk, uint8_t package_id) {
   if (type_pool_.getError() != NO_ERROR) {
-    diag_->Error(DiagMessage(source_) << "missing type string pool");
+    diag_->Error(android::DiagMessage(source_) << "missing type string pool");
     return false;
   }
 
   if (key_pool_.getError() != NO_ERROR) {
-    diag_->Error(DiagMessage(source_) << "missing key string pool");
+    diag_->Error(android::DiagMessage(source_) << "missing key string pool");
     return false;
   }
 
@@ -351,23 +356,24 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
   // a lot and has its own code to handle variable size.
   const ResTable_type* type = ConvertTo<ResTable_type, kResTableTypeMinSize>(chunk);
   if (!type) {
-    diag_->Error(DiagMessage(source_) << "corrupt ResTable_type chunk");
+    diag_->Error(android::DiagMessage(source_) << "corrupt ResTable_type chunk");
     return false;
   }
 
   if (type->id == 0) {
-    diag_->Error(DiagMessage(source_) << "ResTable_type has invalid id: " << (int)type->id);
+    diag_->Error(android::DiagMessage(source_)
+                 << "ResTable_type has invalid id: " << (int)type->id);
     return false;
   }
 
   ConfigDescription config;
   config.copyFromDtoH(type->config);
 
-  const std::string type_str = util::GetString(type_pool_, type->id - 1);
-  const ResourceType* parsed_type = ParseResourceType(type_str);
+  const std::string type_str = android::util::GetString(type_pool_, type->id - 1);
+  std::optional<ResourceNamedTypeRef> parsed_type = ParseResourceNamedType(type_str);
   if (!parsed_type) {
-    diag_->Warn(DiagMessage(source_)
-                << "invalid type name '" << type_str << "' for type with ID " << type->id);
+    diag_->Warn(android::DiagMessage(source_)
+                << "invalid type name '" << type_str << "' for type with ID " << int(type->id));
     return true;
   }
 
@@ -379,24 +385,21 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
     }
 
     const ResourceName name(package->name, *parsed_type,
-                            util::GetString(key_pool_, util::DeviceToHost32(entry->key.index)));
+        android::util::GetString(key_pool_, entry->key()));
     const ResourceId res_id(package_id, type->id, static_cast<uint16_t>(it.index()));
 
     std::unique_ptr<Value> resource_value;
-    if (entry->flags & ResTable_entry::FLAG_COMPLEX) {
-      const ResTable_map_entry* mapEntry = static_cast<const ResTable_map_entry*>(entry);
-
+    if (auto mapEntry = entry->map_entry()) {
       // TODO(adamlesinski): Check that the entry count is valid.
       resource_value = ParseMapEntry(name, config, mapEntry);
     } else {
-      const Res_value* value =
-          (const Res_value*)((const uint8_t*)entry + util::DeviceToHost32(entry->size));
-      resource_value = ParseValue(name, config, *value);
+      resource_value = ParseValue(name, config, entry->value());
     }
 
     if (!resource_value) {
-      diag_->Error(DiagMessage(source_) << "failed to parse value for resource " << name << " ("
-                                        << res_id << ") with configuration '" << config << "'");
+      diag_->Error(android::DiagMessage(source_)
+                   << "failed to parse value for resource " << name << " (" << res_id
+                   << ") with configuration '" << config << "'");
       return false;
     }
 
@@ -411,7 +414,7 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
         .SetId(res_id, OnIdConflict::CREATE_ENTRY)
         .SetAllowMangled(true);
 
-    if (entry->flags & ResTable_entry::FLAG_PUBLIC) {
+    if (entry->flags() & ResTable_entry::FLAG_PUBLIC) {
       Visibility visibility{Visibility::Level::kPublic};
 
       auto spec_flags = entry_type_spec_flags_.find(res_id);
@@ -450,7 +453,7 @@ bool BinaryResourceParser::ParseLibrary(const ResChunk_header* chunk) {
   const size_t count = entries.size();
   for (size_t i = 0; i < count; i++) {
     table_->included_packages_[entries.valueAt(i)] =
-        util::Utf16ToUtf8(StringPiece16(entries.keyAt(i).c_str()));
+        android::util::Utf16ToUtf8(StringPiece16(entries.keyAt(i).c_str()));
   }
   return true;
 }
@@ -458,36 +461,39 @@ bool BinaryResourceParser::ParseLibrary(const ResChunk_header* chunk) {
 bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
   const ResTable_overlayable_header* header = ConvertTo<ResTable_overlayable_header>(chunk);
   if (!header) {
-    diag_->Error(DiagMessage(source_) << "corrupt ResTable_category_header chunk");
+    diag_->Error(android::DiagMessage(source_) << "corrupt ResTable_category_header chunk");
     return false;
   }
 
   auto overlayable = std::make_shared<Overlayable>();
-  overlayable->name = util::Utf16ToUtf8(strcpy16_dtoh((const char16_t*)header->name,
-                                                      arraysize(header->name)));
-  overlayable->actor = util::Utf16ToUtf8(strcpy16_dtoh((const char16_t*)header->actor,
-                                                       arraysize(header->name)));
+  overlayable->name = android::util::Utf16ToUtf8(
+      strcpy16_dtoh((const char16_t*)header->name, arraysize(header->name)));
+  overlayable->actor = android::util::Utf16ToUtf8(
+      strcpy16_dtoh((const char16_t*)header->actor, arraysize(header->name)));
 
   ResChunkPullParser parser(GetChunkData(chunk),
                             GetChunkDataLen(chunk));
   while (ResChunkPullParser::IsGoodEvent(parser.Next())) {
-    if (util::DeviceToHost16(parser.chunk()->type) == android::RES_TABLE_OVERLAYABLE_POLICY_TYPE) {
+    if (android::util::DeviceToHost16(parser.chunk()->type) ==
+        android::RES_TABLE_OVERLAYABLE_POLICY_TYPE) {
       const ResTable_overlayable_policy_header* policy_header =
           ConvertTo<ResTable_overlayable_policy_header>(parser.chunk());
 
       const ResTable_ref* const ref_begin = reinterpret_cast<const ResTable_ref*>(
-          ((uint8_t *)policy_header) + util::DeviceToHost32(policy_header->header.headerSize));
-      const ResTable_ref* const ref_end = ref_begin
-          + util::DeviceToHost32(policy_header->entry_count);
+          ((uint8_t*)policy_header) +
+          android::util::DeviceToHost32(policy_header->header.headerSize));
+      const ResTable_ref* const ref_end =
+          ref_begin + android::util::DeviceToHost32(policy_header->entry_count);
       for (auto ref_iter = ref_begin; ref_iter != ref_end; ++ref_iter) {
-        ResourceId res_id(util::DeviceToHost32(ref_iter->ident));
+        ResourceId res_id(android::util::DeviceToHost32(ref_iter->ident));
         const auto iter = id_index_.find(res_id);
 
         // If the overlayable chunk comes before the type chunks, the resource ids and resource name
         // pairing will not exist at this point.
         if (iter == id_index_.cend()) {
-          diag_->Error(DiagMessage(source_) << "failed to find resource name for overlayable"
-                                            << " resource " << res_id);
+          diag_->Error(android::DiagMessage(source_)
+                       << "failed to find resource name for overlayable"
+                       << " resource " << res_id);
           return false;
         }
 
@@ -511,23 +517,23 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
 bool BinaryResourceParser::ParseStagedAliases(const ResChunk_header* chunk) {
   auto header = ConvertTo<ResTable_staged_alias_header>(chunk);
   if (!header) {
-    diag_->Error(DiagMessage(source_) << "corrupt ResTable_staged_alias_header chunk");
+    diag_->Error(android::DiagMessage(source_) << "corrupt ResTable_staged_alias_header chunk");
     return false;
   }
 
   const auto ref_begin = reinterpret_cast<const ResTable_staged_alias_entry*>(
-      ((uint8_t*)header) + util::DeviceToHost32(header->header.headerSize));
-  const auto ref_end = ref_begin + util::DeviceToHost32(header->count);
+      ((uint8_t*)header) + android::util::DeviceToHost32(header->header.headerSize));
+  const auto ref_end = ref_begin + android::util::DeviceToHost32(header->count);
   for (auto ref_iter = ref_begin; ref_iter != ref_end; ++ref_iter) {
-    const auto staged_id = ResourceId(util::DeviceToHost32(ref_iter->stagedResId));
-    const auto finalized_id = ResourceId(util::DeviceToHost32(ref_iter->finalizedResId));
+    const auto staged_id = ResourceId(android::util::DeviceToHost32(ref_iter->stagedResId));
+    const auto finalized_id = ResourceId(android::util::DeviceToHost32(ref_iter->finalizedResId));
 
     // If the staged alias chunk comes before the type chunks, the resource ids and resource name
     // pairing will not exist at this point.
     const auto iter = id_index_.find(finalized_id);
     if (iter == id_index_.cend()) {
-      diag_->Error(DiagMessage(source_) << "failed to find resource name for finalized"
-                                        << " resource ID " << finalized_id);
+      diag_->Error(android::DiagMessage(source_) << "failed to find resource name for finalized"
+                                                 << " resource ID " << finalized_id);
       return false;
     }
 
@@ -563,9 +569,9 @@ std::unique_ptr<Item> BinaryResourceParser::ParseValue(const ResourceNameRef& na
     if (file_ref != nullptr) {
       file_ref->file = files_->FindFile(*file_ref->path);
       if (file_ref->file == nullptr) {
-        diag_->Warn(DiagMessage() << "resource " << name << " for config '" << config
-                                  << "' is a file reference to '" << *file_ref->path
-                                  << "' but no such path exists");
+        diag_->Warn(android::DiagMessage() << "resource " << name << " for config '" << config
+                                           << "' is a file reference to '" << *file_ref->path
+                                           << "' but no such path exists");
       }
     }
   }
@@ -594,8 +600,8 @@ std::unique_ptr<Value> BinaryResourceParser::ParseMapEntry(const ResourceNameRef
       // We can ignore the value here.
       return util::make_unique<Id>();
     default:
-      diag_->Error(DiagMessage() << "illegal map type '" << name.type << "' ("
-                                 << (int)name.type.type << ")");
+      diag_->Error(android::DiagMessage()
+                   << "illegal map type '" << name.type << "' (" << (int)name.type.type << ")");
       break;
   }
   return {};
@@ -605,18 +611,18 @@ std::unique_ptr<Style> BinaryResourceParser::ParseStyle(const ResourceNameRef& n
                                                         const ConfigDescription& config,
                                                         const ResTable_map_entry* map) {
   std::unique_ptr<Style> style = util::make_unique<Style>();
-  if (util::DeviceToHost32(map->parent.ident) != 0) {
+  if (android::util::DeviceToHost32(map->parent.ident) != 0) {
     // The parent is a regular reference to a resource.
-    style->parent = Reference(util::DeviceToHost32(map->parent.ident));
+    style->parent = Reference(android::util::DeviceToHost32(map->parent.ident));
   }
 
   for (const ResTable_map& map_entry : map) {
-    if (Res_INTERNALID(util::DeviceToHost32(map_entry.name.ident))) {
+    if (Res_INTERNALID(android::util::DeviceToHost32(map_entry.name.ident))) {
       continue;
     }
 
     Style::Entry style_entry;
-    style_entry.key = Reference(util::DeviceToHost32(map_entry.name.ident));
+    style_entry.key = Reference(android::util::DeviceToHost32(map_entry.name.ident));
     style_entry.value = ParseValue(name, config, map_entry.value);
     if (!style_entry.value) {
       return {};
@@ -630,20 +636,20 @@ std::unique_ptr<Attribute> BinaryResourceParser::ParseAttr(const ResourceNameRef
                                                            const ConfigDescription& config,
                                                            const ResTable_map_entry* map) {
   std::unique_ptr<Attribute> attr = util::make_unique<Attribute>();
-  attr->SetWeak((util::DeviceToHost16(map->flags) & ResTable_entry::FLAG_WEAK) != 0);
+  attr->SetWeak((android::util::DeviceToHost16(map->flags) & ResTable_entry::FLAG_WEAK) != 0);
 
   // First we must discover what type of attribute this is. Find the type mask.
   auto type_mask_iter = std::find_if(begin(map), end(map), [](const ResTable_map& entry) -> bool {
-    return util::DeviceToHost32(entry.name.ident) == ResTable_map::ATTR_TYPE;
+    return android::util::DeviceToHost32(entry.name.ident) == ResTable_map::ATTR_TYPE;
   });
 
   if (type_mask_iter != end(map)) {
-    attr->type_mask = util::DeviceToHost32(type_mask_iter->value.data);
+    attr->type_mask = android::util::DeviceToHost32(type_mask_iter->value.data);
   }
 
   for (const ResTable_map& map_entry : map) {
-    if (Res_INTERNALID(util::DeviceToHost32(map_entry.name.ident))) {
-      switch (util::DeviceToHost32(map_entry.name.ident)) {
+    if (Res_INTERNALID(android::util::DeviceToHost32(map_entry.name.ident))) {
+      switch (android::util::DeviceToHost32(map_entry.name.ident)) {
         case ResTable_map::ATTR_MIN:
           attr->min_int = static_cast<int32_t>(map_entry.value.data);
           break;
@@ -656,9 +662,9 @@ std::unique_ptr<Attribute> BinaryResourceParser::ParseAttr(const ResourceNameRef
 
     if (attr->type_mask & (ResTable_map::TYPE_ENUM | ResTable_map::TYPE_FLAGS)) {
       Attribute::Symbol symbol;
-      symbol.value = util::DeviceToHost32(map_entry.value.data);
+      symbol.value = android::util::DeviceToHost32(map_entry.value.data);
       symbol.type = map_entry.value.dataType;
-      symbol.symbol = Reference(util::DeviceToHost32(map_entry.name.ident));
+      symbol.symbol = Reference(android::util::DeviceToHost32(map_entry.name.ident));
       attr->symbols.push_back(std::move(symbol));
     }
   }
@@ -687,7 +693,7 @@ std::unique_ptr<Plural> BinaryResourceParser::ParsePlural(const ResourceNameRef&
       return {};
     }
 
-    switch (util::DeviceToHost32(map_entry.name.ident)) {
+    switch (android::util::DeviceToHost32(map_entry.name.ident)) {
       case ResTable_map::ATTR_ZERO:
         plural->values[Plural::Zero] = std::move(item);
         break;

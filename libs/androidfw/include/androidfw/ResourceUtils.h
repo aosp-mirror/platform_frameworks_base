@@ -25,14 +25,14 @@ namespace android {
 // Extracts the package, type, and name from a string of the format: [[package:]type/]name
 // Validation must be performed on each extracted piece.
 // Returns false if there was a syntax error.
-bool ExtractResourceName(const StringPiece& str, StringPiece* out_package, StringPiece* out_type,
+bool ExtractResourceName(StringPiece str, StringPiece* out_package, StringPiece* out_type,
                          StringPiece* out_entry);
 
 // Convert a type_string_ref, entry_string_ref, and package to AssetManager2::ResourceName.
 // Useful for getting resource name without re-running AssetManager2::FindEntry searches.
 base::expected<AssetManager2::ResourceName, NullOrIOError> ToResourceName(
     const StringPoolRef& type_string_ref, const StringPoolRef& entry_string_ref,
-    const StringPiece& package_name);
+    StringPiece package_name);
 
 // Formats a ResourceName to "package:type/entry_name".
 std::string ToFormattedResourceString(const AssetManager2::ResourceName& resource_name);

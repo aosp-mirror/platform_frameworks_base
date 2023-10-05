@@ -18,7 +18,6 @@ package com.android.systemui.shade
 
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowInsets
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintSet
@@ -62,6 +61,7 @@ class NotificationsQSContainerController @Inject constructor(
     private var isQSCustomizing = false
     private var isQSCustomizerAnimating = false
 
+    private var shadeHeaderHeight = 0
     private var largeScreenShadeHeaderHeight = 0
     private var largeScreenShadeHeaderActive = false
     private var notificationsBottomMargin = 0
@@ -146,6 +146,8 @@ class NotificationsQSContainerController @Inject constructor(
                 R.dimen.notification_panel_margin_bottom)
         largeScreenShadeHeaderHeight =
                 resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height)
+        shadeHeaderHeight =
+                resources.getDimensionPixelSize(R.dimen.qs_header_height)
         panelMarginHorizontal = resources.getDimensionPixelSize(
                 R.dimen.notification_panel_margin_horizontal)
         topMargin = if (largeScreenShadeHeaderActive) {
@@ -216,7 +218,7 @@ class NotificationsQSContainerController @Inject constructor(
             containerPadding = 0
             stackScrollMargin = bottomStableInsets + notificationsBottomMargin
         }
-        val qsContainerPadding = if (!(isQSCustomizing || isQSDetailShowing)) {
+        val qsContainerPadding = if (!isQSDetailShowing) {
             // We also want this padding in the bottom in these cases
             if (splitShadeEnabled) {
                 stackScrollMargin - scrimShadeBottomMargin - footerActionsOffset
@@ -245,7 +247,7 @@ class NotificationsQSContainerController @Inject constructor(
         if (largeScreenShadeHeaderActive) {
             constraintSet.constrainHeight(R.id.split_shade_status_bar, largeScreenShadeHeaderHeight)
         } else {
-            constraintSet.constrainHeight(R.id.split_shade_status_bar, WRAP_CONTENT)
+            constraintSet.constrainHeight(R.id.split_shade_status_bar, shadeHeaderHeight)
         }
     }
 

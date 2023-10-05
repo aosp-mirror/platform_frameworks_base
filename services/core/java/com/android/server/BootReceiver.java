@@ -16,21 +16,21 @@
 
 package com.android.server;
 
+import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.system.OsConstants.O_RDONLY;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.IPackageManager;
 import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.MessageQueue.OnFileDescriptorEventListener;
+import android.os.ParcelFileDescriptor;
 import android.os.RecoverySystem;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.TombstoneWithHeadersProto;
 import android.provider.Downloads;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -38,14 +38,15 @@ import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.am.DropboxRateLimiter;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -57,6 +58,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Matcher;
@@ -81,6 +84,11 @@ public class BootReceiver extends BroadcastReceiver {
 
     private static final String TAG_TOMBSTONE = "SYSTEM_TOMBSTONE";
     private static final String TAG_TOMBSTONE_PROTO = "SYSTEM_TOMBSTONE_PROTO";
+    private static final String TAG_TOMBSTONE_PROTO_WITH_HEADERS =
+            "SYSTEM_TOMBSTONE_PROTO_WITH_HEADERS";
+
+    // Directory to store temporary tombstones.
+    private static final File TOMBSTONE_TMP_DIR = new File("/data/tombstones");
 
     // The pre-froyo package and class of the system updater, which
     // ran in the system process.  We need to remove its packages here
@@ -143,15 +151,7 @@ public class BootReceiver extends BroadcastReceiver {
                     Slog.e(TAG, "Can't log boot events", e);
                 }
                 try {
-                    boolean onlyCore = false;
-                    try {
-                        onlyCore = IPackageManager.Stub.asInterface(ServiceManager.getService(
-                                "package")).isOnlyCoreApps();
-                    } catch (RemoteException e) {
-                    }
-                    if (!onlyCore) {
-                        removeOldUpdatePackages(context);
-                    }
+                    removeOldUpdatePackages(context);
                 } catch (Exception e) {
                     Slog.e(TAG, "Can't remove old update packages", e);
                 }
@@ -337,19 +337,54 @@ public class BootReceiver extends BroadcastReceiver {
             return;
         }
 
-        // Check if we should rate limit and abort early if needed. Do this for both proto and
-        // non-proto tombstones, even though proto tombstones do not support including the counter
-        // of events dropped since rate limiting activated yet.
+        // Check if we should rate limit and abort early if needed.
         DropboxRateLimiter.RateLimitResult rateLimitResult =
                 sDropboxRateLimiter.shouldRateLimit(
-                       proto ? TAG_TOMBSTONE_PROTO : TAG_TOMBSTONE, processName);
+                        proto ? TAG_TOMBSTONE_PROTO_WITH_HEADERS : TAG_TOMBSTONE, processName);
         if (rateLimitResult.shouldRateLimit()) return;
 
         HashMap<String, Long> timestamps = readTimestamps();
         try {
             if (proto) {
                 if (recordFileTimestamp(tombstone, timestamps)) {
-                    db.addFile(TAG_TOMBSTONE_PROTO, tombstone, 0);
+                    // We need to attach the count indicating the number of dropped dropbox entries
+                    // due to rate limiting. Do this by enclosing the proto tombsstone in a
+                    // container proto that has the dropped entry count and the proto tombstone as
+                    // bytes (to avoid the complexity of reading and writing nested protos).
+
+                    // Read the proto tombstone file as bytes.
+                    final byte[] tombstoneBytes = Files.readAllBytes(tombstone.toPath());
+
+                    final File tombstoneProtoWithHeaders = File.createTempFile(
+                            tombstone.getName(), ".tmp", TOMBSTONE_TMP_DIR);
+                    Files.setPosixFilePermissions(
+                            tombstoneProtoWithHeaders.toPath(),
+                            PosixFilePermissions.fromString("rw-rw----"));
+
+                    // Write the new proto container proto with headers.
+                    ParcelFileDescriptor pfd;
+                    try {
+                        pfd = ParcelFileDescriptor.open(tombstoneProtoWithHeaders, MODE_READ_WRITE);
+
+                        ProtoOutputStream protoStream = new ProtoOutputStream(
+                                pfd.getFileDescriptor());
+                        protoStream.write(TombstoneWithHeadersProto.TOMBSTONE, tombstoneBytes);
+                        protoStream.write(
+                                TombstoneWithHeadersProto.DROPPED_COUNT,
+                                rateLimitResult.droppedCountSinceRateLimitActivated());
+                        protoStream.flush();
+
+                        // Add the proto to dropbox.
+                        db.addFile(TAG_TOMBSTONE_PROTO_WITH_HEADERS, tombstoneProtoWithHeaders, 0);
+                    } catch (FileNotFoundException ex) {
+                        Slog.e(TAG, "failed to open for write: " + tombstoneProtoWithHeaders, ex);
+                        throw ex;
+                    } finally {
+                        // Remove the temporary file.
+                        if (tombstoneProtoWithHeaders != null) {
+                            tombstoneProtoWithHeaders.delete();
+                        }
+                    }
                 }
             } else {
                 // Add the header indicating how many events have been dropped due to rate limiting.

@@ -38,6 +38,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
 import com.android.systemui.controls.ControlInterface
+import com.android.systemui.controls.ui.CanUseIconPredicate
 import com.android.systemui.controls.ui.RenderInfo
 
 private typealias ModelFavoriteChanger = (String, Boolean) -> Unit
@@ -51,7 +52,8 @@ private typealias ModelFavoriteChanger = (String, Boolean) -> Unit
  * @property elevation elevation of each control view
  */
 class ControlAdapter(
-    private val elevation: Float
+    private val elevation: Float,
+    private val currentUserId: Int,
 ) : RecyclerView.Adapter<Holder>() {
 
     companion object {
@@ -107,7 +109,8 @@ class ControlAdapter(
                         background = parent.context.getDrawable(
                                 R.drawable.control_background_ripple)
                     },
-                    model?.moveHelper // Indicates that position information is needed
+                    currentUserId,
+                    model?.moveHelper, // Indicates that position information is needed
                 ) { id, favorite ->
                     model?.changeFavoriteStatus(id, favorite)
                 }
@@ -212,8 +215,9 @@ private class ZoneHolder(view: View) : Holder(view) {
  */
 internal class ControlHolder(
     view: View,
+    currentUserId: Int,
     val moveHelper: ControlsModel.MoveHelper?,
-    val favoriteCallback: ModelFavoriteChanger
+    val favoriteCallback: ModelFavoriteChanger,
 ) : Holder(view) {
     private val favoriteStateDescription =
         itemView.context.getString(R.string.accessibility_control_favorite)
@@ -228,6 +232,7 @@ internal class ControlHolder(
         visibility = View.VISIBLE
     }
 
+    private val canUseIconPredicate = CanUseIconPredicate(currentUserId)
     private val accessibilityDelegate = ControlHolderAccessibilityDelegate(
         this::stateDescription,
         this::getLayoutPosition,
@@ -287,7 +292,9 @@ internal class ControlHolder(
         val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
 
         icon.imageTintList = null
-        ci.customIcon?.let {
+        ci.customIcon
+                ?.takeIf(canUseIconPredicate)
+                ?.let {
             icon.setImageIcon(it)
         } ?: run {
             icon.setImageDrawable(ri.icon)

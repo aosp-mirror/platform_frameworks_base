@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.PromptInfo;
@@ -55,43 +56,42 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Contains the Biometric views (title, subtitle, icon, buttons, etc.) and its controllers.
  */
-public abstract class AuthBiometricView extends LinearLayout {
+public abstract class AuthBiometricView extends LinearLayout implements AuthBiometricViewAdapter {
 
     private static final String TAG = "AuthBiometricView";
 
     /**
      * Authentication hardware idle.
      */
-    protected static final int STATE_IDLE = 0;
+    public static final int STATE_IDLE = 0;
     /**
      * UI animating in, authentication hardware active.
      */
-    protected static final int STATE_AUTHENTICATING_ANIMATING_IN = 1;
+    public static final int STATE_AUTHENTICATING_ANIMATING_IN = 1;
     /**
      * UI animated in, authentication hardware active.
      */
-    protected static final int STATE_AUTHENTICATING = 2;
+    public static final int STATE_AUTHENTICATING = 2;
     /**
      * UI animated in, authentication hardware active.
      */
-    protected static final int STATE_HELP = 3;
+    public static final int STATE_HELP = 3;
     /**
      * Hard error, e.g. ERROR_TIMEOUT. Authentication hardware idle.
      */
-    protected static final int STATE_ERROR = 4;
+    public static final int STATE_ERROR = 4;
     /**
      * Authenticated, waiting for user confirmation. Authentication hardware idle.
      */
-    protected static final int STATE_PENDING_CONFIRMATION = 5;
+    public static final int STATE_PENDING_CONFIRMATION = 5;
     /**
      * Authenticated, dialog animating away soon.
      */
-    protected static final int STATE_AUTHENTICATED = 6;
+    public static final int STATE_AUTHENTICATED = 6;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATE_IDLE, STATE_AUTHENTICATING_ANIMATING_IN, STATE_AUTHENTICATING, STATE_HELP,
@@ -101,13 +101,15 @@ public abstract class AuthBiometricView extends LinearLayout {
     /**
      * Callback to the parent when a user action has occurred.
      */
-    interface Callback {
+    public interface Callback {
         int ACTION_AUTHENTICATED = 1;
         int ACTION_USER_CANCELED = 2;
         int ACTION_BUTTON_NEGATIVE = 3;
         int ACTION_BUTTON_TRY_AGAIN = 4;
         int ACTION_ERROR = 5;
         int ACTION_USE_DEVICE_CREDENTIAL = 6;
+        int ACTION_START_DELAYED_FINGERPRINT_SENSOR = 7;
+        int ACTION_AUTHENTICATED_AND_CONFIRMED = 8;
 
         /**
          * When an action has occurred. The caller will only invoke this when the callback should
@@ -124,6 +126,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     protected final int mTextColorHint;
 
     private AuthPanelController mPanelController;
+
     private PromptInfo mPromptInfo;
     private boolean mRequireConfirmation;
     private int mUserId;
@@ -258,7 +261,8 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     /** Ignore all events from this (secondary) modality except successful authentication. */
-    protected boolean ignoreUnsuccessfulEventsFrom(@Modality int modality) {
+    protected boolean ignoreUnsuccessfulEventsFrom(@Modality int modality,
+            String unsuccessfulReason) {
         return false;
     }
 
@@ -266,10 +270,29 @@ public abstract class AuthBiometricView extends LinearLayout {
     @NonNull
     protected abstract AuthIconController createIconController();
 
+    @Override
+    public AuthIconController getLegacyIconController() {
+        return mIconController;
+    }
+
+    @Override
+    public void cancelAnimation() {
+        animate().cancel();
+    }
+
+    @Override
+    public View asView() {
+        return this;
+    }
+
+    @Override
+    public boolean isCoex() {
+        return false;
+    }
+
     void setPanelController(AuthPanelController panelController) {
         mPanelController = panelController;
     }
-
     void setPromptInfo(PromptInfo promptInfo) {
         mPromptInfo = promptInfo;
     }
@@ -298,9 +321,25 @@ public abstract class AuthBiometricView extends LinearLayout {
         mJankListener = jankListener;
     }
 
+    private void updatePaddings(int size) {
+        final Insets navBarInsets = Utils.getNavbarInsets(mContext);
+        if (size != AuthDialog.SIZE_LARGE) {
+            if (mPanelController.getPosition() == AuthPanelController.POSITION_LEFT) {
+                setPadding(navBarInsets.left, 0, 0, 0);
+            } else if (mPanelController.getPosition() == AuthPanelController.POSITION_RIGHT) {
+                setPadding(0, 0, navBarInsets.right, 0);
+            } else {
+                setPadding(0, 0, 0, navBarInsets.bottom);
+            }
+        } else {
+            setPadding(0, 0, 0, 0);
+        }
+    }
+
     @VisibleForTesting
     final void updateSize(@AuthDialog.DialogSize int newSize) {
         Log.v(TAG, "Current size: " + mSize + " New size: " + newSize);
+        updatePaddings(newSize);
         if (newSize == AuthDialog.SIZE_SMALL) {
             mTitleView.setVisibility(View.GONE);
             mSubtitleView.setVisibility(View.GONE);
@@ -462,8 +501,16 @@ public abstract class AuthBiometricView extends LinearLayout {
         return false;
     }
 
+    /**
+     * Updates mIconView animation on updates to fold state, device rotation, or rear display mode
+     * @param animation new asset to use for iconw
+     */
+    public void updateIconViewAnimation(int animation) {
+        mIconView.setAnimation(animation);
+    }
+
     public void updateState(@BiometricState int newState) {
-        Log.v(TAG, "newState: " + newState);
+        Log.d(TAG, "newState: " + newState);
 
         mIconController.updateState(mState, newState);
 
@@ -488,8 +535,14 @@ public abstract class AuthBiometricView extends LinearLayout {
                 }
                 announceForAccessibility(getResources()
                         .getString(R.string.biometric_dialog_authenticated));
-                mHandler.postDelayed(() -> mCallback.onAction(Callback.ACTION_AUTHENTICATED),
-                        getDelayAfterAuthenticatedDurationMs());
+                if (mState == STATE_PENDING_CONFIRMATION) {
+                    mHandler.postDelayed(() -> mCallback.onAction(
+                            Callback.ACTION_AUTHENTICATED_AND_CONFIRMED),
+                            getDelayAfterAuthenticatedDurationMs());
+                } else {
+                    mHandler.postDelayed(() -> mCallback.onAction(Callback.ACTION_AUTHENTICATED),
+                            getDelayAfterAuthenticatedDurationMs());
+                }
                 break;
 
             case STATE_PENDING_CONFIRMATION:
@@ -520,7 +573,12 @@ public abstract class AuthBiometricView extends LinearLayout {
         mState = newState;
     }
 
-    public void onDialogAnimatedIn() {
+    public void onOrientationChanged() {
+        // Update padding and AuthPanel outline by calling updateSize when the orientation changed.
+        updateSize(mSize);
+    }
+
+    public void onDialogAnimatedIn(boolean fingerprintWasStarted) {
         updateState(STATE_AUTHENTICATING);
     }
 
@@ -541,7 +599,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      */
     public void onAuthenticationFailed(
             @Modality int modality, @Nullable String failureReason) {
-        if (ignoreUnsuccessfulEventsFrom(modality)) {
+        if (ignoreUnsuccessfulEventsFrom(modality, failureReason)) {
             return;
         }
 
@@ -556,7 +614,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      * @param error message
      */
     public void onError(@Modality int modality, String error) {
-        if (ignoreUnsuccessfulEventsFrom(modality)) {
+        if (ignoreUnsuccessfulEventsFrom(modality, error)) {
             return;
         }
 
@@ -568,25 +626,13 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     /**
-     * Fingerprint pointer down event. This does nothing by default and will not be called if the
-     * device does not have an appropriate sensor (UDFPS), but it may be used as an alternative
-     * to the "retry" button when fingerprint is used with other modalities.
-     *
-     * @param failedModalities the set of modalities that have failed
-     * @return true if a retry was initiated as a result of this event
-     */
-    public boolean onPointerDown(Set<Integer> failedModalities) {
-        return false;
-    }
-
-    /**
      * Show a help message to the user.
      *
      * @param modality sensor modality
      * @param help message
      */
     public void onHelp(@Modality int modality, String help) {
-        if (ignoreUnsuccessfulEventsFrom(modality)) {
+        if (ignoreUnsuccessfulEventsFrom(modality, help)) {
             return;
         }
         if (mSize != AuthDialog.SIZE_MEDIUM) {
@@ -624,7 +670,6 @@ public abstract class AuthBiometricView extends LinearLayout {
     public void restoreState(@Nullable Bundle savedState) {
         mSavedState = savedState;
     }
-
     private void setTextOrHide(TextView view, CharSequence charSequence) {
         if (TextUtils.isEmpty(charSequence)) {
             view.setVisibility(View.GONE);
@@ -657,7 +702,6 @@ public abstract class AuthBiometricView extends LinearLayout {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mIconController.onConfigurationChanged(newConfig);
         if (mSavedState != null) {
             updateState(mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_STATE));
         }
@@ -725,7 +769,8 @@ public abstract class AuthBiometricView extends LinearLayout {
     /**
      * Kicks off the animation process and invokes the callback.
      */
-    void startTransitionToCredentialUI() {
+    @Override
+    public void startTransitionToCredentialUI() {
         updateSize(AuthDialog.SIZE_LARGE);
         mCallback.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL);
     }
@@ -736,10 +781,10 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         mTitleView.setText(mPromptInfo.getTitle());
 
-        //setSelected could make marguee work
+        // setSelected could make marquee work
         mTitleView.setSelected(true);
         mSubtitleView.setSelected(true);
-        //make description view become scrollable
+        // make description view become scrollable
         mDescriptionView.setMovementMethod(new ScrollingMovementMethod());
 
         if (isDeviceCredentialAllowed()) {
@@ -863,6 +908,25 @@ public abstract class AuthBiometricView extends LinearLayout {
         }
 
         mLayoutParams = onMeasureInternal(width, height);
+
+        final Insets navBarInsets = Utils.getNavbarInsets(mContext);
+        final int navBarHeight = navBarInsets.bottom;
+        final int navBarWidth;
+        if (mPanelController.getPosition() == AuthPanelController.POSITION_LEFT) {
+            navBarWidth = navBarInsets.left;
+        } else if (mPanelController.getPosition() == AuthPanelController.POSITION_RIGHT) {
+            navBarWidth = navBarInsets.right;
+        } else {
+            navBarWidth = 0;
+        }
+
+        // The actual auth dialog w/h should include navigation bar size.
+        if (navBarWidth != 0 || navBarHeight != 0) {
+            mLayoutParams = new AuthDialog.LayoutParams(
+                    mLayoutParams.mMediumWidth + navBarWidth,
+                    mLayoutParams.mMediumHeight + navBarInsets.bottom);
+        }
+
         setMeasuredDimension(mLayoutParams.mMediumWidth, mLayoutParams.mMediumHeight);
     }
 
@@ -895,6 +959,10 @@ public abstract class AuthBiometricView extends LinearLayout {
 
     private boolean isDeviceCredentialAllowed() {
         return Utils.isDeviceCredentialAllowed(mPromptInfo);
+    }
+
+    public LottieAnimationView getIconView() {
+        return mIconView;
     }
 
     @AuthDialog.DialogSize int getSize() {

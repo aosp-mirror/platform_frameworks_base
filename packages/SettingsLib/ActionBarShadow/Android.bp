@@ -22,6 +22,8 @@ android_library {
     min_sdk_version: "28",
     apex_available: [
         "//apex_available:platform",
+        "com.android.adservices",
+        "com.android.extservices",
         "com.android.permission",
     ],
 }

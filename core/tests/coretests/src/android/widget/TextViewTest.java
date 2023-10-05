@@ -19,19 +19,30 @@ package android.widget;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.text.GetChars;
 import android.text.Layout;
 import android.text.PrecomputedText;
+import android.text.method.OffsetMapping;
+import android.text.method.TransformationMethod;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView.BufferType;
@@ -321,6 +332,94 @@ public class TextViewTest {
         assertEquals("hi", charWrapper.toString());
     }
 
+    @Test
+    @UiThreadTest
+    public void transformedToOriginal_noOffsetMapping() {
+        mTextView = new TextView(mActivity);
+        final String text = "Hello world";
+        mTextView.setText(text);
+        for (int offset = 0; offset < text.length(); ++offset) {
+            assertThat(mTextView.transformedToOriginal(offset, OffsetMapping.MAP_STRATEGY_CURSOR))
+                    .isEqualTo(offset);
+            assertThat(mTextView.transformedToOriginal(offset,
+                    OffsetMapping.MAP_STRATEGY_CHARACTER)).isEqualTo(offset);
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    public void originalToTransformed_noOffsetMapping() {
+        mTextView = new TextView(mActivity);
+        final String text = "Hello world";
+        mTextView.setText(text);
+        for (int offset = 0; offset < text.length(); ++offset) {
+            assertThat(mTextView.originalToTransformed(offset, OffsetMapping.MAP_STRATEGY_CURSOR))
+                    .isEqualTo(offset);
+            assertThat(mTextView.originalToTransformed(offset,
+                    OffsetMapping.MAP_STRATEGY_CHARACTER)).isEqualTo(offset);
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    public void originalToTransformed_hasOffsetMapping() {
+        mTextView = new TextView(mActivity);
+        final CharSequence text = "Hello world";
+        final TransformedText transformedText = mock(TransformedText.class);
+        when(transformedText.originalToTransformed(anyInt(), anyInt())).then((invocation) -> {
+            // plus 1 for character strategy and minus 1 for cursor strategy.
+            if ((int) invocation.getArgument(1) == OffsetMapping.MAP_STRATEGY_CHARACTER) {
+                return (int) invocation.getArgument(0) + 1;
+            }
+            return (int) invocation.getArgument(0) - 1;
+        });
+
+        final TransformationMethod transformationMethod =
+                new TestTransformationMethod(transformedText);
+        mTextView.setText(text);
+        mTextView.setTransformationMethod(transformationMethod);
+
+        assertThat(mTextView.originalToTransformed(1, OffsetMapping.MAP_STRATEGY_CHARACTER))
+                .isEqualTo(2);
+        verify(transformedText, times(1))
+                .originalToTransformed(1, OffsetMapping.MAP_STRATEGY_CHARACTER);
+
+        assertThat(mTextView.originalToTransformed(1, OffsetMapping.MAP_STRATEGY_CURSOR))
+                .isEqualTo(0);
+        verify(transformedText, times(1))
+                .originalToTransformed(1, OffsetMapping.MAP_STRATEGY_CURSOR);
+    }
+
+    @Test
+    @UiThreadTest
+    public void transformedToOriginal_hasOffsetMapping() {
+        mTextView = new TextView(mActivity);
+        final CharSequence text = "Hello world";
+        final TransformedText transformedText = mock(TransformedText.class);
+        when(transformedText.transformedToOriginal(anyInt(), anyInt())).then((invocation) -> {
+            // plus 1 for character strategy and minus 1 for cursor strategy.
+            if ((int) invocation.getArgument(1) == OffsetMapping.MAP_STRATEGY_CHARACTER) {
+                return (int) invocation.getArgument(0) + 1;
+            }
+            return (int) invocation.getArgument(0) - 1;
+        });
+
+        final TransformationMethod transformationMethod =
+                new TestTransformationMethod(transformedText);
+        mTextView.setText(text);
+        mTextView.setTransformationMethod(transformationMethod);
+
+        assertThat(mTextView.transformedToOriginal(1, OffsetMapping.MAP_STRATEGY_CHARACTER))
+                .isEqualTo(2);
+        verify(transformedText, times(1))
+                .transformedToOriginal(1, OffsetMapping.MAP_STRATEGY_CHARACTER);
+
+        assertThat(mTextView.transformedToOriginal(1, OffsetMapping.MAP_STRATEGY_CURSOR))
+                .isEqualTo(0);
+        verify(transformedText, times(1))
+                .transformedToOriginal(1, OffsetMapping.MAP_STRATEGY_CURSOR);
+    }
+
     private String createLongText() {
         int size = 600 * 1000;
         final StringBuilder builder = new StringBuilder(size);
@@ -349,6 +448,26 @@ public class TextViewTest {
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 // Empty.
             }
+        }
+    }
+
+    private interface TransformedText extends OffsetMapping, CharSequence { }
+
+    private static class TestTransformationMethod implements TransformationMethod {
+        private final CharSequence mTransformedText;
+
+        TestTransformationMethod(CharSequence transformedText) {
+            this.mTransformedText = transformedText;
+        }
+
+        @Override
+        public CharSequence getTransformation(CharSequence source, View view) {
+            return mTransformedText;
+        }
+
+        @Override
+        public void onFocusChanged(View view, CharSequence sourceText, boolean focused,
+                int direction, Rect previouslyFocusedRect) {
         }
     }
 }

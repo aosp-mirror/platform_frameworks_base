@@ -40,7 +40,6 @@ import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
 import android.os.test.TestLooper;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -58,7 +57,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class AutomaticBrightnessControllerTest {
     private static final float BRIGHTNESS_MIN_FLOAT = 0.0f;
@@ -128,7 +126,7 @@ public class AutomaticBrightnessControllerTest {
                         return mClock::now;
                     }
 
-                }, // pass in test looper instead, pass in offsetable clock
+                }, // pass in test looper instead, pass in offsettable clock
                 () -> { }, mTestLooper.getLooper(), mSensorManager, lightSensor,
                 mBrightnessMappingStrategy, LIGHT_SENSOR_WARMUP_TIME, BRIGHTNESS_MIN_FLOAT,
                 BRIGHTNESS_MAX_FLOAT, DOZE_SCALE_FACTOR, LIGHT_SENSOR_RATE,
@@ -302,6 +300,215 @@ public class AutomaticBrightnessControllerTest {
     }
 
     @Test
+    public void testShortTermModelTimesOut() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Sensor reads 123 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 123));
+        // User sets brightness to 100
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
+                /* brightness= */ 0.5f, /* userChangedBrightness= */ true, /* adjustment= */ 0,
+                /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT,
+                /* shouldResetShortTermModel= */ true);
+
+        when(mBrightnessMappingStrategy.getShortTermModelTimeout()).thenReturn(2000L);
+
+        mController.switchToIdleMode();
+        when(mIdleBrightnessMappingStrategy.isForIdleMode()).thenReturn(true);
+        when(mBrightnessMappingStrategy.shouldResetShortTermModel(
+                123f, 0.5f)).thenReturn(true);
+
+        // Sensor reads 1000 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        mTestLooper.moveTimeForward(
+                mBrightnessMappingStrategy.getShortTermModelTimeout() + 1000);
+        mTestLooper.dispatchAll();
+
+        mController.switchToInteractiveScreenBrightnessMode();
+        mTestLooper.moveTimeForward(4000);
+        mTestLooper.dispatchAll();
+
+        // Verify only happens on the first configure. (i.e. not again when switching back)
+        // Intentionally using any() to ensure it's not called whatsoever.
+        verify(mBrightnessMappingStrategy, times(1))
+                .addUserDataPoint(123.0f, 0.5f);
+        verify(mBrightnessMappingStrategy, times(1))
+                .addUserDataPoint(anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void testShortTermModelDoesntTimeOut() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Sensor reads 123 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 123));
+        // User sets brightness to 100
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
+                0.51f /* brightness= */, true /* userChangedBrightness= */, 0 /* adjustment= */,
+                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
+                /* shouldResetShortTermModel= */ true);
+
+        when(mBrightnessMappingStrategy.shouldResetShortTermModel(
+                anyFloat(), anyFloat())).thenReturn(true);
+        when(mBrightnessMappingStrategy.getShortTermModelTimeout()).thenReturn(2000L);
+        when(mBrightnessMappingStrategy.getUserBrightness()).thenReturn(0.51f);
+        when(mBrightnessMappingStrategy.getUserLux()).thenReturn(123.0f);
+
+        mController.switchToIdleMode();
+        when(mIdleBrightnessMappingStrategy.isForIdleMode()).thenReturn(true);
+
+        // Time does not move forward, since clock is doesn't increment naturally.
+        mTestLooper.dispatchAll();
+
+        // Sensor reads 100000 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 678910));
+        mController.switchToInteractiveScreenBrightnessMode();
+
+        // Verify short term model is not reset.
+        verify(mBrightnessMappingStrategy, never()).clearUserDataPoints();
+
+        // Verify that we add the data point once when the user sets it, and again when we return
+        // interactive mode.
+        verify(mBrightnessMappingStrategy, times(2))
+                .addUserDataPoint(123.0f, 0.51f);
+    }
+
+    @Test
+    public void testShortTermModelIsRestoredWhenSwitchingWithinTimeout() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Sensor reads 123 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 123));
+        // User sets brightness to 100
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
+                /* brightness= */ 0.5f, /* userChangedBrightness= */ true, /* adjustment= */ 0,
+                /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT,
+                /* shouldResetShortTermModel= */ true);
+
+        when(mBrightnessMappingStrategy.getShortTermModelTimeout()).thenReturn(2000L);
+        when(mBrightnessMappingStrategy.getUserBrightness()).thenReturn(0.5f);
+        when(mBrightnessMappingStrategy.getUserLux()).thenReturn(123f);
+
+        mController.switchToIdleMode();
+        when(mIdleBrightnessMappingStrategy.isForIdleMode()).thenReturn(true);
+        when(mIdleBrightnessMappingStrategy.getUserBrightness()).thenReturn(-1f);
+        when(mIdleBrightnessMappingStrategy.getUserLux()).thenReturn(-1f);
+        when(mBrightnessMappingStrategy.shouldResetShortTermModel(
+                123f, 0.5f)).thenReturn(true);
+
+        // Sensor reads 1000 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        mTestLooper.moveTimeForward(
+                mBrightnessMappingStrategy.getShortTermModelTimeout() + 1000);
+        mTestLooper.dispatchAll();
+
+        mController.switchToInteractiveScreenBrightnessMode();
+        mTestLooper.moveTimeForward(4000);
+        mTestLooper.dispatchAll();
+
+        // Verify only happens on the first configure. (i.e. not again when switching back)
+        // Intentionally using any() to ensure it's not called whatsoever.
+        verify(mBrightnessMappingStrategy, times(1))
+                .addUserDataPoint(123.0f, 0.5f);
+        verify(mBrightnessMappingStrategy, times(1))
+                .addUserDataPoint(anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void testShortTermModelNotRestoredAfterTimeout() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Sensor reads 123 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 123));
+        // User sets brightness to 100
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
+                /* brightness= */ 0.5f, /* userChangedBrightness= */ true, /* adjustment= */ 0,
+                /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT,
+                /* shouldResetShortTermModel= */ true);
+
+        when(mBrightnessMappingStrategy.getShortTermModelTimeout()).thenReturn(2000L);
+
+        when(mBrightnessMappingStrategy.getUserBrightness()).thenReturn(0.5f);
+        when(mBrightnessMappingStrategy.getUserLux()).thenReturn(123f);
+
+        mController.switchToIdleMode();
+        when(mIdleBrightnessMappingStrategy.isForIdleMode()).thenReturn(true);
+        when(mIdleBrightnessMappingStrategy.getUserBrightness()).thenReturn(-1f);
+        when(mIdleBrightnessMappingStrategy.getUserLux()).thenReturn(-1f);
+
+        when(mBrightnessMappingStrategy.shouldResetShortTermModel(
+                123f, 0.5f)).thenReturn(true);
+
+        // Sensor reads 1000 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        // Do not fast-forward time.
+        mTestLooper.dispatchAll();
+
+        mController.switchToInteractiveScreenBrightnessMode();
+        // Do not fast-forward time
+        mTestLooper.dispatchAll();
+
+        // Verify this happens on the first configure and again when switching back
+        // Intentionally using any() to ensure it's not called any other times whatsoever.
+        verify(mBrightnessMappingStrategy, times(2))
+                .addUserDataPoint(123.0f, 0.5f);
+        verify(mBrightnessMappingStrategy, times(2))
+                .addUserDataPoint(anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void testSwitchBetweenModesNoUserInteractions() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Sensor reads 123 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 123));
+        when(mBrightnessMappingStrategy.getShortTermModelTimeout()).thenReturn(2000L);
+        when(mBrightnessMappingStrategy.getUserBrightness()).thenReturn(-1.0f);
+        when(mBrightnessMappingStrategy.getUserLux()).thenReturn(-1.0f);
+
+        // No user brightness interaction.
+
+        mController.switchToIdleMode();
+        when(mIdleBrightnessMappingStrategy.isForIdleMode()).thenReturn(true);
+        when(mIdleBrightnessMappingStrategy.getUserBrightness()).thenReturn(-1.0f);
+        when(mIdleBrightnessMappingStrategy.getUserLux()).thenReturn(-1.0f);
+
+        // Sensor reads 1000 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        // Do not fast-forward time.
+        mTestLooper.dispatchAll();
+
+        mController.switchToInteractiveScreenBrightnessMode();
+        // Do not fast-forward time
+        mTestLooper.dispatchAll();
+
+        // Ensure that there are no data points added, since the user has never adjusted the
+        // brightness
+        verify(mBrightnessMappingStrategy, times(0))
+                .addUserDataPoint(anyFloat(), anyFloat());
+    }
+
+    @Test
     public void testSwitchToIdleMappingStrategy() throws Exception {
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
@@ -328,6 +535,11 @@ public class AutomaticBrightnessControllerTest {
         // Called once for init, and once when switching,
         // setAmbientLux() is called twice and once in updateAutoBrightness()
         verify(mBrightnessMappingStrategy, times(5)).isForIdleMode();
+        // Called when switching.
+        verify(mBrightnessMappingStrategy, times(1)).getShortTermModelTimeout();
+        verify(mBrightnessMappingStrategy, times(1)).getUserBrightness();
+        verify(mBrightnessMappingStrategy, times(1)).getUserLux();
+
         // Ensure, after switching, original BMS is not used anymore
         verifyNoMoreInteractions(mBrightnessMappingStrategy);
 
@@ -486,6 +698,7 @@ public class AutomaticBrightnessControllerTest {
         // Sensor reads 100 lux. We should get max brightness.
         listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
         assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getAutomaticScreenBrightness(), 0.0f);
+        assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getRawAutomaticScreenBrightness(), 0.0f);
 
         // Apply throttling and notify ABC (simulates DisplayPowerController#updatePowerState())
         final float throttledBrightness = 0.123f;
@@ -496,6 +709,8 @@ public class AutomaticBrightnessControllerTest {
                 0 /* adjustment= */, false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
                 /* shouldResetShortTermModel= */ true);
         assertEquals(throttledBrightness, mController.getAutomaticScreenBrightness(), 0.0f);
+        // The raw brightness value should not have throttling applied
+        assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getRawAutomaticScreenBrightness(), 0.0f);
 
         // Remove throttling and notify ABC again
         when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
@@ -505,6 +720,7 @@ public class AutomaticBrightnessControllerTest {
                 0 /* adjustment= */, false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
                 /* shouldResetShortTermModel= */ true);
         assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getAutomaticScreenBrightness(), 0.0f);
+        assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getRawAutomaticScreenBrightness(), 0.0f);
     }
 
     @Test

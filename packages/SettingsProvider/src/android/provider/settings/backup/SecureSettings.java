@@ -29,7 +29,7 @@ public class SecureSettings {
      */
     @UnsupportedAppUsage
     public static final String[] SETTINGS_TO_BACKUP = {
-        Settings.Secure.BUGREPORT_IN_POWER_MENU,                            // moved to global
+        Settings.Secure.BUGREPORT_IN_POWER_MENU,
         Settings.Secure.ALLOW_MOCK_LOCATION,
         Settings.Secure.USB_MASS_STORAGE_ENABLED,                           // moved to global
         Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
@@ -143,6 +143,8 @@ public class SecureSettings {
         Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
         Settings.Secure.VOLUME_HUSH_GESTURE,
         Settings.Secure.MANUAL_RINGER_TOGGLE_COUNT,
+        Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
+        Settings.Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED,
         Settings.Secure.HUSH_GESTURE_USED,
         Settings.Secure.IN_CALL_NOTIFICATION_ENABLED,
         Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
@@ -172,6 +174,11 @@ public class SecureSettings {
         Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT,
         Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT,
         Settings.Secure.NAVIGATION_MODE,
+        Settings.Secure.TRACKPAD_GESTURE_BACK_ENABLED,
+        Settings.Secure.TRACKPAD_GESTURE_HOME_ENABLED,
+        Settings.Secure.TRACKPAD_GESTURE_OVERVIEW_ENABLED,
+        Settings.Secure.TRACKPAD_GESTURE_NOTIFICATION_ENABLED,
+        Settings.Secure.TRACKPAD_GESTURE_QUICK_SWITCH_ENABLED,
         Settings.Secure.SKIP_GESTURE_COUNT,
         Settings.Secure.SKIP_TOUCH_COUNT,
         Settings.Secure.SILENCE_ALARMS_GESTURE_COUNT,
@@ -208,6 +215,8 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
+        Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
+        Settings.Secure.ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED,
         Settings.Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED,
         Settings.Secure.NOTIFICATION_BUBBLES,
         Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
@@ -217,12 +226,20 @@ public class SecureSettings {
         Settings.Secure.LOCK_SCREEN_SHOW_QR_CODE_SCANNER,
         Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
         Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON,
+        Settings.Secure.WEAR_TALKBACK_ENABLED,
+        Settings.Secure.HBM_SETTING_KEY,
         Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED,
         Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME,
+        Settings.Secure.CUSTOM_BUGREPORT_HANDLER_APP,
+        Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER,
         Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED,
+        Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
+        Settings.Secure.HEARING_AID_CALL_ROUTING,
+        Settings.Secure.HEARING_AID_MEDIA_ROUTING,
+        Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
         Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED
     };
 }

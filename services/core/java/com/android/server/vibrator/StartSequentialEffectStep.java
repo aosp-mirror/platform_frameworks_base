@@ -93,8 +93,8 @@ final class StartSequentialEffectStep extends Step {
             }
 
             mVibratorsOnMaxDuration = startVibrating(effectMapping, nextSteps);
-            conductor.vibratorManagerHooks.noteVibratorOn(conductor.getVibration().uid,
-                    mVibratorsOnMaxDuration);
+            conductor.vibratorManagerHooks.noteVibratorOn(
+                    conductor.getVibration().callerInfo.uid, mVibratorsOnMaxDuration);
         } finally {
             if (mVibratorsOnMaxDuration >= 0) {
                 // It least one vibrator was started then add a finish step to wait for all
@@ -211,7 +211,8 @@ final class StartSequentialEffectStep extends Step {
         // Check if sync was prepared and if any step was accepted by a vibrator,
         // otherwise there is nothing to trigger here.
         if (hasPrepared && !hasFailed && maxDuration > 0) {
-            hasTriggered = conductor.vibratorManagerHooks.triggerSyncedVibration(getVibration().id);
+            hasTriggered = conductor.vibratorManagerHooks.triggerSyncedVibration(
+                    getVibration().id);
             hasFailed &= hasTriggered;
         }
 

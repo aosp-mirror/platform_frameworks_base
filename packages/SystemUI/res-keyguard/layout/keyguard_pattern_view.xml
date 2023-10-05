@@ -33,6 +33,12 @@
     android:clipToPadding="false">
     <include layout="@layout/keyguard_bouncer_message_area"/>
 
+    <com.android.systemui.keyguard.bouncer.ui.BouncerMessageView
+        android:id="@+id/bouncer_message_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pattern_container"
         android:layout_width="match_parent"

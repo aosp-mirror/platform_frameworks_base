@@ -51,15 +51,31 @@ data class NormalizedTouchData(
 ) {
 
     /**
-     * [nativeSensorBounds] contains the location and dimensions of the sensor area in native
-     * resolution and natural orientation.
+     * [nativeBounds] contains the location and dimensions of the area in native resolution and
+     * natural orientation.
      *
-     * Returns whether the coordinates of the given pointer are within the sensor's bounding box.
+     * Returns whether the coordinates of the given pointer are within the bounding box.
      */
-    fun isWithinSensor(nativeSensorBounds: Rect): Boolean {
-        return nativeSensorBounds.left <= x &&
-            nativeSensorBounds.right >= x &&
-            nativeSensorBounds.top <= y &&
-            nativeSensorBounds.bottom >= y
+    fun isWithinBounds(nativeBounds: Rect): Boolean {
+        return nativeBounds.left <= x &&
+            nativeBounds.right >= x &&
+            nativeBounds.top <= y &&
+            nativeBounds.bottom >= y
     }
+
+    @JvmOverloads
+    fun toPrettyString(tag: String = ""): String =
+        """
+        |NormalizedTouchData [$tag] {
+        |     pointerId: $pointerId
+        |             x: $x
+        |             y: $y
+        |         minor: $minor
+        |         major: $major
+        |   orientation: $orientation
+        |          time: $time
+        |  gestureStart: $gestureStart
+        |}
+        """
+            .trimMargin()
 }

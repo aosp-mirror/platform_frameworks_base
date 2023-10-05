@@ -22,6 +22,7 @@ import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
@@ -41,10 +42,12 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
+import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,6 +56,7 @@ import org.mockito.ArgumentMatchers.anyString
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
@@ -67,6 +71,8 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, true)
+        context.resources.configuration.setLayoutDirection(Locale.US)
         config1 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_1)
         config2 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_2)
         val testDispatcher = StandardTestDispatcher()
@@ -133,6 +139,13 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
             )
     }
 
+    @After
+    fun tearDown() {
+        mContext
+            .getOrCreateTestableResources()
+            .removeOverride(R.bool.custom_lockscreen_shortcuts_enabled)
+    }
+
     @Test
     fun setSelections() =
         testScope.runTest {
@@ -176,12 +189,12 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                     listOf(
                         KeyguardQuickAffordancePickerRepresentation(
                             id = config1.key,
-                            name = config1.pickerName,
+                            name = config1.pickerName(),
                             iconResourceId = config1.pickerIconResourceId,
                         ),
                         KeyguardQuickAffordancePickerRepresentation(
                             id = config2.key,
-                            name = config2.pickerName,
+                            name = config2.pickerName(),
                             iconResourceId = config2.pickerIconResourceId,
                         ),
                     )
@@ -222,7 +235,41 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun `selections for secondary user`() =
+    fun getSlotPickerRepresentations_rightToLeft_slotsReversed() {
+        context.resources.configuration.setLayoutDirection(Locale("he", "IL"))
+        val slot1 = "slot1"
+        val slot2 = "slot2"
+        val slot3 = "slot3"
+        context.orCreateTestableResources.addOverride(
+            R.array.config_keyguardQuickAffordanceSlots,
+            arrayOf(
+                "$slot1:2",
+                "$slot2:4",
+                "$slot3:5",
+            ),
+        )
+
+        assertThat(underTest.getSlotPickerRepresentations())
+            .isEqualTo(
+                listOf(
+                    KeyguardSlotPickerRepresentation(
+                        id = slot3,
+                        maxSelectedAffordances = 5,
+                    ),
+                    KeyguardSlotPickerRepresentation(
+                        id = slot2,
+                        maxSelectedAffordances = 4,
+                    ),
+                    KeyguardSlotPickerRepresentation(
+                        id = slot1,
+                        maxSelectedAffordances = 2,
+                    ),
+                )
+            )
+    }
+
+    @Test
+    fun selectionsForSecondaryUser() =
         testScope.runTest {
             userTracker.set(
                 userInfos =

@@ -200,7 +200,7 @@ public class OverlayConfig {
                 final ParsedOverlayInfo p = partitionOverlayInfos.get(j);
                 if (p.isStatic) {
                     partitionConfigs.add(new ParsedConfiguration(p.packageName,
-                            true /* enabled */, false /* mutable */, partition.policy, p));
+                            true /* enabled */, false /* mutable */, partition.policy, p, null));
                 }
             }
 

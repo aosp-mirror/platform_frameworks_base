@@ -23,11 +23,14 @@ import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
+import android.os.PersistableBundle;
 import android.text.TextUtils;
 import android.util.AndroidException;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
@@ -170,6 +173,13 @@ public class IntentFilter implements Parcelable {
     private static final String NAME_STR = "name";
     private static final String ACTION_STR = "action";
     private static final String AUTO_VERIFY_STR = "autoVerify";
+    private static final String EXTRAS_STR = "extras";
+
+    private static final int[] EMPTY_INT_ARRAY = new int[0];
+    private static final long[] EMPTY_LONG_ARRAY = new long[0];
+    private static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
+    private static final boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
 
     /**
      * The filter {@link #setPriority} value at which system high-priority
@@ -266,6 +276,11 @@ public class IntentFilter implements Parcelable {
      * that were not in the Intent.
      */
     public static final int NO_MATCH_CATEGORY = -4;
+    /**
+     * That filter didn't match due to different extras data.
+     * @hide
+     */
+    public static final int NO_MATCH_EXTRAS = -5;
 
     /**
      * HTTP scheme.
@@ -302,7 +317,7 @@ public class IntentFilter implements Parcelable {
     @UnsupportedAppUsage
     private int mOrder;
     @UnsupportedAppUsage
-    private final ArrayList<String> mActions;
+    private final ArraySet<String> mActions;
     private ArrayList<String> mCategories = null;
     private ArrayList<String> mDataSchemes = null;
     private ArrayList<PatternMatcher> mDataSchemeSpecificParts = null;
@@ -313,6 +328,7 @@ public class IntentFilter implements Parcelable {
     private ArrayList<String> mMimeGroups = null;
     private boolean mHasStaticPartialTypes = false;
     private boolean mHasDynamicPartialTypes = false;
+    private PersistableBundle mExtras = null;
 
     private static final int STATE_VERIFY_AUTO         = 0x00000001;
     private static final int STATE_NEED_VERIFY         = 0x00000010;
@@ -433,7 +449,7 @@ public class IntentFilter implements Parcelable {
      */
     public IntentFilter() {
         mPriority = 0;
-        mActions = new ArrayList<String>();
+        mActions = new ArraySet<>();
     }
 
     /**
@@ -445,7 +461,7 @@ public class IntentFilter implements Parcelable {
      */
     public IntentFilter(String action) {
         mPriority = 0;
-        mActions = new ArrayList<String>();
+        mActions = new ArraySet<>();
         addAction(action);
     }
 
@@ -468,7 +484,7 @@ public class IntentFilter implements Parcelable {
     public IntentFilter(String action, String dataType)
         throws MalformedMimeTypeException {
         mPriority = 0;
-        mActions = new ArrayList<String>();
+        mActions = new ArraySet<>();
         addAction(action);
         addDataType(dataType);
     }
@@ -481,7 +497,7 @@ public class IntentFilter implements Parcelable {
     public IntentFilter(IntentFilter o) {
         mPriority = o.mPriority;
         mOrder = o.mOrder;
-        mActions = new ArrayList<String>(o.mActions);
+        mActions = new ArraySet<>(o.mActions);
         if (o.mCategories != null) {
             mCategories = new ArrayList<String>(o.mCategories);
         }
@@ -506,10 +522,36 @@ public class IntentFilter implements Parcelable {
         if (o.mMimeGroups != null) {
             mMimeGroups = new ArrayList<String>(o.mMimeGroups);
         }
+        if (o.mExtras != null) {
+            mExtras = new PersistableBundle(o.mExtras);
+        }
         mHasStaticPartialTypes = o.mHasStaticPartialTypes;
         mHasDynamicPartialTypes = o.mHasDynamicPartialTypes;
         mVerifyState = o.mVerifyState;
         mInstantAppVisibility = o.mInstantAppVisibility;
+    }
+
+    /** @hide */
+    public String toLongString() {
+        // Not implemented directly as toString() due to potential memory regression
+        final StringBuilder sb = new StringBuilder();
+        sb.append("IntentFilter {");
+        sb.append(" pri=");
+        sb.append(mPriority);
+        if (countActions() > 0) {
+            sb.append(" act=");
+            sb.append(mActions.toString());
+        }
+        if (countCategories() > 0) {
+            sb.append(" cat=");
+            sb.append(mCategories.toString());
+        }
+        if (countDataSchemes() > 0) {
+            sb.append(" sch=");
+            sb.append(mDataSchemes.toString());
+        }
+        sb.append(" }");
+        return sb.toString();
     }
 
     /**
@@ -742,9 +784,7 @@ public class IntentFilter implements Parcelable {
      * @param action Name of the action to match, such as Intent.ACTION_VIEW.
      */
     public final void addAction(String action) {
-        if (!mActions.contains(action)) {
-            mActions.add(action.intern());
-        }
+        mActions.add(action.intern());
     }
 
     /**
@@ -758,7 +798,7 @@ public class IntentFilter implements Parcelable {
      * Return an action in the filter.
      */
     public final String getAction(int index) {
-        return mActions.get(index);
+        return mActions.valueAt(index);
     }
 
     /**
@@ -797,8 +837,11 @@ public class IntentFilter implements Parcelable {
             if (ignoreActions == null) {
                 return !mActions.isEmpty();
             }
+            if (mActions.size() > ignoreActions.size()) {
+                return true;    // some actions are definitely not ignored
+            }
             for (int i = mActions.size() - 1; i >= 0; i--) {
-                if (!ignoreActions.contains(mActions.get(i))) {
+                if (!ignoreActions.contains(mActions.valueAt(i))) {
                     return true;
                 }
             }
@@ -1766,6 +1809,420 @@ public class IntentFilter implements Parcelable {
     }
 
     /**
+     * Match this filter against an Intent's extras. An intent must
+     * have all the extras specified by the filter with the same values,
+     * for the match to succeed.
+     *
+     * <p> An intent con have other extras in addition to those specified
+     * by the filter and it would not affect whether the match succeeds or not.
+     *
+     * @param extras The extras included in the intent, as returned by
+     *               Intent.getExtras().
+     *
+     * @return If all extras match (success), null; else the name of the
+     *         first extra that didn't match.
+     *
+     * @hide
+     */
+    private String matchExtras(@Nullable Bundle extras) {
+        if (mExtras == null) {
+            return null;
+        }
+        final Set<String> keys = mExtras.keySet();
+        for (String key : keys) {
+            if (extras == null) {
+                return key;
+            }
+            final Object value = mExtras.get(key);
+            final Object otherValue = extras.get(key);
+            if (otherValue == null || value.getClass() != otherValue.getClass()
+                    || !Objects.deepEquals(value, otherValue)) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Add a new extra name and value to match against. If an extra is included in the filter,
+     * then an Intent must have an extra with the same {@code name} and {@code value} for it to
+     * match.
+     *
+     * <p> Subsequent calls to this method with the same {@code name} will override any previously
+     * set {@code value}.
+     *
+     * @param name the name of the extra to match against.
+     * @param value the value of the extra to match against.
+     *
+     * @hide
+     */
+    public final void addExtra(@NonNull String name, int value) {
+        Objects.requireNonNull(name);
+        if (mExtras == null) {
+            mExtras = new PersistableBundle();
+        }
+        mExtras.putInt(name, value);
+    }
+
+    /**
+     * Return the value of the extra with {@code name} included in the filter.
+     *
+     * @return the value that was previously set using {@link #addExtra(String, int)} or
+     *         {@code 0} if no value has been set.
+     * @hide
+     */
+    public final int getIntExtra(@NonNull String name) {
+        Objects.requireNonNull(name);
+        return mExtras == null ? 0 : mExtras.getInt(name);
+    }
+
+    /**
+     * Add a new extra name and value to match against. If an extra is included in the filter,
+     * then an Intent must have an extra with the same {@code name} and {@code value} for it to
+     * match.
+     *
+     * <p> Subsequent calls to this method with the same {@code name} will override any previously
+     * set {@code value}.
+     *
+     * @param name the name of the extra to match against.
+     * @param value the value of the extra to match against.
+     *
+     * @hide
+     */
+    public final void addExtra(@NonNull String name, @NonNull int[] value) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(value);
+        if (mExtras == null) {
+            mExtras = new PersistableBundle();
+        }
+        mExtras.putIntArray(name, value);
+    }
+
+    /**
+     * Return the value of the extra with {@code name} included in the filter.
+     *
+     * @return the value that was previously set using {@link #addExtra(String, int[])} or
+     *         an empty int array if no value has been set.
+     * @hide
+     */
+    @NonNull
+    public final int[] getIntArrayExtra(@NonNull String name) {
+        Objects.requireNonNull(name);
+        return mExtras == null ? EMPTY_INT_ARRAY : mExtras.getIntArray(name);
+    }
+
+    /**
+     * Add a new extra name and value to match against. If an extra is included in the filter,
+     * then an Intent must have an extra with the same {@code name} and {@code value} for it to
+     * match.
+     *
+     * <p> Subsequent calls to this method with the same {@code name} will override any previously
+     * set {@code value}.
+     *
+     * @param name the name of the extra to match against.
+     * @param value the value of the extra to match against.
+     *
+     * @hide
+     */
+    public final void addExtra(@NonNull String name, long value) {
+        Objects.requireNonNull(name);
+        if (mExtras == null) {
+            mExtras = new PersistableBundle();
+        }
+        mExtras.putLong(name, value);
+    }
+
+    /**
+     * Return the value of the extra with {@code name} included in the filter.
+     *
+     * @return the value that was previously set using {@link #addExtra(String, long)} or
+     *         {@code 0L} if no value has been set.
+     * @hide
+     */
+    public final long getLongExtra(@NonNull String name) {
+        Objects.requireNonNull(name);
+        return mExtras == null ? 0L : mExtras.getLong(name);
+    }
+
+    /**
+     * Add a new extra name and value to match against. If an extra is included in the filter,
+     * then an Intent must have an extra with the same {@code name} and {@code value} for it to
+     * match.
+     *
+     * <p> Subsequent calls to this method with the same {@code name} will override any previously
+     * set {@code value}.
+     *
+     * @param name the name of the extra to match against.
+     * @param value the value of the extra to match against.
+     *
+     * @hide
+     */
+    public final void addExtra(@NonNull String name, @NonNull long[] value) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(value);
+        if (mExtras == null) {
+            mExtras = new PersistableBundle();
+        }
+        mExtras.putLongArray(name, value);
+    }
+
+    /**
+     * Return the value of the extra with {@code name} included in the filter.
+     *
+     * @return the value that was previously set using {@link #addExtra(String, long[])} or
+     *         an empty long array if no value has been set.
+     * @hide
+     */
+    @NonNull
+    public final long[] getLongArrayExtra(@NonNull String name) {
+        Objects.requireNonNull(name);
+        return mExtras == null ? EMPTY_LONG_ARRAY : mExtras.getLongArray(name);
+    }
+
+    /**
+     * Add a new extra name and value to match against. If an extra is included in the filter,
+     * then an Intent must have an extra with the same {@code name} and {@code value} for it to
+     * match.
+     *
+     * <p> Subsequent calls to this method with the same {@code name} will override any previously
+     * set {@code value}.
+     *
+     * @param name the name of the extra to match against.
+     * @param value the value of the extra to match against.
+     *
+     * @hide
+     */
+    public final void addExtra(@NonNull String name, double value) {
+        Objects.requireNonNull(name);
+        if (mExtras == null) {
+            mExtras = new PersistableBundle();
+        }
+        mExtras.putDouble(name, value);
+    }
+
+    /**
+     * Return the value of the extra with {@code name} included in the filter.
+     *
+     * @return the value that was previously set using {@link #addExtra(String, double)} or
+     *         {@code 0.0} if no value has been set.
+     * @hide
+     */
+    @NonNull
+    public final double getDoubleExtra(@NonNull String name) {
+        Objects.requireNonNull(name);
+        return mExtras == null ? 0.0 : mExtras.getDouble(name);
+    }
+
+    /**
+     * Add a new extra name and value to match against. If an extra is included in the filter,
+     * then an Intent must have an extra with the same {@code name} and {@code value} for it to
+     * match.
+     *
+     * <p> Subsequent calls to this method with the same {@code name} will override any previously
+     * set {@code value}.
+     *
+     * @param name the name of the extra to match against.
+     * @param value the value of the extra to match against.
+     *
+     * @hide
+     */
+    public final void addExtra(@NonNull String name, @NonNull double[] value) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(value);
+        if (mExtras == null) {
+            mExtras = new PersistableBundle();
+        }
+        mExtras.putDoubleArray(name, value);
+    }
+
+    /**
+     * Return the value of the extra with {@code name} included in the filter.
+     *
+     * @return the value that was previously set using {@link #addExtra(String, double[])} or
+     *         an empty double array if no value has been set.
+     * @hide
+     */
+    @NonNull
+    public final double[] getDoubleArrayExtra(@NonNull String name) {
+        Objects.requireNonNull(name);
+        return mExtras == null ? EMPTY_DOUBLE_ARRAY : mExtras.getDoubleArray(name);
+    }
+
+    /**
+     * Add a new extra name and value to match against. If an extra is included in the filter,
+     * then an Intent must have an extra with the same {@code name} and {@code value} for it to
+     * match.
+     *
+     * <p> Subsequent calls to this method with the same {@code name} will override any previously
+     * set {@code value}.
+     *
+     * @param name the name of the extra to match against.
+     * @param value the value of the extra to match against.
+     *
+     * @hide
+     */
+    public final void addExtra(@NonNull String name, @NonNull String value) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(value);
+        if (mExtras == null) {
+            mExtras = new PersistableBundle();
+        }
+        mExtras.putString(name, value);
+    }
+
+    /**
+     * Return the value of the extra with {@code name} included in the filter.
+     *
+     * @return the value that was previously set using {@link #addExtra(String, String)} or a
+     *         {@code null} if no value has been set.
+     * @hide
+     */
+    @Nullable
+    public final String getStringExtra(@NonNull String name) {
+        Objects.requireNonNull(name);
+        return mExtras == null ? null : mExtras.getString(name);
+    }
+
+    /**
+     * Add a new extra name and value to match against. If an extra is included in the filter,
+     * then an Intent must have an extra with the same {@code name} and {@code value} for it to
+     * match.
+     *
+     * <p> Subsequent calls to this method with the same {@code name} will override any previously
+     * set {@code value}.
+     *
+     * @param name the name of the extra to match against.
+     * @param value the value of the extra to match against.
+     *
+     * @hide
+     */
+    public final void addExtra(@NonNull String name, @NonNull String[] value) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(value);
+        if (mExtras == null) {
+            mExtras = new PersistableBundle();
+        }
+        mExtras.putStringArray(name, value);
+    }
+
+    /**
+     * Return the value of the extra with {@code name} included in the filter.
+     *
+     * @return the value that was previously set using {@link #addExtra(String, String[])} or
+     *         an empty string array if no value has been set.
+     * @hide
+     */
+    @NonNull
+    public final String[] getStringArrayExtra(@NonNull String name) {
+        Objects.requireNonNull(name);
+        return mExtras == null ? EMPTY_STRING_ARRAY : mExtras.getStringArray(name);
+    }
+
+    /**
+     * Add a new extra name and value to match against. If an extra is included in the filter,
+     * then an Intent must have an extra with the same {@code name} and {@code value} for it to
+     * match.
+     *
+     * <p> Subsequent calls to this method with the same {@code name} will override any previously
+     * set {@code value}.
+     *
+     * @param name the name of the extra to match against.
+     * @param value the value of the extra to match against.
+     *
+     * @hide
+     */
+    public final void addExtra(@NonNull String name, boolean value) {
+        Objects.requireNonNull(name);
+        if (mExtras == null) {
+            mExtras = new PersistableBundle();
+        }
+        mExtras.putBoolean(name, value);
+    }
+
+    /**
+     * Return the value of the extra with {@code name} included in the filter.
+     *
+     * @return the value that was previously set using {@link #addExtra(String, boolean)} or
+     *         {@code false} if no value has been set.
+     * @hide
+     */
+    public final boolean getBooleanExtra(@NonNull String name) {
+        Objects.requireNonNull(name);
+        return mExtras == null ? false : mExtras.getBoolean(name);
+    }
+
+    /**
+     * Add a new extra name and value to match against. If an extra is included in the filter,
+     * then an Intent must have an extra with the same {@code name} and {@code value} for it to
+     * match.
+     *
+     * <p> Subsequent calls to this method with the same {@code name} will override any previously
+     * set {@code value}.
+     *
+     * @param name the name of the extra to match against.
+     * @param value the value of the extra to match against.
+     *
+     * @hide
+     */
+    public final void addExtra(@NonNull String name, @NonNull boolean[] value) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(value);
+        if (mExtras == null) {
+            mExtras = new PersistableBundle();
+        }
+        mExtras.putBooleanArray(name, value);
+    }
+
+    /**
+     * Return the value of the extra with {@code name} included in the filter.
+     *
+     * @return the value that was previously set using {@link #addExtra(String, boolean[])} or
+     *         an empty boolean array if no value has been set.
+     * @hide
+     */
+    @NonNull
+    public final boolean[] getBooleanArrayExtra(@NonNull String name) {
+        Objects.requireNonNull(name);
+        return mExtras == null ? EMPTY_BOOLEAN_ARRAY : mExtras.getBooleanArray(name);
+    }
+
+    /**
+     * Returns whether or not an extra with {@code name} is included in the filter.
+     *
+     * @return {@code true} if an extra with {@code name} is included in the filter.
+     *         Otherwise {@code false}.
+     * @hide
+     */
+    public final boolean hasExtra(@NonNull String name) {
+        Objects.requireNonNull(name);
+        return mExtras == null ? false : mExtras.containsKey(name);
+    }
+
+    /**
+     * Set the intent extras to match against. For this filter to match an
+     * intent, it must contain all the {@code extras} set.
+     *
+     * <p> Subsequent calls to this method  will override any previously set extras.
+     *
+     * @param extras The intent extras to match against.
+     * @hide
+     */
+    public final void setExtras(@NonNull PersistableBundle extras) {
+        mExtras = extras;
+    }
+
+    /**
+     * Return the intent extras included in this filter.
+     *
+     * @return the extras that were previously set using {@link #setExtras(PersistableBundle)} or
+     *         an empty {@link PersistableBundle} object if no extras were set.
+     * @hide
+     */
+    public final @NonNull PersistableBundle getExtras() {
+        return mExtras == null ? new PersistableBundle() : mExtras;
+    }
+
+    /**
      * Return a {@link Predicate} which tests whether this filter matches the
      * given <var>intent</var>.
      * <p>
@@ -1816,7 +2273,9 @@ public class IntentFilter implements Parcelable {
             boolean resolve, String logTag) {
         String type = resolve ? intent.resolveType(resolver) : intent.getType();
         return match(intent.getAction(), type, intent.getScheme(),
-                     intent.getData(), intent.getCategories(), logTag);
+                     intent.getData(), intent.getCategories(), logTag,
+                     false /* supportWildcards */, null /* ignoreActions */,
+                     intent.getExtras());
     }
 
     /**
@@ -1866,6 +2325,19 @@ public class IntentFilter implements Parcelable {
     public final int match(String action, String type, String scheme,
             Uri data, Set<String> categories, String logTag, boolean supportWildcards,
             @Nullable Collection<String> ignoreActions) {
+        return match(action, type, scheme, data, categories, logTag, supportWildcards,
+                ignoreActions, null /* extras */);
+    }
+
+    /**
+     * Variant of {@link #match(String, String, String, Uri, Set, String, boolean, Collection)}
+     * that supports matching the extra values in the intent.
+     *
+     * @hide
+     */
+    public final int match(String action, String type, String scheme,
+            Uri data, Set<String> categories, String logTag, boolean supportWildcards,
+            @Nullable Collection<String> ignoreActions, @Nullable Bundle extras) {
         if (action != null && !matchAction(action, supportWildcards, ignoreActions)) {
             if (false) Log.v(
                 logTag, "No matching action " + action + " for " + this);
@@ -1895,6 +2367,14 @@ public class IntentFilter implements Parcelable {
             return NO_MATCH_CATEGORY;
         }
 
+        String extraMismatch = matchExtras(extras);
+        if (extraMismatch != null) {
+            if (false) {
+                Log.v(logTag, "Mismatch for extra key " + extraMismatch + " for " + this);
+            }
+            return NO_MATCH_EXTRAS;
+        }
+
         // It would be nice to treat container activities as more
         // important than ones that can be embedded, but this is not the way...
         if (false) {
@@ -1918,7 +2398,7 @@ public class IntentFilter implements Parcelable {
         int N = countActions();
         for (int i=0; i<N; i++) {
             serializer.startTag(null, ACTION_STR);
-            serializer.attribute(null, NAME_STR, mActions.get(i));
+            serializer.attribute(null, NAME_STR, mActions.valueAt(i));
             serializer.endTag(null, ACTION_STR);
         }
         N = countCategories();
@@ -1995,6 +2475,15 @@ public class IntentFilter implements Parcelable {
                     break;
             }
             serializer.endTag(null, PATH_STR);
+        }
+        if (mExtras != null) {
+            serializer.startTag(null, EXTRAS_STR);
+            try {
+                mExtras.saveToXml(serializer);
+            } catch (XmlPullParserException e) {
+                throw new IllegalStateException("Failed to write extras: " + mExtras.toString(), e);
+            }
+            serializer.endTag(null, EXTRAS_STR);
         }
     }
 
@@ -2122,6 +2611,8 @@ public class IntentFilter implements Parcelable {
                 } else if ((path=parser.getAttributeValue(null, SUFFIX_STR)) != null) {
                     addDataPath(path, PatternMatcher.PATTERN_SUFFIX);
                 }
+            } else if (tagName.equals(EXTRAS_STR)) {
+                mExtras = PersistableBundle.restoreFromXml(parser);
             } else {
                 Log.w("IntentFilter", "Unknown tag parsing IntentFilter: " + tagName);
             }
@@ -2185,6 +2676,9 @@ public class IntentFilter implements Parcelable {
             proto.write(IntentFilterProto.HAS_PARTIAL_TYPES, hasPartialTypes());
         }
         proto.write(IntentFilterProto.GET_AUTO_VERIFY, getAutoVerify());
+        if (mExtras != null) {
+            mExtras.dumpDebug(proto, IntentFilterProto.EXTRAS);
+        }
         proto.end(token);
     }
 
@@ -2295,6 +2789,11 @@ public class IntentFilter implements Parcelable {
             sb.append(prefix); sb.append("AutoVerify="); sb.append(getAutoVerify());
             du.println(sb.toString());
         }
+        if (mExtras != null) {
+            sb.setLength(0);
+            sb.append(prefix); sb.append("mExtras="); sb.append(mExtras.toString());
+            du.println(sb.toString());
+        }
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<IntentFilter> CREATOR
@@ -2313,7 +2812,7 @@ public class IntentFilter implements Parcelable {
     }
 
     public final void writeToParcel(Parcel dest, int flags) {
-        dest.writeStringList(mActions);
+        dest.writeStringArray(mActions.toArray(new String[mActions.size()]));
         if (mCategories != null) {
             dest.writeInt(1);
             dest.writeStringList(mCategories);
@@ -2377,6 +2876,12 @@ public class IntentFilter implements Parcelable {
         dest.writeInt(getAutoVerify() ? 1 : 0);
         dest.writeInt(mInstantAppVisibility);
         dest.writeInt(mOrder);
+        if (mExtras != null) {
+            dest.writeInt(1);
+            mExtras.writeToParcel(dest, flags);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /**
@@ -2430,8 +2935,9 @@ public class IntentFilter implements Parcelable {
 
     /** @hide */
     public IntentFilter(Parcel source) {
-        mActions = new ArrayList<String>();
-        source.readStringList(mActions);
+        List<String> actions = new ArrayList<>();
+        source.readStringList(actions);
+        mActions = new ArraySet<>(actions);
         if (source.readInt() != 0) {
             mCategories = new ArrayList<String>();
             source.readStringList(mCategories);
@@ -2479,6 +2985,9 @@ public class IntentFilter implements Parcelable {
         setAutoVerify(source.readInt() > 0);
         setVisibilityToInstantApp(source.readInt());
         mOrder = source.readInt();
+        if (source.readInt() != 0) {
+            mExtras = PersistableBundle.CREATOR.createFromParcel(source);
+        }
     }
 
     private boolean hasPartialTypes() {
@@ -2549,5 +3058,82 @@ public class IntentFilter implements Parcelable {
     public String[] getHosts() {
         ArrayList<String> list = getHostsList();
         return list.toArray(new String[list.size()]);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean filterEquals(IntentFilter f1, IntentFilter f2) {
+        int s1 = f1.countActions();
+        int s2 = f2.countActions();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasAction(f1.getAction(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countCategories();
+        s2 = f2.countCategories();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasCategory(f1.getCategory(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataTypes();
+        s2 = f2.countDataTypes();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasExactDataType(f1.getDataType(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataSchemes();
+        s2 = f2.countDataSchemes();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataScheme(f1.getDataScheme(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataAuthorities();
+        s2 = f2.countDataAuthorities();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataAuthority(f1.getDataAuthority(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataPaths();
+        s2 = f2.countDataPaths();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataPath(f1.getDataPath(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataSchemeSpecificParts();
+        s2 = f2.countDataSchemeSpecificParts();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataSchemeSpecificPart(f1.getDataSchemeSpecificPart(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

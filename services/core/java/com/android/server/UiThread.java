@@ -53,7 +53,7 @@ public final class UiThread extends ServiceThread {
             looper.setTraceTag(Trace.TRACE_TAG_SYSTEM_SERVER);
             looper.setSlowLogThresholdMs(
                     SLOW_DISPATCH_THRESHOLD_MS, SLOW_DELIVERY_THRESHOLD_MS);
-            sHandler = new Handler(sInstance.getLooper());
+            sHandler = makeSharedHandler(sInstance.getLooper());
         }
     }
 

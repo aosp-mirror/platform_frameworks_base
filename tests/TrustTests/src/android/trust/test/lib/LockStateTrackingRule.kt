@@ -18,7 +18,6 @@ package android.trust.test.lib
 
 import android.app.KeyguardManager
 import android.app.trust.TrustManager
-import android.app.trust.TrustManager.TrustListener
 import android.content.Context
 import android.util.Log
 import android.view.WindowManagerGlobal
@@ -79,7 +78,7 @@ class LockStateTrackingRule : TestRule {
         // swipe, which is considered "device unlocked"!
     }
 
-    inner class Listener : TrustListener {
+    inner class Listener : TestTrustListener() {
         override fun onTrustChanged(
             enabled: Boolean,
             newlyUnlocked: Boolean,
@@ -89,15 +88,6 @@ class LockStateTrackingRule : TestRule {
         ) {
             Log.d(TAG, "Device became trusted=$enabled")
             trustState = trustState.copy(trusted=enabled)
-        }
-
-        override fun onTrustManagedChanged(enabled: Boolean, userId: Int) {
-        }
-
-        override fun onTrustError(message: CharSequence) {
-        }
-
-        override fun onEnabledTrustAgentsChanged(userId: Int) {
         }
     }
 

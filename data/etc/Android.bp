@@ -36,6 +36,12 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "initial-package-stopped-states.xml",
+    sub_dir: "sysconfig",
+    src: "initial-package-stopped-states.xml",
+}
+
+prebuilt_etc {
     name: "preinstalled-packages-platform-overlays.xml",
     product_specific: true,
     sub_dir: "sysconfig",
@@ -46,6 +52,12 @@ prebuilt_etc {
     name: "hiddenapi-package-whitelist.xml",
     sub_dir: "sysconfig",
     src: "hiddenapi-package-whitelist.xml",
+}
+
+prebuilt_etc {
+    name: "preinstalled-packages-asl-files.xml",
+    sub_dir: "sysconfig",
+    src: "preinstalled-packages-asl-files.xml",
 }
 
 // Privapp permission whitelist files

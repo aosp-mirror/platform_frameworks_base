@@ -35,6 +35,7 @@ import android.util.Log;
 import android.util.PrintWriterPrinter;
 
 import com.android.internal.util.XmlUtils;
+import com.android.server.utils.EventLogger;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -76,7 +77,8 @@ class SoundEffectsHelper {
         void run(boolean success);
     }
 
-    private final AudioEventLogger mSfxLogger = new AudioEventLogger(
+    private final EventLogger
+            mSfxLogger = new EventLogger(
             AudioManager.NUM_SOUND_EFFECTS + 10, "Sound Effects Loading");
 
     private final Context mContext;
@@ -167,7 +169,7 @@ class SoundEffectsHelper {
     }
 
     private void logEvent(String msg) {
-        mSfxLogger.log(new AudioEventLogger.StringEvent(msg));
+        mSfxLogger.enqueue(new EventLogger.StringEvent(msg));
     }
 
     // All the methods below run on the worker thread

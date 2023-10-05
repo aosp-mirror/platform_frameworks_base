@@ -16,12 +16,14 @@
 
 package com.android.systemui.screenrecord;
 
+import android.app.BroadcastOptions;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.UserHandle;
 import android.util.Log;
@@ -61,6 +63,7 @@ public class RecordingController
     private boolean mIsStarting;
     private boolean mIsRecording;
     private PendingIntent mStopIntent;
+    private final Bundle mInteractiveBroadcastOption;
     private CountDownTimer mCountDownTimer = null;
     private final Executor mMainExecutor;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -120,6 +123,10 @@ public class RecordingController
         mBroadcastDispatcher = broadcastDispatcher;
         mUserContextProvider = userContextProvider;
         mUserTracker = userTracker;
+
+        BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setInteractive(true);
+        mInteractiveBroadcastOption = options.toBundle();
     }
 
     /**
@@ -178,7 +185,7 @@ public class RecordingController
                     cb.onCountdownEnd();
                 }
                 try {
-                    startIntent.send();
+                    startIntent.send(mInteractiveBroadcastOption);
                     mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
 
                     IntentFilter stateFilter = new IntentFilter(INTENT_UPDATE_STATE);
@@ -232,7 +239,7 @@ public class RecordingController
     public void stopRecording() {
         try {
             if (mStopIntent != null) {
-                mStopIntent.send();
+                mStopIntent.send(mInteractiveBroadcastOption);
             } else {
                 Log.e(TAG, "Stop intent was null");
             }

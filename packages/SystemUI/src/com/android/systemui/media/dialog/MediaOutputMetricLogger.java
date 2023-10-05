@@ -80,6 +80,10 @@ public class MediaOutputMetricLogger {
             Log.d(TAG, "logOutputSuccess - selected device: " + selectedDeviceType);
         }
 
+        if (mSourceDevice == null && mTargetDevice == null) {
+            return;
+        }
+
         updateLoggingDeviceCount(deviceList);
 
         SysUiStatsLog.write(
@@ -103,6 +107,10 @@ public class MediaOutputMetricLogger {
     public void logOutputItemSuccess(String selectedDeviceType, List<MediaItem> deviceItemList) {
         if (DEBUG) {
             Log.d(TAG, "logOutputSuccess - selected device: " + selectedDeviceType);
+        }
+
+        if (mSourceDevice == null && mTargetDevice == null) {
+            return;
         }
 
         updateLoggingMediaItemCount(deviceItemList);
@@ -176,6 +184,10 @@ public class MediaOutputMetricLogger {
             Log.e(TAG, "logRequestFailed - " + reason);
         }
 
+        if (mSourceDevice == null && mTargetDevice == null) {
+            return;
+        }
+
         updateLoggingDeviceCount(deviceList);
 
         SysUiStatsLog.write(
@@ -199,6 +211,10 @@ public class MediaOutputMetricLogger {
     public void logOutputItemFailure(List<MediaItem> deviceItemList, int reason) {
         if (DEBUG) {
             Log.e(TAG, "logRequestFailed - " + reason);
+        }
+
+        if (mSourceDevice == null && mTargetDevice == null) {
+            return;
         }
 
         updateLoggingMediaItemCount(deviceItemList);

@@ -51,11 +51,15 @@ interface IUsageStatsManager {
     void reportChooserSelection(String packageName, int userId, String contentType,
             in String[] annotations, String action);
     int getAppStandbyBucket(String packageName, String callingPackage, int userId);
+    @EnforcePermission("CHANGE_APP_IDLE_STATE")
     void setAppStandbyBucket(String packageName, int bucket, int userId);
     ParceledListSlice getAppStandbyBuckets(String callingPackage, int userId);
+    @EnforcePermission("CHANGE_APP_IDLE_STATE")
     void setAppStandbyBuckets(in ParceledListSlice appBuckets, int userId);
     int getAppMinStandbyBucket(String packageName, String callingPackage, int userId);
+    @EnforcePermission("CHANGE_APP_LAUNCH_TIME_ESTIMATE")
     void setEstimatedLaunchTime(String packageName, long estimatedLaunchTime, int userId);
+    @EnforcePermission("CHANGE_APP_LAUNCH_TIME_ESTIMATE")
     void setEstimatedLaunchTimes(in ParceledListSlice appLaunchTimes, int userId);
     void registerAppUsageObserver(int observerId, in String[] packages, long timeLimitMs,
             in PendingIntent callback, String callingPackage);

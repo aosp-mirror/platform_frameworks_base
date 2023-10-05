@@ -495,6 +495,9 @@ public abstract class CallScreeningService extends Service {
              * Note: Calls will still be logged with type
              * {@link android.provider.CallLog.Calls#BLOCKED_TYPE}, regardless of how this property
              * is set.
+             * <p>
+             * Note: Only the carrier and system call screening apps can use this parameter;
+             * this parameter is ignored otherwise.
              */
             public Builder setSkipCallLog(boolean shouldSkipCallLog) {
                 mShouldSkipCallLog = shouldSkipCallLog;

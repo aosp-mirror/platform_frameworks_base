@@ -20,6 +20,7 @@ import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWA
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 
 import android.annotation.NonNull;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -37,8 +38,10 @@ import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.keyguard.domain.interactor.BurnInInteractor;
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -50,16 +53,18 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Assert;
 
+import dagger.Lazy;
+
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Implementation of DozeHost for SystemUI.
  */
-@SysUISingleton
+@ExperimentalCoroutinesApi @SysUISingleton
 public final class DozeServiceHost implements DozeHost {
     private static final String TAG = "DozeServiceHost";
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
@@ -89,12 +94,14 @@ public final class DozeServiceHost implements DozeHost {
     private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private final AuthController mAuthController;
     private final NotificationIconAreaController mNotificationIconAreaController;
+    private final BurnInInteractor mBurnInInteractor;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private NotificationPanelViewController mNotificationPanel;
+    private ShadeViewController mNotificationPanel;
     private View mAmbientIndicationContainer;
     private CentralSurfaces mCentralSurfaces;
     private boolean mAlwaysOnSuppressed;
     private boolean mPulsePending;
+    private DozeInteractor mDozeInteractor;
 
     @Inject
     public DozeServiceHost(DozeLog dozeLog, PowerManager powerManager,
@@ -110,7 +117,9 @@ public final class DozeServiceHost implements DozeHost {
             NotificationShadeWindowController notificationShadeWindowController,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             AuthController authController,
-            NotificationIconAreaController notificationIconAreaController) {
+            NotificationIconAreaController notificationIconAreaController,
+            DozeInteractor dozeInteractor,
+            BurnInInteractor burnInInteractor) {
         super();
         mDozeLog = dozeLog;
         mPowerManager = powerManager;
@@ -129,7 +138,9 @@ public final class DozeServiceHost implements DozeHost {
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
         mAuthController = authController;
         mNotificationIconAreaController = notificationIconAreaController;
+        mBurnInInteractor = burnInInteractor;
         mHeadsUpManagerPhone.addListener(mOnHeadsUpChangedListener);
+        mDozeInteractor = dozeInteractor;
     }
 
     // TODO: we should try to not pass status bar in here if we can avoid it.
@@ -141,7 +152,7 @@ public final class DozeServiceHost implements DozeHost {
             CentralSurfaces centralSurfaces,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             NotificationShadeWindowViewController notificationShadeWindowViewController,
-            NotificationPanelViewController notificationPanel,
+            ShadeViewController notificationPanel,
             View ambientIndicationContainer) {
         mCentralSurfaces = centralSurfaces;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -220,6 +231,7 @@ public final class DozeServiceHost implements DozeHost {
         for (Callback callback : mCallbacks) {
             callback.onDozingChanged(dozing);
         }
+        mDozeInteractor.setIsDozing(dozing);
         mStatusBarStateController.setIsDozing(dozing);
     }
 
@@ -304,6 +316,7 @@ public final class DozeServiceHost implements DozeHost {
         if (mAmbientIndicationContainer instanceof DozeReceiver) {
             ((DozeReceiver) mAmbientIndicationContainer).dozeTimeTick();
         }
+        mBurnInInteractor.dozeTimeTick();
     }
 
     @Override
@@ -353,7 +366,14 @@ public final class DozeServiceHost implements DozeHost {
 
     @Override
     public void onSlpiTap(float screenX, float screenY) {
-        if (screenX > 0 && screenY > 0 && mAmbientIndicationContainer != null
+        if (screenX < 0 || screenY < 0) return;
+        dispatchTouchEventToAmbientIndicationContainer(screenX, screenY);
+
+        mDozeInteractor.setLastTapToWakePosition(new Point((int) screenX, (int) screenY));
+    }
+
+    private void dispatchTouchEventToAmbientIndicationContainer(float screenX, float screenY) {
+        if (mAmbientIndicationContainer != null
                 && mAmbientIndicationContainer.getVisibility() == View.VISIBLE) {
             int[] locationOnScreen = new int[2];
             mAmbientIndicationContainer.getLocationOnScreen(locationOnScreen);

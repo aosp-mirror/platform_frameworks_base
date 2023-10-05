@@ -15,11 +15,14 @@
  */
 package android.hardware.input
 
+import android.content.Context
+import android.content.ContextWrapper
 import android.hardware.BatteryState
 import android.os.Handler
 import android.os.HandlerExecutor
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
+import androidx.test.core.app.ApplicationProvider
 import com.android.server.testutils.any
 import java.util.concurrent.Executor
 import kotlin.test.assertEquals
@@ -32,8 +35,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoJUnitRunner
 
@@ -53,6 +58,7 @@ class InputDeviceBatteryListenerTest {
     private var registeredListener: IInputDeviceBatteryListener? = null
     private val monitoredDevices = mutableListOf<Int>()
     private lateinit var executor: Executor
+    private lateinit var context: Context
     private lateinit var inputManager: InputManager
 
     @Mock
@@ -60,11 +66,15 @@ class InputDeviceBatteryListenerTest {
 
     @Before
     fun setUp() {
+        context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
         testLooper = TestLooper()
         executor = HandlerExecutor(Handler(testLooper.looper))
         registeredListener = null
         monitoredDevices.clear()
-        inputManager = InputManager.resetInstance(iInputManagerMock)
+        InputManagerGlobal.resetInstance(iInputManagerMock)
+        inputManager = InputManager(context)
+        `when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
+                .thenReturn(inputManager)
 
         // Handle battery listener registration.
         doAnswer {
@@ -102,7 +112,7 @@ class InputDeviceBatteryListenerTest {
 
     @After
     fun tearDown() {
-        InputManager.clearInstance()
+        InputManagerGlobal.clearInstance()
     }
 
     private fun notifyBatteryStateChanged(
@@ -112,7 +122,13 @@ class InputDeviceBatteryListenerTest {
         capacity: Float = 1.0f,
         eventTime: Long = 12345L
     ) {
-        registeredListener!!.onBatteryStateChanged(deviceId, isPresent, status, capacity, eventTime)
+        registeredListener!!.onBatteryStateChanged(IInputDeviceBatteryState().apply {
+            this.deviceId = deviceId
+            this.updateTime = eventTime
+            this.isPresent = isPresent
+            this.status = status
+            this.capacity = capacity
+        })
     }
 
     @Test

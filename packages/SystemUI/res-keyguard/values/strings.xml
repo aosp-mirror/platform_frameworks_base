@@ -21,11 +21,20 @@
     <!-- Instructions telling the user to enter their PIN password to unlock the keyguard [CHAR LIMIT=30] -->
     <string name="keyguard_enter_your_pin">Enter your PIN</string>
 
+    <!-- Instructions telling the user to enter their PIN password to unlock the keyguard [CHAR LIMIT=48] -->
+    <string name="keyguard_enter_pin">Enter PIN</string>
+
     <!-- Instructions telling the user to enter their pattern to unlock the keyguard [CHAR LIMIT=30] -->
     <string name="keyguard_enter_your_pattern">Enter your pattern</string>
 
+    <!-- Instructions telling the user to enter their pattern to unlock the keyguard [CHAR LIMIT=48] -->
+    <string name="keyguard_enter_pattern">Draw pattern</string>
+
     <!-- Instructions telling the user to enter their text password to unlock the keyguard [CHAR LIMIT=30] -->
     <string name="keyguard_enter_your_password">Enter your password</string>
+
+    <!-- Instructions telling the user to enter their text password to unlock the keyguard [CHAR LIMIT=48] -->
+    <string name="keyguard_enter_password">Enter password</string>
 
     <!-- Shown in the lock screen when there is SIM card IO error. -->
     <string name="keyguard_sim_error_message_short">Invalid Card.</string>
@@ -54,6 +63,9 @@
 
     <!-- When the lock screen is showing and the phone plugged in, and the defend mode is triggered, say that charging is temporarily limited.  -->
     <string name="keyguard_plugged_in_charging_limited"><xliff:g id="percentage">%s</xliff:g> • Charging optimized to protect battery</string>
+
+    <!-- When the lock screen is showing and the phone plugged in with incompatible charger. -->
+    <string name="keyguard_plugged_in_incompatible_charger"><xliff:g id="percentage">%s</xliff:g> • Issue with charging accessory</string>
 
     <!-- On the keyguard screen, when pattern lock is disabled, only tell them to press menu to unlock.  This is shown in small font at the bottom. -->
     <string name="keyguard_instructions_when_pattern_disabled">Press Menu to unlock.</string>
@@ -115,11 +127,104 @@
 
     <!-- Message shown when user enters wrong pattern -->
     <string name="kg_wrong_pattern">Wrong pattern</string>
+
+    <!-- Message shown when user enters wrong pattern [CHAR LIMIT=48] -->
+    <string name="kg_wrong_pattern_try_again">Wrong pattern. Try again.</string>
+
     <!-- Message shown when user enters wrong password -->
     <string name="kg_wrong_password">Wrong password</string>
+
+    <!-- Message shown when user enters wrong pattern [CHAR LIMIT=48] -->
+    <string name="kg_wrong_password_try_again">Wrong password. Try again.</string>
+
     <!-- Message shown when user enters wrong PIN -->
     <string name="kg_wrong_pin">Wrong PIN</string>
-    <!-- Countdown message shown after too many failed unlock attempts -->
+
+    <!-- Message shown when user enters wrong PIN  [CHAR LIMIT=48] -->
+    <string name="kg_wrong_pin_try_again">Wrong PIN. Try again.</string>
+
+    <!-- Message shown when user enters wrong PIN/password/pattern below the main message, for ex: "Wrong PIN. Try again" in line 1 and the following text in line 2.  [CHAR LIMIT=70] -->
+    <string name="kg_wrong_input_try_fp_suggestion">Or unlock with fingerprint</string>
+
+    <!-- Message shown when user fingerprint is not recognized  [CHAR LIMIT=48] -->
+    <string name="kg_fp_not_recognized">Fingerprint not recognized</string>
+
+    <!-- Message shown when we want the users to try biometric auth again or use pin/pattern/password  [CHAR LIMIT=48] -->
+    <string name="bouncer_face_not_recognized">Face not recognized</string>
+
+    <!-- Message shown when we want the users to try biometric auth again or use pin/pattern/password  [CHAR LIMIT=70] -->
+    <string name="kg_bio_try_again_or_pin">Try again or enter PIN</string>
+
+    <!-- Message shown when we want the users to try biometric auth again or use pin/pattern/password  [CHAR LIMIT=70] -->
+    <string name="kg_bio_try_again_or_password">Try again or enter password</string>
+
+    <!-- Message shown when we want the users to try biometric auth again or use pin/pattern/password  [CHAR LIMIT=70] -->
+    <string name="kg_bio_try_again_or_pattern">Try again or draw pattern</string>
+
+    <!-- Message shown when we are on bouncer after temporary lockout of either face or fingerprint  [CHAR LIMIT=70] -->
+    <string name="kg_bio_too_many_attempts_pin">PIN is required after too many attempts</string>
+
+    <!-- Message shown when we are on bouncer after temporary lockout of either face or fingerprint  [CHAR LIMIT=70] -->
+    <string name="kg_bio_too_many_attempts_password">Password is required after too many attempts</string>
+
+    <!-- Message shown when we are on bouncer after temporary lockout of either face or fingerprint  [CHAR LIMIT=70] -->
+    <string name="kg_bio_too_many_attempts_pattern">Pattern is required after too many attempts</string>
+
+    <!-- Instructions when the user can unlock with PIN/password/pattern or fingerprint from bouncer. [CHAR LIMIT=48]  -->
+    <string name="kg_unlock_with_pin_or_fp">Unlock with PIN or fingerprint</string>
+
+    <!-- Instructions when the user can unlock with PIN/password/pattern or fingerprint from bouncer. [CHAR LIMIT=48]  -->
+    <string name="kg_unlock_with_password_or_fp">Unlock with password or fingerprint</string>
+
+    <!-- Instructions when the user can unlock with PIN/password/pattern or fingerprint from bouncer. [CHAR LIMIT=48]  -->
+    <string name="kg_unlock_with_pattern_or_fp">Unlock with pattern or fingerprint</string>
+
+    <!-- Message shown when we are on bouncer after Device admin requested lockdown.  [CHAR LIMIT=70] -->
+    <string name="kg_prompt_after_dpm_lock">For added security, device was locked by work policy</string>
+
+    <!-- Message shown for pin/pattern/password when we are on bouncer after user triggered lockdown.  [CHAR LIMIT=70] -->
+    <string name="kg_prompt_after_user_lockdown_pin">PIN is required after lockdown</string>
+
+    <!-- Message shown for pin/pattern/password when we are on bouncer after user triggered lockdown.  [CHAR LIMIT=70] -->
+    <string name="kg_prompt_after_user_lockdown_password">Password is required after lockdown</string>
+
+    <!-- Message shown for pin/pattern/password when we are on bouncer after user triggered lockdown.  [CHAR LIMIT=70] -->
+    <string name="kg_prompt_after_user_lockdown_pattern">Pattern is required after lockdown</string>
+
+    <!-- Message shown to prepare for an unattended update (OTA). Also known as an over-the-air (OTA) update.  [CHAR LIMIT=70] -->
+    <string name="kg_prompt_unattended_update">Update will install during inactive hours</string>
+
+    <!-- Message shown when primary authentication hasn't been used for some time.  [CHAR LIMIT=70] -->
+    <string name="kg_prompt_pin_auth_timeout">Added security required. PIN not used for a while.</string>
+
+    <!-- Message shown when primary authentication hasn't been used for some time.  [CHAR LIMIT=70] -->
+    <string name="kg_prompt_password_auth_timeout">Added security required. Password not used for a while.</string>
+
+    <!-- Message shown when primary authentication hasn't been used for some time.  [CHAR LIMIT=76] -->
+    <string name="kg_prompt_pattern_auth_timeout">Added security required. Pattern not used for a while.</string>
+
+    <!-- Message shown when device hasn't been unlocked for a while.  [CHAR LIMIT=82] -->
+    <string name="kg_prompt_auth_timeout">Added security required. Device wasn\u2019t unlocked for a while.</string>
+
+    <!-- Message shown when face unlock is not available after too many failed face authentication attempts.  [CHAR LIMIT=70] -->
+    <string name="kg_face_locked_out">Can\u2019t unlock with face. Too many attempts.</string>
+
+    <!-- Message shown when fingerprint unlock isn't available after too many failed fingerprint authentication attempts.  [CHAR LIMIT=75] -->
+    <string name="kg_fp_locked_out">Can\u2019t unlock with fingerprint. Too many attempts.</string>
+
+    <!-- Message shown when Trust Agent is disabled.  [CHAR LIMIT=70] -->
+    <string name="kg_trust_agent_disabled">Trust agent is unavailable</string>
+
+    <!-- Message shown when primary auth is locked out after too many attempts [CHAR LIMIT=70]  -->
+    <string name="kg_primary_auth_locked_out_pin">Too many attempts with incorrect PIN</string>
+
+    <!-- Message shown when primary auth is locked out after too many attempts [CHAR LIMIT=70]  -->
+    <string name="kg_primary_auth_locked_out_pattern">Too many attempts with incorrect pattern</string>
+
+    <!-- Message shown when primary auth is locked out after too many attempts [CHAR LIMIT=70]  -->
+    <string name="kg_primary_auth_locked_out_password">Too many attempts with incorrect password</string>
+
+    <!-- Countdown message shown after too many failed unlock attempts [CHAR LIMIT=48]-->
     <string name="kg_too_many_failed_attempts_countdown">{count, plural,
         =1 {Try again in # second.}
         other {Try again in # seconds.}
@@ -191,14 +296,14 @@
     <!-- Description of airplane mode -->
     <string name="airplane_mode">Airplane mode</string>
 
-    <!-- An explanation text that the pattern needs to be solved since the device has just been restarted. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_restart_pattern">Pattern required after device restarts</string>
+    <!-- An explanation text that the pattern needs to be solved since the device has just been restarted. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_reason_restart_pattern">Pattern is required after device restarts</string>
 
-    <!-- An explanation text that the pin needs to be entered since the device has just been restarted. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_restart_pin">PIN required after device restarts</string>
+    <!-- An explanation text that the pin needs to be entered since the device has just been restarted. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_reason_restart_pin">PIN is required after device restarts</string>
 
-    <!-- An explanation text that the password needs to be entered since the device has just been restarted. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_restart_password">Password required after device restarts</string>
+    <!-- An explanation text that the password needs to be entered since the device has just been restarted. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_reason_restart_password">Password is required after device restarts</string>
 
     <!-- An explanation text that the pattern needs to be solved since the user hasn't used strong authentication since quite some time. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_timeout_pattern">For additional security, use pattern instead</string>
@@ -243,4 +348,22 @@
     <string name="clock_title_analog">Analog</string>
     <!-- Title of bouncer when we want to authenticate before continuing with action. [CHAR LIMIT=NONE] -->
     <string name="keyguard_unlock_to_continue">Unlock your device to continue</string>
+
+    <!-- Message shown to prepare for an unattended update (OTA). Also known as an over-the-air (OTA) update.  [CHAR LIMIT=70] -->
+    <string name="kg_prompt_unattended_update_pin">Enter PIN to install update later</string>
+
+    <!-- Message shown to prepare for an unattended update (OTA). Also known as an over-the-air (OTA) update.  [CHAR LIMIT=70] -->
+    <string name="kg_prompt_unattended_update_password">Enter password to install update later</string>
+
+    <!-- Message shown to prepare for an unattended update (OTA). Also known as an over-the-air (OTA) update.  [CHAR LIMIT=70] -->
+    <string name="kg_prompt_unattended_update_pattern">Draw pattern to install update later</string>
+
+    <!--  Message shown after an unattended mainline (major) update asking the user to enter their PIN. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_after_update_pin">Device updated. Enter PIN to continue.</string>
+
+    <!-- Message shown after an unattended mainline (major) update asking the user to enter their password. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_after_update_password">Device updated. Enter password to continue.</string>
+
+    <!-- Message shown after an unattended mainline (major) update asking the user to enter their pattern. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_after_update_pattern">Device updated. Draw pattern to continue.</string>
 </resources>

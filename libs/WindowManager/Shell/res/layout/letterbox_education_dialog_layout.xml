@@ -15,6 +15,7 @@
   -->
 <com.android.wm.shell.compatui.LetterboxEduDialogLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/LetterboxDialog">
 
@@ -66,7 +67,7 @@
                     android:lineSpacingExtra="4sp"
                     android:text="@string/letterbox_education_dialog_title"
                     android:textAlignment="center"
-                    android:textColor="@color/compat_controls_text"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
                     android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Headline"
                     android:textSize="24sp"/>
@@ -108,7 +109,7 @@
                     android:background=
                         "@drawable/letterbox_education_dismiss_button_background_ripple"
                     android:text="@string/letterbox_education_got_it"
-                    android:textColor="@android:color/system_neutral1_900"
+                    android:textColor="?android:attr/textColorPrimaryInverse"
                     android:textAlignment="center"
                     android:contentDescription="@string/letterbox_education_got_it"/>
 

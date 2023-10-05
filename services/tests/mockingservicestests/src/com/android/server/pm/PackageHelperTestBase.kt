@@ -48,6 +48,7 @@ open class PackageHelperTestBase {
         const val UNINSTALLER_PACKAGE = "com.android.test.known.uninstaller"
         const val VERIFIER_PACKAGE = "com.android.test.known.verifier"
         const val PERMISSION_CONTROLLER_PACKAGE = "com.android.test.known.permission"
+        const val MGMT_ROLE_HOLDER_PACKAGE = "com.android.test.know.device_management"
         const val TEST_USER_ID = 0
     }
 
@@ -83,8 +84,8 @@ open class PackageHelperTestBase {
                 TEST_PACKAGE_1, TEST_PACKAGE_2, DEVICE_OWNER_PACKAGE, DEVICE_ADMIN_PACKAGE,
                 DEFAULT_HOME_PACKAGE, DIALER_PACKAGE, INSTALLER_PACKAGE, UNINSTALLER_PACKAGE,
                 VERIFIER_PACKAGE, PERMISSION_CONTROLLER_PACKAGE))
-        suspendPackageHelper = SuspendPackageHelper(
-                pms, rule.mocks().injector, broadcastHelper, protectedPackages)
+        suspendPackageHelper = SuspendPackageHelper(pms, rule.mocks().injector,
+                rule.mocks().userManagerService, broadcastHelper, protectedPackages)
         defaultAppProvider = rule.mocks().defaultAppProvider
         testHandler = rule.mocks().handler
         packageSetting1 = pms.snapshotComputer().getPackageStateInternal(TEST_PACKAGE_1)!!
@@ -119,6 +120,8 @@ open class PackageHelperTestBase {
         Mockito.doReturn(arrayOf(PERMISSION_CONTROLLER_PACKAGE)).`when`(pms)
                 .getKnownPackageNamesInternal(any(),
                         eq(KnownPackages.PACKAGE_PERMISSION_CONTROLLER), eq(TEST_USER_ID))
+        Mockito.doReturn(MGMT_ROLE_HOLDER_PACKAGE).`when`(pms)
+                .getDevicePolicyManagementRoleHolderPackageName(eq(TEST_USER_ID))
     }
 
     private fun createPackageManagerService(vararg stageExistingPackages: String):
@@ -128,7 +131,6 @@ open class PackageHelperTestBase {
                     rule.system().dataAppDirectory)
         }
         var pms = PackageManagerService(rule.mocks().injector,
-                false /* coreOnly */,
                 false /* factoryTest */,
                 MockSystem.DEFAULT_VERSION_INFO.fingerprint,
                 false /* isEngBuild */,

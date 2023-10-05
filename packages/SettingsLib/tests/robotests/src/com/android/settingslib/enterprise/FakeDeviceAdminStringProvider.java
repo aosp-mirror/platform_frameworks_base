@@ -32,6 +32,7 @@ class FakeDeviceAdminStringProvider implements DeviceAdminStringProvider {
             "default_disabled_by_policy_title_financed_device";
     static final String DEFAULT_BIOMETRIC_TITLE = "biometric_title";
     static final String DEFAULT_BIOMETRIC_CONTENTS = "biometric_contents";
+    static final String DISABLED_BY_PARENT_CONTENT = "disabled_by_parent_constent";
     static final DeviceAdminStringProvider DEFAULT_DEVICE_ADMIN_STRING_PROVIDER =
             new FakeDeviceAdminStringProvider(/* url = */ null);
 
@@ -94,6 +95,11 @@ class FakeDeviceAdminStringProvider implements DeviceAdminStringProvider {
     @Override
     public String getDisabledBiometricsParentConsentTitle() {
         return DEFAULT_BIOMETRIC_TITLE;
+    }
+
+    @Override
+    public String getDisabledByParentContent() {
+        return DISABLED_BY_PARENT_CONTENT;
     }
 
     @Override

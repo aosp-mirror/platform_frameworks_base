@@ -86,12 +86,117 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST =
             "settings_need_connected_ble_device_for_broadcast";
 
+    /** @hide */
+    public static final String SETTINGS_AUTO_TEXT_WRAPPING = "settings_auto_text_wrapping";
+
     /**
-     * Hide back key in the Settings two pane design.
+     * Enable new language and keyboard settings UI
      * @hide
      */
-    public static final String SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE =
-            "settings_hide_second_layer_page_navigate_up_button_in_two_pane";
+    public static final String SETTINGS_NEW_KEYBOARD_UI = "settings_new_keyboard_ui";
+
+    /**
+     * Enable new modifier key settings UI
+     * @hide
+     */
+    public static final String SETTINGS_NEW_KEYBOARD_MODIFIER_KEY =
+            "settings_new_keyboard_modifier_key";
+
+    /**
+     * Enable new trackpad settings UI
+     * @hide
+     */
+    public static final String SETTINGS_NEW_KEYBOARD_TRACKPAD = "settings_new_keyboard_trackpad";
+
+    /**
+     * Enable trackpad gesture settings UI
+     * @hide
+     */
+    public static final String SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE =
+            "settings_new_keyboard_trackpad_gesture";
+
+    /**
+     * Enable the new pages which is implemented with SPA.
+     * @hide
+     */
+    public static final String SETTINGS_ENABLE_SPA = "settings_enable_spa";
+
+    /**
+     * Enable new pages implemented with SPA besides the SPA pages controlled by the {@code
+     * settings_enable_spa} flag.
+     * @hide
+     */
+    public static final String SETTINGS_ENABLE_SPA_PHASE2 = "settings_enable_spa_phase2";
+
+    /**
+     * Enable the SPA metrics writing.
+     * @hide
+     */
+    public static final String SETTINGS_ENABLE_SPA_METRICS = "settings_enable_spa_metrics";
+
+    /** Flag to enable/disable adb log metrics
+     *  @hide
+     */
+    public static final String SETTINGS_ADB_METRICS_WRITER = "settings_adb_metrics_writer";
+
+    /**
+     * Flag to show stylus-specific preferences in Connected Devices
+     * @hide
+     */
+    public static final String SETTINGS_SHOW_STYLUS_PREFERENCES =
+            "settings_show_stylus_preferences";
+
+    /**
+     * Flag to enable/disable biometrics enrollment v2
+     * @hide
+     */
+    public static final String SETTINGS_BIOMETRICS2_ENROLLMENT = "settings_biometrics2_enrollment";
+
+    /** Flag to enable/disable entire page in Accessibility -> Hearing aids
+     *  @hide
+     */
+    public static final String SETTINGS_ACCESSIBILITY_HEARING_AID_PAGE =
+            "settings_accessibility_hearing_aid_page";
+
+    /**
+     * Flag to enable/disable preferring the AccessibilityMenu service in the system.
+     * @hide
+     */
+    public static final String SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM =
+            "settings_prefer_accessibility_menu_in_system";
+
+    /** Flag to enable/disable audio routing change
+     *  @hide
+     */
+    public static final String SETTINGS_AUDIO_ROUTING = "settings_audio_routing";
+
+    /** Flag to enable/disable flash notifications
+     *  @hide
+     */
+    public static final String SETTINGS_FLASH_NOTIFICATIONS = "settings_flash_notifications";
+
+    /**
+     * Flag to disable/enable showing udfps enroll view in settings. If it's disabled, udfps enroll
+     * view is shown in system ui.
+     * @hide
+     */
+    public static final String SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS =
+            "settings_show_udfps_enroll_in_settings";
+
+    /**
+     * Flag to enable lock screen credentials transfer API in Android U.
+     * @hide
+     */
+    public static final String SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API =
+            "settings_enable_lockscreen_transfer_api";
+
+    /**
+     * Flag to enable remote device credential validation
+     * @hide
+     */
+    public static final String SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION =
+            "settings_remote_device_credential_validation";
+
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -119,18 +224,43 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_VOLUME_PANEL_IN_SYSTEMUI, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
-        DEFAULT_FLAGS.put(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, "true");
+        DEFAULT_FLAGS.put(SETTINGS_AUTO_TEXT_WRAPPING, "false");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "true");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY, "true");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD, "true");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "true");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_PHASE2, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_METRICS, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
+        DEFAULT_FLAGS.put(SETTINGS_SHOW_STYLUS_PREFERENCES, "true");
+        DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_HEARING_AID_PAGE, "true");
+        DEFAULT_FLAGS.put(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM, "false");
+        DEFAULT_FLAGS.put(SETTINGS_AUDIO_ROUTING, "false");
+        DEFAULT_FLAGS.put(SETTINGS_FLASH_NOTIFICATIONS, "true");
+        DEFAULT_FLAGS.put(SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS, "true");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API, "true");
+        DEFAULT_FLAGS.put(SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION, "true");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
+
     static {
         PERSISTENT_FLAGS = new HashSet<>();
         PERSISTENT_FLAGS.add(SETTINGS_APP_LOCALE_OPT_IN_ENABLED);
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
         PERSISTENT_FLAGS.add(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME);
-        PERSISTENT_FLAGS.add(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE);
+        PERSISTENT_FLAGS.add(SETTINGS_AUTO_TEXT_WRAPPING);
+        PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_UI);
+        PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY);
+        PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD);
+        PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE);
+        PERSISTENT_FLAGS.add(SETTINGS_ENABLE_SPA);
+        PERSISTENT_FLAGS.add(SETTINGS_ENABLE_SPA_PHASE2);
+        PERSISTENT_FLAGS.add(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM);
     }
 
     /**

@@ -18,12 +18,11 @@ package com.android.server.om
 
 import android.content.om.OverlayInfo
 import android.content.om.OverlayableInfo
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import android.os.Process
 import android.util.ArrayMap
 import com.android.server.om.OverlayActorEnforcer.ActorState
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.pkg.AndroidPackage
+import com.android.server.pm.pkg.PackageState
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
@@ -31,7 +30,6 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import org.mockito.Mockito
 import org.mockito.Mockito.spy
 import java.io.IOException
 
@@ -126,13 +124,11 @@ class OverlayActorEnforcerTests {
          */
         private val CASES = listOf(
                 ActorState.TARGET_NOT_FOUND withCases {
-                    failure("nullPkgInfo") { targetPkgInfo = null }
+                    failure("nullPkgInfo") { targetPkgState = null }
                     allowed("debuggable") {
-                        targetPkgInfo = androidPackage(TARGET_PKG).apply {
-                            whenever(this.isDebuggable).thenReturn(true)
-                        }
+                        targetPkgState = packageState(TARGET_PKG, debuggable = true)
                     }
-                    skip { targetPkgInfo = androidPackage(TARGET_PKG) }
+                    skip { targetPkgState = packageState(TARGET_PKG) }
                 },
                 ActorState.NO_PACKAGES_FOR_UID withCases {
                     failure("empty") { callingUid = EMPTY_UID }
@@ -240,21 +236,15 @@ class OverlayActorEnforcerTests {
                     }
                 },
                 ActorState.ACTOR_NOT_FOUND withCases {
-                    failure("nullActorPkgInfo") { actorPkgInfo = null }
+                    failure("nullActorPkgInfo") { actorPkgState = null }
                     failure("nullActorAppInfo") {
-                        actorPkgInfo = null
+                        actorPkgState = null
                     }
-                    skip { actorPkgInfo = androidPackage(VALID_ACTOR_PKG) }
+                    skip { actorPkgState = packageState(VALID_ACTOR_PKG) }
                 },
                 ActorState.ACTOR_NOT_PREINSTALLED withCases {
-                    failure("notSystem") {
-                        actorPkgInfo = androidPackage(VALID_ACTOR_PKG)
-                    }
-                    skip {
-                        actorPkgInfo = androidPackage(VALID_ACTOR_PKG).apply {
-                            whenever(this.isSystem).thenReturn(true)
-                        }
-                    }
+                    failure("notSystem") { actorPkgState = packageState(VALID_ACTOR_PKG) }
+                    skip { actorPkgState = packageState(VALID_ACTOR_PKG, isSystem = true) }
                 },
                 ActorState.INVALID_ACTOR withCases {
                     failure("invalidUid") { callingUid = INVALID_ACTOR_UID }
@@ -285,10 +275,18 @@ class OverlayActorEnforcerTests {
         private infix fun ActorState.withCases(block: TestCase.() -> Unit) =
                 TestCase(this).apply(block)
 
-        private fun androidPackage(pkgName: String): AndroidPackage = mockThrowOnUnmocked {
+        private fun packageState(
+            pkgName: String,
+            debuggable: Boolean = false,
+            isSystem: Boolean = false
+        ) = mockThrowOnUnmocked<PackageState> {
             whenever(this.packageName).thenReturn(pkgName)
-            whenever(this.isDebuggable).thenReturn(false)
-            whenever(this.isSystem).thenReturn(false)
+            whenever(this.isSystem).thenReturn(isSystem)
+            val androidPackage = mockThrowOnUnmocked<AndroidPackage> {
+                whenever(this.packageName).thenReturn(pkgName)
+                whenever(this.isDebuggable).thenReturn(debuggable)
+            }
+            whenever(this.androidPackage).thenReturn(androidPackage)
         }
 
         private fun makeTestName(testCase: TestCase, caseName: String, type: Params.Type): String {
@@ -364,8 +362,8 @@ class OverlayActorEnforcerTests {
         var namedActorsMap: Map<String, Map<String, String>> = emptyMap(),
         var hasPermission: Boolean = false,
         var targetOverlayableInfo: OverlayableInfo? = null,
-        var targetPkgInfo: AndroidPackage? = null,
-        var actorPkgInfo: AndroidPackage? = null,
+        var targetPkgState: PackageState? = null,
+        var actorPkgState: PackageState? = null,
         vararg val packageNames: String = arrayOf("com.test.actor.one")
     ) : PackageManagerHelper {
 
@@ -380,7 +378,7 @@ class OverlayActorEnforcerTests {
             throw UnsupportedOperationException()
         }
 
-        override fun initializeForUser(userId: Int): ArrayMap<String, AndroidPackage> {
+        override fun initializeForUser(userId: Int): ArrayMap<String, PackageState> {
             throw UnsupportedOperationException()
         }
 
@@ -391,7 +389,7 @@ class OverlayActorEnforcerTests {
             userId: Int
         ) = targetOverlayableInfo?.takeIf {
             // Protect against this method being called with the wrong package name
-            targetPkgInfo == null || targetPkgInfo?.packageName == packageName
+            targetPkgState == null || targetPkgState?.packageName == packageName
         }
 
         override fun getPackagesForUid(uid: Int) = when (uid) {
@@ -407,7 +405,7 @@ class OverlayActorEnforcerTests {
         override fun doesTargetDefineOverlayable(targetPackageName: String?, userId: Int): Boolean {
             return targetOverlayableInfo?.takeIf {
                 // Protect against this method being called with the wrong package name
-                targetPkgInfo == null || targetPkgInfo?.packageName == targetPackageName
+                targetPkgState == null || targetPkgState?.packageName == targetPackageName
             } != null
         }
 
@@ -417,8 +415,8 @@ class OverlayActorEnforcerTests {
             }
         }
 
-        override fun getPackageForUser(packageName: String, userId: Int) =
-            listOfNotNull(targetPkgInfo, actorPkgInfo).find { it.packageName == packageName }
+        override fun getPackageStateForUser(packageName: String, userId: Int) =
+            listOfNotNull(targetPkgState, actorPkgState).find { it.packageName == packageName }
 
         override fun getConfigSignaturePackage(): String {
             throw UnsupportedOperationException()

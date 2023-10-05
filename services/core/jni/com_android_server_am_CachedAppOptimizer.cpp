@@ -29,8 +29,10 @@
 #include <dirent.h>
 #include <jni.h>
 #include <linux/errno.h>
+#include <linux/time.h>
 #include <log/log.h>
 #include <meminfo/procmeminfo.h>
+#include <meminfo/sysmeminfo.h>
 #include <nativehelper/JNIHelp.h>
 #include <processgroup/processgroup.h>
 #include <stddef.h>
@@ -42,6 +44,7 @@
 #include <sys/sysinfo.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <utils/Timers.h>
 #include <utils/Trace.h>
 
 #include <algorithm>
@@ -146,6 +149,7 @@ uint64_t consumeBytes(VmaBatch& batch, uint64_t bytesToConsume) {
 // vmas vector, instead it iterates on it until the end.
 class VmaBatchCreator {
     const std::vector<Vma>* sourceVmas;
+    const int totalVmasInSource;
     // This is the destination array where batched VMAs will be stored
     // it gets encapsulated into a VmaBatch which is the object
     // meant to be used by client code.
@@ -156,8 +160,13 @@ class VmaBatchCreator {
     uint64_t currentOffset_;
 
 public:
-    VmaBatchCreator(const std::vector<Vma>* vmasToBatch, struct iovec* destVmasVec)
-          : sourceVmas(vmasToBatch), destVmas(destVmasVec), currentIndex_(0), currentOffset_(0) {}
+    VmaBatchCreator(const std::vector<Vma>* vmasToBatch, struct iovec* destVmasVec,
+                    int vmasInSource)
+          : sourceVmas(vmasToBatch),
+            totalVmasInSource(vmasInSource),
+            destVmas(destVmasVec),
+            currentIndex_(0),
+            currentOffset_(0) {}
 
     int currentIndex() { return currentIndex_; }
     uint64_t currentOffset() { return currentOffset_; }
@@ -177,7 +186,7 @@ public:
 
         // Add VMAs to the batch up until we consumed all the VMAs or
         // reached any imposed limit of VMAs per batch.
-        while (indexInBatch < MAX_VMAS_PER_BATCH && currentIndex_ < vmas.size()) {
+        while (indexInBatch < MAX_VMAS_PER_BATCH && currentIndex_ < totalVmasInSource) {
             uint64_t vmaStart = vmas[currentIndex_].start + currentOffset_;
             uint64_t vmaSize = vmas[currentIndex_].end - vmaStart;
             uint64_t bytesAvailableInBatch = MAX_BYTES_PER_BATCH - totalBytesInBatch;
@@ -272,8 +281,9 @@ static inline void compactProcessProcfs(int pid, const std::string& compactionTy
 //
 // If any VMA fails compaction due to -EINVAL it will be skipped and continue.
 // However, if it fails for any other reason, it will bail out and forward the error
-static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseType) {
-    if (vmas.empty()) {
+static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseType,
+                             int totalVmas) {
+    if (totalVmas == 0) {
         return 0;
     }
 
@@ -286,7 +296,7 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
     struct iovec destVmas[MAX_VMAS_PER_BATCH];
 
     VmaBatch batch;
-    VmaBatchCreator batcher(&vmas, destVmas);
+    VmaBatchCreator batcher(&vmas, destVmas, totalVmas);
 
     int64_t totalBytesProcessed = 0;
     while (batcher.createNextBatch(batch)) {
@@ -346,34 +356,53 @@ static int getAnyPageAdvice(const Vma& vma) {
 // Returns the total number of bytes compacted on success. On error
 // returns process_madvise errno code or if compaction was cancelled
 // it returns ERROR_COMPACTION_CANCELLED.
+//
+// Not thread safe. We reuse vectors so we assume this is called only
+// on one thread at most.
 static int64_t compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
     cancelRunningCompaction.store(false);
-
+    static std::string mapsBuffer;
     ATRACE_BEGIN("CollectVmas");
     ProcMemInfo meminfo(pid);
-    std::vector<Vma> pageoutVmas, coldVmas;
-    auto vmaCollectorCb = [&coldVmas,&pageoutVmas,&vmaToAdviseFunc](const Vma& vma) {
+    static std::vector<Vma> pageoutVmas(2000), coldVmas(2000);
+    int coldVmaIndex = 0;
+    int pageoutVmaIndex = 0;
+    auto vmaCollectorCb = [&vmaToAdviseFunc, &pageoutVmaIndex, &coldVmaIndex](const Vma& vma) {
         int advice = vmaToAdviseFunc(vma);
         switch (advice) {
             case MADV_COLD:
-                coldVmas.push_back(vma);
+                if (coldVmaIndex < coldVmas.size()) {
+                    coldVmas[coldVmaIndex] = vma;
+                } else {
+                    coldVmas.push_back(vma);
+                }
+                ++coldVmaIndex;
                 break;
             case MADV_PAGEOUT:
-                pageoutVmas.push_back(vma);
+                if (pageoutVmaIndex < pageoutVmas.size()) {
+                    pageoutVmas[pageoutVmaIndex] = vma;
+                } else {
+                    pageoutVmas.push_back(vma);
+                }
+                ++pageoutVmaIndex;
                 break;
         }
     };
-    meminfo.ForEachVmaFromMaps(vmaCollectorCb);
+    meminfo.ForEachVmaFromMaps(vmaCollectorCb, mapsBuffer);
     ATRACE_END();
+#ifdef DEBUG_COMPACTION
+    ALOGE("Total VMAs sent for compaction anon=%d file=%d", pageoutVmaIndex,
+            coldVmaIndex);
+#endif
 
-    int64_t pageoutBytes = compactMemory(pageoutVmas, pid, MADV_PAGEOUT);
+    int64_t pageoutBytes = compactMemory(pageoutVmas, pid, MADV_PAGEOUT, pageoutVmaIndex);
     if (pageoutBytes < 0) {
         // Error, just forward it.
         cancelRunningCompaction.store(false);
         return pageoutBytes;
     }
 
-    int64_t coldBytes = compactMemory(coldVmas, pid, MADV_COLD);
+    int64_t coldBytes = compactMemory(coldVmas, pid, MADV_COLD, coldVmaIndex);
     if (coldBytes < 0) {
         // Error, just forward it.
         cancelRunningCompaction.store(false);
@@ -460,6 +489,12 @@ static void com_android_server_am_CachedAppOptimizer_cancelCompaction(JNIEnv*, j
     ATRACE_INSTANT_FOR_TRACK(ATRACE_COMPACTION_TRACK, "Cancel compaction");
 }
 
+static jlong com_android_server_am_CachedAppOptimizer_threadCpuTimeNs(JNIEnv*, jobject) {
+    int64_t currentCpuTime = systemTime(CLOCK_THREAD_CPUTIME_ID);
+
+    return currentCpuTime;
+}
+
 static jdouble com_android_server_am_CachedAppOptimizer_getFreeSwapPercent(JNIEnv*, jobject) {
     struct sysinfo memoryInfo;
     int error = sysinfo(&memoryInfo);
@@ -470,15 +505,25 @@ static jdouble com_android_server_am_CachedAppOptimizer_getFreeSwapPercent(JNIEn
     return (double)memoryInfo.freeswap / (double)memoryInfo.totalswap;
 }
 
+static jlong com_android_server_am_CachedAppOptimizer_getUsedZramMemory() {
+    android::meminfo::SysMemInfo sysmeminfo;
+    return sysmeminfo.mem_zram_kb();
+}
+
+static jlong com_android_server_am_CachedAppOptimizer_getMemoryFreedCompaction() {
+    android::meminfo::SysMemInfo sysmeminfo;
+    return sysmeminfo.mem_compacted_kb("/sys/block/zram0/");
+}
+
 static void com_android_server_am_CachedAppOptimizer_compactProcess(JNIEnv*, jobject, jint pid,
                                                                     jint compactionFlags) {
     compactProcessOrFallback(pid, compactionFlags);
 }
 
-static jint com_android_server_am_CachedAppOptimizer_freezeBinder(
-        JNIEnv *env, jobject clazz, jint pid, jboolean freeze) {
-
-    jint retVal = IPCThreadState::freeze(pid, freeze, 100 /* timeout [ms] */);
+static jint com_android_server_am_CachedAppOptimizer_freezeBinder(JNIEnv* env, jobject clazz,
+                                                                  jint pid, jboolean freeze,
+                                                                  jint timeout_ms) {
+    jint retVal = IPCThreadState::freeze(pid, freeze, timeout_ms);
     if (retVal != 0 && retVal != -EAGAIN) {
         jniThrowException(env, "java/lang/RuntimeException", "Unable to freeze/unfreeze binder");
     }
@@ -519,19 +564,34 @@ static jstring com_android_server_am_CachedAppOptimizer_getFreezerCheckPath(JNIE
     return env->NewStringUTF(path.c_str());
 }
 
+static jboolean com_android_server_am_CachedAppOptimizer_isFreezerProfileValid(JNIEnv* env) {
+    int uid = getuid();
+    int pid = getpid();
+
+    return isProfileValidForProcess("Frozen", uid, pid) &&
+            isProfileValidForProcess("Unfrozen", uid, pid);
+}
+
 static const JNINativeMethod sMethods[] = {
         /* name, signature, funcPtr */
         {"cancelCompaction", "()V",
          (void*)com_android_server_am_CachedAppOptimizer_cancelCompaction},
+        {"threadCpuTimeNs", "()J", (void*)com_android_server_am_CachedAppOptimizer_threadCpuTimeNs},
         {"getFreeSwapPercent", "()D",
          (void*)com_android_server_am_CachedAppOptimizer_getFreeSwapPercent},
+        {"getUsedZramMemory", "()J",
+         (void*)com_android_server_am_CachedAppOptimizer_getUsedZramMemory},
+        {"getMemoryFreedCompaction", "()J",
+         (void*)com_android_server_am_CachedAppOptimizer_getMemoryFreedCompaction},
         {"compactSystem", "()V", (void*)com_android_server_am_CachedAppOptimizer_compactSystem},
         {"compactProcess", "(II)V", (void*)com_android_server_am_CachedAppOptimizer_compactProcess},
-        {"freezeBinder", "(IZ)I", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
+        {"freezeBinder", "(IZI)I", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
         {"getBinderFreezeInfo", "(I)I",
          (void*)com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo},
         {"getFreezerCheckPath", "()Ljava/lang/String;",
-         (void*)com_android_server_am_CachedAppOptimizer_getFreezerCheckPath}};
+         (void*)com_android_server_am_CachedAppOptimizer_getFreezerCheckPath},
+        {"isFreezerProfileValid", "()Z",
+         (void*)com_android_server_am_CachedAppOptimizer_isFreezerProfileValid}};
 
 int register_android_server_am_CachedAppOptimizer(JNIEnv* env)
 {

@@ -35,6 +35,7 @@ import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowInsets;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -66,13 +67,12 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
     private static final float START_SCALE = END_SCALE - VERTICAL_START_MARGIN * 2;
 
     private final SparseArray<AnimationContext> mAnimationContextByTaskId = new SparseArray<>();
-    private final int mExpandedTaskBarHeight;
     private final DisplayInsetsController mDisplayInsetsController;
     private final UnfoldBackgroundController mBackgroundController;
     private final Context mContext;
     private final ShellController mShellController;
 
-    private InsetsSource mTaskbarInsetsSource;
+    private InsetsSource mExpandedTaskbarInsetsSource;
     private float mWindowCornerRadiusPx;
 
     public FullscreenUnfoldTaskAnimator(Context context,
@@ -82,8 +82,6 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
         mDisplayInsetsController = displayInsetsController;
         mBackgroundController = backgroundController;
         mShellController = shellController;
-        mExpandedTaskBarHeight = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.taskbar_frame_height);
         mWindowCornerRadiusPx = ScreenDecorationsUtils.getWindowCornerRadius(context);
     }
 
@@ -101,11 +99,22 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
 
     @Override
     public void insetsChanged(InsetsState insetsState) {
-        mTaskbarInsetsSource = insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+        mExpandedTaskbarInsetsSource = getExpandedTaskbarSource(insetsState);
         for (int i = mAnimationContextByTaskId.size() - 1; i >= 0; i--) {
             AnimationContext context = mAnimationContextByTaskId.valueAt(i);
-            context.update(mTaskbarInsetsSource, context.mTaskInfo);
+            context.update(mExpandedTaskbarInsetsSource, context.mTaskInfo);
         }
+    }
+
+    private static InsetsSource getExpandedTaskbarSource(InsetsState state) {
+        for (int i = state.sourceSize() - 1; i >= 0; i--) {
+            final InsetsSource source = state.sourceAt(i);
+            if (source.getType() == WindowInsets.Type.navigationBars()
+                    && source.insetsRoundedCornerFrame()) {
+                return source;
+            }
+        }
+        return null;
     }
 
     public boolean hasActiveTasks() {
@@ -114,8 +123,8 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
 
     @Override
     public void onTaskAppeared(TaskInfo taskInfo, SurfaceControl leash) {
-        AnimationContext animationContext = new AnimationContext(leash, mTaskbarInsetsSource,
-                taskInfo);
+        AnimationContext animationContext = new AnimationContext(
+                leash, mExpandedTaskbarInsetsSource, taskInfo);
         mAnimationContextByTaskId.put(taskInfo.taskId, animationContext);
     }
 
@@ -123,7 +132,7 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
     public void onTaskChanged(TaskInfo taskInfo) {
         AnimationContext animationContext = mAnimationContextByTaskId.get(taskInfo.taskId);
         if (animationContext != null) {
-            animationContext.update(mTaskbarInsetsSource, taskInfo);
+            animationContext.update(mExpandedTaskbarInsetsSource, taskInfo);
         }
     }
 
@@ -222,11 +231,7 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
             mStartCropRect.set(mTaskInfo.getConfiguration().windowConfiguration.getBounds());
 
             if (taskBarInsetsSource != null) {
-                // Only insets the cropping window with task bar when it's expanded
-                if (taskBarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
-                    mStartCropRect.inset(taskBarInsetsSource
-                            .calculateVisibleInsets(mStartCropRect));
-                }
+                mStartCropRect.inset(taskBarInsetsSource.calculateVisibleInsets(mStartCropRect));
             }
 
             mEndCropRect.set(mStartCropRect);

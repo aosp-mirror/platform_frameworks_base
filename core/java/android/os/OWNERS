@@ -83,4 +83,3 @@ per-file ArtModuleServiceManager.java = file:platform/art:/OWNERS
 
 # PerformanceHintManager
 per-file PerformanceHintManager.java = file:/ADPF_OWNERS
-

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.common;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -24,7 +25,8 @@ import android.view.IDisplayWindowInsetsController;
 import android.view.IWindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
+import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.ImeTracker;
 
 import androidx.annotation.BinderThread;
 
@@ -156,34 +158,44 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
             }
         }
 
-        private void showInsets(int types, boolean fromIme) {
+        private void showInsets(@InsetsType int types, boolean fromIme,
+                @Nullable ImeTracker.Token statsToken) {
             CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
             if (listeners == null) {
+                ImeTracker.forLogging().onFailed(
+                        statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
                 return;
             }
+            ImeTracker.forLogging().onProgress(
+                    statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
             for (OnInsetsChangedListener listener : listeners) {
-                listener.showInsets(types, fromIme);
+                listener.showInsets(types, fromIme, statsToken);
             }
         }
 
-        private void hideInsets(int types, boolean fromIme) {
+        private void hideInsets(@InsetsType int types, boolean fromIme,
+                @Nullable ImeTracker.Token statsToken) {
             CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
             if (listeners == null) {
+                ImeTracker.forLogging().onFailed(
+                        statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
                 return;
             }
+            ImeTracker.forLogging().onProgress(
+                    statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
             for (OnInsetsChangedListener listener : listeners) {
-                listener.hideInsets(types, fromIme);
+                listener.hideInsets(types, fromIme, statsToken);
             }
         }
 
         private void topFocusedWindowChanged(ComponentName component,
-                InsetsVisibilities requestedVisibilities) {
+                @InsetsType int requestedVisibleTypes) {
             CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
             if (listeners == null) {
                 return;
             }
             for (OnInsetsChangedListener listener : listeners) {
-                listener.topFocusedWindowChanged(component, requestedVisibilities);
+                listener.topFocusedWindowChanged(component, requestedVisibleTypes);
             }
         }
 
@@ -192,9 +204,9 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
                 extends IDisplayWindowInsetsController.Stub {
             @Override
             public void topFocusedWindowChanged(ComponentName component,
-                    InsetsVisibilities requestedVisibilities) throws RemoteException {
+                    @InsetsType int requestedVisibleTypes) throws RemoteException {
                 mMainExecutor.execute(() -> {
-                    PerDisplay.this.topFocusedWindowChanged(component, requestedVisibilities);
+                    PerDisplay.this.topFocusedWindowChanged(component, requestedVisibleTypes);
                 });
             }
 
@@ -214,16 +226,18 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
             }
 
             @Override
-            public void showInsets(int types, boolean fromIme) throws RemoteException {
+            public void showInsets(@InsetsType int types, boolean fromIme,
+                    @Nullable ImeTracker.Token statsToken) throws RemoteException {
                 mMainExecutor.execute(() -> {
-                    PerDisplay.this.showInsets(types, fromIme);
+                    PerDisplay.this.showInsets(types, fromIme, statsToken);
                 });
             }
 
             @Override
-            public void hideInsets(int types, boolean fromIme) throws RemoteException {
+            public void hideInsets(@InsetsType int types, boolean fromIme,
+                    @Nullable ImeTracker.Token statsToken) throws RemoteException {
                 mMainExecutor.execute(() -> {
-                    PerDisplay.this.hideInsets(types, fromIme);
+                    PerDisplay.this.hideInsets(types, fromIme, statsToken);
                 });
             }
         }
@@ -239,11 +253,13 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
         /**
          * Called when top focused window changes to determine whether or not to take over insets
          * control. Won't be called if config_remoteInsetsControllerControlsSystemBars is false.
+         *
          * @param component The application component that is open in the top focussed window.
-         * @param requestedVisibilities The insets visibilities requested by the focussed window.
+         * @param requestedVisibleTypes The {@link InsetsType} requested visible by the focused
+         *                              window.
          */
         default void topFocusedWindowChanged(ComponentName component,
-                InsetsVisibilities requestedVisibilities) {}
+                @InsetsType int requestedVisibleTypes) {}
 
         /**
          * Called when the window insets configuration has changed.
@@ -259,17 +275,23 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
         /**
          * Called when a set of insets source window should be shown by policy.
          *
-         * @param types internal insets types (WindowInsets.Type.InsetsType) to show
+         * @param types {@link InsetsType} to show
          * @param fromIme true if this request originated from IME (InputMethodService).
+         * @param statsToken the token tracking the current IME show request
+         *                   or {@code null} otherwise.
          */
-        default void showInsets(int types, boolean fromIme) {}
+        default void showInsets(@InsetsType int types, boolean fromIme,
+                @Nullable ImeTracker.Token statsToken) {}
 
         /**
          * Called when a set of insets source window should be hidden by policy.
          *
-         * @param types internal insets types (WindowInsets.Type.InsetsType) to hide
+         * @param types {@link InsetsType} to hide
          * @param fromIme true if this request originated from IME (InputMethodService).
+         * @param statsToken the token tracking the current IME hide request
+         *                   or {@code null} otherwise.
          */
-        default void hideInsets(int types, boolean fromIme) {}
+        default void hideInsets(@InsetsType int types, boolean fromIme,
+                @Nullable ImeTracker.Token statsToken) {}
     }
 }

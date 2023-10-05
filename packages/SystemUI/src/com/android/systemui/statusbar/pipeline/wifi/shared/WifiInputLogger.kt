@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.pipeline.wifi.shared
 import android.net.Network
 import android.net.NetworkCapabilities
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.statusbar.pipeline.dagger.WifiInputLog
 import com.android.systemui.statusbar.pipeline.shared.LoggerHelper
 import javax.inject.Inject

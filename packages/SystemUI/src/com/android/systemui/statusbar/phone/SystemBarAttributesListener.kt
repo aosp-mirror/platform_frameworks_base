@@ -17,16 +17,16 @@
 package com.android.systemui.statusbar.phone
 
 import android.view.InsetsFlags
-import android.view.InsetsVisibilities
 import android.view.ViewDebug
+import android.view.WindowInsets.Type.InsetsType
 import android.view.WindowInsetsController.Appearance
 import android.view.WindowInsetsController.Behavior
 import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
+import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.SysuiStatusBarStateController
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -37,7 +37,7 @@ import javax.inject.Inject
  * It is responsible for modifying any attributes if necessary, and then notifying the other
  * downstream listeners.
  */
-@CentralSurfacesScope
+@SysUISingleton
 class SystemBarAttributesListener
 @Inject
 internal constructor(
@@ -45,18 +45,14 @@ internal constructor(
     private val letterboxAppearanceCalculator: LetterboxAppearanceCalculator,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val lightBarController: LightBarController,
-    private val dumpManager: DumpManager,
-) : CentralSurfacesComponent.Startable, StatusBarBoundsProvider.BoundsChangeListener {
+    dumpManager: DumpManager,
+) : Dumpable, StatusBarBoundsProvider.BoundsChangeListener {
 
     private var lastLetterboxAppearance: LetterboxAppearance? = null
     private var lastSystemBarAttributesParams: SystemBarAttributesParams? = null
 
-    override fun start() {
-        dumpManager.registerDumpable(javaClass.simpleName, this::dump)
-    }
-
-    override fun stop() {
-        dumpManager.unregisterDumpable(javaClass.simpleName)
+    init {
+        dumpManager.registerCriticalDumpable(this)
     }
 
     override fun onStatusBarBoundsChanged() {
@@ -68,21 +64,21 @@ internal constructor(
                 params.appearanceRegionsArray,
                 params.navbarColorManagedByIme,
                 params.behavior,
-                params.requestedVisibilities,
+                params.requestedVisibleTypes,
                 params.packageName,
                 params.letterboxesArray)
         }
     }
 
     fun onSystemBarAttributesChanged(
-        displayId: Int,
-        @Appearance originalAppearance: Int,
-        originalAppearanceRegions: Array<AppearanceRegion>,
-        navbarColorManagedByIme: Boolean,
-        @Behavior behavior: Int,
-        requestedVisibilities: InsetsVisibilities,
-        packageName: String,
-        letterboxDetails: Array<LetterboxDetails>
+            displayId: Int,
+            @Appearance originalAppearance: Int,
+            originalAppearanceRegions: Array<AppearanceRegion>,
+            navbarColorManagedByIme: Boolean,
+            @Behavior behavior: Int,
+            @InsetsType requestedVisibleTypes: Int,
+            packageName: String,
+            letterboxDetails: Array<LetterboxDetails>
     ) {
         lastSystemBarAttributesParams =
             SystemBarAttributesParams(
@@ -91,7 +87,7 @@ internal constructor(
                 originalAppearanceRegions.toList(),
                 navbarColorManagedByIme,
                 behavior,
-                requestedVisibilities,
+                requestedVisibleTypes,
                 packageName,
                 letterboxDetails.toList())
 
@@ -106,7 +102,7 @@ internal constructor(
 
         centralSurfaces.updateBubblesVisibility()
         statusBarStateController.setSystemBarAttributes(
-            appearance, behavior, requestedVisibilities, packageName)
+            appearance, behavior, requestedVisibleTypes, packageName)
     }
 
     private fun modifyAppearanceIfNeeded(
@@ -128,7 +124,7 @@ internal constructor(
     private fun shouldUseLetterboxAppearance(letterboxDetails: Array<LetterboxDetails>) =
         letterboxDetails.isNotEmpty()
 
-    private fun dump(printWriter: PrintWriter, strings: Array<String>) {
+    override fun dump(printWriter: PrintWriter, strings: Array<String>) {
         printWriter.println("lastSystemBarAttributesParams: $lastSystemBarAttributesParams")
         printWriter.println("lastLetterboxAppearance: $lastLetterboxAppearance")
     }
@@ -139,14 +135,14 @@ internal constructor(
  * [SystemBarAttributesListener.onSystemBarAttributesChanged].
  */
 private data class SystemBarAttributesParams(
-    val displayId: Int,
-    @Appearance val appearance: Int,
-    val appearanceRegions: List<AppearanceRegion>,
-    val navbarColorManagedByIme: Boolean,
-    @Behavior val behavior: Int,
-    val requestedVisibilities: InsetsVisibilities,
-    val packageName: String,
-    val letterboxes: List<LetterboxDetails>,
+        val displayId: Int,
+        @Appearance val appearance: Int,
+        val appearanceRegions: List<AppearanceRegion>,
+        val navbarColorManagedByIme: Boolean,
+        @Behavior val behavior: Int,
+        @InsetsType val requestedVisibleTypes: Int,
+        val packageName: String,
+        val letterboxes: List<LetterboxDetails>,
 ) {
     val letterboxesArray = letterboxes.toTypedArray()
     val appearanceRegionsArray = appearanceRegions.toTypedArray()
@@ -159,7 +155,7 @@ private data class SystemBarAttributesParams(
             appearanceRegions=$appearanceRegions,
             navbarColorManagedByIme=$navbarColorManagedByIme,
             behavior=$behavior,
-            requestedVisibilities=$requestedVisibilities,
+            requestedVisibleTypes=$requestedVisibleTypes,
             packageName='$packageName',
             letterboxes=$letterboxes,
             letterboxesArray=${letterboxesArray.contentToString()},

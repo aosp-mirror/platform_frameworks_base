@@ -64,10 +64,10 @@ import java.util.List;
  * and dismisses itself when it receives the broadcast.
  */
 public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigChangedCallback {
+    protected static final int DEFAULT_THEME = R.style.Theme_SystemUI_Dialog;
     // TODO(b/203389579): Remove this once the dialog width on large screens has been agreed on.
     private static final String FLAG_TABLET_DIALOG_WIDTH =
             "persist.systemui.flag_tablet_dialog_width";
-    private static final int DEFAULT_THEME = R.style.Theme_SystemUI_Dialog;
     private static final boolean DEFAULT_DISMISS_ON_DEVICE_LOCK = true;
 
     private final Context mContext;
@@ -90,10 +90,6 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
 
     public SystemUIDialog(Context context, int theme) {
         this(context, theme, DEFAULT_DISMISS_ON_DEVICE_LOCK);
-    }
-
-    public SystemUIDialog(Context context, boolean dismissOnDeviceLock) {
-        this(context, DEFAULT_THEME, dismissOnDeviceLock);
     }
 
     public SystemUIDialog(Context context, int theme, boolean dismissOnDeviceLock) {
@@ -195,7 +191,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     }
 
     @Override
-    protected void onStart() {
+    protected final void onStart() {
         super.onStart();
 
         if (mDismissReceiver != null) {
@@ -208,10 +204,18 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         mDialogManager.setShowing(this, true);
         mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, true)
                 .commitUpdate(mContext.getDisplayId());
+
+        start();
     }
 
+    /**
+     * Called when {@link #onStart} is called. Subclasses wishing to override {@link #onStart()}
+     * should override this method instead.
+     */
+    protected void start() {}
+
     @Override
-    protected void onStop() {
+    protected final void onStop() {
         super.onStop();
 
         if (mDismissReceiver != null) {
@@ -222,7 +226,15 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         mDialogManager.setShowing(this, false);
         mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, false)
                 .commitUpdate(mContext.getDisplayId());
+
+        stop();
     }
+
+    /**
+     * Called when {@link #onStop} is called. Subclasses wishing to override {@link #onStop()}
+     * should override this method instead.
+     */
+    protected void stop() {}
 
     public void setShowForAllUsers(boolean show) {
         setShowForAllUsers(this, show);
@@ -467,4 +479,5 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             mDialog.dismiss();
         }
     }
+
 }

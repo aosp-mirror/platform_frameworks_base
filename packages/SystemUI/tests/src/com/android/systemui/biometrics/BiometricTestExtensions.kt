@@ -18,16 +18,16 @@ package com.android.systemui.biometrics
 
 import android.annotation.IdRes
 import android.content.Context
-import android.hardware.biometrics.BiometricManager
+import android.hardware.biometrics.BiometricManager.Authenticators
 import android.hardware.biometrics.ComponentInfoInternal
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.SensorProperties
-import android.hardware.face.FaceSensorPropertiesInternal
+import android.hardware.biometrics.SensorPropertiesInternal
 import android.hardware.face.FaceSensorProperties
+import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.os.Bundle
-
 import android.testing.ViewUtils
 import android.view.LayoutInflater
 
@@ -62,9 +62,9 @@ internal fun <T : AuthBiometricView> Int.asTestAuthBiometricView(
 private fun buildPromptInfo(allowDeviceCredential: Boolean): PromptInfo {
     val promptInfo = PromptInfo()
     promptInfo.title = "Title"
-    var authenticators = BiometricManager.Authenticators.BIOMETRIC_WEAK
+    var authenticators = Authenticators.BIOMETRIC_WEAK
     if (allowDeviceCredential) {
-        authenticators = authenticators or BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        authenticators = authenticators or Authenticators.DEVICE_CREDENTIAL
     } else {
         promptInfo.negativeButtonText = "Negative"
     }
@@ -81,58 +81,108 @@ internal fun AuthBiometricView?.destroyDialog() {
 
 /** Create [FingerprintSensorPropertiesInternal] for a test. */
 internal fun fingerprintSensorPropertiesInternal(
-    ids: List<Int> = listOf(0)
+    ids: List<Int> = listOf(0),
+    strong: Boolean = true,
 ): List<FingerprintSensorPropertiesInternal> {
-    val componentInfo = listOf(
+    val componentInfo =
+        listOf(
             ComponentInfoInternal(
-                    "fingerprintSensor" /* componentId */,
-                    "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
-                    "00000001" /* serialNumber */, "" /* softwareVersion */
+                "fingerprintSensor" /* componentId */,
+                "vendor/model/revision" /* hardwareVersion */,
+                "1.01" /* firmwareVersion */,
+                "00000001" /* serialNumber */,
+                "" /* softwareVersion */
             ),
             ComponentInfoInternal(
-                    "matchingAlgorithm" /* componentId */,
-                    "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
-                    "vendor/version/revision" /* softwareVersion */
+                "matchingAlgorithm" /* componentId */,
+                "" /* hardwareVersion */,
+                "" /* firmwareVersion */,
+                "" /* serialNumber */,
+                "vendor/version/revision" /* softwareVersion */
             )
-    )
+        )
     return ids.map { id ->
         FingerprintSensorPropertiesInternal(
-                id,
-                SensorProperties.STRENGTH_STRONG,
-                5 /* maxEnrollmentsPerUser */,
-                componentInfo,
-                FingerprintSensorProperties.TYPE_REAR,
-                false /* resetLockoutRequiresHardwareAuthToken */
+            id,
+            if (strong) SensorProperties.STRENGTH_STRONG else SensorProperties.STRENGTH_WEAK,
+            5 /* maxEnrollmentsPerUser */,
+            componentInfo,
+            FingerprintSensorProperties.TYPE_REAR,
+            false /* resetLockoutRequiresHardwareAuthToken */
         )
     }
 }
 
 /** Create [FaceSensorPropertiesInternal] for a test. */
 internal fun faceSensorPropertiesInternal(
-    ids: List<Int> = listOf(1)
+    ids: List<Int> = listOf(1),
+    strong: Boolean = true,
 ): List<FaceSensorPropertiesInternal> {
-    val componentInfo = listOf(
+    val componentInfo =
+        listOf(
             ComponentInfoInternal(
-                    "faceSensor" /* componentId */,
-                    "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
-                    "00000001" /* serialNumber */, "" /* softwareVersion */
+                "faceSensor" /* componentId */,
+                "vendor/model/revision" /* hardwareVersion */,
+                "1.01" /* firmwareVersion */,
+                "00000001" /* serialNumber */,
+                "" /* softwareVersion */
             ),
             ComponentInfoInternal(
-                    "matchingAlgorithm" /* componentId */,
-                    "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
-                    "vendor/version/revision" /* softwareVersion */
+                "matchingAlgorithm" /* componentId */,
+                "" /* hardwareVersion */,
+                "" /* firmwareVersion */,
+                "" /* serialNumber */,
+                "vendor/version/revision" /* softwareVersion */
             )
-    )
+        )
     return ids.map { id ->
         FaceSensorPropertiesInternal(
-                id,
-                SensorProperties.STRENGTH_STRONG,
-                2 /* maxEnrollmentsPerUser */,
-                componentInfo,
-                FaceSensorProperties.TYPE_RGB,
-                true /* supportsFaceDetection */,
-                true /* supportsSelfIllumination */,
-                false /* resetLockoutRequiresHardwareAuthToken */
+            id,
+            if (strong) SensorProperties.STRENGTH_STRONG else SensorProperties.STRENGTH_WEAK,
+            2 /* maxEnrollmentsPerUser */,
+            componentInfo,
+            FaceSensorProperties.TYPE_RGB,
+            true /* supportsFaceDetection */,
+            true /* supportsSelfIllumination */,
+            false /* resetLockoutRequiresHardwareAuthToken */
         )
     }
+}
+
+@Authenticators.Types
+internal fun Collection<SensorPropertiesInternal?>.extractAuthenticatorTypes(): Int {
+    var authenticators = Authenticators.EMPTY_SET
+    mapNotNull { it?.sensorStrength }
+        .forEach { strength ->
+            authenticators =
+                authenticators or
+                    when (strength) {
+                        SensorProperties.STRENGTH_CONVENIENCE ->
+                            Authenticators.BIOMETRIC_CONVENIENCE
+                        SensorProperties.STRENGTH_WEAK -> Authenticators.BIOMETRIC_WEAK
+                        SensorProperties.STRENGTH_STRONG -> Authenticators.BIOMETRIC_STRONG
+                        else -> Authenticators.EMPTY_SET
+                    }
+        }
+    return authenticators
+}
+
+internal fun promptInfo(
+    title: String = "title",
+    subtitle: String = "sub",
+    description: String = "desc",
+    credentialTitle: String? = "cred title",
+    credentialSubtitle: String? = "cred sub",
+    credentialDescription: String? = "cred desc",
+    negativeButton: String = "neg",
+): PromptInfo {
+    val info = PromptInfo()
+    info.title = title
+    info.subtitle = subtitle
+    info.description = description
+    credentialTitle?.let { info.deviceCredentialTitle = it }
+    credentialSubtitle?.let { info.deviceCredentialSubtitle = it }
+    credentialDescription?.let { info.deviceCredentialDescription = it }
+    info.negativeButtonText = negativeButton
+    return info
 }

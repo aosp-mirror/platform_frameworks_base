@@ -60,7 +60,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/batteryRemainingIcon"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/carrier_group"/>
+            app:layout_constraintStart_toEndOf="@id/carrier_group"/>
         <PropertySet android:alpha="1" />
     </Constraint>
 

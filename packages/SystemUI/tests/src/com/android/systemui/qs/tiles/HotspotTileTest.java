@@ -38,6 +38,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -66,6 +67,8 @@ public class HotspotTileTest extends SysuiTestCase {
     private HotspotController mHotspotController;
     @Mock
     private DataSaverController mDataSaverController;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private HotspotTile mTile;
@@ -80,6 +83,7 @@ public class HotspotTileTest extends SysuiTestCase {
 
         mTile = new HotspotTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

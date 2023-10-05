@@ -27,11 +27,14 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.policy.DevicePostureController
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -71,6 +74,11 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     private val falsingCollector: FalsingCollector = FalsingCollectorFake()
     @Mock lateinit var postureController: DevicePostureController
 
+    @Mock lateinit var featureFlags: FeatureFlags
+    @Mock lateinit var passwordTextView: PasswordTextView
+    @Mock lateinit var deleteButton: NumPadButton
+    @Mock lateinit var enterButton: View
+
     lateinit var pinViewController: KeyguardPinViewController
 
     @Before
@@ -82,7 +90,13 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
                 keyguardMessageAreaControllerFactory.create(any(KeyguardMessageArea::class.java))
             )
             .thenReturn(keyguardMessageAreaController)
+        `when`(keyguardPinView.passwordTextViewId).thenReturn(R.id.pinEntry)
+        `when`(keyguardPinView.findViewById<PasswordTextView>(R.id.pinEntry))
+            .thenReturn(passwordTextView)
         `when`(keyguardPinView.resources).thenReturn(context.resources)
+        `when`(keyguardPinView.findViewById<NumPadButton>(R.id.delete_button))
+            .thenReturn(deleteButton)
+        `when`(keyguardPinView.findViewById<View>(R.id.key_enter)).thenReturn(enterButton)
         pinViewController =
             KeyguardPinViewController(
                 keyguardPinView,
@@ -95,7 +109,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
                 liftToActivateListener,
                 mEmergencyButtonController,
                 falsingCollector,
-                postureController
+                postureController,
+                featureFlags
             )
     }
 
@@ -111,5 +126,41 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         Mockito.`when`(keyguardMessageAreaController.message).thenReturn("Unlock to continue.")
         pinViewController.startAppearAnimation()
         verify(keyguardMessageAreaController, Mockito.never()).setMessage(anyString(), anyBoolean())
+    }
+
+    @Test
+    fun startAppearAnimation_withAutoPinConfirmationFailedPasswordAttemptsLessThan5() {
+        `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
+        `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
+        `when`(lockPatternUtils.isAutoPinConfirmEnabled(anyInt())).thenReturn(true)
+        `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(3)
+        `when`(passwordTextView.text).thenReturn("")
+
+        pinViewController.startAppearAnimation()
+        verify(deleteButton).visibility = View.INVISIBLE
+        verify(enterButton).visibility = View.INVISIBLE
+        verify(passwordTextView).setUsePinShapes(true)
+        verify(passwordTextView).setIsPinHinting(true)
+    }
+
+    @Test
+    fun startAppearAnimation_withAutoPinConfirmationFailedPasswordAttemptsMoreThan5() {
+        `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
+        `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
+        `when`(lockPatternUtils.isAutoPinConfirmEnabled(anyInt())).thenReturn(true)
+        `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(6)
+        `when`(passwordTextView.text).thenReturn("")
+
+        pinViewController.startAppearAnimation()
+        verify(deleteButton).visibility = View.VISIBLE
+        verify(enterButton).visibility = View.VISIBLE
+        verify(passwordTextView).setUsePinShapes(true)
+        verify(passwordTextView).setIsPinHinting(false)
+    }
+
+    @Test
+    fun handleLockout_readsNumberOfErrorAttempts() {
+        pinViewController.handleAttemptLockout(0)
+        verify(lockPatternUtils).getCurrentFailedPasswordAttempts(anyInt())
     }
 }

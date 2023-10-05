@@ -17,9 +17,9 @@
 package com.android.keyguard.logging
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.dagger.BiometricLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel.DEBUG
 import javax.inject.Inject
 
 /** Helper class for logging for [com.android.systemui.biometrics.FaceHelpMessageDeferral] */

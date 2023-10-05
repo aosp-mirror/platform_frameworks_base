@@ -122,9 +122,12 @@ AStatsManager_PullAtomCallbackReturn SurfaceFlingerPuller::parseLayerInfoPull(
     for (const auto& atom : atomList.atom()) {
         // The strings must outlive the BytesFields, which only have a pointer to the data.
         std::string present2PresentStr, post2presentStr, acquire2PresentStr, latch2PresentStr,
-                desired2PresentStr, post2AcquireStr, frameRateVoteStr, appDeadlineMissesStr;
+                desired2PresentStr, post2AcquireStr, frameRateVoteStr, appDeadlineMissesStr,
+                present2PresentDeltaStr;
         optional<BytesField> present2Present =
                 getBytes(atom.present_to_present(), present2PresentStr);
+        optional<BytesField> present2PresentDelta =
+                getBytes(atom.present_to_present_delta(), present2PresentDeltaStr);
         optional<BytesField> post2present = getBytes(atom.post_to_present(), post2presentStr);
         optional<BytesField> acquire2Present =
                 getBytes(atom.acquire_to_present(), acquire2PresentStr);
@@ -138,7 +141,8 @@ AStatsManager_PullAtomCallbackReturn SurfaceFlingerPuller::parseLayerInfoPull(
 
         // Fail if any serialization to bytes failed.
         if (!present2Present || !post2present || !acquire2Present || !latch2Present ||
-            !desired2Present || !post2Acquire || !frameRateVote || !appDeadlineMisses) {
+            !desired2Present || !post2Acquire || !frameRateVote || !appDeadlineMisses ||
+            !present2PresentDelta) {
             return AStatsManager_PULL_SKIP;
         }
 
@@ -159,7 +163,7 @@ AStatsManager_PullAtomCallbackReturn SurfaceFlingerPuller::parseLayerInfoPull(
                                       atom.total_jank_frames_app_buffer_stuffing(),
                                       atom.display_refresh_rate_bucket(), atom.render_rate_bucket(),
                                       frameRateVote.value(), appDeadlineMisses.value(),
-                                      atom.game_mode());
+                                      atom.game_mode(), present2PresentDelta.value());
     }
     return AStatsManager_PULL_SUCCESS;
 }

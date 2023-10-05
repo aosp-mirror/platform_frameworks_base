@@ -22,6 +22,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
 
+import java.util.Objects;
+
 /**
  * A unique identifier for an autofill node inside an {@link android.app.Activity}.
  */
@@ -70,6 +72,27 @@ public final class AutofillId implements Parcelable {
         mVirtualIntId = ((flags & FLAG_IS_VIRTUAL_INT) != 0) ? (int) virtualChildId : View.NO_ID;
         mVirtualLongId = ((flags & FLAG_IS_VIRTUAL_LONG) != 0) ? virtualChildId : View.NO_ID;
         mSessionId = sessionId;
+    }
+
+    /** @hide */
+    @NonNull
+    public static final AutofillId NO_AUTOFILL_ID = new AutofillId(0);
+
+    /**
+     * Creates an {@link AutofillId} with the virtual id.
+     *
+     * This method is used by a {@link View} that contains the virtual view hierarchy. Use this
+     * method to create the {@link AutofillId} for each virtual view.
+     *
+     * @param host the view hosting the virtual view hierarchy which is used to show autofill
+     *            suggestions.
+     * @param virtualId id identifying the virtual view inside the host view.
+     * @return an {@link AutofillId} for the virtual view
+     */
+    @NonNull
+    public static AutofillId create(@NonNull View host, int virtualId) {
+        Objects.requireNonNull(host);
+        return new AutofillId(host.getAutofillId(), virtualId);
     }
 
     /** @hide */

@@ -562,6 +562,26 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     }
 
     @Override
+    protected boolean startSvStatusCollection() {
+        return true;
+    }
+
+    @Override
+    protected boolean stopSvStatusCollection() {
+        return true;
+    }
+
+    @Override
+    public boolean startNmeaMessageCollection() {
+        return true;
+    }
+
+    @Override
+    public boolean stopNmeaMessageCollection() {
+        return true;
+    }
+
+    @Override
     protected int getBatchSize() {
         return mBatchSize;
     }

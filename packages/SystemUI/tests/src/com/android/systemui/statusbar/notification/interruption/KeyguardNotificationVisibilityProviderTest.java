@@ -257,7 +257,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                 .setImportance(IMPORTANCE_LOW)
                 .setParent(parent)
                 .build();
-        when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+        when(mHighPriorityProvider.isExplicitlyHighPriority(any())).thenReturn(false);
         assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
     }
 
@@ -270,7 +270,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                 .setUser(new UserHandle(NOTIF_USER_ID))
                 .setImportance(IMPORTANCE_LOW)
                 .build();
-        when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+        when(mHighPriorityProvider.isExplicitlyHighPriority(any())).thenReturn(false);
         assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
     }
 
@@ -292,7 +292,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                 .setImportance(IMPORTANCE_LOW)
                 .setParent(parent)
                 .build();
-        when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+        when(mHighPriorityProvider.isExplicitlyHighPriority(any())).thenReturn(false);
         assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
     }
 
@@ -309,7 +309,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         mEntry = new NotificationEntryBuilder()
                 .setImportance(IMPORTANCE_LOW)
                 .build();
-        when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+        when(mHighPriorityProvider.isExplicitlyHighPriority(any())).thenReturn(false);
 
         // THEN filter out the entry
         assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
@@ -328,7 +328,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         mEntry = new NotificationEntryBuilder()
                 .setImportance(IMPORTANCE_LOW)
                 .build();
-        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        when(mHighPriorityProvider.isExplicitlyHighPriority(mEntry)).thenReturn(false);
 
         // THEN do not filter out the entry
         assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
@@ -345,7 +345,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                 .setUser(new UserHandle(NOTIF_USER_ID))
                 .setImportance(IMPORTANCE_LOW)
                 .build();
-        when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+        when(mHighPriorityProvider.isExplicitlyHighPriority(any())).thenReturn(false);
 
         // WhHEN the show silent notifs on lockscreen setting is unset
         assertNull(mFakeSettings.getString(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS));
@@ -460,9 +460,29 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                 .setKey(mEntry.getKey())
                 .setImportance(IMPORTANCE_MIN)
                 .build());
-        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        when(mHighPriorityProvider.isExplicitlyHighPriority(mEntry)).thenReturn(false);
 
         // THEN filter out the entry
+        assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void highPriorityCharacteristicsIgnored() {
+        // GIVEN an 'unfiltered-keyguard-showing' state with silent notifications hidden
+        setupUnfilteredState(mEntry);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
+
+        // WHEN the notification doesn't exceed the threshold to show on the lockscreen, but does
+        // have the "high priority characteristics" that would promote it to high priority
+        mEntry.setRanking(new RankingBuilder()
+                .setKey(mEntry.getKey())
+                .setImportance(IMPORTANCE_MIN)
+                .build());
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(true);
+        when(mHighPriorityProvider.isExplicitlyHighPriority(mEntry)).thenReturn(false);
+
+        // THEN filter out the entry anyway, because the user explicitly asked us to hide it
         assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
     }
 
@@ -538,14 +558,14 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
         // WHEN its parent does exceed threshold tot show on the lockscreen
         mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
-        when(mHighPriorityProvider.isHighPriority(parent)).thenReturn(true);
+        when(mHighPriorityProvider.isExplicitlyHighPriority(parent)).thenReturn(true);
 
         // THEN filter out the entry regardless of parent
         assertTrue(
                 mKeyguardNotificationVisibilityProvider.shouldHideNotification(entryWithParent));
 
         // WHEN its parent doesn't exceed threshold to show on lockscreen
-        when(mHighPriorityProvider.isHighPriority(parent)).thenReturn(false);
+        when(mHighPriorityProvider.isExplicitlyHighPriority(parent)).thenReturn(false);
         modifyEntry(parent.getSummary(), builder -> builder
                 .setImportance(IMPORTANCE_MIN)
                 .done());
@@ -591,7 +611,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         // notification doesn't have a summary
 
         // notification is high priority, so it shouldn't be filtered
-        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(true);
+        when(mHighPriorityProvider.isExplicitlyHighPriority(mEntry)).thenReturn(true);
     }
 
     @SysUISingleton

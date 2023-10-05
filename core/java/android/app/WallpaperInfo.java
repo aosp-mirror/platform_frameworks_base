@@ -289,12 +289,12 @@ public final class WallpaperInfo implements Parcelable {
             packageName = mService.serviceInfo.packageName;
             applicationInfo = mService.serviceInfo.applicationInfo;
         }
-        String contextUriString = pm.getText(
-                packageName, mContextUriResource, applicationInfo).toString();
-        if (contextUriString == null) {
+        CharSequence contextUriCharSequence = pm.getText(
+                packageName, mContextUriResource, applicationInfo);
+        if (contextUriCharSequence == null) {
             return null;
         }
-        return Uri.parse(contextUriString);
+        return Uri.parse(contextUriCharSequence.toString());
     }
 
     /**

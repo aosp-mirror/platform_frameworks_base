@@ -16,12 +16,11 @@
 
 package com.android.settingslib.fuelgauge;
 
-import static android.os.BatteryManager.BATTERY_HEALTH_OVERHEAT;
-import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
 import static android.os.BatteryManager.BATTERY_STATUS_FULL;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
-import static android.os.BatteryManager.EXTRA_HEALTH;
-import static android.os.BatteryManager.EXTRA_LEVEL;
+import static android.os.BatteryManager.CHARGING_POLICY_ADAPTIVE_LONGLIFE;
+import static android.os.BatteryManager.CHARGING_POLICY_DEFAULT;
+import static android.os.BatteryManager.EXTRA_CHARGING_STATUS;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
@@ -33,6 +32,8 @@ import android.content.Intent;
 import android.os.BatteryManager;
 
 import com.android.settingslib.R;
+
+import java.util.Optional;
 
 /**
  * Stores and computes some battery information.
@@ -49,26 +50,45 @@ public class BatteryStatus {
     public final int status;
     public final int level;
     public final int plugged;
-    public final int health;
+    public final int chargingStatus;
     public final int maxChargingWattage;
     public final boolean present;
+    public final Optional<Boolean> incompatibleCharger;
 
-    public BatteryStatus(int status, int level, int plugged, int health,
+    public static BatteryStatus create(Context context, boolean incompatibleCharger) {
+        final Intent batteryChangedIntent = BatteryUtils.getBatteryIntent(context);
+        return batteryChangedIntent == null
+                ? null : new BatteryStatus(batteryChangedIntent, incompatibleCharger);
+    }
+
+    public BatteryStatus(int status, int level, int plugged, int chargingStatus,
             int maxChargingWattage, boolean present) {
         this.status = status;
         this.level = level;
         this.plugged = plugged;
-        this.health = health;
+        this.chargingStatus = chargingStatus;
         this.maxChargingWattage = maxChargingWattage;
         this.present = present;
+        this.incompatibleCharger = Optional.empty();
     }
 
+
     public BatteryStatus(Intent batteryChangedIntent) {
+        this(batteryChangedIntent, Optional.empty());
+    }
+
+    public BatteryStatus(Intent batteryChangedIntent, boolean incompatibleCharger) {
+        this(batteryChangedIntent, Optional.of(incompatibleCharger));
+    }
+
+    private BatteryStatus(Intent batteryChangedIntent, Optional<Boolean> incompatibleCharger) {
         status = batteryChangedIntent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
         plugged = batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, 0);
-        level = batteryChangedIntent.getIntExtra(EXTRA_LEVEL, 0);
-        health = batteryChangedIntent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
+        level = getBatteryLevel(batteryChangedIntent);
+        chargingStatus = batteryChangedIntent.getIntExtra(EXTRA_CHARGING_STATUS,
+                CHARGING_POLICY_DEFAULT);
         present = batteryChangedIntent.getBooleanExtra(EXTRA_PRESENT, true);
+        this.incompatibleCharger = incompatibleCharger;
 
         final int maxChargingMicroAmp = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT,
                 -1);
@@ -87,42 +107,24 @@ public class BatteryStatus {
         }
     }
 
-    /**
-     * Determine whether the device is plugged in (USB, power, wireless or dock).
-     *
-     * @return true if the device is plugged in.
-     */
+    /** Determine whether the device is plugged. */
     public boolean isPluggedIn() {
-        return plugged == BatteryManager.BATTERY_PLUGGED_AC
-                || plugged == BatteryManager.BATTERY_PLUGGED_USB
-                || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
-                || plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
+        return isPluggedIn(plugged);
     }
 
-    /**
-     * Determine whether the device is plugged in (USB, power).
-     *
-     * @return true if the device is plugged in wired (as opposed to wireless)
-     */
+    /** Determine whether the device is plugged in (USB, power). */
     public boolean isPluggedInWired() {
         return plugged == BatteryManager.BATTERY_PLUGGED_AC
                 || plugged == BatteryManager.BATTERY_PLUGGED_USB;
     }
 
     /**
-     * Determine whether the device is plugged in wireless.
-     *
-     * @return true if the device is plugged in wireless
-     */
+     * Determine whether the device is plugged in wireless. */
     public boolean isPluggedInWireless() {
         return plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
     }
 
-    /**
-     * Determine whether the device is plugged in dock.
-     *
-     * @return true if the device is plugged in dock
-     */
+    /** Determine whether the device is plugged in dock. */
     public boolean isPluggedInDock() {
         return plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
     }
@@ -131,36 +133,22 @@ public class BatteryStatus {
      * Whether or not the device is charged. Note that some devices never return 100% for
      * battery level, so this allows either battery level or status to determine if the
      * battery is charged.
-     *
-     * @return true if the device is charged
      */
     public boolean isCharged() {
         return isCharged(status, level);
     }
 
-    /**
-     * Whether battery is low and needs to be charged.
-     *
-     * @return true if battery is low
-     */
+    /** Whether battery is low and needs to be charged. */
     public boolean isBatteryLow() {
         return level < LOW_BATTERY_THRESHOLD;
     }
 
-    /**
-     * Whether battery is overheated.
-     *
-     * @return true if battery is overheated
-     */
-    public boolean isOverheated() {
-        return health == BATTERY_HEALTH_OVERHEAT;
+    /** Whether battery defender is enabled. */
+    public boolean isBatteryDefender() {
+        return chargingStatus == CHARGING_POLICY_ADAPTIVE_LONGLIFE;
     }
 
-    /**
-     * Return current chargin speed is fast, slow or normal.
-     *
-     * @return the charing speed
-     */
+    /** Return current chargin speed is fast, slow or normal. */
     public final int getChargingSpeed(Context context) {
         final int slowThreshold = context.getResources().getInteger(
                 R.integer.config_chargingSlowlyThreshold);
@@ -175,7 +163,8 @@ public class BatteryStatus {
     @Override
     public String toString() {
         return "BatteryStatus{status=" + status + ",level=" + level + ",plugged=" + plugged
-                + ",health=" + health + ",maxChargingWattage=" + maxChargingWattage + "}";
+                + ",chargingStatus=" + chargingStatus + ",maxChargingWattage=" + maxChargingWattage
+                + "}";
     }
 
     /**
@@ -188,7 +177,7 @@ public class BatteryStatus {
      */
     public static boolean isCharged(Intent batteryChangedIntent) {
         int status = batteryChangedIntent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
-        int level = batteryChangedIntent.getIntExtra(EXTRA_LEVEL, 0);
+        int level = getBatteryLevel(batteryChangedIntent);
         return isCharged(status, level);
     }
 
@@ -203,5 +192,30 @@ public class BatteryStatus {
      */
     public static boolean isCharged(int status, int level) {
         return status == BATTERY_STATUS_FULL || level >= 100;
+    }
+
+    /** Gets the battery level from the intent. */
+    public static int getBatteryLevel(Intent batteryChangedIntent) {
+        if (batteryChangedIntent == null) {
+            return -1; /*invalid battery level*/
+        }
+        final int level = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        final int scale = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
+        return scale == 0
+                ? -1 /*invalid battery level*/
+                : Math.round((level / (float) scale) * 100f);
+    }
+
+    /** Whether the device is plugged or not. */
+    public static boolean isPluggedIn(Intent batteryChangedIntent) {
+        return isPluggedIn(batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, 0));
+    }
+
+    /** Whether the device is plugged or not. */
+    public static boolean isPluggedIn(int plugged) {
+        return plugged == BatteryManager.BATTERY_PLUGGED_AC
+                || plugged == BatteryManager.BATTERY_PLUGGED_USB
+                || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
+                || plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
     }
 }

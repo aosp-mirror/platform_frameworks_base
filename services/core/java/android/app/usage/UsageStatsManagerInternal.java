@@ -339,11 +339,11 @@ public abstract class UsageStatsManagerInternal {
      * when the user is first unlocked to update the usage stats package mappings data that might
      * be stale or have existed from a restore and belongs to packages that are not installed for
      * this user anymore.
-     * Note: this is only executed for the system user.
      *
+     * @param userId The user to update
      * @return {@code true} if the updating was successful, {@code false} otherwise
      */
-    public abstract boolean updatePackageMappingsData();
+    public abstract boolean updatePackageMappingsData(@UserIdInt int userId);
 
     /**
      * Listener interface for usage events.

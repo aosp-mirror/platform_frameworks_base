@@ -186,6 +186,8 @@ struct fields_t {
     jmethodID postEventFromNativeID;
     jmethodID lockAndGetContextID;
     jmethodID setAndUnlockContextID;
+    jmethodID cryptoInfoSetID;
+    jmethodID cryptoInfoSetPatternID;
     jfieldID cryptoInfoNumSubSamplesID;
     jfieldID cryptoInfoNumBytesOfClearDataID;
     jfieldID cryptoInfoNumBytesOfEncryptedDataID;
@@ -205,6 +207,7 @@ struct fields_t {
 static fields_t gFields;
 static const void *sRefBaseOwner;
 
+jint MediaErrorToJavaError(status_t err);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1070,6 +1073,180 @@ static jthrowable createCodecException(
     return (jthrowable)env->NewObject(clazz.get(), ctor, err, actionCode, msgObj.get());
 }
 
+static void AMessageToCryptoInfo(JNIEnv * env, const jobject & obj,
+        const sp<AMessage> & msg) {
+    if(msg == nullptr || obj == nullptr) {
+        ALOGE("CryptoAsync Nothing to do in AMessagetoCryptoInfo");
+        return;
+    }
+    size_t numSubSamples = 0;
+    sp<ABuffer> subSamplesBuffer;
+    sp<ABuffer> keyBuffer;
+    sp<ABuffer> ivBuffer;
+    CryptoPlugin::Mode mode;
+    CryptoPlugin::Pattern pattern;
+    CHECK(msg->findInt32("mode", (int*)&mode));
+    CHECK(msg->findSize("numSubSamples", &numSubSamples));
+    CHECK(msg->findBuffer("subSamples", &subSamplesBuffer));
+    CHECK(msg->findInt32("encryptBlocks", (int32_t *)&pattern.mEncryptBlocks));
+    CHECK(msg->findInt32("skipBlocks", (int32_t *)&pattern.mSkipBlocks));
+    CHECK(msg->findBuffer("iv", &ivBuffer));
+    CHECK(msg->findBuffer("key", &keyBuffer));
+
+    // subsamples
+    ScopedLocalRef<jintArray> samplesOfEncryptedDataArr(env, env->NewIntArray(numSubSamples));
+    ScopedLocalRef<jintArray> samplesOfClearDataArr(env, env->NewIntArray(numSubSamples));
+    jboolean isCopy;
+    jint *dstEncryptedSamples =
+        env->GetIntArrayElements(samplesOfEncryptedDataArr.get(), &isCopy);
+    jint * dstClearSamples =
+        env->GetIntArrayElements(samplesOfClearDataArr.get(), &isCopy);
+
+    CryptoPlugin::SubSample * samplesArray =
+        (CryptoPlugin::SubSample*)(subSamplesBuffer.get()->data());
+
+    for(int i = 0 ; i < numSubSamples ; i++) {
+        dstEncryptedSamples[i] = samplesArray[i].mNumBytesOfEncryptedData;
+        dstClearSamples[i] = samplesArray[i].mNumBytesOfClearData;
+    }
+    env->ReleaseIntArrayElements(samplesOfEncryptedDataArr.get(), dstEncryptedSamples, 0);
+    env->ReleaseIntArrayElements(samplesOfClearDataArr.get(), dstClearSamples, 0);
+    // key and iv
+    jbyteArray keyArray = NULL;
+    jbyteArray ivArray = NULL;
+    if (keyBuffer.get() != nullptr && keyBuffer->size() > 0) {
+        keyArray = env->NewByteArray(keyBuffer->size());
+        jbyte * dstKey = env->GetByteArrayElements(keyArray, &isCopy);
+        memcpy(dstKey, keyBuffer->data(), keyBuffer->size());
+        env->ReleaseByteArrayElements(keyArray,dstKey,0);
+    }
+    if (ivBuffer.get() != nullptr && ivBuffer->size() > 0) {
+        ivArray = env->NewByteArray(ivBuffer->size());
+        jbyte *dstIv = env->GetByteArrayElements(ivArray, &isCopy);
+        memcpy(dstIv, ivBuffer->data(), ivBuffer->size());
+        env->ReleaseByteArrayElements(ivArray, dstIv,0);
+    }
+    // set samples, key and iv
+    env->CallVoidMethod(
+        obj,
+        gFields.cryptoInfoSetID,
+        (jint)numSubSamples,
+        samplesOfClearDataArr.get(),
+        samplesOfEncryptedDataArr.get(),
+        keyArray,
+        ivArray,
+        mode);
+    if (keyArray != NULL) {
+        env->DeleteLocalRef(keyArray);
+    }
+    if (ivArray != NULL) {
+        env->DeleteLocalRef(ivArray);
+    }
+    // set pattern
+    env->CallVoidMethod(
+        obj,
+        gFields.cryptoInfoSetPatternID,
+        pattern.mEncryptBlocks,
+        pattern.mSkipBlocks);
+}
+
+static void CryptoErrorToJavaError(status_t err, jint& jerr, std::string& defaultMsg) {
+    switch(err) {
+        case ERROR_DRM_NO_LICENSE:
+            jerr = gCryptoErrorCodes.cryptoErrorNoKey;
+            defaultMsg = "Crypto key not available";
+            break;
+        case ERROR_DRM_LICENSE_EXPIRED:
+            jerr = gCryptoErrorCodes.cryptoErrorKeyExpired;
+            defaultMsg = "License expired";
+            break;
+        case ERROR_DRM_RESOURCE_BUSY:
+            jerr = gCryptoErrorCodes.cryptoErrorResourceBusy;
+            defaultMsg = "Resource busy or unavailable";
+            break;
+        case ERROR_DRM_INSUFFICIENT_OUTPUT_PROTECTION:
+            jerr = gCryptoErrorCodes.cryptoErrorInsufficientOutputProtection;
+            defaultMsg = "Required output protections are not active";
+            break;
+        case ERROR_DRM_SESSION_NOT_OPENED:
+            jerr = gCryptoErrorCodes.cryptoErrorSessionNotOpened;
+            defaultMsg = "Attempted to use a closed session";
+            break;
+        case ERROR_DRM_INSUFFICIENT_SECURITY:
+            jerr = gCryptoErrorCodes.cryptoErrorInsufficientSecurity;
+            defaultMsg = "Required security level is not met";
+            break;
+        case ERROR_DRM_CANNOT_HANDLE:
+            jerr = gCryptoErrorCodes.cryptoErrorUnsupportedOperation;
+            defaultMsg = "Operation not supported in this configuration";
+            break;
+        case ERROR_DRM_FRAME_TOO_LARGE:
+            jerr = gCryptoErrorCodes.cryptoErrorFrameTooLarge;
+            defaultMsg = "Decrytped frame exceeds size of output buffer";
+            break;
+        case ERROR_DRM_SESSION_LOST_STATE:
+            jerr = gCryptoErrorCodes.cryptoErrorLostState;
+            defaultMsg = "Session state was lost, open a new session and retry";
+            break;
+        default:  // Other negative DRM error codes go out best-effort.
+            jerr = MediaErrorToJavaError(err);
+            defaultMsg = StrCryptoError(err);
+            break;
+    }
+}
+static jthrowable createCryptoException(JNIEnv *env, status_t err,
+        const char * msg = NULL, const sp<ICrypto> & crypto = NULL,
+    const sp<AMessage> & cryptoInfo = NULL) {
+    jthrowable exception = nullptr;
+    jmethodID constructID = nullptr;
+    ScopedLocalRef<jobject> cryptoInfoObject(env);
+    std::string defaultMsg = "Unknown Error";
+    jint jerr = 0;
+    // Get a class ref for CryptoException
+    ScopedLocalRef<jclass> clazz(
+        env, env->FindClass("android/media/MediaCodec$CryptoException"));
+    CHECK(clazz.get() != NULL);
+
+    // Get constructor ref for CryptoException
+    constructID = env->GetMethodID(clazz.get(), "<init>",
+            "(Ljava/lang/String;IIIILandroid/media/MediaCodec$CryptoInfo;)V");
+    CHECK(constructID != NULL);
+
+    // create detailed message for exception
+    CryptoErrorToJavaError(err, jerr, defaultMsg);
+    std::string originalMsg(msg != NULL ? msg : defaultMsg.c_str());
+    DrmStatus dStatus(err, originalMsg.c_str());
+    std::string detailedMsg(
+            DrmUtils::GetExceptionMessage(dStatus, defaultMsg.c_str(), crypto));
+    jstring msgObj = env->NewStringUTF(detailedMsg.c_str());
+
+    if (cryptoInfo != nullptr) {
+        // Class ref for CryptoInfo
+        ScopedLocalRef<jclass> clazzCryptoInfo(
+                env, env->FindClass("android/media/MediaCodec$CryptoInfo"));
+        CHECK(clazzCryptoInfo.get() != NULL);
+
+        // Constructor reference for CryptoInfo
+        jmethodID constructCryptoInfo =
+                env->GetMethodID(clazzCryptoInfo.get(), "<init>", "()V");
+        CHECK(constructCryptoInfo != NULL);
+
+        // Create CryptoInfo jobject
+        cryptoInfoObject.reset(
+                env->NewObject(clazzCryptoInfo.get(), constructCryptoInfo));
+        CHECK(cryptoInfoObject.get() != NULL);
+
+        // Translate AMesage to CryptoInfo
+        AMessageToCryptoInfo(env, cryptoInfoObject.get(), cryptoInfo);
+    }
+
+    exception = (jthrowable)env->NewObject(
+            clazz.get(), constructID, msgObj, jerr,
+            dStatus.getCdmErr(), dStatus.getOemErr(), dStatus.getContext(),
+            cryptoInfoObject.get());
+
+    return exception;
+}
 void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
     int32_t arg1, arg2 = 0;
     jobject obj = NULL;
@@ -1107,6 +1284,17 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
             }
 
             env->CallVoidMethod(obj, gBufferInfo.setId, (jint)offset, (jint)size, timeUs, flags);
+            break;
+        }
+
+        case MediaCodec::CB_CRYPTO_ERROR:
+        {
+            int32_t err, actionCode;
+            AString errorDetail;
+            CHECK(msg->findInt32("err", &err));
+            CHECK(msg->findInt32("actionCode",&actionCode));
+            CHECK(msg->findString("errorDetail", &errorDetail));
+            obj = (jobject)createCryptoException(env, err, errorDetail.c_str(), NULL, msg);
             break;
         }
 
@@ -1150,7 +1338,6 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
         default:
             TRESPASS();
     }
-
     env->CallVoidMethod(
             mObject,
             gFields.postEventFromNativeID,
@@ -1249,7 +1436,6 @@ void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {
     }
 }
 
-jint MediaErrorToJavaError(status_t err);
 
 }  // namespace android
 
@@ -1300,70 +1486,8 @@ static void throwCodecException(JNIEnv *env, status_t err, int32_t actionCode, c
 
 static void throwCryptoException(JNIEnv *env, status_t err, const char *msg,
         const sp<ICrypto> &crypto) {
-    ScopedLocalRef<jclass> clazz(
-            env, env->FindClass("android/media/MediaCodec$CryptoException"));
-    CHECK(clazz.get() != NULL);
-
-    jmethodID constructID =
-        env->GetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;IIII)V");
-    CHECK(constructID != NULL);
-
-    std::string defaultMsg = "Unknown Error";
-
-    /* translate OS errors to Java API CryptoException errorCodes (which are positive) */
-    jint jerr = 0;
-    switch (err) {
-        case ERROR_DRM_NO_LICENSE:
-            jerr = gCryptoErrorCodes.cryptoErrorNoKey;
-            defaultMsg = "Crypto key not available";
-            break;
-        case ERROR_DRM_LICENSE_EXPIRED:
-            jerr = gCryptoErrorCodes.cryptoErrorKeyExpired;
-            defaultMsg = "License expired";
-            break;
-        case ERROR_DRM_RESOURCE_BUSY:
-            jerr = gCryptoErrorCodes.cryptoErrorResourceBusy;
-            defaultMsg = "Resource busy or unavailable";
-            break;
-        case ERROR_DRM_INSUFFICIENT_OUTPUT_PROTECTION:
-            jerr = gCryptoErrorCodes.cryptoErrorInsufficientOutputProtection;
-            defaultMsg = "Required output protections are not active";
-            break;
-        case ERROR_DRM_SESSION_NOT_OPENED:
-            jerr = gCryptoErrorCodes.cryptoErrorSessionNotOpened;
-            defaultMsg = "Attempted to use a closed session";
-            break;
-        case ERROR_DRM_INSUFFICIENT_SECURITY:
-            jerr = gCryptoErrorCodes.cryptoErrorInsufficientSecurity;
-            defaultMsg = "Required security level is not met";
-            break;
-        case ERROR_DRM_CANNOT_HANDLE:
-            jerr = gCryptoErrorCodes.cryptoErrorUnsupportedOperation;
-            defaultMsg = "Operation not supported in this configuration";
-            break;
-        case ERROR_DRM_FRAME_TOO_LARGE:
-            jerr = gCryptoErrorCodes.cryptoErrorFrameTooLarge;
-            defaultMsg = "Decrytped frame exceeds size of output buffer";
-            break;
-        case ERROR_DRM_SESSION_LOST_STATE:
-            jerr = gCryptoErrorCodes.cryptoErrorLostState;
-            defaultMsg = "Session state was lost, open a new session and retry";
-            break;
-        default:  /* Other negative DRM error codes go out best-effort. */
-            jerr = MediaErrorToJavaError(err);
-            defaultMsg = StrCryptoError(err);
-            break;
-    }
-
-    std::string originalMsg(msg != NULL ? msg : defaultMsg.c_str());
-    DrmStatus dStatus(err, originalMsg.c_str());
-    std::string detailedMsg(DrmUtils::GetExceptionMessage(dStatus, defaultMsg.c_str(), crypto));
-    jstring msgObj = env->NewStringUTF(detailedMsg.c_str());
-
-    jthrowable exception =
-        (jthrowable)env->NewObject(clazz.get(), constructID, msgObj, jerr,
-                                   dStatus.getCdmErr(), dStatus.getOemErr(), dStatus.getContext());
-
+    jthrowable exception = createCryptoException(
+            env, err, msg, crypto, /* cryptoInfo */ NULL);
     env->Throw(exception);
 }
 
@@ -3036,6 +3160,12 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
 
     clazz.reset(env->FindClass("android/media/MediaCodec$CryptoInfo"));
     CHECK(clazz.get() != NULL);
+
+    gFields.cryptoInfoSetID = env->GetMethodID(clazz.get(), "set", "(I[I[I[B[BI)V");
+    CHECK(gFields.cryptoInfoSetID != NULL);
+
+    gFields.cryptoInfoSetPatternID = env->GetMethodID(clazz.get(), "setPattern", "(II)V");
+    CHECK(gFields.cryptoInfoSetPatternID != NULL);
 
     gFields.cryptoInfoNumSubSamplesID =
         env->GetFieldID(clazz.get(), "numSubSamples", "I");

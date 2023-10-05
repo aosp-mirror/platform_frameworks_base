@@ -17,17 +17,16 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.RequiresDevice
 import android.platform.test.rule.SettingOverrideRule
 import android.provider.Settings
-import androidx.test.filters.FlakyTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import androidx.test.filters.RequiresDevice
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -44,10 +43,9 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
 @Postsubmit
-open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter)
-    : OpenAppFromNotificationCold(testSpec) {
+open class OpenAppFromLockNotificationCold(flicker: FlickerTest) :
+    OpenAppFromNotificationCold(flicker) {
 
     override val openingNotificationsFromLockScreen = true
 
@@ -55,62 +53,83 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter)
         get() = {
             // Needs to run at start of transition,
             // so before the transition defined in super.transition
-            transitions {
-                device.wakeUp()
-            }
+            transitions { device.wakeUp() }
 
             super.transition(this)
 
             // Needs to run at the end of the setup, so after the setup defined in super.transition
             setup {
-                eachRun {
-                    device.sleep()
-                    wmHelper.waitFor("noAppWindowsOnTop") {
-                        it.wmState.topVisibleAppWindow.isEmpty()
-                    }
-                }
+                device.sleep()
+                wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
             }
         }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 229735718)
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    @Test @Ignore("Display is off at the start") override fun navBarLayerPositionAtStartAndEnd() {}
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 203538234)
     @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    @Ignore("Display is off at the start")
+    override fun statusBarLayerPositionAtStartAndEnd() {}
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 203538234)
     @Test
-    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
+    @Ignore("Display is off at the start")
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test @Ignore("Display is off at the start") override fun taskBarWindowIsAlwaysVisible() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Display is off at the start")
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarWindowIsVisibleAtStartAndEnd() = super.navBarWindowIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarWindowIsAlwaysVisible() {}
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return com.android.server.wm.flicker.FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(repetitions = 3)
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests()
         }
 
         /**
-         * Ensures that posted notifications will be visible on the lockscreen and not
-         * suppressed due to being marked as seen.
+         * Ensures that posted notifications will be visible on the lockscreen and not suppressed
+         * due to being marked as seen.
          */
         @ClassRule
         @JvmField
-        val disableUnseenNotifFilterRule = SettingOverrideRule(
-            Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-            /* value= */ "0",
-        )
+        val disableUnseenNotifFilterRule =
+            SettingOverrideRule(
+                Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+                /* value = */ "0",
+            )
     }
 }

@@ -32,9 +32,11 @@ data class KeyguardQuickAffordanceViewModel(
     val isSelected: Boolean = false,
     val useLongPress: Boolean = false,
     val isDimmed: Boolean = false,
+    val slotId: String,
 ) {
     data class OnClickedParameters(
         val configKey: String,
         val expandable: Expandable?,
+        val slotId: String,
     )
 }

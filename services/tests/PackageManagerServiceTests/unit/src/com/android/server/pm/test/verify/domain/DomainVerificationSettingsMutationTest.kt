@@ -19,16 +19,16 @@ package com.android.server.pm.test.verify.domain
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
-import com.android.server.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
 import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.parsing.pkg.AndroidPackageInternal
 import com.android.server.pm.pkg.PackageStateInternal
+import com.android.server.pm.pkg.PackageUserStateInternal
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy
@@ -41,6 +41,7 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.anyString
+import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.verify
 import java.util.UUID
@@ -187,7 +188,7 @@ class DomainVerificationSettingsMutationTest {
         }
 
 
-        fun mockPkg() = mockThrowOnUnmocked<AndroidPackage> {
+        fun mockPkg() = mockThrowOnUnmocked<AndroidPackageInternal> {
             whenever(packageName) { TEST_PKG }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
             whenever(isEnabled) { true }
@@ -218,12 +219,12 @@ class DomainVerificationSettingsMutationTest {
             whenever(domainSetId) { TEST_UUID }
             whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
             whenever(getUserStateOrDefault(10)) { PackageUserStateInternal.DEFAULT }
-            whenever(userStates) {
+            doReturn(
                 SparseArray<PackageUserStateInternal>().apply {
                     this[0] = PackageUserStateInternal.DEFAULT
                     this[1] = PackageUserStateInternal.DEFAULT
                 }
-            }
+            ).whenever(this).userStates
             whenever(isSystem) { false }
         }
     }

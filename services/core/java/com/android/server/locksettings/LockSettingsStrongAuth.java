@@ -46,6 +46,7 @@ import com.android.internal.widget.LockPatternUtils.StrongAuthTracker;
 /**
  * Keeps track of requests for strong authentication.
  */
+@VisibleForTesting // public visibility is needed for Mockito
 public class LockSettingsStrongAuth {
 
     private static final String TAG = "LockSettingsStrongAuth";

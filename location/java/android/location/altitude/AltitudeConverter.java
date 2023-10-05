@@ -31,8 +31,6 @@ import java.io.IOException;
 /**
  * Converts altitudes reported above the World Geodetic System 1984 (WGS84) reference ellipsoid
  * into ones above Mean Sea Level.
- *
- * @hide
  */
 public final class AltitudeConverter {
 
@@ -45,8 +43,6 @@ public final class AltitudeConverter {
     /**
      * Creates an instance that manages an independent cache to optimized conversions of locations
      * in proximity to one another.
-     *
-     * @hide
      */
     public AltitudeConverter() {
     }
@@ -163,8 +159,6 @@ public final class AltitudeConverter {
      *                                  between -90 and 90 (both inclusive), the longitude must be
      *                                  between -180 and 180 (both inclusive), and the altitude
      *                                  above WGS84 must be finite.
-     *
-     * @hide
      */
     @WorkerThread
     public void addMslAltitudeToLocation(@NonNull Context context, @NonNull Location location)

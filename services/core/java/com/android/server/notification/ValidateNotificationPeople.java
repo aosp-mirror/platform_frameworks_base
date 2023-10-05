@@ -62,7 +62,7 @@ import java.util.concurrent.TimeUnit;
 public class ValidateNotificationPeople implements NotificationSignalExtractor {
     // Using a shorter log tag since setprop has a limit of 32chars on variable name.
     private static final String TAG = "ValidateNoPeople";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);;
+    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final boolean ENABLE_PEOPLE_VALIDATOR = true;
@@ -105,12 +105,13 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     private int mEvictionCount;
     private NotificationUsageStats mUsageStats;
 
+    @Override
     public void initialize(Context context, NotificationUsageStats usageStats) {
         if (DEBUG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
         mUserToContextMap = new ArrayMap<>();
         mBaseContext = context;
         mUsageStats = usageStats;
-        mPeopleCache = new LruCache<String, LookupResult>(PEOPLE_CACHE_SIZE);
+        mPeopleCache = new LruCache<>(PEOPLE_CACHE_SIZE);
         mEnabled = ENABLE_PEOPLE_VALIDATOR && 1 == Settings.Global.getInt(
                 mBaseContext.getContentResolver(), SETTING_ENABLE_PEOPLE_VALIDATOR, 1);
         if (mEnabled) {
@@ -134,7 +135,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     // For tests: just do the setting of various local variables without actually doing work
     @VisibleForTesting
     protected void initForTests(Context context, NotificationUsageStats usageStats,
-            LruCache peopleCache) {
+            LruCache<String, LookupResult> peopleCache) {
         mUserToContextMap = new ArrayMap<>();
         mBaseContext = context;
         mUsageStats = usageStats;
@@ -142,6 +143,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         mEnabled = true;
     }
 
+    @Override
     public RankingReconsideration process(NotificationRecord record) {
         if (!mEnabled) {
             if (VERBOSE) Slog.i(TAG, "disabled");
@@ -272,7 +274,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         }
 
         if (VERBOSE) Slog.i(TAG, "Validating: " + key + " for " + context.getUserId());
-        final LinkedList<String> pendingLookups = new LinkedList<String>();
+        final LinkedList<String> pendingLookups = new LinkedList<>();
         int personIdx = 0;
         for (String handle : people) {
             if (TextUtils.isEmpty(handle)) continue;
@@ -320,7 +322,6 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         return Integer.toString(userId) + ":" + handle;
     }
 
-    // VisibleForTesting
     public static String[] getExtraPeople(Bundle extras) {
         String[] peopleList = getExtraPeopleForKey(extras, Notification.EXTRA_PEOPLE_LIST);
         String[] legacyPeople = getExtraPeopleForKey(extras, Notification.EXTRA_PEOPLE);
@@ -415,101 +416,6 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         }
 
         return null;
-    }
-
-    private LookupResult resolvePhoneContact(Context context, final String number) {
-        Uri phoneUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-                Uri.encode(number));
-        return searchContacts(context, phoneUri);
-    }
-
-    private LookupResult resolveEmailContact(Context context, final String email) {
-        Uri numberUri = Uri.withAppendedPath(
-                ContactsContract.CommonDataKinds.Email.CONTENT_LOOKUP_URI,
-                Uri.encode(email));
-        return searchContacts(context, numberUri);
-    }
-
-    @VisibleForTesting
-    LookupResult searchContacts(Context context, Uri lookupUri) {
-        LookupResult lookupResult = new LookupResult();
-        final Uri corpLookupUri =
-                ContactsContract.Contacts.createCorpLookupUriFromEnterpriseLookupUri(lookupUri);
-        if (corpLookupUri == null) {
-            addContacts(lookupResult, context, lookupUri);
-        } else {
-            addWorkContacts(lookupResult, context, corpLookupUri);
-        }
-        return lookupResult;
-    }
-
-    @VisibleForTesting
-    // Performs a contacts search using searchContacts, and then follows up by looking up
-    // any phone numbers associated with the resulting contact information and merge those
-    // into the lookup result as well. Will have no additional effect if the contact does
-    // not have any phone numbers.
-    LookupResult searchContactsAndLookupNumbers(Context context, Uri lookupUri) {
-        LookupResult lookupResult = searchContacts(context, lookupUri);
-        String phoneLookupKey = lookupResult.getPhoneLookupKey();
-        if (phoneLookupKey != null) {
-            String selection = Contacts.LOOKUP_KEY + " = ?";
-            String[] selectionArgs = new String[] { phoneLookupKey };
-            try (Cursor cursor = context.getContentResolver().query(
-                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PHONE_LOOKUP_PROJECTION,
-                    selection, selectionArgs, /* sortOrder= */ null)) {
-                if (cursor == null) {
-                    Slog.w(TAG, "Cursor is null when querying contact phone number.");
-                    return lookupResult;
-                }
-
-                while (cursor.moveToNext()) {
-                    lookupResult.mergePhoneNumber(cursor);
-                }
-            } catch (Throwable t) {
-                Slog.w(TAG, "Problem getting content resolver or querying phone numbers.", t);
-            }
-        }
-        return lookupResult;
-    }
-
-    private void addWorkContacts(LookupResult lookupResult, Context context, Uri corpLookupUri) {
-        final int workUserId = findWorkUserId(context);
-        if (workUserId == -1) {
-            Slog.w(TAG, "Work profile user ID not found for work contact: " + corpLookupUri);
-            return;
-        }
-        final Uri corpLookupUriWithUserId =
-                ContentProvider.maybeAddUserId(corpLookupUri, workUserId);
-        addContacts(lookupResult, context, corpLookupUriWithUserId);
-    }
-
-    /** Returns the user ID of the managed profile or -1 if none is found. */
-    private int findWorkUserId(Context context) {
-        final UserManager userManager = context.getSystemService(UserManager.class);
-        final int[] profileIds =
-                userManager.getProfileIds(context.getUserId(), /* enabledOnly= */ true);
-        for (int profileId : profileIds) {
-            if (userManager.isManagedProfile(profileId)) {
-                return profileId;
-            }
-        }
-        return -1;
-    }
-
-    /** Modifies the given lookup result to add contacts found at the given URI. */
-    private void addContacts(LookupResult lookupResult, Context context, Uri uri) {
-        try (Cursor c = context.getContentResolver().query(
-                uri, LOOKUP_PROJECTION, null, null, null)) {
-            if (c == null) {
-                Slog.w(TAG, "Null cursor from contacts query.");
-                return;
-            }
-            while (c.moveToNext()) {
-                lookupResult.mergeContact(c);
-            }
-        } catch (Throwable t) {
-            Slog.w(TAG, "Problem getting content resolver or performing contacts query.", t);
-        }
     }
 
     @VisibleForTesting
@@ -619,19 +525,18 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         }
     }
 
-    private class PeopleRankingReconsideration extends RankingReconsideration {
+    @VisibleForTesting
+    class PeopleRankingReconsideration extends RankingReconsideration {
         private final LinkedList<String> mPendingLookups;
         private final Context mContext;
 
-        // Amount of time to wait for a result from the contacts db before rechecking affinity.
-        private static final long LOOKUP_TIME = 1000;
         private float mContactAffinity = NONE;
         private ArraySet<String> mPhoneNumbers = null;
         private NotificationRecord mRecord;
 
         private PeopleRankingReconsideration(Context context, String key,
                 LinkedList<String> pendingLookups) {
-            super(key, LOOKUP_TIME);
+            super(key);
             mContext = context;
             mPendingLookups = pendingLookups;
         }
@@ -642,7 +547,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             long timeStartMs = System.currentTimeMillis();
             for (final String handle: mPendingLookups) {
                 final String cacheKey = getCacheKey(mContext.getUserId(), handle);
-                LookupResult lookupResult = null;
+                LookupResult lookupResult;
                 boolean cacheHit = false;
                 synchronized (mPeopleCache) {
                     lookupResult = mPeopleCache.get(cacheKey);
@@ -700,6 +605,102 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             if (mRecord != null) {
                 mUsageStats.registerPeopleAffinity(mRecord, mContactAffinity > NONE,
                         mContactAffinity == STARRED_CONTACT, false /* cached */);
+            }
+        }
+
+        private static LookupResult resolvePhoneContact(Context context, final String number) {
+            Uri phoneUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                    Uri.encode(number));
+            return searchContacts(context, phoneUri);
+        }
+
+        private static LookupResult resolveEmailContact(Context context, final String email) {
+            Uri numberUri = Uri.withAppendedPath(
+                    ContactsContract.CommonDataKinds.Email.CONTENT_LOOKUP_URI,
+                    Uri.encode(email));
+            return searchContacts(context, numberUri);
+        }
+
+        @VisibleForTesting
+        static LookupResult searchContacts(Context context, Uri lookupUri) {
+            LookupResult lookupResult = new LookupResult();
+            final Uri corpLookupUri =
+                    ContactsContract.Contacts.createCorpLookupUriFromEnterpriseLookupUri(lookupUri);
+            if (corpLookupUri == null) {
+                addContacts(lookupResult, context, lookupUri);
+            } else {
+                addWorkContacts(lookupResult, context, corpLookupUri);
+            }
+            return lookupResult;
+        }
+
+        @VisibleForTesting
+        // Performs a contacts search using searchContacts, and then follows up by looking up
+        // any phone numbers associated with the resulting contact information and merge those
+        // into the lookup result as well. Will have no additional effect if the contact does
+        // not have any phone numbers.
+        static LookupResult searchContactsAndLookupNumbers(Context context, Uri lookupUri) {
+            LookupResult lookupResult = searchContacts(context, lookupUri);
+            String phoneLookupKey = lookupResult.getPhoneLookupKey();
+            if (phoneLookupKey != null) {
+                String selection = Contacts.LOOKUP_KEY + " = ?";
+                String[] selectionArgs = new String[] { phoneLookupKey };
+                try (Cursor cursor = context.getContentResolver().query(
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PHONE_LOOKUP_PROJECTION,
+                        selection, selectionArgs, /* sortOrder= */ null)) {
+                    if (cursor == null) {
+                        Slog.w(TAG, "Cursor is null when querying contact phone number.");
+                        return lookupResult;
+                    }
+
+                    while (cursor.moveToNext()) {
+                        lookupResult.mergePhoneNumber(cursor);
+                    }
+                } catch (Throwable t) {
+                    Slog.w(TAG, "Problem getting content resolver or querying phone numbers.", t);
+                }
+            }
+            return lookupResult;
+        }
+
+        private static void addWorkContacts(LookupResult lookupResult, Context context,
+                Uri corpLookupUri) {
+            final int workUserId = findWorkUserId(context);
+            if (workUserId == -1) {
+                Slog.w(TAG, "Work profile user ID not found for work contact: " + corpLookupUri);
+                return;
+            }
+            final Uri corpLookupUriWithUserId =
+                    ContentProvider.maybeAddUserId(corpLookupUri, workUserId);
+            addContacts(lookupResult, context, corpLookupUriWithUserId);
+        }
+
+        /** Returns the user ID of the managed profile or -1 if none is found. */
+        private static int findWorkUserId(Context context) {
+            final UserManager userManager = context.getSystemService(UserManager.class);
+            final int[] profileIds =
+                    userManager.getProfileIds(context.getUserId(), /* enabledOnly= */ true);
+            for (int profileId : profileIds) {
+                if (userManager.isManagedProfile(profileId)) {
+                    return profileId;
+                }
+            }
+            return -1;
+        }
+
+        /** Modifies the given lookup result to add contacts found at the given URI. */
+        private static void addContacts(LookupResult lookupResult, Context context, Uri uri) {
+            try (Cursor c = context.getContentResolver().query(
+                    uri, LOOKUP_PROJECTION, null, null, null)) {
+                if (c == null) {
+                    Slog.w(TAG, "Null cursor from contacts query.");
+                    return;
+                }
+                while (c.moveToNext()) {
+                    lookupResult.mergeContact(c);
+                }
+            } catch (Throwable t) {
+                Slog.w(TAG, "Problem getting content resolver or performing contacts query.", t);
             }
         }
 

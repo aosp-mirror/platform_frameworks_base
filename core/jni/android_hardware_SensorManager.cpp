@@ -243,13 +243,31 @@ nativeGetDynamicSensors(JNIEnv *env, jclass clazz, jlong sensorManager, jobject 
     }
 }
 
+static void nativeGetRuntimeSensors(JNIEnv *env, jclass clazz, jlong sensorManager, jint deviceId,
+                                    jobject sensorList) {
+    SensorManager *mgr = reinterpret_cast<SensorManager *>(sensorManager);
+    const ListOffsets &listOffsets(gListOffsets);
+
+    Vector<Sensor> nativeList;
+
+    mgr->getRuntimeSensorList(deviceId, nativeList);
+
+    ALOGI("DYNS native SensorManager.getRuntimeSensorList return %zu sensors", nativeList.size());
+    for (size_t i = 0; i < nativeList.size(); ++i) {
+        jobject sensor = translateNativeSensorToJavaSensor(env, NULL, nativeList[i]);
+        // add to list
+        env->CallBooleanMethod(sensorList, listOffsets.add, sensor);
+    }
+}
+
 static jboolean nativeIsDataInjectionEnabled(JNIEnv *_env, jclass _this, jlong sensorManager) {
     SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
     return mgr->isDataInjectionEnabled();
 }
 
 static jint nativeCreateDirectChannel(JNIEnv *_env, jclass _this, jlong sensorManager,
-        jlong size, jint channelType, jint fd, jobject hardwareBufferObj) {
+                                      jint deviceId, jlong size, jint channelType, jint fd,
+                                      jobject hardwareBufferObj) {
     const native_handle_t *nativeHandle = nullptr;
     NATIVE_HANDLE_DECLARE_STORAGE(ashmemHandle, 1, 0);
 
@@ -270,7 +288,7 @@ static jint nativeCreateDirectChannel(JNIEnv *_env, jclass _this, jlong sensorMa
     }
 
     SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
-    return mgr->createDirectChannel(size, channelType, nativeHandle);
+    return mgr->createDirectChannel(deviceId, size, channelType, nativeHandle);
 }
 
 static void nativeDestroyDirectChannel(JNIEnv *_env, jclass _this, jlong sensorManager,
@@ -503,40 +521,26 @@ static jint nativeInjectSensorData(JNIEnv *env, jclass clazz, jlong eventQ, jint
 //----------------------------------------------------------------------------
 
 static const JNINativeMethod gSystemSensorManagerMethods[] = {
-    {"nativeClassInit",
-            "()V",
-            (void*)nativeClassInit },
-    {"nativeCreate",
-             "(Ljava/lang/String;)J",
-             (void*)nativeCreate },
+        {"nativeClassInit", "()V", (void *)nativeClassInit},
+        {"nativeCreate", "(Ljava/lang/String;)J", (void *)nativeCreate},
 
-    {"nativeGetSensorAtIndex",
-            "(JLandroid/hardware/Sensor;I)Z",
-            (void*)nativeGetSensorAtIndex },
+        {"nativeGetSensorAtIndex", "(JLandroid/hardware/Sensor;I)Z",
+         (void *)nativeGetSensorAtIndex},
 
-    {"nativeGetDynamicSensors",
-            "(JLjava/util/List;)V",
-            (void*)nativeGetDynamicSensors },
+        {"nativeGetDynamicSensors", "(JLjava/util/List;)V", (void *)nativeGetDynamicSensors},
 
-    {"nativeIsDataInjectionEnabled",
-            "(J)Z",
-            (void*)nativeIsDataInjectionEnabled },
+        {"nativeGetRuntimeSensors", "(JILjava/util/List;)V", (void *)nativeGetRuntimeSensors},
 
-    {"nativeCreateDirectChannel",
-            "(JJIILandroid/hardware/HardwareBuffer;)I",
-            (void*)nativeCreateDirectChannel },
+        {"nativeIsDataInjectionEnabled", "(J)Z", (void *)nativeIsDataInjectionEnabled},
 
-    {"nativeDestroyDirectChannel",
-            "(JI)V",
-            (void*)nativeDestroyDirectChannel },
+        {"nativeCreateDirectChannel", "(JIJIILandroid/hardware/HardwareBuffer;)I",
+         (void *)nativeCreateDirectChannel},
 
-    {"nativeConfigDirectChannel",
-            "(JIII)I",
-            (void*)nativeConfigDirectChannel },
+        {"nativeDestroyDirectChannel", "(JI)V", (void *)nativeDestroyDirectChannel},
 
-    {"nativeSetOperationParameter",
-            "(JII[F[I)I",
-            (void*)nativeSetOperationParameter },
+        {"nativeConfigDirectChannel", "(JIII)I", (void *)nativeConfigDirectChannel},
+
+        {"nativeSetOperationParameter", "(JII[F[I)I", (void *)nativeSetOperationParameter},
 };
 
 static const JNINativeMethod gBaseEventQueueMethods[] = {

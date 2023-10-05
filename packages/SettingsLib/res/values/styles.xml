@@ -17,6 +17,7 @@
 <resources xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <style name="TextAppearanceSmall">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
     <style name="TextAppearanceMedium">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
@@ -77,4 +78,44 @@
         <item name="android:textSize">@dimen/broadcast_dialog_btn_text_size</item>
     </style>
 
+    <style name="EditUserDialogTitle" parent="@android:TextAppearance.DeviceDefault.Headline">
+        <item name="android:textSize">@dimen/broadcast_dialog_title_text_size</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="DialogWithIconTitle" parent="@android:TextAppearance.DeviceDefault.Headline">
+        <item name="android:textSize">@dimen/broadcast_dialog_title_text_size</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="DialogButtonPositive">
+        <item name="android:buttonCornerRadius">0dp</item>
+        <item name="android:background">@drawable/dialog_btn_filled</item>
+        <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style name="DialogButtonNegative">
+        <item name="android:buttonCornerRadius">28dp</item>
+        <item name="android:background">@drawable/dialog_btn_outline</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style name="TextStyleMessage">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textSize">16dp</item>
+    </style>
 </resources>

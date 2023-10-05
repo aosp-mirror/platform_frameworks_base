@@ -62,6 +62,9 @@ public final class UsbACMidi10Endpoint extends UsbACEndpoint {
                 + " Length: " + getLength());
         canvas.openList();
         canvas.writeListItem("" + getNumJacks() + " Jacks.");
+        for (int i = 0; i < getNumJacks(); i++) {
+            canvas.writeListItem("Jack " + i + ": " + mJackIds[i]);
+        }
         canvas.closeList();
     }
 }

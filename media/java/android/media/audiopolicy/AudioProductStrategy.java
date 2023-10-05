@@ -203,8 +203,14 @@ public final class AudioProductStrategy implements Parcelable {
 
         AudioProductStrategy thatStrategy = (AudioProductStrategy) o;
 
-        return mName == thatStrategy.mName && mId == thatStrategy.mId
+        return mId == thatStrategy.mId
+                && Objects.equals(mName, thatStrategy.mName)
                 && Arrays.equals(mAudioAttributesGroups, thatStrategy.mAudioAttributesGroups);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mId, mName, Arrays.hashCode(mAudioAttributesGroups));
     }
 
     /**
@@ -233,9 +239,10 @@ public final class AudioProductStrategy implements Parcelable {
 
     /**
      * @hide
-     * @return the product strategy ID (which is the generalisation of Car Audio Usage / legacy
+     * @return the product strategy name (which is the generalisation of Car Audio Usage / legacy
      *         routing_strategy linked to {@link AudioAttributes#getUsage()}).
      */
+    @SystemApi
     @NonNull public String getName() {
         return mName;
     }
@@ -457,6 +464,12 @@ public final class AudioProductStrategy implements Parcelable {
             return mVolumeGroupId == thatAag.mVolumeGroupId
                     && mLegacyStreamType == thatAag.mLegacyStreamType
                     && Arrays.equals(mAudioAttributes, thatAag.mAudioAttributes);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mVolumeGroupId, mLegacyStreamType,
+                    Arrays.hashCode(mAudioAttributes));
         }
 
         public int getStreamType() {

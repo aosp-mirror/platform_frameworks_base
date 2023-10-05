@@ -33,10 +33,10 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
 import android.widget.FrameLayout
+import com.android.app.animation.Interpolators
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CujType
 import com.android.systemui.util.registerAnimationOnBackInvoked
-import java.lang.IllegalArgumentException
 import kotlin.math.roundToInt
 
 private const val TAG = "DialogLaunchAnimator"
@@ -249,7 +249,7 @@ constructor(
         // intent is to launch a dialog from another dialog.
         val animatedParent =
             openedDialogs.firstOrNull {
-                it.dialog.window.decorView.viewRootImpl == controller.viewRoot
+                it.dialog.window?.decorView?.viewRootImpl == controller.viewRoot
             }
         val controller =
             animatedParent?.dialogContentWithBackground?.let {
@@ -336,7 +336,7 @@ constructor(
     ): ActivityLaunchAnimator.Controller? {
         val animatedDialog =
             openedDialogs.firstOrNull {
-                it.dialog.window.decorView.viewRootImpl == view.viewRootImpl
+                it.dialog.window?.decorView?.viewRootImpl == view.viewRootImpl
             }
                 ?: return null
         return createActivityLaunchController(animatedDialog, cujType)
@@ -417,7 +417,7 @@ constructor(
                 animatedDialog.prepareForStackDismiss()
 
                 // Remove the dim.
-                dialog.window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             }
 
             override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
@@ -867,7 +867,7 @@ private class AnimatedDialog(
         }
 
         // Show the background dim.
-        dialog.window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
         startAnimation(
             isLaunching = true,
@@ -947,7 +947,7 @@ private class AnimatedDialog(
             isLaunching = false,
             onLaunchAnimationStart = {
                 // Remove the dim background as soon as we start the animation.
-                dialog.window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             },
             onLaunchAnimationEnd = {
                 val dialogContentWithBackground = this.dialogContentWithBackground!!

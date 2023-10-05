@@ -20,6 +20,7 @@ android_test {
         "BinderProxyCountingTestService/src/**/*.java",
         "BinderDeathRecipientHelperApp/src/**/*.java",
         "aidl/**/I*.aidl",
+        ":FrameworksCoreTestDoubles-sources",
     ],
 
     aidl: {
@@ -35,6 +36,7 @@ android_test {
         "-c fa",
     ],
     static_libs: [
+        "collector-device-lib-platform",
         "frameworks-base-testutils",
         "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
         "core-tests-support",
@@ -43,10 +45,12 @@ android_test {
         "mockwebserver",
         "guava",
         "androidx.core_core",
+        "androidx.core_core-ktx",
         "androidx.test.espresso.core",
         "androidx.test.ext.junit",
         "androidx.test.runner",
         "androidx.test.rules",
+        "junit-params",
         "kotlin-test",
         "mockito-target-minus-junit4",
         "ub-uiautomator",
@@ -56,6 +60,7 @@ android_test {
         "print-test-util-lib",
         "testng",
         "servicestests-utils",
+        "device-time-shell-utils",
     ],
 
     libs: [
@@ -70,15 +75,20 @@ android_test {
     ],
     jni_libs: [
         "libpowermanagertest_jni",
+        "libworksourceparceltest_jni",
     ],
 
     sdk_version: "core_platform",
-    test_suites: ["device-tests"],
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
 
     certificate: "platform",
 
     resource_dirs: ["res"],
     resource_zips: [":FrameworksCoreTests_apks_as_resources"],
+    java_resources: [":ApkVerityTestCertDer"],
 
     data: [
         ":BstatsTestApp",
