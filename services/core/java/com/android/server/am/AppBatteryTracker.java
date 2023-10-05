@@ -580,7 +580,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                             batteryStatsInternal);
             curDuration += curStart - lastUidBatteryUsageStartTs;
             try {
-                statsCommit.close();
+                if (statsCommit != null) {
+                    statsCommit.close();
+                } else {
+                    Slog.w(TAG, "Stat was null");
+                }
             } catch (IOException e) {
                 Slog.w(TAG, "Failed to close a stat");
             }
@@ -660,7 +664,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             }
         }
         try {
-            stats.close();
+            if (stats != null) {
+                stats.close();
+            } else {
+                Slog.w(TAG, "Stat was null");
+            }
         } catch (IOException e) {
             Slog.w(TAG, "Failed to close a stat");
         }
@@ -684,7 +692,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         final BatteryUsageStats stats = statsList.get(0);
         for (int i = 1; i < statsList.size(); i++) {
             try {
-                statsList.get(i).close();
+                if (statsList.get(i) != null) {
+                    statsList.get(i).close();
+                } else {
+                    Slog.w(TAG, "Stat was null");
+                }
             } catch (IOException e) {
                 Slog.w(TAG, "Failed to close a stat in BatteryUsageStats List");
             }
