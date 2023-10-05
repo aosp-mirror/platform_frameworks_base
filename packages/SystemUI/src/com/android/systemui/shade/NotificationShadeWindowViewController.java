@@ -21,7 +21,6 @@ import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.app.StatusBarManager;
-import android.os.PowerManager;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.InputDevice;
@@ -36,7 +35,6 @@ import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.back.domain.interactor.BackActionInteractor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
@@ -56,6 +54,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.log.BouncerLogger;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -351,16 +350,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 if (mStatusBarStateController.isDozing()) {
                     mDozeScrimController.extendPulse();
                 }
-                mLockIconViewController.onTouchEvent(
-                        ev,
-                        /* onGestureDetectedRunnable */
-                        () -> {
-                            mService.userActivity();
-                            mPowerInteractor.wakeUpIfDozing(
-                                    "LOCK_ICON_TOUCH",
-                                    PowerManager.WAKE_REASON_GESTURE);
-                        }
-                );
 
                 // In case we start outside of the view bounds (below the status bar), we need to
                 // dispatch the touch manually as the view system can't accommodate for touches
@@ -415,8 +404,18 @@ public class NotificationShadeWindowViewController implements Dumpable {
 
             private boolean shouldInterceptTouchEventInternal(MotionEvent ev) {
                 mLastInterceptWasDragDownHelper = false;
-                if (mStatusBarStateController.isDozing() && !mDozeServiceHost.isPulsing()
-                        && !mDockManager.isDocked()) {
+                // When the device starts dozing, there's a delay before the device's display state
+                // changes from ON => DOZE to allow for the light reveal animation to run at
+                // a higher refresh rate and to delay visual changes (ie: display blink) when
+                // changing the display state. We'll call this specific state the
+                // "aodDefermentState". In this state we:
+                //     - don't want touches to get sent to underlying views, except the lock icon
+                //     - handle the tap to wake gesture via the PulsingGestureListener
+                if (mStatusBarStateController.isDozing()
+                        && !mDozeServiceHost.isPulsing()
+                        && !mDockManager.isDocked()
+                        && !mLockIconViewController.willHandleTouchWhileDozing(ev)
+                ) {
                     if (ev.getAction() == MotionEvent.ACTION_DOWN) {
                         mShadeLogger.d("NSWVC: capture all touch events in always-on");
                     }
@@ -428,14 +427,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
                     // bouncer is showing
                     if (ev.getAction() == MotionEvent.ACTION_DOWN) {
                         mShadeLogger.d("NSWVC: alt bouncer showing");
-                    }
-                    return true;
-                }
-
-                if (mLockIconViewController.onInterceptTouchEvent(ev)) {
-                    // immediately return true; don't send the touch to the drag down helper
-                    if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-                        mShadeLogger.d("NSWVC: don't send touch to drag down helper");
                     }
                     return true;
                 }
