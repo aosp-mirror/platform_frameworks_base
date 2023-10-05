@@ -68,6 +68,7 @@ constructor(
 
     private val hasCancelButtonBeenClicked = MutableStateFlow(false)
     private val isFinishRequiredDueToExecutedAction = MutableStateFlow(false)
+    private val userSwitched = MutableStateFlow(false)
 
     /**
      * Whether the observer should finish the experience. Once consumed, [onFinished] must be called
@@ -89,6 +90,7 @@ constructor(
     fun onFinished() {
         hasCancelButtonBeenClicked.value = false
         isFinishRequiredDueToExecutedAction.value = false
+        userSwitched.value = false
     }
 
     /** Notifies that the user has clicked the "open menu" button. */
@@ -121,8 +123,9 @@ constructor(
             hasCancelButtonBeenClicked,
             // If an executed action told us to finish, we should finish,
             isFinishRequiredDueToExecutedAction,
-        ) { cancelButtonClicked, executedActionFinish ->
-            cancelButtonClicked || executedActionFinish
+            userSwitched,
+        ) { cancelButtonClicked, executedActionFinish, userSwitched ->
+            cancelButtonClicked || executedActionFinish || userSwitched
         }
 
     private fun toViewModel(
@@ -191,7 +194,10 @@ constructor(
         return if (!model.isSelectable) {
             null
         } else {
-            { userInteractor.selectUser(model.id) }
+            {
+                userInteractor.selectUser(model.id)
+                userSwitched.value = true
+            }
         }
     }
 }
