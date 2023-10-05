@@ -1081,6 +1081,7 @@ public class TransitionTests extends WindowTestsBase {
         makeWindowVisible(windows);
         mDisplayContent.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
         mDisplayContent.getDisplayPolicy().addWindowLw(navBar, navBar.mAttrs);
+        mDisplayContent.mTransitionController.setSyncEngine(createTestBLASTSyncEngine());
         final TestTransitionPlayer player = registerTestTransitionPlayer();
 
         mDisplayContent.getDisplayRotation().setRotation(mDisplayContent.getRotation() + 1);

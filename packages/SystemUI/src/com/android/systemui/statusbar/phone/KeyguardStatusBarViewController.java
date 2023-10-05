@@ -172,7 +172,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             new BatteryController.BatteryStateChangeCallback() {
                 @Override
                 public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-                    mView.onBatteryLevelChanged(charging);
+                    mView.onBatteryChargingChanged(charging);
                 }
             };
 
@@ -430,11 +430,18 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Sets whether user switcher is enabled. */
     public void setKeyguardUserSwitcherEnabled(boolean enabled) {
+        if (isMigrationEnabled()) {
+            return;
+        }
         mView.setKeyguardUserSwitcherEnabled(enabled);
     }
 
     /** Sets whether this controller should listen to battery updates. */
     public void setBatteryListening(boolean listening) {
+        if (isMigrationEnabled()) {
+            return;
+        }
+
         if (listening == mBatteryListening) {
             return;
         }
@@ -472,6 +479,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Animate the keyguard status bar in. */
     public void animateKeyguardStatusBarIn() {
+        if (isMigrationEnabled()) {
+            return;
+        }
+
         mLogger.log(TAG, LogLevel.DEBUG, "animating status bar in");
         if (mDisableStateTracker.isDisabled()) {
             // If our view is disabled, don't allow us to animate in.
@@ -488,6 +499,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Animate the keyguard status bar out. */
     public void animateKeyguardStatusBarOut(long startDelay, long duration) {
+        if (isMigrationEnabled()) {
+            return;
+        }
+
         mLogger.log(TAG, LogLevel.DEBUG, "animating status bar out");
         ValueAnimator anim = ValueAnimator.ofFloat(mView.getAlpha(), 0f);
         anim.addUpdateListener(mAnimatorUpdateListener);

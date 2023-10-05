@@ -72,6 +72,14 @@ class StatusBarNotificationActivityStarterLogger @Inject constructor(
         })
     }
 
+    fun logCloseRemoteInput(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+        }, {
+            "Closing remote input for $str1"
+        })
+    }
+
     fun logExpandingBubble(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey

@@ -105,7 +105,7 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
     fun setUp() {
         featureFlags.set(Flags.INSTANT_TETHER, false)
         featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, false)
-        whenever(wifiPickerTrackerFactory.create(any(), capture(callbackCaptor)))
+        whenever(wifiPickerTrackerFactory.create(any(), capture(callbackCaptor), any()))
             .thenReturn(wifiPickerTracker)
     }
 

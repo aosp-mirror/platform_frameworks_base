@@ -241,6 +241,8 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     fun resetViewStates_isOnKeyguard_viewBecomesTransparent() {
         ambientState.setStatusBarState(StatusBarState.KEYGUARD)
         ambientState.hideAmount = 0.25f
+        whenever(notificationRow.isHeadsUpState).thenReturn(true)
+
         stackScrollAlgorithm.initView(context)
 
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
@@ -283,17 +285,20 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val row2 = mockExpandableNotificationRow()
         hostView.addView(row2)
 
+        whenever(row1.isHeadsUpState).thenReturn(true)
+        whenever(row2.isHeadsUpState).thenReturn(false)
+
         ambientState.setStatusBarState(StatusBarState.KEYGUARD)
         ambientState.hideAmount = 0.25f
+        ambientState.dozeAmount = 0.33f
         notificationShelf.viewState.hidden = true
         ambientState.shelf = notificationShelf
         stackScrollAlgorithm.initView(context)
 
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
-        val expected = 1f - ambientState.hideAmount
-        assertThat(row1.viewState.alpha).isEqualTo(expected)
-        assertThat(row2.viewState.alpha).isEqualTo(expected)
+        assertThat(row1.viewState.alpha).isEqualTo(1f - ambientState.hideAmount)
+        assertThat(row2.viewState.alpha).isEqualTo(1f - ambientState.dozeAmount)
     }
 
     @Test

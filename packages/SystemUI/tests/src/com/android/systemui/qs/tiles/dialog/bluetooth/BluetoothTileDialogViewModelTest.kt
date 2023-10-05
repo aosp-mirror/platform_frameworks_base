@@ -95,10 +95,11 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 dispatcher,
             )
-        `when`(deviceItemInteractor.deviceItemFlow).thenReturn(MutableStateFlow(null).asStateFlow())
-        `when`(bluetoothStateInteractor.updateBluetoothStateFlow)
+        `when`(deviceItemInteractor.deviceItemUpdate)
             .thenReturn(MutableStateFlow(null).asStateFlow())
-        `when`(deviceItemInteractor.updateDeviceItemsFlow)
+        `when`(bluetoothStateInteractor.bluetoothStateUpdate)
+            .thenReturn(MutableStateFlow(null).asStateFlow())
+        `when`(deviceItemInteractor.deviceItemUpdateRequest)
             .thenReturn(MutableStateFlow(Unit).asStateFlow())
         `when`(bluetoothStateInteractor.isBluetoothEnabled).thenReturn(true)
     }
@@ -143,7 +144,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             bluetoothTileDialogViewModel.showDialog(context, null)
 
             assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
-            verify(deviceItemInteractor).deviceItemFlow
+            verify(deviceItemInteractor).deviceItemUpdate
         }
     }
 
@@ -153,7 +154,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             bluetoothTileDialogViewModel.showDialog(context, null)
 
             assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
-            verify(bluetoothStateInteractor).updateBluetoothStateFlow
+            verify(bluetoothStateInteractor).bluetoothStateUpdate
         }
     }
 

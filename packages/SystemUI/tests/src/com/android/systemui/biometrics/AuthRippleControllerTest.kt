@@ -301,7 +301,10 @@ class AuthRippleControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testUdfps_onFingerDown_showDwellRipple() {
+    fun testUdfps_onFingerDown_runningForDeviceEntry_showDwellRipple() {
+        // GIVEN fingerprint detection is running on keyguard
+        `when`(keyguardUpdateMonitor.isFingerprintDetectionRunning).thenReturn(true)
+
         // GIVEN view is already attached
         controller.onViewAttached()
         val captor = ArgumentCaptor.forClass(UdfpsController.Callback::class.java)
@@ -317,5 +320,22 @@ class AuthRippleControllerTest : SysuiTestCase() {
         // THEN update sensor location and show ripple
         verify(rippleView).setFingerprintSensorLocation(fpsLocation, 0f)
         verify(rippleView).startDwellRipple(false)
+    }
+
+    @Test
+    fun testUdfps_onFingerDown_notDeviceEntry_doesNotShowDwellRipple() {
+        // GIVEN fingerprint detection is NOT running on keyguard
+        `when`(keyguardUpdateMonitor.isFingerprintDetectionRunning).thenReturn(false)
+
+        // GIVEN view is already attached
+        controller.onViewAttached()
+        val captor = ArgumentCaptor.forClass(UdfpsController.Callback::class.java)
+        verify(udfpsController).addCallback(captor.capture())
+
+        // WHEN finger is down
+        captor.value.onFingerDown()
+
+        // THEN doesn't show dwell ripple
+        verify(rippleView, never()).startDwellRipple(false)
     }
 }

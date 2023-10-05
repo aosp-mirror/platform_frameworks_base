@@ -50,7 +50,7 @@ class PackageMonitorCallbackHelper {
 
     @NonNull
     private final Object mLock = new Object();
-    final IActivityManager mActivityManager = ActivityManager.getService();
+    IActivityManager mActivityManager;
 
     @NonNull
     @GuardedBy("mLock")
@@ -149,6 +149,9 @@ class PackageMonitorCallbackHelper {
         try {
             final int[] resolvedUserIds;
             if (userIds == null) {
+                if (mActivityManager == null) {
+                    mActivityManager = ActivityManager.getService();
+                }
                 if (mActivityManager == null) return;
                 resolvedUserIds = mActivityManager.getRunningUserIds();
             } else {

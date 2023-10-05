@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.flags.Flags.NEW_AOD_TRANSITION;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -109,6 +111,8 @@ public class LegacyNotificationIconAreaControllerImpl implements
 
     private final ViewRefactorFlag mShelfRefactor;
 
+    private final boolean mNewAodTransition;
+
     private int mAodIconAppearTranslation;
 
     private boolean mAnimationsEnabled;
@@ -147,6 +151,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
         mContext = context;
         mStatusBarStateController = statusBarStateController;
         mShelfRefactor = new ViewRefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
+        mNewAodTransition = featureFlags.isEnabled(NEW_AOD_TRANSITION);
         mStatusBarStateController.addCallback(this);
         mMediaManager = notificationMediaManager;
         mDozeParameters = dozeParameters;
@@ -609,9 +614,11 @@ public class LegacyNotificationIconAreaControllerImpl implements
         boolean animate = true;
         if (!mBypassController.getBypassEnabled()) {
             animate = mDozeParameters.getAlwaysOn() && !mDozeParameters.getDisplayNeedsBlanking();
-            // We only want the appear animations to happen when the notifications get fully hidden,
-            // since otherwise the unhide animation overlaps
-            animate &= fullyHidden;
+            if (!mNewAodTransition) {
+                // We only want the appear animations to happen when the notifications get fully
+                // hidden, since otherwise the unhide animation overlaps
+                animate &= fullyHidden;
+            }
         }
         updateAodIconsVisibility(animate, false /* force */);
         updateAodNotificationIcons();
@@ -647,23 +654,34 @@ public class LegacyNotificationIconAreaControllerImpl implements
             mAodIconsVisible = visible;
             mAodIcons.animate().cancel();
             if (animate) {
-                boolean wasFullyInvisible = mAodIcons.getVisibility() != View.VISIBLE;
-                if (mAodIconsVisible) {
-                    if (wasFullyInvisible) {
-                        // No fading here, let's just appear the icons instead!
-                        mAodIcons.setVisibility(View.VISIBLE);
-                        mAodIcons.setAlpha(1.0f);
-                        appearAodIcons();
+                if (mNewAodTransition) {
+                    // Let's make sure the icon are translated to 0, since we cancelled it above
+                    animateInAodIconTranslation();
+                    if (mAodIconsVisible) {
+                        CrossFadeHelper.fadeIn(mAodIcons);
+                    } else {
+                        CrossFadeHelper.fadeOut(mAodIcons);
+                    }
+                } else {
+                    boolean wasFullyInvisible = mAodIcons.getVisibility() != View.VISIBLE;
+                    if (mAodIconsVisible) {
+                        if (wasFullyInvisible) {
+                            // No fading here, let's just appear the icons instead!
+                            mAodIcons.setVisibility(View.VISIBLE);
+                            mAodIcons.setAlpha(1.0f);
+                            appearAodIcons();
+                        } else {
+                            // Let's make sure the icon are translated to 0, since we cancelled it
+                            // above
+                            animateInAodIconTranslation();
+                            // We were fading out, let's fade in instead
+                            CrossFadeHelper.fadeIn(mAodIcons);
+                        }
                     } else {
                         // Let's make sure the icon are translated to 0, since we cancelled it above
                         animateInAodIconTranslation();
-                        // We were fading out, let's fade in instead
-                        CrossFadeHelper.fadeIn(mAodIcons);
+                        CrossFadeHelper.fadeOut(mAodIcons);
                     }
-                } else {
-                    // Let's make sure the icon are translated to 0, since we cancelled it above
-                    animateInAodIconTranslation();
-                    CrossFadeHelper.fadeOut(mAodIcons);
                 }
             } else {
                 mAodIcons.setAlpha(1.0f);

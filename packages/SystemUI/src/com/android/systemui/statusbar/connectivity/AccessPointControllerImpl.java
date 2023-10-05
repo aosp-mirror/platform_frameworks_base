@@ -87,7 +87,7 @@ public class AccessPointControllerImpl implements AccessPointController,
      */
     public void init() {
         if (mWifiPickerTracker == null) {
-            mWifiPickerTracker = mWifiPickerTrackerFactory.create(this.getLifecycle(), this);
+            mWifiPickerTracker = mWifiPickerTrackerFactory.create(this.getLifecycle(), this, TAG);
         }
     }
 

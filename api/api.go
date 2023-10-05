@@ -115,6 +115,7 @@ type defaultsProps struct {
 }
 
 type Bazel_module struct {
+	Label              *string
 	Bp2build_available *bool
 }
 type bazelProperties struct {
@@ -141,6 +142,8 @@ type MergedTxtDefinition struct {
 	ModuleTag string
 	// public, system, module-lib or system-server
 	Scope string
+	// True if there is a bp2build definition for this module
+	Bp2buildDefined bool
 }
 
 func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
@@ -153,8 +156,10 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	if txt.Scope != "public" {
 		filename = txt.Scope + "-" + filename
 	}
+	moduleName := ctx.ModuleName() + "-" + filename
+
 	props := genruleProps{}
-	props.Name = proptools.StringPtr(ctx.ModuleName() + "-" + filename)
+	props.Name = proptools.StringPtr(moduleName)
 	props.Tools = []string{"metalava"}
 	props.Out = []string{filename}
 	props.Cmd = proptools.StringPtr(metalavaCmd + "$(in) --out $(out)")
@@ -172,7 +177,20 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 		},
 	}
 	props.Visibility = []string{"//visibility:public"}
-	ctx.CreateModule(genrule.GenRuleFactory, &props, &bp2buildNotAvailable)
+	bazelProps := bazelProperties{
+		&Bazel_module{
+			Bp2build_available: proptools.BoolPtr(false),
+		},
+	}
+	if txt.Bp2buildDefined {
+		moduleDir := ctx.ModuleDir()
+		if moduleDir == android.Bp2BuildTopLevel {
+			moduleDir = ""
+		}
+		label := fmt.Sprintf("//%s:%s", moduleDir, moduleName)
+		bazelProps.Label = &label
+	}
+	ctx.CreateModule(genrule.GenRuleFactory, &props, &bazelProps)
 }
 
 func createMergedAnnotationsFilegroups(ctx android.LoadHookContext, modules, system_server_modules []string) {
@@ -304,38 +322,43 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 
 	tagSuffix := []string{".api.txt}", ".removed-api.txt}"}
 	distFilename := []string{"android.txt", "android-removed.txt"}
+	bp2BuildDefined := []bool{true, false}
 	for i, f := range []string{"current.txt", "removed.txt"} {
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename:  f,
-			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-" + f,
-			Modules:      bootclasspath,
-			ModuleTag:    "{.public" + tagSuffix[i],
-			Scope:        "public",
+			TxtFilename:     f,
+			DistFilename:    distFilename[i],
+			BaseTxt:         ":non-updatable-" + f,
+			Modules:         bootclasspath,
+			ModuleTag:       "{.public" + tagSuffix[i],
+			Scope:           "public",
+			Bp2buildDefined: bp2BuildDefined[i],
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename:  f,
-			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-system-" + f,
-			Modules:      bootclasspath,
-			ModuleTag:    "{.system" + tagSuffix[i],
-			Scope:        "system",
+			TxtFilename:     f,
+			DistFilename:    distFilename[i],
+			BaseTxt:         ":non-updatable-system-" + f,
+			Modules:         bootclasspath,
+			ModuleTag:       "{.system" + tagSuffix[i],
+			Scope:           "system",
+			Bp2buildDefined: bp2BuildDefined[i],
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename:  f,
-			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-module-lib-" + f,
-			Modules:      bootclasspath,
-			ModuleTag:    "{.module-lib" + tagSuffix[i],
-			Scope:        "module-lib",
+			TxtFilename:     f,
+			DistFilename:    distFilename[i],
+			BaseTxt:         ":non-updatable-module-lib-" + f,
+			Modules:         bootclasspath,
+			ModuleTag:       "{.module-lib" + tagSuffix[i],
+			Scope:           "module-lib",
+			Bp2buildDefined: bp2BuildDefined[i],
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename:  f,
-			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-system-server-" + f,
-			Modules:      system_server_classpath,
-			ModuleTag:    "{.system-server" + tagSuffix[i],
-			Scope:        "system-server",
+			TxtFilename:     f,
+			DistFilename:    distFilename[i],
+			BaseTxt:         ":non-updatable-system-server-" + f,
+			Modules:         system_server_classpath,
+			ModuleTag:       "{.system-server" + tagSuffix[i],
+			Scope:           "system-server",
+			Bp2buildDefined: bp2BuildDefined[i],
 		})
 	}
 	for _, txt := range textFiles {

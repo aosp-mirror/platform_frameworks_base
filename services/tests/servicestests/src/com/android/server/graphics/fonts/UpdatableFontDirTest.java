@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.graphics.FontListParser;
+import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontManager;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontUpdateRequest;
@@ -330,7 +331,8 @@ public final class UpdatableFontDirTest {
 
             FontConfig.FontFamily family = new FontConfig.FontFamily(
                     Arrays.asList(fooFont, barFont), null,
-                    FontConfig.FontFamily.VARIANT_DEFAULT);
+                    FontConfig.FontFamily.VARIANT_DEFAULT,
+                    FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
             return new FontConfig(Collections.emptyList(),
                     Collections.emptyList(),
                     Collections.singletonList(new FontConfig.NamedFamilyList(
@@ -491,7 +493,8 @@ public final class UpdatableFontDirTest {
                     file, null, "bar", new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT),
                     0, null, null);
             FontConfig.FontFamily family = new FontConfig.FontFamily(
-                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT);
+                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT,
+                    FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
             return new FontConfig(
                     Collections.emptyList(),
                     Collections.emptyList(),
@@ -644,7 +647,8 @@ public final class UpdatableFontDirTest {
                     file, null, "test", new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT), 0, null,
                     null);
             FontConfig.FontFamily family = new FontConfig.FontFamily(
-                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT);
+                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT,
+                    FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
             return new FontConfig(Collections.emptyList(), Collections.emptyList(),
                     Collections.singletonList(new FontConfig.NamedFamilyList(
                             Collections.singletonList(family), "sans-serif")), 0, 1);

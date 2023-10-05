@@ -21,7 +21,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -31,6 +33,7 @@ import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Compan
 import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.ACTION_PAIR_NEW_DEVICE
 import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.ACTION_PREVIOUSLY_CONNECTED_DEVICE
 import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.MAX_DEVICE_ITEM_ENTRY
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -73,14 +76,26 @@ constructor(
         job =
             coroutineScope.launch(mainDispatcher) {
                 dialog = createBluetoothTileDialog(context)
-                view?.let { dialogLaunchAnimator.showFromView(dialog!!, it) } ?: dialog!!.show()
+                view?.let {
+                    dialogLaunchAnimator.showFromView(
+                        dialog!!,
+                        it,
+                        animateBackgroundBoundsChange = true,
+                        cuj =
+                            DialogCuj(
+                                InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                INTERACTION_JANK_TAG
+                            )
+                    )
+                }
+                    ?: dialog!!.show()
                 updateDeviceItemJob?.cancel()
                 updateDeviceItemJob = launch { deviceItemInteractor.updateDeviceItems(context) }
 
-                bluetoothStateInteractor.updateBluetoothStateFlow
+                bluetoothStateInteractor.bluetoothStateUpdate
                     .filterNotNull()
                     .onEach {
-                        dialog!!.onBluetoothStateUpdated(it)
+                        dialog!!.onBluetoothStateUpdated(it, getSubtitleResId(it))
                         updateDeviceItemJob?.cancel()
                         updateDeviceItemJob = launch {
                             deviceItemInteractor.updateDeviceItems(context)
@@ -88,7 +103,7 @@ constructor(
                     }
                     .launchIn(this)
 
-                deviceItemInteractor.updateDeviceItemsFlow
+                deviceItemInteractor.deviceItemUpdateRequest
                     .onEach {
                         updateDeviceItemJob?.cancel()
                         updateDeviceItemJob = launch {
@@ -97,7 +112,7 @@ constructor(
                     }
                     .launchIn(this)
 
-                deviceItemInteractor.deviceItemFlow
+                deviceItemInteractor.deviceItemUpdate
                     .filterNotNull()
                     .onEach {
                         dialog!!.onDeviceItemUpdated(
@@ -109,17 +124,13 @@ constructor(
                     .launchIn(this)
 
                 dialog!!
-                    .bluetoothStateSwitchedFlow
+                    .bluetoothStateToggle
                     .onEach { bluetoothStateInteractor.isBluetoothEnabled = it }
                     .launchIn(this)
 
                 dialog!!
-                    .deviceItemClickedFlow
-                    .onEach {
-                        if (deviceItemInteractor.updateDeviceItemOnClick(it.first)) {
-                            dialog!!.onDeviceItemUpdatedAtPosition(it.first, it.second)
-                        }
-                    }
+                    .deviceItemClick
+                    .onEach { deviceItemInteractor.updateDeviceItemOnClick(it) }
                     .launchIn(this)
             }
     }
@@ -127,6 +138,7 @@ constructor(
     private fun createBluetoothTileDialog(context: Context): BluetoothTileDialog {
         return BluetoothTileDialog(
                 bluetoothStateInteractor.isBluetoothEnabled,
+                getSubtitleResId(bluetoothStateInteractor.isBluetoothEnabled),
                 this@BluetoothTileDialogViewModel,
                 uiEventLogger,
                 context
@@ -174,6 +186,13 @@ constructor(
                 dialogLaunchAnimator.createActivityLaunchController(view)
             )
         }
+    }
+
+    companion object {
+        private const val INTERACTION_JANK_TAG = "bluetooth_tile_dialog"
+        private fun getSubtitleResId(isBluetoothEnabled: Boolean) =
+            if (isBluetoothEnabled) R.string.quick_settings_bluetooth_tile_subtitle
+            else R.string.bt_is_off
     }
 }
 

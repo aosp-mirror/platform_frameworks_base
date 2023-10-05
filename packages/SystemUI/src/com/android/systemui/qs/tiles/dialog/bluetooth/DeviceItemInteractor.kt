@@ -55,11 +55,12 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
 
-    private val mutableDeviceItemFlow: MutableStateFlow<List<DeviceItem>?> = MutableStateFlow(null)
-    internal val deviceItemFlow
-        get() = mutableDeviceItemFlow.asStateFlow()
+    private val mutableDeviceItemUpdate: MutableStateFlow<List<DeviceItem>?> =
+        MutableStateFlow(null)
+    internal val deviceItemUpdate
+        get() = mutableDeviceItemUpdate.asStateFlow()
 
-    internal val updateDeviceItemsFlow: SharedFlow<Unit> =
+    internal val deviceItemUpdateRequest: SharedFlow<Unit> =
         conflatedCallbackFlow {
                 val listener =
                     object : BluetoothCallback {
@@ -120,7 +121,7 @@ constructor(
         withContext(backgroundDispatcher) {
             val mostRecentlyConnectedDevices = bluetoothAdapter?.mostRecentlyConnectedDevices
 
-            mutableDeviceItemFlow.value =
+            mutableDeviceItemUpdate.value =
                 bluetoothTileDialogRepository.cachedDevices
                     .mapNotNull { cachedDevice ->
                         deviceItemFactoryList
@@ -143,28 +144,20 @@ constructor(
         )
     }
 
-    internal fun updateDeviceItemOnClick(deviceItem: DeviceItem): Boolean {
-        var isClicked = false
+    internal fun updateDeviceItemOnClick(deviceItem: DeviceItem) {
         when (deviceItem.type) {
             DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
                 if (!BluetoothUtils.isActiveMediaDevice(deviceItem.cachedBluetoothDevice)) {
                     deviceItem.cachedBluetoothDevice.setActive()
                     uiEventLogger.log(BluetoothTileDialogUiEvent.CONNECTED_DEVICE_SET_ACTIVE)
-                    isClicked = true
                 }
             }
             DeviceItemType.CONNECTED_BLUETOOTH_DEVICE -> {}
             DeviceItemType.SAVED_BLUETOOTH_DEVICE -> {
                 deviceItem.cachedBluetoothDevice.connect()
                 uiEventLogger.log(BluetoothTileDialogUiEvent.SAVED_DEVICE_CONNECT)
-                isClicked = true
             }
         }
-        if (isClicked) {
-            deviceItem.isEnabled = false
-            deviceItem.alpha = BluetoothTileDialog.DISABLED_ALPHA
-        }
-        return isClicked
     }
 
     internal fun setDeviceItemFactoryListForTesting(list: List<DeviceItemFactory>) {

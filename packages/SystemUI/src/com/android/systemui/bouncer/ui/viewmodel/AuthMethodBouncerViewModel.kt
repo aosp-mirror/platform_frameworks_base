@@ -102,9 +102,12 @@ sealed class AuthMethodBouncerViewModel(
      *
      * @see BouncerInteractor.authenticate
      */
-    protected fun tryAuthenticate(useAutoConfirm: Boolean = false) {
+    protected fun tryAuthenticate(
+        input: List<Any> = getInput(),
+        useAutoConfirm: Boolean = false,
+    ) {
         viewModelScope.launch {
-            val authenticationResult = interactor.authenticate(getInput(), useAutoConfirm)
+            val authenticationResult = interactor.authenticate(input, useAutoConfirm)
             if (authenticationResult == AuthenticationResult.SKIPPED && useAutoConfirm) {
                 return@launch
             }

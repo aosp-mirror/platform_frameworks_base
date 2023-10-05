@@ -26,6 +26,7 @@ data class QSTileConfig(
     val tileIcon: Icon,
     @StringRes val tileLabelRes: Int,
     val instanceId: InstanceId,
+    val metricsSpec: String = tileSpec.spec,
     val policy: QSTilePolicy = QSTilePolicy.NoRestrictions,
 )
 

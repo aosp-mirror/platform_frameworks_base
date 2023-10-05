@@ -29,13 +29,23 @@ import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository
+import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor
+import com.android.systemui.statusbar.policy.BatteryController
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.mockito.Mockito.verify
 
 @SmallTest
+@OptIn(ExperimentalCoroutinesApi::class)
 class KeyguardStatusBarViewModelTest : SysuiTestCase() {
     private val testScope = TestScope()
     private val sceneTestUtils = SceneTestUtils(this)
@@ -54,11 +64,18 @@ class KeyguardStatusBarViewModelTest : SysuiTestCase() {
         ) {
             sceneTestUtils.sceneInteractor()
         }
+    private val keyguardStatusBarInteractor =
+        KeyguardStatusBarInteractor(
+            FakeKeyguardStatusBarRepository(),
+        )
+    private val batteryController = mock<BatteryController>()
 
     private val underTest =
         KeyguardStatusBarViewModel(
             testScope.backgroundScope,
             keyguardInteractor,
+            keyguardStatusBarInteractor,
+            batteryController,
         )
 
     @Test
@@ -101,5 +118,47 @@ class KeyguardStatusBarViewModelTest : SysuiTestCase() {
             keyguardRepository.setIsDozing(false)
 
             assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun isBatteryCharging_matchesCallback() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isBatteryCharging)
+            runCurrent()
+
+            val captor = argumentCaptor<BatteryController.BatteryStateChangeCallback>()
+            verify(batteryController).addCallback(capture(captor))
+            val callback = captor.value
+
+            callback.onBatteryLevelChanged(
+                /* level= */ 2,
+                /* pluggedIn= */ false,
+                /* charging= */ true,
+            )
+
+            assertThat(latest).isTrue()
+
+            callback.onBatteryLevelChanged(
+                /* level= */ 2,
+                /* pluggedIn= */ true,
+                /* charging= */ false,
+            )
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isBatteryCharging_unregistersWhenNotListening() =
+        testScope.runTest {
+            val job = underTest.isBatteryCharging.launchIn(this)
+            runCurrent()
+
+            val captor = argumentCaptor<BatteryController.BatteryStateChangeCallback>()
+            verify(batteryController).addCallback(capture(captor))
+
+            job.cancel()
+            runCurrent()
+
+            verify(batteryController).removeCallback(captor.value)
         }
 }

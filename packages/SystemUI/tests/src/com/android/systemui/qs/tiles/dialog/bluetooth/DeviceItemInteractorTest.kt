@@ -109,7 +109,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemFlow.value).isEmpty()
+            assertThat(interactor.deviceItemUpdate.value).isEmpty()
         }
     }
 
@@ -123,7 +123,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemFlow.value).isEmpty()
+            assertThat(interactor.deviceItemUpdate.value).isEmpty()
         }
     }
 
@@ -137,8 +137,8 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemFlow.value).hasSize(1)
-            assertThat(interactor.deviceItemFlow.value!![0]).isEqualTo(deviceItem1)
+            assertThat(interactor.deviceItemUpdate.value).hasSize(1)
+            assertThat(interactor.deviceItemUpdate.value!![0]).isEqualTo(deviceItem1)
         }
     }
 
@@ -152,9 +152,9 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemFlow.value).hasSize(2)
-            assertThat(interactor.deviceItemFlow.value!![0]).isEqualTo(deviceItem2)
-            assertThat(interactor.deviceItemFlow.value!![1]).isEqualTo(deviceItem2)
+            assertThat(interactor.deviceItemUpdate.value).hasSize(2)
+            assertThat(interactor.deviceItemUpdate.value!![0]).isEqualTo(deviceItem2)
+            assertThat(interactor.deviceItemUpdate.value!![1]).isEqualTo(deviceItem2)
         }
     }
 
@@ -179,7 +179,8 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemFlow.value).isEqualTo(listOf(deviceItem2, deviceItem1))
+            assertThat(interactor.deviceItemUpdate.value)
+                .isEqualTo(listOf(deviceItem2, deviceItem1))
         }
     }
 
@@ -201,7 +202,8 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemFlow.value).isEqualTo(listOf(deviceItem2, deviceItem1))
+            assertThat(interactor.deviceItemUpdate.value)
+                .isEqualTo(listOf(deviceItem2, deviceItem1))
         }
     }
 

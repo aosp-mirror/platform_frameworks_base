@@ -144,15 +144,17 @@ private fun SceneScope.BouncerScene(
         }
 
         val childModifier = Modifier.element(Bouncer.Elements.Content).fillMaxSize()
+        val isFullScreenUserSwitcherEnabled = viewModel.isUserSwitcherVisible
 
-        when (windowSizeClass.widthSizeClass) {
-            WindowWidthSizeClass.Expanded ->
+        when {
+            windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded ->
                 SideBySide(
                     viewModel = viewModel,
                     dialogFactory = dialogFactory,
                     modifier = childModifier,
                 )
-            WindowWidthSizeClass.Medium ->
+            isFullScreenUserSwitcherEnabled &&
+                windowSizeClass.widthSizeClass == WindowWidthSizeClass.Medium ->
                 Stacked(
                     viewModel = viewModel,
                     dialogFactory = dialogFactory,
@@ -442,14 +444,22 @@ private fun SideBySide(
                 label = "offset",
             )
 
-        UserSwitcher(
-            viewModel = viewModel,
-            modifier =
-                Modifier.fillMaxHeight().weight(1f).graphicsLayer {
-                    translationX = size.width * animatedOffset
-                    alpha = animatedAlpha(animatedOffset)
-                },
-        )
+        val userSwitcherModifier =
+            Modifier.fillMaxHeight().weight(1f).graphicsLayer {
+                translationX = size.width * animatedOffset
+                alpha = animatedAlpha(animatedOffset)
+            }
+        if (viewModel.isUserSwitcherVisible) {
+            UserSwitcher(
+                viewModel = viewModel,
+                modifier = userSwitcherModifier,
+            )
+        } else {
+            Box(
+                modifier = userSwitcherModifier,
+            )
+        }
+
         Box(
             modifier =
                 Modifier.fillMaxHeight().weight(1f).graphicsLayer {
