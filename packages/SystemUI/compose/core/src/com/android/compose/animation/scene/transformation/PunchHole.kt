@@ -47,14 +47,14 @@ internal class PunchHole(
         layoutImpl: SceneTransitionLayoutImpl,
         scene: Scene,
         element: Element,
-        sceneValues: Element.SceneValues,
+        sceneValues: Element.TargetValues,
     ): Modifier {
         return drawWithContent {
             val bounds = layoutImpl.elements[bounds]
             if (
                 bounds == null ||
-                    bounds.lastSize == Element.SizeUnspecified ||
-                    bounds.lastOffset == Offset.Unspecified
+                    bounds.lastSharedValues.size == Element.SizeUnspecified ||
+                    bounds.lastSharedValues.offset == Offset.Unspecified
             ) {
                 drawContent()
                 return@drawWithContent
@@ -64,7 +64,7 @@ internal class PunchHole(
                 canvas.withSaveLayer(size.toRect(), Paint()) {
                     drawContent()
 
-                    val offset = bounds.lastOffset - element.lastOffset
+                    val offset = bounds.lastSharedValues.offset - element.lastSharedValues.offset
                     translate(offset.x, offset.y) { drawHole(bounds) }
                 }
             }
@@ -72,7 +72,7 @@ internal class PunchHole(
     }
 
     private fun DrawScope.drawHole(bounds: Element) {
-        val boundsSize = bounds.lastSize.toSize()
+        val boundsSize = bounds.lastSharedValues.size.toSize()
         if (shape == RectangleShape) {
             drawRect(Color.Black, size = boundsSize, blendMode = BlendMode.DstOut)
             return

@@ -34,12 +34,12 @@ internal class AnchoredSize(
         layoutImpl: SceneTransitionLayoutImpl,
         scene: Scene,
         element: Element,
-        sceneValues: Element.SceneValues,
+        sceneValues: Element.TargetValues,
         transition: TransitionState.Transition,
         value: IntSize,
     ): IntSize {
         fun anchorSizeIn(scene: SceneKey): IntSize {
-            val size = layoutImpl.elements[anchor]?.sceneValues?.get(scene)?.size
+            val size = layoutImpl.elements[anchor]?.sceneValues?.get(scene)?.targetSize
             return if (size != null && size != Element.SizeUnspecified) {
                 size
             } else {

@@ -37,7 +37,7 @@ internal class ScaleSize(
         layoutImpl: SceneTransitionLayoutImpl,
         scene: Scene,
         element: Element,
-        sceneValues: Element.SceneValues,
+        sceneValues: Element.TargetValues,
         transition: TransitionState.Transition,
         value: IntSize,
     ): IntSize {
