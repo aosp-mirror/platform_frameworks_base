@@ -275,6 +275,7 @@ public final class DeviceStateManagerServiceTest {
         assertEquals(info.currentState, DEFAULT_DEVICE_STATE.getIdentifier());
     }
 
+    @FlakyTest(bugId = 297949293)
     @Test
     public void registerCallback() throws RemoteException {
         TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
