@@ -36,6 +36,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.media.IMediaRouter2;
 import android.media.IMediaRouter2Manager;
@@ -200,7 +201,8 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
 
         try {
-            enforcePrivilegedRoutingPermissions(uid, pid);
+            // TODO (b/305919655) - Handle revoking of MEDIA_ROUTING_CONTROL at runtime.
+            enforcePrivilegedRoutingPermissions(uid, pid, /* callerPackageName */ null);
             PackageManager pm = mContext.getPackageManager();
             pm.getPackageInfo(clientPackageName, PackageManager.PackageInfoFlags.of(0));
             return true;
@@ -727,13 +729,36 @@ class MediaRouter2ServiceImpl {
         return hasBluetoothRoutingPermission;
     }
 
-    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
-    private void enforcePrivilegedRoutingPermissions(int callerUid, int callerPid) {
-        mContext.enforcePermission(
-                Manifest.permission.MEDIA_CONTENT_CONTROL,
-                callerPid,
-                callerUid,
-                "Must hold MEDIA_CONTENT_CONTROL permission.");
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.MEDIA_ROUTING_CONTROL,
+                Manifest.permission.MEDIA_CONTENT_CONTROL
+            })
+    private void enforcePrivilegedRoutingPermissions(
+            int callerUid, int callerPid, @Nullable String callerPackageName) {
+        if (mContext.checkPermission(
+                        Manifest.permission.MEDIA_CONTENT_CONTROL, callerPid, callerUid)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        if (!Flags.enablePrivilegedRoutingForMediaRoutingControl()) {
+            throw new SecurityException("Must hold MEDIA_CONTENT_CONTROL");
+        }
+
+        if (PermissionChecker.checkPermissionForDataDelivery(
+                        mContext,
+                        Manifest.permission.MEDIA_ROUTING_CONTROL,
+                        callerPid,
+                        callerUid,
+                        callerPackageName,
+                        /* attributionTag */ null,
+                        /* message */ "Checking permissions for registering manager in"
+                                          + " MediaRouter2ServiceImpl.")
+                != PermissionChecker.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    "Must hold MEDIA_CONTENT_CONTROL or MEDIA_ROUTING_CONTROL permissions.");
+        }
     }
 
     // End of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.
@@ -1195,7 +1220,8 @@ class MediaRouter2ServiceImpl {
                             + " callerUserId: %d",
                         callerUid, callerPid, callerPackageName, callerUserId));
 
-        enforcePrivilegedRoutingPermissions(callerUid, callerPid);
+        // TODO (b/305919655) - Handle revoking of MEDIA_ROUTING_CONTROL at runtime.
+        enforcePrivilegedRoutingPermissions(callerUid, callerPid, callerPackageName);
 
         UserRecord userRecord = getOrCreateUserRecordLocked(callerUserId);
         managerRecord = new ManagerRecord(
