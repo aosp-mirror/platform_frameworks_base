@@ -2034,12 +2034,14 @@ public class SettingsProvider extends ContentProvider {
             final Uri ringtoneUri = Uri.parse(value);
             // Stream selected ringtone into cache, so it's available for playback
             // when CE storage is still locked
-            try (InputStream in = openRingtone(getContext(), ringtoneUri);
-                 OutputStream out = new FileOutputStream(cacheFile)) {
-                FileUtils.copy(in, out);
-            } catch (IOException e) {
-                Slog.w(LOG_TAG, "Failed to cache ringtone: " + e);
-            }
+            Binder.withCleanCallingIdentity(() -> {
+                try (InputStream in = openRingtone(getContext(), ringtoneUri);
+                         OutputStream out = new FileOutputStream(cacheFile)) {
+                    FileUtils.copy(in, out);
+                } catch (IOException e) {
+                    Slog.w(LOG_TAG, "Failed to cache ringtone: " + e);
+                }
+            });
         }
         return true;
     }
