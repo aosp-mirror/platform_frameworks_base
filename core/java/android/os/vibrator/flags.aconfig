@@ -13,3 +13,10 @@ flag {
     description: "Enables the haptics customization feature"
     bug: "241918098"
 }
+
+flag {
+    namespace: "haptics"
+    name: "haptics_customization_ringtone_v2_enabled"
+    description: "Enables the usage of the new RingtoneV2 class"
+    bug: "241918098"
+}
