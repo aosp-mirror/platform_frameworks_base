@@ -396,7 +396,7 @@ public class NotificationManagerService extends SystemService {
     static final int MESSAGE_FINISH_TOKEN_TIMEOUT = 7;
     static final int MESSAGE_ON_PACKAGE_CHANGED = 8;
 
-    static final long BITMAP_EXPIRATION_TIME_MS = TimeUnit.HOURS.toMillis(24);
+    static final Duration BITMAP_DURATION = Duration.ofHours(24);
 
     // ranking thread messages
     private static final int MESSAGE_RECONSIDER_RANKING = 1000;
@@ -6698,7 +6698,7 @@ public class NotificationManagerService extends SystemService {
                     final long timePostedMs = r.getSbn().getPostTime();
                     final long timeNowMs = System.currentTimeMillis();
 
-                    if (isBitmapExpired(timePostedMs, timeNowMs, BITMAP_EXPIRATION_TIME_MS)) {
+                    if (isBitmapExpired(timePostedMs, timeNowMs, BITMAP_DURATION.toMillis())) {
                         removeBitmapAndRepost(r);
                     }
                 }
