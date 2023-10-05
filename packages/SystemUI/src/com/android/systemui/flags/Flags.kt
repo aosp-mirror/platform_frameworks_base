@@ -144,11 +144,6 @@ object Flags {
             "lockscreen_custom_clocks"
         )
 
-    // TODO(b/275694445): Tracking Bug
-    @JvmField
-    val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING =
-        releasedFlag("lockscreen_without_secure_lock_when_dreaming")
-
     // TODO(b/286092087): Tracking Bug
     @JvmField
     val ENABLE_SYSTEM_UI_DREAM_CONTROLLER = unreleasedFlag("enable_system_ui_dream_controller")
