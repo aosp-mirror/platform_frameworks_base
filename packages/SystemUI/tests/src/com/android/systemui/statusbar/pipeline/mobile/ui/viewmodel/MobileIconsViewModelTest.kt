@@ -16,9 +16,12 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
@@ -41,15 +44,18 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MobileIconsViewModelTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsViewModel
     private val interactor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
+    private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
 
     private lateinit var airplaneModeInteractor: AirplaneModeInteractor
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
@@ -77,6 +83,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
                 interactor,
                 airplaneModeInteractor,
                 constants,
+                flags,
                 testScope.backgroundScope,
             )
 

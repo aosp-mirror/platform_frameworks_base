@@ -177,6 +177,12 @@
     <!-- Size of the view displaying the mobile signal icon in the status bar. This value should
         match the viewport height of mobile signal drawables such as ic_lte_mobiledata -->
     <dimen name="status_bar_mobile_type_size">16sp</dimen>
+    <!-- Size of the view that contains the network type. Should be equal to
+    status_bar_mobile_type_size + 2, to account for 1sp top and bottom padding -->
+    <dimen name="status_bar_mobile_container_height">18sp</dimen>
+    <!-- Corner radius for the background of the network type indicator. Should be equal to
+        status_bar_mobile_container_height / 2 -->
+    <dimen name="status_bar_mobile_container_corner_radius">9sp</dimen>
     <!-- Size of the view displaying the mobile roam icon in the status bar. This value should
         match the viewport size of drawable stat_sys_roaming -->
     <dimen name="status_bar_mobile_roam_size">8sp</dimen>
