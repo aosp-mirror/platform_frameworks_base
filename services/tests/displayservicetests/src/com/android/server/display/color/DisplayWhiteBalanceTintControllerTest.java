@@ -23,6 +23,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +38,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.R;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import org.junit.After;
 import org.junit.Before;
@@ -54,6 +56,8 @@ public class DisplayWhiteBalanceTintControllerTest {
     private Resources mMockedResources;
     @Mock
     private DisplayManagerInternal mDisplayManagerInternal;
+    @Mock
+    private DisplayManagerFlags mDisplayManagerFlagsMock;
 
     private MockitoSession mSession;
     private Resources mResources;
@@ -63,16 +67,19 @@ public class DisplayWhiteBalanceTintControllerTest {
     @Before
     public void setUp() {
         DisplayManagerInternal displayManagerInternal = mock(DisplayManagerInternal.class);
-        mDisplayWhiteBalanceTintController =
-                new DisplayWhiteBalanceTintController(displayManagerInternal);
-        mDisplayWhiteBalanceTintController.setUp(InstrumentationRegistry.getContext(), true);
-        mDisplayWhiteBalanceTintController.setActivated(true);
 
         mSession = ExtendedMockito.mockitoSession()
                 .initMocks(this)
                 .mockStatic(SurfaceControl.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
+
+        mDisplayWhiteBalanceTintController =
+                new DisplayWhiteBalanceTintController(displayManagerInternal,
+                        mDisplayManagerFlagsMock);
+        mDisplayWhiteBalanceTintController.setUp(InstrumentationRegistry.getContext(), true);
+        mDisplayWhiteBalanceTintController.setActivated(true);
+
 
         mResources = InstrumentationRegistry.getContext().getResources();
         // These Resources are common to all tests.
@@ -360,9 +367,47 @@ public class DisplayWhiteBalanceTintControllerTest {
                 1e-6f /* tolerance */);
     }
 
+    @Test
+    public void testDisplayWhiteBalance_TransitionTimes() {
+        when(mDisplayManagerFlagsMock.isAdaptiveTone2Enabled()).thenReturn(false);
+        setUpTransitionTimes();
+        setUpTintController();
+
+        assertEquals(30L,
+                mDisplayWhiteBalanceTintController.getTransitionDurationMilliseconds(true));
+        assertEquals(30L,
+                mDisplayWhiteBalanceTintController.getTransitionDurationMilliseconds(false));
+    }
+
+    @Test
+    public void testDisplayWhiteBalance_TransitionTimesDirectional() {
+        when(mDisplayManagerFlagsMock.isAdaptiveTone2Enabled()).thenReturn(true);
+        setUpTransitionTimes();
+        setUpTintController();
+
+        assertEquals(400L,
+                mDisplayWhiteBalanceTintController.getTransitionDurationMilliseconds(true));
+        assertEquals(5000L,
+                mDisplayWhiteBalanceTintController.getTransitionDurationMilliseconds(false));
+    }
+
+
+    private void setUpTransitionTimes() {
+        doReturn(mResources.getStringArray(R.array.config_displayWhiteBalanceDisplayPrimaries))
+                .when(mMockedResources)
+                .getStringArray(R.array.config_displayWhiteBalanceDisplayPrimaries);
+        when(mMockedResources.getInteger(
+                R.integer.config_displayWhiteBalanceTransitionTime)).thenReturn(30);
+        when(mMockedResources.getInteger(
+                R.integer.config_displayWhiteBalanceTransitionTimeIncrease)).thenReturn(400);
+        when(mMockedResources.getInteger(
+                R.integer.config_displayWhiteBalanceTransitionTimeDecrease)).thenReturn(5000);
+
+    }
+
     private void setUpTintController() {
         mDisplayWhiteBalanceTintController = new DisplayWhiteBalanceTintController(
-                mDisplayManagerInternal);
+                mDisplayManagerInternal, mDisplayManagerFlagsMock);
         mDisplayWhiteBalanceTintController.setUp(mMockedContext, true);
         mDisplayWhiteBalanceTintController.setActivated(true);
     }

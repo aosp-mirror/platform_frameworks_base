@@ -1026,6 +1026,12 @@
     <!-- Duration, in milliseconds, of the display white balance animated transitions. -->
     <integer name="config_displayWhiteBalanceTransitionTime">3000</integer>
 
+    <!-- Duration, in milliseconds, of the display white balance animated transitions when increasing cct. -->
+    <integer name="config_displayWhiteBalanceTransitionTimeIncrease">1000</integer>
+
+    <!-- Duration, in milliseconds, of the display white balance animated transitions when decreasing cct. -->
+    <integer name="config_displayWhiteBalanceTransitionTimeDecrease">40000</integer>
+
     <!-- Device states where the sensor based rotation values should be reversed around the Z axis
          for the default display.
          TODO(b/265312193): Remove this workaround when this bug is fixed.-->

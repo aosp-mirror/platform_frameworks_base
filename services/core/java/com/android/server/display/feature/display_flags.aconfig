@@ -35,6 +35,14 @@ flag {
 }
 
 flag {
+    name: "enable_adaptive_tone_improvements_2"
+    namespace: "display_manager"
+    description: "Feature flag for Further Adaptive Tone Improvements"
+    bug: "294762632"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_display_resolution_range_voting"
     namespace: "display_manager"
     description: "Feature flag to enable voting for ranges of resolutions"
