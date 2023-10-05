@@ -138,6 +138,7 @@ public class SettingsToPropertiesMapper {
         "haptics",
         "hardware_backed_security_mainline",
         "machine_learning",
+        "mainline_sdk",
         "media_audio",
         "media_solutions",
         "nfc",
