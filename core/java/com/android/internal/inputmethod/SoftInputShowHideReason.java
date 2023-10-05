@@ -34,6 +34,7 @@ import java.lang.annotation.Retention;
  */
 @Retention(SOURCE)
 @IntDef(value = {
+        SoftInputShowHideReason.NOT_SET,
         SoftInputShowHideReason.SHOW_SOFT_INPUT,
         SoftInputShowHideReason.ATTACH_NEW_INPUT,
         SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME,
@@ -72,8 +73,26 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE,
         SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION,
         SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW,
+        SoftInputShowHideReason.SHOW_SOFT_INPUT_LEGACY_DIRECT,
+        SoftInputShowHideReason.HIDE_SOFT_INPUT_LEGACY_DIRECT,
+        SoftInputShowHideReason.SHOW_WINDOW_LEGACY_DIRECT,
+        SoftInputShowHideReason.HIDE_WINDOW_LEGACY_DIRECT,
+        SoftInputShowHideReason.RESET_NEW_CONFIGURATION,
+        SoftInputShowHideReason.UPDATE_CANDIDATES_VIEW_VISIBILITY,
+        SoftInputShowHideReason.CONTROLS_CHANGED,
+        SoftInputShowHideReason.DISPLAY_CONFIGURATION_CHANGED,
+        SoftInputShowHideReason.DISPLAY_INSETS_CHANGED,
+        SoftInputShowHideReason.DISPLAY_CONTROLS_CHANGED,
+        SoftInputShowHideReason.UNBIND_CURRENT_METHOD,
+        SoftInputShowHideReason.HIDE_SOFT_INPUT_ON_ANIMATION_STATE_CHANGED,
+        SoftInputShowHideReason.HIDE_SOFT_INPUT_REQUEST_HIDE_WITH_CONTROL,
+        SoftInputShowHideReason.SHOW_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT,
+        SoftInputShowHideReason.SHOW_SOFT_INPUT_IMM_DEPRECATION,
 })
 public @interface SoftInputShowHideReason {
+    /** Default, undefined reason. */
+    int NOT_SET = ImeProtoEnums.REASON_NOT_SET;
+
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
     int SHOW_SOFT_INPUT = ImeProtoEnums.REASON_SHOW_SOFT_INPUT;
 
@@ -291,4 +310,91 @@ public @interface SoftInputShowHideReason {
      * Hide soft input when {@link InputMethodManager#hideSoftInputFromView(View, int)} gets called.
      */
     int HIDE_SOFT_INPUT_FROM_VIEW = ImeProtoEnums.REASON_HIDE_SOFT_INPUT_FROM_VIEW;
+
+    /**
+     * Show soft input by legacy (discouraged) call to
+     * {@link android.inputmethodservice.InputMethodService.InputMethodImpl#showSoftInput}.
+     */
+    int SHOW_SOFT_INPUT_LEGACY_DIRECT = ImeProtoEnums.REASON_SHOW_SOFT_INPUT_LEGACY_DIRECT;
+
+    /**
+     * Hide soft input by legacy (discouraged) call to
+     * {@link android.inputmethodservice.InputMethodService.InputMethodImpl#hideSoftInput}.
+     */
+    int HIDE_SOFT_INPUT_LEGACY_DIRECT = ImeProtoEnums.REASON_HIDE_SOFT_INPUT_LEGACY_DIRECT;
+
+    /**
+     * Show soft input by legacy (discouraged) call to
+     * {@link android.inputmethodservice.InputMethodService#showWindow}.
+     */
+    int SHOW_WINDOW_LEGACY_DIRECT = ImeProtoEnums.REASON_SHOW_WINDOW_LEGACY_DIRECT;
+
+    /**
+     * Hide soft input by legacy (discouraged) call to
+     * {@link android.inputmethodservice.InputMethodService#hideWindow}.
+     */
+    int HIDE_WINDOW_LEGACY_DIRECT = ImeProtoEnums.REASON_HIDE_WINDOW_LEGACY_DIRECT;
+
+    /**
+     * Show / Hide soft input by
+     * {@link android.inputmethodservice.InputMethodService#resetStateForNewConfiguration}.
+     */
+    int RESET_NEW_CONFIGURATION = ImeProtoEnums.REASON_RESET_NEW_CONFIGURATION;
+
+    /**
+     * Show / Hide soft input by
+     * {@link android.inputmethodservice.InputMethodService#updateCandidatesVisibility}.
+     */
+    int UPDATE_CANDIDATES_VIEW_VISIBILITY = ImeProtoEnums.REASON_UPDATE_CANDIDATES_VIEW_VISIBILITY;
+
+    /**
+     * Show / Hide soft input by {@link android.view.InsetsController#onControlsChanged}.
+     */
+    int CONTROLS_CHANGED = ImeProtoEnums.REASON_CONTROLS_CHANGED;
+
+    /**
+     * Show soft input by
+     * {@link com.android.wm.shell.common.DisplayImeController#onDisplayConfigurationChanged}.
+     */
+    int DISPLAY_CONFIGURATION_CHANGED = ImeProtoEnums.REASON_DISPLAY_CONFIGURATION_CHANGED;
+
+    /**
+     * Show soft input by
+     * {@link com.android.wm.shell.common.DisplayImeController.PerDisplay#insetsChanged}.
+     */
+    int DISPLAY_INSETS_CHANGED = ImeProtoEnums.REASON_DISPLAY_INSETS_CHANGED;
+
+    /**
+     * Show / Hide soft input by
+     * {@link com.android.wm.shell.common.DisplayImeController.PerDisplay#insetsControlChanged}.
+     */
+    int DISPLAY_CONTROLS_CHANGED = ImeProtoEnums.REASON_DISPLAY_CONTROLS_CHANGED;
+
+    /** Hide soft input by
+     * {@link com.android.server.inputmethod.InputMethodManagerService#onUnbindCurrentMethodByReset}.
+     */
+    int UNBIND_CURRENT_METHOD = ImeProtoEnums.REASON_UNBIND_CURRENT_METHOD;
+
+    /** Hide soft input by {@link android.view.ImeInsetsSourceConsumer#onAnimationStateChanged}. */
+    int HIDE_SOFT_INPUT_ON_ANIMATION_STATE_CHANGED =
+            ImeProtoEnums.REASON_HIDE_SOFT_INPUT_ON_ANIMATION_STATE_CHANGED;
+
+    /** Hide soft input when we already have a {@link android.view.InsetsSourceControl} by
+     * {@link android.view.ImeInsetsSourceConsumer#requestHide}.
+     */
+    int HIDE_SOFT_INPUT_REQUEST_HIDE_WITH_CONTROL =
+            ImeProtoEnums.REASON_HIDE_SOFT_INPUT_REQUEST_HIDE_WITH_CONTROL;
+
+    /**
+     * Show soft input by
+     * {@link android.inputmethodservice.InputMethodService#onToggleSoftInput(int, int)}.
+     */
+    int SHOW_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT =
+            ImeProtoEnums.REASON_SHOW_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT;
+
+    /**
+     * Show soft input by the deprecated
+     * {@link InputMethodManager#showSoftInputFromInputMethod(IBinder, int)}.
+     */
+    int SHOW_SOFT_INPUT_IMM_DEPRECATION = ImeProtoEnums.REASON_SHOW_SOFT_INPUT_IMM_DEPRECATION;
 }

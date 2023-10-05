@@ -183,6 +183,13 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
         return true;
     }
 
+    @Override
+    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
+    public void hideSoftInputFromServerForTest() throws RemoteException {
+        super.hideSoftInputFromServerForTest_enforcePermission();
+        mInner.hideSoftInputFromServerForTest();
+    }
+
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     @Override
     public void startInputOrWindowGainedFocusAsync(

@@ -8258,12 +8258,17 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void showImePostLayout(IBinder imeTargetWindowToken,
-                @Nullable ImeTracker.Token statsToken) {
+                @NonNull ImeTracker.Token statsToken) {
             synchronized (mGlobalLock) {
                 InputTarget imeTarget = getInputTargetFromWindowTokenLocked(imeTargetWindowToken);
                 if (imeTarget == null) {
+                    ImeTracker.forLogging().onFailed(statsToken,
+                            ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
                     return;
                 }
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
+
                 Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.showImePostLayout", 0);
                 final InsetsControlTarget controlTarget = imeTarget.getImeControlTarget();
                 imeTarget = controlTarget.getWindow();
@@ -8278,7 +8283,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void hideIme(IBinder imeTargetWindowToken, int displayId,
-                @Nullable ImeTracker.Token statsToken) {
+                @NonNull ImeTracker.Token statsToken) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.hideIme");
             synchronized (mGlobalLock) {
                 WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);

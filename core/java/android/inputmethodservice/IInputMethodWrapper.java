@@ -453,7 +453,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void showSoftInput(IBinder showInputToken, @Nullable ImeTracker.Token statsToken,
+    public void showSoftInput(IBinder showInputToken, @NonNull ImeTracker.Token statsToken,
             @InputMethod.ShowFlags int flags, ResultReceiver resultReceiver) {
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_WRAPPER);
         mCaller.executeOrSendMessage(mCaller.obtainMessageIOOO(DO_SHOW_SOFT_INPUT,
@@ -462,7 +462,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void hideSoftInput(IBinder hideInputToken, @Nullable ImeTracker.Token statsToken,
+    public void hideSoftInput(IBinder hideInputToken, @NonNull ImeTracker.Token statsToken,
             int flags, ResultReceiver resultReceiver) {
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_WRAPPER);
         mCaller.executeOrSendMessage(mCaller.obtainMessageIOOO(DO_HIDE_SOFT_INPUT,
