@@ -56,11 +56,10 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
-import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -76,7 +75,6 @@ import org.mockito.junit.MockitoRule;
 import java.util.ArrayList;
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper()
 public class KeyguardSecurityContainerTest extends SysuiTestCase {

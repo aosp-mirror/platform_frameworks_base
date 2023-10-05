@@ -21,7 +21,6 @@ import android.testing.TestableLooper
 import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.UdfpsController.UdfpsOverlayController
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -40,7 +39,6 @@ import org.mockito.Mockito.`when` as whenEver
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class UdfpsShellTest : SysuiTestCase() {

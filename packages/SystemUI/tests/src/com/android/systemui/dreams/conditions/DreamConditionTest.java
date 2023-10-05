@@ -31,7 +31,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.condition.Condition;
 
@@ -44,7 +43,6 @@ import org.mockito.MockitoAnnotations;
 
 import kotlinx.coroutines.CoroutineScope;
 
-@RoboPilotTest
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DreamConditionTest extends SysuiTestCase {

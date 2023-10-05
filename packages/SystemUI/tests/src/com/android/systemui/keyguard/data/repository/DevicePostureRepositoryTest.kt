@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.shared.model.DevicePosture
@@ -39,7 +38,6 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class DevicePostureRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: DevicePostureRepository

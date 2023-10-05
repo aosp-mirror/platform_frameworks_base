@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.flags.FeatureFlags;
@@ -48,7 +47,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Collection;
 
-@RoboPilotTest
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DreamOverlayStateControllerTest extends SysuiTestCase {

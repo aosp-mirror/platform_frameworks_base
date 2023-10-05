@@ -23,7 +23,6 @@ import android.content.pm.UserInfo.FLAG_PRIMARY
 import android.content.pm.UserInfo.FLAG_PROFILE
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.pipeline.domain.model.AutoAddSignal
@@ -41,7 +40,6 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class WorkTileAutoAddableTest : SysuiTestCase() {
 

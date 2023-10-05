@@ -18,7 +18,6 @@ package com.android.systemui.shade.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionStateManager
@@ -43,7 +42,6 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class ShadeRepositoryImplTest : SysuiTestCase() {
 

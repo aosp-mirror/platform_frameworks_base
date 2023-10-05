@@ -44,7 +44,6 @@ import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_NOTIFICATION_PAN
 import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.res.R
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
@@ -122,7 +121,6 @@ import java.io.StringWriter
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: DeviceEntryFaceAuthRepositoryImpl

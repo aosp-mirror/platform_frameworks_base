@@ -20,7 +20,6 @@ import android.content.ComponentName
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.util.mockito.mock
@@ -29,7 +28,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class AutoAddableSettingListTest : SysuiTestCase() {
 

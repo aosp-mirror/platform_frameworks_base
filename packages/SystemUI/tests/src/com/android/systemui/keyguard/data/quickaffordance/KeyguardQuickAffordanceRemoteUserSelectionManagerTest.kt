@@ -21,7 +21,6 @@ import android.content.pm.UserInfo
 import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.shared.customization.data.content.FakeCustomizationProviderClient
@@ -44,7 +43,6 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {
 
