@@ -105,7 +105,7 @@ constructor(
 
     override fun removeCallback(callback: QSHost.Callback) {
         if (useNewHost) {
-            synchronized(callbacksMap) { callbacksMap.get(callback)?.cancel() }
+            synchronized(callbacksMap) { callbacksMap.remove(callback)?.cancel() }
         } else {
             qsTileHost.removeCallback(callback)
         }
