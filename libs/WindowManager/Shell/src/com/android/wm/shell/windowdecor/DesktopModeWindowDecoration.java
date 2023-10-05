@@ -116,7 +116,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         this (context, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorConfig,
                 handler, choreographer, syncQueue, rootTaskDisplayAreaOrganizer,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
-                WindowContainerTransaction::new, new SurfaceControlViewHostFactory() {});
+                WindowContainerTransaction::new, SurfaceControl::new,
+                new SurfaceControlViewHostFactory() {});
     }
 
     DesktopModeWindowDecoration(
@@ -133,10 +134,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
+            Supplier<SurfaceControl> surfaceControlSupplier,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
         super(context, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorConfig,
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
-                windowContainerTransactionSupplier, surfaceControlViewHostFactory);
+                windowContainerTransactionSupplier, surfaceControlSupplier,
+                surfaceControlViewHostFactory);
 
         mHandler = handler;
         mChoreographer = choreographer;

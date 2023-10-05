@@ -111,7 +111,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl, mConfiguration,
                 mMockHandler, mMockChoreographer, mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
                 SurfaceControl.Builder::new, mMockTransactionSupplier,
-                WindowContainerTransaction::new, mMockSurfaceControlViewHostFactory);
+                WindowContainerTransaction::new, SurfaceControl::new,
+                mMockSurfaceControlViewHostFactory);
     }
 
     private ActivityManager.RunningTaskInfo createTaskInfo(boolean visible) {
