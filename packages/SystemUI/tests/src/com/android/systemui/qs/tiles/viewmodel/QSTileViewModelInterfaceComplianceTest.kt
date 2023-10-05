@@ -29,11 +29,11 @@ import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
 import com.android.systemui.qs.tiles.base.interactor.FakeDisabledByPolicyInteractor
 import com.android.systemui.qs.tiles.base.interactor.FakeQSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.FakeQSTileUserActionInteractor
-import com.android.systemui.qs.tiles.base.interactor.QSTileDataRequest
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
-import com.android.systemui.qs.tiles.base.interactor.StateUpdateTrigger
 import com.android.systemui.qs.tiles.base.logging.QSTileLogger
 import com.android.systemui.qs.tiles.base.viewmodel.BaseQSTileViewModel
+import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -55,6 +55,7 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
     @Mock private lateinit var qsTileLogger: QSTileLogger
     @Mock private lateinit var qsTileAnalytics: QSTileAnalytics
 
+    private val fakeUserRepository = FakeUserRepository()
     private val fakeQSTileDataInteractor = FakeQSTileDataInteractor<Any>()
     private val fakeQSTileUserActionInteractor = FakeQSTileUserActionInteractor<Any>()
     private val fakeDisabledByPolicyInteractor = FakeDisabledByPolicyInteractor()
@@ -86,7 +87,7 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
 
             assertThat(fakeQSTileDataInteractor.dataRequests).isNotEmpty()
             assertThat(fakeQSTileDataInteractor.dataRequests.first())
-                .isEqualTo(QSTileDataRequest(1, StateUpdateTrigger.InitialRequest))
+                .isEqualTo(FakeQSTileDataInteractor.DataRequest(1))
         }
 
     private fun createViewModel(
@@ -102,9 +103,11 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
                     QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {}
             },
             fakeDisabledByPolicyInteractor,
+            fakeUserRepository,
             fakeFalsingManager,
             qsTileAnalytics,
             qsTileLogger,
+            FakeSystemClock(),
             testCoroutineDispatcher,
             scope.backgroundScope,
         )

@@ -26,7 +26,6 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.pipeline.shared.TileSpec
-import com.android.systemui.qs.tiles.base.interactor.StateUpdateTrigger
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.util.mockito.any
@@ -144,7 +143,6 @@ class QSTileLoggerTest : SysuiTestCase() {
     fun testLogStateUpdate() {
         underTest.logStateUpdate(
             TileSpec.create("test_spec"),
-            StateUpdateTrigger.ForceUpdate,
             QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {},
             "test_data",
         )
@@ -152,19 +150,34 @@ class QSTileLoggerTest : SysuiTestCase() {
         assertThat(logBuffer.getStringBuffer())
             .contains(
                 "tile state update: " +
-                    "trigger=force, " +
-                    "state=[" +
-                    "label=, " +
+                    "state=[label=, " +
                     "state=INACTIVE, " +
                     "s_label=null, " +
                     "cd=null, " +
                     "sd=null, " +
                     "svi=None, " +
                     "enabled=ENABLED, " +
-                    "a11y=null" +
-                    "], " +
+                    "a11y=null], " +
                     "data=test_data"
             )
+    }
+
+    @Test
+    fun testLogForceUpdate() {
+        underTest.logForceUpdate(
+            TileSpec.create("test_spec"),
+        )
+
+        assertThat(logBuffer.getStringBuffer()).contains("tile data force update")
+    }
+
+    @Test
+    fun testLogInitialUpdate() {
+        underTest.logInitialRequest(
+            TileSpec.create("test_spec"),
+        )
+
+        assertThat(logBuffer.getStringBuffer()).contains("tile data initial update")
     }
 
     private fun LogBuffer.getStringBuffer(): String {

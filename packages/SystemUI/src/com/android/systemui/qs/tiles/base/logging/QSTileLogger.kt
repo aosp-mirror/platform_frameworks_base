@@ -24,7 +24,7 @@ import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.QSTilesLogBuffers
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.pipeline.shared.TileSpec
-import com.android.systemui.qs.tiles.base.interactor.StateUpdateTrigger
+import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.statusbar.StatusBarState
@@ -128,10 +128,21 @@ constructor(
             )
     }
 
+    fun logForceUpdate(tileSpec: TileSpec) {
+        tileSpec
+            .getLogBuffer()
+            .log(tileSpec.getLogTag(), LogLevel.DEBUG, {}, { "tile data force update" })
+    }
+
+    fun logInitialRequest(tileSpec: TileSpec) {
+        tileSpec
+            .getLogBuffer()
+            .log(tileSpec.getLogTag(), LogLevel.DEBUG, {}, { "tile data initial update" })
+    }
+
     /** Tracks state changes based on the data and trigger event. */
     fun <T> logStateUpdate(
         tileSpec: TileSpec,
-        trigger: StateUpdateTrigger,
         tileState: QSTileState,
         data: T,
     ) {
@@ -141,11 +152,10 @@ constructor(
                 tileSpec.getLogTag(),
                 LogLevel.DEBUG,
                 {
-                    str1 = trigger.toLogString()
-                    str2 = tileState.toLogString()
-                    str3 = data.toString().take(DATA_MAX_LENGTH)
+                    str1 = tileState.toLogString()
+                    str2 = data.toString().take(DATA_MAX_LENGTH)
                 },
-                { "tile state update: trigger=$str1, state=$str2, data=$str3" }
+                { "tile state update: state=$str1, data=$str2" }
             )
     }
 
@@ -162,11 +172,11 @@ constructor(
             }
         }
 
-    private fun StateUpdateTrigger.toLogString(): String =
+    private fun DataUpdateTrigger.toLogString(): String =
         when (this) {
-            is StateUpdateTrigger.ForceUpdate -> "force"
-            is StateUpdateTrigger.InitialRequest -> "init"
-            is StateUpdateTrigger.UserAction<*> -> action.toLogString()
+            is DataUpdateTrigger.ForceUpdate -> "force"
+            is DataUpdateTrigger.InitialRequest -> "init"
+            is DataUpdateTrigger.UserInput<*> -> input.action.toLogString()
         }
 
     private fun QSTileUserAction.toLogString(): String =

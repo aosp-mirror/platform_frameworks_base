@@ -32,16 +32,16 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class QSTileIntentUserActionHandlerTest : SysuiTestCase() {
+class QSTileIntentUserInputHandlerTest : SysuiTestCase() {
 
     @Mock private lateinit var activityStarted: ActivityStarter
 
-    lateinit var underTest: QSTileIntentUserActionHandler
+    lateinit var underTest: QSTileIntentUserInputHandler
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        underTest = QSTileIntentUserActionHandler(activityStarted)
+        underTest = QSTileIntentUserInputHandler(activityStarted)
     }
 
     @Test

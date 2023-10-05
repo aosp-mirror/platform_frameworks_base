@@ -16,12 +16,18 @@
 
 package com.android.systemui.qs.tiles.base.interactor
 
-import com.android.systemui.qs.tiles.viewmodel.QSTileState
-import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
+/** Event that triggers data update */
+sealed interface DataUpdateTrigger {
+    /**
+     * State update is requested in a response to a user action.
+     * - [action] is the action that happened
+     * - [tileData] is the data state of the tile when that action took place
+     */
+    class UserInput<T>(val input: QSTileInput<T>) : DataUpdateTrigger
 
-sealed interface StateUpdateTrigger {
-    class UserAction<T>(val action: QSTileUserAction, val tileState: QSTileState, val tileData: T) :
-        StateUpdateTrigger
-    data object ForceUpdate : StateUpdateTrigger
-    data object InitialRequest : StateUpdateTrigger
+    /** Force update current state. This is passed when the view needs a new state to show */
+    data object ForceUpdate : DataUpdateTrigger
+
+    /** The data is requested loaded for the first time */
+    data object InitialRequest : DataUpdateTrigger
 }

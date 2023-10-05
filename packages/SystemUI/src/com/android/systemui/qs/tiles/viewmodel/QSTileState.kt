@@ -59,7 +59,16 @@ data class QSTileState(
         // This represents a tile that is currently in a disabled state but is still interactable. A
         // disabled state indicates that the tile is not currently active (e.g. wifi disconnected or
         // bluetooth disabled), but is still interactable by the user to modify this state.
-        INACTIVE(Tile.STATE_INACTIVE),
+        INACTIVE(Tile.STATE_INACTIVE);
+
+        companion object {
+            fun valueOf(legacyState: Int): ActivationState =
+                when (legacyState) {
+                    Tile.STATE_ACTIVE -> ACTIVE
+                    Tile.STATE_INACTIVE -> INACTIVE
+                    else -> UNAVAILABLE
+                }
+        }
     }
 
     /**
