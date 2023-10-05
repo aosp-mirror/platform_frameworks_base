@@ -13,3 +13,10 @@ flag {
     description: "Bind wallpaper service on its own thread instead of system_server's main handler during a user switch."
     bug: "302100344"
 }
+
+flag {
+    name: "support_communal_profile"
+    namespace: "multiuser"
+    description: "Framework support for communal profile."
+    bug: "285426179"
+}
