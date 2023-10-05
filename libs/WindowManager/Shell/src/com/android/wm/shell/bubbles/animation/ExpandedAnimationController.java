@@ -34,6 +34,8 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.animation.PhysicsAnimator;
+import com.android.wm.shell.bubbles.BadgedImageView;
+import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
@@ -62,6 +64,12 @@ public class ExpandedAnimationController
 
     /** Damping ratio for expand/collapse spring. */
     private static final float DAMPING_RATIO_MEDIUM_LOW_BOUNCY = 0.65f;
+
+    /**
+     * Damping ratio for the overflow bubble spring; this is less bouncy so it doesn't bounce behind
+     * the top bubble when it goes to disappear.
+     */
+    private static final float DAMPING_RATIO_OVERFLOW_BOUNCY = 0.90f;
 
     /** Stiffness for the expand/collapse path-following animation. */
     private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 400;
@@ -274,9 +282,14 @@ public class ExpandedAnimationController
                 // of the screen where the bubble will be stacked.
                 path.lineTo(stackedX, p.y);
 
+                // The overflow should animate to the collapse point, so 0 offset.
+                final boolean isOverflow = bubble instanceof BadgedImageView
+                        && BubbleOverflow.KEY.equals(((BadgedImageView) bubble).getKey());
+                final float offsetY = isOverflow
+                        ? 0
+                        : Math.min(index, NUM_VISIBLE_WHEN_RESTING - 1) * mStackOffsetPx;
                 // Then, draw a line down to the stack position.
-                path.lineTo(stackedX, mCollapsePoint.y
-                        + Math.min(index, NUM_VISIBLE_WHEN_RESTING - 1) * mStackOffsetPx);
+                path.lineTo(stackedX, mCollapsePoint.y + offsetY);
             }
 
             // The lead bubble should be the bubble with the longest distance to travel when we're
@@ -505,8 +518,12 @@ public class ExpandedAnimationController
 
     @Override
     SpringForce getSpringForce(DynamicAnimation.ViewProperty property, View view) {
+        boolean isOverflow = (view instanceof BadgedImageView)
+                && BubbleOverflow.KEY.equals(((BadgedImageView) view).getKey());
         return new SpringForce()
-                .setDampingRatio(DAMPING_RATIO_MEDIUM_LOW_BOUNCY)
+                .setDampingRatio(isOverflow
+                        ? DAMPING_RATIO_OVERFLOW_BOUNCY
+                        : DAMPING_RATIO_MEDIUM_LOW_BOUNCY)
                 .setStiffness(SpringForce.STIFFNESS_LOW);
     }
 

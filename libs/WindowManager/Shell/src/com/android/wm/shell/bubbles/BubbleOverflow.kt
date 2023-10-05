@@ -27,6 +27,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.InsetDrawable
 import android.util.PathParser
 import android.view.LayoutInflater
+import android.view.View.VISIBLE
 import android.widget.FrameLayout
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.R
@@ -156,7 +157,9 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
 
     fun setShowDot(show: Boolean) {
         showDot = show
-        overflowBtn?.updateDotVisibility(true /* animate */)
+        if (overflowBtn?.visibility == VISIBLE) {
+            overflowBtn?.updateDotVisibility(true /* animate */)
+        }
     }
 
     /** Creates the expanded view for bubbles showing in the stack view. */
