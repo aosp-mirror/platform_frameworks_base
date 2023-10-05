@@ -338,4 +338,8 @@ public class AppChildProcessTest {
         }
     }
 
+    // TODO: [b/302724778] Remove manual JNI load
+    static {
+        System.loadLibrary("mockingservicestestjni");
+    }
 }

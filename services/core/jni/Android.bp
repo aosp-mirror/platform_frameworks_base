@@ -78,6 +78,7 @@ cc_library_static {
         "onload.cpp",
         ":lib_cachedAppOptimizer_native",
         ":lib_gameManagerService_native",
+        ":lib_oomConnection_native",
     ],
 
     include_dirs: [
@@ -122,6 +123,7 @@ cc_defaults {
         "libhardware_legacy",
         "libhidlbase",
         "libmeminfo",
+        "libmemevents",
         "libmemtrackproxy",
         "libmtp",
         "libnativehelper",
@@ -238,4 +240,9 @@ filegroup {
     srcs: [
         "com_android_server_app_GameManagerService.cpp",
     ],
+}
+
+filegroup {
+    name: "lib_oomConnection_native",
+    srcs: ["com_android_server_am_OomConnection.cpp",],
 }

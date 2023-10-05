@@ -1210,4 +1210,9 @@ public class ActivityManagerServiceTest {
             return returnValueForstartUserOnSecondaryDisplay;
         }
     }
+
+    // TODO: [b/302724778] Remove manual JNI load
+    static {
+        System.loadLibrary("mockingservicestestjni");
+    }
 }

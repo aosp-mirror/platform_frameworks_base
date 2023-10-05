@@ -218,4 +218,9 @@ public class ActivityManagerInternalTest {
             assertEquals(errMsg, Thread.State.TERMINATED, getState());
         }
     }
+
+    // TODO: [b/302724778] Remove manual JNI load
+    static {
+        System.loadLibrary("mockingservicestestjni");
+    }
 }
