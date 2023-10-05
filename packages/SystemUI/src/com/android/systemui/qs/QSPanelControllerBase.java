@@ -158,6 +158,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected void onInit() {
         mView.initialize(mQSLogger);
         mQSLogger.logAllTilesChangeListening(mView.isListening(), mView.getDumpableTag(), "");
+        mHost.addCallback(mQSHostCallback);
     }
 
     /**
@@ -172,6 +173,18 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     @Override
+    public void destroy() {
+        super.destroy();
+        mHost.removeCallback(mQSHostCallback);
+
+        for (TileRecord record : mRecords) {
+            record.tile.removeCallback(record.callback);
+            mView.removeTile(record);
+        }
+        mRecords.clear();
+    }
+
+    @Override
     protected void onViewAttached() {
         mQsTileRevealController = createTileRevealController();
         if (mQsTileRevealController != null) {
@@ -180,7 +193,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
         mMediaHost.addVisibilityChangeListener(mMediaHostVisibilityListener);
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        mHost.addCallback(mQSHostCallback);
         setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
         mQSLogger.logOnViewAttached(mLastOrientation, mView.getDumpableTag());
@@ -193,16 +205,11 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected void onViewDetached() {
         mQSLogger.logOnViewDetached(mLastOrientation, mView.getDumpableTag());
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        mHost.removeCallback(mQSHostCallback);
 
         mView.getTileLayout().setListening(false, mUiEventLogger);
 
         mMediaHost.removeVisibilityChangeListener(mMediaHostVisibilityListener);
 
-        for (TileRecord record : mRecords) {
-            record.tile.removeCallback(record.callback);
-        }
-        mRecords.clear();
         mDumpManager.unregisterDumpable(mView.getDumpableTag());
     }
 
@@ -222,15 +229,30 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         if (!collapsedView && mQsTileRevealController != null) {
             mQsTileRevealController.updateRevealedTiles(tiles);
         }
-
-        for (QSPanelControllerBase.TileRecord record : mRecords) {
-            mView.removeTile(record);
-            record.tile.removeCallback(record.callback);
+        boolean shouldChange = false;
+        if (tiles.size() == mRecords.size()) {
+            int i = 0;
+            for (QSTile tile : tiles) {
+                if (tile != mRecords.get(i).tile) {
+                    shouldChange = true;
+                    break;
+                }
+                i++;
+            }
+        } else {
+            shouldChange = true;
         }
-        mRecords.clear();
-        mCachedSpecs = "";
-        for (QSTile tile : tiles) {
-            addTile(tile, collapsedView);
+
+        if (shouldChange) {
+            for (QSPanelControllerBase.TileRecord record : mRecords) {
+                mView.removeTile(record);
+                record.tile.removeCallback(record.callback);
+            }
+            mRecords.clear();
+            mCachedSpecs = "";
+            for (QSTile tile : tiles) {
+                addTile(tile, collapsedView);
+            }
         }
     }
 
