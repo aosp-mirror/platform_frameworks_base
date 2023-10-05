@@ -45,7 +45,7 @@ fun UserProfilePager(content: @Composable (userGroup: UserGroup) -> Unit) {
         val enterpriseRepository = EnterpriseRepository(context)
         userGroups.map { userGroup ->
             enterpriseRepository.getProfileTitle(
-                isManagedProfile = userGroup.userInfos.first().isManagedProfile,
+                userGroup.userInfos.first(),
             )
         }
     }

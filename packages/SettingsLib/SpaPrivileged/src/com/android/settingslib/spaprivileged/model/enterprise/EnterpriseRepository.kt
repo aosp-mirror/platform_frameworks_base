@@ -18,8 +18,10 @@ package com.android.settingslib.spaprivileged.model.enterprise
 
 import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResources.Strings.Settings.PERSONAL_CATEGORY_HEADER
+import android.app.admin.DevicePolicyResources.Strings.Settings.PRIVATE_CATEGORY_HEADER
 import android.app.admin.DevicePolicyResources.Strings.Settings.WORK_CATEGORY_HEADER
 import android.content.Context
+import android.content.pm.UserInfo
 import com.android.settingslib.R
 
 class EnterpriseRepository(private val context: Context) {
@@ -30,8 +32,10 @@ class EnterpriseRepository(private val context: Context) {
     fun getEnterpriseString(updatableStringId: String, resId: Int): String =
         checkNotNull(resources.getString(updatableStringId) { context.getString(resId) })
 
-    fun getProfileTitle(isManagedProfile: Boolean): String = if (isManagedProfile) {
+    fun getProfileTitle(userInfo: UserInfo): String = if (userInfo.isManagedProfile) {
         getEnterpriseString(WORK_CATEGORY_HEADER, R.string.category_work)
+    } else if (userInfo.isPrivateProfile) {
+        getEnterpriseString(PRIVATE_CATEGORY_HEADER, R.string.category_private)
     } else {
         getEnterpriseString(PERSONAL_CATEGORY_HEADER, R.string.category_personal)
     }
