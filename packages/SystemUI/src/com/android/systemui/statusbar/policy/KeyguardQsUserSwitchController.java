@@ -38,6 +38,7 @@ import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.res.R;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.user.UserSwitchDialogController;
@@ -148,6 +149,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             DozeParameters dozeParameters,
             ScreenOffAnimationController screenOffAnimationController,
             UserSwitchDialogController userSwitchDialogController,
+            FeatureFlags featureFlags,
             UiEventLogger uiEventLogger) {
         super(view);
         if (DEBUG) Log.d(TAG, "New KeyguardQsUserSwitchController");
@@ -160,7 +162,8 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         mStatusBarStateController = statusBarStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters,
-                screenOffAnimationController,  /* animateYPos= */ false, /* logBuffer= */ null);
+                screenOffAnimationController,  /* animateYPos= */ false,
+                featureFlags, /* logBuffer= */ null);
         mUserSwitchDialogController = userSwitchDialogController;
         mUiEventLogger = uiEventLogger;
     }

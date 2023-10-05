@@ -26,10 +26,11 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @SysUISingleton
 class FromAodTransitionInteractor
@@ -86,15 +87,19 @@ constructor(
                 }
         }
     }
-
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
-            duration = TRANSITION_DURATION_MS
+            duration =
+                when (toState) {
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    else -> DEFAULT_DURATION
+                }.inWholeMilliseconds
         }
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 500L
+        val TO_LOCKSCREEN_DURATION = 500.milliseconds
+        private val DEFAULT_DURATION = 500.milliseconds
     }
 }

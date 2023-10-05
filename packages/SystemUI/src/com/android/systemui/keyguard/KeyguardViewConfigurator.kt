@@ -20,6 +20,7 @@ package com.android.systemui.keyguard
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.KeyguardStatusViewController
 import com.android.keyguard.LockIconView
@@ -71,6 +72,7 @@ constructor(
     private val keyguardIndicationController: KeyguardIndicationController,
     private val lockIconViewController: LockIconViewController,
     private val shadeInteractor: ShadeInteractor,
+    private val interactionJankMonitor: InteractionJankMonitor
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -140,6 +142,7 @@ constructor(
                 keyguardStateController,
                 shadeInteractor,
                 { keyguardStatusViewController!!.getClockController() },
+                interactionJankMonitor,
             )
     }
 
