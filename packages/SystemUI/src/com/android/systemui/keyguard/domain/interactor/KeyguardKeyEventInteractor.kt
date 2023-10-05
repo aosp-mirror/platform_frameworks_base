@@ -21,7 +21,7 @@ import android.media.AudioManager
 import android.view.KeyEvent
 import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor.Companion.handleAction
+import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler.Companion.handleAction
 import com.android.systemui.media.controls.util.MediaSessionLegacyHelperWrapper
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -37,7 +37,6 @@ class KeyguardKeyEventInteractor
 constructor(
     private val context: Context,
     private val statusBarStateController: StatusBarStateController,
-    private val keyguardInteractor: KeyguardInteractor,
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     private val shadeController: ShadeController,
     private val mediaSessionLegacyHelperWrapper: MediaSessionLegacyHelperWrapper,

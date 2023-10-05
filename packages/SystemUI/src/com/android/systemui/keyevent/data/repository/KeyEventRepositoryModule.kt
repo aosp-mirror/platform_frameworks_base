@@ -13,23 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.keyevent.domain.interactor
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyevent.data.repository.KeyEventRepository
-import javax.inject.Inject
+package com.android.systemui.keyevent.data.repository
 
-/**
- * Business logic for all key event state. This includes all key events, regardless of whether
- * they've been handled or not by a consumer.
- *
- * For key events that SysUI wants to properly handle, see [SysUIKeyEventHandler].
- */
-@SysUISingleton
-class KeyEventInteractor
-@Inject
-constructor(
-    repository: KeyEventRepository,
-) {
-    val isPowerButtonDown = repository.isPowerButtonDown
+import dagger.Binds
+import dagger.Module
+
+@Module
+interface KeyEventRepositoryModule {
+    @Binds fun keyEventRepository(impl: KeyEventRepositoryImpl): KeyEventRepository
 }

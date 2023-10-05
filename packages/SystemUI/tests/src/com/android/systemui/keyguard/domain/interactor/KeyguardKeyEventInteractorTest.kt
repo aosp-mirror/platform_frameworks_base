@@ -57,8 +57,6 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
         KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_UP)
     private val backKeyEvent = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK)
 
-    private lateinit var keyguardInteractorWithDependencies:
-        KeyguardInteractorFactory.WithDependencies
     private lateinit var powerInteractor: PowerInteractor
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
@@ -73,14 +71,12 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
     fun setup() {
         whenever(mediaSessionLegacyHelperWrapper.getHelper(any()))
             .thenReturn(mediaSessionLegacyHelper)
-        keyguardInteractorWithDependencies = KeyguardInteractorFactory.create()
         powerInteractor = PowerInteractorFactory.create().powerInteractor
 
         underTest =
             KeyguardKeyEventInteractor(
                 context,
                 statusBarStateController,
-                keyguardInteractorWithDependencies.keyguardInteractor,
                 statusBarKeyguardViewManager,
                 shadeController,
                 mediaSessionLegacyHelperWrapper,
