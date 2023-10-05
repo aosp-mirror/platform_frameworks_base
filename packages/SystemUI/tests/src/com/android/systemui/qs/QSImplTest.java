@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs;
 
+import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
+
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
@@ -41,6 +43,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +52,6 @@ import androidx.lifecycle.Lifecycle;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.BouncerPanelExpansionCalculator;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
@@ -60,6 +62,7 @@ import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.CommandQueue;
@@ -110,6 +113,9 @@ public class QSImplTest extends SysuiTestCase {
     @Mock private FeatureFlagsClassic mFeatureFlags;
     private View mQsView;
 
+    private final CommandQueue mCommandQueue =
+            new CommandQueue(mContext, new FakeDisplayTracker(mContext));
+
     private QSImpl mUnderTest;
 
 
@@ -120,6 +126,16 @@ public class QSImplTest extends SysuiTestCase {
         mUnderTest.onComponentCreated(mQsComponent, null);
     }
 
+    /*
+     * Regression test for b/303180152.
+     */
+    @Test
+    public void testDisableCallbackOnDisabledQuickSettingsUponCreationDoesntCrash() {
+        QSImpl other = instantiate();
+        mCommandQueue.disable(Display.DEFAULT_DISPLAY, 0, DISABLE2_QUICK_SETTINGS);
+
+        other.onComponentCreated(mQsComponent, null);
+    }
 
     @Test
     public void testSaveState() {
@@ -473,7 +489,6 @@ public class QSImplTest extends SysuiTestCase {
 
     private QSImpl instantiate() {
         MockitoAnnotations.initMocks(this);
-        CommandQueue commandQueue = new CommandQueue(mContext, new FakeDisplayTracker(mContext));
 
         setupQsComponent();
         setUpViews();
@@ -484,11 +499,11 @@ public class QSImplTest extends SysuiTestCase {
         return new QSImpl(
                 new RemoteInputQuickSettingsDisabler(
                         mContext,
-                        commandQueue,
+                        mCommandQueue,
                         new ResourcesSplitShadeStateController(),
                         mock(ConfigurationController.class)),
                 mStatusBarStateController,
-                commandQueue,
+                mCommandQueue,
                 mQSMediaHost,
                 mQQSMediaHost,
                 mBypassController,
