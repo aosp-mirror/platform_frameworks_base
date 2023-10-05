@@ -1431,13 +1431,17 @@ public class ContextHubService extends IContextHubService.Stub {
                 mContextHubWrapper.onBtMainSettingChanged(btEnabled);
             }
         } else {
-            Log.d(TAG, "BT adapter not available. Defaulting to disabled");
-            if (forceUpdate || mIsBtMainEnabled) {
-                mIsBtMainEnabled = false;
+            Log.d(TAG, "BT adapter not available. Getting permissions from user settings");
+            boolean btEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.BLUETOOTH_ON, 0) == 1;
+            boolean btScanEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE, 0) == 1;
+            if (forceUpdate || mIsBtMainEnabled != btEnabled) {
+                mIsBtMainEnabled = btEnabled;
                 mContextHubWrapper.onBtMainSettingChanged(mIsBtMainEnabled);
             }
-            if (forceUpdate || mIsBtScanningEnabled) {
-                mIsBtScanningEnabled = false;
+            if (forceUpdate || mIsBtScanningEnabled != btScanEnabled) {
+                mIsBtScanningEnabled = btScanEnabled;
                 mContextHubWrapper.onBtScanningSettingChanged(mIsBtScanningEnabled);
             }
         }
