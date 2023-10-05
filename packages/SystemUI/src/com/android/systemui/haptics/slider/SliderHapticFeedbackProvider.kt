@@ -46,6 +46,8 @@ class SliderHapticFeedbackProvider(
     private val positionAccelerateInterpolator =
         AccelerateInterpolator(config.progressInterpolatorFactor)
     private var dragTextureLastTime = clock.elapsedRealtime()
+    var dragTextureLastProgress = -1f
+        private set
     private val lowTickDurationMs =
         vibratorHelper.getPrimitiveDurations(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)[0]
     private var hasVibratedAtLowerBookend = false
@@ -91,6 +93,9 @@ class SliderHapticFeedbackProvider(
         val elapsedSinceLastDrag = currentTime - dragTextureLastTime
         if (elapsedSinceLastDrag < thresholdUntilNextDragCallMillis) return
 
+        val deltaProgress = abs(normalizedSliderProgress - dragTextureLastProgress)
+        if (deltaProgress < config.deltaProgressForDragThreshold) return
+
         val velocityInterpolated =
             velocityAccelerateInterpolator.getInterpolation(
                 min(absoluteVelocity / config.maxVelocityToScale, 1f)
@@ -116,11 +121,14 @@ class SliderHapticFeedbackProvider(
         }
         vibratorHelper.vibrate(composition.compose(), VIBRATION_ATTRIBUTES_PIPELINING)
         dragTextureLastTime = currentTime
+        dragTextureLastProgress = normalizedSliderProgress
     }
 
     override fun onHandleAcquiredByTouch() {}
 
-    override fun onHandleReleasedFromTouch() {}
+    override fun onHandleReleasedFromTouch() {
+        dragTextureLastProgress = -1f
+    }
 
     override fun onLowerBookend() {
         if (!hasVibratedAtLowerBookend) {
