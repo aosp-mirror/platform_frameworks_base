@@ -29,7 +29,12 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
-import java.util.Calendar;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 /**
  * This service runs everyday at 2am local time to remove expired bitmaps.
@@ -69,26 +74,25 @@ public class NotificationBitmapJobService extends JobService {
      * @return Milliseconds until the next time the job should run.
      */
     private static long getRunAfterMs() {
-        Calendar cal = Calendar.getInstance();  // Uses local time zone
-        final long now = cal.getTimeInMillis();
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime now = Instant.now().atZone(zoneId);
 
-        cal.set(Calendar.HOUR_OF_DAY, 2);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        final long today2AM = cal.getTimeInMillis();
+        LocalDate today = now.toLocalDate();
+        LocalTime twoAM = LocalTime.of(/* hour= */ 2, /* minute= */ 0);
 
-        cal.add(Calendar.DAY_OF_YEAR, 1);
-        final long tomorrow2AM = cal.getTimeInMillis();
+        ZonedDateTime today2AM = ZonedDateTime.of(today, twoAM, zoneId);
+        ZonedDateTime tomorrow2AM = today2AM.plusDays(1);
 
         return getTimeUntilRemoval(now, today2AM, tomorrow2AM);
     }
 
     @VisibleForTesting
-    static long getTimeUntilRemoval(long now, long today2AM, long tomorrow2AM) {
-        if (now < today2AM) {
-            return today2AM - now;
+    static long getTimeUntilRemoval(ZonedDateTime now, ZonedDateTime today2AM,
+                                    ZonedDateTime tomorrow2AM) {
+        if (Duration.between(now, today2AM).isNegative()) {
+            return Duration.between(now, tomorrow2AM).toMillis();
         }
-        return tomorrow2AM - now;
+        return Duration.between(now, today2AM).toMillis();
     }
 
     @Override
