@@ -199,12 +199,33 @@ public class ScaleGestureDetector {
      * @throws NullPointerException if {@code listener} is null.
      */
     public ScaleGestureDetector(@NonNull Context context, @NonNull OnScaleGestureListener listener,
-                                @Nullable Handler handler) {
+            @Nullable Handler handler) {
+        this(context, ViewConfiguration.get(context).getScaledTouchSlop() * 2,
+                ViewConfiguration.get(context).getScaledMinimumScalingSpan(), handler, listener);
+    }
+
+    /**
+     * Creates a ScaleGestureDetector with span slop and min span.
+     *
+     * @param context the application's context.
+     * @param spanSlop the threshold for interpreting a touch movement as scaling.
+     * @param minSpan the minimum threshold of scaling span. The span could be
+     *                overridden by other usages to specify a different scaling span, for instance,
+     *                if you need pinch gestures to continue closer together than the default.
+     * @param listener the listener invoked for all the callbacks, this must not be null.
+     * @param handler the handler to use for running deferred listener events.
+     *
+     * @throws NullPointerException if {@code listener} is null.
+     *
+     * @hide
+     */
+    public ScaleGestureDetector(@NonNull Context context, @NonNull int spanSlop,
+            @NonNull int minSpan, @Nullable Handler handler,
+            @NonNull OnScaleGestureListener listener) {
         mContext = context;
         mListener = listener;
-        final ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
-        mSpanSlop = viewConfiguration.getScaledTouchSlop() * 2;
-        mMinSpan = viewConfiguration.getScaledMinimumScalingSpan();
+        mSpanSlop = spanSlop;
+        mMinSpan = minSpan;
         mHandler = handler;
         // Quick scale is enabled by default after JB_MR2
         final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;

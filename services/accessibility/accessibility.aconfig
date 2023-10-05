@@ -34,3 +34,10 @@ flag {
     description: "Calls WMS.addWindowToken without holding A11yManagerService#mLock"
     bug: "297972548"
 }
+
+flag {
+    name: "pinch_zoom_zero_min_span"
+    namespace: "accessibility"
+    description: "Whether to set min span of ScaleGestureDetector to zero."
+    bug: "295327792"
+}
