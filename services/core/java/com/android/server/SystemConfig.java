@@ -316,6 +316,11 @@ public class SystemConfig {
     private final ArraySet<String> mBugreportWhitelistedPackages = new ArraySet<>();
     private final ArraySet<String> mAppDataIsolationWhitelistedApps = new ArraySet<>();
 
+    // These packages will be set as 'prevent disable', where they are no longer possible
+    // for the end user to disable via settings. This flag should only be used for packages
+    // which meet the 'force or keep enabled apps' policy.
+    private final ArrayList<String> mPreventUserDisablePackages = new ArrayList<>();
+
     // Map of packagesNames to userTypes. Stored temporarily until cleared by UserManagerService().
     private ArrayMap<String, Set<String>> mPackageToUserTypeWhitelist = new ArrayMap<>();
     private ArrayMap<String, Set<String>> mPackageToUserTypeBlacklist = new ArrayMap<>();
@@ -499,6 +504,10 @@ public class SystemConfig {
 
     public ArraySet<String> getAppDataIsolationWhitelistedApps() {
         return mAppDataIsolationWhitelistedApps;
+    }
+
+    public @NonNull ArrayList<String> getPreventUserDisablePackages() {
+        return mPreventUserDisablePackages;
     }
 
     /**
@@ -1300,6 +1309,16 @@ public class SystemConfig {
                                     + " at " + parser.getPositionDescription());
                         } else {
                             mBugreportWhitelistedPackages.add(pkgname);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "prevent-disable": {
+                        String pkgname = parser.getAttributeValue(null, "package");
+                        if (pkgname == null) {
+                            Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mPreventUserDisablePackages.add(pkgname);
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
