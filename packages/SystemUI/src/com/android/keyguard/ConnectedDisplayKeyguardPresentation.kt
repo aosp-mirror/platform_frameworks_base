@@ -68,10 +68,13 @@ constructor(
 
         clock = requireViewById(R.id.clock)
         keyguardStatusViewController =
-            keyguardStatusViewComponentFactory.build(clock).keyguardStatusViewController.apply {
-                setDisplayedOnSecondaryDisplay()
-                init()
-            }
+            keyguardStatusViewComponentFactory
+                .build(clock, display)
+                .keyguardStatusViewController
+                .apply {
+                    setDisplayedOnSecondaryDisplay()
+                    init()
+                }
     }
 
     /** [ConnectedDisplayKeyguardPresentation] factory. */

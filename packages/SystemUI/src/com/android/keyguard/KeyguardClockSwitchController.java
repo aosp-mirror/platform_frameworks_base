@@ -84,7 +84,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final DumpManager mDumpManager;
     private final ClockEventController mClockEventController;
     private final LogBuffer mLogBuffer;
-
     private FrameLayout mSmallClockFrame; // top aligned clock
     private FrameLayout mLargeClockFrame; // centered clock
 
@@ -265,6 +264,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         if (mShownOnSecondaryDisplay) {
             mView.setLargeClockOnSecondaryDisplay(true);
+            mClockEventController.setLargeClockOnSecondaryDisplay(true);
             displayClock(LARGE, /* animate= */ false);
             hideSliceViewAndNotificationIconContainer();
             return;

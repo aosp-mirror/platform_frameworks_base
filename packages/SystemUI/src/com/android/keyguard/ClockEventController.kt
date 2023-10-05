@@ -34,6 +34,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.customization.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.DisplaySpecific
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.DOZING_MIGRATION_1
@@ -79,8 +80,8 @@ constructor(
     private val batteryController: BatteryController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val configurationController: ConfigurationController,
-    @Main private val resources: Resources,
-    private val context: Context,
+    @DisplaySpecific private val resources: Resources,
+    @DisplaySpecific private val context: Context,
     @Main private val mainExecutor: DelayableExecutor,
     @Background private val bgExecutor: Executor,
     @KeyguardSmallClockLog private val smallLogBuffer: LogBuffer?,
@@ -205,7 +206,7 @@ constructor(
     private var isRegistered = false
     private var disposableHandle: DisposableHandle? = null
     private val regionSamplingEnabled = featureFlags.isEnabled(REGION_SAMPLING)
-
+    private var largeClockOnSecondaryDisplay = false
 
     private fun updateColors() {
         if (regionSamplingEnabled) {
@@ -381,6 +382,19 @@ constructor(
                 ?.removeOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
     }
 
+    /**
+     * Sets this clock as showing in a secondary display.
+     *
+     * Not that this is not necessarily needed, as we could get the displayId from [Context]
+     * directly and infere [largeClockOnSecondaryDisplay] from the id being different than the
+     * default display one. However, if we do so, current screenshot tests would not work, as they
+     * pass an activity context always from the default display.
+     */
+    fun setLargeClockOnSecondaryDisplay(onSecondaryDisplay: Boolean) {
+        largeClockOnSecondaryDisplay = onSecondaryDisplay
+        updateFontSizes()
+    }
+
     private fun updateTimeListeners() {
         smallTimeListener?.stop()
         largeTimeListener?.stop()
@@ -403,9 +417,15 @@ constructor(
             smallClock.events.onFontSettingChanged(
                 resources.getDimensionPixelSize(R.dimen.small_clock_text_size).toFloat()
             )
-            largeClock.events.onFontSettingChanged(
-                resources.getDimensionPixelSize(R.dimen.large_clock_text_size).toFloat()
-            )
+            largeClock.events.onFontSettingChanged(getLargeClockSizePx())
+        }
+    }
+
+    private fun getLargeClockSizePx(): Float {
+        return if (largeClockOnSecondaryDisplay) {
+            resources.getDimensionPixelSize(R.dimen.presentation_clock_text_size).toFloat()
+        } else {
+            resources.getDimensionPixelSize(R.dimen.large_clock_text_size).toFloat()
         }
     }
 

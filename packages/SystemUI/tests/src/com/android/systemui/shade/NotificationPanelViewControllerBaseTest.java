@@ -547,7 +547,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mLockscreenShadeTransitionController,
                 new FalsingCollectorFake(),
                 mDumpManager);
-        when(mKeyguardStatusViewComponentFactory.build(any()))
+        when(mKeyguardStatusViewComponentFactory.build(any(), any()))
                 .thenReturn(mKeyguardStatusViewComponent);
         when(mKeyguardStatusViewComponent.getKeyguardClockSwitchController())
                 .thenReturn(mKeyguardClockSwitchController);
