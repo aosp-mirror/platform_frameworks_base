@@ -75,13 +75,13 @@ import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.multiuser.Flags;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.Flags;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IProgressListener;
@@ -1557,7 +1557,7 @@ public class UserManagerService extends IUserManager.Stub {
         logQuietModeEnabled(userId, enableQuietMode, callingPackage);
 
         // Broadcast generic intents for all profiles
-        if (android.os.Flags.allowPrivateProfile()) {
+        if (Flags.allowPrivateProfile()) {
             broadcastProfileAvailabilityChanges(profile, parent.getUserHandle(),
                     enableQuietMode, false);
         }
@@ -3783,8 +3783,6 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy({"mPackagesLock"})
     private void readUserListLP() {
-        // Whether guest restrictions are present on userlist.xml
-        boolean guestRestrictionsArePresentOnUserListXml = false;
         try (ResilientAtomicFile file = getUserListFile()) {
             FileInputStream fin = null;
             try {
@@ -3834,7 +3832,6 @@ public class UserManagerService extends IUserManager.Stub {
                                 }
                             }
                         } else if (name.equals(TAG_GUEST_RESTRICTIONS)) {
-                            guestRestrictionsArePresentOnUserListXml = true;
                             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                                     && type != XmlPullParser.END_TAG) {
                                 if (type == XmlPullParser.START_TAG) {
@@ -3853,7 +3850,6 @@ public class UserManagerService extends IUserManager.Stub {
 
                 updateUserIds();
                 upgradeIfNecessaryLP();
-                updateUsersWithFeatureFlags(guestRestrictionsArePresentOnUserListXml);
             } catch (Exception e) {
                 // Remove corrupted file and retry.
                 file.failRead(fin, e);
@@ -3876,25 +3872,6 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy({"mPackagesLock"})
     private void upgradeIfNecessaryLP() {
         upgradeIfNecessaryLP(mUserVersion, mUserTypeVersion);
-    }
-
-    /**
-     * Update any user formats or Xml data that need to be updated based on the current user state
-     * and the feature flag settings.
-     */
-    @GuardedBy({"mPackagesLock"})
-    private void updateUsersWithFeatureFlags(boolean guestRestrictionsArePresentOnUserListXml) {
-        // User Xml re-writes are required when guest restrictions are saved on userlist.xml but
-        // as per the feature flag it should be on the SYSTEM user's xml or guest restrictions
-        // are saved on SYSTEM user's xml but as per the flags it should not be saved there.
-        if (guestRestrictionsArePresentOnUserListXml
-                == Flags.saveGlobalAndGuestRestrictionsOnSystemUserXml()) {
-            for (int userId: getUserIds()) {
-                writeUserLP(getUserDataNoChecks(userId));
-            }
-
-            writeUserListLP();
-        }
     }
 
     /**
@@ -4412,24 +4389,9 @@ public class UserManagerService extends IUserManager.Stub {
             UserRestrictionsUtils.writeRestrictions(serializer,
                     mBaseUserRestrictions.getRestrictions(userInfo.id), TAG_RESTRICTIONS);
 
-            if (Flags.saveGlobalAndGuestRestrictionsOnSystemUserXml()) {
-                if (userInfo.id == UserHandle.USER_SYSTEM) {
-                    UserRestrictionsUtils.writeRestrictions(serializer,
-                            mDevicePolicyUserRestrictions.getRestrictions(UserHandle.USER_ALL),
-                            TAG_DEVICE_POLICY_GLOBAL_RESTRICTIONS);
-
-                    serializer.startTag(null, TAG_GUEST_RESTRICTIONS);
-                    synchronized (mGuestRestrictions) {
-                        UserRestrictionsUtils.writeRestrictions(serializer, mGuestRestrictions,
-                                        TAG_RESTRICTIONS);
-                    }
-                    serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
-                }
-            } else {
-                UserRestrictionsUtils.writeRestrictions(serializer,
-                        mDevicePolicyUserRestrictions.getRestrictions(UserHandle.USER_ALL),
-                        TAG_DEVICE_POLICY_GLOBAL_RESTRICTIONS);
-            }
+            UserRestrictionsUtils.writeRestrictions(serializer,
+                    mDevicePolicyUserRestrictions.getRestrictions(UserHandle.USER_ALL),
+                    TAG_DEVICE_POLICY_GLOBAL_RESTRICTIONS);
 
             UserRestrictionsUtils.writeRestrictions(serializer,
                     mDevicePolicyUserRestrictions.getRestrictions(userInfo.id),
@@ -4498,15 +4460,12 @@ public class UserManagerService extends IUserManager.Stub {
                 serializer.attributeInt(null, ATTR_USER_VERSION, mUserVersion);
                 serializer.attributeInt(null, ATTR_USER_TYPE_VERSION, mUserTypeVersion);
 
-                if (!Flags.saveGlobalAndGuestRestrictionsOnSystemUserXml()) {
-                    serializer.startTag(null, TAG_GUEST_RESTRICTIONS);
-                    synchronized (mGuestRestrictions) {
-                        UserRestrictionsUtils
-                                .writeRestrictions(serializer, mGuestRestrictions,
-                                        TAG_RESTRICTIONS);
-                    }
-                    serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
+                serializer.startTag(null, TAG_GUEST_RESTRICTIONS);
+                synchronized (mGuestRestrictions) {
+                    UserRestrictionsUtils
+                            .writeRestrictions(serializer, mGuestRestrictions, TAG_RESTRICTIONS);
                 }
+                serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
                 int[] userIdsToWrite;
                 synchronized (mUsersLock) {
                     userIdsToWrite = new int[mUsers.size()];
@@ -4650,19 +4609,6 @@ public class UserManagerService extends IUserManager.Stub {
                     localRestrictions = UserRestrictionsUtils.readRestrictions(parser);
                 } else if (TAG_DEVICE_POLICY_GLOBAL_RESTRICTIONS.equals(tag)) {
                     globalRestrictions = UserRestrictionsUtils.readRestrictions(parser);
-                } else if (name.equals(TAG_GUEST_RESTRICTIONS)) {
-                    while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                            && type != XmlPullParser.END_TAG) {
-                        if (type == XmlPullParser.START_TAG) {
-                            if (parser.getName().equals(TAG_RESTRICTIONS)) {
-                                synchronized (mGuestRestrictions) {
-                                    UserRestrictionsUtils
-                                            .readRestrictions(parser, mGuestRestrictions);
-                                }
-                            }
-                            break;
-                        }
-                    }
                 } else if (TAG_ACCOUNT.equals(tag)) {
                     type = parser.next();
                     if (type == XmlPullParser.TEXT) {
