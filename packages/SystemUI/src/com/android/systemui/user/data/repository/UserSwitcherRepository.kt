@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.footer.data.repository
+package com.android.systemui.user.data.repository
 
 import android.content.Context
 import android.graphics.drawable.Drawable
@@ -22,7 +22,6 @@ import android.os.Handler
 import android.os.UserManager
 import android.provider.Settings.Global.USER_SWITCHER_ENABLED
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.res.R
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -30,6 +29,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.SettingObserver
 import com.android.systemui.qs.footer.data.model.UserSwitcherStatusModel
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.UserSwitcherController
@@ -48,6 +48,9 @@ import kotlinx.coroutines.withContext
 interface UserSwitcherRepository {
     /** The current [UserSwitcherStatusModel]. */
     val userSwitcherStatus: Flow<UserSwitcherStatusModel>
+
+    /** Whether the user switcher is currently enabled. */
+    val isEnabled: Flow<Boolean>
 }
 
 @SysUISingleton
@@ -66,8 +69,7 @@ constructor(
     private val showUserSwitcherForSingleUser =
         context.resources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)
 
-    /** Whether the user switcher is currently enabled. */
-    private val isEnabled: Flow<Boolean> = conflatedCallbackFlow {
+    override val isEnabled: Flow<Boolean> = conflatedCallbackFlow {
         suspend fun updateState() {
             trySendWithFailureLogging(isUserSwitcherEnabled(), TAG)
         }

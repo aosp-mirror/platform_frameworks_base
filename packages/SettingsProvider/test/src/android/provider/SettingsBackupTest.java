@@ -101,6 +101,7 @@ public class SettingsBackupTest {
                     Settings.System.MIN_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.SCREEN_BRIGHTNESS_FLOAT,
+                    Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
                     Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
                     Settings.System.WEAR_TTS_PREWARM_ENABLED,
                     Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,

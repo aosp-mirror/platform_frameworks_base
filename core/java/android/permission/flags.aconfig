@@ -2,6 +2,7 @@ package: "android.permission.flags"
 
 flag {
   name: "device_aware_permission_apis"
+  is_fixed_read_only: true
   namespace: "permissions"
   description: "enable device aware permission APIs"
   bug: "274852670"

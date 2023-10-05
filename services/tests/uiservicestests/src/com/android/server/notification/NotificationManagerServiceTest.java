@@ -164,6 +164,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.AssociationInfo;
 import android.companion.ICompanionDeviceManager;
+import android.compat.testing.PlatformCompatChangeRule;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentUris;
@@ -270,11 +271,15 @@ import com.android.server.wm.WindowManagerInternal;
 import com.google.android.collect.Lists;
 import com.google.common.collect.ImmutableList;
 
+import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
@@ -316,6 +321,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private final int mUid = Binder.getCallingUid();
     private final @UserIdInt int mUserId = UserHandle.getUserId(mUid);
+
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
     private TestableNotificationManagerService mService;
     private INotificationManager mBinderService;
@@ -4828,6 +4836,62 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableCompatChanges({NotificationManagerService.ENFORCE_NO_CLEAR_FLAG_ON_MEDIA_NOTIFICATION})
+    public void testMediaStyle_enforceNoClearFlagEnabled() throws RemoteException {
+        Notification.MediaStyle style = new Notification.MediaStyle();
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setStyle(style);
+
+        NotificationRecord posted = createAndPostNotification(nb, "testMediaStyleSetNoClearFlag");
+
+        assertThat(posted.getFlags() & FLAG_NO_CLEAR).isEqualTo(FLAG_NO_CLEAR);
+    }
+
+    @Test
+    @EnableCompatChanges({NotificationManagerService.ENFORCE_NO_CLEAR_FLAG_ON_MEDIA_NOTIFICATION})
+    public void testCustomMediaStyle_enforceNoClearFlagEnabled() throws RemoteException {
+        Notification.DecoratedMediaCustomViewStyle style =
+                new Notification.DecoratedMediaCustomViewStyle();
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setStyle(style);
+
+        NotificationRecord posted = createAndPostNotification(nb,
+                "testCustomMediaStyleSetNoClearFlag");
+
+        assertThat(posted.getFlags() & FLAG_NO_CLEAR).isEqualTo(FLAG_NO_CLEAR);
+    }
+
+    @Test
+    @DisableCompatChanges(NotificationManagerService.ENFORCE_NO_CLEAR_FLAG_ON_MEDIA_NOTIFICATION)
+    public void testMediaStyle_enforceNoClearFlagDisabled() throws RemoteException {
+        Notification.MediaStyle style = new Notification.MediaStyle();
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setStyle(style);
+
+        NotificationRecord posted = createAndPostNotification(nb, "testMediaStyleSetNoClearFlag");
+
+        assertThat(posted.getFlags() & FLAG_NO_CLEAR).isNotEqualTo(FLAG_NO_CLEAR);
+    }
+
+    @Test
+    @DisableCompatChanges(NotificationManagerService.ENFORCE_NO_CLEAR_FLAG_ON_MEDIA_NOTIFICATION)
+    public void testCustomMediaStyle_enforceNoClearFlagDisabled() throws RemoteException {
+        Notification.DecoratedMediaCustomViewStyle style =
+                new Notification.DecoratedMediaCustomViewStyle();
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setStyle(style);
+
+        NotificationRecord posted = createAndPostNotification(nb,
+                "testCustomMediaStyleSetNoClearFlag");
+
+        assertThat(posted.getFlags() & FLAG_NO_CLEAR).isNotEqualTo(FLAG_NO_CLEAR);
+    }
+
+    @Test
     public void testMediaStyleRemote_hasPermission() throws RemoteException {
         String deviceName = "device";
         mContext.getTestablePermissions().setPermission(
@@ -4838,17 +4902,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mTestNotificationChannel.getId())
                 .setStyle(style);
 
-        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
-                "testMediaStyleRemoteHasPermission", mUid, 0,
-                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
-        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
-
-        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
-                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
-        waitForIdle();
-
-        NotificationRecord posted = mService.findNotificationLocked(
-                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+        NotificationRecord posted = createAndPostNotification(nb,
+                "testMediaStyleRemoteHasPermission");
         Bundle extras = posted.getNotification().extras;
 
         assertTrue(extras.containsKey(Notification.EXTRA_MEDIA_REMOTE_DEVICE));
@@ -4866,17 +4921,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mTestNotificationChannel.getId())
                 .setStyle(style);
 
-        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
-                "testMediaStyleRemoteNoPermission", mUid, 0,
-                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
-        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
-
-        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
-                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
-        waitForIdle();
-
-        NotificationRecord posted = mService.findNotificationLocked(
-                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+        NotificationRecord posted = createAndPostNotification(nb,
+                "testMediaStyleRemoteNoPermission");
 
         assertFalse(posted.getNotification().extras
                 .containsKey(Notification.EXTRA_MEDIA_REMOTE_DEVICE));
@@ -4899,17 +4945,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mTestNotificationChannel.getId())
                 .setStyle(style);
 
-        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
-                "testCustomMediaStyleRemoteNoPermission", mUid, 0,
-                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
-        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
-
-        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
-                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
-        waitForIdle();
-
-        NotificationRecord posted = mService.findNotificationLocked(
-                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+        NotificationRecord posted = createAndPostNotification(nb,
+                "testCustomMediaStyleRemoteNoPermission");
 
         assertFalse(posted.getNotification().extras
                 .containsKey(Notification.EXTRA_MEDIA_REMOTE_DEVICE));
@@ -4929,16 +4966,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb = new Notification.Builder(mContext,
                 mTestNotificationChannel.getId())
                 .addExtras(extras);
-        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
-                "testSubstituteAppNamePermission", mUid, 0,
-                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
-        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
-        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
-                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
-        waitForIdle();
-        NotificationRecord posted = mService.findNotificationLocked(
-                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+        NotificationRecord posted = createAndPostNotification(nb,
+                "testSubstituteAppNameHasPermission");
 
         assertTrue(posted.getNotification().extras
                 .containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME));
@@ -4955,16 +4985,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb = new Notification.Builder(mContext,
                 mTestNotificationChannel.getId())
                 .addExtras(extras);
-        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
-                "testSubstituteAppNamePermission", mUid, 0,
-                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
-        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
-        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
-                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
-        waitForIdle();
-        NotificationRecord posted = mService.findNotificationLocked(
-                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+        NotificationRecord posted = createAndPostNotification(nb,
+                "testSubstituteAppNameNoPermission");
 
         assertFalse(posted.getNotification().extras
                 .containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME));
@@ -12654,6 +12677,20 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mConditionProviders, times(1)).resetDefaultFromConfig();
         verify(service, times(1)).allowDndPackages(user.id);
         verify(service, times(1)).setDNDMigrationDone(user.id);
+    }
+
+    private NotificationRecord createAndPostNotification(Notification.Builder nb, String testName)
+            throws RemoteException {
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, testName, mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        return mService.findNotificationLocked(
+                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
     }
 
     private static <T extends Parcelable> T parcelAndUnparcel(T source,

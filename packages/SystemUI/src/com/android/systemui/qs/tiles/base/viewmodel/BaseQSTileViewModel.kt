@@ -20,12 +20,15 @@ import androidx.annotation.CallSuper
 import androidx.annotation.VisibleForTesting
 import com.android.internal.util.Preconditions
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
 import com.android.systemui.qs.tiles.base.interactor.DisabledByPolicyInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataRequest
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.base.interactor.StateUpdateTrigger
+import com.android.systemui.qs.tiles.base.logging.QSTileLogger
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileLifecycle
 import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy
@@ -33,6 +36,7 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.util.kotlin.sample
+import com.android.systemui.util.kotlin.throttle
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -70,6 +74,9 @@ constructor(
     private val tileDataInteractor: QSTileDataInteractor<DATA_TYPE>,
     private val mapper: QSTileDataToStateMapper<DATA_TYPE>,
     private val disabledByPolicyInteractor: DisabledByPolicyInteractor,
+    private val falsingManager: FalsingManager,
+    private val qsTileAnalytics: QSTileAnalytics,
+    private val qsTileLogger: QSTileLogger,
     private val backgroundDispatcher: CoroutineDispatcher,
     private val tileScope: CoroutineScope,
 ) : QSTileViewModel {
@@ -81,6 +88,9 @@ constructor(
         @Assisted tileDataInteractor: QSTileDataInteractor<DATA_TYPE>,
         @Assisted mapper: QSTileDataToStateMapper<DATA_TYPE>,
         disabledByPolicyInteractor: DisabledByPolicyInteractor,
+        falsingManager: FalsingManager,
+        qsTileAnalytics: QSTileAnalytics,
+        qsTileLogger: QSTileLogger,
         @Background backgroundDispatcher: CoroutineDispatcher,
     ) : this(
         config,
@@ -88,6 +98,9 @@ constructor(
         tileDataInteractor,
         mapper,
         disabledByPolicyInteractor,
+        falsingManager,
+        qsTileAnalytics,
+        qsTileLogger,
         backgroundDispatcher,
         CoroutineScope(SupervisorJob())
     )
@@ -98,8 +111,10 @@ constructor(
         MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     private val forceUpdates: MutableSharedFlow<Unit> =
         MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    private val spec
+        get() = config.tileSpec
 
-    private lateinit var tileData: SharedFlow<DATA_TYPE>
+    private lateinit var tileData: SharedFlow<DataWithTrigger<DATA_TYPE>>
 
     override lateinit var state: SharedFlow<QSTileState>
     override val isAvailable: StateFlow<Boolean> =
@@ -128,8 +143,14 @@ constructor(
 
     @CallSuper
     override fun onActionPerformed(userAction: QSTileUserAction) {
-        Preconditions.checkState(tileData.replayCache.isNotEmpty())
         Preconditions.checkState(currentLifeState == QSTileLifecycle.ALIVE)
+
+        qsTileLogger.logUserAction(
+            userAction,
+            spec,
+            tileData.replayCache.isNotEmpty(),
+            state.replayCache.isNotEmpty()
+        )
         userInputs.tryEmit(userAction)
     }
 
@@ -142,7 +163,16 @@ constructor(
                 state =
                     tileData
                         // TODO(b/299908705): log data and corresponding tile state
-                        .map { mapper.map(config, it) }
+                        .map { dataWithTrigger ->
+                            mapper.map(config, dataWithTrigger.data).also { state ->
+                                qsTileLogger.logStateUpdate(
+                                    spec,
+                                    dataWithTrigger.trigger,
+                                    state,
+                                    dataWithTrigger.data
+                                )
+                            }
+                        }
                         .flowOn(backgroundDispatcher)
                         .shareIn(
                             tileScope,
@@ -158,7 +188,7 @@ constructor(
         currentLifeState = lifecycle
     }
 
-    private fun createTileDataFlow(): SharedFlow<DATA_TYPE> =
+    private fun createTileDataFlow(): SharedFlow<DataWithTrigger<DATA_TYPE>> =
         userIds
             .flatMapLatest { userId ->
                 merge(
@@ -180,7 +210,7 @@ constructor(
                         request.trigger.tileData as DATA_TYPE,
                     )
                 }
-                dataFlow
+                dataFlow.map { DataWithTrigger(it, request.trigger) }
             }
             .flowOn(backgroundDispatcher)
             .shareIn(
@@ -193,20 +223,52 @@ constructor(
         data class StateWithData<T>(val state: QSTileState, val data: T)
 
         return when (config.policy) {
-            is QSTilePolicy.NoRestrictions -> userInputs
-            is QSTilePolicy.Restricted ->
-                userInputs.filter {
-                    val result =
-                        disabledByPolicyInteractor.isDisabled(userId, config.policy.userRestriction)
-                    !disabledByPolicyInteractor.handlePolicyResult(result)
+                is QSTilePolicy.NoRestrictions -> userInputs
+                is QSTilePolicy.Restricted ->
+                    userInputs.filter { action ->
+                        val result =
+                            disabledByPolicyInteractor.isDisabled(
+                                userId,
+                                config.policy.userRestriction
+                            )
+                        !disabledByPolicyInteractor.handlePolicyResult(result).also { isDisabled ->
+                            if (isDisabled) {
+                                qsTileLogger.logUserActionRejectedByPolicy(action, spec)
+                            }
+                        }
+                    }
+            }
+            .filter { action ->
+                val isFalseAction =
+                    when (action) {
+                        is QSTileUserAction.Click ->
+                            falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)
+                        is QSTileUserAction.LongClick ->
+                            falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)
+                    }
+                if (isFalseAction) {
+                    qsTileLogger.logUserActionRejectedByFalsing(action, spec)
                 }
-        // Skip the input until there is some data
-        }.sample(state.combine(tileData) { state, data -> StateWithData(state, data) }) {
-            input,
-            stateWithData ->
-            StateUpdateTrigger.UserAction(input, stateWithData.state, stateWithData.data)
-        }
+                !isFalseAction
+            }
+            .throttle(500)
+            // Skip the input until there is some data
+            .sample(state.combine(tileData) { state, data -> StateWithData(state, data) }) {
+                input,
+                stateWithData ->
+                StateUpdateTrigger.UserAction(input, stateWithData.state, stateWithData.data).also {
+                    qsTileLogger.logUserActionPipeline(
+                        spec,
+                        it.action,
+                        stateWithData.state,
+                        stateWithData.data
+                    )
+                    qsTileAnalytics.trackUserAction(config, it.action)
+                }
+            }
     }
+
+    private data class DataWithTrigger<T>(val data: T, val trigger: StateUpdateTrigger)
 
     interface Factory<T> {
 

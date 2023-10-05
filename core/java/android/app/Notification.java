@@ -9195,6 +9195,12 @@ public class Notification implements Parcelable
      * You can opt-out of this behavior by using {@link Notification.Builder#setColorized(boolean)}.
      * <p>
      *
+     * <p>
+     * Starting at {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM Android V} the
+     * {@link Notification#FLAG_NO_CLEAR NO_CLEAR flag} will be set for valid MediaStyle
+     * notifications.
+     * <p>
+     *
      * To use this style with your Notification, feed it to
      * {@link Notification.Builder#setStyle(android.app.Notification.Style)} like so:
      * <pre class="prettyprint">

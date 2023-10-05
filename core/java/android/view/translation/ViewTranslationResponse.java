@@ -33,7 +33,7 @@ import java.util.Set;
 
 /**
  * Wrapper class representing a translation response associated with a {@link android.view.View} to
- * be used by {@link android.service.translation.TranslationService}.
+ * be used by translation service.
  */
 @DataClass(genBuilder = true, genToString = true, genEqualsHashCode = true, genGetters = false)
 public final class ViewTranslationResponse implements Parcelable {

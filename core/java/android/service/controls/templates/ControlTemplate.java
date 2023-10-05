@@ -137,7 +137,7 @@ public abstract class ControlTemplate {
     }
 
     /**
-     * The {@link TemplateType} associated with this class.
+     * The template type associated with this class.
      */
     public abstract @TemplateType int getTemplateType();
 

@@ -31,6 +31,7 @@ import android.annotation.CallSuper;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.LayoutRes;
@@ -98,6 +99,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.permission.flags.Flags;
 import android.service.voice.VoiceInteractionSession;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -5556,8 +5558,7 @@ public class Activity extends ContextThemeWrapper
      *                    reported to {@link #onRequestPermissionsResult}.
      *                    Should be >= 0.
      * @param deviceId The app is requesting permissions for this device. The primary/physical
-     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and {@link
-     *                 android.companion.virtual.VirtualDeviceManager.VirtualDevice virtual devices}
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
      *                 are assigned unique device Ids.
      *
      * @throws IllegalArgumentException if requestCode is negative.
@@ -5567,6 +5568,7 @@ public class Activity extends ContextThemeWrapper
      * @see #shouldShowRequestPermissionRationale
      * @see Context#DEVICE_ID_DEFAULT
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
     public final void requestPermissions(@NonNull String[] permissions, int requestCode,
             int deviceId) {
         if (requestCode < 0) {
@@ -5634,12 +5636,12 @@ public class Activity extends ContextThemeWrapper
      *                     {@link android.content.pm.PackageManager#PERMISSION_GRANTED} or
      *                     {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
      * @param deviceId The deviceId for which permissions were requested. The primary/physical
-     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and {@link
-     *                 android.companion.virtual.VirtualDeviceManager.VirtualDevice virtual devices}
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
      *                 are assigned unique device Ids.
      *
      * @see #requestPermissions
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
             @NonNull int[] grantResults, int deviceId) {
         onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -5664,8 +5666,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param permission A permission your app wants to request.
      * @param deviceId The app is requesting permissions for this device. The primary/physical
-     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and {@link
-     *                 android.companion.virtual.VirtualDeviceManager.VirtualDevice virtual devices}
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
      *                 are assigned unique device Ids.
      * @return Whether you should show permission rationale UI.
      *
@@ -5673,6 +5674,7 @@ public class Activity extends ContextThemeWrapper
      * @see #requestPermissions
      * @see #onRequestPermissionsResult
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
     public boolean shouldShowRequestPermissionRationale(@NonNull String permission, int deviceId) {
         final PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
                 : createDeviceContext(deviceId).getPackageManager();

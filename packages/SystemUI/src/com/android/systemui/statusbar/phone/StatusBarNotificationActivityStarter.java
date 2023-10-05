@@ -219,6 +219,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             // We have an active remote input typed and the user clicked on the notification.
             // this was probably unintentional, so we're closing the edit text instead.
             mRemoteInputManager.closeRemoteInputs();
+            mLogger.logCloseRemoteInput(entry);
             return;
         }
         Notification notification = entry.getSbn().getNotification();

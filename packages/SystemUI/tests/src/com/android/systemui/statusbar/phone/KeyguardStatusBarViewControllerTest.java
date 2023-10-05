@@ -64,12 +64,13 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.SceneTestUtils;
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
 import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository;
+import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -156,7 +157,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     public void setup() throws Exception {
         mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, false);
         mShadeViewStateProvider = new TestShadeViewStateProvider();
-        mShadeViewStateProvider = new TestShadeViewStateProvider();
 
         MockitoAnnotations.initMocks(this);
 
@@ -176,7 +176,9 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mViewModel =
                 new KeyguardStatusBarViewModel(
                         mTestScope.getBackgroundScope(),
-                        mKeyguardInteractor);
+                        mKeyguardInteractor,
+                        new KeyguardStatusBarInteractor(new FakeKeyguardStatusBarRepository()),
+                        mBatteryController);
 
         allowTestableLooperAsMainThread();
         TestableLooper.get(this).runWithLooper(() -> {
@@ -317,6 +319,15 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mController.setBatteryListening(true);
 
         verify(mBatteryController).addCallback(any());
+    }
+
+    @Test
+    public void setBatteryListening_true_flagOn_callbackNotAdded() {
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
+
+        mController.setBatteryListening(true);
+
+        verify(mBatteryController, never()).addCallback(any());
     }
 
     @Test

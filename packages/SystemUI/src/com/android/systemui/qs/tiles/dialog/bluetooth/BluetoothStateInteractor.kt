@@ -40,7 +40,7 @@ constructor(
     @Application private val coroutineScope: CoroutineScope,
 ) {
 
-    internal val updateBluetoothStateFlow: StateFlow<Boolean?> =
+    internal val bluetoothStateUpdate: StateFlow<Boolean?> =
         conflatedCallbackFlow {
                 val listener =
                     object : BluetoothCallback {

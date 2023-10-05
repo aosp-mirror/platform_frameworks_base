@@ -218,6 +218,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     void setActivityLaunchDefaultAllowed(boolean activityLaunchDefaultAllowed) {
         synchronized (mGenericWindowPolicyControllerLock) {
+            if (mActivityLaunchAllowedByDefault != activityLaunchDefaultAllowed) {
+                mActivityPolicyExemptions.clear();
+            }
             mActivityLaunchAllowedByDefault = activityLaunchDefaultAllowed;
         }
     }

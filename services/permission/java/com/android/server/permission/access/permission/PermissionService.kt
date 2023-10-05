@@ -41,6 +41,7 @@ import android.os.RemoteException
 import android.os.ServiceManager
 import android.os.UserHandle
 import android.os.UserManager
+import android.permission.flags.Flags
 import android.permission.IOnPermissionsChangeListener
 import android.permission.PermissionControllerManager
 import android.permission.PermissionManager
@@ -1409,7 +1410,7 @@ class PermissionService(
         permissionName: String,
         deviceId: Int,
     ): Int {
-        return if (deviceId == Context.DEVICE_ID_DEFAULT) {
+        return if (!Flags.deviceAwarePermissionApis() || deviceId == Context.DEVICE_ID_DEFAULT) {
             with(policy) { getPermissionFlags(appId, userId, permissionName) }
         } else {
             if (permissionName !in DevicePermissionPolicy.DEVICE_AWARE_PERMISSIONS) {
@@ -1442,7 +1443,7 @@ class PermissionService(
         deviceId: Int,
         flags: Int
     ): Boolean {
-        return if (deviceId == Context.DEVICE_ID_DEFAULT) {
+        return if (!Flags.deviceAwarePermissionApis() || deviceId == Context.DEVICE_ID_DEFAULT) {
             with(policy) {
                setPermissionFlags(appId, userId, permissionName, flags)
             }

@@ -215,12 +215,7 @@ final class LocaleUtils {
      * TODO: Use {@link Locale#toLanguageTag()} and {@link Locale#forLanguageTag(String)}
      */
     static String getLanguageFromLocaleString(String locale) {
-        final int idx = locale.indexOf('_');
-        if (idx < 0) {
-            return locale;
-        } else {
-            return locale.substring(0, idx);
-        }
+        return Locale.forLanguageTag(locale).getLanguage();
     }
 
     static Locale getSystemLocaleFromContext(Context context) {

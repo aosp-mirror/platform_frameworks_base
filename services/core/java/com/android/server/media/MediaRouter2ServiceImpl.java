@@ -707,7 +707,8 @@ class MediaRouter2ServiceImpl {
     }
 
     private boolean checkCallerHasSystemRoutingPermissions(int pid, int uid) {
-        return checkCallerHasModifyAudioRoutingPermission(pid, uid);
+        return checkCallerHasModifyAudioRoutingPermission(pid, uid)
+                || checkCallerHasBluetoothPermissions(pid, uid);
     }
 
     private boolean checkCallerHasModifyAudioRoutingPermission(int pid, int uid) {

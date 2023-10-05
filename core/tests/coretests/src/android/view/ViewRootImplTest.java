@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.accessibility.Flags.FLAG_FORCE_INVERT_COLOR;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
@@ -38,12 +39,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import android.app.Instrumentation;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
+import android.os.SystemProperties;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
 
@@ -52,9 +59,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.compatibility.common.util.ShellIdentityUtils;
+
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -71,6 +82,10 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ViewRootImplTest {
+    private static final String TAG = "ViewRootImplTest";
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private ViewRootImpl mViewRootImpl;
     private volatile boolean mKeyReceived = false;
@@ -99,6 +114,18 @@ public class ViewRootImplTest {
         sInstrumentation.setInTouchMode(true);
         sInstrumentation.runOnMainSync(() ->
                 mViewRootImpl = new ViewRootImpl(sContext, sContext.getDisplayNoVerify()));
+    }
+
+    @After
+    public void teardown() {
+        ShellIdentityUtils.invokeWithShellPermissions(() -> {
+            Settings.Secure.resetToDefaults(sContext.getContentResolver(), TAG);
+
+            var uiModeManager = sContext.getSystemService(UiModeManager.class);
+            uiModeManager.setNightMode(UiModeManager.MODE_NIGHT_NO);
+
+            setForceDarkSysProp(false);
+        });
     }
 
     @Test
@@ -398,6 +425,100 @@ public class ViewRootImplTest {
                 HapticFeedbackConstants.CONTEXT_CLICK, true);
 
         assertThat(result).isFalse();
+    }
+
+    @Test
+    public void forceInvertOffDarkThemeOff_forceDarkModeDisabled() {
+        mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);
+        ShellIdentityUtils.invokeWithShellPermissions(() -> {
+            Settings.Secure.putInt(
+                    sContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
+                    /* value= */ 0
+            );
+            var uiModeManager = sContext.getSystemService(UiModeManager.class);
+            uiModeManager.setNightMode(UiModeManager.MODE_NIGHT_NO);
+        });
+
+        sInstrumentation.runOnMainSync(() ->
+                mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
+        );
+
+        assertThat(mViewRootImpl.isForceDarkEnabled()).isFalse();
+    }
+
+    @Test
+    public void forceInvertOnDarkThemeOff_forceDarkModeEnabled() {
+        mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);
+        ShellIdentityUtils.invokeWithShellPermissions(() -> {
+            Settings.Secure.putInt(
+                    sContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
+                    /* value= */ 1
+            );
+            var uiModeManager = sContext.getSystemService(UiModeManager.class);
+            uiModeManager.setNightMode(UiModeManager.MODE_NIGHT_NO);
+        });
+
+        sInstrumentation.runOnMainSync(() ->
+                mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
+        );
+
+        assertThat(mViewRootImpl.isForceDarkEnabled()).isTrue();
+    }
+
+    @Test
+    public void forceInvertOffForceDarkOff_forceDarkModeDisabled() {
+        mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);
+        ShellIdentityUtils.invokeWithShellPermissions(() -> {
+            Settings.Secure.putInt(
+                    sContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
+                    /* value= */ 0
+            );
+
+            // TODO(b/297556388): figure out how to set this without getting blocked by SELinux
+            assumeTrue(setForceDarkSysProp(true));
+        });
+
+        sInstrumentation.runOnMainSync(() ->
+                mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
+        );
+
+        assertThat(mViewRootImpl.isForceDarkEnabled()).isFalse();
+    }
+
+    @Test
+    public void forceInvertOffForceDarkOn_forceDarkModeEnabled() {
+        mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);
+        ShellIdentityUtils.invokeWithShellPermissions(() -> {
+            Settings.Secure.putInt(
+                    sContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
+                    /* value= */ 0
+            );
+
+            assumeTrue(setForceDarkSysProp(true));
+        });
+
+        sInstrumentation.runOnMainSync(() ->
+                mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
+        );
+
+        assertThat(mViewRootImpl.isForceDarkEnabled()).isTrue();
+    }
+
+    private boolean setForceDarkSysProp(boolean isForceDarkEnabled) {
+        try {
+            SystemProperties.set(
+                    ThreadedRenderer.DEBUG_FORCE_DARK,
+                    Boolean.toString(isForceDarkEnabled)
+            );
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to set force_dark sysprop", e);
+            return false;
+        }
     }
 
     class KeyView extends View {

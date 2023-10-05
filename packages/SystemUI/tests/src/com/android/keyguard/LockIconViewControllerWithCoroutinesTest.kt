@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -42,7 +43,7 @@ class LockIconViewControllerWithCoroutinesTest : LockIconViewControllerBaseTest(
 
     /** After migration, replaces LockIconViewControllerTest version */
     @Test
-    fun testLockIcon_clearsIconOnAod_whenUdfpsNotEnrolled() =
+    fun testLockIcon_clearsIconWhenUnlocked() =
         runBlocking(IMMEDIATE) {
             // GIVEN udfps not enrolled
             setupUdfps()
@@ -50,14 +51,14 @@ class LockIconViewControllerWithCoroutinesTest : LockIconViewControllerBaseTest(
 
             // GIVEN starting state for the lock icon
             setupShowLockIcon()
+            whenever(mStatusBarStateController.state).thenReturn(StatusBarState.SHADE)
 
             // GIVEN lock icon controller is initialized and view is attached
             init(/* useMigrationFlag= */ true)
             reset(mLockIconView)
 
             // WHEN the dozing state changes
-            mUnderTest.mIsDozingCallback.accept(true)
-
+            mUnderTest.mIsDozingCallback.accept(false)
             // THEN the icon is cleared
             verify(mLockIconView).clearIcon()
         }

@@ -637,15 +637,15 @@ public final class VirtualDeviceManager {
         /**
          * Specifies a component name to be exempt from the current activity launch policy.
          *
-         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVIY} allows activity
-         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT},
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
          * then the specified component will be blocked from launching.
-         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity
-         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}, then
-         * the specified component will be allowed to launch.</p>
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
+         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then the
+         * specified component will be allowed to launch.</p>
          *
-         * <p>Note that changing the activity launch policy will not affect current set of exempt
-         * components and it needs to be updated separately.</p>
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * components.</p>
          *
          * @see #removeActivityPolicyExemption
          * @see #setDevicePolicy
@@ -660,15 +660,15 @@ public final class VirtualDeviceManager {
         /**
          * Makes the specified component name to adhere to the default activity launch policy.
          *
-         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVIY} allows activity
-         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT},
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
          * then the specified component will be allowed to launch.
-         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity
-         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}, then
-         * the specified component will be blocked from launching.</p>
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
+         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then the
+         * specified component will be blocked from launching.</p>
          *
-         * <p>Note that changing the activity launch policy will not affect current set of exempt
-         * components and it needs to be updated separately.</p>
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * components.</p>
          *
          * @see #addActivityPolicyExemption
          * @see #setDevicePolicy

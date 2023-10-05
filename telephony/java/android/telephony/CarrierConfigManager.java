@@ -519,8 +519,6 @@ public class CarrierConfigManager {
     /**
      * Used in the Preferred Network Types menu to determine if the 2G option is displayed.
      * Value defaults to false as of Android T to discourage the use of insecure 2G protocols.
-     *
-     * @see #KEY_HIDE_ENABLE_2G
      */
     public static final String KEY_PREFER_2G_BOOL = "prefer_2g_bool";
 
@@ -9541,9 +9539,9 @@ public class CarrierConfigManager {
      * Used to trade privacy/security against potentially reduced carrier coverage for some
      * carriers.
      *
-     * @deprecated Future versions of Android will disallow carriers from hiding this toggle
-     * because disabling 2g is a security feature that users should always have access to at
-     * their discretion.
+     * @removed This config option is no longer supported as it was hiding a security feature
+     * from users. Setting this option will not change the behavior of the Settings menu starting
+     * in Android V.
      */
     @Deprecated
     public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";

@@ -69,24 +69,13 @@ final class InputMethodSubtypeSwitchingController {
                     mIsSystemLanguage = true;
                 } else {
                     // TODO: Use Locale#getLanguage or Locale#toLanguageTag
-                    final String systemLanguage = parseLanguageFromLocaleString(systemLocale);
-                    final String subtypeLanguage = parseLanguageFromLocaleString(subtypeLocale);
+                    final String systemLanguage = LocaleUtils.getLanguageFromLocaleString(
+                            systemLocale);
+                    final String subtypeLanguage = LocaleUtils.getLanguageFromLocaleString(
+                            subtypeLocale);
                     mIsSystemLanguage = systemLanguage.length() >= 2
                             && systemLanguage.equals(subtypeLanguage);
                 }
-            }
-        }
-
-        /**
-         * Returns the language component of a given locale string.
-         * TODO: Use {@link Locale#getLanguage()} instead.
-         */
-        private static String parseLanguageFromLocaleString(final String locale) {
-            final int idx = locale.indexOf('_');
-            if (idx < 0) {
-                return locale;
-            } else {
-                return locale.substring(0, idx);
             }
         }
 
@@ -116,7 +105,7 @@ final class InputMethodSubtypeSwitchingController {
          *
          * @param other the object to be compared.
          * @return a negative integer, zero, or positive integer as this object is less than, equal
-         *         to, or greater than the specified <code>other</code> object.
+         * to, or greater than the specified <code>other</code> object.
          */
         @Override
         public int compareTo(ImeSubtypeListItem other) {
@@ -253,9 +242,10 @@ final class InputMethodSubtypeSwitchingController {
 
         /**
          * Returns the index of the specified input method and subtype in the given list.
-         * @param imi The {@link InputMethodInfo} to be searched.
+         *
+         * @param imi     The {@link InputMethodInfo} to be searched.
          * @param subtype The {@link InputMethodSubtype} to be searched. null if the input method
-         * does not have a subtype.
+         *                does not have a subtype.
          * @return The index in the given list. -1 if not found.
          */
         private int getIndex(InputMethodInfo imi, InputMethodSubtype subtype) {
@@ -327,6 +317,7 @@ final class InputMethodSubtypeSwitchingController {
          * {@link #mUsageHistoryOfSubtypeListItemIndex}.
          * <p>We call the index of {@link #mUsageHistoryOfSubtypeListItemIndex} as "Usage Rank"
          * so as not to be confused with the index in {@link #mImeSubtypeList}.
+         *
          * @return -1 when the specified item doesn't belong to {@link #mImeSubtypeList} actually.
          */
         private int getUsageRank(final InputMethodInfo imi, InputMethodSubtype subtype) {

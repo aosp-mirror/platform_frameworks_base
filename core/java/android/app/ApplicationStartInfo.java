@@ -473,9 +473,8 @@ public final class ApplicationStartInfo implements Parcelable {
      * available.
      * For {@link #STARTUP_STATE_ERROR}, no additional timestamps are guaranteed available.
      * For {@link #STARTUP_STATE_FIRST_FRAME_DRAWN}, timestamps
-     * {@link #START_TIMESTAMP_JAVA_CLASSLOADING_COMPLETE}, {@link #START_TIMESTAMP_APPLICATION_ONCREATE},
-     * {@link #START_TIMESTAMP_BIND_APPLICATION}, and {@link #START_TIMESTAMP_FIRST_FRAME} will
-     * additionally be available.
+     * {@link #START_TIMESTAMP_APPLICATION_ONCREATE}, {@link #START_TIMESTAMP_BIND_APPLICATION},
+     * and {@link #START_TIMESTAMP_FIRST_FRAME} will additionally be available.
      *
      * Timestamp {@link #START_TIMESTAMP_FULLY_DRAWN} is never guaranteed to be available as it is
      * dependant on devloper calling {@link Activity#reportFullyDrawn}.

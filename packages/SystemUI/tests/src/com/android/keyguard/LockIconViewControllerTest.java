@@ -17,9 +17,11 @@
 package com.android.keyguard;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+
 import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
 import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
@@ -41,6 +43,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.doze.util.BurnInHelperKt;
+import com.android.systemui.statusbar.StatusBarState;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -180,13 +183,14 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
     }
 
     @Test
-    public void testLockIcon_clearsIconOnAod_whenUdfpsNotEnrolled() {
+    public void testLockIcon_clearsIconWhenUnlocked() {
         // GIVEN udfps not enrolled
         setupUdfps();
         when(mKeyguardUpdateMonitor.isUdfpsEnrolled()).thenReturn(false);
 
         // GIVEN starting state for the lock icon
         setupShowLockIcon();
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
 
         // GIVEN lock icon controller is initialized and view is attached
         init(/* useMigrationFlag= */false);
@@ -194,7 +198,7 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
         reset(mLockIconView);
 
         // WHEN the dozing state changes
-        mStatusBarStateListener.onDozingChanged(true /* isDozing */);
+        mStatusBarStateListener.onDozingChanged(false /* isDozing */);
 
         // THEN the icon is cleared
         verify(mLockIconView).clearIcon();

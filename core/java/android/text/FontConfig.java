@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.fonts.FontFamily.Builder.VariableFontFamilyType;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.os.Build;
@@ -528,6 +529,7 @@ public final class FontConfig implements Parcelable {
         private final @NonNull List<Font> mFonts;
         private final @NonNull LocaleList mLocaleList;
         private final @Variant int mVariant;
+        private final int mVariableFontFamilyType;
 
         /** @hide */
         @Retention(SOURCE)
@@ -567,10 +569,11 @@ public final class FontConfig implements Parcelable {
          * @hide Only system server can create this instance and passed via IPC.
          */
         public FontFamily(@NonNull List<Font> fonts, @NonNull LocaleList localeList,
-                @Variant int variant) {
+                @Variant int variant, int variableFontFamilyType) {
             mFonts = fonts;
             mLocaleList = localeList;
             mVariant = variant;
+            mVariableFontFamilyType = variableFontFamilyType;
         }
 
         /**
@@ -621,6 +624,20 @@ public final class FontConfig implements Parcelable {
             return mVariant;
         }
 
+        /**
+         * Returns the font family type.
+         *
+         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_NONE
+         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL
+         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY
+         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT
+         * @hide
+         * @return variable font family type.
+         */
+        public @VariableFontFamilyType int getVariableFontFamilyType() {
+            return mVariableFontFamilyType;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -631,6 +648,7 @@ public final class FontConfig implements Parcelable {
             dest.writeTypedList(mFonts, flags);
             dest.writeString8(mLocaleList.toLanguageTags());
             dest.writeInt(mVariant);
+            dest.writeInt(mVariableFontFamilyType);
         }
 
         public static final @NonNull Creator<FontFamily> CREATOR = new Creator<FontFamily>() {
@@ -641,8 +659,10 @@ public final class FontConfig implements Parcelable {
                 source.readTypedList(fonts, Font.CREATOR);
                 String langTags = source.readString8();
                 int variant = source.readInt();
+                int varFamilyType = source.readInt();
 
-                return new FontFamily(fonts, LocaleList.forLanguageTags(langTags), variant);
+                return new FontFamily(fonts, LocaleList.forLanguageTags(langTags), variant,
+                        varFamilyType);
             }
 
             @Override

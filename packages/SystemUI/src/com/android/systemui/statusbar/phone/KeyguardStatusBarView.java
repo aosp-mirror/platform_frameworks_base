@@ -43,9 +43,9 @@ import android.widget.TextView;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.res.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
@@ -367,15 +367,22 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mMultiUserAvatar.setImageDrawable(picture);
     }
 
-    /** Should only be called from {@link KeyguardStatusBarViewController}. */
-    void onBatteryLevelChanged(boolean charging) {
+    /**
+     * Should only be called from {@link KeyguardStatusBarViewController} or
+     * {@link com.android.systemui.statusbar.ui.binder.KeyguardStatusBarViewBinder}.
+     */
+    public void onBatteryChargingChanged(boolean charging) {
         if (mBatteryCharging != charging) {
             mBatteryCharging = charging;
             updateVisibilities();
         }
     }
 
-    void setKeyguardUserSwitcherEnabled(boolean enabled) {
+    /**
+     * Should only be called from {@link KeyguardStatusBarViewController} or
+     * {@link com.android.systemui.statusbar.ui.binder.KeyguardStatusBarViewBinder}.
+     */
+    public void setKeyguardUserSwitcherEnabled(boolean enabled) {
         mKeyguardUserSwitcherEnabled = enabled;
     }
 

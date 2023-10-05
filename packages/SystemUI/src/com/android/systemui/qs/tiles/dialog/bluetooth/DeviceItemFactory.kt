@@ -24,6 +24,8 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.systemui.res.R
 
 private val backgroundOn = R.drawable.settingslib_switch_bar_bg_on
+private val backgroundOff = R.drawable.bluetooth_tile_dialog_bg_off
+private val backgroundOffBusy = R.drawable.bluetooth_tile_dialog_bg_off_busy
 private val connected = R.string.quick_settings_bluetooth_device_connected
 private val saved = R.string.quick_settings_bluetooth_device_saved
 
@@ -57,11 +59,8 @@ internal class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
                 BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
                     Pair(p.first, p.second)
                 },
-            background = context.getDrawable(backgroundOn),
+            background = backgroundOn,
             isEnabled = !cachedDevice.isBusy,
-            alpha =
-                if (cachedDevice.isBusy) BluetoothTileDialog.DISABLED_ALPHA
-                else BluetoothTileDialog.ENABLED_ALPHA,
         )
     }
 }
@@ -85,10 +84,8 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
                 BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
                     Pair(p.first, p.second)
                 },
+            background = backgroundOn,
             isEnabled = !cachedDevice.isBusy,
-            alpha =
-                if (cachedDevice.isBusy) BluetoothTileDialog.DISABLED_ALPHA
-                else BluetoothTileDialog.ENABLED_ALPHA,
         )
     }
 }
@@ -112,10 +109,8 @@ internal class SavedDeviceItemFactory : DeviceItemFactory() {
                 BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
                     Pair(p.first, p.second)
                 },
+            background = if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
             isEnabled = !cachedDevice.isBusy,
-            alpha =
-                if (cachedDevice.isBusy) BluetoothTileDialog.DISABLED_ALPHA
-                else BluetoothTileDialog.ENABLED_ALPHA,
         )
     }
 }

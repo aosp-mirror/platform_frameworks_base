@@ -165,7 +165,7 @@ constructor(
                     }
 
                 wifiPickerTracker =
-                    wifiPickerTrackerFactory.create(lifecycle, callback).apply {
+                    wifiPickerTrackerFactory.create(lifecycle, callback, "WifiRepository").apply {
                         // By default, [WifiPickerTracker] will scan to see all available wifi
                         // networks in the area. Because SysUI only needs to display the
                         // **connected** network, we don't need scans to be running (and in fact,
