@@ -283,12 +283,28 @@ public class RotationButtonController {
     }
 
     public void setRotationLockedAtAngle(int rotationSuggestion) {
-        RotationPolicy.setRotationLockAtAngle(mContext, /* enabled= */ isRotationLocked(),
+        final Boolean isLocked = isRotationLocked();
+        if (isLocked == null) {
+            // Ignore if we can't read the setting for the current user
+            return;
+        }
+        RotationPolicy.setRotationLockAtAngle(mContext, /* enabled= */ isLocked,
                 /* rotation= */ rotationSuggestion);
     }
 
-    public boolean isRotationLocked() {
-        return RotationPolicy.isRotationLocked(mContext);
+    /**
+     * @return whether rotation is currently locked, or <code>null</code> if the setting couldn't
+     *         be read
+     */
+    public Boolean isRotationLocked() {
+        try {
+            return RotationPolicy.isRotationLocked(mContext);
+        } catch (SecurityException e) {
+            // TODO(b/279561841): RotationPolicy uses the current user to resolve the setting which
+            //                    may change before the rotation watcher can be unregistered
+            Log.e(TAG, "Failed to get isRotationLocked", e);
+            return null;
+        }
     }
 
     public void setRotateSuggestionButtonState(boolean visible) {
@@ -462,7 +478,11 @@ public class RotationButtonController {
 
         // If the screen rotation changes while locked, potentially update lock to flow with
         // new screen rotation and hide any showing suggestions.
-        boolean rotationLocked = isRotationLocked();
+        Boolean rotationLocked = isRotationLocked();
+        if (rotationLocked == null) {
+            // Ignore if we can't read the setting for the current user
+            return;
+        }
         // The isVisible check makes the rotation button disappear when we are not locked
         // (e.g. for tabletop auto-rotate).
         if (rotationLocked || mRotationButton.isVisible()) {
