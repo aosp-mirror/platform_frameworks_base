@@ -178,9 +178,6 @@ public interface ShadeController extends CoreStartable {
 
     /** Listens for shade visibility changes. */
     interface ShadeVisibilityListener {
-        /** Called when the visibility of the shade changes. */
-        void visibilityChanged(boolean visible);
-
         /** Called when shade expanded and visible state changed. */
         void expandedVisibleChanged(boolean expandedVisible);
     }
