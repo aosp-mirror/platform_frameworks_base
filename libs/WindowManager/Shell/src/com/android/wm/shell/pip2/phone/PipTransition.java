@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip2;
+package com.android.wm.shell.pip2.phone;
+
+import static android.view.WindowManager.TRANSIT_OPEN;
 
 import android.annotation.NonNull;
+import android.app.ActivityManager;
+import android.app.PictureInPictureParams;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -34,8 +39,13 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
-/** Placeholder, for demonstrate purpose only. */
+/**
+ * Implementation of transitions for PiP on phone.
+ */
 public class PipTransition extends PipTransitionController {
+    @Nullable
+    private IBinder mAutoEnterButtonNavTransition;
+
     public PipTransition(
             @NonNull ShellInit shellInit,
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
@@ -58,7 +68,50 @@ public class PipTransition extends PipTransitionController {
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
+        if (isAutoEnterInButtonNavigation(request)) {
+            mAutoEnterButtonNavTransition = transition;
+            return getEnterPipTransaction(transition, request);
+        }
         return null;
+    }
+
+    @Override
+    public void augmentRequest(@NonNull IBinder transition, @NonNull TransitionRequestInfo request,
+            @NonNull WindowContainerTransaction outWct) {
+        if (isAutoEnterInButtonNavigation(request)) {
+            outWct.merge(getEnterPipTransaction(transition, request), true /* transfer */);
+            mAutoEnterButtonNavTransition = transition;
+        }
+    }
+
+    private WindowContainerTransaction getEnterPipTransaction(@NonNull IBinder transition,
+            @NonNull TransitionRequestInfo request) {
+        final ActivityManager.RunningTaskInfo pipTask = request.getPipTask();
+        PictureInPictureParams pipParams = pipTask.pictureInPictureParams;
+        mPipBoundsState.setBoundsStateForEntry(pipTask.topActivity, pipTask.topActivityInfo,
+                pipParams, mPipBoundsAlgorithm);
+
+        // calculate the entry bounds and notify core to move task to pinned with final bounds
+        final Rect entryBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.movePipActivityToPinnedRootTask(pipTask.token, entryBounds);
+        return wct;
+    }
+
+    private boolean isAutoEnterInButtonNavigation(@NonNull TransitionRequestInfo requestInfo) {
+        final ActivityManager.RunningTaskInfo pipTask = requestInfo.getPipTask();
+        if (pipTask == null) {
+            return false;
+        }
+        if (pipTask.pictureInPictureParams == null) {
+            return false;
+        }
+
+        // Assuming auto-enter is enabled and pipTask is non-null, the TRANSIT_OPEN request type
+        // implies that we are entering PiP in button navigation mode. This is guaranteed by
+        // TaskFragment#startPausing()` in Core which wouldn't get called in gesture nav.
+        return requestInfo.getType() == TRANSIT_OPEN
+                && pipTask.pictureInPictureParams.isAutoEnterEnabled();
     }
 
     @Override
@@ -67,6 +120,11 @@ public class PipTransition extends PipTransitionController {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        if (transition == mAutoEnterButtonNavTransition) {
+            startTransaction.apply();
+            finishCallback.onTransitionFinished(null);
+            return true;
+        }
         return false;
     }
 

@@ -41,6 +41,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_FINISH_ACTIVITY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_MOVE_PIP_ACTIVITY_TO_PINNED_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK;
@@ -1086,6 +1087,26 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (success) {
                     effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
+                break;
+            }
+            case HIERARCHY_OP_TYPE_MOVE_PIP_ACTIVITY_TO_PINNED_TASK: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
+                Task pipTask = container.asTask();
+                if (pipTask == null) {
+                    break;
+                }
+                ActivityRecord[] pipActivity = new ActivityRecord[1];
+                pipTask.forAllActivities((activity) -> {
+                    if (activity.pictureInPictureArgs != null) {
+                        pipActivity[0] = activity;
+                    }
+                });
+
+                Rect entryBounds = hop.getBounds();
+                mService.mRootWindowContainer.moveActivityToPinnedRootTask(
+                        pipActivity[0], null /* launchIntoPipHostActivity */,
+                        "moveActivityToPinnedRootTask", null /* transition */, entryBounds);
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
             }
             case HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER: {
