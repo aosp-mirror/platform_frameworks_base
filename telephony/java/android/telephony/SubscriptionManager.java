@@ -1364,7 +1364,7 @@ public class SubscriptionManager {
     public static class OnSubscriptionsChangedListener {
 
         /**
-         * After {@link Build.VERSION_CODES.Q}, it is no longer necessary to instantiate a
+         * After {@link Build.VERSION_CODES#Q}, it is no longer necessary to instantiate a
          * Handler inside of the OnSubscriptionsChangedListener in all cases, so it will only
          * be done for callers that do not supply an Executor.
          */
@@ -1388,13 +1388,14 @@ public class SubscriptionManager {
         /**
          * Create an OnSubscriptionsChangedListener.
          *
-         * For callers targeting {@link Build.VERSION_CODES.P} or earlier, this can only be called
+         * For callers targeting {@link Build.VERSION_CODES#P} or earlier, this can only be called
          * on a thread that already has a prepared Looper. Callers targeting Q or later should
          * subsequently use {@link SubscriptionManager#addOnSubscriptionsChangedListener(
          * Executor, OnSubscriptionsChangedListener)}.
          *
-         * On OS versions prior to {@link Build.VERSION_CODES.V} callers should assume that this
-         * call will fail if invoked on a thread that does not already have a prepared looper.
+         * On OS versions prior to {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} callers should
+         * assume that this call will fail if invoked on a thread that does not already have a
+         * prepared looper.
          */
         public OnSubscriptionsChangedListener() {
             mCreatorLooper = Looper.myLooper();

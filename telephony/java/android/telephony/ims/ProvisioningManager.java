@@ -1469,9 +1469,8 @@ public class ProvisioningManager {
     /**
      * Get the provisioning status for the IMS MmTel capability specified.
      *
-     * If provisioning is not required for the queried
-     * {@link MmTelFeature.MmTelCapabilities.MmTelCapability} and
-     * {@link ImsRegistrationImplBase.ImsRegistrationTech} combination specified, this method will
+     * If provisioning is not required for the queried {@code capability} and
+     * {@code tech} combination specified, this method will
      * always return {@code true}.
      *
      * <p> Requires Permission:
@@ -1503,7 +1502,7 @@ public class ProvisioningManager {
      * Get the provisioning status for the IMS RCS capability specified.
      *
      * If provisioning is not required for the queried
-     * {@link ImsRcsManager.RcsImsCapabilityFlag} or if the device does not support IMS
+     * {@code capability} or if the device does not support IMS
      * this method will always return {@code true}.
      *
      * @see CarrierConfigManager.Ims#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
@@ -1533,7 +1532,7 @@ public class ProvisioningManager {
      * Get the provisioning status for the IMS RCS capability specified.
      *
      * If provisioning is not required for the queried
-     * {@link ImsRcsManager.RcsImsCapabilityFlag} or if the device does not support IMS
+     * {@code capability} or if the device does not support IMS
      * this method will always return {@code true}.
      *
      * <p> Requires Permission:

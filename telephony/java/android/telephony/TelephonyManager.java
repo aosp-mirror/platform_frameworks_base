@@ -13132,8 +13132,8 @@ public class TelephonyManager {
      * </ul>
      *
      * @param executor The executor on which the result listener will be called.
-     * @param resultListener {@link Consumer} that will be called with the result fetched
-     *                       from the radio of type {@link CarrierRestrictionStatus}
+     * @param resultListener {@link Consumer} that will be called with the carrier restriction
+     *                       status result fetched from the radio
      * @throws SecurityException if the caller does not have the required permission/privileges or
      *                           if the caller is not pre-registered.
      */
@@ -13465,7 +13465,7 @@ public class TelephonyManager {
     public static final int DATA_ENABLED_REASON_THERMAL = 3;
 
     /**
-     * To indicate data was enabled or disabled due to {@link MobileDataPolicy} overrides.
+     * To indicate data was enabled or disabled due to mobile data policy overrides.
      * Note that this is not a valid reason for {@link #setDataEnabledForReason(int, boolean)} and
      * is only used to indicate that data enabled was changed due to an override.
      */
@@ -14571,7 +14571,7 @@ public class TelephonyManager {
      * @param needValidation whether validation is needed before switch happens.
      * @param executor The executor of where the callback will execute.
      * @param callback Callback will be triggered once it succeeds or failed.
-     *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
+     *                 See the {@code SET_OPPORTUNISTIC_SUB_*} constants
      *                 for more details. Pass null if don't care about the result.
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_DATA)
@@ -17516,7 +17516,7 @@ public class TelephonyManager {
     public @interface PurchasePremiumCapabilityResult {}
 
     /**
-     * Returns the purchase result {@link PurchasePremiumCapabilityResult} as a String.
+     * Returns the purchase result as a String.
      *
      * @param result The purchase premium capability result.
      * @return The purchase result as a String.
@@ -17570,7 +17570,6 @@ public class TelephonyManager {
      * @param capability The premium capability to purchase.
      * @param executor The callback executor for the response.
      * @param callback The result of the purchase request.
-     *                 One of {@link PurchasePremiumCapabilityResult}.
      * @throws SecurityException if the caller does not hold permissions
      *         READ_BASIC_PHONE_STATE or INTERNET.
      * @see #isPremiumCapabilityAvailableForPurchase(int) to check whether the capability is valid.

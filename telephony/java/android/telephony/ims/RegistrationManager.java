@@ -31,7 +31,6 @@ import android.os.Bundle;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
-import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.Log;
 
@@ -42,7 +41,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * Manages IMS Service registration state for associated {@link ImsFeature}s.
+ * Manages IMS Service registration state for associated {@code ImsFeature}s.
  */
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS)
 public interface RegistrationManager {
@@ -394,7 +393,7 @@ public interface RegistrationManager {
      * @param c The {@link RegistrationCallback} to be added.
      * @see #unregisterImsRegistrationCallback(RegistrationCallback)
      * @throws ImsException if the subscription associated with this callback is valid, but
-     * the {@link ImsService} associated with the subscription is not available. This can happen if
+     * the {@code ImsService} associated with the subscription is not available. This can happen if
      * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
      * reason.
      */
