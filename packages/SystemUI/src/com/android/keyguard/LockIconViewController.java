@@ -62,6 +62,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
+import com.android.systemui.bouncer.domain.interactor.BouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -74,11 +75,14 @@ import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -128,6 +132,8 @@ public class LockIconViewController implements Dumpable {
     @NonNull private final KeyguardTransitionInteractor mTransitionInteractor;
     @NonNull private final KeyguardInteractor mKeyguardInteractor;
     @NonNull private final View.AccessibilityDelegate mAccessibilityDelegate;
+    @NonNull private final Lazy<BouncerInteractor> mBouncerInteractor;
+    @NonNull private final SceneContainerFlags mSceneContainerFlags;
 
     // Tracks the velocity of a touch to help filter out the touches that move too fast.
     private VelocityTracker mVelocityTracker;
@@ -204,7 +210,9 @@ public class LockIconViewController implements Dumpable {
             @NonNull KeyguardInteractor keyguardInteractor,
             @NonNull FeatureFlags featureFlags,
             PrimaryBouncerInteractor primaryBouncerInteractor,
-            Context context
+            Context context,
+            Lazy<BouncerInteractor> bouncerInteractor,
+            SceneContainerFlags sceneContainerFlags
     ) {
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -233,6 +241,8 @@ public class LockIconViewController implements Dumpable {
         dumpManager.registerDumpable(TAG, this);
         mResources = resources;
         mContext = context;
+        mBouncerInteractor = bouncerInteractor;
+        mSceneContainerFlags = sceneContainerFlags;
 
         mAccessibilityDelegate = new View.AccessibilityDelegate() {
             private final AccessibilityNodeInfo.AccessibilityAction mAccessibilityAuthenticateHint =
@@ -715,7 +725,8 @@ public class LockIconViewController implements Dumpable {
         return mDownDetected;
     }
 
-    private void onLongPress() {
+    @VisibleForTesting
+    protected void onLongPress() {
         cancelTouches();
         if (mFalsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) {
             Log.v(TAG, "lock icon long-press rejected by the falsing manager.");
@@ -732,7 +743,11 @@ public class LockIconViewController implements Dumpable {
         // play device entry haptic (consistent with UDFPS controller longpress)
         vibrateOnLongPress();
 
-        mKeyguardViewController.showPrimaryBouncer(/* scrim */ true);
+        if (mSceneContainerFlags.isEnabled()) {
+            mBouncerInteractor.get().showOrUnlockDevice(null);
+        } else {
+            mKeyguardViewController.showPrimaryBouncer(/* scrim */ true);
+        }
     }
 
 
