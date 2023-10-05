@@ -16,17 +16,20 @@
 
 package com.android.settingslib.enterprise;
 
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.Settings;
-import android.util.Log;
+import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.settingslib.RestrictedLockUtils;
 
-import org.jetbrains.annotations.Nullable;
 
 final class SupervisedDeviceActionDisabledByAdminController
         extends BaseActionDisabledByAdminController {
@@ -57,8 +60,13 @@ final class SupervisedDeviceActionDisabledByAdminController
 
     @Nullable
     @Override
-    public DialogInterface.OnClickListener getPositiveButtonListener(Context context,
-            RestrictedLockUtils.EnforcedAdmin enforcedAdmin) {
+    public DialogInterface.OnClickListener getPositiveButtonListener(@NonNull Context context,
+            @NonNull RestrictedLockUtils.EnforcedAdmin enforcedAdmin) {
+        if (enforcedAdmin.component == null
+                || TextUtils.isEmpty(enforcedAdmin.component.getPackageName())) {
+            return null;
+        }
+
         final Intent intent = new Intent(Settings.ACTION_MANAGE_SUPERVISOR_RESTRICTED_SETTING)
                 .setData(new Uri.Builder()
                         .scheme("policy")
@@ -72,7 +80,6 @@ final class SupervisedDeviceActionDisabledByAdminController
             return null;
         }
         return (dialog, which) -> {
-            Log.d(TAG, "Positive button clicked, component: " + enforcedAdmin.component);
             context.startActivity(intent);
         };
     }
