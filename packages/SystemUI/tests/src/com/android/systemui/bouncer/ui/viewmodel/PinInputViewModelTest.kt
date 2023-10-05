@@ -1,5 +1,6 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.ui.viewmodel.EntryToken.ClearAll
@@ -16,14 +17,13 @@ import java.lang.Character.isDigit
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 /**
  * This test uses a mnemonic code to create and verify PinInput instances: strings of digits [0-9]
  * for [Digit] tokens, as well as a `C` for the [ClearAll] token.
  */
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class PinInputViewModelTest : SysuiTestCase() {
 
     @Test

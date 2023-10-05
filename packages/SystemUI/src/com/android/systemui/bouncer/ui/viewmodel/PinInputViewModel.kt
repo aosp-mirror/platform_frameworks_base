@@ -35,10 +35,8 @@ import com.android.systemui.bouncer.ui.viewmodel.EntryToken.Digit
  * The input is guaranteed to always contain a initial [ClearAll] token as a sentinel, thus clients
  * can always assume there is a 'ClearAll' watermark available.
  */
-data class PinInputViewModel
-internal constructor(
-    @get:VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal val input: List<EntryToken>
+data class PinInputViewModel(
+    @get:VisibleForTesting(otherwise = VisibleForTesting.PRIVATE) val input: List<EntryToken>
 ) {
     init {
         require(input.firstOrNull() is ClearAll) { "input does not begin with a ClearAll token" }
@@ -132,8 +130,7 @@ sealed interface EntryToken : Comparable<EntryToken> {
     val sequenceNumber: Int
 
     /** The pin bouncer [input] as digits 0-9. */
-    data class Digit
-    internal constructor(val input: Int, override val sequenceNumber: Int = nextSequenceNumber++) :
+    data class Digit(val input: Int, override val sequenceNumber: Int = nextSequenceNumber++) :
         EntryToken {
         init {
             check(input in 0..9)
@@ -144,8 +141,7 @@ sealed interface EntryToken : Comparable<EntryToken> {
      * Marker to indicate the input is completely cleared, and subsequent [EntryToken]s mark a new
      * pin entry.
      */
-    data class ClearAll
-    internal constructor(override val sequenceNumber: Int = nextSequenceNumber++) : EntryToken
+    data class ClearAll(override val sequenceNumber: Int = nextSequenceNumber++) : EntryToken
 
     override fun compareTo(other: EntryToken): Int =
         compareValuesBy(this, other, EntryToken::sequenceNumber)

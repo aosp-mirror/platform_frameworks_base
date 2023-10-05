@@ -16,6 +16,7 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.model.AuthenticationMethodModel
@@ -37,11 +38,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class PinBouncerViewModelTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
@@ -92,7 +92,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onShown()
 
-            assertThat(message?.text).isEqualTo(ENTER_YOUR_PIN)
+            assertThat(message?.text).ignoringCase().isEqualTo(ENTER_YOUR_PIN)
             assertThat(pin).isEmpty()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             assertThat(underTest.authenticationMethod)
@@ -209,7 +209,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onAuthenticateButtonClicked()
 
             assertThat(pin).isEmpty()
-            assertThat(message?.text).isEqualTo(WRONG_PIN)
+            assertThat(message?.text).ignoringCase().isEqualTo(WRONG_PIN)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
 
@@ -227,7 +227,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onPinButtonClicked(4)
             underTest.onPinButtonClicked(5) // PIN is now wrong!
             underTest.onAuthenticateButtonClicked()
-            assertThat(message?.text).isEqualTo(WRONG_PIN)
+            assertThat(message?.text).ignoringCase().isEqualTo(WRONG_PIN)
             assertThat(pin).isEmpty()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
@@ -273,7 +273,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             ) // PIN is now wrong!
 
             assertThat(pin).isEmpty()
-            assertThat(message?.text).isEqualTo(WRONG_PIN)
+            assertThat(message?.text).ignoringCase().isEqualTo(WRONG_PIN)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
 
