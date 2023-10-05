@@ -59,7 +59,7 @@ internal interface ModifierTransformation : Transformation {
         layoutImpl: SceneTransitionLayoutImpl,
         scene: Scene,
         element: Element,
-        sceneValues: Element.SceneValues,
+        sceneValues: Element.TargetValues,
     ): Modifier
 }
 
@@ -74,7 +74,7 @@ internal sealed interface PropertyTransformation<T> : Transformation {
         layoutImpl: SceneTransitionLayoutImpl,
         scene: Scene,
         element: Element,
-        sceneValues: Element.SceneValues,
+        sceneValues: Element.TargetValues,
         transition: TransitionState.Transition,
         value: T,
     ): T
