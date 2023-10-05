@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.notification.icon.ui.viewmodel
+package com.android.systemui.statusbar.policy.data
 
-import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepositoryModule
+import dagger.Module
 
-/** View-model for the overflow row of notification icons displayed in the notification shade. */
-class NotificationIconContainerShelfViewModel @Inject constructor() :
-    NotificationIconContainerViewModel {
-    override val animationsEnabled: Flow<Boolean> = flowOf(true)
-}
+@Module(includes = [FakeDeviceProvisioningRepositoryModule::class])
+object FakeStatusBarPolicyDataLayerModule

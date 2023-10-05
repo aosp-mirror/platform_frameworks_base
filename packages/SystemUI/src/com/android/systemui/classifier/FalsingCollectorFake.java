@@ -18,8 +18,15 @@ package com.android.systemui.classifier;
 
 import android.view.MotionEvent;
 
+import javax.inject.Inject;
+
 /** */
 public class FalsingCollectorFake implements FalsingCollector {
+
+    @Inject
+    public FalsingCollectorFake() {
+    }
+
     @Override
     public void onSuccessfulUnlock() {
     }

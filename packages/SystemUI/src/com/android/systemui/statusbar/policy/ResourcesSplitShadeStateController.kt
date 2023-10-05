@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.policy
 
 import android.content.res.Resources
 import com.android.systemui.res.R
+import javax.inject.Inject
 
 /**
  * Fake SplitShadeStateController
@@ -24,7 +25,7 @@ import com.android.systemui.res.R
  * Identical behaviour to legacy implementation (that used LargeScreenUtils.kt) I.E., behaviour
  * based solely on resources, no extra flag logic.
  */
-class ResourcesSplitShadeStateController : SplitShadeStateController {
+class ResourcesSplitShadeStateController @Inject constructor() : SplitShadeStateController {
     override fun shouldUseSplitNotificationShade(resources: Resources): Boolean {
         return resources.getBoolean(R.bool.config_use_split_notification_shade)
     }

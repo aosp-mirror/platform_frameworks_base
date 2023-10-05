@@ -15,8 +15,13 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
+import kotlinx.coroutines.flow.Flow
+
 /**
  * View-model for the row of notification icons displayed in the NotificationShelf, StatusBar, and
  * AOD.
  */
-interface NotificationIconContainerViewModel
+interface NotificationIconContainerViewModel {
+    /** Are changes to the icon container animated? */
+    val animationsEnabled: Flow<Boolean>
+}

@@ -5,41 +5,32 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
+import com.android.SysUITestModule
+import com.android.TestMocksModule
 import com.android.systemui.ExpandHelper
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.flags.Flags
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
-import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
-import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
+import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeViewController
-import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
-import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.ScrimController
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.policy.FakeConfigurationController
-import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.user.domain.UserDomainLayerModule
+import dagger.BindsInstance
+import dagger.Component
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -60,9 +51,8 @@ import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
@@ -73,68 +63,38 @@ private fun <T> anyObject(): T {
 @RunWith(AndroidTestingRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
 
-    lateinit var transitionController: LockscreenShadeTransitionController
+    private lateinit var testComponent: TestComponent
+
+    private val transitionController
+        get() = testComponent.transitionController
+    private val configurationController
+        get() = testComponent.configurationController
+    private val disableFlagsRepository
+        get() = testComponent.disableFlagsRepository
+    private val testScope
+        get() = testComponent.testScope
+
     lateinit var row: ExpandableNotificationRow
-    @Mock lateinit var statusbarStateController: SysuiStatusBarStateController
-    @Mock lateinit var logger: LSShadeTransitionLogger
-    @Mock lateinit var dumpManager: DumpManager
+
+    @Mock lateinit var centralSurfaces: CentralSurfaces
+    @Mock lateinit var depthController: NotificationShadeDepthController
+    @Mock lateinit var expandHelperCallback: ExpandHelper.Callback
     @Mock lateinit var keyguardBypassController: KeyguardBypassController
     @Mock lateinit var lockScreenUserManager: NotificationLockscreenUserManager
-    @Mock lateinit var falsingCollector: FalsingCollector
-    @Mock lateinit var ambientState: AmbientState
-    @Mock lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock lateinit var mediaHierarchyManager: MediaHierarchyManager
-    @Mock lateinit var scrimController: ScrimController
-    @Mock lateinit var falsingManager: FalsingManager
-    @Mock lateinit var shadeViewController: ShadeViewController
     @Mock lateinit var nsslController: NotificationStackScrollLayoutController
-    @Mock lateinit var depthController: NotificationShadeDepthController
-    @Mock lateinit var stackscroller: NotificationStackScrollLayout
-    @Mock lateinit var expandHelperCallback: ExpandHelper.Callback
-    @Mock lateinit var mCentralSurfaces: CentralSurfaces
     @Mock lateinit var qS: QS
-    @Mock lateinit var singleShadeOverScroller: SingleShadeLockScreenOverScroller
-    @Mock lateinit var splitShadeOverScroller: SplitShadeLockScreenOverScroller
-    @Mock lateinit var qsTransitionController: LockscreenShadeQsTransitionController
-    @Mock lateinit var activityStarter: ActivityStarter
+    @Mock lateinit var scrimController: ScrimController
+    @Mock lateinit var shadeViewController: ShadeViewController
+    @Mock lateinit var stackscroller: NotificationStackScrollLayout
+    @Mock lateinit var statusbarStateController: SysuiStatusBarStateController
     @Mock lateinit var transitionControllerCallback: LockscreenShadeTransitionController.Callback
-    private val sceneContainerFlags = FakeSceneContainerFlags()
-    private val sceneInteractor = utils.sceneInteractor()
-    private val disableFlagsRepository = FakeDisableFlagsRepository()
-    private val keyguardRepository = FakeKeyguardRepository()
-    private val configurationRepository = FakeConfigurationRepository()
-    private val sharedNotificationContainerInteractor = SharedNotificationContainerInteractor(
-        configurationRepository,
-        mContext,
-            ResourcesSplitShadeStateController()
-    )
-    private val shadeInteractor =
-        ShadeInteractor(
-            testScope.backgroundScope,
-            disableFlagsRepository,
-            sceneContainerFlags,
-            { sceneInteractor },
-            keyguardRepository,
-            userSetupRepository = FakeUserSetupRepository(),
-            deviceProvisionedController = mock(),
-            userInteractor = mock(),
-            sharedNotificationContainerInteractor,
-            repository = FakeShadeRepository(),
-        )
-    private val powerInteractor = PowerInteractorFactory.create().powerInteractor
-    @JvmField @Rule val mockito = MockitoJUnit.rule()
 
-    private val configurationController = FakeConfigurationController()
+    @JvmField @Rule val mockito = MockitoJUnit.rule()
 
     @Before
     fun setup() {
-        // By default, have the shade enabled
-        disableFlagsRepository.disableFlags.value = DisableFlagsModel()
-        testScope.runCurrent()
-
         val helper = NotificationTestHelper(mContext, mDependency, TestableLooper.get(this))
         row = helper.createRow()
         context
@@ -143,55 +103,9 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         context
             .getOrCreateTestableResources()
             .addOverride(R.dimen.lockscreen_shade_depth_controller_transition_distance, 100)
-        transitionController =
-            LockscreenShadeTransitionController(
-                statusBarStateController = statusbarStateController,
-                logger = logger,
-                keyguardBypassController = keyguardBypassController,
-                lockScreenUserManager = lockScreenUserManager,
-                falsingCollector = falsingCollector,
-                ambientState = ambientState,
-                mediaHierarchyManager = mediaHierarchyManager,
-                depthController = depthController,
-                wakefulnessLifecycle = wakefulnessLifecycle,
-                context = context,
-                configurationController = configurationController,
-                falsingManager = falsingManager,
-                dumpManager = dumpManager,
-                splitShadeOverScrollerFactory = { _, _ -> splitShadeOverScroller },
-                singleShadeOverScrollerFactory = { singleShadeOverScroller },
-                scrimTransitionController =
-                    LockscreenShadeScrimTransitionController(
-                        scrimController,
-                        context,
-                        configurationController,
-                        dumpManager,
-                            ResourcesSplitShadeStateController()
-                    ),
-                keyguardTransitionControllerFactory = { notificationPanelController ->
-                    LockscreenShadeKeyguardTransitionController(
-                        mediaHierarchyManager,
-                        notificationPanelController,
-                        context,
-                        configurationController,
-                        dumpManager,
-                            ResourcesSplitShadeStateController()
-                    )
-                },
-                qsTransitionControllerFactory = { qsTransitionController },
-                activityStarter = activityStarter,
-                shadeRepository = FakeShadeRepository(),
-                shadeInteractor = shadeInteractor,
-                powerInteractor = powerInteractor,
-                splitShadeStateController = ResourcesSplitShadeStateController()
-            )
-        transitionController.addCallback(transitionControllerCallback)
+
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
-        transitionController.shadeViewController = shadeViewController
-        transitionController.centralSurfaces = mCentralSurfaces
-        transitionController.qS = qS
-        transitionController.setStackScroller(nsslController)
         whenever(statusbarStateController.state).thenReturn(StatusBarState.KEYGUARD)
         whenever(nsslController.isInLockedDownShade).thenReturn(false)
         whenever(qS.isFullyCollapsed).thenReturn(true)
@@ -199,9 +113,36 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
             .thenReturn(true)
         whenever(lockScreenUserManager.shouldShowLockscreenNotifications()).thenReturn(true)
         whenever(lockScreenUserManager.isLockscreenPublicMode(anyInt())).thenReturn(true)
-        whenever(falsingCollector.shouldEnforceBouncer()).thenReturn(false)
         whenever(keyguardBypassController.bypassEnabled).thenReturn(false)
-        clearInvocations(mCentralSurfaces)
+
+        testComponent =
+            DaggerLockscreenShadeTransitionControllerTest_TestComponent.factory()
+                .create(
+                    test = this,
+                    featureFlags =
+                        FakeFeatureFlagsClassicModule {
+                            set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+                        },
+                    mocks =
+                        TestMocksModule(
+                            notificationShadeDepthController = depthController,
+                            keyguardBypassController = keyguardBypassController,
+                            mediaHierarchyManager = mediaHierarchyManager,
+                            notificationLockscreenUserManager = lockScreenUserManager,
+                            notificationStackScrollLayoutController = nsslController,
+                            scrimController = scrimController,
+                            statusBarStateController = statusbarStateController,
+                        )
+                )
+
+        transitionController.addCallback(transitionControllerCallback)
+        transitionController.shadeViewController = shadeViewController
+        transitionController.centralSurfaces = centralSurfaces
+        transitionController.qS = qS
+        transitionController.setStackScroller(nsslController)
+        clearInvocations(centralSurfaces)
+
+        testScope.runCurrent()
     }
 
     @After
@@ -282,7 +223,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.goToLockedShade(null)
         verify(statusbarStateController, never()).setState(anyInt())
         verify(statusbarStateController).setLeaveOpenOnKeyguardHide(true)
-        verify(mCentralSurfaces).showBouncerWithDimissAndCancelIfKeyguard(anyObject(), anyObject())
+        verify(centralSurfaces).showBouncerWithDimissAndCancelIfKeyguard(anyObject(), anyObject())
     }
 
     @Test
@@ -318,7 +259,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verify(scrimController, never()).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(transitionControllerCallback, never())
             .setTransitionToFullShadeAmount(anyFloat(), anyBoolean(), anyLong())
-        verify(qsTransitionController, never()).dragDownAmount = anyFloat()
+        verify(qS, never()).setTransitionToFullShadeProgress(anyBoolean(), anyFloat(), anyFloat())
     }
 
     @Test
@@ -329,7 +270,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verify(scrimController).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(transitionControllerCallback)
             .setTransitionToFullShadeAmount(anyFloat(), anyBoolean(), anyLong())
-        verify(qsTransitionController).dragDownAmount = 10f
+        verify(qS).setTransitionToFullShadeProgress(eq(true), anyFloat(), anyFloat())
         verify(depthController).transitionToFullShadeProgress = anyFloat()
     }
 
@@ -532,8 +473,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
         transitionController.dragDownAmount = 10f
 
-        verify(singleShadeOverScroller).expansionDragDownAmount = 10f
-        verifyZeroInteractions(splitShadeOverScroller)
+        verify(nsslController).setOverScrollAmount(0)
+        verify(scrimController, never()).setNotificationsOverScrollAmount(anyInt())
     }
 
     @Test
@@ -542,8 +483,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
         transitionController.dragDownAmount = 10f
 
-        verify(splitShadeOverScroller).expansionDragDownAmount = 10f
-        verifyZeroInteractions(singleShadeOverScroller)
+        verify(nsslController).setOverScrollAmount(0)
+        verify(scrimController).setNotificationsOverScrollAmount(0)
     }
 
     @Test
@@ -591,6 +532,32 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         progress: Float,
         lockScreenNotificationsProgress: Float
     ) {
-        scrimController.setTransitionToFullShadeProgress(progress, lockScreenNotificationsProgress)
+        setTransitionToFullShadeProgress(progress, lockScreenNotificationsProgress)
+    }
+
+    @SysUISingleton
+    @Component(
+        modules =
+            [
+                SysUITestModule::class,
+                UserDomainLayerModule::class,
+            ]
+    )
+    interface TestComponent {
+
+        val transitionController: LockscreenShadeTransitionController
+
+        val configurationController: FakeConfigurationController
+        val disableFlagsRepository: FakeDisableFlagsRepository
+        val testScope: TestScope
+
+        @Component.Factory
+        interface Factory {
+            fun create(
+                @BindsInstance test: SysuiTestCase,
+                featureFlags: FakeFeatureFlagsClassicModule,
+                mocks: TestMocksModule,
+            ): TestComponent
+        }
     }
 }

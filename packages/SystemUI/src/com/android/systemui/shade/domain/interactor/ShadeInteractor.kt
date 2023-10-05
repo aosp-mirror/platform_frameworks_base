@@ -19,7 +19,11 @@ package com.android.systemui.shade.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.DozeStateModel
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
@@ -27,8 +31,9 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
-import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepository
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
@@ -56,13 +61,16 @@ class ShadeInteractor
 @Inject
 constructor(
     @Application scope: CoroutineScope,
+    deviceProvisioningRepository: DeviceProvisioningRepository,
     disableFlagsRepository: DisableFlagsRepository,
+    dozeParams: DozeParameters,
     sceneContainerFlags: SceneContainerFlags,
     // TODO(b/300258424) convert to direct reference instead of provider
     sceneInteractorProvider: Provider<SceneInteractor>,
     keyguardRepository: KeyguardRepository,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    powerInteractor: PowerInteractor,
     userSetupRepository: UserSetupRepository,
-    deviceProvisionedController: DeviceProvisionedController,
     userInteractor: UserInteractor,
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     repository: ShadeRepository,
@@ -187,6 +195,26 @@ constructor(
         combine(isUserInteractingWithShade, isUserInteractingWithShade) { shade, qs -> shade || qs }
             .distinctUntilChanged()
 
+    /** Are touches allowed on the notification panel? */
+    val isShadeTouchable: Flow<Boolean> =
+        combine(
+            powerInteractor.isAsleep,
+            keyguardTransitionInteractor.isInTransitionToStateWhere { it == KeyguardState.AOD },
+            keyguardRepository.dozeTransitionModel.map { it.to == DozeStateModel.DOZE_PULSING },
+            deviceProvisioningRepository.isFactoryResetProtectionActive,
+        ) { isAsleep, goingToSleep, isPulsing, isFrpActive ->
+            when {
+                // Touches are disabled when Factory Reset Protection is active
+                isFrpActive -> false
+                // If the device is going to sleep, only accept touches if we're still
+                // animating
+                goingToSleep -> dozeParams.shouldControlScreenOff()
+                // If the device is asleep, only accept touches if there's a pulse
+                isAsleep -> isPulsing
+                else -> true
+            }
+        }
+
     /** Emits true if the shade can be expanded from QQS to QS and false otherwise. */
     val isExpandToQsEnabled: Flow<Boolean> =
         combine(
@@ -194,8 +222,9 @@ constructor(
             isShadeEnabled,
             keyguardRepository.isDozing,
             userSetupRepository.isUserSetupFlow,
-        ) { disableFlags, isShadeEnabled, isDozing, isUserSetup ->
-            deviceProvisionedController.isDeviceProvisioned &&
+            deviceProvisioningRepository.isDeviceProvisioned,
+        ) { disableFlags, isShadeEnabled, isDozing, isUserSetup, isDeviceProvisioned ->
+            isDeviceProvisioned &&
                 // Disallow QS during setup if it's a simple user switcher. (The user intends to
                 // use the lock screen user switcher, QS is not needed.)
                 (isUserSetup || !userInteractor.isSimpleUserSwitcher) &&

@@ -16,50 +16,52 @@
 
 package com.android.systemui.shade.data.repository
 
-import android.app.ActivityManager
 import android.app.StatusBarManager.DISABLE2_NONE
 import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
 import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
 import android.content.pm.UserInfo
 import android.os.UserManager
 import androidx.test.filters.SmallTest
-import com.android.internal.logging.UiEventLogger
-import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.SysUITestModule
+import com.android.TestMocksModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FakeFeatureFlagsClassicModule
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.DozeStateModel
+import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
-import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.res.R
-import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
-import com.android.systemui.statusbar.policy.DeviceProvisionedController
-import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
-import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
-import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
+import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.user.domain.interactor.GuestUserInteractor
-import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
-import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
-import com.android.systemui.user.domain.interactor.UserInteractor
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.user.domain.UserDomainLayerModule
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import dagger.BindsInstance
+import dagger.Component
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -70,50 +72,55 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 class ShadeInteractorTest : SysuiTestCase() {
+
+    @Mock private lateinit var dozeParameters: DozeParameters
+
+    private lateinit var testComponent: TestComponent
+
+    private val configurationRepository
+        get() = testComponent.configurationRepository
+    private val deviceProvisioningRepository
+        get() = testComponent.deviceProvisioningRepository
+    private val disableFlagsRepository
+        get() = testComponent.disableFlagsRepository
+    private val keyguardRepository
+        get() = testComponent.keyguardRepository
+    private val keyguardTransitionRepository
+        get() = testComponent.keygaurdTransitionRepository
+    private val powerRepository
+        get() = testComponent.powerRepository
+    private val sceneInteractor
+        get() = testComponent.sceneInteractor
+    private val shadeRepository
+        get() = testComponent.shadeRepository
+    private val testScope
+        get() = testComponent.testScope
+    private val userRepository
+        get() = testComponent.userRepository
+    private val userSetupRepository
+        get() = testComponent.userSetupRepository
+
     private lateinit var underTest: ShadeInteractor
-
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val featureFlags = FakeFeatureFlags()
-    private val sceneContainerFlags = FakeSceneContainerFlags()
-    private val sceneInteractor = utils.sceneInteractor()
-    private val userSetupRepository = FakeUserSetupRepository()
-    private val userRepository = FakeUserRepository()
-    private val disableFlagsRepository = FakeDisableFlagsRepository()
-    private val keyguardRepository = FakeKeyguardRepository()
-    private val shadeRepository = FakeShadeRepository()
-    private val configurationRepository = FakeConfigurationRepository()
-    private val sharedNotificationContainerInteractor =
-        SharedNotificationContainerInteractor(
-            configurationRepository,
-            mContext,
-            ResourcesSplitShadeStateController()
-        )
-
-    @Mock private lateinit var manager: UserManager
-    @Mock private lateinit var headlessSystemUserMode: HeadlessSystemUserMode
-    @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
-    @Mock private lateinit var activityStarter: ActivityStarter
-    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
-    @Mock private lateinit var activityManager: ActivityManager
-    @Mock private lateinit var uiEventLogger: UiEventLogger
-    @Mock private lateinit var guestInteractor: GuestUserInteractor
-
-    private lateinit var userInteractor: UserInteractor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        featureFlags.set(Flags.FACE_AUTH_REFACTOR, false)
-        featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
-
-        val refreshUsersScheduler =
-            RefreshUsersScheduler(
-                applicationScope = testScope.backgroundScope,
-                mainDispatcher = utils.testDispatcher,
-                repository = userRepository,
-            )
+        testComponent =
+            DaggerShadeInteractorTest_TestComponent.factory()
+                .create(
+                    test = this,
+                    featureFlags =
+                        FakeFeatureFlagsClassicModule {
+                            set(Flags.FACE_AUTH_REFACTOR, false)
+                            set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+                        },
+                    mocks =
+                        TestMocksModule(
+                            dozeParameters = dozeParameters,
+                        ),
+                )
+        underTest = testComponent.underTest
 
         runBlocking {
             val userInfos =
@@ -131,44 +138,6 @@ class ShadeInteractorTest : SysuiTestCase() {
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
         }
-        userInteractor =
-            UserInteractor(
-                applicationContext = context,
-                repository = userRepository,
-                activityStarter = activityStarter,
-                keyguardInteractor =
-                    KeyguardInteractorFactory.create(featureFlags = featureFlags)
-                        .keyguardInteractor,
-                featureFlags = featureFlags,
-                manager = manager,
-                headlessSystemUserMode = headlessSystemUserMode,
-                applicationScope = testScope.backgroundScope,
-                telephonyInteractor =
-                    TelephonyInteractor(
-                        repository = FakeTelephonyRepository(),
-                    ),
-                broadcastDispatcher = fakeBroadcastDispatcher,
-                keyguardUpdateMonitor = keyguardUpdateMonitor,
-                backgroundDispatcher = utils.testDispatcher,
-                activityManager = activityManager,
-                refreshUsersScheduler = refreshUsersScheduler,
-                guestUserInteractor = guestInteractor,
-                uiEventLogger = uiEventLogger,
-                userRestrictionChecker = mock(),
-            )
-        underTest =
-            ShadeInteractor(
-                testScope.backgroundScope,
-                disableFlagsRepository,
-                sceneContainerFlags,
-                { sceneInteractor },
-                keyguardRepository,
-                userSetupRepository,
-                deviceProvisionedController,
-                userInteractor,
-                sharedNotificationContainerInteractor,
-                shadeRepository,
-            )
     }
 
     @Test
@@ -188,7 +157,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     @Test
     fun isExpandToQsEnabled_deviceNotProvisioned_false() =
         testScope.runTest {
-            whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(false)
+            deviceProvisioningRepository.setDeviceProvisioned(false)
 
             val actual by collectLastValue(underTest.isExpandToQsEnabled)
 
@@ -198,7 +167,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     @Test
     fun isExpandToQsEnabled_userNotSetupAndSimpleUserSwitcher_false() =
         testScope.runTest {
-            whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+            deviceProvisioningRepository.setDeviceProvisioned(true)
 
             userSetupRepository.setUserSetup(false)
             userRepository.setSettings(UserSwitcherSettingsModel(isSimpleUserSwitcher = true))
@@ -211,7 +180,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     @Test
     fun isExpandToQsEnabled_shadeNotEnabled_false() =
         testScope.runTest {
-            whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+            deviceProvisioningRepository.setDeviceProvisioned(true)
             userSetupRepository.setUserSetup(true)
 
             disableFlagsRepository.disableFlags.value =
@@ -227,7 +196,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     @Test
     fun isExpandToQsEnabled_quickSettingsNotEnabled_false() =
         testScope.runTest {
-            whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+            deviceProvisioningRepository.setDeviceProvisioned(true)
             userSetupRepository.setUserSetup(true)
 
             disableFlagsRepository.disableFlags.value =
@@ -242,7 +211,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     @Test
     fun isExpandToQsEnabled_dozing_false() =
         testScope.runTest {
-            whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+            deviceProvisioningRepository.setDeviceProvisioned(true)
             userSetupRepository.setUserSetup(true)
             disableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(
@@ -259,7 +228,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     @Test
     fun isExpandToQsEnabled_userSetup_true() =
         testScope.runTest {
-            whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+            deviceProvisioningRepository.setDeviceProvisioned(true)
             keyguardRepository.setIsDozing(false)
             disableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(
@@ -276,7 +245,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     @Test
     fun isExpandToQsEnabled_notSimpleUserSwitcher_true() =
         testScope.runTest {
-            whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+            deviceProvisioningRepository.setDeviceProvisioned(true)
             keyguardRepository.setIsDozing(false)
             disableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(
@@ -293,7 +262,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     @Test
     fun isExpandToQsEnabled_respondsToDozingUpdates() =
         testScope.runTest {
-            whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+            deviceProvisioningRepository.setDeviceProvisioned(true)
             keyguardRepository.setIsDozing(false)
             disableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(
@@ -321,7 +290,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     @Test
     fun isExpandToQsEnabled_respondsToDisableUpdates() =
         testScope.runTest {
-            whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+            deviceProvisioningRepository.setDeviceProvisioned(true)
             keyguardRepository.setIsDozing(false)
             disableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(
@@ -353,7 +322,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     @Test
     fun isExpandToQsEnabled_respondsToUserUpdates() =
         testScope.runTest {
-            whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+            deviceProvisioningRepository.setDeviceProvisioned(true)
             keyguardRepository.setIsDozing(false)
             disableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(
@@ -1129,4 +1098,168 @@ class ShadeInteractorTest : SysuiTestCase() {
             // THEN interacting is false
             assertThat(interacting).isFalse()
         }
+
+    @Test
+    fun isShadeTouchable_isFalse_whenFrpIsActive() =
+        testScope.runTest {
+            deviceProvisioningRepository.setFactoryResetProtectionActive(true)
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
+            runCurrent()
+            assertThat(isShadeTouchable).isFalse()
+        }
+
+    @Test
+    fun isShadeTouchable_isFalse_whenDeviceAsleepAndNotPulsing() =
+        testScope.runTest {
+            powerRepository.updateWakefulness(
+                rawState = WakefulnessState.ASLEEP,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.OTHER,
+            )
+            // goingToSleep == false
+            // TODO: remove?
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(
+                    to = DozeStateModel.DOZE_AOD,
+                )
+            )
+            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
+            runCurrent()
+            assertThat(isShadeTouchable).isFalse()
+        }
+
+    @Test
+    fun isShadeTouchable_isTrue_whenDeviceAsleepAndPulsing() =
+        testScope.runTest {
+            powerRepository.updateWakefulness(
+                rawState = WakefulnessState.ASLEEP,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.OTHER,
+            )
+            // goingToSleep == false
+            // TODO: remove?
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(
+                    to = DozeStateModel.DOZE_PULSING,
+                )
+            )
+            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
+            runCurrent()
+            assertThat(isShadeTouchable).isTrue()
+        }
+
+    @Test
+    fun isShadeTouchable_isFalse_whenStartingToSleepAndNotControlScreenOff() =
+        testScope.runTest {
+            powerRepository.updateWakefulness(
+                rawState = WakefulnessState.STARTING_TO_SLEEP,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.OTHER,
+            )
+            // goingToSleep == true
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            whenever(dozeParameters.shouldControlScreenOff()).thenReturn(false)
+            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
+            runCurrent()
+            assertThat(isShadeTouchable).isFalse()
+        }
+
+    @Test
+    fun isShadeTouchable_isTrue_whenStartingToSleepAndControlScreenOff() =
+        testScope.runTest {
+            powerRepository.updateWakefulness(
+                rawState = WakefulnessState.STARTING_TO_SLEEP,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.OTHER,
+            )
+            // goingToSleep == true
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            whenever(dozeParameters.shouldControlScreenOff()).thenReturn(true)
+            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
+            runCurrent()
+            assertThat(isShadeTouchable).isTrue()
+        }
+
+    @Test
+    fun isShadeTouchable_isTrue_whenNotAsleep() =
+        testScope.runTest {
+            powerRepository.updateWakefulness(
+                rawState = WakefulnessState.AWAKE,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.OTHER,
+            )
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
+            runCurrent()
+            assertThat(isShadeTouchable).isTrue()
+        }
+
+    @SysUISingleton
+    @Component(
+        modules =
+            [
+                SysUITestModule::class,
+                UserDomainLayerModule::class,
+            ]
+    )
+    interface TestComponent {
+
+        val underTest: ShadeInteractor
+
+        val configurationRepository: FakeConfigurationRepository
+        val deviceProvisioningRepository: FakeDeviceProvisioningRepository
+        val disableFlagsRepository: FakeDisableFlagsRepository
+        val keyguardRepository: FakeKeyguardRepository
+        val keygaurdTransitionRepository: FakeKeyguardTransitionRepository
+        val powerRepository: FakePowerRepository
+        val sceneInteractor: SceneInteractor
+        val shadeRepository: FakeShadeRepository
+        val testScope: TestScope
+        val userRepository: FakeUserRepository
+        val userSetupRepository: FakeUserSetupRepository
+
+        @Component.Factory
+        interface Factory {
+            fun create(
+                @BindsInstance test: SysuiTestCase,
+                featureFlags: FakeFeatureFlagsClassicModule,
+                mocks: TestMocksModule,
+            ): TestComponent
+        }
+    }
 }
