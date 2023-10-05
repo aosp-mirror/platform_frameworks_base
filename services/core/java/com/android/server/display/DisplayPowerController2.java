@@ -561,8 +561,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                         brightnessSetting, () -> postBrightnessChangeRunnable(),
                         new HandlerExecutor(mHandler));
 
-        mBrightnessClamperController = new BrightnessClamperController(mHandler,
-                modeChangeCallback::run, new BrightnessClamperController.DisplayDeviceData(
+        mBrightnessClamperController = mInjector.getBrightnessClamperController(
+                mHandler, modeChangeCallback::run,
+                new BrightnessClamperController.DisplayDeviceData(
                 mUniqueDisplayId,
                 mThermalBrightnessThrottlingDataId,
                 logicalDisplay.getPowerThrottlingDataIdLocked(),
@@ -1353,6 +1354,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         float rawBrightnessState = displayBrightnessState.getBrightness();
         mBrightnessReasonTemp.set(displayBrightnessState.getBrightnessReason());
         boolean slowChange = displayBrightnessState.isSlowChange();
+        // custom transition duration
+        float customAnimationRate = displayBrightnessState.getCustomAnimationRate();
 
         // Set up the ScreenOff controller used when coming out of SCREEN_OFF and the ALS sensor
         // doesn't yet have a valid lux value to use with auto-brightness.
@@ -1485,6 +1488,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         brightnessState = clampedState.getBrightness();
         slowChange = clampedState.isSlowChange();
+        // faster rate wins, at this point customAnimationRate == -1, strategy does not control
+        // customAnimationRate. Should be revisited if strategy start setting this value
+        customAnimationRate = Math.max(customAnimationRate, clampedState.getCustomAnimationRate());
         mBrightnessReasonTemp.addModifier(clampedState.getBrightnessReason().getModifier());
 
         if (updateScreenBrightnessSetting) {
@@ -1553,9 +1559,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             // allowed range.
             float animateValue = clampScreenBrightness(brightnessState);
 
-            // custom transition duration
-            float customTransitionRate = -1f;
-
             // If there are any HDR layers on the screen, we have a special brightness value that we
             // use instead. We still preserve the calculated brightness for Standard Dynamic Range
             // (SDR) layers, but the main brightness value will be the one for HDR.
@@ -1570,8 +1573,19 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 // We want to scale HDR brightness level with the SDR level, we also need to restore
                 // SDR brightness immediately when entering dim or low power mode.
                 animateValue = mBrightnessRangeController.getHdrBrightnessValue();
-                customTransitionRate = mBrightnessRangeController.getHdrTransitionRate();
+                customAnimationRate = Math.max(customAnimationRate,
+                        mBrightnessRangeController.getHdrTransitionRate());
                 mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_HDR);
+            }
+
+            // if doze or suspend state is requested, we want to finish brightnes animation fast
+            // to allow state animation to start
+            if (mPowerRequest.policy == DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE
+                    && (mPowerRequest.dozeScreenState == Display.STATE_UNKNOWN  // dozing
+                    || mPowerRequest.dozeScreenState == Display.STATE_DOZE_SUSPEND
+                    || mPowerRequest.dozeScreenState == Display.STATE_ON_SUSPEND)) {
+                customAnimationRate = DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
+                slowChange = false;
             }
 
             final float currentBrightness = mPowerState.getScreenBrightness();
@@ -1601,9 +1615,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 if (skipAnimation) {
                     animateScreenBrightness(animateValue, sdrAnimateValue,
                             SCREEN_ANIMATION_RATE_MINIMUM);
-                } else if (customTransitionRate > 0) {
+                } else if (customAnimationRate > 0) {
                     animateScreenBrightness(animateValue, sdrAnimateValue,
-                            customTransitionRate, /* ignoreAnimationLimits = */true);
+                            customAnimationRate, /* ignoreAnimationLimits = */true);
                 } else {
                     boolean isIncreasing = animateValue > currentBrightness;
                     final float rampSpeed;
@@ -3057,6 +3071,15 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 DisplayManagerFlags flags, IBinder displayToken, DisplayDeviceInfo info) {
             return new BrightnessRangeController(hbmController,
                     modeChangeCallback, displayDeviceConfig, handler, flags, displayToken, info);
+        }
+
+        BrightnessClamperController getBrightnessClamperController(Handler handler,
+                BrightnessClamperController.ClamperChangeListener clamperChangeListener,
+                BrightnessClamperController.DisplayDeviceData data, Context context,
+                DisplayManagerFlags flags) {
+
+            return new BrightnessClamperController(handler, clamperChangeListener, data, context,
+                    flags);
         }
 
         DisplayWhiteBalanceController getDisplayWhiteBalanceController(Handler handler,
