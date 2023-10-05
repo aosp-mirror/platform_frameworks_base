@@ -8803,7 +8803,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void grantInputChannel(Session session, int callingUid, int callingPid, int displayId,
             SurfaceControl surface, IWindow window, IBinder hostInputToken,
             int flags, int privateFlags, int inputFeatures, int type, IBinder windowToken,
-            IBinder focusGrantToken, String inputHandleName, InputChannel outInputChannel) {
+            IBinder inputTransferToken, String inputHandleName, InputChannel outInputChannel) {
         final int sanitizedType = sanitizeWindowType(session, displayId, windowToken, type);
         final InputApplicationHandle applicationHandle;
         final String name;
@@ -8812,7 +8812,7 @@ public class WindowManagerService extends IWindowManager.Stub
             EmbeddedWindowController.EmbeddedWindow win =
                     new EmbeddedWindowController.EmbeddedWindow(session, this, window,
                             mInputToWindowMap.get(hostInputToken), callingUid, callingPid,
-                            sanitizedType, displayId, focusGrantToken, inputHandleName,
+                            sanitizedType, displayId, inputTransferToken, inputHandleName,
                             (flags & FLAG_NOT_FOCUSABLE) == 0);
             win.openInputChannel(outInputChannel);
             mEmbeddedWindowController.add(outInputChannel.getToken(), win);
@@ -9139,10 +9139,10 @@ public class WindowManagerService extends IWindowManager.Stub
         return mPossibleDisplayInfoMapper.getPossibleDisplayInfos(displayId);
     }
 
-    void grantEmbeddedWindowFocus(Session session, IBinder focusToken, boolean grantFocus) {
+    void grantEmbeddedWindowFocus(Session session, IBinder inputTransferToken, boolean grantFocus) {
         synchronized (mGlobalLock) {
             final EmbeddedWindowController.EmbeddedWindow embeddedWindow =
-                    mEmbeddedWindowController.getByFocusToken(focusToken);
+                    mEmbeddedWindowController.getByInputTransferToken(inputTransferToken);
             if (embeddedWindow == null) {
                 Slog.e(TAG, "Embedded window not found");
                 return;
@@ -9187,8 +9187,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void grantEmbeddedWindowFocus(Session session, IWindow callingWindow, IBinder targetFocusToken,
-                                  boolean grantFocus) {
+    void grantEmbeddedWindowFocus(Session session, IWindow callingWindow,
+            IBinder inputTransferToken, boolean grantFocus) {
         synchronized (mGlobalLock) {
             final WindowState hostWindow =
                     windowForClientLocked(session, callingWindow, false /* throwOnError*/);
@@ -9201,7 +9201,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             final EmbeddedWindowController.EmbeddedWindow embeddedWindow =
-                    mEmbeddedWindowController.getByFocusToken(targetFocusToken);
+                    mEmbeddedWindowController.getByInputTransferToken(inputTransferToken);
             if (embeddedWindow == null) {
                 Slog.e(TAG, "Embedded window not found");
                 return;

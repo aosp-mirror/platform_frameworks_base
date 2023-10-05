@@ -163,7 +163,8 @@ class BackNavigationController {
 
             if (window == null) {
                 EmbeddedWindowController.EmbeddedWindow embeddedWindow =
-                        wmService.mEmbeddedWindowController.getByFocusToken(focusedWindowToken);
+                        wmService.mEmbeddedWindowController.getByInputTransferToken(
+                                focusedWindowToken);
                 if (embeddedWindow != null) {
                     ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                             "Current focused window is embeddedWindow. Dispatch KEYCODE_BACK.");
