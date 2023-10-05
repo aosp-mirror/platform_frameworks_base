@@ -492,13 +492,14 @@ public abstract class WMShellModule {
             ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             LaunchAdjacentController launchAdjacentController,
+            RecentsTransitionHandler recentsTransitionHandler,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
                 transitions, enterDesktopTransitionHandler, exitDesktopTransitionHandler,
                 toggleResizeDesktopTaskTransitionHandler, desktopModeTaskRepository,
-                launchAdjacentController, mainExecutor);
+                launchAdjacentController, recentsTransitionHandler, mainExecutor);
     }
 
     @WMSingleton
