@@ -24,6 +24,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.wm.shell.compatui.impl.CompatUIEventsKt.CAMERA_CONTROL_STATE_UPDATE;
+import static com.android.wm.shell.compatui.impl.CompatUIEventsKt.SIZE_COMPAT_RESTART_BUTTON_APPEARED;
+import static com.android.wm.shell.compatui.impl.CompatUIEventsKt.SIZE_COMPAT_RESTART_BUTTON_CLICKED;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
@@ -31,7 +34,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.LocusId;
@@ -57,6 +59,11 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.compatui.CompatUIController;
+import com.android.wm.shell.compatui.api.CompatUIHandler;
+import com.android.wm.shell.compatui.api.CompatUIInfo;
+import com.android.wm.shell.compatui.impl.CompatUIEvents.CameraControlStateUpdated;
+import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonAppeared;
+import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonClicked;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -75,8 +82,7 @@ import java.util.function.Consumer;
  * Unified task organizer for all components in the shell.
  * TODO(b/167582004): may consider consolidating this class and TaskOrganizer
  */
-public class ShellTaskOrganizer extends TaskOrganizer implements
-        CompatUIController.CompatUICallback {
+public class ShellTaskOrganizer extends TaskOrganizer {
     private static final String TAG = "ShellTaskOrganizer";
 
     // Intentionally using negative numbers here so the positive numbers can be used
@@ -194,12 +200,11 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
      * In charge of showing compat UI. Can be {@code null} if the device doesn't support size
      * compat or if this isn't the main {@link ShellTaskOrganizer}.
      *
-     * <p>NOTE: only the main {@link ShellTaskOrganizer} should have a {@link CompatUIController},
-     * and register itself as a {@link CompatUIController.CompatUICallback}. Subclasses should be
-     * initialized with a {@code null} {@link CompatUIController}.
+     * <p>NOTE: only the main {@link ShellTaskOrganizer} should have a {@link CompatUIHandler},
+     * Subclasses should be initialized with a {@code null} {@link CompatUIHandler}.
      */
     @Nullable
-    private final CompatUIController mCompatUI;
+    private final CompatUIHandler mCompatUI;
 
     @NonNull
     private final ShellCommandHandler mShellCommandHandler;
@@ -223,7 +228,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     public ShellTaskOrganizer(ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
-            @Nullable CompatUIController compatUI,
+            @Nullable CompatUIHandler compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasks,
             ShellExecutor mainExecutor) {
@@ -235,7 +240,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     protected ShellTaskOrganizer(ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             ITaskOrganizerController taskOrganizerController,
-            @Nullable CompatUIController compatUI,
+            @Nullable CompatUIHandler compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasks,
             ShellExecutor mainExecutor) {
@@ -252,7 +257,21 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     private void onInit() {
         mShellCommandHandler.addDumpCallback(this::dump, this);
         if (mCompatUI != null) {
-            mCompatUI.setCompatUICallback(this);
+            mCompatUI.setCallback(compatUIEvent -> {
+                switch(compatUIEvent.getEventId()) {
+                    case SIZE_COMPAT_RESTART_BUTTON_APPEARED:
+                        onSizeCompatRestartButtonAppeared(compatUIEvent.asType());
+                        break;
+                    case SIZE_COMPAT_RESTART_BUTTON_CLICKED:
+                        onSizeCompatRestartButtonClicked(compatUIEvent.asType());
+                        break;
+                    case CAMERA_CONTROL_STATE_UPDATE:
+                        onCameraControlStateUpdated(compatUIEvent.asType());
+                        break;
+                    default:
+
+                }
+            });
         }
         registerOrganizer();
     }
@@ -727,45 +746,6 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
     }
 
-    @Override
-    public void onSizeCompatRestartButtonAppeared(int taskId) {
-        final TaskAppearedInfo info;
-        synchronized (mLock) {
-            info = mTasks.get(taskId);
-        }
-        if (info == null) {
-            return;
-        }
-        logSizeCompatRestartButtonEventReported(info,
-                FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED__EVENT__APPEARED);
-    }
-
-    @Override
-    public void onSizeCompatRestartButtonClicked(int taskId) {
-        final TaskAppearedInfo info;
-        synchronized (mLock) {
-            info = mTasks.get(taskId);
-        }
-        if (info == null) {
-            return;
-        }
-        logSizeCompatRestartButtonEventReported(info,
-                FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED__EVENT__CLICKED);
-        restartTaskTopActivityProcessIfVisible(info.getTaskInfo().token);
-    }
-
-    @Override
-    public void onCameraControlStateUpdated(int taskId, @CameraCompatControlState int state) {
-        final TaskAppearedInfo info;
-        synchronized (mLock) {
-            info = mTasks.get(taskId);
-        }
-        if (info == null) {
-            return;
-        }
-        updateCameraCompatControlState(info.getTaskInfo().token, state);
-    }
-
     /** Reparents a child window surface to the task surface. */
     public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
             SurfaceControl.Transaction t) {
@@ -782,6 +762,50 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
         taskListener.reparentChildSurfaceToTask(taskId, sc, t);
     }
+
+    @VisibleForTesting
+    void onSizeCompatRestartButtonAppeared(@NonNull SizeCompatRestartButtonAppeared compatUIEvent) {
+        final int taskId = compatUIEvent.getTaskId();
+        final TaskAppearedInfo info;
+        synchronized (mLock) {
+            info = mTasks.get(taskId);
+        }
+        if (info == null) {
+            return;
+        }
+        logSizeCompatRestartButtonEventReported(info,
+                FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED__EVENT__APPEARED);
+    }
+
+    @VisibleForTesting
+    void onSizeCompatRestartButtonClicked(@NonNull SizeCompatRestartButtonClicked compatUIEvent) {
+        final int taskId = compatUIEvent.getTaskId();
+        final TaskAppearedInfo info;
+        synchronized (mLock) {
+            info = mTasks.get(taskId);
+        }
+        if (info == null) {
+            return;
+        }
+        logSizeCompatRestartButtonEventReported(info,
+                FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED__EVENT__CLICKED);
+        restartTaskTopActivityProcessIfVisible(info.getTaskInfo().token);
+    }
+
+    @VisibleForTesting
+    void onCameraControlStateUpdated(@NonNull CameraControlStateUpdated compatUIEvent) {
+        final int taskId = compatUIEvent.getTaskId();
+        final int state = compatUIEvent.getState();
+        final TaskAppearedInfo info;
+        synchronized (mLock) {
+            info = mTasks.get(taskId);
+        }
+        if (info == null) {
+            return;
+        }
+        updateCameraCompatControlState(info.getTaskInfo().token, state);
+    }
+
 
     private void logSizeCompatRestartButtonEventReported(@NonNull TaskAppearedInfo info,
             int event) {
@@ -810,10 +834,10 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         // on this Task if there is any.
         if (taskListener == null || !taskListener.supportCompatUI()
                 || !taskInfo.appCompatTaskInfo.hasCompatUI() || !taskInfo.isVisible) {
-            mCompatUI.onCompatInfoChanged(taskInfo, null /* taskListener */);
+            mCompatUI.onCompatInfoChanged(new CompatUIInfo(taskInfo, null /* taskListener */));
             return;
         }
-        mCompatUI.onCompatInfoChanged(taskInfo, taskListener);
+        mCompatUI.onCompatInfoChanged(new CompatUIInfo(taskInfo, taskListener));
     }
 
     private TaskListener getTaskListener(RunningTaskInfo runningTaskInfo) {
