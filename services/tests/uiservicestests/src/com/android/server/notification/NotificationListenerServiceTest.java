@@ -462,7 +462,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
     }
 
     private void detailedAssertEquals(NotificationRankingUpdate a, NotificationRankingUpdate b) {
-        assertEquals(a.getRankingMap(), b.getRankingMap());
+        detailedAssertEquals(a.getRankingMap(), b.getRankingMap());
     }
 
     private void detailedAssertEquals(String comment, Ranking a, Ranking b) {
