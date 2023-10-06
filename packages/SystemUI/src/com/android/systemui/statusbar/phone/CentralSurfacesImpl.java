@@ -2900,7 +2900,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
                 updateVisibleToUser();
                 updateIsKeyguard();
+                // TODO(b/301913237): can't delay transition if config_displayBlanksAfterDoze=true,
+                // otherwise, the clock will flicker during LOCKSCREEN_TRANSITION_FROM_AOD
                 mShouldDelayLockscreenTransitionFromAod = mDozeParameters.getAlwaysOn()
+                        && !mDozeParameters.getDisplayNeedsBlanking()
                         && mFeatureFlags.isEnabled(
                                 Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD);
                 if (!mShouldDelayLockscreenTransitionFromAod) {
