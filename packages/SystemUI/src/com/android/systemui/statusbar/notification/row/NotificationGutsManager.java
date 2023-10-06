@@ -44,6 +44,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
@@ -99,6 +100,7 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
     // Dependencies:
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final StatusBarStateController mStatusBarStateController;
+    private final IStatusBarService mStatusBarService;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final AssistantFeedbackController mAssistantFeedbackController;
 
@@ -152,6 +154,7 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
             WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             StatusBarStateController statusBarStateController,
+            IStatusBarService statusBarService,
             DeviceProvisionedController deviceProvisionedController,
             MetricsLogger metricsLogger,
             HeadsUpManager headsUpManager,
@@ -177,6 +180,7 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
         mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;
         mLockscreenUserManager = notificationLockscreenUserManager;
         mStatusBarStateController = statusBarStateController;
+        mStatusBarService = statusBarService;
         mDeviceProvisionedController = deviceProvisionedController;
         mMetricsLogger = metricsLogger;
         mHeadsUpManager = headsUpManager;
@@ -358,7 +362,8 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
         PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(mContext,
                 userHandle.getIdentifier());
 
-        feedbackInfo.bindGuts(pmUser, sbn, row.getEntry(), row, mAssistantFeedbackController);
+        feedbackInfo.bindGuts(pmUser, sbn, row.getEntry(), row, mAssistantFeedbackController,
+                mStatusBarService, this);
     }
 
     /**
