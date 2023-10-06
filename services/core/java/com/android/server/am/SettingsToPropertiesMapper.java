@@ -131,6 +131,7 @@ public class SettingsToPropertiesMapper {
         "car_telemetry",
         "codec_fwk",
         "companion",
+        "content_protection",
         "context_hub",
         "core_experiments_team_internal",
         "core_graphics",
