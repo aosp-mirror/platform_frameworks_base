@@ -59,7 +59,7 @@ android_robolectric_test {
         "mockito-robolectric-prebuilt",
         "platform-test-annotations",
         "testng",
-        "truth-prebuilt",
+        "truth",
     ],
 
     instrumentation_for: "BackupFrameworksServicesLib",

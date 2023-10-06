@@ -29,7 +29,7 @@ android_test {
         "androidx.lifecycle_lifecycle-livedata-ktx",
         "androidx.lifecycle_lifecycle-runtime-compose",
         "androidx.navigation_navigation-compose",
-        "truth-prebuilt",
+        "truth",
         "androidx.compose.runtime_runtime",
         "androidx.test.core",
         "androidx.test.ext.junit",
@@ -47,7 +47,7 @@ android_test {
         "services.core.unboosted",
         "testables",
         "testng",
-        "truth-prebuilt",
+        "truth",
     ],
     libs: [
         "android.test.mock",

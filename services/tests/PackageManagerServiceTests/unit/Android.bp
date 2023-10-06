@@ -37,7 +37,7 @@ android_test {
         "services.core",
         "servicestests-utils",
         "servicestests-core-utils",
-        "truth-prebuilt",
+        "truth",
     ],
     jni_libs: [
         "libdexmakerjvmtiagent",

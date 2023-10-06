@@ -16,7 +16,7 @@ android_test {
         "coretests-aidl",
         "platformprotosnano",
         "junit",
-        "truth-prebuilt",
+        "truth",
         "androidx.test.runner",
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",

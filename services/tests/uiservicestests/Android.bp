@@ -39,7 +39,7 @@ android_test {
         "hamcrest-library",
         "servicestests-utils",
         "testables",
-        "truth-prebuilt",
+        "truth",
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",

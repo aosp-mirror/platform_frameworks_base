@@ -43,7 +43,7 @@ android_test {
         "androidx.compose.ui_ui-test-junit4",
         "androidx.compose.ui_ui-test-manifest",
 
-        "truth-prebuilt",
+        "truth",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],

@@ -52,7 +52,7 @@ android_test {
         "flag-junit",
         "mockito-target-minus-junit4",
         "platform-test-annotations",
-        "truth-prebuilt",
+        "truth",
         "SettingsLibDeviceStateRotationLock",
         "SettingsLibSettingsSpinner",
         "SettingsLibUsageProgressBarPreference",
