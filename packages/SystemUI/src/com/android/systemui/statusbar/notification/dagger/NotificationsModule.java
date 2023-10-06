@@ -45,7 +45,6 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProviderImpl;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationVisibilityProviderImpl;
-import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderModule;
 import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl;
@@ -95,7 +94,6 @@ import javax.inject.Provider;
 @Module(includes = {
         CoordinatorsModule.class,
         KeyguardNotificationVisibilityProviderModule.class,
-        SeenNotificationsProviderModule.class,
         ShadeEventsModule.class,
         NotifPipelineChoreographerModule.class,
         NotificationSectionHeadersModule.class,

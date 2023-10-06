@@ -77,7 +77,6 @@ import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
-import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderImpl;
 import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifStats;
@@ -88,6 +87,8 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.notification.stack.NotificationSwipeHelper.NotificationCallback;
+import com.android.systemui.statusbar.notification.stack.data.repository.NotificationListRepository;
+import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationListInteractor;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -170,8 +171,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
 
-    private final SeenNotificationsProviderImpl mSeenNotificationsProvider =
-            new SeenNotificationsProviderImpl();
+    private final NotificationListInteractor mNotificationListInteractor =
+            new NotificationListInteractor(new NotificationListRepository());
 
     private NotificationStackScrollLayoutController mController;
 
@@ -503,7 +504,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Test
     public void testSetNotifStats_updatesHasFilteredOutSeenNotifications() {
         initController(/* viewIsAttached= */ true);
-        mSeenNotificationsProvider.setHasFilteredOutSeenNotifications(true);
+        mNotificationListInteractor.setHasFilteredOutSeenNotifications(true);
         mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());
         verify(mNotificationStackScrollLayout).setHasFilteredOutSeenNotifications(true);
         verify(mNotificationStackScrollLayout).updateFooter();
@@ -703,7 +704,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mUiEventLogger,
                 mRemoteInputManager,
                 mVisibilityLocationProviderDelegator,
-                mSeenNotificationsProvider,
+                mNotificationListInteractor,
                 mShadeController,
                 mJankMonitor,
                 mStackLogger,
