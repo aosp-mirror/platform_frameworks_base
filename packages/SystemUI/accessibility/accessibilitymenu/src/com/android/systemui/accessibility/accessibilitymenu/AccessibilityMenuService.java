@@ -63,6 +63,7 @@ public class AccessibilityMenuService extends AccessibilityService
 
     private static final String TAG = "A11yMenuService";
     private static final long BUFFER_MILLISECONDS_TO_PREVENT_UPDATE_FAILURE = 100L;
+    private static final long TAKE_SCREENSHOT_DELAY_MS = 100L;
 
     private static final int BRIGHTNESS_UP_INCREMENT_GAMMA =
             (int) Math.ceil(BrightnessUtils.GAMMA_SPACE_MAX * 0.11f);
@@ -301,7 +302,14 @@ public class AccessibilityMenuService extends AccessibilityService
         } else if (viewTag == ShortcutId.ID_NOTIFICATION_VALUE.ordinal()) {
             performGlobalActionInternal(GLOBAL_ACTION_NOTIFICATIONS);
         } else if (viewTag == ShortcutId.ID_SCREENSHOT_VALUE.ordinal()) {
-            performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT);
+            if (Flags.a11yMenuHideBeforeTakingAction()) {
+                // Delay before taking a screenshot to give time for the UI to close.
+                mHandler.postDelayed(
+                        () -> performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT),
+                        TAKE_SCREENSHOT_DELAY_MS);
+            } else {
+                performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT);
+            }
         }
 
         if (!Flags.a11yMenuHideBeforeTakingAction()) {
