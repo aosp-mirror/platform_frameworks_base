@@ -19,6 +19,7 @@ package com.android.packageinstaller.v2.ui;
 import static android.content.Intent.CATEGORY_LAUNCHER;
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
 import static android.os.Process.INVALID_UID;
+import static com.android.packageinstaller.v2.model.InstallRepository.EXTRA_STAGED_SESSION_ID;
 
 import android.app.Activity;
 import android.app.AppOpsManager;
@@ -336,10 +337,16 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
             }
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (!isDestroyed()) {
-                    // Bring Pia to the foreground. FLAG_ACTIVITY_REORDER_TO_FRONT will reuse the
-                    // paused instance, so we don't unnecessarily create a new instance of Pia.
+                    // Relaunch Pia to continue installation.
                     startActivity(getIntent()
-                        .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
+                        .putExtra(EXTRA_STAGED_SESSION_ID, mInstallViewModel.getStagedSessionId()));
+
+                    // If the userId of the root of activity stack is different from current userId,
+                    // starting Pia again lead to duplicate instances of the app in the stack.
+                    // As such, finish the old instance. Old Pia is finished even if the userId of
+                    // the root is the same, since there is no way to determine the difference in
+                    // userIds.
+                    finish();
                 }
             }, 500);
         }
