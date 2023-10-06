@@ -57,7 +57,7 @@ android_test {
         "platform-test-annotations",
         "servicestests-utils",
         "testng",
-        "truth-prebuilt",
+        "truth",
         "testables",
         "hamcrest-library",
         "platform-compat-test-rules",

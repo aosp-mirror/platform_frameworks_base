@@ -22,7 +22,7 @@ android_test {
         "android-ex-camera2",
         "testables",
         "testng",
-        "truth-prebuilt",
+        "truth",
     ],
     jni_libs: [
         "libdexmakerjvmtiagent",

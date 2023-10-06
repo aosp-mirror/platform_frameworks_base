@@ -20,11 +20,11 @@ android_test {
         "foldable-device-state-provider",
         "androidx.test.rules",
         "junit",
-        "truth-prebuilt",
+        "truth",
         "mockito-target-extended-minus-junit4",
         "androidx.test.uiautomator_uiautomator",
         "androidx.test.ext.junit",
         "testables",
     ],
-    test_suites: ["device-tests"]
+    test_suites: ["device-tests"],
 }

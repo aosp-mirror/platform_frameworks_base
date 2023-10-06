@@ -64,7 +64,7 @@ android_test {
         "SettingsLibDeviceStateRotationLock",
         "SettingsLibDisplayUtils",
         "platform-test-annotations",
-        "truth-prebuilt",
+        "truth",
     ],
     libs: [
         "android.test.base",
