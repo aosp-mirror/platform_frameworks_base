@@ -272,7 +272,6 @@ constructor(
                             // repository
                             launch { tileSpecRepository.setTiles(currentUser.value, resolvedSpecs) }
                         }
-                        Log.d("Fabian", "Finished resolving tiles")
                     }
             }
         }
