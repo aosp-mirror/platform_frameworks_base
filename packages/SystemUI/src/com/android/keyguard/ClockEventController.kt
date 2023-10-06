@@ -34,7 +34,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.customization.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.dagger.qualifiers.DisplaySpecific
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.DOZING_MIGRATION_1
@@ -80,8 +79,8 @@ constructor(
     private val batteryController: BatteryController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val configurationController: ConfigurationController,
-    @DisplaySpecific private val resources: Resources,
-    @DisplaySpecific private val context: Context,
+    @Main private val resources: Resources,
+    private val context: Context,
     @Main private val mainExecutor: DelayableExecutor,
     @Background private val bgExecutor: Executor,
     @KeyguardSmallClockLog private val smallLogBuffer: LogBuffer?,
@@ -212,13 +211,13 @@ constructor(
         if (regionSamplingEnabled) {
             clock?.let { clock ->
                 smallRegionSampler?.let {
-                    smallClockIsDark = it.currentRegionDarkness().isDark
-                    clock.smallClock.events.onRegionDarknessChanged(smallClockIsDark)
+                    val isRegionDark = it.currentRegionDarkness().isDark
+                    clock.smallClock.events.onRegionDarknessChanged(isRegionDark)
                 }
 
                 largeRegionSampler?.let {
-                    largeClockIsDark = it.currentRegionDarkness().isDark
-                    clock.largeClock.events.onRegionDarknessChanged(largeClockIsDark)
+                    val isRegionDark = it.currentRegionDarkness().isDark
+                    clock.largeClock.events.onRegionDarknessChanged(isRegionDark)
                 }
             }
             return
@@ -226,12 +225,12 @@ constructor(
 
         val isLightTheme = TypedValue()
         context.theme.resolveAttribute(android.R.attr.isLightTheme, isLightTheme, true)
-        smallClockIsDark = isLightTheme.data == 0
-        largeClockIsDark = isLightTheme.data == 0
+        val isRegionDark = isLightTheme.data == 0
 
         clock?.run {
-            smallClock.events.onRegionDarknessChanged(smallClockIsDark)
-            largeClock.events.onRegionDarknessChanged(largeClockIsDark)
+            Log.i(TAG, "Region isDark: $isRegionDark")
+            smallClock.events.onRegionDarknessChanged(isRegionDark)
+            largeClock.events.onRegionDarknessChanged(isRegionDark)
         }
     }
     protected open fun createRegionSampler(
@@ -260,9 +259,6 @@ constructor(
     val shouldTimeListenerRun: Boolean
         get() = isKeyguardVisible && dozeAmount < DOZE_TICKRATE_THRESHOLD
     private var cachedWeatherData: WeatherData? = null
-
-    private var smallClockIsDark = true
-    private var largeClockIsDark = true
 
     private val configListener =
         object : ConfigurationController.ConfigurationListener {
