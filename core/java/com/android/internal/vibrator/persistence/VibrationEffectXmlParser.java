@@ -18,7 +18,7 @@ package com.android.internal.vibrator.persistence;
 
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_PREDEFINED_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_PRIMITIVE_EFFECT;
-import static com.android.internal.vibrator.persistence.XmlConstants.TAG_VIBRATION;
+import static com.android.internal.vibrator.persistence.XmlConstants.TAG_VIBRATION_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_WAVEFORM_EFFECT;
 
 import android.annotation.NonNull;
@@ -44,9 +44,9 @@ import java.util.List;
  *
  * <pre>
  *   {@code
- *     <vibration>
+ *     <vibration-effect>
  *       <predefined-effect name="click" />
- *     </vibration>
+ *     </vibration-effect>
  *   }
  * </pre>
  *
@@ -54,7 +54,7 @@ import java.util.List;
  *
  * <pre>
  *   {@code
- *     <vibration>
+ *     <vibration-effect>
  *       <waveform-effect>
  *         <waveform-entry amplitude="default" durationMs="10" />
  *         <waveform-entry amplitude="0" durationMs="10" />
@@ -65,7 +65,7 @@ import java.util.List;
  *           <waveform-entry amplitude="255" durationMs="20" />
  *         </repeating>
  *       </waveform-effect>
- *     </vibration>
+ *     </vibration-effect>
  *   }
  * </pre>
  *
@@ -73,10 +73,10 @@ import java.util.List;
  *
  * <pre>
  *   {@code
- *     <vibration>
+ *     <vibration-effect>
  *       <primitive-effect name="click" />
  *       <primitive-effect name="tick" scale="0.5" delayMs="100" />
- *     </vibration>
+ *     </vibration-effect>
  *   }
  * </pre>
  *
@@ -94,7 +94,7 @@ public class VibrationEffectXmlParser {
     public static XmlSerializedVibration<VibrationEffect> parseTag(
             @NonNull TypedXmlPullParser parser, @XmlConstants.Flags int flags)
             throws XmlParserException, IOException {
-        XmlValidator.checkStartTag(parser, TAG_VIBRATION);
+        XmlValidator.checkStartTag(parser, TAG_VIBRATION_EFFECT);
         XmlValidator.checkTagHasNoUnexpectedAttributes(parser);
 
         return parseVibrationContent(parser, flags);
