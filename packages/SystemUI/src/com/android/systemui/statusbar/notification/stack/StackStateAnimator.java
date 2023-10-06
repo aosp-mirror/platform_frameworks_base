@@ -429,14 +429,6 @@ public class StackStateAnimator {
                         changingView.setInRemovalAnimation(false);
                         changingView.removeFromTransientContainer();
                     };
-                    if (isHeadsUp) {
-                        mLogger.logHUNViewDisappearingWithRemoveEvent(key);
-                        postAnimation = () -> {
-                            changingView.setInRemovalAnimation(false);
-                            mLogger.disappearAnimationEnded(finalKey);
-                            changingView.removeFromTransientContainer();
-                        };
-                    }
                 } else {
                     startAnimation = ()-> {
                         changingView.setInRemovalAnimation(true);
@@ -516,7 +508,6 @@ public class StackStateAnimator {
                     Runnable postAnimation;
                     Runnable startAnimation;
                     if (loggable) {
-                        mLogger.logHUNViewDisappearing(key);
                         String finalKey1 = key;
                         final boolean finalIsHeadsUp = isHeadsUp;
                         final String type =
@@ -528,7 +519,6 @@ public class StackStateAnimator {
                             changingView.setInRemovalAnimation(true);
                         };
                         postAnimation = () -> {
-                            mLogger.disappearAnimationEnded(finalKey1);
                             mLogger.animationEnd(finalKey1, type, finalIsHeadsUp);
                             changingView.setInRemovalAnimation(false);
                             if (tmpEndRunnable != null) {
