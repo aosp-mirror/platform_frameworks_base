@@ -214,6 +214,9 @@ class StorageManagerService extends IStorageManager.Stub
     // external storage service.
     public static final int FAILED_MOUNT_RESET_TIMEOUT_SECONDS = 10;
 
+     /** Extended timeout for the system server watchdog. */
+    private static final int SLOW_OPERATION_WATCHDOG_TIMEOUT_MS = 60 * 1000;
+
     @GuardedBy("mLock")
     private final Set<Integer> mFuseMountedUser = new ArraySet<>();
 
@@ -1230,6 +1233,8 @@ class StorageManagerService extends IStorageManager.Stub
     private void onUserStopped(int userId) {
         Slog.d(TAG, "onUserStopped " + userId);
 
+        Watchdog.getInstance().setOneOffTimeoutForMonitors(
+                SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#onUserStopped might be slow");
         try {
             mVold.onUserStopped(userId);
             mStoraged.onUserStopped(userId);
@@ -1312,6 +1317,8 @@ class StorageManagerService extends IStorageManager.Stub
                 unlockedUsers.add(userId);
             }
         }
+        Watchdog.getInstance().setOneOffTimeoutForMonitors(
+                SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#onUserStopped might be slow");
         for (Integer userId : unlockedUsers) {
             try {
                 mVold.onUserStopped(userId);
@@ -3600,6 +3607,8 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public ParcelFileDescriptor open() throws AppFuseMountException {
+            Watchdog.getInstance().setOneOffTimeoutForMonitors(
+                SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#open might be slow");
             try {
                 final FileDescriptor fd = mVold.mountAppFuse(uid, mountId);
                 mMounted = true;
@@ -3612,6 +3621,8 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public ParcelFileDescriptor openFile(int mountId, int fileId, int flags)
                 throws AppFuseMountException {
+            Watchdog.getInstance().setOneOffTimeoutForMonitors(
+                SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#openFile might be slow");
             try {
                 return new ParcelFileDescriptor(
                         mVold.openAppFuseFile(uid, mountId, fileId, flags));
@@ -3622,6 +3633,8 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public void close() throws Exception {
+            Watchdog.getInstance().setOneOffTimeoutForMonitors(
+                SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#close might be slow");
             if (mMounted) {
                 mVold.unmountAppFuse(uid, mountId);
                 mMounted = false;
