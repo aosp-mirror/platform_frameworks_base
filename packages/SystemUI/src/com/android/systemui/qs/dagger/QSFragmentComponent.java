@@ -16,6 +16,9 @@
 
 package com.android.systemui.qs.dagger;
 
+import android.view.View;
+
+import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.qs.QSFragmentLegacy;
 
 import dagger.BindsInstance;
@@ -31,6 +34,7 @@ public interface QSFragmentComponent extends QSComponent {
     /** Factory for building a {@link QSFragmentComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        QSFragmentComponent create(@BindsInstance QSFragmentLegacy qsFragment);
+        /** */
+        QSFragmentComponent create(@BindsInstance @RootView View view);
     }
 }

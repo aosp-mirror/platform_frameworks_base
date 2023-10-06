@@ -19,15 +19,14 @@ package com.android.systemui.statusbar.phone.fragment.dagger;
 import android.view.View;
 import android.view.ViewStub;
 
-import com.android.systemui.res.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
-import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
@@ -48,15 +47,6 @@ public interface StatusBarFragmentModule {
     String OPERATOR_NAME_FRAME_VIEW = "operator_name_frame_view";
     String START_SIDE_CONTENT = "start_side_content";
     String END_SIDE_CONTENT = "end_side_content";
-
-    /** */
-    @Provides
-    @RootView
-    @StatusBarFragmentScope
-    static PhoneStatusBarView providePhoneStatusBarView(
-            CollapsedStatusBarFragment collapsedStatusBarFragment) {
-        return (PhoneStatusBarView) collapsedStatusBarFragment.getView();
-    }
 
     /** */
     @Provides

@@ -38,11 +38,11 @@ import com.android.app.animation.Interpolators;
 import com.android.app.animation.InterpolatorsAndroidX;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -74,8 +74,6 @@ import com.android.systemui.util.CarrierConfigTracker.CarrierConfigChangedListen
 import com.android.systemui.util.CarrierConfigTracker.DefaultDataSubscriptionChangedListener;
 import com.android.systemui.util.settings.SecureSettings;
 
-import kotlin.Unit;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -85,6 +83,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import kotlin.Unit;
 
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags
@@ -279,7 +278,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mDumpManager.registerDumpable(getClass().getSimpleName(), this);
-        mStatusBarFragmentComponent = mStatusBarFragmentComponentFactory.create(this);
+        mStatusBarFragmentComponent = mStatusBarFragmentComponentFactory.create(
+                (PhoneStatusBarView) getView());
         mStatusBarFragmentComponent.init();
         mStartableStates.clear();
         for (Startable startable : mStatusBarFragmentComponent.getStartables()) {
