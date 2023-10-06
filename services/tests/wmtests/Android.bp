@@ -63,6 +63,8 @@ android_test {
         "platform-compat-test-rules",
         "CtsSurfaceValidatorLib",
         "service-sdksandbox.impl",
+        "com.android.window.flags.window-aconfig-java",
+        "flag-junit",
     ],
 
     libs: [
