@@ -157,8 +157,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"สัญญาณ Wi-Fi 2 ขีด"</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"สัญญาณ Wi-Fi 3 ขีด"</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"สัญญาณ Wi-Fi เต็ม"</string>
-    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
-    <skip />
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"เชื่อมต่อกับอุปกรณ์แล้ว"</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"เครือข่ายแบบเปิด"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"เครือข่ายที่ปลอดภัย"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"ระบบปฏิบัติการ Android"</string>
@@ -598,7 +597,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"ข้อมูลโปรไฟล์"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ก่อนที่คุณจะสามารถสร้างโปรไฟล์ที่ถูกจำกัดได้ คุณจะต้องตั้งค่าล็อกหน้าจอเพื่อปกป้องแอปและข้อมูลส่วนตัวของคุณ"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"ตั้งค่าล็อก"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"เปลี่ยนเป็น <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"เปลี่ยนเป็น<xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"กำลังสร้างผู้ใช้ใหม่…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"กำลังสร้างผู้ใช้ชั่วคราวใหม่…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"สร้างผู้ใช้ใหม่ไม่ได้"</string>
