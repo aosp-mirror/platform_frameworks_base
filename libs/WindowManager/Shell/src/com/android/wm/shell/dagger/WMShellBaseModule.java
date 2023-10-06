@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.SystemProperties;
 import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.window.SystemPerformanceHinter;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
@@ -85,6 +86,7 @@ import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
+import com.android.wm.shell.performance.PerfHintController;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
@@ -294,6 +296,17 @@ public abstract class WMShellBaseModule {
     static LaunchAdjacentController provideLaunchAdjacentController(
             SyncTransactionQueue syncQueue) {
         return new LaunchAdjacentController(syncQueue);
+    }
+
+    @WMSingleton
+    @Provides
+    static SystemPerformanceHinter provideSystemPerformanceHinter(Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
+            RootTaskDisplayAreaOrganizer rootTdaOrganizer) {
+        final PerfHintController perfHintController =
+                new PerfHintController(context, shellInit, shellCommandHandler, rootTdaOrganizer);
+        return perfHintController.getHinter();
     }
 
     //

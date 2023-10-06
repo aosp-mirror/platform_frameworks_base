@@ -241,6 +241,7 @@ import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
 import static android.provider.Telephony.Carriers.INVALID_APN_ID;
 import static android.security.keystore.AttestationUtils.USE_INDIVIDUAL_ATTESTATION;
+
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
@@ -15781,57 +15782,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } else {
             long ident = mInjector.binderClearCallingIdentity();
             try {
-                // TODO(b/277908283): check in the policy engine instead of calling user manager.
-                List<UserManager.EnforcingUser> sources = mUserManager
-                        .getUserRestrictionSources(restriction, UserHandle.of(userId));
-                if (sources == null) {
-                    // The restriction is not enforced.
-                    return null;
-                }
-                int sizeBefore = sources.size();
-                if (sizeBefore > 1) {
-                    Slogf.d(LOG_TAG, "getEnforcingAdminAndUserDetailsInternal(%d, %s): "
-                            + "%d sources found, excluding those set by UserManager",
-                            userId, restriction, sizeBefore);
-                    sources = getDevicePolicySources(sources);
-                }
-                if (sources.isEmpty()) {
-                    // The restriction is not enforced (or is just enforced by the system)
+                if (getEnforcingAdminsForRestrictionInternal(userId, restriction).size() == 0) {
                     return null;
                 }
 
-                if (sources.size() > 1) {
-                    // In this case, we'll show an admin support dialog that does not
-                    // specify the admin.
-                    // TODO(b/128928355): if this restriction is enforced by multiple DPCs, return
-                    // the admin for the calling user.
-                    Slogf.w(LOG_TAG, "getEnforcingAdminAndUserDetailsInternal(%d, %s): multiple "
-                            + "sources for restriction %s on user %d",
-                            userId, restriction, restriction, userId);
+                ActiveAdmin admin = getMostProbableDPCAdminForLocalPolicy(userId);
+                if (admin != null) {
                     result = new Bundle();
-                    result.putInt(Intent.EXTRA_USER_ID, userId);
+                    result.putInt(Intent.EXTRA_USER_ID, admin.getUserHandle().getIdentifier());
+                    result.putParcelable(DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+                            admin.info.getComponent());
                     return result;
                 }
-                final UserManager.EnforcingUser enforcingUser = sources.get(0);
-                final int sourceType = enforcingUser.getUserRestrictionSource();
-                if (sourceType == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER
-                        || sourceType == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
-                    ActiveAdmin admin = getMostProbableDPCAdminForLocalPolicy(userId);
-                    if (admin != null) {
-                        result = new Bundle();
-                        result.putInt(Intent.EXTRA_USER_ID, admin.getUserHandle().getIdentifier());
-                        result.putParcelable(DevicePolicyManager.EXTRA_DEVICE_ADMIN,
-                                admin.info.getComponent());
-                        return result;
-                    }
-                } else if (sourceType == UserManager.RESTRICTION_SOURCE_SYSTEM) {
-                    /*
-                     * In this case, the user restriction is enforced by the system.
-                     * So we won't show an admin support intent, even if it is also
-                     * enforced by a profile/device owner.
-                     */
-                    return null;
-                }
+                return null;
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }

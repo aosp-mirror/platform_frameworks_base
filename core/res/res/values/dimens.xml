@@ -349,6 +349,9 @@
     <!-- the height of the expand button pill -->
     <dimen name="notification_expand_button_pill_height">24dp</dimen>
 
+    <!-- the padding of the expand icon in the notification header -->
+    <dimen name="notification_expand_button_icon_padding">2dp</dimen>
+
     <!-- Vertical margin for the headerless notification content, when content has 1 line -->
     <!-- 16 * 2 (margins) + 24 (1 line) = 56 (notification) -->
     <dimen name="notification_headerless_margin_oneline">16dp</dimen>

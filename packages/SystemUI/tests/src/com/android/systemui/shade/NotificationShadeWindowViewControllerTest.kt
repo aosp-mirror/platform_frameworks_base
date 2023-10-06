@@ -83,7 +83,6 @@ import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
@@ -97,8 +96,9 @@ import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import java.util.Optional
+import org.mockito.Mockito.`when` as whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -425,29 +425,37 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun shouldInterceptTouchEvent_notificationPanelViewControllerShouldIntercept() {
-        // GIVEN not dozing
-        whenever(sysuiStatusBarStateController.isDozing()).thenReturn(false)
+    fun shouldInterceptTouchEvent_dozing_touchInLockIconArea_touchNotIntercepted() {
+        // GIVEN dozing
+        whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
         // AND alternate bouncer doesn't want the touch
         whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(DOWN_EVENT))
             .thenReturn(false)
-        // AND the lock icon doesn't want the touch
-        whenever(lockIconViewController.onInterceptTouchEvent(DOWN_EVENT)).thenReturn(false)
-        // AND the notification panel can accept touches
-        whenever(notificationPanelViewController.isFullyExpanded()).thenReturn(true)
-        whenever(dragDownHelper.isDragDownEnabled).thenReturn(true)
-        whenever(centralSurfaces.isBouncerShowing()).thenReturn(false)
-
-        // AND the drag down helper doesn't want the touch (to pull the shade down)
-        whenever(dragDownHelper.onInterceptTouchEvent(DOWN_EVENT)).thenReturn(false)
+        // AND the lock icon wants the touch
+        whenever(lockIconViewController.willHandleTouchWhileDozing(DOWN_EVENT))
+                .thenReturn(true)
 
         featureFlags.set(Flags.MIGRATE_NSSL, true)
 
-        // WHEN asked if should intercept touch
-        interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)
+        // THEN touch should NOT be intercepted by NotificationShade
+        assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isFalse()
+    }
 
-        // Verify that NPVC gets a chance to use the touch
-        verify(notificationPanelViewController).handleExternalInterceptTouch(DOWN_EVENT)
+    @Test
+    fun shouldInterceptTouchEvent_dozing_touchNotInLockIconArea_touchIntercepted() {
+        // GIVEN dozing
+        whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
+        // AND alternate bouncer doesn't want the touch
+        whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(DOWN_EVENT))
+                .thenReturn(false)
+        // AND the lock icon does NOT want the touch
+        whenever(lockIconViewController.willHandleTouchWhileDozing(DOWN_EVENT))
+                .thenReturn(false)
+
+        featureFlags.set(Flags.MIGRATE_NSSL, true)
+
+        // THEN touch should NOT be intercepted by NotificationShade
+        assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isTrue()
     }
 
     @Test

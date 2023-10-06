@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -46,6 +47,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.hardware.input.IInputManager;
@@ -87,6 +89,7 @@ import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
+import android.view.flags.FeatureFlags;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
@@ -172,6 +175,8 @@ public class VibratorManagerServiceTest {
     private VirtualDeviceManagerInternal mVirtualDeviceManagerInternalMock;
     @Mock
     private AudioManager mAudioManagerMock;
+    @Mock
+    private FeatureFlags mViewFeatureFlags;
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
 
@@ -321,7 +326,8 @@ public class VibratorManagerServiceTest {
                     HapticFeedbackVibrationProvider createHapticFeedbackVibrationProvider(
                             Resources resources, VibratorInfo vibratorInfo) {
                         return new HapticFeedbackVibrationProvider(
-                                resources, vibratorInfo, mHapticFeedbackVibrationMap);
+                                resources, vibratorInfo, mHapticFeedbackVibrationMap,
+                                mViewFeatureFlags);
                     }
                 });
         return mService;
@@ -646,6 +652,42 @@ public class VibratorManagerServiceTest {
                 () -> vibrate(service,
                         VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK),
                         VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH)));
+    }
+
+    @Test
+    public void vibrate_withoutBypassFlagsPermissions_bypassFlagsNotApplied() throws Exception {
+        denyPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        denyPermission(android.Manifest.permission.MODIFY_PHONE_STATE);
+        denyPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING);
+
+        assertCanVibrateWithBypassFlags(false);
+    }
+
+    @Test
+    public void vibrate_withSecureSettingsPermission_bypassFlagsApplied() throws Exception {
+        grantPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        denyPermission(android.Manifest.permission.MODIFY_PHONE_STATE);
+        denyPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING);
+
+        assertCanVibrateWithBypassFlags(true);
+    }
+
+    @Test
+    public void vibrate_withModifyPhoneStatePermission_bypassFlagsApplied() throws Exception {
+        denyPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        grantPermission(android.Manifest.permission.MODIFY_PHONE_STATE);
+        denyPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING);
+
+        assertCanVibrateWithBypassFlags(true);
+    }
+
+    @Test
+    public void vibrate_withModifyAudioRoutingPermission_bypassFlagsApplied() throws Exception {
+        denyPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        denyPermission(android.Manifest.permission.MODIFY_PHONE_STATE);
+        grantPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING);
+
+        assertCanVibrateWithBypassFlags(true);
     }
 
     @Test
@@ -1166,7 +1208,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void vibrate_withTriggerCallback_finishesVibration() throws Exception {
+    public void vibrate_withriggerCallback_finishesVibration() throws Exception {
         mockCapabilities(IVibratorManager.CAP_SYNC, IVibratorManager.CAP_PREPARE_COMPOSE);
         mockVibrators(1, 2);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
@@ -1303,10 +1345,18 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void performHapticFeedback_doesNotRequirePermission() throws Exception {
+    public void performHapticFeedback_doesNotRequireVibrateOrBypassPermissions() throws Exception {
+        // Deny permissions that would have been required for regular vibrations, and check that
+        // the vibration proceed as expected to verify that haptic feedback does not need these
+        // permissions.
         denyPermission(android.Manifest.permission.VIBRATE);
+        denyPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        denyPermission(android.Manifest.permission.MODIFY_PHONE_STATE);
+        denyPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING);
+        // Flag override to enable the scroll feedack constants to bypass interruption policies.
+        when(mViewFeatureFlags.scrollFeedbackApi()).thenReturn(true);
         mHapticFeedbackVibrationMap.put(
-                HapticFeedbackConstants.KEYBOARD_TAP,
+                HapticFeedbackConstants.SCROLL_TICK,
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
         mockVibrators(1);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
@@ -1315,13 +1365,16 @@ public class VibratorManagerServiceTest {
 
         HalVibration vibration =
                 performHapticFeedbackAndWaitUntilFinished(
-                        service, HapticFeedbackConstants.KEYBOARD_TAP, /* always= */ true);
+                        service, HapticFeedbackConstants.SCROLL_TICK, /* always= */ true);
 
         List<VibrationEffectSegment> playedSegments = fakeVibrator.getAllEffectSegments();
         assertEquals(1, playedSegments.size());
         PrebakedSegment segment = (PrebakedSegment) playedSegments.get(0);
         assertEquals(VibrationEffect.EFFECT_CLICK, segment.getEffectId());
-        assertEquals(VibrationAttributes.USAGE_TOUCH, vibration.callerInfo.attrs.getUsage());
+        VibrationAttributes attrs = vibration.callerInfo.attrs;
+        assertEquals(VibrationAttributes.USAGE_HARDWARE_FEEDBACK, attrs.getUsage());
+        assertTrue(attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF));
+        assertTrue(attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
     }
 
     @Test
@@ -2261,6 +2314,31 @@ public class VibratorManagerServiceTest {
         assertNull(metrics.halUnsupportedEffectsUsed);
     }
 
+    private void assertCanVibrateWithBypassFlags(boolean expectedCanApplyBypassFlags)
+            throws Exception {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        HalVibration vibration = vibrateAndWaitUntilFinished(
+                service,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK),
+                new VibrationAttributes.Builder()
+                        .setUsage(VibrationAttributes.USAGE_TOUCH)
+                        .setFlags(
+                                VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF
+                                        | VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY)
+                        .build());
+
+        VibrationAttributes attrs = vibration.callerInfo.attrs;
+        assertEquals(
+                expectedCanApplyBypassFlags,
+                attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF));
+        assertEquals(
+                expectedCanApplyBypassFlags,
+                attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
+    }
+
     private VibrationEffectSegment expectedPrebaked(int effectId) {
         return expectedPrebaked(effectId, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
     }
@@ -2327,12 +2405,13 @@ public class VibratorManagerServiceTest {
         return vib;
     }
 
-    private void vibrateAndWaitUntilFinished(VibratorManagerService service, VibrationEffect effect,
-            VibrationAttributes attrs) throws InterruptedException {
-        vibrateAndWaitUntilFinished(service, CombinedVibration.createParallel(effect), attrs);
+    private HalVibration vibrateAndWaitUntilFinished(VibratorManagerService service,
+            VibrationEffect effect, VibrationAttributes attrs) throws InterruptedException {
+        return vibrateAndWaitUntilFinished(
+                service, CombinedVibration.createParallel(effect), attrs);
     }
 
-    private void vibrateAndWaitUntilFinished(VibratorManagerService service,
+    private HalVibration vibrateAndWaitUntilFinished(VibratorManagerService service,
             CombinedVibration effect, VibrationAttributes attrs) throws InterruptedException {
         HalVibration vib =
                 service.vibrateWithPermissionCheck(UID, Display.DEFAULT_DISPLAY, PACKAGE_NAME,
@@ -2340,6 +2419,8 @@ public class VibratorManagerServiceTest {
         if (vib != null) {
             vib.waitForEnd();
         }
+
+        return vib;
     }
 
     private void vibrate(VibratorManagerService service, VibrationEffect effect,
@@ -2368,7 +2449,15 @@ public class VibratorManagerServiceTest {
         return predicateResult;
     }
 
+    private void grantPermission(String permission) {
+        when(mContextSpy.checkCallingOrSelfPermission(permission))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        doNothing().when(mContextSpy).enforceCallingOrSelfPermission(eq(permission), anyString());
+    }
+
     private void denyPermission(String permission) {
+        when(mContextSpy.checkCallingOrSelfPermission(permission))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
         doThrow(new SecurityException()).when(mContextSpy)
                 .enforceCallingOrSelfPermission(eq(permission), anyString());
     }

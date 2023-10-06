@@ -144,11 +144,6 @@ object Flags {
             "lockscreen_custom_clocks"
         )
 
-    // TODO(b/275694445): Tracking Bug
-    @JvmField
-    val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING =
-        releasedFlag("lockscreen_without_secure_lock_when_dreaming")
-
     // TODO(b/286092087): Tracking Bug
     @JvmField
     val ENABLE_SYSTEM_UI_DREAM_CONTROLLER = unreleasedFlag("enable_system_ui_dream_controller")
@@ -234,8 +229,7 @@ object Flags {
     /** Whether page transition animations in the wallpaper picker are enabled */
     // TODO(b/291710220): Tracking bug.
     @JvmField
-    val WALLPAPER_PICKER_PAGE_TRANSITIONS =
-        unreleasedFlag("wallpaper_picker_page_transitions", teamfood = true)
+    val WALLPAPER_PICKER_PAGE_TRANSITIONS = releasedFlag("wallpaper_picker_page_transitions")
 
     /** Add "Apply" button to wall paper picker's grid preview page. */
     // TODO(b/294866904): Tracking bug.

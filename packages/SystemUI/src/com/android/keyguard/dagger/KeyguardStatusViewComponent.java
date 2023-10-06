@@ -16,6 +16,8 @@
 
 package com.android.keyguard.dagger;
 
+import android.view.Display;
+
 import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
@@ -28,13 +30,17 @@ import dagger.Subcomponent;
  *
  * TODO: unify this with {@link KeyguardStatusBarViewComponent}
  */
-@Subcomponent(modules = {KeyguardStatusViewModule.class})
+@Subcomponent(modules = {KeyguardStatusViewModule.class, KeyguardDisplayModule.class})
 @KeyguardStatusViewScope
 public interface KeyguardStatusViewComponent {
     /** Simple factory for {@link KeyguardStatusViewComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        KeyguardStatusViewComponent build(@BindsInstance KeyguardStatusView presentation);
+        /** Creates {@link KeyguardStatusViewComponent} for a given display. */
+        KeyguardStatusViewComponent build(
+                @BindsInstance KeyguardStatusView presentation,
+                @BindsInstance Display display
+        );
     }
 
     /** Builds a {@link com.android.keyguard.KeyguardClockSwitchController}. */
