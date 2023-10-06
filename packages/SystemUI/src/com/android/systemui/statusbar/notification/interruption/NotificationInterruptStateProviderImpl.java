@@ -175,6 +175,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     }
 
     @Override
+    public void removeSuppressor(NotificationInterruptSuppressor suppressor) {
+        mSuppressors.remove(suppressor);
+    }
+
+    @Override
     public boolean shouldBubbleUp(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.getSbn();
 
