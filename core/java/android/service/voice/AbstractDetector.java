@@ -199,8 +199,12 @@ abstract class AbstractDetector implements HotwordDetector {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+        Consumer<AbstractDetector> onDestroyListener;
         synchronized (mLock) {
-            mOnDestroyListener.accept(this);
+            onDestroyListener = mOnDestroyListener;
+        }
+        if (onDestroyListener != null) {
+            onDestroyListener.accept(this);
         }
     }
 
