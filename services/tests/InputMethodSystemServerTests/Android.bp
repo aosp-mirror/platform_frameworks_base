@@ -43,7 +43,7 @@ android_test {
         "services.core",
         "servicestests-core-utils",
         "servicestests-utils-mockito-extended",
-        "truth-prebuilt",
+        "truth",
     ],
 
     libs: [
@@ -90,7 +90,7 @@ android_test {
         "services.core",
         "servicestests-core-utils",
         "servicestests-utils-mockito-extended",
-        "truth-prebuilt",
+        "truth",
         "SimpleImeTestingLib",
         "SimpleImeImsLib",
     ],

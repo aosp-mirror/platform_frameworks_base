@@ -30,7 +30,7 @@ java_test_host {
     libs: [
         "tradefed",
         "junit",
-        "truth-prebuilt",
+        "truth",
     ],
     static_libs: [
         "ApexInstallHelper",

@@ -18,7 +18,7 @@ android_test {
         "platform-test-annotations",
         "platformprotosnano",
         "statsdprotolite",
-        "truth-prebuilt",
+        "truth",
     ],
 
     libs: ["android.test.runner"],

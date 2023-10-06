@@ -32,7 +32,7 @@ android_test {
         "platform-test-annotations",
         "testables",
         "testng",
-        "truth-prebuilt",
+        "truth",
     ],
     libs: [
         "android.test.mock",

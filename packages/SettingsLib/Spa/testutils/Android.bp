@@ -30,7 +30,7 @@ android_library {
         "androidx.compose.ui_ui-test-junit4",
         "androidx.compose.ui_ui-test-manifest",
         "mockito",
-        "truth-prebuilt",
+        "truth",
     ],
     kotlincflags: [
         "-Xjvm-default=all",
