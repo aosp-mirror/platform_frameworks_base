@@ -45,7 +45,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
-import com.android.server.PersistentDataBlockManagerInternal;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

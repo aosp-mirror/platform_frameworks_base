@@ -76,7 +76,7 @@ namespace android {
         return ret;
     }
 
-    static jlong com_android_server_PersistentDataBlockService_getBlockDeviceSize(JNIEnv *env, jclass, jstring jpath)
+    static jlong com_android_server_pdb_PersistentDataBlockService_getBlockDeviceSize(JNIEnv *env, jclass, jstring jpath)
     {
         ScopedUtfChars path(env, jpath);
         int fd = open(path.c_str(), O_RDONLY);
@@ -91,7 +91,7 @@ namespace android {
         return size;
     }
 
-    static int com_android_server_PersistentDataBlockService_wipe(JNIEnv *env, jclass, jstring jpath) {
+    static int com_android_server_pdb_PersistentDataBlockService_wipe(JNIEnv *env, jclass, jstring jpath) {
         ScopedUtfChars path(env, jpath);
         int fd = open(path.c_str(), O_WRONLY);
 
@@ -107,13 +107,13 @@ namespace android {
 
     static const JNINativeMethod sMethods[] = {
          /* name, signature, funcPtr */
-        {"nativeGetBlockDeviceSize", "(Ljava/lang/String;)J", (void*)com_android_server_PersistentDataBlockService_getBlockDeviceSize},
-        {"nativeWipe", "(Ljava/lang/String;)I", (void*)com_android_server_PersistentDataBlockService_wipe},
+        {"nativeGetBlockDeviceSize", "(Ljava/lang/String;)J", (void*)com_android_server_pdb_PersistentDataBlockService_getBlockDeviceSize},
+        {"nativeWipe", "(Ljava/lang/String;)I", (void*)com_android_server_pdb_PersistentDataBlockService_wipe},
     };
 
-    int register_android_server_PersistentDataBlockService(JNIEnv* env)
+    int register_android_server_pdb_PersistentDataBlockService(JNIEnv* env)
     {
-        return jniRegisterNativeMethods(env, "com/android/server/PersistentDataBlockService",
+        return jniRegisterNativeMethods(env, "com/android/server/pdb/PersistentDataBlockService",
                                         sMethods, NELEM(sMethods));
     }
 

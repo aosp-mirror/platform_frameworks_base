@@ -41,8 +41,8 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
-import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.SystemService;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 
 import java.io.ByteArrayInputStream;
