@@ -23,6 +23,8 @@ import android.graphics.GraphicBuffer;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 
+import com.android.internal.os.IResultReceiver;
+
 /**
  * Passed to the {@link IRecentsAnimationRunner} in order for the runner to control to let the
  * runner control certain aspects of the recents animation, and to notify window manager when the
@@ -58,7 +60,7 @@ interface IRecentsAnimationController {
      *                          top resumed app, false otherwise.
      */
     @UnsupportedAppUsage
-    void finish(boolean moveHomeToTop, boolean sendUserLeaveHint);
+    void finish(boolean moveHomeToTop, boolean sendUserLeaveHint, in IResultReceiver finishCb);
 
     /**
      * Called by the handler to indicate that the recents animation input consumer should be

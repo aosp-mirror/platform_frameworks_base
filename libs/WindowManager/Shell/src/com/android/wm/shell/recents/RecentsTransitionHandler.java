@@ -54,6 +54,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -279,7 +280,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             mDeathHandler = () -> {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                         "[%d] RecentsController.DeathRecipient: binder died", mInstanceId);
-                finish(mWillFinishToHome, false /* leaveHint */);
+                finish(mWillFinishToHome, false /* leaveHint */, null /* finishCb */);
             };
             try {
                 mListener.asBinder().linkToDeath(mDeathHandler, 0 /* flags */);
@@ -313,7 +314,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
             if (mFinishCB != null) {
-                finishInner(toHome, false /* userLeave */);
+                finishInner(toHome, false /* userLeave */, null /* finishCb */);
             } else {
                 cleanUp();
             }
@@ -670,7 +671,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 // now and let it do its animation (since recents is going to be occluded).
                 sendCancelWithSnapshots();
                 mExecutor.executeDelayed(
-                        () -> finishInner(true /* toHome */, false /* userLeaveHint */), 0);
+                        () -> finishInner(true /* toHome */, false /* userLeaveHint */,
+                                null /* finishCb */), 0);
                 return;
             }
             if (recentsOpening != null) {
@@ -899,11 +901,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
 
         @Override
         @SuppressLint("NewApi")
-        public void finish(boolean toHome, boolean sendUserLeaveHint) {
-            mExecutor.execute(() -> finishInner(toHome, sendUserLeaveHint));
+        public void finish(boolean toHome, boolean sendUserLeaveHint, IResultReceiver finishCb) {
+            mExecutor.execute(() -> finishInner(toHome, sendUserLeaveHint, finishCb));
         }
 
-        private void finishInner(boolean toHome, boolean sendUserLeaveHint) {
+        private void finishInner(boolean toHome, boolean sendUserLeaveHint,
+                IResultReceiver runnerFinishCb) {
             if (mFinishCB == null) {
                 Slog.e(TAG, "Duplicate call to finish");
                 return;
@@ -993,6 +996,16 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             }
             cleanUp();
             finishCB.onTransitionFinished(wct.isEmpty() ? null : wct);
+            if (runnerFinishCb != null) {
+                try {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                            "[%d] RecentsController.finishInner: calling finish callback",
+                            mInstanceId);
+                    runnerFinishCb.send(0, null);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to report transition finished", e);
+                }
+            }
         }
 
         @Override
