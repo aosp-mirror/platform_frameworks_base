@@ -2493,14 +2493,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 outInsetsState.set(win.getCompatInsetsState(), true /* copySources */);
             }
 
-            // TODO (b/298562855): Remove this after identifying the reason why the frame is empty.
-            if (win.mAttrs.providedInsets != null && win.getFrame().isEmpty()) {
-                Slog.w(TAG, "Empty frame of " + win
-                        + " configChanged=" + configChanged
-                        + " frame=" + win.getFrame().toShortString()
-                        + " attrs=" + attrs);
-            }
-
             ProtoLog.v(WM_DEBUG_FOCUS, "Relayout of %s: focusMayChange=%b",
                     win, focusMayChange);
 
