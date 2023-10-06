@@ -35,8 +35,8 @@ import android.service.oemlock.IOemLockService;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
-import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.SystemService;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
 import com.android.server.pm.UserRestrictionsUtils;
