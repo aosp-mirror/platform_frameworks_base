@@ -419,7 +419,7 @@ public class KeyguardDisplayManager {
             mClock.post(mMoveTextRunnable);
 
             mKeyguardClockSwitchController = mKeyguardStatusViewComponentFactory
-                    .build(findViewById(R.id.clock))
+                    .build(findViewById(R.id.clock), getDisplay())
                     .getKeyguardClockSwitchController();
 
             mKeyguardClockSwitchController.setOnlyClock(true);

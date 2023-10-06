@@ -48,28 +48,40 @@ import com.android.compose.ui.util.lerp
 /** An element on screen, that can be composed in one or more scenes. */
 internal class Element(val key: ElementKey) {
     /**
-     * The last offset assigned to this element, relative to the SceneTransitionLayout containing
-     * it.
+     * The last values of this element, coming from any scene. Note that this value will be unstable
+     * if this element is present in multiple scenes but the shared element animation is disabled,
+     * given that multiple instances of the element with different states will write to these
+     * values. You should prefer using [TargetValues.lastValues] in the current scene if it is
+     * defined.
      */
-    var lastOffset = Offset.Unspecified
-
-    /** The last size assigned to this element. */
-    var lastSize = SizeUnspecified
-
-    /** The last alpha assigned to this element. */
-    var lastAlpha = 1f
+    val lastSharedValues = Values()
 
     /** The mapping between a scene and the values/state this element has in that scene, if any. */
-    val sceneValues = SnapshotStateMap<SceneKey, SceneValues>()
+    val sceneValues = SnapshotStateMap<SceneKey, TargetValues>()
 
     override fun toString(): String {
         return "Element(key=$key)"
     }
 
+    /** The current values of this element, either in a specific scene or in a shared context. */
+    class Values {
+        /** The offset of the element, relative to the SceneTransitionLayout containing it. */
+        var offset = Offset.Unspecified
+
+        /** The size of this element. */
+        var size = SizeUnspecified
+
+        /** The alpha of this element. */
+        var alpha = AlphaUnspecified
+    }
+
     /** The target values of this element in a given scene. */
-    class SceneValues {
-        var size by mutableStateOf(SizeUnspecified)
-        var offset by mutableStateOf(Offset.Unspecified)
+    class TargetValues {
+        val lastValues = Values()
+
+        var targetSize by mutableStateOf(SizeUnspecified)
+        var targetOffset by mutableStateOf(Offset.Unspecified)
+
         val sharedValues = SnapshotStateMap<ValueKey, SharedValue<*>>()
     }
 
@@ -80,6 +92,7 @@ internal class Element(val key: ElementKey) {
 
     companion object {
         val SizeUnspecified = IntSize(Int.MAX_VALUE, Int.MAX_VALUE)
+        val AlphaUnspecified = Float.MIN_VALUE
     }
 }
 
@@ -91,7 +104,7 @@ internal fun Modifier.element(
     scene: Scene,
     key: ElementKey,
 ): Modifier {
-    val sceneValues = remember(scene, key) { Element.SceneValues() }
+    val sceneValues = remember(scene, key) { Element.TargetValues() }
     val element =
         // Get the element associated to [key] if it was already composed in another scene,
         // otherwise create it and add it to our Map<ElementKey, Element>. This is done inside a
@@ -108,6 +121,8 @@ internal fun Modifier.element(
 
             element
         }
+    val lastSharedValues = element.lastSharedValues
+    val lastSceneValues = sceneValues.lastValues
 
     DisposableEffect(scene, sceneValues, element) {
         onDispose {
@@ -121,13 +136,14 @@ internal fun Modifier.element(
     }
 
     val alpha =
-        remember(layoutImpl, element, scene) {
-            derivedStateOf { elementAlpha(layoutImpl, element, scene) }
+        remember(layoutImpl, element, scene, sceneValues) {
+            derivedStateOf { elementAlpha(layoutImpl, element, scene, sceneValues) }
         }
     val isOpaque by remember(alpha) { derivedStateOf { alpha.value == 1f } }
     SideEffect {
-        if (isOpaque && element.lastAlpha != 1f) {
-            element.lastAlpha = 1f
+        if (isOpaque) {
+            lastSharedValues.alpha = 1f
+            lastSceneValues.alpha = 1f
         }
     }
 
@@ -148,7 +164,8 @@ internal fun Modifier.element(
             Modifier.graphicsLayer {
                 val alpha = alpha.value
                 this.alpha = alpha
-                element.lastAlpha = alpha
+                lastSharedValues.alpha = alpha
+                lastSceneValues.alpha = alpha
             }
         }
         .testTag(key.testTag)
@@ -220,7 +237,7 @@ private fun Modifier.modifierTransformations(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
-    sceneValues: Element.SceneValues,
+    sceneValues: Element.TargetValues,
 ): Modifier {
     when (val state = layoutImpl.state.transitionState) {
         is TransitionState.Idle -> return this
@@ -248,7 +265,8 @@ private fun Modifier.modifierTransformations(
 private fun elementAlpha(
     layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
-    scene: Scene
+    scene: Scene,
+    sceneValues: Element.TargetValues,
 ): Float {
     return computeValue(
             layoutImpl,
@@ -258,7 +276,11 @@ private fun elementAlpha(
             transformation = { it.alpha },
             idleValue = 1f,
             currentValue = { 1f },
-            lastValue = { element.lastAlpha },
+            lastValue = {
+                sceneValues.lastValues.alpha.takeIf { it != Element.AlphaUnspecified }
+                    ?: element.lastSharedValues.alpha.takeIf { it != Element.AlphaUnspecified }
+                        ?: 1f
+            },
             ::lerp,
         )
         .coerceIn(0f, 1f)
@@ -269,15 +291,15 @@ private fun IntermediateMeasureScope.measure(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
-    sceneValues: Element.SceneValues,
+    sceneValues: Element.TargetValues,
     measurable: Measurable,
     constraints: Constraints,
 ): Placeable {
     // Update the size this element has in this scene when idle.
     val targetSizeInScene = lookaheadSize
-    if (targetSizeInScene != sceneValues.size) {
+    if (targetSizeInScene != sceneValues.targetSize) {
         // TODO(b/290930950): Better handle when this changes to avoid instant size jumps.
-        sceneValues.size = targetSizeInScene
+        sceneValues.targetSize = targetSizeInScene
     }
 
     // Some lambdas called (max once) by computeValue() will need to measure [measurable], in which
@@ -292,17 +314,14 @@ private fun IntermediateMeasureScope.measure(
             layoutImpl,
             scene,
             element,
-            sceneValue = { it.size },
+            sceneValue = { it.targetSize },
             transformation = { it.size },
             idleValue = lookaheadSize,
             currentValue = { measurable.measure(constraints).also { maybePlaceable = it }.size() },
             lastValue = {
-                val lastSize = element.lastSize
-                if (lastSize != Element.SizeUnspecified) {
-                    lastSize
-                } else {
-                    measurable.measure(constraints).also { maybePlaceable = it }.size()
-                }
+                sceneValues.lastValues.size.takeIf { it != Element.SizeUnspecified }
+                    ?: element.lastSharedValues.size.takeIf { it != Element.SizeUnspecified }
+                        ?: measurable.measure(constraints).also { maybePlaceable = it }.size()
             },
             ::lerp,
         )
@@ -316,7 +335,9 @@ private fun IntermediateMeasureScope.measure(
                 )
             )
 
-    element.lastSize = placeable.size()
+    val size = placeable.size()
+    element.lastSharedValues.size = size
+    sceneValues.lastValues.size = size
     return placeable
 }
 
@@ -325,7 +346,7 @@ private fun IntermediateMeasureScope.place(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
-    sceneValues: Element.SceneValues,
+    sceneValues: Element.TargetValues,
     placeable: Placeable,
     placementScope: Placeable.PlacementScope,
 ) {
@@ -334,9 +355,9 @@ private fun IntermediateMeasureScope.place(
         // when idle.
         val coords = coordinates!!
         val targetOffsetInScene = lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
-        if (targetOffsetInScene != sceneValues.offset) {
+        if (targetOffsetInScene != sceneValues.targetOffset) {
             // TODO(b/290930950): Better handle when this changes to avoid instant offset jumps.
-            sceneValues.offset = targetOffsetInScene
+            sceneValues.targetOffset = targetOffsetInScene
         }
 
         val currentOffset = lookaheadScopeCoordinates.localPositionOf(coords, Offset.Zero)
@@ -345,22 +366,20 @@ private fun IntermediateMeasureScope.place(
                 layoutImpl,
                 scene,
                 element,
-                sceneValue = { it.offset },
+                sceneValue = { it.targetOffset },
                 transformation = { it.offset },
                 idleValue = targetOffsetInScene,
                 currentValue = { currentOffset },
                 lastValue = {
-                    val lastValue = element.lastOffset
-                    if (lastValue.isSpecified) {
-                        lastValue
-                    } else {
-                        currentOffset
-                    }
+                    sceneValues.lastValues.offset.takeIf { it.isSpecified }
+                        ?: element.lastSharedValues.offset.takeIf { it.isSpecified }
+                            ?: currentOffset
                 },
                 ::lerp,
             )
 
-        element.lastOffset = targetOffset
+        element.lastSharedValues.offset = targetOffset
+        sceneValues.lastValues.offset = targetOffset
         placeable.place((targetOffset - currentOffset).round())
     }
 }
@@ -391,7 +410,7 @@ private inline fun <T> computeValue(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
-    sceneValue: (Element.SceneValues) -> T,
+    sceneValue: (Element.TargetValues) -> T,
     transformation: (ElementTransformations) -> PropertyTransformation<T>?,
     idleValue: T,
     currentValue: () -> T,
