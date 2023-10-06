@@ -1235,6 +1235,9 @@ public class LocalDisplayAdapterTest {
 
             @Override
             public void stopOffload() {}
+
+            @Override
+            public void onBlockingScreenOn(Runnable unblocker) {}
         });
 
         mDisplayOffloadSession = new DisplayOffloadSessionImpl(mDisplayOffloader,

@@ -56,6 +56,15 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
         }
     }
 
+    @Override
+    public boolean blockScreenOn(Runnable unblocker) {
+        if (mDisplayOffloader == null) {
+            return false;
+        }
+        mDisplayOffloader.onBlockingScreenOn(unblocker);
+        return true;
+    }
+
     /**
      * Start the offload session. The method returns if the session is already active.
      * @return Whether the session was started successfully
