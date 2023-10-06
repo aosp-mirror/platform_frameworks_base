@@ -44,6 +44,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 @RunWith(AndroidTestingRunner.class)
 public class NotificationBitmapJobServiceTest extends UiServiceTestCase {
@@ -103,17 +109,39 @@ public class NotificationBitmapJobServiceTest extends UiServiceTestCase {
 
     @Test
     public void testGetTimeUntilRemoval_beforeToday2am_returnTimeUntilToday2am() {
-        final long timeUntilRemoval = mJobService.getTimeUntilRemoval(/* now= */ 1,
-                /* today2AM= */ 2, /* tomorrow2AM= */ 26);
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime now = Instant.now().atZone(zoneId);
+        LocalDate today = now.toLocalDate();
 
-        assertThat(timeUntilRemoval).isEqualTo(1);
+        LocalTime oneAM = LocalTime.of(/* hour= */ 1, /* minute= */ 0);
+        LocalTime twoAM = LocalTime.of(/* hour= */ 2, /* minute= */ 0);
+
+        ZonedDateTime today1AM = ZonedDateTime.of(today, oneAM, zoneId);
+        ZonedDateTime today2AM = ZonedDateTime.of(today, twoAM, zoneId);
+        ZonedDateTime tomorrow2AM = today2AM.plusDays(1);
+
+        final long msUntilRemoval = mJobService.getTimeUntilRemoval(
+                /* now= */ today1AM, today2AM, tomorrow2AM);
+
+        assertThat(msUntilRemoval).isEqualTo(Duration.ofHours(1).toMillis());
     }
 
     @Test
     public void testGetTimeUntilRemoval_afterToday2am_returnTimeUntilTomorrow2am() {
-        final long timeUntilRemoval = mJobService.getTimeUntilRemoval(/* now= */ 3,
-                /* today2AM= */ 2, /* tomorrow2AM= */ 26);
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime now = Instant.now().atZone(zoneId);
+        LocalDate today = now.toLocalDate();
 
-        assertThat(timeUntilRemoval).isEqualTo(23);
+        LocalTime threeAM = LocalTime.of(/* hour= */ 3, /* minute= */ 0);
+        LocalTime twoAM = LocalTime.of(/* hour= */ 2, /* minute= */ 0);
+
+        ZonedDateTime today3AM = ZonedDateTime.of(today, threeAM, zoneId);
+        ZonedDateTime today2AM = ZonedDateTime.of(today, twoAM, zoneId);
+        ZonedDateTime tomorrow2AM = today2AM.plusDays(1);
+
+        final long msUntilRemoval = mJobService.getTimeUntilRemoval(/* now= */ today3AM,
+                today2AM, tomorrow2AM);
+
+        assertThat(msUntilRemoval).isEqualTo(Duration.ofHours(23).toMillis());
     }
 }
