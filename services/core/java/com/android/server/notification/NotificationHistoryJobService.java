@@ -27,6 +27,7 @@ import android.content.Context;
 import android.os.CancellationSignal;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
 import java.util.concurrent.TimeUnit;
@@ -76,6 +77,12 @@ public class NotificationHistoryJobService extends JobService {
             mSignal.cancel();
         }
         return false;
+    }
+
+    @Override
+    @VisibleForTesting
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
     }
 }
 
