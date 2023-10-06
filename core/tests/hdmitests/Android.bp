@@ -30,7 +30,7 @@ android_test {
         "frameworks-base-testutils",
         "guava-android-testlib",
         "platform-test-annotations",
-        "truth-prebuilt",
+        "truth",
     ],
     libs: ["android.test.runner"],
     platform_apis: true,

@@ -56,7 +56,7 @@ android_test {
         "platform-test-annotations",
         "servicestests-utils",
         "testng",
-        "truth-prebuilt",
+        "truth",
         "testables",
         "ub-uiautomator",
         "hamcrest-library",

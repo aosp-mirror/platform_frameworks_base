@@ -26,7 +26,7 @@ android_test {
         "compatibility-device-util-axt",
         "platform-test-annotations",
         "platform-test-rules",
-        "truth-prebuilt",
+        "truth",
     ],
     test_suites: [
         "general-tests",
