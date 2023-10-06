@@ -4557,7 +4557,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     void notifyComponentUsed(@NonNull Computer snapshot, @NonNull String packageName,
-            @UserIdInt int userId, @NonNull String recentCallingPackage,
+            @UserIdInt int userId, @Nullable String recentCallingPackage,
             @NonNull String debugInfo) {
         synchronized (mLock) {
             final PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);

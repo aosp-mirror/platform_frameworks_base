@@ -1387,11 +1387,12 @@ public abstract class PackageManagerInternal {
             @UserIdInt int userId);
 
     /**
-     * Tells PackageManager when a component (except BroadcastReceivers) of the package is used
+     * Tells PackageManager when a component of the package is used
      * and the package should get out of stopped state and be enabled.
      */
     public abstract void notifyComponentUsed(@NonNull String packageName,
-            @UserIdInt int userId, @NonNull String recentCallingPackage, @NonNull String debugInfo);
+            @UserIdInt int userId, @Nullable String recentCallingPackage,
+            @NonNull String debugInfo);
 
     /** @deprecated For legacy shell command only. */
     @Deprecated

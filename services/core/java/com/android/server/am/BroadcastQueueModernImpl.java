@@ -1977,8 +1977,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         mService.notifyPackageUse(receiverPackageName,
                 PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER);
 
-        mService.mPackageManagerInt.setPackageStoppedState(
-                receiverPackageName, false, r.userId);
+        mService.mPackageManagerInt.notifyComponentUsed(
+                receiverPackageName, r.userId, r.callerPackage, r.toString());
     }
 
     private void reportUsageStatsBroadcastDispatched(@NonNull ProcessRecord app,
