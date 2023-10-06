@@ -85,10 +85,10 @@ class DevicePermissionPolicy : SchemePolicy() {
         appId: Int,
         userId: Int
     ) {
-        resetPermissionStates(packageName, userId)
+        resetRuntimePermissions(packageName, userId)
     }
 
-    private fun MutateStateScope.resetPermissionStates(packageName: String, userId: Int) {
+    fun MutateStateScope.resetRuntimePermissions(packageName: String, userId: Int) {
         // It's okay to skip resetting permissions for packages that are removed,
         // because their states will be trimmed in onPackageRemoved()/onAppIdRemoved()
         val packageState = newState.externalState.packageStates[packageName] ?: return
