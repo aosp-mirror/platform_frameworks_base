@@ -20,10 +20,10 @@ import android.content.Context;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.shade.ShadeEventsModule;
 import com.android.systemui.statusbar.NotificationListener;
@@ -74,9 +74,9 @@ import com.android.systemui.statusbar.notification.stack.NotificationSectionsMan
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModelModule;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Binds;
@@ -206,7 +206,7 @@ public interface NotificationsModule {
     static NotificationLaunchAnimatorControllerProvider provideNotifLaunchAnimControllerProvider(
             NotificationExpansionRepository notificationExpansionRepository,
             NotificationListContainer notificationListContainer,
-            HeadsUpManagerPhone headsUpManager,
+            HeadsUpManager headsUpManager,
             InteractionJankMonitor jankMonitor) {
         return new NotificationLaunchAnimatorControllerProvider(
                 notificationExpansionRepository,

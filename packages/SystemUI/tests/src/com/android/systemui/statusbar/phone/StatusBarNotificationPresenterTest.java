@@ -15,6 +15,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -59,6 +60,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -106,7 +108,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mContext,
                 shadeViewController,
                 mock(QuickSettingsController.class),
-                mock(HeadsUpManagerPhone.class),
+                mock(HeadsUpManager.class),
                 notificationShadeWindowView,
                 mock(ActivityStarter.class),
                 stackScrollLayoutController,

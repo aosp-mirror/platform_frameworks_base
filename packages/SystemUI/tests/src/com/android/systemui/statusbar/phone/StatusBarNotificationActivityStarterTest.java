@@ -92,6 +92,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -218,7 +219,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 mScreenOffAnimationController,
                 mStatusBarStateController).getPowerInteractor();
 
-        HeadsUpManagerPhone headsUpManager = mock(HeadsUpManagerPhone.class);
+        HeadsUpManager headsUpManager = mock(HeadsUpManager.class);
         NotificationLaunchAnimatorControllerProvider notificationAnimationProvider =
                 new NotificationLaunchAnimatorControllerProvider(
                         new NotificationExpansionRepository(),
