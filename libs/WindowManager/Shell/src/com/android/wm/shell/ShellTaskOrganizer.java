@@ -42,6 +42,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizerController;
+import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
@@ -420,16 +421,16 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     /**
      * Removes listener.
      */
-    public void removeLocusIdListener(FocusListener listener) {
+    public void removeFocusListener(FocusListener listener) {
         synchronized (mLock) {
             mFocusListeners.remove(listener);
         }
     }
 
     @Override
-    public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
+    public void addStartingWindow(StartingWindowInfo info) {
         if (mStartingWindow != null) {
-            mStartingWindow.addStartingWindow(info, appToken);
+            mStartingWindow.addStartingWindow(info);
         }
     }
 
@@ -463,6 +464,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
+        if (leash != null) {
+            leash.setUnreleasedWarningCallSite("ShellTaskOrganizer.onTaskAppeared");
+        }
         synchronized (mLock) {
             onTaskAppeared(new TaskAppearedInfo(taskInfo, leash));
         }
@@ -489,7 +493,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
      * Take a screenshot of a task.
      */
     public void screenshotTask(RunningTaskInfo taskInfo, Rect crop,
-            Consumer<SurfaceControl.ScreenshotHardwareBuffer> consumer) {
+            Consumer<ScreenCapture.ScreenshotHardwareBuffer> consumer) {
         final TaskAppearedInfo info = mTasks.get(taskInfo.taskId);
         if (info == null) {
             return;

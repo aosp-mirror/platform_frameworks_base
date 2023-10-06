@@ -28,6 +28,10 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.yield
 
 class FakeUserRepository : UserRepository {
+    companion object {
+        // User id to represent a non system (human) user id. We presume this is the main user.
+        private const val MAIN_USER_ID = 10
+    }
 
     private val _userSwitcherSettings = MutableStateFlow(UserSwitcherSettingsModel())
     override val userSwitcherSettings: Flow<UserSwitcherSettingsModel> =
@@ -43,7 +47,8 @@ class FakeUserRepository : UserRepository {
     override val userSwitchingInProgress: Flow<Boolean>
         get() = _userSwitchingInProgress
 
-    override var lastSelectedNonGuestUserId: Int = UserHandle.USER_SYSTEM
+    override var mainUserId: Int = MAIN_USER_ID
+    override var lastSelectedNonGuestUserId: Int = mainUserId
 
     private var _isGuestUserAutoCreated: Boolean = false
     override val isGuestUserAutoCreated: Boolean
@@ -74,6 +79,10 @@ class FakeUserRepository : UserRepository {
         return _userSwitcherSettings.value.isSimpleUserSwitcher
     }
 
+    override fun isUserSwitcherEnabled(): Boolean {
+        return _userSwitcherSettings.value.isUserSwitcherEnabled
+    }
+
     fun setUserInfos(infos: List<UserInfo>) {
         _userInfos.value = infos
     }
@@ -94,5 +103,9 @@ class FakeUserRepository : UserRepository {
 
     fun setGuestUserAutoCreated(value: Boolean) {
         _isGuestUserAutoCreated = value
+    }
+
+    fun setUserSwitching(value: Boolean) {
+        _userSwitchingInProgress.value = value
     }
 }

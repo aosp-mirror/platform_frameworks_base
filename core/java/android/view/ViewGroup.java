@@ -66,6 +66,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.Helper;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
@@ -2039,8 +2040,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
-        final float x = event.getX(pointerIndex);
-        final float y = event.getY(pointerIndex);
+        final float x = event.getXDispatchLocation(pointerIndex);
+        final float y = event.getYDispatchLocation(pointerIndex);
         if (isOnScrollbarThumb(x, y) || isDraggingScrollBar()) {
             return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_ARROW);
         }
@@ -2124,8 +2125,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         HoverTarget firstOldHoverTarget = mFirstHoverTarget;
         mFirstHoverTarget = null;
         if (!interceptHover && action != MotionEvent.ACTION_HOVER_EXIT) {
-            final float x = event.getX();
-            final float y = event.getY();
+            final float x = event.getXDispatchLocation(0);
+            final float y = event.getYDispatchLocation(0);
             final int childrenCount = mChildrenCount;
             if (childrenCount != 0) {
                 final ArrayList<View> preorderedList = buildOrderedChildList();
@@ -2346,8 +2347,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 // Check what the child under the pointer says about the tooltip.
                 final int childrenCount = mChildrenCount;
                 if (childrenCount != 0) {
-                    final float x = event.getX();
-                    final float y = event.getY();
+                    final float x = event.getXDispatchLocation(0);
+                    final float y = event.getYDispatchLocation(0);
 
                     final ArrayList<View> preorderedList = buildOrderedChildList();
                     final boolean customOrder = preorderedList == null
@@ -2442,8 +2443,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     protected boolean pointInHoveredChild(MotionEvent event) {
         if (mFirstHoverTarget != null) {
-            return isTransformedTouchPointInView(event.getX(), event.getY(),
-                mFirstHoverTarget.child, null);
+            return isTransformedTouchPointInView(event.getXDispatchLocation(0),
+                    event.getYDispatchLocation(0), mFirstHoverTarget.child, null);
         }
         return false;
     }
@@ -2512,8 +2513,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public boolean onInterceptHoverEvent(MotionEvent event) {
         if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
             final int action = event.getAction();
-            final float x = event.getX();
-            final float y = event.getY();
+            final float x = event.getXDispatchLocation(0);
+            final float y = event.getYDispatchLocation(0);
             if ((action == MotionEvent.ACTION_HOVER_MOVE
                     || action == MotionEvent.ACTION_HOVER_ENTER) && isOnScrollbar(x, y)) {
                 return true;
@@ -2534,8 +2535,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // Send the event to the child under the pointer.
         final int childrenCount = mChildrenCount;
         if (childrenCount != 0) {
-            final float x = event.getX();
-            final float y = event.getY();
+            final float x = event.getXDispatchLocation(0);
+            final float y = event.getXDispatchLocation(0);
 
             final ArrayList<View> preorderedList = buildOrderedChildList();
             final boolean customOrder = preorderedList == null
@@ -2699,10 +2700,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
                     final int childrenCount = mChildrenCount;
                     if (newTouchTarget == null && childrenCount != 0) {
-                        final float x =
-                                isMouseEvent ? ev.getXCursorPosition() : ev.getX(actionIndex);
-                        final float y =
-                                isMouseEvent ? ev.getYCursorPosition() : ev.getY(actionIndex);
+                        final float x = ev.getXDispatchLocation(actionIndex);
+                        final float y = ev.getYDispatchLocation(actionIndex);
                         // Find a child that can receive the event.
                         // Scan children from front to back.
                         final ArrayList<View> preorderedList = buildTouchDispatchChildList();
@@ -2756,8 +2755,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 } else {
                                     mLastTouchDownIndex = childIndex;
                                 }
-                                mLastTouchDownX = ev.getX();
-                                mLastTouchDownY = ev.getY();
+                                mLastTouchDownX = x;
+                                mLastTouchDownY = y;
                                 newTouchTarget = addTouchTarget(child, idBitsToAssign);
                                 alreadyDispatchedToNewTouchTarget = true;
                                 break;
@@ -3286,7 +3285,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (ev.isFromSource(InputDevice.SOURCE_MOUSE)
                 && ev.getAction() == MotionEvent.ACTION_DOWN
                 && ev.isButtonPressed(MotionEvent.BUTTON_PRIMARY)
-                && isOnScrollbarThumb(ev.getX(), ev.getY())) {
+                && isOnScrollbarThumb(ev.getXDispatchLocation(0), ev.getYDispatchLocation(0))) {
             return true;
         }
         return false;
@@ -3532,7 +3531,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         boolean handled = false;
-        if (includeForAccessibility()) {
+        if (includeForAccessibility(false)) {
             handled = super.dispatchPopulateAccessibilityEventInternal(event);
             if (handled) {
                 return handled;
@@ -3709,6 +3708,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return children;
     }
 
+    private AutofillManager getAutofillManager() {
+        return mContext.getSystemService(AutofillManager.class);
+    }
+
+    private boolean shouldIncludeAllChildrenViewWithAutofillTypeNotNone(AutofillManager afm) {
+        if (afm == null) return false;
+        return afm.shouldIncludeAllChildrenViewsWithAutofillTypeNotNoneInAssistStructure();
+    }
+
+    private boolean shouldIncludeAllChildrenViews(AutofillManager afm){
+        if (afm == null) return false;
+        return afm.shouldIncludeAllChildrenViewInAssistStructure();
+    }
+
     /** @hide */
     private void populateChildrenForAutofill(ArrayList<View> list, @AutofillFlags int flags) {
         final int childrenCount = mChildrenCount;
@@ -3718,12 +3731,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final ArrayList<View> preorderedList = buildOrderedChildList();
         final boolean customOrder = preorderedList == null
                 && isChildrenDrawingOrderEnabled();
+        final AutofillManager afm = getAutofillManager();
         for (int i = 0; i < childrenCount; i++) {
             final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
             final View child = (preorderedList == null)
                     ? mChildren[childIndex] : preorderedList.get(childIndex);
             if ((flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
-                    || child.isImportantForAutofill()) {
+                    || child.isImportantForAutofill()
+                    || (child.isMatchingAutofillableHeuristics()
+                        && !child.isActivityDeniedForAutofillForUnimportantView())
+                    || (shouldIncludeAllChildrenViewWithAutofillTypeNotNone(afm)
+                        && child.getAutofillType() != AUTOFILL_TYPE_NONE)
+                    || shouldIncludeAllChildrenViews(afm)){
                 list.add(child);
             } else if (child instanceof ViewGroup) {
                 ((ViewGroup) child).populateChildrenForAutofill(list, flags);
@@ -3916,6 +3935,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public boolean onNestedPrePerformAccessibilityAction(View target, int action, Bundle args) {
         return false;
+    }
+
+    @Override
+    void calculateAccessibilityDataSensitive() {
+        super.calculateAccessibilityDataSensitive();
+        for (int i = 0; i < mChildrenCount; i++) {
+            mChildren[i].calculateAccessibilityDataSensitive();
+        }
     }
 
     @Override
@@ -4158,7 +4185,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * @hide
      */
-    protected void onDebugDrawMargins(Canvas canvas, Paint paint) {
+    protected void onDebugDrawMargins(@NonNull Canvas canvas, Paint paint) {
         for (int i = 0; i < getChildCount(); i++) {
             View c = getChildAt(i);
             c.getLayoutParams().onDebugDraw(c, canvas, paint);
@@ -4168,7 +4195,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * @hide
      */
-    protected void onDebugDraw(Canvas canvas) {
+    protected void onDebugDraw(@NonNull Canvas canvas) {
         Paint paint = getDebugPaint();
 
         // Draw optical bounds
@@ -4216,7 +4243,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
+    protected void dispatchDraw(@NonNull Canvas canvas) {
         final int childrenCount = mChildrenCount;
         final View[] children = mChildren;
         int flags = mGroupFlags;
@@ -4525,7 +4552,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param drawingTime The time at which draw is occurring
      * @return True if an invalidate() was issued
      */
-    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+    protected boolean drawChild(@NonNull Canvas canvas, View child, long drawingTime) {
         return child.draw(canvas, this, drawingTime);
     }
 
@@ -9200,7 +9227,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    private static void drawRect(Canvas canvas, Paint paint, int x1, int y1, int x2, int y2) {
+    private static void drawRect(@NonNull Canvas canvas, Paint paint, int x1, int y1,
+                                 int x2, int y2) {
         if (sDebugLines== null) {
             // TODO: This won't work with multiple UI threads in a single process
             sDebugLines = new float[16];

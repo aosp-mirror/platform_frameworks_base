@@ -22,10 +22,10 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
-import com.android.systemui.shade.NotificationPanelViewController
 import com.android.systemui.shade.PanelState
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.panelStateToString
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -47,7 +47,7 @@ constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
 ) {
 
-    lateinit var notificationPanelViewController: NotificationPanelViewController
+    lateinit var shadeViewController: ShadeViewController
     lateinit var notificationStackScrollLayoutController: NotificationStackScrollLayoutController
     lateinit var qs: QS
 
@@ -63,7 +63,9 @@ constructor(
                     updateResources()
                 }
             })
-        shadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged)
+        val currentState =
+            shadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged)
+        onPanelExpansionChanged(currentState)
         shadeExpansionStateManager.addStateListener(this::onPanelStateChanged)
         dumpManager.registerCriticalDumpable("ShadeTransitionController") { printWriter, _ ->
             dump(printWriter)
@@ -93,7 +95,7 @@ constructor(
                 currentPanelState: ${currentPanelState?.panelStateToString()}
                 lastPanelExpansionChangeEvent: $lastShadeExpansionChangeEvent
                 qs.isInitialized: ${this::qs.isInitialized}
-                npvc.isInitialized: ${this::notificationPanelViewController.isInitialized}
+                npvc.isInitialized: ${this::shadeViewController.isInitialized}
                 nssl.isInitialized: ${this::notificationStackScrollLayoutController.isInitialized}
             """.trimIndent())
     }

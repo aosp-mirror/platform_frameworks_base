@@ -24,16 +24,6 @@
         <item name="android:layout_gravity">top</item>
     </style>
 
-    <style name="AuthCredentialPatternContainerStyle">
-        <item name="android:gravity">center</item>
-        <item name="android:maxHeight">@dimen/biometric_auth_pattern_view_max_size</item>
-        <item name="android:maxWidth">@dimen/biometric_auth_pattern_view_max_size</item>
-        <item name="android:minHeight">@dimen/biometric_auth_pattern_view_size</item>
-        <item name="android:minWidth">@dimen/biometric_auth_pattern_view_size</item>
-        <item name="android:paddingHorizontal">180dp</item>
-        <item name="android:paddingVertical">80dp</item>
-    </style>
-
     <style name="TextAppearance.AuthNonBioCredential.Title">
         <item name="android:fontFamily">google-sans</item>
         <item name="android:layout_marginTop">24dp</item>

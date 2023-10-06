@@ -20,13 +20,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferFactory
-import com.android.systemui.plugins.log.LogcatEchoTracker
-import com.android.systemui.statusbar.DisableFlagsLogger
+import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
 import com.google.common.truth.Truth.assertThat
-import org.junit.Test
-import org.mockito.Mockito.mock
 import java.io.PrintWriter
 import java.io.StringWriter
+import org.junit.Test
+import org.mockito.Mockito.mock
 
 @SmallTest
 class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
@@ -43,15 +43,39 @@ class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
     fun logDisableFlagChange_bufferHasStates() {
         val state = DisableFlagsLogger.DisableState(0, 1)
 
-        logger.logDisableFlagChange(state, state)
+        logger.logDisableFlagChange(state)
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
         val actualString = stringWriter.toString()
-        val expectedLogString = disableFlagsLogger.getDisableFlagsString(
-            old = null, new = state, newAfterLocalModification = state
-        )
+        val expectedLogString =
+            disableFlagsLogger.getDisableFlagsString(
+                old = null,
+                new = state,
+                newAfterLocalModification = null,
+            )
 
         assertThat(actualString).contains(expectedLogString)
+    }
+
+    @Test
+    fun logVisibilityModel_bufferCorrect() {
+        logger.logVisibilityModel(
+            StatusBarVisibilityModel(
+                showClock = false,
+                showNotificationIcons = true,
+                showOngoingCallChip = false,
+                showSystemInfo = true,
+            )
+        )
+
+        val stringWriter = StringWriter()
+        buffer.dump(PrintWriter(stringWriter), tailLength = 0)
+        val actualString = stringWriter.toString()
+
+        assertThat(actualString).contains("showClock=false")
+        assertThat(actualString).contains("showNotificationIcons=true")
+        assertThat(actualString).contains("showOngoingCallChip=false")
+        assertThat(actualString).contains("showSystemInfo=true")
     }
 }

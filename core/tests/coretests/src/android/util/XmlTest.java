@@ -29,6 +29,8 @@ import android.os.PersistableBundle;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

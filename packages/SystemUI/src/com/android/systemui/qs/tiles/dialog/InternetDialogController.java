@@ -153,14 +153,16 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     @VisibleForTesting
     /** Should be accessible only to the main thread. */
     final Map<Integer, TelephonyDisplayInfo> mSubIdTelephonyDisplayInfoMap = new HashMap<>();
+    @VisibleForTesting
+    /** Should be accessible only to the main thread. */
+    final Map<Integer, TelephonyManager> mSubIdTelephonyManagerMap = new HashMap<>();
+    @VisibleForTesting
+    /** Should be accessible only to the main thread. */
+    final Map<Integer, TelephonyCallback> mSubIdTelephonyCallbackMap = new HashMap<>();
 
     private WifiManager mWifiManager;
     private Context mContext;
     private SubscriptionManager mSubscriptionManager;
-    /** Should be accessible only to the main thread. */
-    private Map<Integer, TelephonyManager> mSubIdTelephonyManagerMap = new HashMap<>();
-    /** Should be accessible only to the main thread. */
-    private Map<Integer, TelephonyCallback> mSubIdTelephonyCallbackMap = new HashMap<>();
     private TelephonyManager mTelephonyManager;
     private ConnectivityManager mConnectivityManager;
     private CarrierConfigTracker mCarrierConfigTracker;
@@ -320,6 +322,9 @@ public class InternetDialogController implements AccessPointController.AccessPoi
                 Log.e(TAG, "Unexpected null telephony call back for Sub " + tm.getSubscriptionId());
             }
         }
+        mSubIdTelephonyManagerMap.clear();
+        mSubIdTelephonyCallbackMap.clear();
+        mSubIdTelephonyDisplayInfoMap.clear();
         mSubscriptionManager.removeOnSubscriptionsChangedListener(
                 mOnSubscriptionsChangedListener);
         mAccessPointController.removeAccessPointCallback(this);
@@ -784,12 +789,40 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     }
 
     void connectCarrierNetwork() {
-        final MergedCarrierEntry mergedCarrierEntry =
-                mAccessPointController.getMergedCarrierEntry();
-        if (mergedCarrierEntry != null && mergedCarrierEntry.canConnect()) {
-            mergedCarrierEntry.connect(null /* ConnectCallback */, false);
-            makeOverlayToast(R.string.wifi_wont_autoconnect_for_now);
+        String errorLogPrefix = "Fail to connect carrier network : ";
+
+        if (!isMobileDataEnabled()) {
+            if (DEBUG) {
+                Log.d(TAG, errorLogPrefix + "settings OFF");
+            }
+            return;
         }
+        if (isDeviceLocked()) {
+            if (DEBUG) {
+                Log.d(TAG, errorLogPrefix + "device locked");
+            }
+            return;
+        }
+        if (activeNetworkIsCellular()) {
+            Log.d(TAG, errorLogPrefix + "already active");
+            return;
+        }
+
+        MergedCarrierEntry mergedCarrierEntry =
+                mAccessPointController.getMergedCarrierEntry();
+        if (mergedCarrierEntry == null) {
+            Log.e(TAG, errorLogPrefix + "no merged entry");
+            return;
+        }
+
+        if (!mergedCarrierEntry.canConnect()) {
+            Log.w(TAG, errorLogPrefix + "merged entry connect state "
+                    + mergedCarrierEntry.getConnectedState());
+            return;
+        }
+
+        mergedCarrierEntry.connect(null /* ConnectCallback */, false);
+        makeOverlayToast(R.string.wifi_wont_autoconnect_for_now);
     }
 
     boolean isCarrierNetworkActive() {

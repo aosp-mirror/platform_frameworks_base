@@ -213,7 +213,14 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
 
     outWindowInfo->bufferFormat = ColorTypeToBufferFormat(colorType);
     outWindowInfo->colorspace = colorSpace;
-    outWindowInfo->dataspace = ColorSpaceToADataSpace(colorSpace.get(), colorType);
+    outWindowInfo->colorMode = colorMode;
+
+    if (colorMode == ColorMode::Hdr || colorMode == ColorMode::Hdr10) {
+        outWindowInfo->dataspace =
+                static_cast<android_dataspace>(STANDARD_DCI_P3 | TRANSFER_SRGB | RANGE_EXTENDED);
+    } else {
+        outWindowInfo->dataspace = ColorSpaceToADataSpace(colorSpace.get(), colorType);
+    }
     LOG_ALWAYS_FATAL_IF(
             outWindowInfo->dataspace == HAL_DATASPACE_UNKNOWN && colorType != kAlpha_8_SkColorType,
             "Unsupported colorspace");
@@ -368,6 +375,14 @@ void VulkanSurface::releaseBuffers() {
     }
 }
 
+void VulkanSurface::invalidateBuffers() {
+    for (uint32_t i = 0; i < mWindowInfo.bufferCount; i++) {
+        VulkanSurface::NativeBufferInfo& bufferInfo = mNativeBuffers[i];
+        bufferInfo.hasValidContents = false;
+        bufferInfo.lastPresentedCount = 0;
+    }
+}
+
 VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     // Set the mCurrentBufferInfo to invalid in case of error and only reset it to the correct
     // value at the end of the function if everything dequeued correctly.
@@ -400,6 +415,10 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
             // new NativeBufferInfo storage will be populated lazily as we dequeue each new buffer.
             mWindowInfo.actualSize = actualSize;
             releaseBuffers();
+        } else {
+            // A change in transform means we need to repaint the entire buffer area as the damage
+            // rects have just moved about.
+            invalidateBuffers();
         }
 
         if (transformHint != mWindowInfo.transform) {
@@ -446,9 +465,15 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     VulkanSurface::NativeBufferInfo* bufferInfo = &mNativeBuffers[idx];
 
     if (bufferInfo->skSurface.get() == nullptr) {
+        SkSurfaceProps surfaceProps;
+        if (mWindowInfo.colorMode != ColorMode::Default) {
+            surfaceProps = SkSurfaceProps(SkSurfaceProps::kAlwaysDither_Flag | surfaceProps.flags(),
+                                          surfaceProps.pixelGeometry());
+        }
         bufferInfo->skSurface = SkSurface::MakeFromAHardwareBuffer(
                 mGrContext, ANativeWindowBuffer_getHardwareBuffer(bufferInfo->buffer.get()),
-                kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, nullptr, /*from_window=*/true);
+                kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, &surfaceProps,
+                /*from_window=*/true);
         if (bufferInfo->skSurface.get() == nullptr) {
             ALOGE("SkSurface::MakeFromAHardwareBuffer failed");
             mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer,
@@ -509,6 +534,33 @@ int VulkanSurface::getCurrentBuffersAge() {
     LOG_ALWAYS_FATAL_IF(!mCurrentBufferInfo);
     VulkanSurface::NativeBufferInfo& currentBuffer = *mCurrentBufferInfo;
     return currentBuffer.hasValidContents ? (mPresentCount - currentBuffer.lastPresentedCount) : 0;
+}
+
+void VulkanSurface::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
+    mWindowInfo.colorspace = std::move(colorSpace);
+    for (int i = 0; i < kNumBufferSlots; i++) {
+        mNativeBuffers[i].skSurface.reset();
+    }
+
+    if (mWindowInfo.colorMode == ColorMode::Hdr || mWindowInfo.colorMode == ColorMode::Hdr10) {
+        mWindowInfo.dataspace =
+                static_cast<android_dataspace>(STANDARD_DCI_P3 | TRANSFER_SRGB | RANGE_EXTENDED);
+    } else {
+        mWindowInfo.dataspace = ColorSpaceToADataSpace(
+                mWindowInfo.colorspace.get(), BufferFormatToColorType(mWindowInfo.bufferFormat));
+    }
+    LOG_ALWAYS_FATAL_IF(mWindowInfo.dataspace == HAL_DATASPACE_UNKNOWN &&
+                                mWindowInfo.bufferFormat != AHARDWAREBUFFER_FORMAT_R8_UNORM,
+                        "Unsupported colorspace");
+
+    if (mNativeWindow) {
+        int err = ANativeWindow_setBuffersDataSpace(mNativeWindow.get(), mWindowInfo.dataspace);
+        if (err != 0) {
+            ALOGE("VulkanSurface::setColorSpace() native_window_set_buffers_data_space(%d) "
+                  "failed: %s (%d)",
+                  mWindowInfo.dataspace, strerror(-err), err);
+        }
+    }
 }
 
 } /* namespace renderthread */

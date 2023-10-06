@@ -57,7 +57,9 @@ VulkanManager& SkiaVulkanPipeline::vulkanManager() {
 MakeCurrentResult SkiaVulkanPipeline::makeCurrent() {
     // In case the surface was destroyed (e.g. a previous trimMemory call) we
     // need to recreate it here.
-    if (!isSurfaceReady() && mNativeWindow) {
+    if (mHardwareBuffer) {
+        mRenderThread.requireVkContext();
+    } else if (!isSurfaceReady() && mNativeWindow) {
         setSurface(mNativeWindow.get(), SwapBehavior::kSwap_default);
     }
     return isContextReady() ? MakeCurrentResult::AlreadyCurrent : MakeCurrentResult::Failed;
@@ -72,28 +74,39 @@ IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
         const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
         const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
         const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
-        const std::vector<sp<RenderNode>>& renderNodes, FrameInfoVisualizer* profiler) {
-    sk_sp<SkSurface> backBuffer = mVkSurface->getCurrentSkSurface();
+        const std::vector<sp<RenderNode>>& renderNodes, FrameInfoVisualizer* profiler,
+        const HardwareBufferRenderParams& bufferParams) {
+    sk_sp<SkSurface> backBuffer;
+    SkMatrix preTransform;
+    if (mHardwareBuffer) {
+        backBuffer = getBufferSkSurface(bufferParams);
+        preTransform = bufferParams.getTransform();
+    } else {
+        backBuffer = mVkSurface->getCurrentSkSurface();
+        preTransform = mVkSurface->getCurrentPreTransform();
+    }
+
     if (backBuffer.get() == nullptr) {
         return {false, -1};
     }
 
     // update the coordinates of the global light position based on surface rotation
-    SkPoint lightCenter = mVkSurface->getCurrentPreTransform().mapXY(lightGeometry.center.x,
-                                                                     lightGeometry.center.y);
+    SkPoint lightCenter = preTransform.mapXY(lightGeometry.center.x, lightGeometry.center.y);
     LightGeometry localGeometry = lightGeometry;
     localGeometry.center.x = lightCenter.fX;
     localGeometry.center.y = lightCenter.fY;
 
     LightingInfo::updateLighting(localGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, backBuffer,
-                mVkSurface->getCurrentPreTransform());
+                preTransform);
 
     // Draw visual debugging features
     if (CC_UNLIKELY(Properties::showDirtyRegions ||
                     ProfileType::None != Properties::getProfileType())) {
         SkCanvas* profileCanvas = backBuffer->getCanvas();
-        SkiaProfileRenderer profileRenderer(profileCanvas);
+        SkAutoCanvasRestore saver(profileCanvas, true);
+        profileCanvas->concat(mVkSurface->getCurrentPreTransform());
+        SkiaProfileRenderer profileRenderer(profileCanvas, frame.width(), frame.height());
         profiler->draw(profileRenderer);
     }
 
@@ -114,11 +127,15 @@ IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
 
 bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
                                      FrameInfo* currentFrameInfo, bool* requireSwap) {
-    *requireSwap = drew;
-
     // Even if we decided to cancel the frame, from the perspective of jank
     // metrics the frame was swapped at this point
     currentFrameInfo->markSwapBuffers();
+
+    if (mHardwareBuffer) {
+        return false;
+    }
+
+    *requireSwap = drew;
 
     if (*requireSwap) {
         vulkanManager().swapBuffers(mVkSurface, screenDirty);
@@ -134,6 +151,12 @@ DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
 }
 
 void SkiaVulkanPipeline::onStop() {}
+
+[[nodiscard]] android::base::unique_fd SkiaVulkanPipeline::flush() {
+    int fence = -1;
+    vulkanManager().createReleaseFence(&fence, mRenderThread.getGrContext());
+    return android::base::unique_fd(fence);
+}
 
 // We can safely ignore the swap behavior because VkManager will always operate
 // in a mode equivalent to EGLManager::SwapBehavior::kBufferAge
@@ -153,6 +176,13 @@ bool SkiaVulkanPipeline::setSurface(ANativeWindow* surface, SwapBehavior /*swapB
     }
 
     return mVkSurface != nullptr;
+}
+
+void SkiaVulkanPipeline::setTargetSdrHdrRatio(float ratio) {
+    SkiaPipeline::setTargetSdrHdrRatio(ratio);
+    if (mVkSurface) {
+        mVkSurface->setColorSpace(mSurfaceColorSpace);
+    }
 }
 
 bool SkiaVulkanPipeline::isSurfaceReady() {

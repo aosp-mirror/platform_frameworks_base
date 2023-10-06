@@ -180,9 +180,22 @@ public class VibrationSettingsTest {
         mVibrationSettings.onSystemReady();
     }
 
+    private void removeServicesForTest() {
+        LocalServices.removeServiceForTest(PowerManagerInternal.class);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
+    }
+
+    private void addServicesForTest() {
+        LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
+        LocalServices.addService(VirtualDeviceManagerInternal.class,
+                mVirtualDeviceManagerInternalMock);
+    }
+
     @After
     public void tearDown() throws Exception {
-        LocalServices.removeServiceForTest(PowerManagerInternal.class);
+        removeServicesForTest();
     }
 
     @Test
@@ -551,17 +564,17 @@ public class VibrationSettingsTest {
 
         for (int usage : ALL_USAGES) {
             // Non-system vibration
-            assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                    UID, "some.app", usage, vibrateStartTime));
+            assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(createCallerInfo(
+                    UID, "some.app", usage), vibrateStartTime));
             // Vibration with UID zero
             assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                    /* uid= */ 0, "", usage, vibrateStartTime));
+                    createCallerInfo(/* uid= */ 0, "", usage), vibrateStartTime));
             // System vibration
             assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                    Process.SYSTEM_UID, "", usage, vibrateStartTime));
+                    createCallerInfo(Process.SYSTEM_UID, "", usage), vibrateStartTime));
             // SysUI vibration
             assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                    UID, SYSUI_PACKAGE_NAME, usage, vibrateStartTime));
+                    createCallerInfo(UID, SYSUI_PACKAGE_NAME, usage), vibrateStartTime));
         }
     }
 
@@ -579,16 +592,16 @@ public class VibrationSettingsTest {
             for (int usage : ALL_USAGES) {
                 // Non-system vibration
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        UID, "some.app", usage, vibrateStartTime));
+                        createCallerInfo(UID, "some.app", usage), vibrateStartTime));
                 // Vibration with UID zero
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        /* uid= */ 0, "", usage, vibrateStartTime));
+                        createCallerInfo(/* uid= */ 0, "", usage), vibrateStartTime));
                 // System vibration
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        Process.SYSTEM_UID, "", usage, vibrateStartTime));
+                        createCallerInfo(Process.SYSTEM_UID, "", usage), vibrateStartTime));
                 // SysUI vibration
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        UID, SYSUI_PACKAGE_NAME, usage, vibrateStartTime));
+                        createCallerInfo(UID, SYSUI_PACKAGE_NAME, usage), vibrateStartTime));
             }
         }
     }
@@ -600,57 +613,75 @@ public class VibrationSettingsTest {
 
         for (int usage : ALL_USAGES) {
             assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                    UID, "some.app", usage, vibrateStartTime));
+                    createCallerInfo(UID, "some.app", usage), vibrateStartTime));
         }
     }
 
     @Test
-    public void shouldCancelVibrationOnScreenOff_withUidZero_returnsFalseForTouchAndHardware() {
+    public void shouldCancelVibrationOnScreenOff_withUidZero_returnsFalseForUsagesInAllowlist() {
         long vibrateStartTime = 100;
         mockGoToSleep(vibrateStartTime + 10, PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN);
 
+        Set<Integer> expectedAllowedVibrations = new HashSet<>(Arrays.asList(
+                USAGE_TOUCH,
+                USAGE_ACCESSIBILITY,
+                USAGE_PHYSICAL_EMULATION,
+                USAGE_HARDWARE_FEEDBACK
+        ));
+
         for (int usage : ALL_USAGES) {
-            if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
-                    || usage == USAGE_PHYSICAL_EMULATION) {
+            if (expectedAllowedVibrations.contains(usage)) {
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        /* uid= */ 0, "", usage, vibrateStartTime));
+                        createCallerInfo(/* uid= */ 0, "", usage), vibrateStartTime));
             } else {
                 assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        /* uid= */ 0, "", usage, vibrateStartTime));
+                        createCallerInfo(/* uid= */ 0, "", usage), vibrateStartTime));
             }
         }
     }
 
     @Test
-    public void shouldCancelVibrationOnScreenOff_withSystemUid_returnsFalseForTouchAndHardware() {
+    public void shouldCancelVibrationOnScreenOff_withSystemUid__returnsFalseForUsagesInAllowlist() {
         long vibrateStartTime = 100;
         mockGoToSleep(vibrateStartTime + 10, PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD);
 
+        Set<Integer> expectedAllowedVibrations = new HashSet<>(Arrays.asList(
+                USAGE_TOUCH,
+                USAGE_ACCESSIBILITY,
+                USAGE_PHYSICAL_EMULATION,
+                USAGE_HARDWARE_FEEDBACK
+        ));
+
         for (int usage : ALL_USAGES) {
-            if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
-                    || usage == USAGE_PHYSICAL_EMULATION) {
+            if (expectedAllowedVibrations.contains(usage)) {
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        Process.SYSTEM_UID, "", usage, vibrateStartTime));
+                        createCallerInfo(Process.SYSTEM_UID, "", usage), vibrateStartTime));
             } else {
                 assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        Process.SYSTEM_UID, "", usage, vibrateStartTime));
+                        createCallerInfo(Process.SYSTEM_UID, "", usage), vibrateStartTime));
             }
         }
     }
 
     @Test
-    public void shouldCancelVibrationOnScreenOff_withSysUiPkg_returnsFalseForTouchAndHardware() {
+    public void shouldCancelVibrationOnScreenOff_withSysUiPkg_returnsFalseForUsagesInAllowlist() {
         long vibrateStartTime = 100;
         mockGoToSleep(vibrateStartTime + 10, PowerManager.GO_TO_SLEEP_REASON_HDMI);
 
+        Set<Integer> expectedAllowedVibrations = new HashSet<>(Arrays.asList(
+                USAGE_TOUCH,
+                USAGE_ACCESSIBILITY,
+                USAGE_PHYSICAL_EMULATION,
+                USAGE_HARDWARE_FEEDBACK
+        ));
+
         for (int usage : ALL_USAGES) {
-            if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
-                    || usage == USAGE_PHYSICAL_EMULATION) {
+            if (expectedAllowedVibrations.contains(usage)) {
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        UID, SYSUI_PACKAGE_NAME, usage, vibrateStartTime));
+                        createCallerInfo(UID, SYSUI_PACKAGE_NAME, usage), vibrateStartTime));
             } else {
                 assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        UID, SYSUI_PACKAGE_NAME, usage, vibrateStartTime));
+                        createCallerInfo(UID, SYSUI_PACKAGE_NAME, usage), vibrateStartTime));
             }
         }
     }
@@ -735,19 +766,6 @@ public class VibrationSettingsTest {
         assertNotNull(mVibrationSettings.getFallbackEffect(VibrationEffect.EFFECT_DOUBLE_CLICK));
     }
 
-    private void removeServicesForTest() {
-        LocalServices.removeServiceForTest(PowerManagerInternal.class);
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
-        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
-    }
-
-    private void addServicesForTest() {
-        LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
-        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
-        LocalServices.addService(VirtualDeviceManagerInternal.class,
-                mVirtualDeviceManagerInternalMock);
-    }
-
     private void assertVibrationIgnoredForUsage(@VibrationAttributes.Usage int usage,
             Vibration.Status expectedStatus) {
         assertVibrationIgnoredForUsageAndDisplay(usage, Display.DEFAULT_DISPLAY, expectedStatus);
@@ -755,10 +773,10 @@ public class VibrationSettingsTest {
 
     private void assertVibrationIgnoredForUsageAndDisplay(@VibrationAttributes.Usage int usage,
             int displayId, Vibration.Status expectedStatus) {
-        assertEquals(errorMessageForUsage(usage),
-                expectedStatus,
-                mVibrationSettings.shouldIgnoreVibration(UID, displayId,
-                        VibrationAttributes.createForUsage(usage)));
+        Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(
+                VibrationAttributes.createForUsage(usage), UID, displayId, null, null);
+        assertEquals(errorMessageForUsage(usage), expectedStatus,
+                mVibrationSettings.shouldIgnoreVibration(callerInfo));
     }
 
     private void assertVibrationNotIgnoredForUsage(@VibrationAttributes.Usage int usage) {
@@ -767,25 +785,24 @@ public class VibrationSettingsTest {
 
     private void assertVibrationNotIgnoredForUsageAndFlags(@VibrationAttributes.Usage int usage,
             @VibrationAttributes.Flag int flags) {
-        assertVibrationNotIgnoredForUsageAndFlagsAndDidsplay(usage, Display.DEFAULT_DISPLAY, flags);
+        assertVibrationNotIgnoredForUsageAndFlagsAndDisplay(usage, Display.DEFAULT_DISPLAY, flags);
     }
 
     private void assertVibrationNotIgnoredForUsageAndDisplay(@VibrationAttributes.Usage int usage,
             int displayId) {
-        assertVibrationNotIgnoredForUsageAndFlagsAndDidsplay(usage, displayId, /* flags= */ 0);
+        assertVibrationNotIgnoredForUsageAndFlagsAndDisplay(usage, displayId, /* flags= */ 0);
     }
 
-    private void assertVibrationNotIgnoredForUsageAndFlagsAndDidsplay(
+    private void assertVibrationNotIgnoredForUsageAndFlagsAndDisplay(
             @VibrationAttributes.Usage int usage, int displayId,
             @VibrationAttributes.Flag int flags) {
+        Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(
+                new VibrationAttributes.Builder().setUsage(usage).setFlags(flags).build(), UID,
+                displayId, null, null);
         assertNull(errorMessageForUsage(usage),
-                mVibrationSettings.shouldIgnoreVibration(UID,
-                        displayId,
-                        new VibrationAttributes.Builder()
-                                .setUsage(usage)
-                                .setFlags(flags)
-                                .build()));
+                mVibrationSettings.shouldIgnoreVibration(callerInfo));
     }
+
 
     private String errorMessageForUsage(int usage) {
         return "Error for usage " + VibrationAttributes.usageToString(usage);
@@ -824,5 +841,11 @@ public class VibrationSettingsTest {
     private void mockGoToSleep(long sleepTime, int reason) {
         when(mPowerManagerInternalMock.getLastGoToSleep()).thenReturn(
                 new PowerManager.SleepData(sleepTime, reason));
+    }
+
+    private Vibration.CallerInfo createCallerInfo(int uid, String opPkg,
+            @VibrationAttributes.Usage int usage) {
+        VibrationAttributes attrs = VibrationAttributes.createForUsage(usage);
+        return new Vibration.CallerInfo(attrs, uid, VIRTUAL_DISPLAY_ID, opPkg, null);
     }
 }

@@ -17,8 +17,10 @@
 package com.android.systemui.reardisplay;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
 
+import android.content.res.Configuration;
 import android.hardware.devicestate.DeviceStateManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -65,6 +67,27 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
         assertEquals(deviceClosedTitleTextView.getText().toString(),
                 getContext().getResources().getString(
                         R.string.rear_display_folded_bottom_sheet_title));
+    }
+
+    @Test
+    public void testClosedDialogIsRefreshedOnConfigurationChange() {
+        RearDisplayDialogController controller = new RearDisplayDialogController(mContext,
+                mCommandQueue, mFakeExecutor);
+        controller.setDeviceStateManagerCallback(new TestDeviceStateManagerCallback());
+        controller.setFoldedStates(new int[]{0});
+        controller.setAnimationRepeatCount(0);
+
+        controller.showRearDisplayDialog(CLOSED_BASE_STATE);
+        assertTrue(controller.mRearDisplayEducationDialog.isShowing());
+        TextView deviceClosedTitleTextView = controller.mRearDisplayEducationDialog.findViewById(
+                R.id.rear_display_title_text_view);
+
+        controller.onConfigurationChanged(new Configuration());
+        assertTrue(controller.mRearDisplayEducationDialog.isShowing());
+        TextView deviceClosedTitleTextView2 = controller.mRearDisplayEducationDialog.findViewById(
+                R.id.rear_display_title_text_view);
+
+        assertNotSame(deviceClosedTitleTextView, deviceClosedTitleTextView2);
     }
 
     @Test

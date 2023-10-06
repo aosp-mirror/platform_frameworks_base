@@ -28,10 +28,13 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.hardware.display.DisplayManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -41,6 +44,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
@@ -57,7 +61,7 @@ import org.mockito.junit.MockitoRule;
 
 /** Test for {@link AccessibilityFloatingMenuController}. */
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
 
@@ -67,6 +71,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
     public MockitoRule mockito = MockitoJUnit.rule();
 
     private Context mContextWrapper;
+    private WindowManager mWindowManager;
+    private AccessibilityManager mAccessibilityManager;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private AccessibilityFloatingMenuController mController;
     private AccessibilityButtonTargetsObserver mTargetsObserver;
@@ -74,7 +80,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardCallbackCaptor;
     private KeyguardUpdateMonitorCallback mKeyguardCallback;
-
+    private int mLastButtonMode;
+    private String mLastButtonTargets;
     @Mock
     private SecureSettings mSecureSettings;
 
@@ -87,6 +94,13 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
                 return getBaseContext();
             }
         };
+
+        mWindowManager = mContext.getSystemService(WindowManager.class);
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
+        mLastButtonTargets = Settings.Secure.getStringForUser(mContextWrapper.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, UserHandle.USER_CURRENT);
+        mLastButtonMode = Settings.Secure.getIntForUser(mContextWrapper.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, UserHandle.USER_CURRENT);
     }
 
     @After
@@ -95,6 +109,13 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
             mController.onAccessibilityButtonTargetsChanged("");
             mController = null;
         }
+
+        Settings.Secure.putStringForUser(mContextWrapper.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, mLastButtonTargets,
+                UserHandle.USER_CURRENT);
+        Settings.Secure.putIntForUser(mContextWrapper.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, mLastButtonMode,
+                UserHandle.USER_CURRENT);
     }
 
     @Test
@@ -136,7 +157,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
     public void onKeyguardVisibilityChanged_showing_destroyWidget() {
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
-        mController.mFloatingMenu = new AccessibilityFloatingMenu(mContextWrapper, mSecureSettings);
+        mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
+                mAccessibilityManager, mSecureSettings);
         captureKeyguardUpdateMonitorCallback();
         mKeyguardCallback.onUserUnlocked();
 
@@ -162,7 +184,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         final int fakeUserId = 1;
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
-        mController.mFloatingMenu = new AccessibilityFloatingMenu(mContextWrapper, mSecureSettings);
+        mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
+                mAccessibilityManager, mSecureSettings);
         captureKeyguardUpdateMonitorCallback();
 
         mKeyguardCallback.onUserSwitching(fakeUserId);
@@ -175,7 +198,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         final int fakeUserId = 1;
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
-        mController.mFloatingMenu = new AccessibilityFloatingMenu(mContextWrapper, mSecureSettings);
+        mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
+                mAccessibilityManager, mSecureSettings);
         captureKeyguardUpdateMonitorCallback();
         mKeyguardCallback.onUserUnlocked();
         mKeyguardCallback.onKeyguardVisibilityChanged(true);
@@ -295,13 +319,29 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         assertThat(mController.mFloatingMenu).isNull();
     }
 
+    @Test
+    public void onTargetsChanged_isFloatingViewLayerControllerCreated() {
+        Settings.Secure.putIntForUser(mContextWrapper.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU,
+                UserHandle.USER_CURRENT);
+
+        mController = setUpController();
+        mController.onAccessibilityButtonTargetsChanged(TEST_A11Y_BTN_TARGETS);
+
+        assertThat(mController.mFloatingMenu).isInstanceOf(MenuViewLayerController.class);
+    }
+
     private AccessibilityFloatingMenuController setUpController() {
+        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
+        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        final FakeDisplayTracker displayTracker = new FakeDisplayTracker(mContext);
         mTargetsObserver = spy(Dependency.get(AccessibilityButtonTargetsObserver.class));
         mModeObserver = spy(Dependency.get(AccessibilityButtonModeObserver.class));
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         final AccessibilityFloatingMenuController controller =
-                new AccessibilityFloatingMenuController(mContextWrapper, mTargetsObserver,
-                        mModeObserver, mKeyguardUpdateMonitor, mSecureSettings);
+                new AccessibilityFloatingMenuController(mContextWrapper, windowManager,
+                        displayManager, mAccessibilityManager, mTargetsObserver, mModeObserver,
+                        mKeyguardUpdateMonitor, mSecureSettings, displayTracker);
         controller.init();
 
         return controller;

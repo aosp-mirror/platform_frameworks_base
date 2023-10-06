@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.pipeline.mobile.ui
 import android.view.View
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.statusbar.pipeline.dagger.VerboseMobileViewLog
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger.Companion.getIdForLogging
 import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel

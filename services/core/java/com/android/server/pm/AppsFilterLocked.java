@@ -33,10 +33,11 @@ abstract class AppsFilterLocked extends AppsFilterBase {
     protected final Object mQueriesViaComponentLock = new Object();
     /**
      * This lock covers both {@link #mImplicitlyQueryable} and {@link #mRetainedImplicitlyQueryable}
-      */
+     */
     protected final Object mImplicitlyQueryableLock = new Object();
     protected final Object mQueryableViaUsesLibraryLock = new Object();
     protected final Object mProtectedBroadcastsLock = new Object();
+    protected final Object mQueryableViaUsesPermissionLock = new Object();
 
     /**
      * Guards the access for {@link AppsFilterBase#mShouldFilterCache};
@@ -82,6 +83,13 @@ abstract class AppsFilterLocked extends AppsFilterBase {
     protected boolean isQueryableViaUsesLibrary(int callingAppId, int targetAppId) {
         synchronized (mQueryableViaUsesLibraryLock) {
             return super.isQueryableViaUsesLibrary(callingAppId, targetAppId);
+        }
+    }
+
+    @Override
+    protected boolean isQueryableViaUsesPermission(int callingAppId, int targetAppId) {
+        synchronized (mQueryableViaUsesPermissionLock) {
+            return super.isQueryableViaUsesPermission(callingAppId, targetAppId);
         }
     }
 

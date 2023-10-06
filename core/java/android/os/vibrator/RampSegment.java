@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
 
 import com.android.internal.util.Preconditions;
 
@@ -91,6 +92,29 @@ public final class RampSegment extends VibrationEffectSegment {
     @Override
     public long getDuration() {
         return mDuration;
+    }
+
+    /** @hide */
+    @Override
+    public boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator) {
+        boolean areFeaturesSupported = true;
+        // If the start/end frequencies are not the same, require frequency control since we need to
+        // ramp up/down the frequency.
+        if ((mStartFrequencyHz != mEndFrequencyHz)
+                // If there is no frequency ramping, make sure that the one frequency used does not
+                // require frequency control.
+                || frequencyRequiresFrequencyControl(mStartFrequencyHz)) {
+            areFeaturesSupported &= vibrator.hasFrequencyControl();
+        }
+        // If the start/end amplitudes are not the same, require amplitude control since we need to
+        // ramp up/down the amplitude.
+        if ((mStartAmplitude != mEndAmplitude)
+                // If there is no amplitude ramping, make sure that the amplitude used does not
+                // require amplitude control.
+                || amplitudeRequiresAmplitudeControl(mStartAmplitude)) {
+            areFeaturesSupported &= vibrator.hasAmplitudeControl();
+        }
+        return areFeaturesSupported;
     }
 
     /** @hide */

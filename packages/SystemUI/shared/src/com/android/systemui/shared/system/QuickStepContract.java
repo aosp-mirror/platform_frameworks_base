@@ -23,6 +23,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.SystemProperties;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicyConstants;
 
@@ -136,6 +137,10 @@ public class QuickStepContract {
     public static final int WAKEFULNESS_GOING_TO_SLEEP = SYSUI_STATE_WAKEFULNESS_TRANSITION;
     public static final int WAKEFULNESS_WAKING =
             SYSUI_STATE_WAKEFULNESS_TRANSITION | SYSUI_STATE_AWAKE;
+
+    // Whether the back gesture is allowed (or ignored) by the Shade
+    public static final boolean ALLOW_BACK_GESTURE_IN_SHADE = SystemProperties.getBoolean(
+            "persist.wm.debug.shade_allow_back_gesture", false);
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -331,9 +336,14 @@ public class QuickStepContract {
             sysuiStateFlags &= ~SYSUI_STATE_NAV_BAR_HIDDEN;
         }
         // Disable when in immersive, or the notifications are interactive
-        int disableFlags = SYSUI_STATE_NAV_BAR_HIDDEN
-                | SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
-                | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+        int disableFlags = SYSUI_STATE_NAV_BAR_HIDDEN | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+
+        // EdgeBackGestureHandler ignores Back gesture when SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED.
+        // To allow Shade to respond to Back, we're bypassing this check (behind a flag).
+        if (!ALLOW_BACK_GESTURE_IN_SHADE) {
+            disableFlags |= SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
+        }
+
         return (sysuiStateFlags & disableFlags) != 0;
     }
 

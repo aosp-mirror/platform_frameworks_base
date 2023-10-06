@@ -22,6 +22,8 @@ package com.android.wm.shell.sysui;
 public class ShellSharedConstants {
     // See IPip.aidl
     public static final String KEY_EXTRA_SHELL_PIP = "extra_shell_pip";
+    // See IBubbles.aidl
+    public static final String KEY_EXTRA_SHELL_BUBBLES = "extra_shell_bubbles";
     // See ISplitScreen.aidl
     public static final String KEY_EXTRA_SHELL_SPLIT_SCREEN = "extra_shell_split_screen";
     // See IOneHanded.aidl
@@ -40,4 +42,6 @@ public class ShellSharedConstants {
     public static final String KEY_EXTRA_SHELL_FLOATING_TASKS = "extra_shell_floating_tasks";
     // See IDesktopMode.aidl
     public static final String KEY_EXTRA_SHELL_DESKTOP_MODE = "extra_shell_desktop_mode";
+    // See IDragAndDrop.aidl
+    public static final String KEY_EXTRA_SHELL_DRAG_AND_DROP = "extra_shell_drag_and_drop";
 }

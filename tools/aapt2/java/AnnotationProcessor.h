@@ -56,11 +56,11 @@ class AnnotationProcessor {
   // Extracts the first sentence of a comment. The algorithm selects the substring starting from
   // the beginning of the string, and ending at the first '.' character that is followed by a
   // whitespace character. If these requirements are not met, the whole string is returned.
-  static android::StringPiece ExtractFirstSentence(const android::StringPiece& comment);
+  static android::StringPiece ExtractFirstSentence(android::StringPiece comment);
 
   // Adds more comments. Resources can have value definitions for various configurations, and
   // each of the definitions may have comments that need to be processed.
-  void AppendComment(const android::StringPiece& comment);
+  void AppendComment(android::StringPiece comment);
 
   void AppendNewLine();
 

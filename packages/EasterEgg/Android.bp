@@ -39,16 +39,33 @@ android_app {
     certificate: "platform",
 
     optimize: {
+        enabled: true,
+        optimize: true,
+        shrink: true,
+        shrink_resources: true,
+        proguard_compatibility: false,
         proguard_flags_files: ["proguard.flags"],
     },
 
     static_libs: [
         "androidx.core_core",
-        "androidx.recyclerview_recyclerview",
         "androidx.annotation_annotation",
+        "androidx.recyclerview_recyclerview",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
-        //"kotlinx-coroutines-reactive",
+
+        "androidx.core_core-ktx",
+        "androidx.lifecycle_lifecycle-runtime-ktx",
+        "androidx.activity_activity-compose",
+        "androidx.compose.ui_ui",
+        "androidx.compose.ui_ui-util",
+        "androidx.compose.ui_ui-tooling-preview",
+        "androidx.compose.material_material",
+        "androidx.window_window",
+
+        "androidx.compose.runtime_runtime",
+        "androidx.activity_activity-compose",
+        "androidx.compose.ui_ui",
     ],
 
     manifest: "AndroidManifest.xml",

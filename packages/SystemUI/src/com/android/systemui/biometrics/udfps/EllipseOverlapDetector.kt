@@ -18,22 +18,98 @@ package com.android.systemui.biometrics.udfps
 
 import android.graphics.Point
 import android.graphics.Rect
-import androidx.annotation.VisibleForTesting
+import android.util.Log
+import com.android.systemui.biometrics.EllipseOverlapDetectorParams
 import com.android.systemui.dagger.SysUISingleton
 import kotlin.math.cos
-import kotlin.math.pow
 import kotlin.math.sin
+
+private enum class SensorPixelPosition {
+    OUTSIDE, // Pixel that falls outside of sensor circle
+    SENSOR, // Pixel within sensor circle
+    TARGET // Pixel within sensor center target
+}
+
+private const val isDebug = false
+private const val TAG = "EllipseOverlapDetector"
 
 /**
  * Approximates the touch as an ellipse and determines whether the ellipse has a sufficient overlap
  * with the sensor.
  */
 @SysUISingleton
-class EllipseOverlapDetector(private val neededPoints: Int = 2) : OverlapDetector {
+class EllipseOverlapDetector(private val params: EllipseOverlapDetectorParams) : OverlapDetector {
+    override fun isGoodOverlap(
+        touchData: NormalizedTouchData,
+        nativeSensorBounds: Rect,
+        nativeOverlayBounds: Rect,
+    ): Boolean {
+        // First, check if touch is within bounding box to exit early
+        if (touchData.isWithinBounds(nativeSensorBounds)) {
+            return true
+        }
 
-    override fun isGoodOverlap(touchData: NormalizedTouchData, nativeSensorBounds: Rect): Boolean {
-        val points = calculateSensorPoints(nativeSensorBounds)
-        return points.count { checkPoint(it, touchData) } >= neededPoints
+        // Check touch is within overlay bounds, not worth checking if outside
+        if (!touchData.isWithinBounds(nativeOverlayBounds)) {
+            return false
+        }
+
+        var isTargetTouched = false
+        var sensorPixels = 0
+        var coveredPixels = 0
+        for (y in nativeSensorBounds.top..nativeSensorBounds.bottom step params.stepSize) {
+            for (x in nativeSensorBounds.left..nativeSensorBounds.right step params.stepSize) {
+                // Check where pixel is within the sensor TODO: (b/265836919) This could be improved
+                // by precomputing these points
+                val pixelPosition =
+                    isPartOfSensorArea(
+                        x,
+                        y,
+                        nativeSensorBounds.centerX(),
+                        nativeSensorBounds.centerY(),
+                        nativeSensorBounds.width() / 2
+                    )
+                if (pixelPosition != SensorPixelPosition.OUTSIDE) {
+                    sensorPixels++
+
+                    // Check if this pixel falls within ellipse touch
+                    if (checkPoint(Point(x, y), touchData)) {
+                        coveredPixels++
+
+                        // Check that at least one covered pixel is within sensor target
+                        isTargetTouched =
+                            isTargetTouched or (pixelPosition == SensorPixelPosition.TARGET)
+                    }
+                }
+            }
+        }
+
+        val percentage: Float = coveredPixels.toFloat() / sensorPixels
+        if (isDebug) {
+            Log.d(
+                TAG,
+                "covered: $coveredPixels, sensor: $sensorPixels, " +
+                    "percentage: $percentage, isCenterTouched: $isTargetTouched"
+            )
+        }
+
+        return percentage >= params.minOverlap && isTargetTouched
+    }
+
+    /** Checks if point is in the sensor center target circle, outer circle, or outside of sensor */
+    private fun isPartOfSensorArea(x: Int, y: Int, cX: Int, cY: Int, r: Int): SensorPixelPosition {
+        val dx = cX - x
+        val dy = cY - y
+
+        val disSquared = dx * dx + dy * dy
+
+        return if (disSquared <= (r * params.targetSize) * (r * params.targetSize)) {
+            SensorPixelPosition.TARGET
+        } else if (disSquared <= r * r) {
+            SensorPixelPosition.SENSOR
+        } else {
+            SensorPixelPosition.OUTSIDE
+        }
     }
 
     private fun checkPoint(point: Point, touchData: NormalizedTouchData): Boolean {
@@ -45,29 +121,9 @@ class EllipseOverlapDetector(private val neededPoints: Int = 2) : OverlapDetecto
         val c: Float = sin(touchData.orientation) * (point.x - touchData.x)
         val d: Float = cos(touchData.orientation) * (point.y - touchData.y)
         val result =
-            (a + b).pow(2) / (touchData.minor / 2).pow(2) +
-                (c - d).pow(2) / (touchData.major / 2).pow(2)
+            (a + b) * (a + b) / ((touchData.minor / 2) * (touchData.minor / 2)) +
+                (c - d) * (c - d) / ((touchData.major / 2) * (touchData.major / 2))
 
         return result <= 1
-    }
-
-    @VisibleForTesting
-    fun calculateSensorPoints(sensorBounds: Rect): List<Point> {
-        val sensorX = sensorBounds.centerX()
-        val sensorY = sensorBounds.centerY()
-        val cornerOffset: Int = sensorBounds.width() / 4
-        val sideOffset: Int = sensorBounds.width() / 3
-
-        return listOf(
-            Point(sensorX - cornerOffset, sensorY - cornerOffset),
-            Point(sensorX, sensorY - sideOffset),
-            Point(sensorX + cornerOffset, sensorY - cornerOffset),
-            Point(sensorX - sideOffset, sensorY),
-            Point(sensorX, sensorY),
-            Point(sensorX + sideOffset, sensorY),
-            Point(sensorX - cornerOffset, sensorY + cornerOffset),
-            Point(sensorX, sensorY + sideOffset),
-            Point(sensorX + cornerOffset, sensorY + cornerOffset)
-        )
     }
 }

@@ -16,8 +16,10 @@
 
 package android.telephony.ims.aidl;
 
+import android.annotation.NonNull;
 import android.os.RemoteException;
 import android.telephony.ims.ImsException;
+import android.telephony.ims.SipDetails;
 import android.telephony.ims.stub.RcsCapabilityExchangeImplBase.PublishResponseCallback;
 
 /**
@@ -43,20 +45,38 @@ public class RcsPublishResponseAidlWrapper implements PublishResponseCallback {
     }
 
     @Override
-    public void onNetworkResponse(int code, String reason) throws ImsException {
+    @Deprecated
+    public void onNetworkResponse(int code, String reasonPhrase) throws ImsException {
+        SipDetails details = new SipDetails.Builder(SipDetails.METHOD_PUBLISH)
+                .setSipResponseCode(code, reasonPhrase)
+                .build();
         try {
-            mResponseBinder.onNetworkResponse(code, reason);
+            mResponseBinder.onNetworkResponse(details);
         } catch (RemoteException e) {
             throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 
     @Override
+    @Deprecated
     public void onNetworkResponse(int code, String reasonPhrase, int reasonHeaderCause,
             String reasonHeaderText) throws ImsException {
+        SipDetails details = new SipDetails.Builder(SipDetails.METHOD_PUBLISH)
+                .setSipResponseCode(code, reasonPhrase)
+                .setSipResponseReasonHeader(reasonHeaderCause, reasonHeaderText)
+                .build();
         try {
-            mResponseBinder.onNetworkRespHeader(code, reasonPhrase, reasonHeaderCause,
-                    reasonHeaderText);
+            mResponseBinder.onNetworkResponse(details);
+        } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    @Override
+    public void onNetworkResponse(@NonNull SipDetails details)
+            throws ImsException {
+        try {
+            mResponseBinder.onNetworkResponse(details);
         } catch (RemoteException e) {
             throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }

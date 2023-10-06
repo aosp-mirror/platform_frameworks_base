@@ -193,6 +193,15 @@ public class BluetoothUtilsTest {
     }
 
     @Test
+    public void isAdvancedDetailsHeader_deviceTypeStylus_returnTrue() {
+        when(mBluetoothDevice.getMetadata(
+                BluetoothDevice.METADATA_DEVICE_TYPE)).thenReturn(
+                BluetoothDevice.DEVICE_TYPE_STYLUS.getBytes());
+
+        assertThat(BluetoothUtils.isAdvancedDetailsHeader(mBluetoothDevice)).isEqualTo(true);
+    }
+
+    @Test
     public void isAdvancedDetailsHeader_deviceTypeDefault_returnTrue() {
         when(mBluetoothDevice.getMetadata(
                 BluetoothDevice.METADATA_DEVICE_TYPE)).thenReturn(

@@ -64,7 +64,6 @@ import java.util.concurrent.Executor;
 @RunWith(AndroidJUnit4.class)
 public class WMShellTest extends SysuiTestCase {
     WMShell mWMShell;
-    FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     @Mock ShellInterface mShellInterface;
     @Mock CommandQueue mCommandQueue;
@@ -86,6 +85,7 @@ public class WMShellTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        FakeDisplayTracker displayTracker = new FakeDisplayTracker(mContext);
         mWMShell = new WMShell(
                 mContext,
                 mShellInterface,
@@ -102,7 +102,7 @@ public class WMShellTest extends SysuiTestCase {
                 mProtoTracer,
                 mWakefulnessLifecycle,
                 mUserTracker,
-                mDisplayTracker,
+                displayTracker,
                 mNoteTaskInitializer,
                 mSysUiMainExecutor
         );
@@ -128,7 +128,7 @@ public class WMShellTest extends SysuiTestCase {
     @Test
     public void initDesktopMode_registersListener() {
         mWMShell.initDesktopMode(mDesktopMode);
-        verify(mDesktopMode).addListener(
+        verify(mDesktopMode).addVisibleTasksListener(
                 any(DesktopModeTaskRepository.VisibleTasksListener.class),
                 any(Executor.class));
     }

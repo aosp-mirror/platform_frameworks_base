@@ -23,8 +23,8 @@ import android.util.Log.TerribleFailureHandler
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
+import com.android.app.animation.Interpolators
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
@@ -70,7 +70,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun `startTransition runs animator to completion`() =
+    fun startTransitionRunsAnimatorToCompletion() =
         TestScope().runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
@@ -86,7 +86,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `starting second transition will cancel the first transition`() =
+    fun startingSecondTransitionWillCancelTheFirstTransition() =
         TestScope().runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
@@ -114,7 +114,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `Null animator enables manual control with updateTransition`() =
+    fun nullAnimatorEnablesManualControlWithUpdateTransition() =
         TestScope().runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
@@ -146,13 +146,13 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `Attempt to  manually update transition with invalid UUID throws exception`() {
+    fun attemptTomanuallyUpdateTransitionWithInvalidUUIDthrowsException() {
         underTest.updateTransition(UUID.randomUUID(), 0f, TransitionState.RUNNING)
         assertThat(wtfHandler.failed).isTrue()
     }
 
     @Test
-    fun `Attempt to manually update transition after FINISHED state throws exception`() {
+    fun attemptToManuallyUpdateTransitionAfterFINISHEDstateThrowsException() {
         val uuid =
             underTest.startTransition(
                 TransitionInfo(
@@ -171,7 +171,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun `Attempt to manually update transition after CANCELED state throws exception`() {
+    fun attemptToManuallyUpdateTransitionAfterCANCELEDstateThrowsException() {
         val uuid =
             underTest.startTransition(
                 TransitionInfo(

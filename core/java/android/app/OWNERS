@@ -96,6 +96,7 @@ per-file Fragment.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *Task* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file Window* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file ConfigurationController.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file *ScreenCapture* = file:/services/core/java/com/android/server/wm/OWNERS
 
 # Zygote
 per-file *Zygote* = file:/ZYGOTE_OWNERS

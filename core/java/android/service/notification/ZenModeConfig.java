@@ -45,21 +45,19 @@ import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.PluralsMessageFormatter;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -308,86 +306,6 @@ public class ZenModeConfig implements Parcelable {
         }
         buffer.append('}');
         return buffer.toString();
-    }
-
-    public Diff diff(ZenModeConfig to) {
-        final Diff d = new Diff();
-        if (to == null) {
-            return d.addLine("config", "delete");
-        }
-        if (user != to.user) {
-            d.addLine("user", user, to.user);
-        }
-        if (allowAlarms != to.allowAlarms) {
-            d.addLine("allowAlarms", allowAlarms, to.allowAlarms);
-        }
-        if (allowMedia != to.allowMedia) {
-            d.addLine("allowMedia", allowMedia, to.allowMedia);
-        }
-        if (allowSystem != to.allowSystem) {
-            d.addLine("allowSystem", allowSystem, to.allowSystem);
-        }
-        if (allowCalls != to.allowCalls) {
-            d.addLine("allowCalls", allowCalls, to.allowCalls);
-        }
-        if (allowReminders != to.allowReminders) {
-            d.addLine("allowReminders", allowReminders, to.allowReminders);
-        }
-        if (allowEvents != to.allowEvents) {
-            d.addLine("allowEvents", allowEvents, to.allowEvents);
-        }
-        if (allowRepeatCallers != to.allowRepeatCallers) {
-            d.addLine("allowRepeatCallers", allowRepeatCallers, to.allowRepeatCallers);
-        }
-        if (allowMessages != to.allowMessages) {
-            d.addLine("allowMessages", allowMessages, to.allowMessages);
-        }
-        if (allowCallsFrom != to.allowCallsFrom) {
-            d.addLine("allowCallsFrom", allowCallsFrom, to.allowCallsFrom);
-        }
-        if (allowMessagesFrom != to.allowMessagesFrom) {
-            d.addLine("allowMessagesFrom", allowMessagesFrom, to.allowMessagesFrom);
-        }
-        if (suppressedVisualEffects != to.suppressedVisualEffects) {
-            d.addLine("suppressedVisualEffects", suppressedVisualEffects,
-                    to.suppressedVisualEffects);
-        }
-        final ArraySet<String> allRules = new ArraySet<>();
-        addKeys(allRules, automaticRules);
-        addKeys(allRules, to.automaticRules);
-        final int N = allRules.size();
-        for (int i = 0; i < N; i++) {
-            final String rule = allRules.valueAt(i);
-            final ZenRule fromRule = automaticRules != null ? automaticRules.get(rule) : null;
-            final ZenRule toRule = to.automaticRules != null ? to.automaticRules.get(rule) : null;
-            ZenRule.appendDiff(d, "automaticRule[" + rule + "]", fromRule, toRule);
-        }
-        ZenRule.appendDiff(d, "manualRule", manualRule, to.manualRule);
-
-        if (areChannelsBypassingDnd != to.areChannelsBypassingDnd) {
-            d.addLine("areChannelsBypassingDnd", areChannelsBypassingDnd,
-                    to.areChannelsBypassingDnd);
-        }
-        return d;
-    }
-
-    public static Diff diff(ZenModeConfig from, ZenModeConfig to) {
-        if (from == null) {
-            final Diff d = new Diff();
-            if (to != null) {
-                d.addLine("config", "insert");
-            }
-            return d;
-        }
-        return from.diff(to);
-    }
-
-    private static <T> void addKeys(ArraySet<T> set, ArrayMap<T, ?> map) {
-        if (map != null) {
-            for (int i = 0; i < map.size(); i++) {
-                set.add(map.keyAt(i));
-            }
-        }
     }
 
     public boolean isValid() {
@@ -1922,66 +1840,6 @@ public class ZenModeConfig implements Parcelable {
             proto.end(token);
         }
 
-        private static void appendDiff(Diff d, String item, ZenRule from, ZenRule to) {
-            if (d == null) return;
-            if (from == null) {
-                if (to != null) {
-                    d.addLine(item, "insert");
-                }
-                return;
-            }
-            from.appendDiff(d, item, to);
-        }
-
-        private void appendDiff(Diff d, String item, ZenRule to) {
-            if (to == null) {
-                d.addLine(item, "delete");
-                return;
-            }
-            if (enabled != to.enabled) {
-                d.addLine(item, "enabled", enabled, to.enabled);
-            }
-            if (snoozing != to.snoozing) {
-                d.addLine(item, "snoozing", snoozing, to.snoozing);
-            }
-            if (!Objects.equals(name, to.name)) {
-                d.addLine(item, "name", name, to.name);
-            }
-            if (zenMode != to.zenMode) {
-                d.addLine(item, "zenMode", zenMode, to.zenMode);
-            }
-            if (!Objects.equals(conditionId, to.conditionId)) {
-                d.addLine(item, "conditionId", conditionId, to.conditionId);
-            }
-            if (!Objects.equals(condition, to.condition)) {
-                d.addLine(item, "condition", condition, to.condition);
-            }
-            if (!Objects.equals(component, to.component)) {
-                d.addLine(item, "component", component, to.component);
-            }
-            if (!Objects.equals(configurationActivity, to.configurationActivity)) {
-                d.addLine(item, "configActivity", configurationActivity, to.configurationActivity);
-            }
-            if (!Objects.equals(id, to.id)) {
-                d.addLine(item, "id", id, to.id);
-            }
-            if (creationTime != to.creationTime) {
-                d.addLine(item, "creationTime", creationTime, to.creationTime);
-            }
-            if (!Objects.equals(enabler, to.enabler)) {
-                d.addLine(item, "enabler", enabler, to.enabler);
-            }
-            if (!Objects.equals(zenPolicy, to.zenPolicy)) {
-                d.addLine(item, "zenPolicy", zenPolicy, to.zenPolicy);
-            }
-            if (modified != to.modified) {
-                d.addLine(item, "modified", modified, to.modified);
-            }
-            if (!Objects.equals(pkg, to.pkg)) {
-                d.addLine(item, "pkg", pkg, to.pkg);
-            }
-        }
-
         @Override
         public boolean equals(@Nullable Object o) {
             if (!(o instanceof ZenRule)) return false;
@@ -2038,40 +1896,6 @@ public class ZenModeConfig implements Parcelable {
                 return new ZenRule[size];
             }
         };
-    }
-
-    public static class Diff {
-        private final ArrayList<String> lines = new ArrayList<>();
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder("Diff[");
-            final int N = lines.size();
-            for (int i = 0; i < N; i++) {
-                if (i > 0) {
-                    sb.append(",\n");
-                }
-                sb.append(lines.get(i));
-            }
-            return sb.append(']').toString();
-        }
-
-        private Diff addLine(String item, String action) {
-            lines.add(item + ":" + action);
-            return this;
-        }
-
-        public Diff addLine(String item, String subitem, Object from, Object to) {
-            return addLine(item + "." + subitem, from, to);
-        }
-
-        public Diff addLine(String item, Object from, Object to) {
-            return addLine(item, from + "->" + to);
-        }
-
-        public boolean isEmpty() {
-            return lines.isEmpty();
-        }
     }
 
     /**

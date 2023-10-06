@@ -14,7 +14,9 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -26,6 +28,8 @@ import android.net.NetworkKey;
 import android.net.NetworkRequest;
 import android.net.NetworkScoreManager;
 import android.net.ScoredNetwork;
+import android.net.TransportInfo;
+import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
@@ -34,8 +38,9 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.provider.Settings;
 
+import androidx.annotation.Nullable;
+
 import com.android.settingslib.R;
-import com.android.settingslib.Utils;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -46,6 +51,7 @@ import java.util.Set;
 /**
  * Track status of Wi-Fi for the Sys UI.
  */
+@SuppressLint("MissingPermission")
 public class WifiStatusTracker {
     private static final int HISTORY_SIZE = 32;
     private static final SimpleDateFormat SSDF = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
@@ -66,8 +72,9 @@ public class WifiStatusTracker {
     private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
             .clearCapabilities()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).build();
+            .addTransportType(TRANSPORT_WIFI)
+            .addTransportType(TRANSPORT_CELLULAR)
+            .build();
     private final NetworkCallback mNetworkCallback =
             new NetworkCallback(NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
         // Note: onCapabilitiesChanged is guaranteed to be called "immediately" after onAvailable
@@ -75,18 +82,10 @@ public class WifiStatusTracker {
         @Override
         public void onCapabilitiesChanged(
                 Network network, NetworkCapabilities networkCapabilities) {
-            boolean isVcnOverWifi = false;
-            boolean isWifi = false;
-            WifiInfo wifiInfo = null;
-            if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                wifiInfo = Utils.tryGetWifiInfoForVcn(networkCapabilities);
-                isVcnOverWifi = (wifiInfo != null);
-            } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                wifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
-                isWifi = true;
-            }
+            WifiInfo wifiInfo = getMainOrUnderlyingWifiInfo(networkCapabilities);
+            boolean isWifi = connectionIsWifi(networkCapabilities, wifiInfo);
             // As long as it is a WiFi network, we will log it in the dumpsys for debugging.
-            if (isVcnOverWifi || isWifi) {
+            if (isWifi) {
                 String log = new StringBuilder()
                         .append(SSDF.format(System.currentTimeMillis())).append(",")
                         .append("onCapabilitiesChanged: ")
@@ -303,17 +302,8 @@ public class WifiStatusTracker {
             return;
         }
         NetworkCapabilities networkCapabilities;
-        isDefaultNetwork = false;
-        if (mDefaultNetworkCapabilities != null) {
-            boolean isWifi = mDefaultNetworkCapabilities.hasTransport(
-                    NetworkCapabilities.TRANSPORT_WIFI);
-            boolean isVcnOverWifi = mDefaultNetworkCapabilities.hasTransport(
-                    NetworkCapabilities.TRANSPORT_CELLULAR)
-                            && (Utils.tryGetWifiInfoForVcn(mDefaultNetworkCapabilities) != null);
-            if (isWifi || isVcnOverWifi) {
-                isDefaultNetwork = true;
-            }
-        }
+        isDefaultNetwork = mDefaultNetworkCapabilities != null
+                && connectionIsWifi(mDefaultNetworkCapabilities);
         if (isDefaultNetwork) {
             // Wifi is connected and the default network.
             networkCapabilities = mDefaultNetworkCapabilities;
@@ -350,6 +340,82 @@ public class WifiStatusTracker {
                 mWifiNetworkScoreCache.getScoredNetwork(NetworkKey.createFromWifiInfo(mWifiInfo));
         statusLabel = scoredNetwork == null
                 ? null : AccessPoint.getSpeedLabel(mContext, scoredNetwork, rssi);
+    }
+
+    @Nullable
+    private WifiInfo getMainOrUnderlyingWifiInfo(
+            @Nullable NetworkCapabilities networkCapabilities) {
+        if (networkCapabilities == null) {
+            return null;
+        }
+
+        WifiInfo mainWifiInfo = getMainWifiInfo(networkCapabilities);
+        if (mainWifiInfo != null) {
+            return mainWifiInfo;
+        }
+
+        // Only CELLULAR networks may have underlying wifi information that's relevant to SysUI,
+        // so skip the underlying network check if it's not CELLULAR.
+        if (!networkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+            return mainWifiInfo;
+        }
+
+        List<Network> underlyingNetworks = networkCapabilities.getUnderlyingNetworks();
+        if (underlyingNetworks == null) {
+            return null;
+        }
+
+        // Some connections, like VPN connections, may have underlying networks that are
+        // eventually traced to a wifi or carrier merged connection. So, check those underlying
+        // networks for possible wifi information as well. See b/225902574.
+        for (Network underlyingNetwork : underlyingNetworks) {
+            NetworkCapabilities underlyingNetworkCapabilities =
+                    mConnectivityManager.getNetworkCapabilities(underlyingNetwork);
+            WifiInfo underlyingWifiInfo = getMainWifiInfo(underlyingNetworkCapabilities);
+            if (underlyingWifiInfo != null) {
+                return underlyingWifiInfo;
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    private WifiInfo getMainWifiInfo(@Nullable NetworkCapabilities networkCapabilities) {
+        if (networkCapabilities == null) {
+            return null;
+        }
+        boolean canHaveWifiInfo = networkCapabilities.hasTransport(TRANSPORT_WIFI)
+                || networkCapabilities.hasTransport(TRANSPORT_CELLULAR);
+        if (!canHaveWifiInfo) {
+            return null;
+        }
+
+        TransportInfo transportInfo = networkCapabilities.getTransportInfo();
+        if (transportInfo instanceof VcnTransportInfo) {
+            // This VcnTransportInfo logic is copied from
+            // [com.android.settingslib.Utils.tryGetWifiInfoForVcn]. It's copied instead of
+            // re-used because it makes the logic here clearer.
+            return ((VcnTransportInfo) transportInfo).getWifiInfo();
+        } else if (transportInfo instanceof WifiInfo) {
+            return (WifiInfo) transportInfo;
+        } else {
+            return null;
+        }
+    }
+
+    private boolean connectionIsWifi(NetworkCapabilities networkCapabilities) {
+        return connectionIsWifi(
+                networkCapabilities,
+                getMainOrUnderlyingWifiInfo(networkCapabilities));
+    }
+
+    private boolean connectionIsWifi(
+            @Nullable NetworkCapabilities networkCapabilities, WifiInfo wifiInfo) {
+        if (networkCapabilities == null) {
+            return false;
+        }
+        return wifiInfo != null || networkCapabilities.hasTransport(TRANSPORT_WIFI);
     }
 
     /** Refresh the status label on Locale changed. */

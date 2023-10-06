@@ -48,6 +48,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.view.RemoteAnimationAdapter;
+import android.window.RemoteTransition;
 import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -143,7 +144,11 @@ public class SafeActivityOptions {
                 .setLaunchTaskDisplayArea(options.getLaunchTaskDisplayArea())
                 .setLaunchDisplayId(options.getLaunchDisplayId())
                 .setCallerDisplayId(options.getCallerDisplayId())
-                .setLaunchRootTask(options.getLaunchRootTask());
+                .setLaunchRootTask(options.getLaunchRootTask())
+                .setPendingIntentBackgroundActivityStartMode(
+                        options.getPendingIntentBackgroundActivityStartMode())
+                .setPendingIntentCreatorBackgroundActivityStartMode(
+                        options.getPendingIntentCreatorBackgroundActivityStartMode());
     }
 
     /**
@@ -377,6 +382,18 @@ public class SafeActivityOptions {
             final String msg = "Permission Denial: starting " + getIntentString(intent)
                     + " from " + callerApp + " (pid=" + callingPid
                     + ", uid=" + callingUid + ") with remoteAnimationAdapter";
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+
+        // Check permission for remote transitions
+        final RemoteTransition transition = options.getRemoteTransition();
+        if (transition != null && supervisor.mService.checkPermission(
+                CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS, callingPid, callingUid)
+                != PERMISSION_GRANTED) {
+            final String msg = "Permission Denial: starting " + getIntentString(intent)
+                    + " from " + callerApp + " (pid=" + callingPid
+                    + ", uid=" + callingUid + ") with remoteTransition";
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }

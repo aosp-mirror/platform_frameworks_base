@@ -27,6 +27,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
+import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
@@ -38,17 +39,19 @@ import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 
 interface IVoiceInteractionManagerService {
-    void showSession(in Bundle sessionArgs, int flags);
+    void showSession(in Bundle sessionArgs, int flags, String attributionTag);
     boolean deliverNewSession(IBinder token, IVoiceInteractionSession session,
             IVoiceInteractor interactor);
-    boolean showSessionFromSession(IBinder token, in Bundle sessionArgs, int flags);
+    boolean showSessionFromSession(IBinder token, in Bundle sessionArgs, int flags,
+            String attributionTag);
     boolean hideSessionFromSession(IBinder token);
     int startVoiceActivity(IBinder token, in Intent intent, String resolvedType,
-            String callingFeatureId);
+            String attributionTag);
     int startAssistantActivity(IBinder token, in Intent intent, String resolvedType,
-            String callingFeatureId);
+            String attributionTag, in Bundle bundle);
     void setKeepAwake(IBinder token, boolean keepAwake);
     void closeSystemDialogs(IBinder token);
     void finish(IBinder token);
@@ -93,6 +96,21 @@ interface IVoiceInteractionManagerService {
      * @RequiresPermission Manifest.permission.MANAGE_VOICE_KEYPHRASES
      */
     int deleteKeyphraseSoundModel(int keyphraseId, in String bcp47Locale);
+
+    /**
+     * Override the persistent enrolled model database with an in-memory
+     * fake for testing purposes.
+     *
+     * @param enabled - {@code true} to enable the test database. {@code false} to enable
+     * the real, persistent database.
+     * @param token - IBinder used to register a death listener to clean-up the override
+     * if tests do not clean up gracefully.
+     */
+    @EnforcePermission("MANAGE_VOICE_KEYPHRASES")
+    @JavaPassthrough(annotation= "@android.annotation.RequiresPermission(" +
+            "android.Manifest.permission.MANAGE_VOICE_KEYPHRASES)")
+    void setModelDatabaseForTestEnabled(boolean enabled, IBinder token);
+
     /**
      * Indicates if there's a keyphrase sound model available for the given keyphrase ID and the
      * user ID of the caller.
@@ -103,6 +121,7 @@ interface IVoiceInteractionManagerService {
      * @param bcp47Locale The BCP47 language tag  for the keyphrase's locale.
      */
     boolean isEnrolledForKeyphrase(int keyphraseId, String bcp47Locale);
+
     /**
      * Generates KeyphraseMetadata for an enrolled sound model based on keyphrase string, locale,
      * and the user ID of the caller.
@@ -126,17 +145,21 @@ interface IVoiceInteractionManagerService {
      *
      * @param args the bundle to pass as arguments to the voice interaction session
      * @param sourceFlags flags indicating the source of this show
+     * @param attributionTag the attribution tag of the calling context or {@code null} for default
+     *                       attribution
      * @param showCallback optional callback to be notified when the session was shown
      * @param activityToken optional token of activity that needs to be on top
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
-    boolean showSessionForActiveService(in Bundle args, int sourceFlags,
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
+    boolean showSessionForActiveService(in Bundle args, int sourceFlags, String attributionTag,
             IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken);
 
     /**
      * Hides the session from the active service, if it is showing.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void hideCurrentSession();
 
     /**
@@ -144,12 +167,14 @@ interface IVoiceInteractionManagerService {
      * be called if {@link #activeServiceSupportsLaunchFromKeyguard()} returns true.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void launchVoiceAssistFromKeyguard();
 
     /**
      * Indicates whether there is a voice session running (but not necessarily showing).
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     boolean isSessionRunning();
 
     /**
@@ -157,6 +182,7 @@ interface IVoiceInteractionManagerService {
      * assist gesture.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     boolean activeServiceSupportsAssist();
 
     /**
@@ -164,18 +190,21 @@ interface IVoiceInteractionManagerService {
      * from the lockscreen.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     boolean activeServiceSupportsLaunchFromKeyguard();
 
     /**
      * Called when the lockscreen got shown.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void onLockscreenShown();
 
     /**
      * Register a voice interaction listener.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void registerVoiceInteractionSessionListener(IVoiceInteractionSessionListener listener);
 
     /**
@@ -183,6 +212,7 @@ interface IVoiceInteractionManagerService {
      * Returns all supported voice actions.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void getActiveServiceSupportedActions(in List<String> voiceActions,
      in IVoiceActionCheckCallback callback);
 
@@ -215,6 +245,7 @@ interface IVoiceInteractionManagerService {
      * NOTE: it's only effective when the service itself is available / enabled in the device, so
      * calling setDisable(false) would be a no-op when it isn't.
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void setDisabled(boolean disabled);
 
     /**
@@ -228,10 +259,36 @@ interface IVoiceInteractionManagerService {
      */
     IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
             in Identity originatorIdentity,
-            IBinder client);
+            IBinder client,
+            in SoundTrigger.ModuleProperties moduleProperties);
+
+    /**
+     * Lists properties of SoundTrigger modules that can be attached to by
+     * @{link createSoundTriggerSessionAsOriginator}.
+     */
+    List<SoundTrigger.ModuleProperties> listModuleProperties(in Identity originatorIdentity);
 
     /**
      * Set configuration and pass read-only data to hotword detection service.
+     *
+     * @param options Application configuration data to provide to the
+     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob to provide to the
+     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
+     * such data to the trusted process.
+     * @param token Use this to identify which detector calls this method.
+     */
+    @EnforcePermission("MANAGE_HOTWORD_DETECTION")
+    void updateState(
+            in PersistableBundle options,
+            in SharedMemory sharedMemory,
+            in IBinder token);
+
+    /**
+     * Set configuration and pass read-only data to hotword detection service when creating
+     * the detector.
+     *
      * Caller must provide an identity, used for permission tracking purposes.
      * The uid/pid elements of the identity will be ignored by the server and replaced with the ones
      * provided by binder.
@@ -242,20 +299,40 @@ interface IVoiceInteractionManagerService {
      * @param sharedMemory The unrestricted data blob to provide to the
      * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
+     * @param token Use this to identify which detector calls this method.
      * @param callback Use this to report {@link HotwordDetectionService} status.
      * @param detectorType Indicate which detector is used.
      */
-    void updateState(
+    @EnforcePermission("MANAGE_HOTWORD_DETECTION")
+    void initAndVerifyDetector(
             in Identity originatorIdentity,
             in PersistableBundle options,
             in SharedMemory sharedMemory,
+            in IBinder token,
             in IHotwordRecognitionStatusCallback callback,
             int detectorType);
+
+    /**
+     * Destroy the detector callback.
+     *
+     * @param token Indicate which callback will be destroyed.
+     */
+    void destroyDetector(in IBinder token);
 
     /**
      * Requests to shutdown hotword detection service.
      */
     void shutdownHotwordDetectionService();
+
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
+    void enableVisualQueryDetection(in IVisualQueryDetectionAttentionListener Listener);
+
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
+    void disableVisualQueryDetection();
+
+    void startPerceiving(in IVisualQueryDetectionVoiceInteractionCallback callback);
+
+    void stopPerceiving();
 
     void startListeningFromMic(
         in AudioFormat audioFormat,
@@ -267,6 +344,7 @@ interface IVoiceInteractionManagerService {
         in ParcelFileDescriptor audioStream,
         in AudioFormat audioFormat,
         in PersistableBundle options,
+        in IBinder token,
         in IMicrophoneHotwordDetectionVoiceInteractionCallback callback);
 
     /**

@@ -850,6 +850,12 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                         params.getMaxUsageCount()
                 ));
             }
+
+            if (params.isRollbackResistant()) {
+                importArgs.add(KeyStore2ParameterUtils.makeBool(
+                        KeymasterDefs.KM_TAG_ROLLBACK_RESISTANT
+                ));
+            }
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new KeyStoreException(e);
         }

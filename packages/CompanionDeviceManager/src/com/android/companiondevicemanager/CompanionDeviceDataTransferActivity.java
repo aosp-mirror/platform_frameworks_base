@@ -16,37 +16,45 @@
 
 package com.android.companiondevicemanager;
 
+import static android.companion.datatransfer.SystemDataTransferRequest.DATA_TYPE_PERMISSION_SYNC;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+
+import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.companion.SystemDataTransferRequest;
+import android.companion.datatransfer.PermissionSyncRequest;
+import android.companion.datatransfer.SystemDataTransferRequest;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ResultReceiver;
-import android.text.Html;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 
 /**
  * This activity manages the UI of companion device data transfer.
  */
+@SuppressLint("LongLogTag")
 public class CompanionDeviceDataTransferActivity extends Activity {
 
-    private static final String LOG_TAG = CompanionDeviceDataTransferActivity.class.getSimpleName();
+    private static final String LOG_TAG = "CDM_CompanionDeviceDataTransferActivity";
 
-    // UI -> SystemDataTransferProcessor
-    private static final int RESULT_CODE_SYSTEM_DATA_TRANSFER_ALLOWED = 0;
-    private static final int RESULT_CODE_SYSTEM_DATA_TRANSFER_DISALLOWED = 1;
-    private static final String EXTRA_SYSTEM_DATA_TRANSFER_REQUEST = "system_data_transfer_request";
+    // Intent data keys from SystemDataTransferProcessor
+    private static final String EXTRA_PERMISSION_SYNC_REQUEST = "permission_sync_request";
+    private static final String EXTRA_COMPANION_DEVICE_NAME = "companion_device_name";
     private static final String EXTRA_SYSTEM_DATA_TRANSFER_RESULT_RECEIVER =
             "system_data_transfer_result_receiver";
 
+    // Intent data keys to SystemDataTransferProcessor
+    private static final int RESULT_CODE_SYSTEM_DATA_TRANSFER_ALLOWED = 0;
+    private static final int RESULT_CODE_SYSTEM_DATA_TRANSFER_DISALLOWED = 1;
+
     private SystemDataTransferRequest mRequest;
+    private CharSequence mCompanionDeviceName;
     private ResultReceiver mCdmServiceReceiver;
 
     @Override
@@ -61,23 +69,27 @@ public class CompanionDeviceDataTransferActivity extends Activity {
 
         TextView titleView = findViewById(R.id.title);
         TextView summaryView = findViewById(R.id.summary);
-        ListView listView = findViewById(R.id.device_list);
-        listView.setVisibility(View.GONE);
         Button allowButton = findViewById(R.id.btn_positive);
         Button disallowButton = findViewById(R.id.btn_negative);
 
         final Intent intent = getIntent();
-        mRequest = intent.getParcelableExtra(EXTRA_SYSTEM_DATA_TRANSFER_REQUEST);
-        mCdmServiceReceiver = intent.getParcelableExtra(EXTRA_SYSTEM_DATA_TRANSFER_RESULT_RECEIVER);
+        mRequest = intent.getParcelableExtra(EXTRA_PERMISSION_SYNC_REQUEST,
+                PermissionSyncRequest.class);
+        mCompanionDeviceName = intent.getCharSequenceExtra(EXTRA_COMPANION_DEVICE_NAME);
+        mCdmServiceReceiver = intent.getParcelableExtra(EXTRA_SYSTEM_DATA_TRANSFER_RESULT_RECEIVER,
+                ResultReceiver.class);
 
         requireNonNull(mRequest);
         requireNonNull(mCdmServiceReceiver);
 
-        if (mRequest.isPermissionSyncAllPackages()
-                || !mRequest.getPermissionSyncPackages().isEmpty()) {
-            titleView.setText(Html.fromHtml(getString(
-                    R.string.permission_sync_confirmation_title), 0));
-            summaryView.setText(getString(R.string.permission_sync_summary));
+        final String primaryDeviceName = Build.MODEL;
+
+        if (mRequest.getDataType() == DATA_TYPE_PERMISSION_SYNC) {
+            titleView.setText(getHtmlFromResources(this,
+                    R.string.permission_sync_confirmation_title, mCompanionDeviceName,
+                    primaryDeviceName));
+            summaryView.setText(getHtmlFromResources(this, R.string.permission_sync_summary,
+                    mCompanionDeviceName));
             allowButton.setOnClickListener(v -> allow());
             disallowButton.setOnClickListener(v -> disallow());
         }
@@ -101,7 +113,9 @@ public class CompanionDeviceDataTransferActivity extends Activity {
 
     private void sendDataToReceiver(int cdmResultCode) {
         Bundle data = new Bundle();
-        data.putParcelable(EXTRA_SYSTEM_DATA_TRANSFER_REQUEST, mRequest);
+        if (mRequest instanceof PermissionSyncRequest) {
+            data.putParcelable(EXTRA_PERMISSION_SYNC_REQUEST, (PermissionSyncRequest) mRequest);
+        }
         mCdmServiceReceiver.send(cdmResultCode, data);
     }
 

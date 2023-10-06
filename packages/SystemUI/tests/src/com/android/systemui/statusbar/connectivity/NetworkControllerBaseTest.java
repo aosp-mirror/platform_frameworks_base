@@ -70,7 +70,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.log.LogBuffer;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy;
@@ -340,6 +340,11 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void setConnectivityViaCallbackInNetworkController(
+            Network network, NetworkCapabilities networkCapabilities) {
+        mDefaultCallbackInNetworkController.onCapabilitiesChanged(network, networkCapabilities);
+    }
+
+    public void setConnectivityViaCallbackInNetworkController(
             int networkType, boolean validated, boolean isConnected, WifiInfo wifiInfo) {
         final NetworkCapabilities.Builder builder =
                 new NetworkCapabilities.Builder(mNetCapabilities);
@@ -349,6 +354,13 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setConnectivityCommon(builder, networkType, validated, isConnected);
         mDefaultCallbackInNetworkController.onCapabilitiesChanged(
                 mock(Network.class), builder.build());
+    }
+
+    public void setConnectivityViaDefaultAndNormalCallbackInWifiTracker(
+            Network network, NetworkCapabilities networkCapabilities) {
+        mNetworkCallback.onAvailable(network);
+        mNetworkCallback.onCapabilitiesChanged(network, networkCapabilities);
+        mDefaultCallbackInWifiTracker.onCapabilitiesChanged(network, networkCapabilities);
     }
 
     public void setConnectivityViaCallbackInWifiTracker(

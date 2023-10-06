@@ -435,25 +435,27 @@ public final class ContactsContract {
                 Uri.withAppendedPath(AUTHORITY_URI, "directories");
 
         /**
-         * URI used for getting all directories from primary and managed profile.
-         * It supports the same semantics as {@link #CONTENT_URI} and returns the same columns.
-         * If the device has no managed profile that is linked to the current profile, it behaves
-         * in the exact same way as {@link #CONTENT_URI}.
-         * If there is a managed profile linked to the current profile, it will merge
-         * managed profile and current profile's results and return.
-         *
-         * Note: this query returns primary profile results before managed profile results,
-         * and this order is not affected by sorting parameter.
+         * URI used for getting all directories from both the calling user and the managed profile
+         * that is linked to it.
+         * <p>
+         * It supports the same semantics as {@link #CONTENT_URI} and returns the same columns.<br>
+         * If the device has no managed profile that is linked to the calling user, it behaves
+         * in the exact same way as {@link #CONTENT_URI}.<br>
+         * If there is a managed profile linked to the calling user, it will return merged results
+         * from both.
+         * <p>
+         * Note: this query returns the calling user results before the managed profile results,
+         * and this order is not affected by the sorting parameter.
          *
          */
         public static final Uri ENTERPRISE_CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI,
                 "directories_enterprise");
 
         /**
-         * Access file provided by remote directory. It allows both personal and work remote
-         * directory, but not local and invisible diretory.
-         *
-         * It's supported only by a few specific places for referring to contact pictures in the
+         * Access file provided by remote directory. It allows both calling user and managed profile
+         * remote directory, but not local and invisible directory.
+         * <p>
+         * It is supported only by a few specific places for referring to contact pictures in the
          * remote directory. Contact picture URIs, e.g.
          * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}, may contain this kind of URI.
          *
@@ -490,13 +492,13 @@ public final class ContactsContract {
         public static final long LOCAL_INVISIBLE = 1;
 
         /**
-         * _ID of the work profile default directory, which represents locally stored contacts.
+         * _ID of the managed profile default directory, which represents locally stored contacts.
          */
         public static final long ENTERPRISE_DEFAULT = Directory.ENTERPRISE_DIRECTORY_ID_BASE
                 + DEFAULT;
 
         /**
-         * _ID of the work profile directory that represents locally stored invisible contacts.
+         * _ID of the managed profile directory that represents locally stored invisible contacts.
          */
         public static final long ENTERPRISE_LOCAL_INVISIBLE = Directory.ENTERPRISE_DIRECTORY_ID_BASE
                 + LOCAL_INVISIBLE;
@@ -557,8 +559,8 @@ public final class ContactsContract {
         public static final String ACCOUNT_NAME = "accountName";
 
         /**
-         * Mimimal ID for corp directory returned from
-         * {@link Directory#CORP_CONTENT_URI}.
+         * Mimimal ID for managed profile directory returned from
+         * {@link Directory#ENTERPRISE_CONTENT_URI}.
          *
          * @hide
          */
@@ -1537,12 +1539,42 @@ public final class ContactsContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "contacts");
 
         /**
-         * Special contacts URI to refer to contacts on the corp profile from the personal
-         * profile.
-         *
+         * URI used for getting all contacts from both the calling user and the managed profile
+         * that is linked to it.
+         * <p>
+         * It supports the same semantics as {@link #CONTENT_URI} and returns the same columns.<br>
+         * If the calling user has no managed profile, it behaves in the exact same way as
+         * {@link #CONTENT_URI}.<br>
+         * If there is a managed profile linked to the calling user, it will return merged results
+         * from both.
+         * <p>
+         * Note: this query returns the calling user results before the managed profile results,
+         * and this order is not affected by the sorting parameter.
+         * <p>
+         * If a result is from the managed profile, the following changes are made to the data:
+         * <ul>
+         *     <li>{@link #PHOTO_THUMBNAIL_URI} and {@link #PHOTO_URI} will be rewritten to special
+         *     URIs. Use {@link ContentResolver#openAssetFileDescriptor} or its siblings to
+         *     load pictures from them.
+         *     <li>{@link #PHOTO_ID} and {@link #PHOTO_FILE_ID} will be set to null. Don't use them.
+         *     <li>{@link #_ID} and {@link #LOOKUP_KEY} will be replaced with artificial values.
+         *     These values will be consistent across multiple queries, but do not use them in
+         *     places that do not explicitly say they accept them. If they are used in the
+         *     {@code selection} param in {@link android.content.ContentProvider#query}, the result
+         *     is undefined.
+         *     <li>In order to tell whether a contact is from the managed profile, use
+         *     {@link ContactsContract.Contacts#isEnterpriseContactId(long)}.
+         */
+        public static final @NonNull Uri ENTERPRISE_CONTENT_URI = Uri.withAppendedPath(
+                CONTENT_URI, "enterprise");
+
+        /**
+         * Special contacts URI to refer to contacts on the managed profile from the calling user.
+         * <p>
          * It's supported only by a few specific places for referring to contact pictures that
-         * are in the corp provider for enterprise caller-ID.  Contact picture URIs returned from
-         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI} may contain this kind of URI.
+         * are in the managed profile provider for enterprise caller-ID. Contact picture URIs
+         * returned from {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI} and similar APIs may
+         * contain this kind of URI.
          *
          * @hide
          */
@@ -1736,7 +1768,8 @@ public final class ContactsContract {
         /**
          * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
          * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in parameters,
-         * otherwise it will throw IllegalArgumentException.
+         * otherwise it will throw IllegalArgumentException. The passed directory can belong either
+         * to the calling user or to a managed profile that is linked to it.
          */
         public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
                 CONTENT_URI, "filter_enterprise");
@@ -1807,25 +1840,25 @@ public final class ContactsContract {
         public static final String CONTENT_VCARD_TYPE = "text/x-vcard";
 
         /**
-         * Mimimal ID for corp contacts returned from
-         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
+         * Mimimal ID for managed profile contacts returned from
+         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI} and similar APIs
          *
          * @hide
          */
         public static long ENTERPRISE_CONTACT_ID_BASE = 1000000000; // slightly smaller than 2 ** 30
 
         /**
-         * Prefix for corp contacts returned from
-         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
+         * Prefix for managed profile contacts returned from
+         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI} and similar APIs.
          *
          * @hide
          */
         public static String ENTERPRISE_CONTACT_LOOKUP_PREFIX = "c-";
 
         /**
-         * Return TRUE if a contact ID is from the contacts provider on the enterprise profile.
+         * Return {@code true} if a contact ID is from the contacts provider on the managed profile.
          *
-         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI} may return such a contact.
+         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI} and similar APIs may return such IDs.
          */
         public static boolean isEnterpriseContactId(long contactId) {
             return (contactId >= ENTERPRISE_CONTACT_ID_BASE) && (contactId < Profile.MIN_ID);
@@ -5167,7 +5200,7 @@ public final class ContactsContract {
                 Uri.withAppendedPath(AUTHORITY_URI, "raw_contact_entities");
 
         /**
-        * The content:// style URI for this table in corp profile
+        * The content:// style URI for this table in the managed profile
         *
         * @hide
         */
@@ -5209,13 +5242,13 @@ public final class ContactsContract {
         public static final String DATA_ID = "data_id";
 
         /**
-         * Query raw contacts entity by a contact ID, which can potentially be a corp profile
-         * contact ID
+         * Query raw contacts entity by a contact ID, which can potentially be a managed profile
+         * contact ID.
+         * <p>
+         * @param contentResolver The content resolver to query
+         * @param contactId Contact ID, which can potentially be a managed profile contact ID.
+         * @return A map from a mimetype to a list of the entity content values.
          *
-         * @param context A context to get the ContentResolver from
-         * @param contactId Contact ID, which can potentialy be a corp profile contact ID.
-         *
-         * @return A map from a mimetype to a List of the entity content values.
          * {@hide}
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
@@ -5452,55 +5485,44 @@ public final class ContactsContract {
                 "phone_lookup");
 
         /**
-         * <p>URI used for the "enterprise caller-id".</p>
-         *
-         * <p class="caution"><b>Caution: </b>If you publish your app to the Google Play Store, this
-         * field doesn't sort results based on contacts frequency. For more information, see the
-         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
-         * page.
-         *
+         * URI used for looking up contacts by phone number on the contact databases of both the
+         * calling user and the managed profile that is linked to it.
          * <p>
          * It supports the same semantics as {@link #CONTENT_FILTER_URI} and returns the same
-         * columns.  If the device has no corp profile that is linked to the current profile, it
-         * behaves in the exact same way as {@link #CONTENT_FILTER_URI}.  If there is a corp profile
-         * linked to the current profile, it first queries against the personal contact database,
-         * and if no matching contacts are found there, then queries against the
-         * corp contacts database.
-         * </p>
+         * columns.<br>
+         * If the device has no managed profile that is linked to the calling user, it behaves in
+         * the exact same way as {@link #CONTENT_FILTER_URI}.<br>
+         * If there is a managed profile linked to the calling user, it first queries the calling
+         * user's contact database, and only if no matching contacts are found there it then queries
+         * the managed profile database.
+         * <p class="caution">
+         * <b>Caution: </b>If you publish your app to the Google Play Store, this field doesn't sort
+         * results based on contacts frequency. For more information, see the
+         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+         * page.
          * <p>
-         * If a result is from the corp profile, it makes the following changes to the data:
+         * If a result is from the managed profile, the following changes are made to the data:
          * <ul>
-         *     <li>
-         *     {@link #PHOTO_THUMBNAIL_URI} and {@link #PHOTO_URI} will be rewritten to special
-         *     URIs.  Use {@link ContentResolver#openAssetFileDescriptor} or its siblings to
+         *     <li>{@link #PHOTO_THUMBNAIL_URI} and {@link #PHOTO_URI} will be rewritten to special
+         *     URIs. Use {@link ContentResolver#openAssetFileDescriptor} or its siblings to
          *     load pictures from them.
-         *     {@link #PHOTO_ID} and {@link #PHOTO_FILE_ID} will be set to null.  Do not use them.
-         *     </li>
-         *     <li>
-         *     Corp contacts will get artificial {@link #_ID}s.  In order to tell whether a contact
-         *     is from the corp profile, use
+         *     <li>{@link #PHOTO_ID} and {@link #PHOTO_FILE_ID} will be set to null. Don't use them.
+         *     <li>{@link #CONTACT_ID} and {@link #LOOKUP_KEY} will be replaced with artificial
+         *     values. These values will be consistent across multiple queries, but do not use them
+         *     in places that do not explicitly say they accept them. If they are used in the
+         *     {@code selection} param in {@link android.content.ContentProvider#query}, the result
+         *     is undefined.
+         *     <li>In order to tell whether a contact is from the managed profile, use
          *     {@link ContactsContract.Contacts#isEnterpriseContactId(long)}.
-         *     </li>
-         *     <li>
-         *     Corp contacts will get artificial {@link #LOOKUP_KEY}s too.
-         *     </li>
-         *     <li>
-         *     Returned work contact IDs and lookup keys are not accepted in places that not
-         *     explicitly say to accept them.
-         *     </li>
-         * </ul>
          * <p>
          * A contact lookup URL built by
          * {@link ContactsContract.Contacts#getLookupUri(long, String)}
-         * with an {@link #_ID} and a {@link #LOOKUP_KEY} returned by this API can be passed to
-         * {@link ContactsContract.QuickContact#showQuickContact} even if a contact is from the
-         * corp profile.
-         * </p>
-         *
+         * with a {@link #CONTACT_ID} and a {@link #LOOKUP_KEY} returned by this API can be passed
+         * to {@link ContactsContract.QuickContact#showQuickContact} even if a contact is from the
+         * managed profile.
          * <pre>
          * Uri lookupUri = Uri.withAppendedPath(PhoneLookup.ENTERPRISE_CONTENT_FILTER_URI,
          *         Uri.encode(phoneNumber));
-         * </pre>
          */
         public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(AUTHORITY_URI,
                 "phone_lookup_enterprise");
@@ -6236,19 +6258,32 @@ public final class ContactsContract {
                     "phones");
 
             /**
-            * URI used for getting all contacts from primary and managed profile.
-            *
-            * It supports the same semantics as {@link #CONTENT_URI} and returns the same
-            * columns.  If the device has no corp profile that is linked to the current profile, it
-            * behaves in the exact same way as {@link #CONTENT_URI}.  If there is a corp profile
-            * linked to the current profile, it will merge corp profile and current profile's
-            * results and return
-            *
-            * @hide
-            */
-            @SystemApi
-            @TestApi
-            @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+             * URI used for getting all data records of the {@link #CONTENT_ITEM_TYPE} MIME type,
+             * combined with the associated raw contact and aggregate contact data, from both the
+             * calling user and the managed profile that is linked to it.
+             * <p>
+             * It supports the same semantics as {@link #CONTENT_URI} and returns the same
+             * columns.<br>
+             * If the device has no managed profile that is linked to the calling user, it behaves
+             * in the exact same way as {@link #CONTENT_URI}.<br>
+             * If there is a managed profile linked to the calling user, it will return merged
+             * results from both.
+             * <p>
+             * If a result is from the managed profile, the following changes are made to the data:
+             * <ul>
+             *     <li>{@link #PHOTO_THUMBNAIL_URI} and {@link #PHOTO_URI} will be rewritten to
+             *     special URIs. Use {@link ContentResolver#openAssetFileDescriptor} or its siblings
+             *     to load pictures from them.
+             *     <li>{@link #PHOTO_ID} and {@link #PHOTO_FILE_ID} will be set to null. Don't use
+             *     them.
+             *     <li>{@link #CONTACT_ID} and {@link #LOOKUP_KEY} will be replaced with artificial
+             *     values. These values will be consistent across multiple queries, but do not use
+             *     them in places that don't explicitly say they accept them. If they are used in
+             *     the {@code selection} param in {@link android.content.ContentProvider#query}, the
+             *     result is undefined.
+             *     <li>In order to tell whether a contact is from the managed profile, use
+             *     {@link ContactsContract.Contacts#isEnterpriseContactId(long)}.
+             */
             public static final @NonNull Uri ENTERPRISE_CONTENT_URI =
                     Uri.withAppendedPath(Data.ENTERPRISE_CONTENT_URI, "phones");
 
@@ -6387,7 +6422,7 @@ public final class ContactsContract {
              * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
-                    CharSequence label) {
+                    @Nullable CharSequence label) {
                 if ((type == TYPE_CUSTOM || type == TYPE_ASSISTANT) && !TextUtils.isEmpty(label)) {
                     return label;
                 } else {
@@ -6483,53 +6518,41 @@ public final class ContactsContract {
                     "lookup");
 
             /**
-            * <p>URI used for enterprise email lookup.</p>
-            *
-            * <p>
-            * It supports the same semantics as {@link #CONTENT_LOOKUP_URI} and returns the same
-            * columns.  If the device has no corp profile that is linked to the current profile, it
-            * behaves in the exact same way as {@link #CONTENT_LOOKUP_URI}.  If there is a
-            * corp profile linked to the current profile, it first queries against the personal contact database,
-            * and if no matching contacts are found there, then queries against the
-            * corp contacts database.
-            * </p>
-            * <p>
-            * If a result is from the corp profile, it makes the following changes to the data:
-            * <ul>
-            *     <li>
-            *     {@link #PHOTO_THUMBNAIL_URI} and {@link #PHOTO_URI} will be rewritten to special
-            *     URIs.  Use {@link ContentResolver#openAssetFileDescriptor} or its siblings to
-            *     load pictures from them.
-            *     {@link #PHOTO_ID} and {@link #PHOTO_FILE_ID} will be set to null.  Do not
-            *     use them.
-            *     </li>
-            *     <li>
-            *     Corp contacts will get artificial {@link #CONTACT_ID}s.  In order to tell whether
-            *     a contact
-            *     is from the corp profile, use
-            *     {@link ContactsContract.Contacts#isEnterpriseContactId(long)}.
-             *     </li>
-             *     <li>
-             *     Corp contacts will get artificial {@link #LOOKUP_KEY}s too.
-             *     </li>
-             *     <li>
-             *     Returned work contact IDs and lookup keys are not accepted in places that not
-             *     explicitly say to accept them.
-             *     </li>
-             * </ul>
+             * URI used for looking up contacts by email on the contact databases of both the
+             * calling user and the managed profile that is linked to it.
+             * <p>
+             * It supports the same semantics as {@link #CONTENT_LOOKUP_URI} and returns the same
+             * columns.<br>
+             * If the device has no managed profile that is linked to the calling user, it behaves
+             * in the exact same way as {@link #CONTENT_LOOKUP_URI}.<br>
+             * If there is a managed profile linked to the calling user, it first queries the
+             * calling user's contact database, and only if no matching contacts are found there it
+             * then queries the managed profile database.
+             * <p class="caution">
+             * If a result is from the managed profile, the following changes are made to the data:
+             * <ul>
+             *     <li>{@link #PHOTO_THUMBNAIL_URI} and {@link #PHOTO_URI} will be rewritten to
+             *     specialURIs. Use {@link ContentResolver#openAssetFileDescriptor} or its siblings
+             *     to load pictures from them.
+             *     <li>{@link #PHOTO_ID} and {@link #PHOTO_FILE_ID} will be set to null. Don't use
+             *     them.
+             *     <li>{@link #CONTACT_ID} and {@link #LOOKUP_KEY} will be replaced with artificial
+             *     values. These values will be consistent across multiple queries, but do not use
+             *     them in places that do not explicitly say they accept them. If they are used in
+             *     the {@code selection} param in {@link android.content.ContentProvider#query}, the
+             *     result is undefined.
+             *     <li>In order to tell whether a contact is from the managed profile, use
+             *     {@link ContactsContract.Contacts#isEnterpriseContactId(long)}.
              * <p>
              * A contact lookup URL built by
              * {@link ContactsContract.Contacts#getLookupUri(long, String)}
-             * with an {@link #_ID} and a {@link #LOOKUP_KEY} returned by this API can be passed to
-             * {@link ContactsContract.QuickContact#showQuickContact} even if a contact is from the
-             * corp profile.
-             * </p>
-            *
-            * <pre>
-            * Uri lookupUri = Uri.withAppendedPath(Email.ENTERPRISE_CONTENT_LOOKUP_URI,
-            *         Uri.encode(email));
-            * </pre>
-            */
+             * with a {@link #CONTACT_ID} and a {@link #LOOKUP_KEY} returned by this API can be
+             * passed to {@link ContactsContract.QuickContact#showQuickContact} even if a contact is
+             * from the managed profile.
+             * <pre>
+             * Uri lookupUri = Uri.withAppendedPath(Email.ENTERPRISE_CONTENT_LOOKUP_URI,
+             *         Uri.encode(email));
+             */
             public static final Uri ENTERPRISE_CONTENT_LOOKUP_URI =
                     Uri.withAppendedPath(CONTENT_URI, "lookup_enterprise");
 
@@ -6562,9 +6585,10 @@ public final class ContactsContract {
             /**
              * <p>It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the
              * same columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
-             * parameters, otherwise it will throw IllegalArgumentException.
-             *
-             * <p class="caution"><b>Caution: </b>If you publish your app to the Google Play Store,
+             * parameters, otherwise it will throw IllegalArgumentException. The passed directory
+             * can belong either to the calling user or to a managed profile that is linked to it.
+             * <p class="caution">
+             * <b>Caution: </b>If you publish your app to the Google Play Store,
              * this field doesn't sort results based on contacts frequency. For more information,
              * see the
              * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
@@ -6610,7 +6634,7 @@ public final class ContactsContract {
              * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
-                    CharSequence label) {
+                    @Nullable CharSequence label) {
                 if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
                     return label;
                 } else {
@@ -6818,7 +6842,7 @@ public final class ContactsContract {
              * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
-                    CharSequence label) {
+                    @Nullable CharSequence label) {
                 if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
                     return label;
                 } else {
@@ -6979,7 +7003,7 @@ public final class ContactsContract {
              * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
-                    CharSequence label) {
+                    @Nullable CharSequence label) {
                 if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
                     return label;
                 } else {
@@ -7186,7 +7210,7 @@ public final class ContactsContract {
              * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
-                    CharSequence label) {
+                    @Nullable CharSequence label) {
                 if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
                     return label;
                 } else {
@@ -7313,7 +7337,7 @@ public final class ContactsContract {
              * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
-                    CharSequence label) {
+                    @Nullable CharSequence label) {
                 if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
                     return label;
                 } else {
@@ -7409,7 +7433,7 @@ public final class ContactsContract {
              * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
-                    CharSequence label) {
+                    @Nullable CharSequence label) {
                 if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
                     return label;
                 } else {
@@ -7738,7 +7762,7 @@ public final class ContactsContract {
              * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
-                    CharSequence label) {
+                    @Nullable CharSequence label) {
                 if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
                     return label;
                 } else {
@@ -8448,7 +8472,7 @@ public final class ContactsContract {
             Bundle response = nullSafeCall(contentResolver, ContactsContract.AUTHORITY_URI,
                     ContactsContract.SimContacts.QUERY_SIM_ACCOUNTS_METHOD,
                     null, null);
-            List<SimAccount> result = response.getParcelableArrayList(KEY_SIM_ACCOUNTS);
+            List<SimAccount> result = response.getParcelableArrayList(KEY_SIM_ACCOUNTS, android.provider.ContactsContract.SimAccount.class);
 
             if (result == null) {
                 result = new ArrayList<>();
@@ -8821,7 +8845,7 @@ public final class ContactsContract {
         public static Account getDefaultAccount(@NonNull ContentResolver resolver) {
             Bundle response = resolver.call(ContactsContract.AUTHORITY_URI,
                     QUERY_DEFAULT_ACCOUNT_METHOD, null, null);
-            return response.getParcelable(KEY_DEFAULT_ACCOUNT);
+            return response.getParcelable(KEY_DEFAULT_ACCOUNT, android.accounts.Account.class);
         }
 
         /**
@@ -9262,7 +9286,7 @@ public final class ContactsContract {
          *            around this {@link View}.
          * @param lookupUri A {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog. A work lookup uri is supported here,
+         *            in this dialog. A managed profile lookup uri is supported here,
          *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
          *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
@@ -9298,7 +9322,7 @@ public final class ContactsContract {
          * @param lookupUri A
          *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog. A work lookup uri is supported here,
+         *            in this dialog. A managed profile lookup uri is supported here,
          *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
          *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
@@ -9331,7 +9355,7 @@ public final class ContactsContract {
          * @param lookupUri A
          *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog. A work lookup uri is supported here,
+         *            in this dialog. A managed profile lookup uri is supported here,
          *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
          *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param excludeMimes Optional list of {@link Data#MIMETYPE} MIME-types
@@ -9371,7 +9395,7 @@ public final class ContactsContract {
          * @param lookupUri A
          *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog. A work lookup uri is supported here,
+         *            in this dialog. A managed profile lookup uri is supported here,
          *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
          *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param excludeMimes Optional list of {@link Data#MIMETYPE} MIME-types

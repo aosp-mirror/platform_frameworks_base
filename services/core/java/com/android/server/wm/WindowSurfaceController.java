@@ -236,33 +236,22 @@ class WindowSurfaceController {
         }
     }
 
-    void setColorSpaceAgnostic(boolean agnostic) {
+    void setColorSpaceAgnostic(SurfaceControl.Transaction t, boolean agnostic) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isColorSpaceAgnostic=%b: %s", agnostic, title);
 
         if (mSurfaceControl == null) {
             return;
         }
-        if (SHOW_LIGHT_TRANSACTIONS) {
-            Slog.i(TAG, ">>> OPEN TRANSACTION setColorSpaceAgnosticLocked");
-        }
-        mService.openSurfaceTransaction();
-        try {
-            getGlobalTransaction().setColorSpaceAgnostic(mSurfaceControl, agnostic);
-        } finally {
-            mService.closeSurfaceTransaction("setColorSpaceAgnostic");
-            if (SHOW_LIGHT_TRANSACTIONS) {
-                Slog.i(TAG, "<<< CLOSE TRANSACTION setColorSpaceAgnosticLocked");
-            }
-        }
+        t.setColorSpaceAgnostic(mSurfaceControl, agnostic);
     }
 
-    boolean showRobustly(SurfaceControl.Transaction t) {
+    void showRobustly(SurfaceControl.Transaction t) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE SHOW (performLayout): %s", title);
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
                 + " during relayout");
 
         if (mSurfaceShown) {
-            return true;
+            return;
         }
 
         setShown(true);
@@ -273,7 +262,6 @@ class WindowSurfaceController {
                     dc.mDisplayId, 1 /* request shown */,
                     String.valueOf(dc.mWallpaperController.getWallpaperTarget()));
         }
-        return true;
     }
 
     boolean clearWindowContentFrameStats() {

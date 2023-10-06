@@ -16,7 +16,9 @@
 
 package com.android.server;
 
+import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Process;
 import android.os.StrictMode;
 
@@ -42,5 +44,9 @@ public class ServiceThread extends HandlerThread {
         }
 
         super.run();
+    }
+
+    protected static Handler makeSharedHandler(Looper looper) {
+        return new Handler(looper, /*callback=*/ null, /* async=*/ false, /* shared=*/ true);
     }
 }

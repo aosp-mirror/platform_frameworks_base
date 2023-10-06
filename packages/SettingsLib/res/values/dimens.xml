@@ -19,16 +19,11 @@
     <!-- The y translation to apply at the start in appear animations. -->
     <dimen name="appear_y_translation_start">32dp</dimen>
 
-    <!-- The translation for disappearing security views after having solved them. -->
-    <dimen name="disappear_y_translation">-32dp</dimen>
-
     <!-- Height of a user icon view -->
     <dimen name="user_icon_view_height">24dp</dimen>
     <!-- User spinner -->
-    <dimen name="user_spinner_height">72dp</dimen>
     <dimen name="user_spinner_padding">4dp</dimen>
     <dimen name="user_spinner_padding_sides">20dp</dimen>
-    <dimen name="user_spinner_item_height">56dp</dimen>
 
     <!-- Lock icon for preferences locked by admin -->
     <dimen name="restricted_icon_padding">4dp</dimen>
@@ -36,10 +31,8 @@
     <dimen name="wifi_preference_badge_padding">8dip</dimen>
 
     <!-- Usage graph dimens -->
-    <dimen name="usage_graph_area_height">122dp</dimen>
     <dimen name="usage_graph_margin_top_bottom">9dp</dimen>
     <dimen name="usage_graph_labels_width">56dp</dimen>
-    <dimen name="usage_graph_labels_padding">16dp</dimen>
 
     <dimen name="usage_graph_divider_size">1dp</dimen>
 
@@ -64,25 +57,18 @@
     <!-- Ratio between width and height -->
     <fraction name="bt_battery_ratio_fraction">35%</fraction>
 
-    <!-- Ratio of height between battery icon and bluetooth icon -->
-    <fraction name="bt_battery_scale_fraction">75%</fraction>
-
     <!-- Fraction value to smooth the edges of the battery icon. The path will be inset by this
          fraction of a pixel.-->
     <fraction name="battery_subpixel_smoothing_left">0%</fraction>
     <fraction name="battery_subpixel_smoothing_right">0%</fraction>
 
-    <!-- Zen mode panel: condition item button padding -->
-    <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>
-    <!-- Zen mode panel: spacing between condition items -->
-    <dimen name="zen_mode_condition_detail_item_spacing">12dp</dimen>
     <!-- Zen mode panel: spacing between two-line condition upper and lower lines -->
     <dimen name="zen_mode_condition_detail_item_interline_spacing">4dp</dimen>
-    <!-- Zen mode panel: bottom padding, a bit less than qs_panel_padding -->
-    <dimen name="zen_mode_condition_detail_bottom_padding">4dp</dimen>
 
     <!-- SignalDrawable -->
     <dimen name="signal_icon_size">15dp</dimen>
+    <!-- The size of the roaming icon in the top-left corner of the signal icon. -->
+    <dimen name="signal_icon_size_roaming">8dp</dimen>
 
     <!-- Size of nearby icon -->
     <dimen name="bt_nearby_icon_size">24dp</dimen>
@@ -92,9 +78,6 @@
 
     <!-- Size of advanced icon -->
     <dimen name="advanced_icon_size">18dp</dimen>
-
-    <!-- Minimum width for the popup for updating a user's photo. -->
-    <dimen name="update_user_photo_popup_min_width">300dp</dimen>
 
     <dimen name="add_a_photo_circled_padding">6dp</dimen>
     <dimen name="user_photo_size_in_user_info_dialog">112dp</dimen>
@@ -128,4 +111,17 @@
     <dimen name="broadcast_dialog_btn_text_size">16sp</dimen>
     <dimen name="broadcast_dialog_btn_minHeight">44dp</dimen>
     <dimen name="broadcast_dialog_margin">16dp</dimen>
+
+    <dimen name="dialog_content_padding">16dp</dimen>
+    <dimen name="radio_button_padding">12dp</dimen>
+    <dimen name="radio_button_padding_start">8dp</dimen>
+
+    <dimen name="dialog_button_horizontal_padding">16dp</dimen>
+    <dimen name="dialog_button_vertical_padding">8dp</dimen>
+    <!-- The button will be 48dp tall, but the background needs to be 36dp tall -->
+    <dimen name="dialog_button_vertical_inset">6dp</dimen>
+    <dimen name="dialog_top_padding">24dp</dimen>
+    <dimen name="dialog_bottom_padding">18dp</dimen>
+    <dimen name="dialog_side_padding">24dp</dimen>
+    <dimen name="dialog_button_bar_top_padding">32dp</dimen>
 </resources>

@@ -159,7 +159,7 @@ final class VolumeControlAction extends HdmiCecFeatureAction {
 
         // Update audio status if current volume position is edge of volume bar,
         // i.e max or min volume.
-        AudioManager audioManager = tv().getService().getAudioManager();
+        AudioManagerWrapper audioManager = tv().getService().getAudioManager();
         int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         if (mIsVolumeUp) {
             int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);

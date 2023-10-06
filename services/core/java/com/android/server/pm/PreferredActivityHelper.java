@@ -43,13 +43,12 @@ import android.util.LogPrinter;
 import android.util.PrintStreamPrinter;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.net.NetworkPolicyManagerInternal;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -432,6 +431,23 @@ final class PreferredActivityHelper {
         }
     }
 
+    public void clearPersistentPreferredActivity(IntentFilter filter, int userId) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException(
+                    "clearPersistentPreferredActivity can only be run by the system");
+        }
+        boolean changed = false;
+        synchronized (mPm.mLock) {
+            changed = mPm.mSettings.clearPersistentPreferredActivity(filter, userId);
+        }
+        if (changed) {
+            updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
+            mPm.postPreferredActivityChangedBroadcast(userId);
+            mPm.scheduleWritePackageRestrictions(userId);
+        }
+    }
+
     private boolean isHomeFilter(@NonNull WatchedIntentFilter filter) {
         return filter.hasAction(Intent.ACTION_MAIN) && filter.hasCategory(Intent.CATEGORY_HOME)
                 && filter.hasCategory(CATEGORY_DEFAULT);
@@ -601,11 +617,7 @@ final class PreferredActivityHelper {
             synchronized (mPm.mLock) {
                 mPm.mSettings.applyDefaultPreferredAppsLPw(userId);
                 mPm.mDomainVerificationManager.clearUser(userId);
-                final int numPackages = mPm.mPackages.size();
-                for (int i = 0; i < numPackages; i++) {
-                    final AndroidPackage pkg = mPm.mPackages.valueAt(i);
-                    mPm.mPermissionManager.resetRuntimePermissions(pkg, userId);
-                }
+                mPm.mPermissionManager.resetRuntimePermissionsForUser(userId);
             }
             updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
             resetNetworkPolicies(userId);

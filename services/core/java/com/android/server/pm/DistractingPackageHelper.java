@@ -92,9 +92,9 @@ public final class DistractingPackageHelper {
         for (int i = 0; i < packageNames.length; i++) {
             final String packageName = packageNames[i];
             final PackageStateInternal packageState =
-                    snapshot.getPackageStateInternal(packageName);
-            if (packageState == null
-                    || snapshot.shouldFilterApplication(packageState, callingUid, userId)) {
+                    snapshot.getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
+            if (packageState == null) {
                 Slog.w(PackageManagerService.TAG,
                         "Could not find package setting for package: " + packageName
                                 + ". Skipping...");
@@ -181,18 +181,21 @@ public final class DistractingPackageHelper {
      * @param uidList The uids of packages which have suspension changes.
      * @param userId The user where packages reside.
      */
-    void sendDistractingPackagesChanged(@NonNull String[] pkgList,
-            int[] uidList, int userId, int distractionFlags) {
-        final Bundle extras = new Bundle(3);
+    void sendDistractingPackagesChanged(@NonNull String[] pkgList, int[] uidList, int userId,
+            int distractionFlags) {
+        final Bundle extras = new Bundle();
         extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
         extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
         extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, distractionFlags);
 
         final Handler handler = mInjector.getHandler();
         handler.post(() -> mBroadcastHelper.sendPackageBroadcast(
-                Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null /* pkg */, extras,
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY, null /* targetPkg */,
+                Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null /* pkg */,
+                extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null /* targetPkg */,
                 null /* finishedReceiver */, new int[]{userId}, null /* instantUserIds */,
-                null /* allowList */, null /* bOptions */));
+                null /* broadcastAllowList */,
+                (callingUid, intentExtras) -> BroadcastHelper.filterExtrasChangedPackageList(
+                        mPm.snapshotComputer(), callingUid, intentExtras),
+                null /* bOptions */));
     }
 }

@@ -28,6 +28,7 @@ import android.app.ActivityThread;
 import android.app.IWindowToken;
 import android.app.ResourcesManager;
 import android.content.Context;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Build;
@@ -221,6 +222,7 @@ public class WindowTokenClient extends IWindowToken.Stub {
         if (context == null) {
             return;
         }
+        CompatibilityInfo.applyOverrideScaleIfNeeded(newConfig);
         final boolean displayChanged;
         final boolean shouldUpdateResources;
         final int diff;

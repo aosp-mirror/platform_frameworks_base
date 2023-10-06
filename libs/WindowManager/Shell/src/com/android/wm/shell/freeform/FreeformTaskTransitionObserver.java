@@ -112,6 +112,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
                     onChangeTransitionReady(change, startT, finishT);
                     break;
             }
+            mWindowDecorViewModel.onTransitionReady(transition, info, change);
         }
         mTransitionToTaskInfo.put(transition, taskInfoList);
     }
@@ -152,6 +153,8 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
 
     @Override
     public void onTransitionMerged(@NonNull IBinder merged, @NonNull IBinder playing) {
+        mWindowDecorViewModel.onTransitionMerged(merged, playing);
+
         final List<ActivityManager.RunningTaskInfo> infoOfMerged =
                 mTransitionToTaskInfo.get(merged);
         if (infoOfMerged == null) {
@@ -175,7 +178,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
         final List<ActivityManager.RunningTaskInfo> taskInfo =
                 mTransitionToTaskInfo.getOrDefault(transition, Collections.emptyList());
         mTransitionToTaskInfo.remove(transition);
-
+        mWindowDecorViewModel.onTransitionFinished(transition);
         for (int i = 0; i < taskInfo.size(); ++i) {
             mWindowDecorViewModel.destroyWindowDecoration(taskInfo.get(i));
         }

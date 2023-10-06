@@ -19,24 +19,23 @@ package com.android.systemui.dreams;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamAlphaScaledExpansion;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamYPositionScaledExpansion;
+import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM;
+import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
-import static com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_BOTTOM;
-import static com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_TOP;
 
 import android.animation.Animator;
 import android.content.res.Resources;
+import android.graphics.Region;
 import android.os.Handler;
 import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
-
+import com.android.app.animation.Interpolators;
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
@@ -45,7 +44,6 @@ import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInt
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.util.ViewController;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.Arrays;
 
@@ -223,6 +221,9 @@ public class DreamOverlayContainerViewController extends
         mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
         mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
+        final Region emptyRegion = Region.obtain();
+        mView.getRootSurfaceControl().setTouchableRegion(emptyRegion);
+        emptyRegion.recycle();
 
         // Start dream entry animations. Skip animations for low light clock.
         if (!mStateController.isLowLightActive()) {
@@ -298,20 +299,15 @@ public class DreamOverlayContainerViewController extends
 
     /**
      * Handle the dream waking up and run any necessary animations.
-     *
-     * @param onAnimationEnd Callback to trigger once animations are finished.
-     * @param callbackExecutor Executor to execute the callback on.
      */
-    public void wakeUp(@NonNull Runnable onAnimationEnd,
-            @NonNull DelayableExecutor callbackExecutor) {
+    public void wakeUp() {
         // When swiping causes wakeup, do not run any animations as the dream should exit as soon
         // as possible.
         if (mWakingUpFromSwipe) {
-            onAnimationEnd.run();
             return;
         }
 
-        mDreamOverlayAnimationsController.wakeUp(onAnimationEnd, callbackExecutor);
+        mDreamOverlayAnimationsController.wakeUp();
     }
 
     @Override

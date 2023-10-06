@@ -21,8 +21,11 @@
 #include <sys/stat.h>
 #include <utils/Log.h>
 
+#include "SkData.h"
 #include "SkFontMgr.h"
+#include "SkRefCnt.h"
 #include "SkStream.h"
+#include "SkTypeface.h"
 
 #include "hwui/MinikinSkia.h"
 #include "hwui/Typeface.h"
@@ -61,7 +64,7 @@ std::shared_ptr<minikin::FontFamily> buildFamily(const char* fileName) {
                                               std::vector<minikin::FontVariation>());
     std::vector<std::shared_ptr<minikin::Font>> fonts;
     fonts.push_back(minikin::Font::Builder(font).build());
-    return std::make_shared<minikin::FontFamily>(std::move(fonts));
+    return minikin::FontFamily::create(std::move(fonts));
 }
 
 std::vector<std::shared_ptr<minikin::FontFamily>> makeSingleFamlyVector(const char* fileName) {
@@ -70,7 +73,8 @@ std::vector<std::shared_ptr<minikin::FontFamily>> makeSingleFamlyVector(const ch
 
 TEST(TypefaceTest, resolveDefault_and_setDefaultTest) {
     std::unique_ptr<Typeface> regular(Typeface::createFromFamilies(
-            makeSingleFamlyVector(kRobotoVariable), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
+            makeSingleFamlyVector(kRobotoVariable), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE,
+            nullptr /* fallback */));
     EXPECT_EQ(regular.get(), Typeface::resolveDefault(regular.get()));
 
     // Keep the original to restore it later.
@@ -348,24 +352,24 @@ TEST(TypefaceTest, createAbsolute) {
 TEST(TypefaceTest, createFromFamilies_Single) {
     // In Java, new
     // Typeface.Builder("Roboto-Regular.ttf").setWeight(400).setItalic(false).build();
-    std::unique_ptr<Typeface> regular(
-            Typeface::createFromFamilies(makeSingleFamlyVector(kRobotoVariable), 400, false));
+    std::unique_ptr<Typeface> regular(Typeface::createFromFamilies(
+            makeSingleFamlyVector(kRobotoVariable), 400, false, nullptr /* fallback */));
     EXPECT_EQ(400, regular->fStyle.weight());
     EXPECT_EQ(minikin::FontStyle::Slant::UPRIGHT, regular->fStyle.slant());
     EXPECT_EQ(Typeface::kNormal, regular->fAPIStyle);
 
     // In Java, new
     // Typeface.Builder("Roboto-Regular.ttf").setWeight(700).setItalic(false).build();
-    std::unique_ptr<Typeface> bold(
-            Typeface::createFromFamilies(makeSingleFamlyVector(kRobotoVariable), 700, false));
+    std::unique_ptr<Typeface> bold(Typeface::createFromFamilies(
+            makeSingleFamlyVector(kRobotoVariable), 700, false, nullptr /* fallback */));
     EXPECT_EQ(700, bold->fStyle.weight());
     EXPECT_EQ(minikin::FontStyle::Slant::UPRIGHT, bold->fStyle.slant());
     EXPECT_EQ(Typeface::kBold, bold->fAPIStyle);
 
     // In Java, new
     // Typeface.Builder("Roboto-Regular.ttf").setWeight(400).setItalic(true).build();
-    std::unique_ptr<Typeface> italic(
-            Typeface::createFromFamilies(makeSingleFamlyVector(kRobotoVariable), 400, true));
+    std::unique_ptr<Typeface> italic(Typeface::createFromFamilies(
+            makeSingleFamlyVector(kRobotoVariable), 400, true, nullptr /* fallback */));
     EXPECT_EQ(400, italic->fStyle.weight());
     EXPECT_EQ(minikin::FontStyle::Slant::ITALIC, italic->fStyle.slant());
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
@@ -373,8 +377,8 @@ TEST(TypefaceTest, createFromFamilies_Single) {
     // In Java,
     // new
     // Typeface.Builder("Roboto-Regular.ttf").setWeight(700).setItalic(true).build();
-    std::unique_ptr<Typeface> boldItalic(
-            Typeface::createFromFamilies(makeSingleFamlyVector(kRobotoVariable), 700, true));
+    std::unique_ptr<Typeface> boldItalic(Typeface::createFromFamilies(
+            makeSingleFamlyVector(kRobotoVariable), 700, true, nullptr /* fallback */));
     EXPECT_EQ(700, boldItalic->fStyle.weight());
     EXPECT_EQ(minikin::FontStyle::Slant::ITALIC, boldItalic->fStyle.slant());
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
@@ -382,8 +386,8 @@ TEST(TypefaceTest, createFromFamilies_Single) {
     // In Java,
     // new
     // Typeface.Builder("Roboto-Regular.ttf").setWeight(1100).setItalic(false).build();
-    std::unique_ptr<Typeface> over1000(
-            Typeface::createFromFamilies(makeSingleFamlyVector(kRobotoVariable), 1100, false));
+    std::unique_ptr<Typeface> over1000(Typeface::createFromFamilies(
+            makeSingleFamlyVector(kRobotoVariable), 1100, false, nullptr /* fallback */));
     EXPECT_EQ(1000, over1000->fStyle.weight());
     EXPECT_EQ(minikin::FontStyle::Slant::UPRIGHT, over1000->fStyle.slant());
     EXPECT_EQ(Typeface::kBold, over1000->fAPIStyle);
@@ -391,30 +395,33 @@ TEST(TypefaceTest, createFromFamilies_Single) {
 
 TEST(TypefaceTest, createFromFamilies_Single_resolveByTable) {
     // In Java, new Typeface.Builder("Family-Regular.ttf").build();
-    std::unique_ptr<Typeface> regular(Typeface::createFromFamilies(
-            makeSingleFamlyVector(kRegularFont), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
+    std::unique_ptr<Typeface> regular(
+            Typeface::createFromFamilies(makeSingleFamlyVector(kRegularFont), RESOLVE_BY_FONT_TABLE,
+                                         RESOLVE_BY_FONT_TABLE, nullptr /* fallback */));
     EXPECT_EQ(400, regular->fStyle.weight());
     EXPECT_EQ(minikin::FontStyle::Slant::UPRIGHT, regular->fStyle.slant());
     EXPECT_EQ(Typeface::kNormal, regular->fAPIStyle);
 
     // In Java, new Typeface.Builder("Family-Bold.ttf").build();
-    std::unique_ptr<Typeface> bold(Typeface::createFromFamilies(
-            makeSingleFamlyVector(kBoldFont), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
+    std::unique_ptr<Typeface> bold(
+            Typeface::createFromFamilies(makeSingleFamlyVector(kBoldFont), RESOLVE_BY_FONT_TABLE,
+                                         RESOLVE_BY_FONT_TABLE, nullptr /* fallback */));
     EXPECT_EQ(700, bold->fStyle.weight());
     EXPECT_EQ(minikin::FontStyle::Slant::UPRIGHT, bold->fStyle.slant());
     EXPECT_EQ(Typeface::kBold, bold->fAPIStyle);
 
     // In Java, new Typeface.Builder("Family-Italic.ttf").build();
-    std::unique_ptr<Typeface> italic(Typeface::createFromFamilies(
-            makeSingleFamlyVector(kItalicFont), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
+    std::unique_ptr<Typeface> italic(
+            Typeface::createFromFamilies(makeSingleFamlyVector(kItalicFont), RESOLVE_BY_FONT_TABLE,
+                                         RESOLVE_BY_FONT_TABLE, nullptr /* fallback */));
     EXPECT_EQ(400, italic->fStyle.weight());
     EXPECT_EQ(minikin::FontStyle::Slant::ITALIC, italic->fStyle.slant());
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 
     // In Java, new Typeface.Builder("Family-BoldItalic.ttf").build();
-    std::unique_ptr<Typeface> boldItalic(
-            Typeface::createFromFamilies(makeSingleFamlyVector(kBoldItalicFont),
-                                         RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
+    std::unique_ptr<Typeface> boldItalic(Typeface::createFromFamilies(
+            makeSingleFamlyVector(kBoldItalicFont), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE,
+            nullptr /* fallback */));
     EXPECT_EQ(700, boldItalic->fStyle.weight());
     EXPECT_EQ(minikin::FontStyle::Slant::ITALIC, boldItalic->fStyle.slant());
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
@@ -424,8 +431,9 @@ TEST(TypefaceTest, createFromFamilies_Family) {
     std::vector<std::shared_ptr<minikin::FontFamily>> families = {
             buildFamily(kRegularFont), buildFamily(kBoldFont), buildFamily(kItalicFont),
             buildFamily(kBoldItalicFont)};
-    std::unique_ptr<Typeface> typeface(Typeface::createFromFamilies(
-            std::move(families), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
+    std::unique_ptr<Typeface> typeface(
+            Typeface::createFromFamilies(std::move(families), RESOLVE_BY_FONT_TABLE,
+                                         RESOLVE_BY_FONT_TABLE, nullptr /* fallback */));
     EXPECT_EQ(400, typeface->fStyle.weight());
     EXPECT_EQ(minikin::FontStyle::Slant::UPRIGHT, typeface->fStyle.slant());
 }
@@ -433,10 +441,24 @@ TEST(TypefaceTest, createFromFamilies_Family) {
 TEST(TypefaceTest, createFromFamilies_Family_withoutRegular) {
     std::vector<std::shared_ptr<minikin::FontFamily>> families = {
             buildFamily(kBoldFont), buildFamily(kItalicFont), buildFamily(kBoldItalicFont)};
-    std::unique_ptr<Typeface> typeface(Typeface::createFromFamilies(
-            std::move(families), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
+    std::unique_ptr<Typeface> typeface(
+            Typeface::createFromFamilies(std::move(families), RESOLVE_BY_FONT_TABLE,
+                                         RESOLVE_BY_FONT_TABLE, nullptr /* fallback */));
     EXPECT_EQ(700, typeface->fStyle.weight());
     EXPECT_EQ(minikin::FontStyle::Slant::UPRIGHT, typeface->fStyle.slant());
+}
+
+TEST(TypefaceTest, createFromFamilies_Family_withFallback) {
+    std::vector<std::shared_ptr<minikin::FontFamily>> fallbackFamilies = {
+            buildFamily(kBoldFont), buildFamily(kItalicFont), buildFamily(kBoldItalicFont)};
+    std::unique_ptr<Typeface> fallback(
+            Typeface::createFromFamilies(std::move(fallbackFamilies), RESOLVE_BY_FONT_TABLE,
+                                         RESOLVE_BY_FONT_TABLE, nullptr /* fallback */));
+    std::unique_ptr<Typeface> regular(
+            Typeface::createFromFamilies(makeSingleFamlyVector(kRegularFont), RESOLVE_BY_FONT_TABLE,
+                                         RESOLVE_BY_FONT_TABLE, fallback.get()));
+    EXPECT_EQ(400, regular->fStyle.weight());
+    EXPECT_EQ(minikin::FontStyle::Slant::UPRIGHT, regular->fStyle.slant());
 }
 
 }  // namespace

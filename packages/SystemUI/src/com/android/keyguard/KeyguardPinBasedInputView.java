@@ -21,6 +21,7 @@ import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NONE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART;
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
@@ -34,9 +35,11 @@ import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
 
+import androidx.annotation.CallSuper;
+
+import com.android.app.animation.Interpolators;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,9 +85,6 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
     protected void setPasswordEntryInputEnabled(boolean enabled) {
         mPasswordEntry.setEnabled(enabled);
         mOkButton.setEnabled(enabled);
-        if (enabled && !mPasswordEntry.hasFocus()) {
-            mPasswordEntry.requestFocus();
-        }
     }
 
     @Override
@@ -114,14 +114,16 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
         switch (reason) {
             case PROMPT_REASON_RESTART:
                 return R.string.kg_prompt_reason_restart_pin;
+            case PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE:
+                return R.string.kg_prompt_after_update_pin;
             case PROMPT_REASON_TIMEOUT:
                 return R.string.kg_prompt_reason_timeout_pin;
             case PROMPT_REASON_DEVICE_ADMIN:
                 return R.string.kg_prompt_reason_device_admin;
             case PROMPT_REASON_USER_REQUEST:
-                return R.string.kg_prompt_reason_user_request;
+                return R.string.kg_prompt_after_user_lockdown_pin;
             case PROMPT_REASON_PREPARE_FOR_UPDATE:
-                return R.string.kg_prompt_reason_timeout_pin;
+                return R.string.kg_prompt_unattended_update_pin;
             case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
                 return R.string.kg_prompt_reason_timeout_pin;
             case PROMPT_REASON_TRUSTAGENT_EXPIRED:
@@ -150,7 +152,9 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
     }
 
     @Override
+    @CallSuper
     protected void onFinishInflate() {
+        super.onFinishInflate();
         mPasswordEntry = findViewById(getPasswordTextViewId());
 
         // Set selected property on so the view can send accessibility events.

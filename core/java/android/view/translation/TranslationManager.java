@@ -247,7 +247,7 @@ public final class TranslationManager {
                 return Collections.emptySet();
             }
             ParceledListSlice<TranslationCapability> listSlice =
-                    result.bundle.getParcelable(EXTRA_CAPABILITIES);
+                    result.bundle.getParcelable(EXTRA_CAPABILITIES, android.content.pm.ParceledListSlice.class);
             ArraySet<TranslationCapability> capabilities =
                     new ArraySet<>(listSlice == null ? null : listSlice.getList());
             return capabilities;
@@ -467,7 +467,7 @@ public final class TranslationManager {
 
         private void onTranslationCapabilityUpdate(Bundle bundle) {
             TranslationCapability capability =
-                    (TranslationCapability) bundle.getParcelable(EXTRA_CAPABILITIES);
+                    (TranslationCapability) bundle.getParcelable(EXTRA_CAPABILITIES, android.view.translation.TranslationCapability.class);
             mListener.accept(capability);
         }
     }

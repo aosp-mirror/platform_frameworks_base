@@ -20,6 +20,7 @@
 #include "android_media_tv_Tuner.h"
 
 #include <aidl/android/hardware/tv/tuner/AudioExtraMetaData.h>
+#include <aidl/android/hardware/tv/tuner/AudioPresentation.h>
 #include <aidl/android/hardware/tv/tuner/AudioStreamType.h>
 #include <aidl/android/hardware/tv/tuner/AvStreamType.h>
 #include <aidl/android/hardware/tv/tuner/Constant.h>
@@ -47,6 +48,7 @@
 #include <aidl/android/hardware/tv/tuner/DemuxFilterSubType.h>
 #include <aidl/android/hardware/tv/tuner/DemuxFilterTemiEvent.h>
 #include <aidl/android/hardware/tv/tuner/DemuxFilterTsRecordEvent.h>
+#include <aidl/android/hardware/tv/tuner/DemuxInfo.h>
 #include <aidl/android/hardware/tv/tuner/DemuxIpAddress.h>
 #include <aidl/android/hardware/tv/tuner/DemuxIpFilterSettings.h>
 #include <aidl/android/hardware/tv/tuner/DemuxIpFilterType.h>
@@ -131,6 +133,11 @@
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtPartialReceptionFlag.h>
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtSettings.h>
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtTimeInterleaveMode.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIptvSettings.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIptvSettingsFec.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIptvSettingsProtocol.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIptvSettingsIgmp.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIptvSettingsFecType.h>
 #include <aidl/android/hardware/tv/tuner/FrontendModulation.h>
 #include <aidl/android/hardware/tv/tuner/FrontendModulationStatus.h>
 #include <aidl/android/hardware/tv/tuner/FrontendRollOff.h>
@@ -155,12 +162,14 @@
 #include <nativehelper/ScopedLocalRef.h>
 #include <utils/Log.h>
 
+#include "android_media_AudioPresentation.h"
 #include "android_media_MediaCodecLinearBlock.h"
 #include "android_runtime/AndroidRuntime.h"
 
 #pragma GCC diagnostic ignored "-Wunused-function"
 
 using ::aidl::android::hardware::tv::tuner::AudioExtraMetaData;
+using ::aidl::android::hardware::tv::tuner::AudioPreselection;
 using ::aidl::android::hardware::tv::tuner::AudioStreamType;
 using ::aidl::android::hardware::tv::tuner::AvStreamType;
 using ::aidl::android::hardware::tv::tuner::Constant;
@@ -192,6 +201,7 @@ using ::aidl::android::hardware::tv::tuner::DemuxFilterSettings;
 using ::aidl::android::hardware::tv::tuner::DemuxFilterSubType;
 using ::aidl::android::hardware::tv::tuner::DemuxFilterTemiEvent;
 using ::aidl::android::hardware::tv::tuner::DemuxFilterTsRecordEvent;
+using ::aidl::android::hardware::tv::tuner::DemuxInfo;
 using ::aidl::android::hardware::tv::tuner::DemuxIpAddress;
 using ::aidl::android::hardware::tv::tuner::DemuxIpAddressIpAddress;
 using ::aidl::android::hardware::tv::tuner::DemuxIpFilterSettings;
@@ -281,6 +291,11 @@ using ::aidl::android::hardware::tv::tuner::FrontendIsdbtModulation;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtPartialReceptionFlag;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtSettings;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtTimeInterleaveMode;
+using ::aidl::android::hardware::tv::tuner::FrontendIptvSettings;
+using ::aidl::android::hardware::tv::tuner::FrontendIptvSettingsFec;
+using ::aidl::android::hardware::tv::tuner::FrontendIptvSettingsProtocol;
+using ::aidl::android::hardware::tv::tuner::FrontendIptvSettingsIgmp;
+using ::aidl::android::hardware::tv::tuner::FrontendIptvSettingsFecType;
 using ::aidl::android::hardware::tv::tuner::FrontendModulation;
 using ::aidl::android::hardware::tv::tuner::FrontendModulationStatus;
 using ::aidl::android::hardware::tv::tuner::FrontendRollOff;
@@ -350,14 +365,17 @@ void DestroyCallback(const C2Buffer * buf, void *arg) {
 }
 
 namespace android {
+
+static JAudioPresentationInfo::fields_t gAudioPresentationFields;
+
 /////////////// LnbClientCallbackImpl ///////////////////////
 void LnbClientCallbackImpl::onEvent(const LnbEventType lnbEventType) {
     ALOGV("LnbClientCallbackImpl::onEvent, type=%d", lnbEventType);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jobject lnb(env->NewLocalRef(mLnbObj));
-    if (!env->IsSameObject(lnb, nullptr)) {
+    ScopedLocalRef lnb(env, env->NewLocalRef(mLnbObj));
+    if (!env->IsSameObject(lnb.get(), nullptr)) {
         env->CallVoidMethod(
-                lnb,
+                lnb.get(),
                 gFields.onLnbEventID,
                 (jint)lnbEventType);
     } else {
@@ -369,15 +387,15 @@ void LnbClientCallbackImpl::onEvent(const LnbEventType lnbEventType) {
 void LnbClientCallbackImpl::onDiseqcMessage(const vector<uint8_t> &diseqcMessage) {
     ALOGV("LnbClientCallbackImpl::onDiseqcMessage");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jobject lnb(env->NewLocalRef(mLnbObj));
-    if (!env->IsSameObject(lnb, nullptr)) {
-        jbyteArray array = env->NewByteArray(diseqcMessage.size());
-        env->SetByteArrayRegion(array, 0, diseqcMessage.size(),
+    ScopedLocalRef lnb(env, env->NewLocalRef(mLnbObj));
+    if (!env->IsSameObject(lnb.get(), nullptr)) {
+        ScopedLocalRef array(env, env->NewByteArray(diseqcMessage.size()));
+        env->SetByteArrayRegion(array.get(), 0, diseqcMessage.size(),
                                 reinterpret_cast<const jbyte *>(&diseqcMessage[0]));
         env->CallVoidMethod(
-                lnb,
+                lnb.get(),
                 gFields.onLnbDiseqcMessageID,
-                array);
+                array.get());
     } else {
         ALOGE("LnbClientCallbackImpl::onDiseqcMessage:"
                 "Lnb object has been freed. Ignoring callback.");
@@ -401,9 +419,9 @@ LnbClientCallbackImpl::~LnbClientCallbackImpl() {
 void DvrClientCallbackImpl::onRecordStatus(RecordStatus status) {
     ALOGV("DvrClientCallbackImpl::onRecordStatus");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jobject dvr(env->NewLocalRef(mDvrObj));
-    if (!env->IsSameObject(dvr, nullptr)) {
-        env->CallVoidMethod(dvr, gFields.onDvrRecordStatusID, (jint)status);
+    ScopedLocalRef dvr(env, env->NewLocalRef(mDvrObj));
+    if (!env->IsSameObject(dvr.get(), nullptr)) {
+        env->CallVoidMethod(dvr.get(), gFields.onDvrRecordStatusID, (jint)status);
     } else {
         ALOGE("DvrClientCallbackImpl::onRecordStatus:"
                 "Dvr object has been freed. Ignoring callback.");
@@ -413,9 +431,9 @@ void DvrClientCallbackImpl::onRecordStatus(RecordStatus status) {
 void DvrClientCallbackImpl::onPlaybackStatus(PlaybackStatus status) {
     ALOGV("DvrClientCallbackImpl::onPlaybackStatus");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jobject dvr(env->NewLocalRef(mDvrObj));
-    if (!env->IsSameObject(dvr, nullptr)) {
-        env->CallVoidMethod(dvr, gFields.onDvrPlaybackStatusID, (jint)status);
+    ScopedLocalRef dvr(env, env->NewLocalRef(mDvrObj));
+    if (!env->IsSameObject(dvr.get(), nullptr)) {
+        env->CallVoidMethod(dvr.get(), gFields.onDvrPlaybackStatusID, (jint)status);
     } else {
         ALOGE("DvrClientCallbackImpl::onPlaybackStatus:"
                 "Dvr object has been freed. Ignoring callback.");
@@ -483,9 +501,11 @@ MediaEvent::~MediaEvent() {
 }
 
 void MediaEvent::finalize() {
-    if (mAvHandleRefCnt == 0 && mFilterClient != nullptr) {
-        mFilterClient->releaseAvHandle(
-                mAvHandle, mDataIdRefCnt == 0 ? mDataId : 0);
+    if (mAvHandleRefCnt == 0) {
+        if (mFilterClient != nullptr) {
+            mFilterClient->releaseAvHandle(
+                    mAvHandle, mDataIdRefCnt == 0 ? mDataId : 0);
+        }
         native_handle_close(mAvHandle);
     }
 }
@@ -589,11 +609,9 @@ int64_t MediaEvent::getAudioHandle() {
 }
 
 /////////////// FilterClientCallbackImpl ///////////////////////
-void FilterClientCallbackImpl::getSectionEvent(jobjectArray &arr, const int size,
+void FilterClientCallbackImpl::getSectionEvent(const jobjectArray& arr, const int size,
                                                const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/SectionEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIJ)V");
 
     const DemuxFilterSectionEvent &sectionEvent = event.get<DemuxFilterEvent::Tag::section>();
     jint tableId = sectionEvent.tableId;
@@ -601,38 +619,49 @@ void FilterClientCallbackImpl::getSectionEvent(jobjectArray &arr, const int size
     jint sectionNum = sectionEvent.sectionNum;
     jlong dataLength = sectionEvent.dataLength;
 
-    jobject obj = env->NewObject(eventClazz, eventInit, tableId, version, sectionNum, dataLength);
-    env->SetObjectArrayElement(arr, size, obj);
+    ScopedLocalRef obj(env, env->NewObject(mSectionEventClass, mSectionEventInitID, tableId,
+                                           version, sectionNum, dataLength));
+    env->SetObjectArrayElement(arr, size, obj.get());
 }
 
-void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
+void FilterClientCallbackImpl::getMediaEvent(const jobjectArray& arr, const int size,
                                              const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/MediaEvent");
-    jmethodID eventInit = env->GetMethodID(
-            eventClazz,
-            "<init>",
-            "(IZJZJJJLandroid/media/MediaCodec$LinearBlock;"
-            "ZJIZILandroid/media/tv/tuner/filter/AudioDescriptor;)V");
-    jfieldID eventContext = env->GetFieldID(eventClazz, "mNativeContext", "J");
 
     const DemuxFilterMediaEvent &mediaEvent = event.get<DemuxFilterEvent::Tag::media>();
-    jobject audioDescriptor = nullptr;
-    if (mediaEvent.extraMetaData.getTag() == DemuxFilterMediaEventExtraMetaData::Tag::audio) {
-        jclass adClazz = env->FindClass("android/media/tv/tuner/filter/AudioDescriptor");
-        jmethodID adInit = env->GetMethodID(adClazz, "<init>", "(BBCBBB)V");
+    ScopedLocalRef<jobject> audioDescriptor(env);
+    gAudioPresentationFields.init(env);
+    ScopedLocalRef presentationsJObj(env, JAudioPresentationInfo::asJobject(
+        env, gAudioPresentationFields));
+    switch (mediaEvent.extraMetaData.getTag()) {
+        case DemuxFilterMediaEventExtraMetaData::Tag::audio: {
 
-        const AudioExtraMetaData &ad =
-                mediaEvent.extraMetaData.get<DemuxFilterMediaEventExtraMetaData::Tag::audio>();
-        jbyte adFade = ad.adFade;
-        jbyte adPan = ad.adPan;
-        jchar versionTextTag = ad.versionTextTag;
-        jbyte adGainCenter = ad.adGainCenter;
-        jbyte adGainFront = ad.adGainFront;
-        jbyte adGainSurround = ad.adGainSurround;
+            const AudioExtraMetaData &ad =
+                    mediaEvent.extraMetaData.get<DemuxFilterMediaEventExtraMetaData::Tag::audio>();
+            jbyte adFade = ad.adFade;
+            jbyte adPan = ad.adPan;
+            jchar versionTextTag = ad.versionTextTag;
+            jbyte adGainCenter = ad.adGainCenter;
+            jbyte adGainFront = ad.adGainFront;
+            jbyte adGainSurround = ad.adGainSurround;
 
-        audioDescriptor = env->NewObject(adClazz, adInit, adFade, adPan, versionTextTag,
-                                         adGainCenter, adGainFront, adGainSurround);
+            audioDescriptor.reset(env->NewObject(mAudioDescriptorClass, mAudioDescriptorInitID,
+                                                 adFade, adPan, versionTextTag, adGainCenter,
+                                                 adGainFront, adGainSurround));
+            break;
+        }
+        case DemuxFilterMediaEventExtraMetaData::Tag::audioPresentations: {
+            JAudioPresentationInfo::addPresentations(
+                    env, gAudioPresentationFields,
+                    mediaEvent.extraMetaData
+                            .get<DemuxFilterMediaEventExtraMetaData::Tag::audioPresentations>(),
+                    presentationsJObj.get());
+            break;
+        }
+        default: {
+            ALOGE("FilterClientCallbackImpl::getMediaEvent: unknown extraMetaData");
+            break;
+        }
     }
 
     jlong dataLength = mediaEvent.dataLength;
@@ -655,46 +684,47 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
         sc = mediaEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scAvc>();
         // Java uses the values defined by HIDL HAL. Left shift 4 bits.
         sc = sc << 4;
+    } else if (mediaEvent.scIndexMask.getTag() == DemuxFilterScIndexMask::Tag::scVvc) {
+        sc = mediaEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scVvc>();
     }
 
-    jobject obj = env->NewObject(eventClazz, eventInit, streamId, isPtsPresent, pts, isDtsPresent,
-                                 dts, dataLength, offset, nullptr, isSecureMemory, avDataId,
-                                 mpuSequenceNumber, isPesPrivateData, sc, audioDescriptor);
+    ScopedLocalRef obj(env, env->NewObject(mMediaEventClass, mMediaEventInitID, streamId,
+                                           isPtsPresent, pts, isDtsPresent, dts, dataLength,
+                                           offset, nullptr, isSecureMemory, avDataId,
+                                           mpuSequenceNumber, isPesPrivateData, sc,
+                                           audioDescriptor.get(), presentationsJObj.get()));
 
     uint64_t avSharedMemSize = mFilterClient->getAvSharedHandleInfo().size;
     if (mediaEvent.avMemory.fds.size() > 0 || mediaEvent.avDataId != 0 ||
         (dataLength > 0 && (dataLength + offset) < avSharedMemSize)) {
         sp<MediaEvent> mediaEventSp =
                 new MediaEvent(mFilterClient, dupFromAidl(mediaEvent.avMemory),
-                               mediaEvent.avDataId, dataLength + offset, obj);
+                               mediaEvent.avDataId, dataLength + offset, obj.get());
         mediaEventSp->mAvHandleRefCnt++;
-        env->SetLongField(obj, eventContext, (jlong)mediaEventSp.get());
-        mediaEventSp->incStrong(obj);
+        env->SetLongField(obj.get(), mMediaEventFieldContextID, (jlong)mediaEventSp.get());
+        mediaEventSp->incStrong(obj.get());
     }
 
-    env->SetObjectArrayElement(arr, size, obj);
+    env->SetObjectArrayElement(arr, size, obj.get());
 }
 
-void FilterClientCallbackImpl::getPesEvent(jobjectArray &arr, const int size,
+void FilterClientCallbackImpl::getPesEvent(const jobjectArray& arr, const int size,
                                            const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/PesEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(III)V");
 
     const DemuxFilterPesEvent &pesEvent = event.get<DemuxFilterEvent::Tag::pes>();
     jint streamId = pesEvent.streamId;
     jint dataLength = pesEvent.dataLength;
     jint mpuSequenceNumber = pesEvent.mpuSequenceNumber;
 
-    jobject obj = env->NewObject(eventClazz, eventInit, streamId, dataLength, mpuSequenceNumber);
-    env->SetObjectArrayElement(arr, size, obj);
+    ScopedLocalRef obj(env, env->NewObject(mPesEventClass, mPesEventInitID, streamId, dataLength,
+                                 mpuSequenceNumber));
+    env->SetObjectArrayElement(arr, size, obj.get());
 }
 
-void FilterClientCallbackImpl::getTsRecordEvent(jobjectArray &arr, const int size,
+void FilterClientCallbackImpl::getTsRecordEvent(const jobjectArray& arr, const int size,
                                                 const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/TsRecordEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIJJI)V");
 
     const DemuxFilterTsRecordEvent &tsRecordEvent = event.get<DemuxFilterEvent::Tag::tsRecord>();
     DemuxPid pid = tsRecordEvent.pid;
@@ -715,6 +745,8 @@ void FilterClientCallbackImpl::getTsRecordEvent(jobjectArray &arr, const int siz
         sc = tsRecordEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scAvc>();
         // Java uses the values defined by HIDL HAL. Left shift 4 bits.
         sc = sc << 4;
+    } else if (tsRecordEvent.scIndexMask.getTag() == DemuxFilterScIndexMask::Tag::scVvc) {
+        sc = tsRecordEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scVvc>();
     }
 
     jint ts = tsRecordEvent.tsIndexMask;
@@ -722,16 +754,14 @@ void FilterClientCallbackImpl::getTsRecordEvent(jobjectArray &arr, const int siz
     jlong pts = tsRecordEvent.pts;
     jint firstMbInSlice = tsRecordEvent.firstMbInSlice;
 
-    jobject obj =
-            env->NewObject(eventClazz, eventInit, jpid, ts, sc, byteNumber, pts, firstMbInSlice);
-    env->SetObjectArrayElement(arr, size, obj);
+    ScopedLocalRef obj(env, env->NewObject(mTsRecordEventClass, mTsRecordEventInitID, jpid, ts, sc,
+                                 byteNumber, pts, firstMbInSlice));
+    env->SetObjectArrayElement(arr, size, obj.get());
 }
 
-void FilterClientCallbackImpl::getMmtpRecordEvent(jobjectArray &arr, const int size,
+void FilterClientCallbackImpl::getMmtpRecordEvent(const jobjectArray& arr, const int size,
                                                   const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/MmtpRecordEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IJIJII)V");
 
     const DemuxFilterMmtpRecordEvent &mmtpRecordEvent =
             event.get<DemuxFilterEvent::Tag::mmtpRecord>();
@@ -742,16 +772,15 @@ void FilterClientCallbackImpl::getMmtpRecordEvent(jobjectArray &arr, const int s
     jint firstMbInSlice = mmtpRecordEvent.firstMbInSlice;
     jlong tsIndexMask = mmtpRecordEvent.tsIndexMask;
 
-    jobject obj = env->NewObject(eventClazz, eventInit, scHevcIndexMask, byteNumber,
-                                 mpuSequenceNumber, pts, firstMbInSlice, tsIndexMask);
-    env->SetObjectArrayElement(arr, size, obj);
+    ScopedLocalRef obj(env, env->NewObject(mMmtpRecordEventClass, mMmtpRecordEventInitID,
+                                           scHevcIndexMask, byteNumber, mpuSequenceNumber, pts,
+                                           firstMbInSlice, tsIndexMask));
+    env->SetObjectArrayElement(arr, size, obj.get());
 }
 
-void FilterClientCallbackImpl::getDownloadEvent(jobjectArray &arr, const int size,
+void FilterClientCallbackImpl::getDownloadEvent(const jobjectArray& arr, const int size,
                                                 const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/DownloadEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIIII)V");
 
     const DemuxFilterDownloadEvent &downloadEvent = event.get<DemuxFilterEvent::Tag::download>();
     jint itemId = downloadEvent.itemId;
@@ -761,139 +790,135 @@ void FilterClientCallbackImpl::getDownloadEvent(jobjectArray &arr, const int siz
     jint lastItemFragmentIndex = downloadEvent.lastItemFragmentIndex;
     jint dataLength = downloadEvent.dataLength;
 
-    jobject obj = env->NewObject(eventClazz, eventInit, itemId, downloadId, mpuSequenceNumber,
-                                 itemFragmentIndex, lastItemFragmentIndex, dataLength);
-    env->SetObjectArrayElement(arr, size, obj);
+    ScopedLocalRef obj(env, env->NewObject(mDownloadEventClass, mDownloadEventInitID, itemId,
+                                           downloadId, mpuSequenceNumber, itemFragmentIndex,
+                                           lastItemFragmentIndex, dataLength));
+    env->SetObjectArrayElement(arr, size, obj.get());
 }
 
-void FilterClientCallbackImpl::getIpPayloadEvent(jobjectArray &arr, const int size,
+void FilterClientCallbackImpl::getIpPayloadEvent(const jobjectArray& arr, const int size,
                                                  const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/IpPayloadEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
 
-    const DemuxFilterIpPayloadEvent &ipPayloadEvent = event.get<DemuxFilterEvent::Tag::ipPayload>();
+    const DemuxFilterIpPayloadEvent &ipPayloadEvent =
+        event.get<DemuxFilterEvent::Tag::ipPayload>();
     jint dataLength = ipPayloadEvent.dataLength;
-    jobject obj = env->NewObject(eventClazz, eventInit, dataLength);
-    env->SetObjectArrayElement(arr, size, obj);
+    ScopedLocalRef obj(env, env->NewObject(mIpPayloadEventClass, mIpPayloadEventInitID,
+                                           dataLength));
+    env->SetObjectArrayElement(arr, size, obj.get());
 }
 
-void FilterClientCallbackImpl::getTemiEvent(jobjectArray &arr, const int size,
+void FilterClientCallbackImpl::getTemiEvent(const jobjectArray& arr, const int size,
                                             const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/TemiEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(JB[B)V");
 
     const DemuxFilterTemiEvent &temiEvent = event.get<DemuxFilterEvent::Tag::temi>();
     jlong pts = temiEvent.pts;
     jbyte descrTag = temiEvent.descrTag;
     std::vector<uint8_t> descrData = temiEvent.descrData;
 
-    jbyteArray array = env->NewByteArray(descrData.size());
-    env->SetByteArrayRegion(array, 0, descrData.size(), reinterpret_cast<jbyte *>(&descrData[0]));
+    ScopedLocalRef array(env, env->NewByteArray(descrData.size()));
+    env->SetByteArrayRegion(array.get(), 0, descrData.size(),
+                            reinterpret_cast<jbyte *>(&descrData[0]));
 
-    jobject obj = env->NewObject(eventClazz, eventInit, pts, descrTag, array);
-    env->SetObjectArrayElement(arr, size, obj);
+    ScopedLocalRef obj(env, env->NewObject(mTemiEventClass, mTemiEventInitID, pts, descrTag,
+                                           array.get()));
+    env->SetObjectArrayElement(arr, size, obj.get());
 }
 
-void FilterClientCallbackImpl::getScramblingStatusEvent(jobjectArray &arr, const int size,
+void FilterClientCallbackImpl::getScramblingStatusEvent(const jobjectArray& arr, const int size,
                                                         const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/ScramblingStatusEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
 
     const DemuxFilterMonitorEvent &scramblingStatus =
             event.get<DemuxFilterEvent::Tag::monitorEvent>()
                     .get<DemuxFilterMonitorEvent::Tag::scramblingStatus>();
-    jobject obj = env->NewObject(eventClazz, eventInit, scramblingStatus);
-    env->SetObjectArrayElement(arr, size, obj);
+    ScopedLocalRef obj(env, env->NewObject(mScramblingStatusEventClass,
+                                           mScramblingStatusEventInitID,
+                                           scramblingStatus));
+    env->SetObjectArrayElement(arr, size, obj.get());
 }
 
-void FilterClientCallbackImpl::getIpCidChangeEvent(jobjectArray &arr, const int size,
+void FilterClientCallbackImpl::getIpCidChangeEvent(const jobjectArray& arr, const int size,
                                                    const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/IpCidChangeEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
 
     const DemuxFilterMonitorEvent &cid = event.get<DemuxFilterEvent::Tag::monitorEvent>()
                                                  .get<DemuxFilterMonitorEvent::Tag::cid>();
-    jobject obj = env->NewObject(eventClazz, eventInit, cid);
-    env->SetObjectArrayElement(arr, size, obj);
+    ScopedLocalRef obj(env, env->NewObject(mIpCidChangeEventClass, mIpCidChangeEventInitID, cid));
+    env->SetObjectArrayElement(arr, size, obj.get());
 }
 
-void FilterClientCallbackImpl::getRestartEvent(jobjectArray &arr, const int size,
+void FilterClientCallbackImpl::getRestartEvent(const jobjectArray& arr, const int size,
                                                const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/RestartEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
 
     const int32_t &startId = event.get<DemuxFilterEvent::Tag::startId>();
-    jobject obj = env->NewObject(eventClazz, eventInit, startId);
-    env->SetObjectArrayElement(arr, size, obj);
+    ScopedLocalRef obj(env, env->NewObject(mRestartEventClass, mRestartEventInitID, startId));
+    env->SetObjectArrayElement(arr, size, obj.get());
 }
 
 void FilterClientCallbackImpl::onFilterEvent(const vector<DemuxFilterEvent> &events) {
     ALOGV("FilterClientCallbackImpl::onFilterEvent");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/FilterEvent");
-    jobjectArray array;
+    ScopedLocalRef<jobjectArray> array(env);
 
     if (!events.empty()) {
-        array = env->NewObjectArray(events.size(), eventClazz, nullptr);
+        array.reset(env->NewObjectArray(events.size(), mEventClass, nullptr));
     }
 
     for (int i = 0, arraySize = 0; i < events.size(); i++) {
         const DemuxFilterEvent &event = events[i];
         switch (event.getTag()) {
             case DemuxFilterEvent::Tag::media: {
-                getMediaEvent(array, arraySize, event);
+                getMediaEvent(array.get(), arraySize, event);
                 arraySize++;
                 break;
             }
             case DemuxFilterEvent::Tag::section: {
-                getSectionEvent(array, arraySize, event);
+                getSectionEvent(array.get(), arraySize, event);
                 arraySize++;
                 break;
             }
             case DemuxFilterEvent::Tag::pes: {
-                getPesEvent(array, arraySize, event);
+                getPesEvent(array.get(), arraySize, event);
                 arraySize++;
                 break;
             }
             case DemuxFilterEvent::Tag::tsRecord: {
-                getTsRecordEvent(array, arraySize, event);
+                getTsRecordEvent(array.get(), arraySize, event);
                 arraySize++;
                 break;
             }
             case DemuxFilterEvent::Tag::mmtpRecord: {
-                getMmtpRecordEvent(array, arraySize, event);
+                getMmtpRecordEvent(array.get(), arraySize, event);
                 arraySize++;
                 break;
             }
             case DemuxFilterEvent::Tag::download: {
-                getDownloadEvent(array, arraySize, event);
+                getDownloadEvent(array.get(), arraySize, event);
                 arraySize++;
                 break;
             }
             case DemuxFilterEvent::Tag::ipPayload: {
-                getIpPayloadEvent(array, arraySize, event);
+                getIpPayloadEvent(array.get(), arraySize, event);
                 arraySize++;
                 break;
             }
             case DemuxFilterEvent::Tag::temi: {
-                getTemiEvent(array, arraySize, event);
+                getTemiEvent(array.get(), arraySize, event);
                 arraySize++;
                 break;
             }
             case DemuxFilterEvent::Tag::monitorEvent: {
                 switch (event.get<DemuxFilterEvent::Tag::monitorEvent>().getTag()) {
                     case DemuxFilterMonitorEvent::Tag::scramblingStatus: {
-                        getScramblingStatusEvent(array, arraySize, event);
+                        getScramblingStatusEvent(array.get(), arraySize, event);
                         arraySize++;
                         break;
                     }
                     case DemuxFilterMonitorEvent::Tag::cid: {
-                        getIpCidChangeEvent(array, arraySize, event);
+                        getIpCidChangeEvent(array.get(), arraySize, event);
                         arraySize++;
                         break;
                     }
@@ -905,7 +930,7 @@ void FilterClientCallbackImpl::onFilterEvent(const vector<DemuxFilterEvent> &eve
                 break;
             }
             case DemuxFilterEvent::Tag::startId: {
-                getRestartEvent(array, arraySize, event);
+                getRestartEvent(array.get(), arraySize, event);
                 arraySize++;
                 break;
             }
@@ -915,13 +940,13 @@ void FilterClientCallbackImpl::onFilterEvent(const vector<DemuxFilterEvent> &eve
             }
         }
     }
-    jobject filter(env->NewLocalRef(mFilterObj));
-    if (!env->IsSameObject(filter, nullptr)) {
+    ScopedLocalRef filter(env, env->NewLocalRef(mFilterObj));
+    if (!env->IsSameObject(filter.get(), nullptr)) {
         jmethodID methodID = gFields.onFilterEventID;
         if (mSharedFilter) {
             methodID = gFields.onSharedFilterEventID;
         }
-        env->CallVoidMethod(filter, methodID, array);
+        env->CallVoidMethod(filter.get(), methodID, array.get());
     } else {
         ALOGE("FilterClientCallbackImpl::onFilterEvent:"
               "Filter object has been freed. Ignoring callback.");
@@ -931,13 +956,13 @@ void FilterClientCallbackImpl::onFilterEvent(const vector<DemuxFilterEvent> &eve
 void FilterClientCallbackImpl::onFilterStatus(const DemuxFilterStatus status) {
     ALOGV("FilterClientCallbackImpl::onFilterStatus");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jobject filter(env->NewLocalRef(mFilterObj));
-    if (!env->IsSameObject(filter, nullptr)) {
+    ScopedLocalRef filter(env, env->NewLocalRef(mFilterObj));
+    if (!env->IsSameObject(filter.get(), nullptr)) {
         jmethodID methodID = gFields.onFilterStatusID;
         if (mSharedFilter) {
             methodID = gFields.onSharedFilterStatusID;
         }
-        env->CallVoidMethod(filter, methodID, (jint)static_cast<uint8_t>(status));
+        env->CallVoidMethod(filter.get(), methodID, (jint)static_cast<uint8_t>(status));
     } else {
         ALOGE("FilterClientCallbackImpl::onFilterStatus:"
               "Filter object has been freed. Ignoring callback.");
@@ -960,6 +985,67 @@ void FilterClientCallbackImpl::setSharedFilter(jweak filterObj, sp<FilterClient>
     mSharedFilter = true;
 }
 
+FilterClientCallbackImpl::FilterClientCallbackImpl() {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    ScopedLocalRef eventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/FilterEvent"));
+    ScopedLocalRef sectionEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/SectionEvent"));
+    ScopedLocalRef mediaEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/MediaEvent"));
+    ScopedLocalRef audioDescriptorClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/AudioDescriptor"));
+    ScopedLocalRef pesEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/PesEvent"));
+    ScopedLocalRef tsRecordEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/TsRecordEvent"));
+    ScopedLocalRef mmtpRecordEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/MmtpRecordEvent"));
+    ScopedLocalRef downloadEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/DownloadEvent"));
+    ScopedLocalRef ipPayloadEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/IpPayloadEvent"));
+    ScopedLocalRef temiEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/TemiEvent"));
+    ScopedLocalRef scramblingStatusEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/ScramblingStatusEvent"));
+    ScopedLocalRef ipCidChangeEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/IpCidChangeEvent"));
+    ScopedLocalRef restartEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/RestartEvent"));
+    mEventClass = (jclass) env->NewGlobalRef(eventClass.get());
+    mSectionEventClass = (jclass) env->NewGlobalRef(sectionEventClass.get());
+    mMediaEventClass = (jclass) env->NewGlobalRef(mediaEventClass.get());
+    mAudioDescriptorClass = (jclass) env->NewGlobalRef(audioDescriptorClass.get());
+    mPesEventClass = (jclass) env->NewGlobalRef(pesEventClass.get());
+    mTsRecordEventClass = (jclass) env->NewGlobalRef(tsRecordEventClass.get());
+    mMmtpRecordEventClass = (jclass) env->NewGlobalRef(mmtpRecordEventClass.get());
+    mDownloadEventClass = (jclass) env->NewGlobalRef(downloadEventClass.get());
+    mIpPayloadEventClass = (jclass) env->NewGlobalRef(ipPayloadEventClass.get());
+    mTemiEventClass = (jclass) env->NewGlobalRef(temiEventClass.get());
+    mScramblingStatusEventClass = (jclass) env->NewGlobalRef(scramblingStatusEventClass.get());
+    mIpCidChangeEventClass = (jclass) env->NewGlobalRef(ipCidChangeEventClass.get());
+    mRestartEventClass = (jclass) env->NewGlobalRef(restartEventClass.get());
+    mSectionEventInitID = env->GetMethodID(mSectionEventClass, "<init>", "(IIIJ)V");
+    mMediaEventInitID = env->GetMethodID(
+            mMediaEventClass,
+            "<init>",
+            "(IZJZJJJLandroid/media/MediaCodec$LinearBlock;"
+            "ZJIZILandroid/media/tv/tuner/filter/AudioDescriptor;"
+            "Ljava/util/List;)V");
+    mAudioDescriptorInitID = env->GetMethodID(mAudioDescriptorClass, "<init>", "(BBCBBB)V");
+    mPesEventInitID = env->GetMethodID(mPesEventClass, "<init>", "(III)V");
+    mTsRecordEventInitID = env->GetMethodID(mTsRecordEventClass, "<init>", "(IIIJJI)V");
+    mMmtpRecordEventInitID = env->GetMethodID(mMmtpRecordEventClass, "<init>", "(IJIJII)V");
+    mDownloadEventInitID = env->GetMethodID(mDownloadEventClass, "<init>", "(IIIIII)V");
+    mIpPayloadEventInitID = env->GetMethodID(mIpPayloadEventClass, "<init>", "(I)V");
+    mTemiEventInitID = env->GetMethodID(mTemiEventClass, "<init>", "(JB[B)V");
+    mScramblingStatusEventInitID = env->GetMethodID(mScramblingStatusEventClass, "<init>", "(I)V");
+    mIpCidChangeEventInitID = env->GetMethodID(mIpCidChangeEventClass, "<init>", "(I)V");
+    mRestartEventInitID = env->GetMethodID(mRestartEventClass, "<init>", "(I)V");
+    mMediaEventFieldContextID = env->GetFieldID(mMediaEventClass, "mNativeContext", "J");
+}
+
 FilterClientCallbackImpl::~FilterClientCallbackImpl() {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     if (mFilterObj != nullptr) {
@@ -967,6 +1053,19 @@ FilterClientCallbackImpl::~FilterClientCallbackImpl() {
         mFilterObj = nullptr;
     }
     mFilterClient = nullptr;
+    env->DeleteGlobalRef(mEventClass);
+    env->DeleteGlobalRef(mSectionEventClass);
+    env->DeleteGlobalRef(mMediaEventClass);
+    env->DeleteGlobalRef(mAudioDescriptorClass);
+    env->DeleteGlobalRef(mPesEventClass);
+    env->DeleteGlobalRef(mTsRecordEventClass);
+    env->DeleteGlobalRef(mMmtpRecordEventClass);
+    env->DeleteGlobalRef(mDownloadEventClass);
+    env->DeleteGlobalRef(mIpPayloadEventClass);
+    env->DeleteGlobalRef(mTemiEventClass);
+    env->DeleteGlobalRef(mScramblingStatusEventClass);
+    env->DeleteGlobalRef(mIpCidChangeEventClass);
+    env->DeleteGlobalRef(mRestartEventClass);
 }
 
 /////////////// FrontendClientCallbackImpl ///////////////////////
@@ -1000,10 +1099,10 @@ void FrontendClientCallbackImpl::onEvent(FrontendEventType frontendEventType) {
     std::scoped_lock<std::mutex> lock(mMutex);
     for (const auto& mapEntry : mListenersMap) {
         ALOGV("JTuner:%p, jweak:%p", mapEntry.first, mapEntry.second);
-        jobject frontend(env->NewLocalRef(mapEntry.second));
-        if (!env->IsSameObject(frontend, nullptr)) {
+        ScopedLocalRef frontend(env, env->NewLocalRef(mapEntry.second));
+        if (!env->IsSameObject(frontend.get(), nullptr)) {
             env->CallVoidMethod(
-                    frontend,
+                    frontend.get(),
                     gFields.onFrontendEventID,
                     (jint)frontendEventType);
         } else {
@@ -1017,17 +1116,17 @@ void FrontendClientCallbackImpl::onScanMessage(
         FrontendScanMessageType type, const FrontendScanMessage& message) {
     ALOGV("FrontendClientCallbackImpl::onScanMessage, type=%d", type);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass clazz = env->FindClass("android/media/tv/tuner/Tuner");
+    ScopedLocalRef clazz(env, env->FindClass("android/media/tv/tuner/Tuner"));
 
     std::scoped_lock<std::mutex> lock(mMutex);
     for (const auto& mapEntry : mListenersMap) {
-        jobject frontend(env->NewLocalRef(mapEntry.second));
-        if (env->IsSameObject(frontend, nullptr)) {
+        ScopedLocalRef frontend(env, env->NewLocalRef(mapEntry.second));
+        if (env->IsSameObject(frontend.get(), nullptr)) {
             ALOGE("FrontendClientCallbackImpl::onScanMessage:"
                     "Tuner object has been freed. Ignoring callback.");
             continue;
         }
-        executeOnScanMessage(env, clazz, frontend, type, message);
+        executeOnScanMessage(env, clazz.get(), frontend.get(), type, message);
     }
 }
 
@@ -1065,18 +1164,19 @@ void FrontendClientCallbackImpl::executeOnScanMessage(
         }
         case FrontendScanMessageType::FREQUENCY: {
             std::vector<int64_t> v = message.get<FrontendScanMessage::Tag::frequencies>();
-            jlongArray freqs = env->NewLongArray(v.size());
-            env->SetLongArrayRegion(freqs, 0, v.size(), reinterpret_cast<jlong *>(&v[0]));
+            ScopedLocalRef freqs(env, env->NewLongArray(v.size()));
+            env->SetLongArrayRegion(freqs.get(), 0, v.size(), reinterpret_cast<jlong *>(&v[0]));
             env->CallVoidMethod(frontend, env->GetMethodID(clazz, "onFrequenciesReport", "([J)V"),
-                                freqs);
+                                freqs.get());
             break;
         }
         case FrontendScanMessageType::SYMBOL_RATE: {
             std::vector<int32_t> v = message.get<FrontendScanMessage::Tag::symbolRates>();
-            jintArray symbolRates = env->NewIntArray(v.size());
-            env->SetIntArrayRegion(symbolRates, 0, v.size(), reinterpret_cast<jint *>(&v[0]));
+            ScopedLocalRef symbolRates(env, env->NewIntArray(v.size()));
+            env->SetIntArrayRegion(symbolRates.get(), 0, v.size(),
+                                   reinterpret_cast<jint *>(&v[0]));
             env->CallVoidMethod(frontend, env->GetMethodID(clazz, "onSymbolRates", "([I)V"),
-                                symbolRates);
+                                symbolRates.get());
             break;
         }
         case FrontendScanMessageType::HIERARCHY: {
@@ -1091,24 +1191,29 @@ void FrontendClientCallbackImpl::executeOnScanMessage(
         }
         case FrontendScanMessageType::PLP_IDS: {
             std::vector<int32_t> jintV = message.get<FrontendScanMessage::Tag::plpIds>();
-            jintArray plpIds = env->NewIntArray(jintV.size());
-            env->SetIntArrayRegion(plpIds, 0, jintV.size(), reinterpret_cast<jint *>(&jintV[0]));
-            env->CallVoidMethod(frontend, env->GetMethodID(clazz, "onPlpIds", "([I)V"), plpIds);
+            ScopedLocalRef plpIds(env, env->NewIntArray(jintV.size()));
+            env->SetIntArrayRegion(plpIds.get(), 0, jintV.size(),
+                                   reinterpret_cast<jint *>(&jintV[0]));
+            env->CallVoidMethod(frontend, env->GetMethodID(clazz, "onPlpIds", "([I)V"),
+                                plpIds.get());
             break;
         }
         case FrontendScanMessageType::GROUP_IDS: {
             std::vector<int32_t> jintV = message.get<FrontendScanMessage::groupIds>();
-            jintArray groupIds = env->NewIntArray(jintV.size());
-            env->SetIntArrayRegion(groupIds, 0, jintV.size(), reinterpret_cast<jint *>(&jintV[0]));
-            env->CallVoidMethod(frontend, env->GetMethodID(clazz, "onGroupIds", "([I)V"), groupIds);
+            ScopedLocalRef groupIds(env, env->NewIntArray(jintV.size()));
+            env->SetIntArrayRegion(groupIds.get(), 0, jintV.size(),
+                                   reinterpret_cast<jint *>(&jintV[0]));
+            env->CallVoidMethod(frontend, env->GetMethodID(clazz, "onGroupIds", "([I)V"),
+                                groupIds.get());
             break;
         }
         case FrontendScanMessageType::INPUT_STREAM_IDS: {
             std::vector<int32_t> jintV = message.get<FrontendScanMessage::inputStreamIds>();
-            jintArray streamIds = env->NewIntArray(jintV.size());
-            env->SetIntArrayRegion(streamIds, 0, jintV.size(), reinterpret_cast<jint *>(&jintV[0]));
+            ScopedLocalRef streamIds(env, env->NewIntArray(jintV.size()));
+            env->SetIntArrayRegion(streamIds.get(), 0, jintV.size(),
+                                   reinterpret_cast<jint *>(&jintV[0]));
             env->CallVoidMethod(frontend, env->GetMethodID(clazz, "onInputStreamIds", "([I)V"),
-                                streamIds);
+                                streamIds.get());
             break;
         }
         case FrontendScanMessageType::STANDARD: {
@@ -1131,23 +1236,25 @@ void FrontendClientCallbackImpl::executeOnScanMessage(
             break;
         }
         case FrontendScanMessageType::ATSC3_PLP_INFO: {
-            jclass plpClazz = env->FindClass("android/media/tv/tuner/frontend/Atsc3PlpInfo");
-            jmethodID init = env->GetMethodID(plpClazz, "<init>", "(IZ)V");
+            ScopedLocalRef plpClazz(env,
+                    env->FindClass("android/media/tv/tuner/frontend/Atsc3PlpInfo"));
+            jmethodID init = env->GetMethodID(plpClazz.get(), "<init>", "(IZ)V");
             std::vector<FrontendScanAtsc3PlpInfo> plpInfos =
                     message.get<FrontendScanMessage::atsc3PlpInfos>();
-            jobjectArray array = env->NewObjectArray(plpInfos.size(), plpClazz, nullptr);
+            ScopedLocalRef array(env,
+                                 env->NewObjectArray(plpInfos.size(), plpClazz.get(), nullptr));
             for (int i = 0; i < plpInfos.size(); i++) {
                 const FrontendScanAtsc3PlpInfo &info = plpInfos[i];
                 jint plpId = info.plpId;
                 jboolean lls = info.bLlsFlag;
-                jobject obj = env->NewObject(plpClazz, init, plpId, lls);
-                env->SetObjectArrayElement(array, i, obj);
+                ScopedLocalRef obj(env, env->NewObject(plpClazz.get(), init, plpId, lls));
+                env->SetObjectArrayElement(array.get(), i, obj.get());
             }
             env->CallVoidMethod(frontend,
                                 env->GetMethodID(clazz, "onAtsc3PlpInfos",
                                                  "([Landroid/media/tv/tuner/frontend/"
                                                  "Atsc3PlpInfo;)V"),
-                                array);
+                                array.get());
             break;
         }
         case FrontendScanMessageType::MODULATION: {
@@ -1215,10 +1322,12 @@ void FrontendClientCallbackImpl::executeOnScanMessage(
         }
         case FrontendScanMessageType::DVBT_CELL_IDS: {
             std::vector<int32_t> jintV = message.get<FrontendScanMessage::dvbtCellIds>();
-            jintArray cellIds = env->NewIntArray(jintV.size());
-            env->SetIntArrayRegion(cellIds, 0, jintV.size(), reinterpret_cast<jint *>(&jintV[0]));
-            env->CallVoidMethod(frontend, env->GetMethodID(clazz, "onDvbtCellIdsReported", "([I)V"),
-                                cellIds);
+            ScopedLocalRef cellIds(env, env->NewIntArray(jintV.size()));
+            env->SetIntArrayRegion(cellIds.get(), 0, jintV.size(),
+                                   reinterpret_cast<jint *>(&jintV[0]));
+            env->CallVoidMethod(frontend,
+                                env->GetMethodID(clazz, "onDvbtCellIdsReported", "([I)V"),
+                                cellIds.get());
             break;
         }
         default:
@@ -1238,7 +1347,8 @@ FrontendClientCallbackImpl::~FrontendClientCallbackImpl() {
 }
 
 /////////////// Tuner ///////////////////////
-sp<TunerClient> JTuner::mTunerClient;
+sp<TunerClient> JTuner::sTunerClient = nullptr;
+std::mutex JTuner::sTunerClientMutex;
 
 JTuner::JTuner(JNIEnv *env, jobject thiz) : mClass(nullptr) {
     jclass clazz = env->GetObjectClass(thiz);
@@ -1246,10 +1356,15 @@ JTuner::JTuner(JNIEnv *env, jobject thiz) : mClass(nullptr) {
 
     mClass = (jclass)env->NewGlobalRef(clazz);
     mObject = env->NewWeakGlobalRef(thiz);
-    if (mTunerClient == nullptr) {
-        mTunerClient = new TunerClient();
+    {
+        std::scoped_lock<std::mutex> lock(sTunerClientMutex);
+        if (sTunerClient == nullptr) {
+            sTunerClient = new TunerClient();
+        } else {
+            sTunerClient->incStrong(this);
+        }
+        ALOGV("JTuner refs count: %d", sTunerClient->getStrongCount());
     }
-
     mSharedFeId = (int)Constant::INVALID_FRONTEND_ID;
 }
 
@@ -1271,18 +1386,28 @@ JTuner::~JTuner() {
     mFeClient = nullptr;
     mFeClientCb = nullptr;
     mDemuxClient = nullptr;
+    {
+        std::scoped_lock<std::mutex> lock(sTunerClientMutex);
+        int32_t refCnt = sTunerClient->getStrongCount();
+        ALOGV("~JTuner refs count: %d", refCnt);
+        if (refCnt == 1) {
+            sTunerClient = nullptr;
+        } else {
+            sTunerClient->decStrong(this);
+        }
+    }
     mClass = nullptr;
     mObject = nullptr;
 }
 
 jint JTuner::getTunerVersion() {
     ALOGV("JTuner::getTunerVersion()");
-    return (jint)mTunerClient->getHalTunerVersion();
+    return (jint)sTunerClient->getHalTunerVersion();
 }
 
 jobject JTuner::getFrontendIds() {
     ALOGV("JTuner::getFrontendIds()");
-    vector<int32_t> ids = mTunerClient->getFrontendIds();
+    vector<int32_t> ids = sTunerClient->getFrontendIds();
     if (ids.size() == 0) {
         ALOGW("Frontend isn't available");
         return nullptr;
@@ -1291,7 +1416,8 @@ jobject JTuner::getFrontendIds() {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass arrayListClazz = env->FindClass("java/util/ArrayList");
     jmethodID arrayListAdd = env->GetMethodID(arrayListClazz, "add", "(Ljava/lang/Object;)Z");
-    jobject obj = env->NewObject(arrayListClazz, env->GetMethodID(arrayListClazz, "<init>", "()V"));
+    jobject obj = env->NewObject(arrayListClazz,
+                                 env->GetMethodID(arrayListClazz, "<init>", "()V"));
 
     jclass integerClazz = env->FindClass("java/lang/Integer");
     jmethodID intInit = env->GetMethodID(integerClazz, "<init>", "(I)V");
@@ -1305,7 +1431,7 @@ jobject JTuner::getFrontendIds() {
 
 jobject JTuner::openFrontendByHandle(int feHandle) {
     // TODO: Handle reopening frontend with different handle
-    sp<FrontendClient> feClient = mTunerClient->openFrontend(feHandle);
+    sp<FrontendClient> feClient = sTunerClient->openFrontend(feHandle);
     if (feClient == nullptr) {
         ALOGE("Failed to open frontend");
         return nullptr;
@@ -1513,9 +1639,18 @@ jobject JTuner::getDtmbFrontendCaps(JNIEnv *env, FrontendCapabilities &caps) {
             interleaveModeCap, codeRateCap, bandwidthCap);
 }
 
+jobject JTuner::getIptvFrontendCaps(JNIEnv *env, FrontendCapabilities &caps) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/frontend/IptvFrontendCapabilities");
+    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(I)V");
+
+    jint protocolCap = caps.get<FrontendCapabilities::Tag::iptvCaps>()->protocolCap;
+
+    return env->NewObject(clazz, capsInit, protocolCap);
+}
+
 jobject JTuner::getFrontendInfo(int id) {
     shared_ptr<FrontendInfo> feInfo;
-    feInfo = mTunerClient->getFrontendInfo(id);
+    feInfo = sTunerClient->getFrontendInfo(id);
     if (feInfo == nullptr) {
         return nullptr;
     }
@@ -1524,7 +1659,7 @@ jobject JTuner::getFrontendInfo(int id) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/FrontendInfo");
     jmethodID infoInit =
             env->GetMethodID(clazz, "<init>",
-                             "(IIJJIIJI[ILandroid/media/tv/tuner/frontend/FrontendCapabilities;)V");
+                    "(IIJJIIJI[ILandroid/media/tv/tuner/frontend/FrontendCapabilities;)V");
 
     jint type = (jint)feInfo->type;
     jlong minFrequency = feInfo->minFrequency;
@@ -1591,6 +1726,11 @@ jobject JTuner::getFrontendInfo(int id) {
                 jcaps = getDtmbFrontendCaps(env, caps);
             }
             break;
+        case FrontendType::IPTV:
+            if (FrontendCapabilities::Tag::iptvCaps == caps.getTag()) {
+                jcaps = getIptvFrontendCaps(env, caps);
+            }
+            break;
         default:
             break;
     }
@@ -1609,21 +1749,21 @@ Result JTuner::getFrontendHardwareInfo(string &info) {
 }
 
 jint JTuner::setMaxNumberOfFrontends(int32_t type, int32_t maxNumber) {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         ALOGE("tuner is not initialized");
         return (jint)Result::INVALID_STATE;
     }
 
-    return (jint)mTunerClient->setMaxNumberOfFrontends(static_cast<FrontendType>(type), maxNumber);
+    return (jint)sTunerClient->setMaxNumberOfFrontends(static_cast<FrontendType>(type), maxNumber);
 }
 
 int32_t JTuner::getMaxNumberOfFrontends(int32_t type) {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         ALOGE("tuner is not initialized");
         return -1;
     }
 
-    return mTunerClient->getMaxNumberOfFrontends(static_cast<FrontendType>(type));
+    return sTunerClient->getMaxNumberOfFrontends(static_cast<FrontendType>(type));
 }
 
 jint JTuner::removeOutputPid(int32_t pid) {
@@ -1659,20 +1799,20 @@ jobjectArray JTuner::getFrontendStatusReadiness(jintArray types) {
     jmethodID init = env->GetMethodID(clazz, "<init>", "(II)V");
     jobjectArray valObj = env->NewObjectArray(size, clazz, nullptr);
     for (int i = 0; i < size; i++) {
-        jobject readinessObj = env->NewObject(clazz, init, intTypes[i], readiness[i]);
-        env->SetObjectArrayElement(valObj, i, readinessObj);
+        ScopedLocalRef readinessObj(env, env->NewObject(clazz, init, intTypes[i], readiness[i]));
+        env->SetObjectArrayElement(valObj, i, readinessObj.get());
     }
     return valObj;
 }
 
 jobject JTuner::openLnbByHandle(int handle) {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         return nullptr;
     }
 
     sp<LnbClient> lnbClient;
     sp<LnbClientCallbackImpl> callback = new LnbClientCallbackImpl();
-    lnbClient = mTunerClient->openLnb(handle);
+    lnbClient = sTunerClient->openLnb(handle);
     if (lnbClient == nullptr) {
         ALOGD("Failed to open lnb, handle = %d", handle);
         return nullptr;
@@ -1696,7 +1836,7 @@ jobject JTuner::openLnbByHandle(int handle) {
 }
 
 jobject JTuner::openLnbByName(jstring name) {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         return nullptr;
     }
 
@@ -1704,7 +1844,7 @@ jobject JTuner::openLnbByName(jstring name) {
     std::string lnbName(env->GetStringUTFChars(name, nullptr));
     sp<LnbClient> lnbClient;
     sp<LnbClientCallbackImpl> callback = new LnbClientCallbackImpl();
-    lnbClient = mTunerClient->openLnbByName(lnbName);
+    lnbClient = sTunerClient->openLnbByName(lnbName);
     if (lnbClient == nullptr) {
         ALOGD("Failed to open lnb by name, name = %s", lnbName.c_str());
         return nullptr;
@@ -1773,21 +1913,28 @@ int JTuner::setLnb(sp<LnbClient> lnbClient) {
     return (int)result;
 }
 
-int JTuner::setLna(bool enable) {
-    if (mTunerClient == nullptr) {
+bool JTuner::isLnaSupported() {
+    if (sTunerClient == nullptr) {
         return (int)Result::NOT_INITIALIZED;
     }
-    Result result = mTunerClient->setLna(enable);
+    return sTunerClient->isLnaSupported();
+}
+
+int JTuner::setLna(bool enable) {
+    if (sTunerClient == nullptr) {
+        return (int)Result::NOT_INITIALIZED;
+    }
+    Result result = sTunerClient->setLna(enable);
     return (int)result;
 }
 
 Result JTuner::openDemux(int handle) {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         return Result::NOT_INITIALIZED;
     }
 
     if (mDemuxClient == nullptr) {
-        mDemuxClient = mTunerClient->openDemux(handle);
+        mDemuxClient = sTunerClient->openDemux(handle);
         if (mDemuxClient == nullptr) {
             ALOGE("Failed to open demux");
             return Result::UNKNOWN_ERROR;
@@ -1885,10 +2032,10 @@ int JTuner::unlinkCiCam(int id) {
 
 jobject JTuner::openDescrambler() {
     ALOGV("JTuner::openDescrambler");
-    if (mTunerClient == nullptr || mDemuxClient == nullptr) {
+    if (sTunerClient == nullptr || mDemuxClient == nullptr) {
         return nullptr;
     }
-    sp<DescramblerClient> descramblerClient = mTunerClient->openDescrambler(0/*unused*/);
+    sp<DescramblerClient> descramblerClient = sTunerClient->openDescrambler(0 /*unused*/);
 
     if (descramblerClient == nullptr) {
         ALOGD("Failed to open descrambler");
@@ -1999,19 +2146,19 @@ jobject JTuner::openDvr(DvrType type, jlong bufferSize) {
 }
 
 jobject JTuner::getDemuxCaps() {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         return nullptr;
     }
 
     shared_ptr<DemuxCapabilities> caps;
-    caps = mTunerClient->getDemuxCaps();
+    caps = sTunerClient->getDemuxCaps();
     if (caps == nullptr) {
         return nullptr;
     }
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass clazz = env->FindClass("android/media/tv/tuner/DemuxCapabilities");
-    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIIIIIIIJI[IZ)V");
+    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIIIIIIIJI[I[IZ)V");
 
     jint numDemux = caps->numDemux;
     jint numRecord = caps->numRecord;
@@ -2023,16 +2170,49 @@ jobject JTuner::getDemuxCaps() {
     jint numPesFilter = caps->numPesFilter;
     jint numPcrFilter = caps->numPcrFilter;
     jlong numBytesInSectionFilter = caps->numBytesInSectionFilter;
-    jint filterCaps = caps->filterCaps;
     jboolean bTimeFilter = caps->bTimeFilter;
 
+    jint filterCaps = caps->filterCaps;
+    jintArray filterCapsList = nullptr;
+    vector<DemuxInfo> demuxInfoList;
+    sTunerClient->getDemuxInfoList(&demuxInfoList);
+    if (demuxInfoList.size() > 0) {
+        vector<int32_t> demuxFilterTypesList;
+        for (int i = 0; i < demuxInfoList.size(); i++) {
+            demuxFilterTypesList.push_back(demuxInfoList[i].filterTypes);
+        }
+        filterCapsList = env->NewIntArray(demuxFilterTypesList.size());
+        env->SetIntArrayRegion(filterCapsList, 0, demuxFilterTypesList.size(),
+                               reinterpret_cast<jint *>(&demuxFilterTypesList[0]));
+    } else {
+        filterCapsList = env->NewIntArray(0);
+    }
     jintArray linkCaps = env->NewIntArray(caps->linkCaps.size());
     env->SetIntArrayRegion(linkCaps, 0, caps->linkCaps.size(),
                            reinterpret_cast<jint *>(&caps->linkCaps[0]));
 
     return env->NewObject(clazz, capsInit, numDemux, numRecord, numPlayback, numTsFilter,
             numSectionFilter, numAudioFilter, numVideoFilter, numPesFilter, numPcrFilter,
-            numBytesInSectionFilter, filterCaps, linkCaps, bTimeFilter);
+            numBytesInSectionFilter, filterCaps, filterCapsList, linkCaps, bTimeFilter);
+}
+
+jobject JTuner::getDemuxInfo(int handle) {
+    if (sTunerClient == nullptr) {
+        ALOGE("tuner is not initialized");
+        return nullptr;
+    }
+    shared_ptr<DemuxInfo> demuxInfo = sTunerClient->getDemuxInfo(handle);
+    if (demuxInfo == nullptr) {
+        return nullptr;
+    }
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass clazz = env->FindClass("android/media/tv/tuner/DemuxInfo");
+    jmethodID infoInit = env->GetMethodID(clazz, "<init>", "(I)V");
+
+    jint filterTypes = demuxInfo->filterTypes;
+
+    return env->NewObject(clazz, infoInit, filterTypes);
 }
 
 jobject JTuner::getFrontendStatus(jintArray types) {
@@ -2066,69 +2246,72 @@ jobject JTuner::getFrontendStatus(jintArray types) {
         switch (s.getTag()) {
             case FrontendStatus::Tag::isDemodLocked: {
                 jfieldID field = env->GetFieldID(clazz, "mIsDemodLocked", "Ljava/lang/Boolean;");
-                jobject newBooleanObj = env->NewObject(booleanClazz, initBoolean,
-                                                       s.get<FrontendStatus::Tag::isDemodLocked>());
-                env->SetObjectField(statusObj, field, newBooleanObj);
+                ScopedLocalRef newBooleanObj(env,
+                        env->NewObject(booleanClazz, initBoolean,
+                                       s.get<FrontendStatus::Tag::isDemodLocked>()));
+                env->SetObjectField(statusObj, field, newBooleanObj.get());
                 break;
             }
             case FrontendStatus::Tag::snr: {
                 jfieldID field = env->GetFieldID(clazz, "mSnr", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::snr>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::snr>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::ber: {
                 jfieldID field = env->GetFieldID(clazz, "mBer", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::ber>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::ber>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::per: {
                 jfieldID field = env->GetFieldID(clazz, "mPer", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::per>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::per>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::preBer: {
                 jfieldID field = env->GetFieldID(clazz, "mPerBer", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::preBer>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::preBer>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::signalQuality: {
                 jfieldID field = env->GetFieldID(clazz, "mSignalQuality", "Ljava/lang/Integer;");
-                jobject newIntegerObj = env->NewObject(intClazz, initInt,
-                                                       s.get<FrontendStatus::Tag::signalQuality>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt,
+                                       s.get<FrontendStatus::Tag::signalQuality>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::signalStrength: {
                 jfieldID field = env->GetFieldID(clazz, "mSignalStrength", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
+                ScopedLocalRef newIntegerObj(env,
                         env->NewObject(intClazz, initInt,
-                                       s.get<FrontendStatus::Tag::signalStrength>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                                       s.get<FrontendStatus::Tag::signalStrength>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::symbolRate: {
                 jfieldID field = env->GetFieldID(clazz, "mSymbolRate", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::symbolRate>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt,
+                                       s.get<FrontendStatus::Tag::symbolRate>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::innerFec: {
                 jfieldID field = env->GetFieldID(clazz, "mInnerFec", "Ljava/lang/Long;");
-                jclass longClazz = env->FindClass("java/lang/Long");
-                jmethodID initLong = env->GetMethodID(longClazz, "<init>", "(J)V");
-                jobject newLongObj =
-                        env->NewObject(longClazz, initLong,
-                                       static_cast<long>(s.get<FrontendStatus::Tag::innerFec>()));
-                env->SetObjectField(statusObj, field, newLongObj);
+                ScopedLocalRef longClazz(env, env->FindClass("java/lang/Long"));
+                jmethodID initLong = env->GetMethodID(longClazz.get(), "<init>", "(J)V");
+                ScopedLocalRef newLongObj(env,
+                        env->NewObject(longClazz.get(), initLong,
+                                       static_cast<long>(s.get<FrontendStatus::Tag::innerFec>())));
+                env->SetObjectField(statusObj, field, newLongObj.get());
                 break;
             }
             case FrontendStatus::Tag::modulationStatus: {
@@ -2169,124 +2352,128 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                     }
                 }
                 if (valid) {
-                    jobject newIntegerObj = env->NewObject(intClazz, initInt, intModulation);
-                    env->SetObjectField(statusObj, field, newIntegerObj);
+                    ScopedLocalRef newIntegerObj(env,
+                            env->NewObject(intClazz, initInt, intModulation));
+                    env->SetObjectField(statusObj, field, newIntegerObj.get());
                 }
                 break;
             }
             case FrontendStatus::Tag::inversion: {
                 jfieldID field = env->GetFieldID(clazz, "mInversion", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
+                ScopedLocalRef newIntegerObj(env,
                         env->NewObject(intClazz, initInt,
-                                       static_cast<jint>(s.get<FrontendStatus::Tag::inversion>()));
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                                static_cast<jint>(s.get<FrontendStatus::Tag::inversion>())));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::lnbVoltage: {
                 jfieldID field = env->GetFieldID(clazz, "mLnbVoltage", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
+                ScopedLocalRef newIntegerObj(env,
                         env->NewObject(intClazz, initInt,
-                                       static_cast<jint>(s.get<FrontendStatus::Tag::lnbVoltage>()));
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                                static_cast<jint>(s.get<FrontendStatus::Tag::lnbVoltage>())));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::plpId: {
                 jfieldID field = env->GetFieldID(clazz, "mPlpId", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::plpId>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::plpId>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::isEWBS: {
                 jfieldID field = env->GetFieldID(clazz, "mIsEwbs", "Ljava/lang/Boolean;");
-                jobject newBooleanObj = env->NewObject(booleanClazz, initBoolean,
-                                                       s.get<FrontendStatus::Tag::isEWBS>());
-                env->SetObjectField(statusObj, field, newBooleanObj);
+                ScopedLocalRef newBooleanObj(env, env->NewObject(booleanClazz, initBoolean,
+                                                       s.get<FrontendStatus::Tag::isEWBS>()));
+                env->SetObjectField(statusObj, field, newBooleanObj.get());
                 break;
             }
             case FrontendStatus::Tag::agc: {
                 jfieldID field = env->GetFieldID(clazz, "mAgc", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::agc>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::agc>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::isLnaOn: {
                 jfieldID field = env->GetFieldID(clazz, "mIsLnaOn", "Ljava/lang/Boolean;");
-                jobject newBooleanObj = env->NewObject(booleanClazz, initBoolean,
-                                                       s.get<FrontendStatus::Tag::isLnaOn>());
-                env->SetObjectField(statusObj, field, newBooleanObj);
+                ScopedLocalRef newBooleanObj(env, env->NewObject(booleanClazz, initBoolean,
+                                                       s.get<FrontendStatus::Tag::isLnaOn>()));
+                env->SetObjectField(statusObj, field, newBooleanObj.get());
                 break;
             }
             case FrontendStatus::Tag::isLayerError: {
                 jfieldID field = env->GetFieldID(clazz, "mIsLayerErrors", "[Z");
                 vector<bool> layerErr = s.get<FrontendStatus::Tag::isLayerError>();
 
-                jbooleanArray valObj = env->NewBooleanArray(layerErr.size());
+                ScopedLocalRef valObj(env, env->NewBooleanArray(layerErr.size()));
 
                 for (size_t i = 0; i < layerErr.size(); i++) {
                     jboolean x = layerErr[i];
-                    env->SetBooleanArrayRegion(valObj, i, 1, &x);
+                    env->SetBooleanArrayRegion(valObj.get(), i, 1, &x);
                 }
-                env->SetObjectField(statusObj, field, valObj);
+                env->SetObjectField(statusObj, field, valObj.get());
                 break;
             }
             case FrontendStatus::Tag::mer: {
                 jfieldID field = env->GetFieldID(clazz, "mMer", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::mer>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::mer>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::freqOffset: {
                 jfieldID field = env->GetFieldID(clazz, "mFreqOffset", "Ljava/lang/Long;");
-                jobject newLongObj = env->NewObject(longClazz, initLong,
-                                                    s.get<FrontendStatus::Tag::freqOffset>());
-                env->SetObjectField(statusObj, field, newLongObj);
+                ScopedLocalRef newLongObj(env, env->NewObject(longClazz, initLong,
+                                                    s.get<FrontendStatus::Tag::freqOffset>()));
+                env->SetObjectField(statusObj, field, newLongObj.get());
                 break;
             }
             case FrontendStatus::Tag::hierarchy: {
                 jfieldID field = env->GetFieldID(clazz, "mHierarchy", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
+                ScopedLocalRef newIntegerObj(env,
                         env->NewObject(intClazz, initInt,
-                                       static_cast<jint>(s.get<FrontendStatus::Tag::hierarchy>()));
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                                static_cast<jint>(s.get<FrontendStatus::Tag::hierarchy>())));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::isRfLocked: {
                 jfieldID field = env->GetFieldID(clazz, "mIsRfLocked", "Ljava/lang/Boolean;");
-                jobject newBooleanObj = env->NewObject(booleanClazz, initBoolean,
-                                                       s.get<FrontendStatus::Tag::isRfLocked>());
-                env->SetObjectField(statusObj, field, newBooleanObj);
+                ScopedLocalRef newBooleanObj(env, env->NewObject(booleanClazz, initBoolean,
+                                                       s.get<FrontendStatus::Tag::isRfLocked>()));
+                env->SetObjectField(statusObj, field, newBooleanObj.get());
                 break;
             }
             case FrontendStatus::Tag::plpInfo: {
                 jfieldID field = env->GetFieldID(clazz, "mPlpInfo",
                         "[Landroid/media/tv/tuner/frontend/FrontendStatus$Atsc3PlpTuningInfo;");
-                jclass plpClazz = env->FindClass(
-                        "android/media/tv/tuner/frontend/FrontendStatus$Atsc3PlpTuningInfo");
-                jmethodID initPlp = env->GetMethodID(plpClazz, "<init>", "(IZI)V");
+                ScopedLocalRef plpClazz(env, env->FindClass(
+                        "android/media/tv/tuner/frontend/FrontendStatus$Atsc3PlpTuningInfo"));
+                jmethodID initPlp = env->GetMethodID(plpClazz.get(), "<init>", "(IZI)V");
 
-                vector<FrontendStatusAtsc3PlpInfo> plpInfos = s.get<FrontendStatus::Tag::plpInfo>();
-                jobjectArray valObj = env->NewObjectArray(plpInfos.size(), plpClazz, nullptr);
+                vector<FrontendStatusAtsc3PlpInfo> plpInfos =
+                        s.get<FrontendStatus::Tag::plpInfo>();
+                ScopedLocalRef valObj(env, env->NewObjectArray(plpInfos.size(), plpClazz.get(),
+                                                               nullptr));
                 for (int i = 0; i < plpInfos.size(); i++) {
                     const FrontendStatusAtsc3PlpInfo &info = plpInfos[i];
                     jint plpId = info.plpId;
                     jboolean isLocked = info.isLocked;
                     jint uec = info.uec;
 
-                    jobject plpObj = env->NewObject(plpClazz, initPlp, plpId, isLocked, uec);
-                    env->SetObjectArrayElement(valObj, i, plpObj);
+                    ScopedLocalRef plpObj(env, env->NewObject(plpClazz.get(), initPlp, plpId,
+                                                              isLocked, uec));
+                    env->SetObjectArrayElement(valObj.get(), i, plpObj.get());
                 }
 
-                env->SetObjectField(statusObj, field, valObj);
+                env->SetObjectField(statusObj, field, valObj.get());
                 break;
             }
             case FrontendStatus::Tag::modulations: {
                 jfieldID field = env->GetFieldID(clazz, "mModulationsExt", "[I");
                 std::vector<FrontendModulation> v = s.get<FrontendStatus::Tag::modulations>();
 
-                jintArray valObj = env->NewIntArray(v.size());
+                ScopedLocalRef valObj(env, env->NewIntArray(v.size()));
                 bool valid = false;
                 jint m[1];
                 for (int i = 0; i < v.size(); i++) {
@@ -2295,63 +2482,63 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         case FrontendModulation::Tag::dvbc: {
                             m[0] = static_cast<jint>(
                                     modulation.get<FrontendModulation::Tag::dvbc>());
-                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, m);
                             valid = true;
                             break;
                         }
                         case FrontendModulation::Tag::dvbs: {
                             m[0] = static_cast<jint>(
                                     modulation.get<FrontendModulation::Tag::dvbs>());
-                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, m);
                             valid = true;
                            break;
                         }
                         case FrontendModulation::Tag::dvbt: {
                             m[0] = static_cast<jint>(
                                     modulation.get<FrontendModulation::Tag::dvbt>());
-                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, m);
                             valid = true;
                             break;
                         }
                         case FrontendModulation::Tag::isdbs: {
                             m[0] = static_cast<jint>(
                                     modulation.get<FrontendModulation::Tag::isdbs>());
-                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, m);
                             valid = true;
                             break;
                         }
                         case FrontendModulation::Tag::isdbs3: {
                             m[0] = static_cast<jint>(
                                     modulation.get<FrontendModulation::Tag::isdbs3>());
-                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, m);
                             valid = true;
                             break;
                         }
                         case FrontendModulation::Tag::isdbt: {
                             m[0] = static_cast<jint>(
                                     modulation.get<FrontendModulation::Tag::isdbt>());
-                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, m);
                             valid = true;
                             break;
                         }
                         case FrontendModulation::Tag::atsc: {
                             m[0] = static_cast<jint>(
                                     modulation.get<FrontendModulation::Tag::atsc>());
-                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, m);
                             valid = true;
                             break;
                         }
                         case FrontendModulation::Tag::atsc3: {
                             m[0] = static_cast<jint>(
                                     modulation.get<FrontendModulation::Tag::atsc3>());
-                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, m);
                             valid = true;
                             break;
                         }
                         case FrontendModulation::Tag::dtmb: {
                             m[0] = static_cast<jint>(
                                     modulation.get<FrontendModulation::Tag::dtmb>());
-                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, m);
                             valid = true;
                             break;
                         }
@@ -2360,7 +2547,7 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                     }
                 }
                 if (valid) {
-                    env->SetObjectField(statusObj, field, valObj);
+                    env->SetObjectField(statusObj, field, valObj.get());
                 }
                 break;
             }
@@ -2368,20 +2555,20 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 jfieldID field = env->GetFieldID(clazz, "mBers", "[I");
                 std::vector<int32_t> v = s.get<FrontendStatus::Tag::bers>();
 
-                jintArray valObj = env->NewIntArray(v.size());
-                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint *>(&v[0]));
+                ScopedLocalRef valObj(env, env->NewIntArray(v.size()));
+                env->SetIntArrayRegion(valObj.get(), 0, v.size(), reinterpret_cast<jint *>(&v[0]));
 
-                env->SetObjectField(statusObj, field, valObj);
+                env->SetObjectField(statusObj, field, valObj.get());
                 break;
             }
             case FrontendStatus::Tag::codeRates: {
                 jfieldID field = env->GetFieldID(clazz, "mCodeRates", "[I");
                 std::vector<FrontendInnerFec> v = s.get<FrontendStatus::Tag::codeRates>();
 
-                jintArray valObj = env->NewIntArray(v.size());
-                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint *>(&v[0]));
+                ScopedLocalRef valObj(env, env->NewIntArray(v.size()));
+                env->SetIntArrayRegion(valObj.get(), 0, v.size(), reinterpret_cast<jint *>(&v[0]));
 
-                env->SetObjectField(statusObj, field, valObj);
+                env->SetObjectField(statusObj, field, valObj.get());
                 break;
             }
             case FrontendStatus::Tag::bandwidth: {
@@ -2420,8 +2607,9 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         break;
                 }
                 if (valid) {
-                    jobject newIntegerObj = env->NewObject(intClazz, initInt, intBandwidth);
-                    env->SetObjectField(statusObj, field, newIntegerObj);
+                    ScopedLocalRef newIntegerObj(env, env->NewObject(intClazz, initInt,
+                                                                     intBandwidth));
+                    env->SetObjectField(statusObj, field, newIntegerObj.get());
                 }
                 break;
             }
@@ -2432,8 +2620,8 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 bool valid = true;
                 switch (interval.getTag()) {
                     case FrontendGuardInterval::Tag::dvbt: {
-                        intInterval =
-                                static_cast<jint>(interval.get<FrontendGuardInterval::Tag::dvbt>());
+                        intInterval = static_cast<jint>(
+                                interval.get<FrontendGuardInterval::Tag::dvbt>());
                         break;
                     }
                     case FrontendGuardInterval::Tag::isdbt: {
@@ -2442,8 +2630,8 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         break;
                     }
                     case FrontendGuardInterval::Tag::dtmb: {
-                        intInterval =
-                                static_cast<jint>(interval.get<FrontendGuardInterval::Tag::dtmb>());
+                        intInterval = static_cast<jint>(
+                                interval.get<FrontendGuardInterval::Tag::dtmb>());
                         break;
                     }
                     default:
@@ -2451,13 +2639,15 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         break;
                 }
                 if (valid) {
-                    jobject newIntegerObj = env->NewObject(intClazz, initInt, intInterval);
-                    env->SetObjectField(statusObj, field, newIntegerObj);
+                    ScopedLocalRef newIntegerObj(env, env->NewObject(intClazz, initInt,
+                                                                     intInterval));
+                    env->SetObjectField(statusObj, field, newIntegerObj.get());
                 }
                 break;
             }
             case FrontendStatus::Tag::transmissionMode: {
-                jfieldID field = env->GetFieldID(clazz, "mTransmissionMode", "Ljava/lang/Integer;");
+                jfieldID field = env->GetFieldID(clazz, "mTransmissionMode",
+                                                 "Ljava/lang/Integer;");
                 const FrontendTransmissionMode &transmissionMode =
                         s.get<FrontendStatus::Tag::transmissionMode>();
                 jint intTransmissionMode;
@@ -2483,29 +2673,30 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         break;
                 }
                 if (valid) {
-                    jobject newIntegerObj = env->NewObject(intClazz, initInt, intTransmissionMode);
-                    env->SetObjectField(statusObj, field, newIntegerObj);
+                    ScopedLocalRef newIntegerObj(env, env->NewObject(intClazz, initInt,
+                                                                     intTransmissionMode));
+                    env->SetObjectField(statusObj, field, newIntegerObj.get());
                 }
                 break;
             }
             case FrontendStatus::Tag::uec: {
                 jfieldID field = env->GetFieldID(clazz, "mUec", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::uec>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::uec>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::systemId: {
                 jfieldID field = env->GetFieldID(clazz, "mSystemId", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::systemId>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::systemId>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::interleaving: {
                 jfieldID field = env->GetFieldID(clazz, "mInterleaving", "[I");
                 std::vector<FrontendInterleaveMode> v = s.get<FrontendStatus::Tag::interleaving>();
-                jintArray valObj = env->NewIntArray(v.size());
+                ScopedLocalRef valObj(env, env->NewIntArray(v.size()));
                 bool valid = false;
                 jint in[1];
                 for (int i = 0; i < v.size(); i++) {
@@ -2514,28 +2705,28 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         case FrontendInterleaveMode::Tag::atsc3: {
                             in[0] = static_cast<jint>(
                                     interleaving.get<FrontendInterleaveMode::Tag::atsc3>());
-                            env->SetIntArrayRegion(valObj, i, 1, in);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, in);
                             valid = true;
                             break;
                         }
                         case FrontendInterleaveMode::Tag::dvbc: {
                             in[0] = static_cast<jint>(
                                     interleaving.get<FrontendInterleaveMode::Tag::dvbc>());
-                            env->SetIntArrayRegion(valObj, i, 1, in);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, in);
                             valid = true;
                            break;
                         }
                         case FrontendInterleaveMode::Tag::dtmb: {
                             in[0] = static_cast<jint>(
                                     interleaving.get<FrontendInterleaveMode::Tag::dtmb>());
-                            env->SetIntArrayRegion(valObj, i, 1, in);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, in);
                             valid = true;
                            break;
                         }
                         case FrontendInterleaveMode::Tag::isdbt: {
                             in[0] = static_cast<jint>(
                                     interleaving.get<FrontendInterleaveMode::Tag::isdbt>());
-                            env->SetIntArrayRegion(valObj, i, 1, in);
+                            env->SetIntArrayRegion(valObj.get(), i, 1, in);
                             valid = true;
                             break;
                         }
@@ -2544,7 +2735,7 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                     }
                 }
                 if (valid) {
-                    env->SetObjectField(statusObj, field, valObj);
+                    env->SetObjectField(statusObj, field, valObj.get());
                 }
                 break;
             }
@@ -2552,20 +2743,20 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 jfieldID field = env->GetFieldID(clazz, "mIsdbtSegment", "[I");
                 std::vector<int32_t> v = s.get<FrontendStatus::Tag::isdbtSegment>();
 
-                jintArray valObj = env->NewIntArray(v.size());
-                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint*>(&v[0]));
+                ScopedLocalRef valObj(env, env->NewIntArray(v.size()));
+                env->SetIntArrayRegion(valObj.get(), 0, v.size(), reinterpret_cast<jint*>(&v[0]));
 
-                env->SetObjectField(statusObj, field, valObj);
+                env->SetObjectField(statusObj, field, valObj.get());
                 break;
             }
             case FrontendStatus::Tag::tsDataRate: {
                 jfieldID field = env->GetFieldID(clazz, "mTsDataRate", "[I");
                 std::vector<int32_t> v = s.get<FrontendStatus::Tag::tsDataRate>();
 
-                jintArray valObj = env->NewIntArray(v.size());
-                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint *>(&v[0]));
+                ScopedLocalRef valObj(env, env->NewIntArray(v.size()));
+                env->SetIntArrayRegion(valObj.get(), 0, v.size(), reinterpret_cast<jint *>(&v[0]));
 
-                env->SetObjectField(statusObj, field, valObj);
+                env->SetObjectField(statusObj, field, valObj.get());
                 break;
             }
             case FrontendStatus::Tag::rollOff: {
@@ -2583,7 +2774,8 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         break;
                     }
                     case FrontendRollOff::Tag::isdbs3: {
-                        intRollOff = static_cast<jint>(rollOff.get<FrontendRollOff::Tag::isdbs3>());
+                        intRollOff = static_cast<jint>(
+                                rollOff.get<FrontendRollOff::Tag::isdbs3>());
                         break;
                     }
                     default:
@@ -2591,84 +2783,135 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         break;
                 }
                 if (valid) {
-                    jobject newIntegerObj = env->NewObject(intClazz, initInt, intRollOff);
-                    env->SetObjectField(statusObj, field, newIntegerObj);
+                    ScopedLocalRef newIntegerObj(env, env->NewObject(intClazz, initInt,
+                                                                     intRollOff));
+                    env->SetObjectField(statusObj, field, newIntegerObj.get());
                 }
                 break;
             }
             case FrontendStatus::Tag::isMiso: {
                 jfieldID field = env->GetFieldID(clazz, "mIsMisoEnabled", "Ljava/lang/Boolean;");
-                jobject newBooleanObj = env->NewObject(booleanClazz, initBoolean,
-                                                       s.get<FrontendStatus::Tag::isMiso>());
-                env->SetObjectField(statusObj, field, newBooleanObj);
+                ScopedLocalRef newBooleanObj(env, env->NewObject(booleanClazz, initBoolean,
+                                                       s.get<FrontendStatus::Tag::isMiso>()));
+                env->SetObjectField(statusObj, field, newBooleanObj.get());
                 break;
             }
             case FrontendStatus::Tag::isLinear: {
                 jfieldID field = env->GetFieldID(clazz, "mIsLinear", "Ljava/lang/Boolean;");
-                jobject newBooleanObj = env->NewObject(booleanClazz, initBoolean,
-                                                       s.get<FrontendStatus::Tag::isLinear>());
-                env->SetObjectField(statusObj, field, newBooleanObj);
+                ScopedLocalRef newBooleanObj(env, env->NewObject(booleanClazz, initBoolean,
+                                                       s.get<FrontendStatus::Tag::isLinear>()));
+                env->SetObjectField(statusObj, field, newBooleanObj.get());
                 break;
             }
             case FrontendStatus::Tag::isShortFrames: {
                 jfieldID field = env->GetFieldID(clazz, "mIsShortFrames", "Ljava/lang/Boolean;");
-                jobject newBooleanObj = env->NewObject(booleanClazz, initBoolean,
-                                                       s.get<FrontendStatus::Tag::isShortFrames>());
-                env->SetObjectField(statusObj, field, newBooleanObj);
+                ScopedLocalRef newBooleanObj(env,
+                        env->NewObject(booleanClazz, initBoolean,
+                                s.get<FrontendStatus::Tag::isShortFrames>()));
+                env->SetObjectField(statusObj, field, newBooleanObj.get());
                 break;
             }
             case FrontendStatus::Tag::isdbtMode: {
                 jfieldID field = env->GetFieldID(clazz, "mIsdbtMode", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
-                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::isdbtMode>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt,
+                                s.get<FrontendStatus::Tag::isdbtMode>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::partialReceptionFlag: {
                 jfieldID field =
-                        env->GetFieldID(clazz, "mIsdbtPartialReceptionFlag", "Ljava/lang/Integer;");
-                jobject newIntegerObj =
+                        env->GetFieldID(clazz, "mIsdbtPartialReceptionFlag",
+                                        "Ljava/lang/Integer;");
+                ScopedLocalRef newIntegerObj(env,
                         env->NewObject(intClazz, initInt,
-                                       s.get<FrontendStatus::Tag::partialReceptionFlag>());
-                env->SetObjectField(statusObj, field, newIntegerObj);
+                                       s.get<FrontendStatus::Tag::partialReceptionFlag>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
             case FrontendStatus::Tag::streamIdList: {
                 jfieldID field = env->GetFieldID(clazz, "mStreamIds", "[I");
                 std::vector<int32_t> ids = s.get<FrontendStatus::Tag::streamIdList>();
 
-                jintArray valObj = env->NewIntArray(v.size());
-                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint *>(&ids[0]));
+                ScopedLocalRef valObj(env, env->NewIntArray(v.size()));
+                env->SetIntArrayRegion(valObj.get(), 0, v.size(),
+                                       reinterpret_cast<jint *>(&ids[0]));
 
-                env->SetObjectField(statusObj, field, valObj);
+                env->SetObjectField(statusObj, field, valObj.get());
                 break;
             }
             case FrontendStatus::Tag::dvbtCellIds: {
                 jfieldID field = env->GetFieldID(clazz, "mDvbtCellIds", "[I");
                 std::vector<int32_t> ids = s.get<FrontendStatus::Tag::dvbtCellIds>();
 
-                jintArray valObj = env->NewIntArray(v.size());
-                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint *>(&ids[0]));
+                ScopedLocalRef valObj(env, env->NewIntArray(v.size()));
+                env->SetIntArrayRegion(valObj.get(), 0, v.size(),
+                                       reinterpret_cast<jint *>(&ids[0]));
 
-                env->SetObjectField(statusObj, field, valObj);
+                env->SetObjectField(statusObj, field, valObj.get());
                 break;
             }
             case FrontendStatus::Tag::allPlpInfo: {
                 jfieldID field = env->GetFieldID(clazz, "mAllPlpInfo",
-                                                 "[Landroid/media/tv/tuner/frontend/Atsc3PlpInfo;");
-                jclass plpClazz = env->FindClass("android/media/tv/tuner/frontend/Atsc3PlpInfo");
-                jmethodID initPlp = env->GetMethodID(plpClazz, "<init>", "(IZ)V");
+                        "[Landroid/media/tv/tuner/frontend/Atsc3PlpInfo;");
+                ScopedLocalRef plpClazz(env,
+                        env->FindClass("android/media/tv/tuner/frontend/Atsc3PlpInfo"));
+                jmethodID initPlp = env->GetMethodID(plpClazz.get(), "<init>", "(IZ)V");
 
                 vector<FrontendScanAtsc3PlpInfo> plpInfos =
                         s.get<FrontendStatus::Tag::allPlpInfo>();
-                jobjectArray valObj = env->NewObjectArray(plpInfos.size(), plpClazz, nullptr);
+                ScopedLocalRef valObj(env, env->NewObjectArray(plpInfos.size(), plpClazz.get(),
+                                                               nullptr));
                 for (int i = 0; i < plpInfos.size(); i++) {
-                    jobject plpObj = env->NewObject(plpClazz, initPlp, plpInfos[i].plpId,
-                                                    plpInfos[i].bLlsFlag);
-                    env->SetObjectArrayElement(valObj, i, plpObj);
+                    ScopedLocalRef plpObj(env, env->NewObject(plpClazz.get(), initPlp,
+                                                              plpInfos[i].plpId,
+                                                              plpInfos[i].bLlsFlag));
+                    env->SetObjectArrayElement(valObj.get(), i, plpObj.get());
                 }
 
-                env->SetObjectField(statusObj, field, valObj);
+                env->SetObjectField(statusObj, field, valObj.get());
+                break;
+            }
+            case FrontendStatus::Tag::iptvContentUrl: {
+                jfieldID field = env->GetFieldID(clazz, "mIptvContentUrl", "Ljava/lang/String;");
+                std::string iptvContentUrl = s.get<FrontendStatus::Tag::iptvContentUrl>();
+                ScopedLocalRef iptvContentUrlUtf8(env, env->NewStringUTF(iptvContentUrl.c_str()));
+                env->SetObjectField(statusObj, field, iptvContentUrlUtf8.get());
+                break;
+            }
+            case FrontendStatus::Tag::iptvPacketsLost: {
+                jfieldID field = env->GetFieldID(clazz, "mIptvPacketsLost", "Ljava/lang/Long;");
+                ScopedLocalRef newLongObj(env,
+                        env->NewObject(longClazz, initLong,
+                                       s.get<FrontendStatus::Tag::iptvPacketsLost>()));
+                env->SetObjectField(statusObj, field, newLongObj.get());
+                break;
+            }
+            case FrontendStatus::Tag::iptvPacketsReceived: {
+                jfieldID field = env->GetFieldID(clazz, "mIptvPacketsReceived",
+                                                 "Ljava/lang/Long;");
+                ScopedLocalRef newLongObj(env,
+                        env->NewObject(longClazz, initLong,
+                                       s.get<FrontendStatus::Tag::iptvPacketsReceived>()));
+                env->SetObjectField(statusObj, field, newLongObj.get());
+                break;
+            }
+            case FrontendStatus::Tag::iptvWorstJitterMs: {
+                jfieldID field = env->GetFieldID(clazz, "mIptvWorstJitterMs",
+                                                 "Ljava/lang/Integer;");
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt,
+                                       s.get<FrontendStatus::Tag::iptvWorstJitterMs>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
+                break;
+            }
+            case FrontendStatus::Tag::iptvAverageJitterMs: {
+                jfieldID field = env->GetFieldID(clazz, "mIptvAverageJitterMs",
+                                                 "Ljava/lang/Integer;");
+                ScopedLocalRef newIntegerObj(env,
+                        env->NewObject(intClazz, initInt,
+                                       s.get<FrontendStatus::Tag::iptvAverageJitterMs>()));
+                env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
             }
         }
@@ -2802,21 +3045,22 @@ static vector<FrontendAtsc3PlpSettings> getAtsc3PlpSettings(JNIEnv *env, const j
     vector<FrontendAtsc3PlpSettings> plps = vector<FrontendAtsc3PlpSettings>(len);
     // parse PLP settings
     for (int i = 0; i < len; i++) {
-        jobject plp = env->GetObjectArrayElement(plpSettings, i);
-        int32_t plpId = env->GetIntField(plp, env->GetFieldID(plpClazz, "mPlpId", "I"));
+        ScopedLocalRef plp(env, env->GetObjectArrayElement(plpSettings, i));
+        int32_t plpId = env->GetIntField(plp.get(), env->GetFieldID(plpClazz, "mPlpId", "I"));
         FrontendAtsc3Modulation modulation =
                 static_cast<FrontendAtsc3Modulation>(
-                        env->GetIntField(plp, env->GetFieldID(plpClazz, "mModulation", "I")));
+                        env->GetIntField(plp.get(), env->GetFieldID(plpClazz, "mModulation",
+                                                                    "I")));
         FrontendAtsc3TimeInterleaveMode interleaveMode =
                 static_cast<FrontendAtsc3TimeInterleaveMode>(
                         env->GetIntField(
-                                plp, env->GetFieldID(plpClazz, "mInterleaveMode", "I")));
+                                plp.get(), env->GetFieldID(plpClazz, "mInterleaveMode", "I")));
         FrontendAtsc3CodeRate codeRate =
                 static_cast<FrontendAtsc3CodeRate>(
-                        env->GetIntField(plp, env->GetFieldID(plpClazz, "mCodeRate", "I")));
+                        env->GetIntField(plp.get(), env->GetFieldID(plpClazz, "mCodeRate", "I")));
         FrontendAtsc3Fec fec =
                 static_cast<FrontendAtsc3Fec>(
-                        env->GetIntField(plp, env->GetFieldID(plpClazz, "mFec", "I")));
+                        env->GetIntField(plp.get(), env->GetFieldID(plpClazz, "mFec", "I")));
         FrontendAtsc3PlpSettings frontendAtsc3PlpSettings {
                 .plpId = plpId,
                 .modulation = modulation,
@@ -3169,17 +3413,17 @@ static FrontendSettings getIsdbtFrontendSettings(JNIEnv *env, const jobject& set
             "android/media/tv/tuner/frontend/IsdbtFrontendSettings$IsdbtLayerSettings");
     frontendIsdbtSettings.layerSettings.resize(len);
     for (int i = 0; i < len; i++) {
-        jobject layer = env->GetObjectArrayElement(layerSettings, i);
+        ScopedLocalRef layer(env, env->GetObjectArrayElement(layerSettings, i));
         frontendIsdbtSettings.layerSettings[i].modulation = static_cast<FrontendIsdbtModulation>(
-                env->GetIntField(layer, env->GetFieldID(layerClazz, "mModulation", "I")));
+                env->GetIntField(layer.get(), env->GetFieldID(layerClazz, "mModulation", "I")));
         frontendIsdbtSettings.layerSettings[i].timeInterleave =
                 static_cast<FrontendIsdbtTimeInterleaveMode>(
-                        env->GetIntField(layer,
+                        env->GetIntField(layer.get(),
                                          env->GetFieldID(layerClazz, "mTimeInterleaveMode", "I")));
         frontendIsdbtSettings.layerSettings[i].coderate = static_cast<FrontendIsdbtCoderate>(
-                env->GetIntField(layer, env->GetFieldID(layerClazz, "mCodeRate", "I")));
+                env->GetIntField(layer.get(), env->GetFieldID(layerClazz, "mCodeRate", "I")));
         frontendIsdbtSettings.layerSettings[i].numOfSegment =
-                env->GetIntField(layer, env->GetFieldID(layerClazz, "mNumOfSegments", "I"));
+                env->GetIntField(layer.get(), env->GetFieldID(layerClazz, "mNumOfSegments", "I"));
     }
 
     frontendSettings.set<FrontendSettings::Tag::isdbt>(frontendIsdbtSettings);
@@ -3209,7 +3453,8 @@ static FrontendSettings getDtmbFrontendSettings(JNIEnv *env, const jobject &sett
                     env->GetIntField(settings, env->GetFieldID(clazz, "mGuardInterval", "I")));
     FrontendDtmbTimeInterleaveMode interleaveMode =
             static_cast<FrontendDtmbTimeInterleaveMode>(
-                    env->GetIntField(settings, env->GetFieldID(clazz, "mTimeInterleaveMode", "I")));
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mTimeInterleaveMode",
+                                                               "I")));
 
     FrontendDtmbSettings frontendDtmbSettings{
             .frequency = freq,
@@ -3223,6 +3468,113 @@ static FrontendSettings getDtmbFrontendSettings(JNIEnv *env, const jobject &sett
             .inversion = inversion,
     };
     frontendSettings.set<FrontendSettings::Tag::dtmb>(frontendDtmbSettings);
+    return frontendSettings;
+}
+
+static DemuxIpAddress getDemuxIpAddress(JNIEnv *env, const jobject& config,
+                                        const char* className) {
+    jclass clazz = env->FindClass(className);
+
+    jbyteArray jsrcIpAddress = static_cast<jbyteArray>(
+            env->GetObjectField(config, env->GetFieldID(clazz, "mSrcIpAddress", "[B")));
+    jsize srcSize = env->GetArrayLength(jsrcIpAddress);
+    jbyteArray jdstIpAddress = static_cast<jbyteArray>(
+            env->GetObjectField(config, env->GetFieldID(clazz, "mDstIpAddress", "[B")));
+    jsize dstSize = env->GetArrayLength(jdstIpAddress);
+
+    DemuxIpAddress res;
+
+    if (srcSize != dstSize) {
+        // should never happen. Validated on Java size.
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+            "IP address lengths don't match. srcLength=%d, dstLength=%d", srcSize, dstSize);
+        return res;
+    }
+
+    if (srcSize == IP_V4_LENGTH) {
+        vector<uint8_t> srcAddr;
+        vector<uint8_t> dstAddr;
+        srcAddr.resize(IP_V4_LENGTH);
+        dstAddr.resize(IP_V4_LENGTH);
+        env->GetByteArrayRegion(jsrcIpAddress, 0, srcSize, reinterpret_cast<jbyte *>(&srcAddr[0]));
+        env->GetByteArrayRegion(jdstIpAddress, 0, dstSize, reinterpret_cast<jbyte *>(&dstAddr[0]));
+        res.srcIpAddress.set<DemuxIpAddressIpAddress::Tag::v4>(srcAddr);
+        res.dstIpAddress.set<DemuxIpAddressIpAddress::Tag::v4>(dstAddr);
+    } else if (srcSize == IP_V6_LENGTH) {
+        vector<uint8_t> srcAddr;
+        vector<uint8_t> dstAddr;
+        srcAddr.resize(IP_V6_LENGTH);
+        dstAddr.resize(IP_V6_LENGTH);
+        env->GetByteArrayRegion(jsrcIpAddress, 0, srcSize, reinterpret_cast<jbyte *>(&srcAddr[0]));
+        env->GetByteArrayRegion(jdstIpAddress, 0, dstSize, reinterpret_cast<jbyte *>(&dstAddr[0]));
+        res.srcIpAddress.set<DemuxIpAddressIpAddress::Tag::v6>(srcAddr);
+        res.dstIpAddress.set<DemuxIpAddressIpAddress::Tag::v6>(dstAddr);
+    } else {
+        // should never happen. Validated on Java size.
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+            "Invalid IP address length %d", srcSize);
+        return res;
+    }
+
+    res.srcPort = env->GetIntField(config, env->GetFieldID(clazz, "mSrcPort", "I"));
+    res.dstPort = env->GetIntField(config, env->GetFieldID(clazz, "mDstPort", "I"));
+
+    return res;
+}
+
+static FrontendIptvSettingsFec getIptvFrontendSettingsFec(JNIEnv *env, const jobject &settings) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/frontend/IptvFrontendSettings");
+    jclass fecClazz = env->FindClass("android/media/tv/tuner/frontend/IptvFrontendSettingsFec");
+    jobject fec = env->GetObjectField(settings, env->GetFieldID(clazz, "mFec",
+            "Landroid/media/tv/tuner/frontend/IptvFrontendSettingsFec;"));
+
+    FrontendIptvSettingsFecType type =
+            static_cast<FrontendIptvSettingsFecType>(
+                    env->GetIntField(fec, env->GetFieldID(fecClazz, "mFecType", "I")));
+    int32_t fecColNum = env->GetIntField(fec, env->GetFieldID(fecClazz, "mFecColNum", "I"));
+    int32_t fecRowNum = env->GetIntField(fec, env->GetFieldID(fecClazz, "mFecRowNum", "I"));
+
+    FrontendIptvSettingsFec frontendIptvSettingsFec = {
+        .type = type,
+        .fecColNum = fecColNum,
+        .fecRowNum = fecRowNum,
+    };
+
+    return frontendIptvSettingsFec;
+}
+
+static FrontendSettings getIptvFrontendSettings(JNIEnv *env, const jobject &settings) {
+    FrontendSettings frontendSettings;
+    const char *className = "android/media/tv/tuner/frontend/IptvFrontendSettings";
+    jclass clazz = env->FindClass(className);
+    FrontendIptvSettingsProtocol protocol =
+            static_cast<FrontendIptvSettingsProtocol>(
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mProtocol", "I")));
+    FrontendIptvSettingsIgmp igmp =
+            static_cast<FrontendIptvSettingsIgmp>(
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mIgmp", "I")));
+    int64_t bitrate = env->GetIntField(settings, env->GetFieldID(clazz, "mBitrate", "J"));
+    jstring jContentUrl = (jstring) env->GetObjectField(settings, env->GetFieldID(
+                                clazz, "mContentUrl", "Ljava/lang/String;"));
+    const char *contentUrl = env->GetStringUTFChars(jContentUrl, 0);
+    DemuxIpAddress ipAddr = getDemuxIpAddress(env, settings, className);
+
+    FrontendIptvSettings frontendIptvSettings{
+            .protocol = protocol,
+            .igmp = igmp,
+            .bitrate = bitrate,
+            .ipAddr = ipAddr,
+            .contentUrl = contentUrl,
+    };
+
+    jobject jFec = env->GetObjectField(settings, env->GetFieldID(clazz, "mFec",
+            "Landroid/media/tv/tuner/frontend/IptvFrontendSettingsFec;"));
+    if (jFec != nullptr) {
+        frontendIptvSettings.fec = getIptvFrontendSettingsFec(env, settings);
+    }
+
+    frontendSettings.set<FrontendSettings::Tag::iptv>(frontendIptvSettings);
+    env->ReleaseStringUTFChars(jContentUrl, contentUrl);
     return frontendSettings;
 }
 
@@ -3250,6 +3602,8 @@ static FrontendSettings getFrontendSettings(JNIEnv *env, int type, jobject setti
             return getIsdbtFrontendSettings(env, settings);
         case FrontendType::DTMB:
             return getDtmbFrontendSettings(env, settings);
+        case FrontendType::IPTV:
+            return getIptvFrontendSettings(env, settings);
         default:
             // should never happen because a type is associated with a subclass of
             // FrontendSettings and not set by users
@@ -3470,6 +3824,11 @@ static int android_media_tv_Tuner_set_lnb(JNIEnv *env, jobject thiz, jobject lnb
     return tuner->setLnb(lnbClient);
 }
 
+static bool android_media_tv_Tuner_is_lna_supported(JNIEnv *env, jobject thiz) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->isLnaSupported();
+}
+
 static int android_media_tv_Tuner_set_lna(JNIEnv *env, jobject thiz, jboolean enable) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->setLna(enable);
@@ -3531,7 +3890,6 @@ static jobject android_media_tv_Tuner_open_lnb_by_name(JNIEnv *env, jobject thiz
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->openLnbByName(name);
 }
-
 
 static jobject android_media_tv_Tuner_open_filter(
         JNIEnv *env, jobject thiz, jint type, jint subType, jlong bufferSize) {
@@ -3715,6 +4073,8 @@ static DemuxFilterRecordSettings getFilterRecordSettings(JNIEnv *env, const jobj
     } else if (scIndexType == DemuxRecordScIndexType::SC_AVC) {
         // Java uses the values defined by HIDL HAL. Right shift 4 bits.
         filterRecordSettings.scIndexMask.set<DemuxFilterScIndexMask::Tag::scAvc>(scIndexMask >> 4);
+    } else if (scIndexType == DemuxRecordScIndexType::SC_VVC) {
+        filterRecordSettings.scIndexMask.set<DemuxFilterScIndexMask::Tag::scVvc>(scIndexMask);
     }
     return filterRecordSettings;
 }
@@ -3730,56 +4090,6 @@ static DemuxFilterDownloadSettings getFilterDownloadSettings(JNIEnv *env, const 
             .downloadId = downloadId,
     };
     return filterDownloadSettings;
-}
-
-static DemuxIpAddress getDemuxIpAddress(JNIEnv *env, const jobject& config) {
-    jclass clazz = env->FindClass("android/media/tv/tuner/filter/IpFilterConfiguration");
-
-    jbyteArray jsrcIpAddress = static_cast<jbyteArray>(
-            env->GetObjectField(config, env->GetFieldID(clazz, "mSrcIpAddress", "[B")));
-    jsize srcSize = env->GetArrayLength(jsrcIpAddress);
-    jbyteArray jdstIpAddress = static_cast<jbyteArray>(
-            env->GetObjectField(config, env->GetFieldID(clazz, "mDstIpAddress", "[B")));
-    jsize dstSize = env->GetArrayLength(jdstIpAddress);
-
-    DemuxIpAddress res;
-
-    if (srcSize != dstSize) {
-        // should never happen. Validated on Java size.
-        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-            "IP address lengths don't match. srcLength=%d, dstLength=%d", srcSize, dstSize);
-        return res;
-    }
-
-    if (srcSize == IP_V4_LENGTH) {
-        vector<uint8_t> srcAddr;
-        vector<uint8_t> dstAddr;
-        srcAddr.resize(IP_V4_LENGTH);
-        dstAddr.resize(IP_V4_LENGTH);
-        env->GetByteArrayRegion(jsrcIpAddress, 0, srcSize, reinterpret_cast<jbyte *>(&srcAddr[0]));
-        env->GetByteArrayRegion(jdstIpAddress, 0, dstSize, reinterpret_cast<jbyte *>(&dstAddr[0]));
-        res.srcIpAddress.set<DemuxIpAddressIpAddress::Tag::v4>(srcAddr);
-        res.dstIpAddress.set<DemuxIpAddressIpAddress::Tag::v4>(dstAddr);
-    } else if (srcSize == IP_V6_LENGTH) {
-        vector<uint8_t> srcAddr;
-        vector<uint8_t> dstAddr;
-        srcAddr.resize(IP_V6_LENGTH);
-        dstAddr.resize(IP_V6_LENGTH);
-        env->GetByteArrayRegion(jsrcIpAddress, 0, srcSize, reinterpret_cast<jbyte *>(&srcAddr[0]));
-        env->GetByteArrayRegion(jdstIpAddress, 0, dstSize, reinterpret_cast<jbyte *>(&dstAddr[0]));
-        res.srcIpAddress.set<DemuxIpAddressIpAddress::Tag::v6>(srcAddr);
-        res.dstIpAddress.set<DemuxIpAddressIpAddress::Tag::v6>(dstAddr);
-    } else {
-        // should never happen. Validated on Java size.
-        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-            "Invalid IP address length %d", srcSize);
-        return res;
-    }
-
-    res.srcPort = env->GetIntField(config, env->GetFieldID(clazz, "mSrcPort", "I"));
-    res.dstPort = env->GetIntField(config, env->GetFieldID(clazz, "mDstPort", "I"));
-
-    return res;
 }
 
 static DemuxFilterSettings getFilterConfiguration(
@@ -3877,7 +4187,8 @@ static DemuxFilterSettings getFilterConfiguration(
             break;
         }
         case DemuxFilterMainType::IP: {
-            DemuxIpAddress ipAddr = getDemuxIpAddress(env, filterConfigObj);
+            DemuxIpAddress ipAddr = getDemuxIpAddress(env, filterConfigObj,
+                                    "android/media/tv/tuner/filter/IpFilterConfiguration");
             DemuxIpFilterSettings ipFilterSettings {
                 .ipAddr = ipAddr,
             };
@@ -4359,6 +4670,11 @@ static jobject android_media_tv_Tuner_get_demux_caps(JNIEnv* env, jobject thiz) 
     return tuner->getDemuxCaps();
 }
 
+static jobject android_media_tv_Tuner_get_demux_info(JNIEnv* env, jobject thiz, jint handle) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->getDemuxInfo(handle);
+}
+
 static jint android_media_tv_Tuner_open_demux(JNIEnv* env, jobject thiz, jint handle) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return (jint)tuner->openDemux(handle);
@@ -4470,6 +4786,17 @@ static jint android_media_tv_Tuner_configure_dvr(JNIEnv *env, jobject dvr, jobje
     bool isRecorder =
             env->IsInstanceOf(dvr, env->FindClass("android/media/tv/tuner/dvr/DvrRecorder"));
     Result result = dvrClient->configure(getDvrSettings(env, settings, isRecorder));
+    return (jint)result;
+}
+
+static jint android_media_tv_Tuner_set_status_check_interval_hint(JNIEnv *env, jobject dvr,
+                                                                  jlong durationInMs) {
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == nullptr) {
+        ALOGD("Failed to set status check interval hint: dvr client not found");
+        return (int)Result::NOT_INITIALIZED;
+    }
+    Result result = dvrClient->setStatusCheckIntervalHint(durationInMs);
     return (jint)result;
 }
 
@@ -4707,6 +5034,7 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_scan },
     { "nativeStopScan", "()I", (void *)android_media_tv_Tuner_stop_scan },
     { "nativeSetLnb", "(Landroid/media/tv/tuner/Lnb;)I", (void *)android_media_tv_Tuner_set_lnb },
+    { "nativeIsLnaSupported", "()Z", (void *)android_media_tv_Tuner_is_lna_supported },
     { "nativeSetLna", "(Z)I", (void *)android_media_tv_Tuner_set_lna },
     { "nativeGetFrontendStatus", "([I)Landroid/media/tv/tuner/frontend/FrontendStatus;",
             (void *)android_media_tv_Tuner_get_frontend_status },
@@ -4738,6 +5066,8 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_dvr_playback },
     { "nativeGetDemuxCapabilities", "()Landroid/media/tv/tuner/DemuxCapabilities;",
             (void *)android_media_tv_Tuner_get_demux_caps },
+    { "nativeGetDemuxInfo", "(I)Landroid/media/tv/tuner/DemuxInfo;",
+            (void *)android_media_tv_Tuner_get_demux_info },
     { "nativeOpenDemuxByhandle", "(I)I", (void *)android_media_tv_Tuner_open_demux },
     { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_tuner },
     { "nativeCloseFrontend", "(I)I", (void *)android_media_tv_Tuner_close_frontend },
@@ -4816,6 +5146,8 @@ static const JNINativeMethod gDvrRecorderMethods[] = {
             (void *)android_media_tv_Tuner_detach_filter },
     { "nativeConfigureDvr", "(Landroid/media/tv/tuner/dvr/DvrSettings;)I",
             (void *)android_media_tv_Tuner_configure_dvr },
+    { "nativeSetStatusCheckIntervalHint", "(J)I",
+            (void *)android_media_tv_Tuner_set_status_check_interval_hint},
     { "nativeStartDvr", "()I", (void *)android_media_tv_Tuner_start_dvr },
     { "nativeStopDvr", "()I", (void *)android_media_tv_Tuner_stop_dvr },
     { "nativeFlushDvr", "()I", (void *)android_media_tv_Tuner_flush_dvr },
@@ -4832,6 +5164,8 @@ static const JNINativeMethod gDvrPlaybackMethods[] = {
             (void *)android_media_tv_Tuner_detach_filter},
     { "nativeConfigureDvr", "(Landroid/media/tv/tuner/dvr/DvrSettings;)I",
             (void *)android_media_tv_Tuner_configure_dvr},
+    { "nativeSetStatusCheckIntervalHint", "(J)I",
+            (void *)android_media_tv_Tuner_set_status_check_interval_hint},
     { "nativeStartDvr", "()I", (void *)android_media_tv_Tuner_start_dvr},
     { "nativeStopDvr", "()I", (void *)android_media_tv_Tuner_stop_dvr},
     { "nativeFlushDvr", "()I", (void *)android_media_tv_Tuner_flush_dvr},

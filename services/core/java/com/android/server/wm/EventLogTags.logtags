@@ -8,11 +8,11 @@ option java_package com.android.server.wm
 # An activity is being finished:
 30001 wm_finish_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Reason|3)
 # A task is being brought to the front of the screen:
-30002 wm_task_to_front (User|1|5),(Task|1|5)
+30002 wm_task_to_front (User|1|5),(Task|1|5),(Display Id|1|5)
 # An existing activity is being given a new intent:
 30003 wm_new_intent (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
 # A new task is being created:
-30004 wm_create_task (User|1|5),(Task ID|1|5)
+30004 wm_create_task (User|1|5),(Task ID|1|5),(Root Task ID|1|5),(Display Id|1|5)
 # A new activity is being created in an existing task:
 30005 wm_create_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
 # An activity has been resumed into the foreground but was not already running:
@@ -32,9 +32,9 @@ option java_package com.android.server.wm
 # An activity is being destroyed:
 30018 wm_destroy_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Reason|3)
 # An activity has been relaunched, resumed, and is now in the foreground:
-30019 wm_relaunch_resume_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
+30019 wm_relaunch_resume_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(config mask|3)
 # An activity has been relaunched:
-30020 wm_relaunch_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
+30020 wm_relaunch_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(config mask|3)
 
 # Activity set to resumed
 30043 wm_set_resumed_activity (User|1|5),(Component Name|3),(Reason|3)
@@ -45,9 +45,6 @@ option java_package com.android.server.wm
 # Attempting to stop an activity
 30048 wm_stop_activity (User|1|5),(Token|1|5),(Component Name|3)
 
-# The task is being removed from its parent task
-30061 wm_remove_task (Task ID|1|5), (Root Task ID|1|5)
-
 # An activity been add into stopping list
 30066 wm_add_to_stopping (User|1|5),(Token|1|5),(Component Name|3),(Reason|3)
 
@@ -57,11 +54,11 @@ option java_package com.android.server.wm
 # Out of memory for surfaces.
 31000 wm_no_surface_memory (Window|3),(PID|1|5),(Operation|3)
 # Task created.
-31001 wm_task_created (TaskId|1|5),(RootTaskId|1|5)
+31001 wm_task_created (TaskId|1|5)
 # Task moved to top (1) or bottom (0).
-31002 wm_task_moved (TaskId|1|5),(ToTop|1),(Index|1)
+31002 wm_task_moved (TaskId|1|5),(Root Task ID|1|5),(Display Id|1|5),(ToTop|1),(Index|1)
 # Task removed with source explanation.
-31003 wm_task_removed (TaskId|1|5),(Reason|3)
+31003 wm_task_removed (TaskId|1|5),(Root Task ID|1|5),(Display Id|1|5),(Reason|3)
 
 # Set the requested orientation of an activity.
 31006 wm_set_requested_orientation (Orientation|1|5),(Component Name|3)
@@ -71,5 +68,18 @@ option java_package com.android.server.wm
 # Notify keyguard occlude statuc change to SysUI.
 31008 wm_set_keyguard_occluded (occluded|1),(animate|1),(transit|1),(Channel|3)
 
+# Back navigation.
+31100 wm_back_navi_canceled (Reason|3)
+
+# IME surface parent is updated.
+32003 imf_update_ime_parent (surface name|3)
+# IME snapshot is shown.
+32004 imf_show_ime_screenshot (target window|3),(transition|1),(surface position|3)
+# IME snapshot is hidden.
+32005 imf_remove_ime_screenshot (target window|3)
+
 # Request surface flinger to show / hide the wallpaper surface.
 33001 wm_wallpaper_surface (Display Id|1|5),(Visible|1),(Target|3)
+
+# Entering pip called
+38000 wm_enter_pip (User|1|5),(Token|1|5),(Component Name|3),(is Auto Enter|3)

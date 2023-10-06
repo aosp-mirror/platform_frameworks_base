@@ -16,11 +16,12 @@
 
 package android.telephony.ims.aidl;
 
+import android.telephony.ims.PublishAttributes;
 /**
  * Interface for RCS UCE publish state change callbacks.
  *
  * {@hide}
  */
 oneway interface IRcsUcePublishStateCallback {
-    void onPublishStateChanged(int publishState);
+    void onPublishUpdated(in PublishAttributes attributes);
 }

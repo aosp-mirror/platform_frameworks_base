@@ -254,10 +254,16 @@ public class SecurityControllerImpl implements SecurityController {
         return mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser();
     }
 
+    // TODO(b/259908270): remove
     @Override
     @DeviceOwnerType
     public int getDeviceOwnerType(@NonNull ComponentName admin) {
         return mDevicePolicyManager.getDeviceOwnerType(admin);
+    }
+
+    @Override
+    public boolean isFinancedDevice() {
+        return mDevicePolicyManager.isFinancedDevice();
     }
 
     @Override

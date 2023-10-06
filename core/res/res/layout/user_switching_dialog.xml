@@ -14,17 +14,48 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:id="@+id/content"
+             android:background="?attr/colorBackground"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/message"
-        style="?attr/textAppearanceListItem"
-        android:background="?attr/colorSurface"
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:gravity="center"
-        android:drawablePadding="12dp"
-        android:drawableTint="?attr/textColorPrimary"
-        android:paddingStart="?attr/dialogPreferredPadding"
-        android:paddingEnd="?attr/dialogPreferredPadding"
-        android:paddingTop="24dp"
-        android:paddingBottom="24dp" />
+        android:orientation="vertical"
+        android:paddingBottom="77dp">
+
+        <RelativeLayout
+            android:layout_width="242dp"
+            android:layout_height="242dp"
+            android:layout_gravity="center">
+
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="26dp" />
+
+            <ImageView
+                android:id="@+id/progress_circular"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="6dp"
+                android:src="@drawable/loading_spinner" />
+
+        </RelativeLayout>
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:id="@+id/message"
+                  style="?attr/textAppearanceListItem"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:textSize="20sp"
+                  android:textAlignment="center"
+                  android:drawableTint="?attr/textColorPrimary" />
+
+    </LinearLayout>
+</FrameLayout>

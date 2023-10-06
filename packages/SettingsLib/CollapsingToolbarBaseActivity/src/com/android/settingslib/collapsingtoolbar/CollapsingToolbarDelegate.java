@@ -19,8 +19,11 @@ package com.android.settingslib.collapsingtoolbar;
 import static android.text.Layout.HYPHENATION_FREQUENCY_NORMAL_FAST;
 
 import android.app.ActionBar;
+import android.app.Activity;
+import android.content.res.Configuration;
 import android.graphics.text.LineBreakConfig;
 import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +32,7 @@ import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.android.settingslib.widget.R;
@@ -41,7 +45,7 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
  * extend from {@link CollapsingToolbarBaseActivity} or from {@link CollapsingToolbarBaseFragment}.
  */
 public class CollapsingToolbarDelegate {
-
+    private static final String TAG = "CTBdelegate";
     /** Interface to be implemented by the host of the Collapsing Toolbar. */
     public interface HostCallback {
         /**
@@ -51,6 +55,13 @@ public class CollapsingToolbarDelegate {
          */
         @Nullable
         ActionBar setActionBar(Toolbar toolbar);
+
+        /** Sets support tool bar and return support action bar, this is for AppCompatActivity. */
+        @Nullable
+        default androidx.appcompat.app.ActionBar setActionBar(
+                androidx.appcompat.widget.Toolbar toolbar) {
+            return null;
+        }
 
         /** Sets a title on the host. */
         void setOuterTitle(CharSequence title);
@@ -78,6 +89,13 @@ public class CollapsingToolbarDelegate {
     /** Method to call that creates the root view of the collapsing toolbar. */
     @SuppressWarnings("RestrictTo")
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container) {
+        return onCreateView(inflater, container, null);
+    }
+
+    /** Method to call that creates the root view of the collapsing toolbar. */
+    @SuppressWarnings("RestrictTo")
+    View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            Activity activity) {
         final View view =
                 inflater.inflate(R.layout.collapsing_toolbar_base_layout, container, false);
         if (view instanceof CoordinatorLayout) {
@@ -97,18 +115,58 @@ public class CollapsingToolbarDelegate {
                                         .build()));
             }
         }
-        disableCollapsingToolbarLayoutScrollingBehavior();
-        mToolbar = view.findViewById(R.id.action_bar);
+        autoSetCollapsingToolbarLayoutScrolling();
         mContentFrameLayout = view.findViewById(R.id.content_frame);
-        final ActionBar actionBar = mHostCallback.setActionBar(mToolbar);
+        if (activity instanceof AppCompatActivity) {
+            Log.d(TAG, "onCreateView: from AppCompatActivity and sub-class.");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                initSupportActionBar(inflater);
+            } else {
+                initRSupportActionBar(view);
+            }
+        } else {
+            Log.d(TAG, "onCreateView: from NonAppCompatActivity.");
+            mToolbar = view.findViewById(R.id.action_bar);
+            final ActionBar actionBar = mHostCallback.setActionBar(mToolbar);
+            // Enable title and home button by default
+            if (actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+                actionBar.setHomeButtonEnabled(true);
+                actionBar.setDisplayShowTitleEnabled(true);
+            }
+        }
+        return view;
+    }
 
-        // Enable title and home button by default
+    private void initSupportActionBar(@NonNull LayoutInflater inflater) {
+        if (mCollapsingToolbarLayout == null) {
+            return;
+        }
+        mCollapsingToolbarLayout.removeAllViews();
+        inflater.inflate(R.layout.support_toolbar, mCollapsingToolbarLayout);
+        final androidx.appcompat.widget.Toolbar supportToolbar =
+                mCollapsingToolbarLayout.findViewById(R.id.support_action_bar);
+        final androidx.appcompat.app.ActionBar actionBar =
+                mHostCallback.setActionBar(supportToolbar);
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayShowTitleEnabled(true);
         }
-        return view;
+    }
+
+    private void initRSupportActionBar(View view) {
+        view.findViewById(R.id.action_bar).setVisibility(View.GONE);
+        final androidx.appcompat.widget.Toolbar supportToolbar =
+                view.findViewById(R.id.support_action_bar);
+        supportToolbar.setVisibility(View.VISIBLE);
+        final androidx.appcompat.app.ActionBar actionBar =
+                mHostCallback.setActionBar(supportToolbar);
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(true);
+        }
     }
 
     /** Return an instance of CoordinatorLayout. */
@@ -148,7 +206,7 @@ public class CollapsingToolbarDelegate {
         return mAppBarLayout;
     }
 
-    private void disableCollapsingToolbarLayoutScrollingBehavior() {
+    private void autoSetCollapsingToolbarLayoutScrolling() {
         if (mAppBarLayout == null) {
             return;
         }
@@ -159,7 +217,13 @@ public class CollapsingToolbarDelegate {
                 new AppBarLayout.Behavior.DragCallback() {
                     @Override
                     public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
-                        return false;
+                        // Header can be scrolling while device in landscape mode and SDK > 33
+                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.TIRAMISU) {
+                            return false;
+                        } else {
+                            return appBarLayout.getResources().getConfiguration().orientation
+                                    == Configuration.ORIENTATION_LANDSCAPE;
+                        }
                     }
                 });
         params.setBehavior(behavior);

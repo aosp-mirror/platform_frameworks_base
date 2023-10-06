@@ -55,6 +55,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.DisplayShape;
 import android.view.Gravity;
 import android.view.InsetsState;
 import android.view.PrivacyIndicatorBounds;
@@ -126,6 +127,10 @@ public class WallpaperControllerTests extends WindowTestsBase {
     public void testWallpaperSizeWithFixedTransform() {
         // No wallpaper
         final DisplayContent dc = mDisplayContent;
+        if (dc.mBaseDisplayHeight == dc.mBaseDisplayWidth) {
+            // Make sure the size is different when changing orientation.
+            resizeDisplay(dc, 500, 1000);
+        }
 
         // No wallpaper WSA Surface
         final WindowState wallpaperWindow = createWallpaperWindow(dc);
@@ -167,7 +172,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
         final DisplayInfo info = dc.computeScreenConfiguration(config, Surface.ROTATION_0);
         final DisplayCutout cutout = dc.calculateDisplayCutoutForRotation(Surface.ROTATION_0);
         final DisplayFrames displayFrames = new DisplayFrames(new InsetsState(),
-                info, cutout, RoundedCorners.NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds());
+                info, cutout, RoundedCorners.NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds(),
+                DisplayShape.NONE);
         wallpaperWindow.mToken.applyFixedRotationTransform(info, displayFrames, config);
 
         // Check that the wallpaper has the same frame in landscape than in portrait
@@ -282,6 +288,32 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertEquals(homeWin, dc.mWallpaperController.getWallpaperTarget());
     }
 
+    @Test
+    public void testShowWhenLockedWallpaperTarget() {
+        final WindowState wallpaperWindow = createWallpaperWindow(mDisplayContent);
+        wallpaperWindow.mToken.asWallpaperToken().setShowWhenLocked(true);
+        final WindowState behind = createWindow(null, TYPE_BASE_APPLICATION, "behind");
+        final WindowState topTranslucent = createWindow(null, TYPE_BASE_APPLICATION,
+                "topTranslucent");
+        behind.mAttrs.width = behind.mAttrs.height = topTranslucent.mAttrs.width =
+                topTranslucent.mAttrs.height = WindowManager.LayoutParams.MATCH_PARENT;
+        topTranslucent.mAttrs.flags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+        doReturn(true).when(behind.mActivityRecord).fillsParent();
+        doReturn(false).when(topTranslucent.mActivityRecord).fillsParent();
+
+        spyOn(mWm.mPolicy);
+        doReturn(true).when(mWm.mPolicy).isKeyguardLocked();
+        doReturn(true).when(mWm.mPolicy).isKeyguardOccluded();
+        mDisplayContent.mWallpaperController.adjustWallpaperWindows();
+        // Wallpaper is visible because the show-when-locked activity is translucent.
+        assertTrue(mDisplayContent.mWallpaperController.isWallpaperTarget(wallpaperWindow));
+
+        behind.mActivityRecord.setShowWhenLocked(true);
+        mDisplayContent.mWallpaperController.adjustWallpaperWindows();
+        // Wallpaper is invisible because the lowest show-when-locked activity is opaque.
+        assertTrue(mDisplayContent.mWallpaperController.isWallpaperTarget(null));
+    }
+
     /**
      * Tests that the windowing mode of the wallpaper window must always be fullscreen.
      */
@@ -380,7 +412,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertTrue(wallpaperWindow.isVisible());
         assertTrue(token.isVisibleRequested());
         assertTrue(token.isVisible());
-        mWm.mAtmService.getTransitionController().abort(transit);
+        transit.abort();
 
         // In a transition, setting invisible should ONLY set requestedVisible false; otherwise
         // wallpaper should remain "visible" until transition is over.
@@ -392,9 +424,9 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertTrue(token.isVisible());
 
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
-        token.finishSync(t, false /* cancel */);
+        token.finishSync(t, token.getSyncGroup(), false /* cancel */);
         transit.onTransactionReady(transit.getSyncId(), t);
-        dc.mTransitionController.finishTransition(transit.getToken());
+        dc.mTransitionController.finishTransition(transit);
         assertFalse(wallpaperWindow.isVisible());
         assertFalse(token.isVisible());
     }

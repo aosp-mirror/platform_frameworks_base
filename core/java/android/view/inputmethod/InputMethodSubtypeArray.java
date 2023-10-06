@@ -17,6 +17,7 @@
 package android.view.inputmethod;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.BadParcelableException;
 import android.os.Parcel;
 import android.util.Slog;
 
@@ -69,6 +70,9 @@ public class InputMethodSubtypeArray {
      */
     public InputMethodSubtypeArray(final Parcel source) {
         mCount = source.readInt();
+        if (mCount < 0) {
+            throw new BadParcelableException("mCount must be non-negative.");
+        }
         if (mCount > 0) {
             mDecompressedSize = source.readInt();
             mCompressedData = source.createByteArray();

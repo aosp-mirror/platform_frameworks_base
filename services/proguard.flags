@@ -51,6 +51,12 @@
 # Referenced via CarServiceHelperService in car-frameworks-service (avoid removing)
 -keep public class com.android.server.utils.Slogf { *; }
 
+# Referenced in wear-service
+# HIDL interfaces
+-keep public class android.hidl.base.** { *; }
+-keep public class android.hidl.manager.** { *; }
+-keep public class com.android.server.wm.WindowManagerInternal { *; }
+
 # Notification extractors
 # TODO(b/210510433): Revisit and consider generating from frameworks/base/core/res/res/values/config.xml.
 -keep,allowoptimization,allowaccessmodification public class com.android.server.notification.** implements com.android.server.notification.NotificationSignalExtractor
@@ -76,6 +82,7 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.location.gnss.GnssPowerStats { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.location.gnss.hal.GnssNative { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.pm.PackageManagerShellCommandDataLoader { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.sensors.SensorManagerInternal$RuntimeSensorCallback { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.sensors.SensorManagerInternal$ProximityActiveListener { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.sensors.SensorService { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareImpl$AudioSessionProvider$AudioSession { *; }
@@ -83,13 +90,16 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.storage.AppFuseBridge { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.tv.TvInputHal { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbAlsaJackDetector { *; }
--keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbMidiDevice { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbAlsaMidiDevice { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.vibrator.VibratorController$OnVibrationCompleteListener { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.vibrator.VibratorManagerService$OnSyncedVibrationCompleteListener { *; }
 -keepclasseswithmembers,allowoptimization,allowaccessmodification class com.android.server.** {
   *** *FromNative(...);
 }
 -keep,allowoptimization,allowaccessmodification class com.android.server.input.InputManagerService {
+  <methods>;
+}
+-keep,allowoptimization,allowaccessmodification class com.android.server.input.NativeInputManagerService$NativeImpl {
   <methods>;
 }
 -keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbHostManager {

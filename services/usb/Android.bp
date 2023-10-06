@@ -22,6 +22,10 @@ java_library_static {
     libs: [
         "services.core",
         "android.hidl.manager-V1.0-java",
+        "android.hardware.usb.gadget-V1.0-java",
+        "android.hardware.usb.gadget-V1.1-java",
+        "android.hardware.usb.gadget-V1.2-java",
+        "android.hardware.usb.gadget-V1-java",
     ],
 
     static_libs: [
@@ -29,10 +33,6 @@ java_library_static {
         "android.hardware.usb-V1.1-java",
         "android.hardware.usb-V1.2-java",
         "android.hardware.usb-V1.3-java",
-        "android.hardware.usb-V1-java",
-        "android.hardware.usb.gadget-V1.0-java",
-        "android.hardware.usb.gadget-V1.1-java",
-        "android.hardware.usb.gadget-V1.2-java",
-        "android.hardware.usb.gadget-V1-java",
+        "android.hardware.usb-V2-java",
     ],
 }

@@ -36,7 +36,7 @@
             android:layout_width="@dimen/screenrecord_logo_size"
             android:layout_height="@dimen/screenrecord_logo_size"
             android:src="@drawable/ic_media_projection_permission"
-            android:tint="?androidprv:attr/colorAccentPrimary"
+            android:tint="?androidprv:attr/colorAccentPrimaryVariant"
             android:importantForAccessibility="no"/>
         <TextView
             android:id="@+id/screen_share_dialog_title"
@@ -63,7 +63,7 @@
             android:id="@+id/text_warning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/screenrecord_description"
+            android:text="@string/screenrecord_permission_dialog_warning_entire_screen"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:textColorSecondary"
             android:gravity="start"
@@ -76,7 +76,7 @@
             android:orientation="horizontal"
             android:layout_marginTop="@dimen/screenrecord_buttons_margin_top">
             <TextView
-                android:id="@+id/button_cancel"
+                android:id="@android:id/button2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
@@ -87,11 +87,11 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
             <TextView
-                android:id="@+id/button_start"
+                android:id="@android:id/button1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
-                android:text="@string/screenrecord_start"
+                android:text="@string/screenrecord_continue"
                 style="@style/Widget.Dialog.Button" />
         </LinearLayout>
     </LinearLayout>

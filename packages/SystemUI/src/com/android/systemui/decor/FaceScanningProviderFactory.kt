@@ -98,7 +98,8 @@ class FaceScanningProviderFactory @Inject constructor(
     }
 
     fun shouldShowFaceScanningAnim(): Boolean {
-        return canShowFaceScanningAnim() && keyguardUpdateMonitor.isFaceDetectionRunning
+        return canShowFaceScanningAnim() &&
+                (keyguardUpdateMonitor.isFaceDetectionRunning || authController.isShowing)
     }
 }
 
@@ -142,6 +143,7 @@ class FaceScanningOverlayProviderImpl(
                 keyguardUpdateMonitor,
                 mainExecutor,
                 logger,
+                authController,
         )
         view.id = viewId
         view.setColor(tintColor)

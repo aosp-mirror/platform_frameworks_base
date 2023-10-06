@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.audiopolicy.AudioVolumeGroup;
 import android.os.IBinder;
@@ -31,17 +32,14 @@ import java.util.Objects;
 
 /**
  * @hide
- * A class to represent type of volume information.
+ * A class to represent volume information.
  * Can be used to represent volume associated with a stream type or {@link AudioVolumeGroup}.
  * Volume index is optional when used to represent a category of volume.
- * Volume ranges are supported too, making the representation of volume changes agnostic
- * regarding the range of values that are supported (e.g. can be used to map BT A2DP absolute
- * volume range to internal range).
- *
- * Note: this class is not yet part of the SystemApi but is intended to be gradually introduced
- *       particularly in parts of the audio framework that suffer from code ambiguity when
- *       dealing with different volume ranges / units.
+ * Volume ranges are supported too, making the representation of volume changes agnostic regarding
+ * the range of values that are supported (e.g. can be used to map BT A2DP absolute volume range to
+ * internal range).
  */
+@SystemApi
 public final class VolumeInfo implements Parcelable {
     private static final String TAG = "VolumeInfo";
 

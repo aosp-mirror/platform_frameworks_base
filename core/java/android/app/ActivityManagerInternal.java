@@ -18,15 +18,20 @@ package android.app;
 
 import static android.app.ActivityManager.StopUserOnSwitch;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionMethod;
+import android.annotation.PermissionName;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityManager.RestrictionLevel;
+import android.app.assist.ActivityId;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.ApplicationInfo;
@@ -40,11 +45,17 @@ import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.util.StatsEvent;
 
+import com.android.internal.os.TimeoutRecord;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 /**
  * Activity manager local system service interface.
@@ -215,6 +226,18 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isSystemReady();
 
     /**
+     * @return {@code true} if system is using the "modern" broadcast queue,
+     *         {@code false} otherwise.
+     */
+    public abstract boolean isModernQueueEnabled();
+
+    /**
+     * Enforce capability restrictions on use of the given BroadcastOptions
+     */
+    public abstract void enforceBroadcastOptionsPermissions(@Nullable Bundle options,
+            int callingUid);
+
+    /**
      * Returns package name given pid.
      *
      * @param pid The pid we are searching package name for.
@@ -288,8 +311,15 @@ public abstract class ActivityManagerInternal {
     public abstract int handleIncomingUser(int callingPid, int callingUid, @UserIdInt int userId,
             boolean allowAll, int allowMode, String name, String callerPackage);
 
-    /** Checks if the calling binder pid as the permission. */
-    public abstract void enforceCallingPermission(String permission, String func);
+    /** Checks if the calling binder pid/uid has the given permission. */
+    @PermissionMethod
+    public abstract void enforceCallingPermission(@PermissionName String permission, String func);
+
+    /**
+     * Returns the current and target user ids as a {@link Pair}. Target user id will be
+     * {@link android.os.UserHandle#USER_NULL} if there is not an ongoing user switch.
+     */
+    public abstract Pair<Integer, Integer> getCurrentAndTargetUserIds();
 
     /** Returns the current user id. */
     public abstract int getCurrentUserId();
@@ -314,7 +344,170 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean hasRunningActivity(int uid, @Nullable String packageName);
 
-    public abstract void updateOomAdj();
+    /**
+     * Oom Adj Reason: none - internal use only, do not use it.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_NONE = 0;
+
+    /**
+     * Oom Adj Reason: activity changes.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_ACTIVITY = 1;
+
+    /**
+     * Oom Adj Reason: finishing a broadcast receiver.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_FINISH_RECEIVER = 2;
+
+    /**
+     * Oom Adj Reason: starting a broadcast receiver.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_START_RECEIVER = 3;
+
+    /**
+     * Oom Adj Reason: binding to a service.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_BIND_SERVICE = 4;
+
+    /**
+     * Oom Adj Reason: unbinding from a service.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_UNBIND_SERVICE = 5;
+
+    /**
+     * Oom Adj Reason: starting a service.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_START_SERVICE = 6;
+
+    /**
+     * Oom Adj Reason: connecting to a content provider.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_GET_PROVIDER = 7;
+
+    /**
+     * Oom Adj Reason: disconnecting from a content provider.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_REMOVE_PROVIDER = 8;
+
+    /**
+     * Oom Adj Reason: UI visibility changes.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_UI_VISIBILITY = 9;
+
+    /**
+     * Oom Adj Reason: device power allowlist changes.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_ALLOWLIST = 10;
+
+    /**
+     * Oom Adj Reason: starting a process.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_PROCESS_BEGIN = 11;
+
+    /**
+     * Oom Adj Reason: ending a process.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_PROCESS_END = 12;
+
+    /**
+     * Oom Adj Reason: short FGS timeout.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_SHORT_FGS_TIMEOUT = 13;
+
+    /**
+     * Oom Adj Reason: system initialization.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_SYSTEM_INIT = 14;
+
+    /**
+     * Oom Adj Reason: backup/restore.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_BACKUP = 15;
+
+    /**
+     * Oom Adj Reason: instrumented by the SHELL.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_SHELL = 16;
+
+    /**
+     * Oom Adj Reason: task stack is being removed.
+     */
+    public static final int OOM_ADJ_REASON_REMOVE_TASK = 17;
+
+    /**
+     * Oom Adj Reason: uid idle.
+     */
+    public static final int OOM_ADJ_REASON_UID_IDLE = 18;
+
+    /**
+     * Oom Adj Reason: stop service.
+     */
+    public static final int OOM_ADJ_REASON_STOP_SERVICE = 19;
+
+    /**
+     * Oom Adj Reason: executing service.
+     */
+    public static final int OOM_ADJ_REASON_EXECUTING_SERVICE = 20;
+
+    /**
+     * Oom Adj Reason: background restriction changes.
+     */
+    public static final int OOM_ADJ_REASON_RESTRICTION_CHANGE = 21;
+
+    /**
+     * Oom Adj Reason: A package or its component is disabled.
+     */
+    public static final int OOM_ADJ_REASON_COMPONENT_DISABLED = 22;
+
+    @IntDef(prefix = {"OOM_ADJ_REASON_"}, value = {
+        OOM_ADJ_REASON_NONE,
+        OOM_ADJ_REASON_ACTIVITY,
+        OOM_ADJ_REASON_FINISH_RECEIVER,
+        OOM_ADJ_REASON_START_RECEIVER,
+        OOM_ADJ_REASON_BIND_SERVICE,
+        OOM_ADJ_REASON_UNBIND_SERVICE,
+        OOM_ADJ_REASON_START_SERVICE,
+        OOM_ADJ_REASON_GET_PROVIDER,
+        OOM_ADJ_REASON_REMOVE_PROVIDER,
+        OOM_ADJ_REASON_UI_VISIBILITY,
+        OOM_ADJ_REASON_ALLOWLIST,
+        OOM_ADJ_REASON_PROCESS_BEGIN,
+        OOM_ADJ_REASON_PROCESS_END,
+        OOM_ADJ_REASON_SHORT_FGS_TIMEOUT,
+        OOM_ADJ_REASON_SYSTEM_INIT,
+        OOM_ADJ_REASON_BACKUP,
+        OOM_ADJ_REASON_SHELL,
+        OOM_ADJ_REASON_REMOVE_TASK,
+        OOM_ADJ_REASON_UID_IDLE,
+        OOM_ADJ_REASON_STOP_SERVICE,
+        OOM_ADJ_REASON_EXECUTING_SERVICE,
+        OOM_ADJ_REASON_RESTRICTION_CHANGE,
+        OOM_ADJ_REASON_COMPONENT_DISABLED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OomAdjReason {}
+
+    /**
+     * Request to update oom adj.
+     */
+    public abstract void updateOomAdj(@OomAdjReason int oomAdjReason);
     public abstract void updateCpuStats();
 
     /**
@@ -337,7 +530,7 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void updateActivityUsageStats(
             ComponentName activity, @UserIdInt int userId, int event, IBinder appToken,
-            ComponentName taskRoot);
+            ComponentName taskRoot, ActivityId activityId);
     public abstract void updateForegroundTimeIfOnBattery(
             String packageName, int uid, long cpuTimeDiff);
     public abstract void sendForegroundProfileChanged(@UserIdInt int userId);
@@ -376,6 +569,10 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean isAppStartModeDisabled(int uid, String packageName);
 
+    /**
+     * Returns the ids of the current user and all of its profiles (if any), regardless of the
+     * running state of the profiles.
+     */
     public abstract int[] getCurrentProfileIds();
     public abstract UserInfo getCurrentUser();
     public abstract void ensureNotSpecialUser(@UserIdInt int userId);
@@ -413,16 +610,17 @@ public abstract class ActivityManagerInternal {
 
     public abstract int broadcastIntentInPackage(String packageName, @Nullable String featureId,
             int uid, int realCallingUid, int realCallingPid, Intent intent, String resolvedType,
-            IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
-            String requiredPermission, Bundle bOptions, boolean serialized, boolean sticky,
-            @UserIdInt int userId, boolean allowBackgroundActivityStarts,
-            @Nullable IBinder backgroundActivityStartsToken, @Nullable int[] broadcastAllowList);
+            IApplicationThread resultToThread, IIntentReceiver resultTo, int resultCode,
+            String resultData, Bundle resultExtras, String requiredPermission, Bundle bOptions,
+            boolean serialized, boolean sticky, @UserIdInt int userId,
+            BackgroundStartPrivileges backgroundStartPrivileges,
+            @Nullable int[] broadcastAllowList);
 
     public abstract ComponentName startServiceInPackage(int uid, Intent service,
             String resolvedType, boolean fgRequired, String callingPackage,
             @Nullable String callingFeatureId, @UserIdInt int userId,
-            boolean allowBackgroundActivityStarts,
-            @Nullable IBinder backgroundActivityStartsToken) throws TransactionTooLargeException;
+            BackgroundStartPrivileges backgroundStartPrivileges)
+            throws TransactionTooLargeException;
 
     public abstract void disconnectActivityFromServices(Object connectionHolder);
     public abstract void cleanUpServices(@UserIdInt int userId, ComponentName component,
@@ -433,17 +631,31 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isActivityStartsLoggingEnabled();
     /** Returns true if the background activity starts is enabled. */
     public abstract boolean isBackgroundActivityStartsEnabled();
+    /**
+     * Returns The current {@link BackgroundStartPrivileges} of the UID.
+     */
+    @NonNull
+    public abstract BackgroundStartPrivileges getBackgroundStartPrivileges(int uid);
     public abstract void reportCurKeyguardUsageEvent(boolean keyguardShowing);
+
+    /**
+     * Returns whether the app is in a state where it is allowed to schedule a
+     * {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job}.
+     */
+    public abstract boolean canScheduleUserInitiatedJobs(int uid, int pid, String pkgName);
 
     /** @see com.android.server.am.ActivityManagerService#monitor */
     public abstract void monitor();
 
     /** Input dispatch timeout to a window, start the ANR process. Return the timeout extension,
      * in milliseconds, or 0 to abort dispatch. */
-    public abstract long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason);
+    public abstract long inputDispatchingTimedOut(int pid, boolean aboveSystem,
+            TimeoutRecord timeoutRecord);
+
     public abstract boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,
-            boolean aboveSystem, String reason);
+            boolean aboveSystem, TimeoutRecord timeoutRecord);
+
     /**
      * App started responding to input events. This signal can be used to abort the ANR process and
      * hide the ANR dialog.
@@ -468,6 +680,12 @@ public abstract class ActivityManagerInternal {
      * flags.
      */
     public abstract void broadcastCloseSystemDialogs(String reason);
+
+    /**
+     * Trigger an ANR for the specified process.
+     */
+    public abstract void appNotResponding(@NonNull String processName, int uid,
+            @NonNull TimeoutRecord timeoutRecord);
 
     /**
      * Kills all background processes, except those matching any of the specified properties.
@@ -550,13 +768,6 @@ public abstract class ActivityManagerInternal {
     public abstract void stopAppForUser(String pkg, @UserIdInt int userId);
 
     /**
-     * If the given app has any FGSs whose notifications are in the given channel,
-     * stop them.
-     */
-    public abstract void stopForegroundServicesForChannel(String pkg, @UserIdInt int userId,
-            String channelId);
-
-    /**
      * Registers the specified {@code processObserver} to be notified of future changes to
      * process state.
      */
@@ -618,6 +829,13 @@ public abstract class ActivityManagerInternal {
      * broadcast my be sent to; any app Ids < {@link android.os.Process#FIRST_APPLICATION_UID} are
      * automatically allowlisted.
      *
+     * @param filterExtrasForReceiver A function to filter intent extras for the given receiver by
+     * using the rules of package visibility. Returns extras with legitimate package info that the
+     * receiver is able to access, or {@code null} if none of the packages is visible to the
+     * receiver.
+     * @param serialized Specifies whether or not the broadcast should be delivered to the
+     *                   receivers in a serial order.
+     *
      * @see com.android.server.am.ActivityManagerService#broadcastIntentWithFeature(
      *      IApplicationThread, String, Intent, String, IIntentReceiver, int, String, Bundle,
      *      String[], int, Bundle, boolean, boolean, int)
@@ -625,7 +843,22 @@ public abstract class ActivityManagerInternal {
     public abstract int broadcastIntent(Intent intent,
             IIntentReceiver resultTo,
             String[] requiredPermissions, boolean serialized,
-            int userId, int[] appIdAllowList, @Nullable Bundle bOptions);
+            int userId, int[] appIdAllowList,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            @Nullable Bundle bOptions);
+
+    /**
+     * Variant of
+     * {@link #broadcastIntent(Intent, IIntentReceiver, String[], boolean, int, int[], BiFunction, Bundle)}
+     * that allows sender to receive a finish callback once the broadcast delivery is completed,
+     * but provides no ordering guarantee for how the broadcast is delivered to receivers.
+     */
+    public abstract int broadcastIntentWithCallback(Intent intent,
+            IIntentReceiver resultTo,
+            String[] requiredPermissions,
+            int userId, int[] appIdAllowList,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            @Nullable Bundle bOptions);
 
     /**
      * Add uid to the ActivityManagerService PendingStartActivityUids list.
@@ -860,4 +1093,135 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void registerNetworkPolicyUidObserver(@NonNull IUidObserver observer,
             int which, int cutpoint, @NonNull String callingPackage);
+
+    /**
+     * Return all client package names of a service.
+     */
+    public abstract ArraySet<String> getClientPackages(String servicePackageName);
+
+    /**
+     * Retrieve an IUnsafeIntentStrictModeCallback matching the given callingUid.
+     * Returns null no match is found.
+     * @param callingPid The PID mapped with the callback.
+     * @return The callback, if it exists.
+     */
+    public abstract IUnsafeIntentStrictModeCallback getRegisteredStrictModeCallback(
+            int callingPid);
+
+    /**
+     * Unregisters an IUnsafeIntentStrictModeCallback matching the given callingUid.
+     * @param callingPid The PID mapped with the callback.
+     */
+    public abstract void unregisterStrictModeCallback(int callingPid);
+
+    /**
+     * Start a foreground service delegate.
+     * @param options foreground service delegate options.
+     * @param connection a service connection served as callback to caller.
+     * @return true if delegate is started successfully, false otherwise.
+     * @hide
+     */
+    public abstract boolean startForegroundServiceDelegate(
+            @NonNull ForegroundServiceDelegationOptions options,
+            @Nullable ServiceConnection connection);
+
+    /**
+     * Stop a foreground service delegate.
+     * @param options the foreground service delegate options.
+     * @hide
+     */
+    public abstract void stopForegroundServiceDelegate(
+            @NonNull ForegroundServiceDelegationOptions options);
+
+    /**
+     * Stop a foreground service delegate by service connection.
+     * @param connection service connection used to start delegate previously.
+     * @hide
+     */
+    public abstract void stopForegroundServiceDelegate(@NonNull ServiceConnection connection);
+
+    /**
+     * Same as {@link android.app.IActivityManager#startProfile(int userId)}, but it would succeed
+     * even if the profile is disabled - it should only be called by
+     * {@link com.android.server.devicepolicy.DevicePolicyManagerService} when starting a profile
+     * while it's being created.
+     */
+    public abstract boolean startProfileEvenWhenDisabled(@UserIdInt int userId);
+
+    /**
+     * Internal method for logging foreground service API journey start.
+     * Used with FGS metrics logging
+     *
+     * @hide
+     */
+    public abstract void logFgsApiBegin(int apiType, int uid, int pid);
+
+    /**
+     * Internal method for logging foreground service API journey end.
+     * Used with FGS metrics logging
+     *
+     * @hide
+     */
+    public abstract void logFgsApiEnd(int apiType, int uid, int pid);
+
+     /**
+     * Temporarily allow foreground service started by an uid to have while-in-use permission
+     * for durationMs.
+     *
+     * @param uid The UID of the app that starts the foreground service.
+     * @param durationMs elapsedRealTime duration in milliseconds.
+     * @hide
+     */
+    public abstract void tempAllowWhileInUsePermissionInFgs(int uid, long durationMs);
+
+    /**
+     * The list of the events about the {@link android.media.projection.IMediaProjection} itself.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        MEDIA_PROJECTION_TOKEN_EVENT_CREATED,
+        MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED,
+    })
+    public @interface MediaProjectionTokenEvent{};
+
+    /**
+     * An instance of {@link android.media.projection.IMediaProjection} has been created
+     * by the system.
+     *
+     * @hide
+     */
+    public static final @MediaProjectionTokenEvent int MEDIA_PROJECTION_TOKEN_EVENT_CREATED = 0;
+
+    /**
+     * An instance of {@link android.media.projection.IMediaProjection} has been destroyed
+     * by the system.
+     *
+     * @hide
+     */
+    public static final @MediaProjectionTokenEvent int MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED = 1;
+
+    /**
+     * Called after the system created/destroyed a media projection for an app, if the user
+     * has granted the permission to start a media projection from this app.
+     *
+     * <p>This API is specifically for the use case of enforcing the FGS type
+     * {@code android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION},
+     * where the app who is starting this type of FGS must have been granted with the permission
+     * to start the projection via the {@link android.media.projection.MediaProjection} APIs.
+     *
+     * @param uid The uid of the app which the system created/destroyed a media projection for.
+     * @param projectionToken The {@link android.media.projection.IMediaProjection} token that
+     *                        the system created/destroyed.
+     * @param event The actual event happening to the given {@code projectionToken}.
+     */
+    public abstract void notifyMediaProjectionEvent(int uid, @NonNull IBinder projectionToken,
+            @MediaProjectionTokenEvent int event);
+
+    /**
+     * @return The stats event for the cached apps high watermark since last pull.
+     */
+    @NonNull
+    public abstract StatsEvent getCachedAppsHighWatermarkStats(int atomTag, boolean resetAfterPull);
 }

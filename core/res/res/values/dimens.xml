@@ -257,8 +257,8 @@
     <!-- The margin of the notification action list at the top -->
     <dimen name="notification_action_list_margin_top">0dp</dimen>
 
-    <!-- The visual height of the emphasized notification action -->
-    <dimen name="notification_action_emphasized_height">36dp</dimen>
+    <!-- The overall height of the emphasized notification action -->
+    <dimen name="notification_action_emphasized_height">48dp</dimen>
 
     <!-- The padding of the actions in non-conversation layout. For conversations, the analogous
          value is calculated in ConversationLayout#updateActionListPadding() -->
@@ -606,6 +606,12 @@
     <!-- Width of the outline stroke used by the accessibility focus rectangle -->
     <dimen name="accessibility_focus_highlight_stroke_width">4dp</dimen>
 
+    <!-- padding of fullscreen magnification thumbnail -->
+    <dimen name="accessibility_magnification_thumbnail_padding">12dp</dimen>
+
+    <!-- width of the border of the magnification thumbnail -->
+    <dimen name="accessibility_magnification_thumbnail_container_stroke_width">4dp</dimen>
+
     <!-- The padding ratio of the Accessibility icon foreground drawable -->
     <item name="accessibility_icon_foreground_padding_ratio" type="dimen">21.88%</item>
 
@@ -720,8 +726,6 @@
     <item type="dimen" name="aerr_padding_list_bottom">8dp</item>
 
     <item type="fraction" name="docked_stack_divider_fixed_ratio">34.15%</item>
-
-    <dimen name="resize_shadow_size">5dp</dimen>
 
     <!-- The default minimal size of a resizable task, in both dimensions. -->
     <dimen name="default_minimal_size_resizable_task">220dp</dimen>
@@ -870,6 +874,7 @@
     <dimen name="autofill_elevation">32dp</dimen>
     <dimen name="autofill_save_inner_padding">16dp</dimen>
     <dimen name="autofill_save_icon_size">32dp</dimen>
+    <dimen name="autofill_save_icon_max_height">56dp</dimen>
     <dimen name="autofill_save_title_start_padding">8dp</dimen>
     <dimen name="autofill_save_scroll_view_top_margin">16dp</dimen>
     <dimen name="autofill_save_button_bar_padding">16dp</dimen>
@@ -878,18 +883,17 @@
     <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
     <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>
 
-    <!-- Max (absolute) dimensions (both width and height) of autofill service icon on autofill save affordance.
-      NOTE: the actual displayed size might is actually smaller than this and is hardcoded in the
-      autofill_save.xml layout; this dimension is just used to avoid a crash in the UI (if the icon provided
-      by the autofill service metadata is bigger than these dimentionsit will not be displayed).
-    -->
-    <dimen name="autofill_save_icon_max_size">300dp</dimen>
-
     <!-- Maximum number of datasets that are visible in the UX picker without scrolling -->
     <integer name="autofill_max_visible_datasets">3</integer>
 
-    <!-- Size of an icon in the Autolfill fill dialog -->
+    <!-- Size of an icon in the Autofill fill dialog -->
     <dimen name="autofill_dialog_icon_size">32dp</dimen>
+
+    <!-- The max height of an icon in the Autofill fill dialog. -->
+    <dimen name="autofill_dialog_icon_max_height">56dp</dimen>
+
+    <!-- The max width of the Autofill fill dialog. -->
+    <dimen name="autofill_dialog_max_width">640dp</dimen>
 
     <!-- Size of a slice shortcut view -->
     <dimen name="slice_shortcut_size">56dp</dimen>
@@ -1010,4 +1014,10 @@
     <!-- Dimensions for the translations of the default dialog animation. -->
     <dimen name="popup_enter_animation_from_y_delta">20dp</dimen>
     <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
+
+    <!-- Default handwriting bounds offsets for editors. -->
+    <dimen name="handwriting_bounds_offset_left">10dp</dimen>
+    <dimen name="handwriting_bounds_offset_top">40dp</dimen>
+    <dimen name="handwriting_bounds_offset_right">10dp</dimen>
+    <dimen name="handwriting_bounds_offset_bottom">40dp</dimen>
 </resources>

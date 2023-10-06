@@ -120,10 +120,6 @@
         />
     </com.android.systemui.shade.NotificationsQuickSettingsContainer>
 
-    <include
-        layout="@layout/keyguard_bottom_area"
-        android:visibility="gone" />
-
     <ViewStub
         android:id="@+id/keyguard_user_switcher_stub"
         android:layout="@layout/keyguard_user_switcher"
@@ -141,7 +137,7 @@
             android:id="@+id/lock_icon_bg"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/fingerprint_bg"
+            android:src="@drawable/fingerprint_bg"
             android:visibility="invisible"/>
 
         <ImageView
@@ -153,9 +149,7 @@
 
     </com.android.keyguard.LockIconView>
 
-    <FrameLayout
-        android:id="@+id/preview_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </FrameLayout>
+    <include
+        layout="@layout/keyguard_bottom_area"
+        android:visibility="gone" />
 </com.android.systemui.shade.NotificationPanelView>

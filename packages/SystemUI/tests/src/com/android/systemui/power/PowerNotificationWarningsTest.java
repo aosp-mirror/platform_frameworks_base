@@ -57,6 +57,8 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.NotificationChannels;
+import com.android.systemui.util.settings.FakeSettings;
+import com.android.systemui.util.settings.GlobalSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -75,6 +77,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public static final String FORMATTED_45M = "0h 45m";
     public static final String FORMATTED_HOUR = "1h 0m";
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
+    private final GlobalSettings mGlobalSettings = new FakeSettings();
     private PowerNotificationWarnings mPowerNotificationWarnings;
 
     @Mock
@@ -112,7 +115,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
                 UserHandle.of(ActivityManager.getCurrentUser()));
         mPowerNotificationWarnings = new PowerNotificationWarnings(wrapper, starter,
                 broadcastSender, () -> mBatteryController, mDialogLaunchAnimator, mUiEventLogger,
-                mUserTracker);
+                mGlobalSettings, mUserTracker);
         BatteryStateSnapshot snapshot = new BatteryStateSnapshot(100, false, false, 1,
                 BatteryManager.BATTERY_HEALTH_GOOD, 5, 15);
         mPowerNotificationWarnings.updateSnapshot(snapshot);

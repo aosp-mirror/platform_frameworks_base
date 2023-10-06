@@ -72,7 +72,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-import java.util.function.Supplier;
 
 /**
  * Container for a message (data and object references) that can
@@ -3139,7 +3138,7 @@ public final class Parcel {
         switch (code) {
             case EX_PARCELABLE:
                 if (readInt() > 0) {
-                    return (Exception) readParcelable(Parcelable.class.getClassLoader());
+                    return (Exception) readParcelable(Parcelable.class.getClassLoader(), java.lang.Exception.class);
                 } else {
                     return new RuntimeException(msg + " [missing Parcelable]");
                 }
@@ -3772,9 +3771,6 @@ public final class Parcel {
      * current dataPosition().  The list <em>must</em> have
      * previously been written via {@link #writeTypedList} with the same object
      * type.
-     *
-     * @return A newly created ArrayList containing objects with the same data
-     *         as those that were previously written.
      *
      * @see #writeTypedList
      */
@@ -4612,17 +4608,28 @@ public final class Parcel {
         public void writeToParcel(Parcel out) {
             Parcel source = mSource;
             if (source != null) {
-                out.appendFrom(source, mPosition, mLength);
-            } else {
-                out.writeValue(mObject);
+                synchronized (source) {
+                    if (mSource != null) {
+                        out.appendFrom(source, mPosition, mLength);
+                        return;
+                    }
+                }
             }
+
+            out.writeValue(mObject);
         }
 
         public boolean hasFileDescriptors() {
             Parcel source = mSource;
-            return (source != null)
-                    ? source.hasFileDescriptors(mPosition, mLength)
-                    : Parcel.hasFileDescriptors(mObject);
+            if (source != null) {
+                synchronized (source) {
+                    if (mSource != null) {
+                        return source.hasFileDescriptors(mPosition, mLength);
+                    }
+                }
+            }
+
+            return Parcel.hasFileDescriptors(mObject);
         }
 
         @Override
@@ -5423,20 +5430,20 @@ public final class Parcel {
      * Reads a map into {@code map}.
      *
      * @param sorted Whether the keys are sorted by their hashes, if so we use an optimized path.
-     * @param lazy   Whether to populate the map with lazy {@link Supplier} objects for
+     * @param lazy   Whether to populate the map with lazy {@link Function} objects for
      *               length-prefixed values. See {@link Parcel#readLazyValue(ClassLoader)} for more
      *               details.
-     * @return whether the parcel can be recycled or not.
+     * @return a count of the lazy values in the map
      * @hide
      */
-    boolean readArrayMap(ArrayMap<? super String, Object> map, int size, boolean sorted,
+    int readArrayMap(ArrayMap<? super String, Object> map, int size, boolean sorted,
             boolean lazy, @Nullable ClassLoader loader) {
-        boolean recycle = true;
+        int lazyValues = 0;
         while (size > 0) {
             String key = readString();
             Object value = (lazy) ? readLazyValue(loader) : readValue(loader);
             if (value instanceof LazyValue) {
-                recycle = false;
+                lazyValues++;
             }
             if (sorted) {
                 map.append(key, value);
@@ -5448,7 +5455,7 @@ public final class Parcel {
         if (sorted) {
             map.validate();
         }
-        return recycle;
+        return lazyValues;
     }
 
     /**

@@ -52,9 +52,9 @@ import java.lang.reflect.Field;
 @RunWith(AndroidTestingRunner.class)
 public class NotificationHistoryJobServiceTest extends UiServiceTestCase {
     private NotificationHistoryJobService mJobService;
-    private JobParameters mJobParams = new JobParameters(null,
-            NotificationHistoryJobService.BASE_JOB_ID, null, null, null,
-            0, false, false, null, null, null);
+
+    @Mock
+    private JobParameters mJobParams;
 
     @Captor
     ArgumentCaptor<JobInfo> mJobInfoCaptor;

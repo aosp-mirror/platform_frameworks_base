@@ -41,11 +41,11 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -378,7 +378,13 @@ class TestableControlsBindingControllerImpl(
     executor: DelayableExecutor,
     lazyController: Lazy<ControlsController>,
     userTracker: UserTracker
-) : ControlsBindingControllerImpl(context, executor, lazyController, userTracker) {
+) : ControlsBindingControllerImpl(
+    context,
+    executor,
+    lazyController,
+    mock(PackageUpdateMonitor.Factory::class.java),
+    userTracker
+) {
 
     companion object {
         val providers = mutableListOf<ControlsProviderLifecycleManager>()

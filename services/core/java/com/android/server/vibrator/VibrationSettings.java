@@ -27,9 +27,10 @@ import static android.os.VibrationAttributes.USAGE_RINGTONE;
 import static android.os.VibrationAttributes.USAGE_TOUCH;
 import static android.os.VibrationAttributes.USAGE_UNKNOWN;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -123,6 +124,7 @@ final class VibrationSettings {
     private static final Set<Integer> SYSTEM_VIBRATION_SCREEN_OFF_USAGE_ALLOWLIST = new HashSet<>(
             Arrays.asList(
                     USAGE_TOUCH,
+                    USAGE_ACCESSIBILITY,
                     USAGE_PHYSICAL_EMULATION,
                     USAGE_HARDWARE_FEEDBACK));
 
@@ -156,7 +158,7 @@ final class VibrationSettings {
     @VisibleForTesting
     final SettingsContentObserver mSettingObserver;
     @VisibleForTesting
-    final UidObserver mUidObserver;
+    final MyUidObserver mUidObserver;
     @VisibleForTesting
     final SettingsBroadcastReceiver mSettingChangeReceiver;
     final VirtualDeviceListener mVirtualDeviceListener;
@@ -194,7 +196,7 @@ final class VibrationSettings {
         mContext = context;
         mVibrationConfig = config;
         mSettingObserver = new SettingsContentObserver(handler);
-        mUidObserver = new UidObserver();
+        mUidObserver = new MyUidObserver();
         mSettingChangeReceiver = new SettingsBroadcastReceiver();
         mVirtualDeviceListener = new VirtualDeviceListener();
 
@@ -375,15 +377,15 @@ final class VibrationSettings {
      * null otherwise.
      */
     @Nullable
-    public Vibration.Status shouldIgnoreVibration(int uid, int displayId,
-            VibrationAttributes attrs) {
-        final int usage = attrs.getUsage();
+    public Vibration.Status shouldIgnoreVibration(@NonNull Vibration.CallerInfo callerInfo) {
+        final int usage = callerInfo.attrs.getUsage();
         synchronized (mLock) {
-            if (!mUidObserver.isUidForeground(uid)
+            if (!mUidObserver.isUidForeground(callerInfo.uid)
                     && !BACKGROUND_PROCESS_USAGE_ALLOWLIST.contains(usage)) {
                 return Vibration.Status.IGNORED_BACKGROUND;
             }
-            if (mVirtualDeviceListener.isAppOrDisplayOnAnyVirtualDevice(uid, displayId)) {
+            if (mVirtualDeviceListener.isAppOrDisplayOnAnyVirtualDevice(callerInfo.uid,
+                    callerInfo.displayId)) {
                 return Vibration.Status.IGNORED_FROM_VIRTUAL_DEVICE;
             }
 
@@ -391,7 +393,8 @@ final class VibrationSettings {
                 return Vibration.Status.IGNORED_FOR_POWER;
             }
 
-            if (!attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)) {
+            if (!callerInfo.attrs.isFlagSet(
+                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)) {
                 if (!mVibrateOn && (VIBRATE_ON_DISABLED_USAGE_ALLOWED != usage)) {
                     return Vibration.Status.IGNORED_FOR_SETTINGS;
                 }
@@ -401,7 +404,7 @@ final class VibrationSettings {
                 }
             }
 
-            if (!attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY)) {
+            if (!callerInfo.attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY)) {
                 if (!shouldVibrateForRingerModeLocked(usage)) {
                     return Vibration.Status.IGNORED_FOR_RINGER_MODE;
                 }
@@ -420,8 +423,8 @@ final class VibrationSettings {
      *
      * @return true if the vibration should be cancelled when the screen goes off, false otherwise.
      */
-    public boolean shouldCancelVibrationOnScreenOff(int uid, String opPkg,
-            @VibrationAttributes.Usage int usage, long vibrationStartUptimeMillis) {
+    public boolean shouldCancelVibrationOnScreenOff(@NonNull Vibration.CallerInfo callerInfo,
+            long vibrationStartUptimeMillis) {
         PowerManagerInternal pm;
         synchronized (mLock) {
             pm = mPowerManagerInternal;
@@ -442,12 +445,13 @@ final class VibrationSettings {
                 return false;
             }
         }
-        if (!SYSTEM_VIBRATION_SCREEN_OFF_USAGE_ALLOWLIST.contains(usage)) {
+        if (!SYSTEM_VIBRATION_SCREEN_OFF_USAGE_ALLOWLIST.contains(callerInfo.attrs.getUsage())) {
             // Usages not allowed even for system vibrations should always be cancelled.
             return true;
         }
         // Only allow vibrations from System packages to continue vibrating when the screen goes off
-        return uid != Process.SYSTEM_UID && uid != 0 && !mSystemUiPackage.equals(opPkg);
+        return callerInfo.uid != Process.SYSTEM_UID && callerInfo.uid != 0
+                && !mSystemUiPackage.equals(callerInfo.opPkg);
     }
 
     /**
@@ -655,7 +659,8 @@ final class VibrationSettings {
     }
 
     private void registerSettingsChangeReceiver(IntentFilter intentFilter) {
-        mContext.registerReceiver(mSettingChangeReceiver, intentFilter);
+        mContext.registerReceiver(mSettingChangeReceiver, intentFilter,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
     }
 
     @Nullable
@@ -722,7 +727,7 @@ final class VibrationSettings {
 
     /** Implementation of {@link ContentObserver} to be registered to a setting {@link Uri}. */
     @VisibleForTesting
-    final class UidObserver extends IUidObserver.Stub {
+    final class MyUidObserver extends UidObserver {
         private final SparseArray<Integer> mProcStatesCache = new SparseArray<>();
 
         public boolean isUidForeground(int uid) {
@@ -736,24 +741,8 @@ final class VibrationSettings {
         }
 
         @Override
-        public void onUidActive(int uid) {
-        }
-
-        @Override
-        public void onUidIdle(int uid, boolean disabled) {
-        }
-
-        @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mProcStatesCache.put(uid, procState);
-        }
-
-        @Override
-        public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {
         }
     }
 

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -26,6 +27,7 @@ import android.view.IWindow;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.ScrollCaptureResponse;
+import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 
 import com.android.internal.os.IResultReceiver;
@@ -44,7 +46,7 @@ public class TestIWindow extends IWindow.Stub {
     @Override
     public void resized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfig, InsetsState insetsState, boolean forceLayout,
-            boolean alwaysConsumeSystemBars, int displayId, int seqId, int resizeMode)
+            boolean alwaysConsumeSystemBars, int displayId, int seqId, boolean dragResizing)
             throws RemoteException {
     }
 
@@ -117,10 +119,12 @@ public class TestIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void showInsets(int types, boolean fromIme) throws RemoteException {
+    public void showInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken)
+            throws RemoteException {
     }
 
     @Override
-    public void hideInsets(int types, boolean fromIme) throws RemoteException {
+    public void hideInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken)
+            throws RemoteException {
     }
 }

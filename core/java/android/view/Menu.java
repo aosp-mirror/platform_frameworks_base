@@ -355,6 +355,15 @@ public interface Menu {
      * @see MenuItem#setVisible
      */
     public void setGroupVisible(int group, boolean visible);
+
+    /**
+     * Sets the optional icon visible.
+     * @param visible true for visible, false for hidden.
+     *
+     * @hide
+     */
+    default void setOptionalIconsVisible(boolean visible) {
+    }
     
     /**
      * Enable or disable all menu items that are in the given group.

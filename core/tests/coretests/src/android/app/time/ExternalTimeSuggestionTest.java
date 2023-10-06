@@ -40,14 +40,14 @@ public class ExternalTimeSuggestionTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseCommandLineArg_noUnixEpochTime() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321");
+                "--elapsed_realtime 54321");
         ExternalTimeSuggestion.parseCommandLineArg(testShellCommand);
     }
 
     @Test
     public void testParseCommandLineArg_validSuggestion() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321 --unix_epoch_time 12345");
+                "--elapsed_realtime 54321 --unix_epoch_time 12345");
         ExternalTimeSuggestion expectedSuggestion = new ExternalTimeSuggestion(54321L, 12345L);
         ExternalTimeSuggestion actualSuggestion =
                 ExternalTimeSuggestion.parseCommandLineArg(testShellCommand);
@@ -57,7 +57,7 @@ public class ExternalTimeSuggestionTest {
     @Test(expected = IllegalArgumentException.class)
     public void testParseCommandLineArg_unknownArgument() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321 --unix_epoch_time 12345 --bad_arg 0");
+                "--elapsed_realtime 54321 --unix_epoch_time 12345 --bad_arg 0");
         ExternalTimeSuggestion.parseCommandLineArg(testShellCommand);
     }
 }

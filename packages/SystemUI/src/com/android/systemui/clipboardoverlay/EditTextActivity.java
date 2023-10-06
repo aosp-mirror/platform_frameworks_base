@@ -72,7 +72,7 @@ public class EditTextActivity extends Activity
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Package not found: " + mClipboardManager.getPrimaryClipSource(), e);
         }
-        mEditText.setText(clip.getItemAt(0).getText());
+        mEditText.setText(clip.getItemAt(0).getText().toString());
         mEditText.requestFocus();
         mEditText.setSelection(0);
         mSensitive = clip.getDescription().getExtras() != null

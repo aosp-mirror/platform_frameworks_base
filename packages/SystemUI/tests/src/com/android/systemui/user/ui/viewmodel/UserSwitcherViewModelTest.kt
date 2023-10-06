@@ -168,6 +168,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                             activityManager = activityManager,
                             refreshUsersScheduler = refreshUsersScheduler,
                             guestUserInteractor = guestUserInteractor,
+                            uiEventLogger = uiEventLogger,
                         ),
                     guestUserInteractor = guestUserInteractor,
                 )
@@ -231,7 +232,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `maximumUserColumns - few users`() =
+    fun maximumUserColumns_fewUsers() =
         testScope.runTest {
             setUsers(count = 2)
             val values = mutableListOf<Int>()
@@ -243,7 +244,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `maximumUserColumns - many users`() =
+    fun maximumUserColumns_manyUsers() =
         testScope.runTest {
             setUsers(count = 5)
             val values = mutableListOf<Int>()
@@ -254,7 +255,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isOpenMenuButtonVisible - has actions - true`() =
+    fun isOpenMenuButtonVisible_hasActions_true() =
         testScope.runTest {
             setUsers(2)
 
@@ -266,7 +267,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isOpenMenuButtonVisible - no actions - false`() =
+    fun isOpenMenuButtonVisible_noActions_false() =
         testScope.runTest {
             val userInfos = setUsers(2)
             userRepository.setSelectedUserInfo(userInfos[1])
@@ -297,7 +298,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `menu actions`() =
+    fun menuActions() =
         testScope.runTest {
             setUsers(2)
             val actions = mutableListOf<List<UserActionViewModel>>()
@@ -317,7 +318,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isFinishRequested - finishes when cancel button is clicked`() =
+    fun isFinishRequested_finishesWhenCancelButtonIsClicked() =
         testScope.runTest {
             setUsers(count = 2)
             val isFinishRequested = mutableListOf<Boolean>()
@@ -337,7 +338,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `guest selected -- name is exit guest`() =
+    fun guestSelected_nameIsExitGuest() =
         testScope.runTest {
             val userInfos =
                 listOf(
@@ -385,7 +386,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `guest not selected -- name is guest`() =
+    fun guestNotSelected_nameIsGuest() =
         testScope.runTest {
             val userInfos =
                 listOf(

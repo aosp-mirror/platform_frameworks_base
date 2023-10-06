@@ -116,8 +116,10 @@ public final class FrameMetrics {
      * and be issued to the display subsystem.
      * </p>
      * <p>
-     * Equal to the sum of the values of all other time-valued metric
-     * identifiers.
+     * The total duration is the difference in time between when the frame
+     * began and when it ended. This value may not be exactly equal to the
+     * sum of the values of all other time-valued metric identifiers because
+     * some stages may happen concurrently.
      * </p>
      */
     public static final int TOTAL_DURATION = 8;

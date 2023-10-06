@@ -52,7 +52,8 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
             STATUS_ICON_CAMERA_DISABLED,
             STATUS_ICON_MIC_DISABLED,
             STATUS_ICON_MIC_CAMERA_DISABLED,
-            STATUS_ICON_PRIORITY_MODE_ON
+            STATUS_ICON_PRIORITY_MODE_ON,
+            STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE,
     })
     public @interface StatusIconType {}
     public static final int STATUS_ICON_NOTIFICATIONS = 0;
@@ -62,6 +63,7 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
     public static final int STATUS_ICON_MIC_DISABLED = 4;
     public static final int STATUS_ICON_MIC_CAMERA_DISABLED = 5;
     public static final int STATUS_ICON_PRIORITY_MODE_ON = 6;
+    public static final int STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE = 7;
 
     private final Map<Integer, View> mStatusIcons = new HashMap<>();
     private Context mContext;
@@ -132,6 +134,8 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
                 fetchStatusIconForResId(R.id.dream_overlay_notification_indicator));
         mStatusIcons.put(STATUS_ICON_PRIORITY_MODE_ON,
                 addDoubleShadow(fetchStatusIconForResId(R.id.dream_overlay_priority_mode)));
+        mStatusIcons.put(STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE,
+                fetchStatusIconForResId(R.id.dream_overlay_assistant_attention_indicator));
 
         mSystemStatusViewGroup = findViewById(R.id.dream_overlay_system_status);
         mExtraSystemStatusViewGroup = findViewById(R.id.dream_overlay_extra_items);

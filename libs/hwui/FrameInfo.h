@@ -104,6 +104,7 @@ public:
         set(FrameInfoIndex::AnimationStart) = vsyncTime;
         set(FrameInfoIndex::PerformTraversalsStart) = vsyncTime;
         set(FrameInfoIndex::DrawStart) = vsyncTime;
+        set(FrameInfoIndex::FrameStartTime) = vsyncTime;
         set(FrameInfoIndex::FrameDeadline) = frameDeadline;
         set(FrameInfoIndex::FrameInterval) = frameInterval;
         return *this;

@@ -21,8 +21,8 @@ using android::ConfigDescription;
 namespace aapt {
 namespace test {
 
-struct TestDiagnosticsImpl : public IDiagnostics {
-  void Log(Level level, DiagMessageActual& actual_msg) override {
+struct TestDiagnosticsImpl : public android::IDiagnostics {
+  void Log(Level level, android::DiagMessageActual& actual_msg) override {
     switch (level) {
       case Level::Note:
         return;
@@ -38,16 +38,15 @@ struct TestDiagnosticsImpl : public IDiagnostics {
   }
 };
 
-IDiagnostics* GetDiagnostics() {
+android::IDiagnostics* GetDiagnostics() {
   static TestDiagnosticsImpl diag;
   return &diag;
 }
 
 template <>
-Value* GetValueForConfigAndProduct<Value>(ResourceTable* table,
-                                          const android::StringPiece& res_name,
+Value* GetValueForConfigAndProduct<Value>(ResourceTable* table, android::StringPiece res_name,
                                           const ConfigDescription& config,
-                                          const android::StringPiece& product) {
+                                          android::StringPiece product) {
   std::optional<ResourceTable::SearchResult> result = table->FindResource(ParseNameOrDie(res_name));
   if (result) {
     ResourceConfigValue* config_value = result.value().entry->FindValue(config, product);

@@ -301,6 +301,11 @@ class GnssNetworkConnectivityHandler {
         mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback, mHandler);
     }
 
+    void unregisterNetworkCallbacks() {
+        mConnMgr.unregisterNetworkCallback(mNetworkConnectivityCallback);
+        mNetworkConnectivityCallback = null;
+    }
+
     /**
      * @return {@code true} if there is a data network available for outgoing connections,
      * {@code false} otherwise.
@@ -756,6 +761,10 @@ class GnssNetworkConnectivityHandler {
             return APN_IPV6;
         }
         return APN_INVALID;
+    }
+
+    protected boolean isNativeAgpsRilSupported() {
+        return native_is_agps_ril_supported();
     }
 
     // AGPS support

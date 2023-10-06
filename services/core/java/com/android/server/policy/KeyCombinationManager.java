@@ -106,14 +106,41 @@ public class KeyCombinationManager {
             return KeyEvent.keyCodeToString(mKeyCode1) + " + "
                     + KeyEvent.keyCodeToString(mKeyCode2);
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o instanceof TwoKeysCombinationRule) {
+                TwoKeysCombinationRule that = (TwoKeysCombinationRule) o;
+                return (mKeyCode1 == that.mKeyCode1 && mKeyCode2 == that.mKeyCode2) || (
+                        mKeyCode1 == that.mKeyCode2 && mKeyCode2 == that.mKeyCode1);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = mKeyCode1;
+            result = 31 * result + mKeyCode2;
+            return result;
+        }
     }
 
-    public KeyCombinationManager(Handler handler) {
+    KeyCombinationManager(Handler handler) {
         mHandler = handler;
     }
 
     void addRule(TwoKeysCombinationRule rule) {
+        if (mRules.contains(rule)) {
+            throw new IllegalArgumentException("Rule : " + rule + " already exists.");
+        }
         mRules.add(rule);
+    }
+
+    void removeRule(TwoKeysCombinationRule rule) {
+        mRules.remove(rule);
     }
 
     /**

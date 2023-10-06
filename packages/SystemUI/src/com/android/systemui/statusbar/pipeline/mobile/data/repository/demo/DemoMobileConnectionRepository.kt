@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.telephony.CellSignalStrength
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.TelephonyManager
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
@@ -25,6 +26,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameMode
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_CARRIER_ID
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_CARRIER_NETWORK_CHANGE
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_CDMA_LEVEL
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_EMERGENCY
@@ -52,6 +54,17 @@ class DemoMobileConnectionRepository(
     override val tableLogBuffer: TableLogBuffer,
     val scope: CoroutineScope,
 ) : MobileConnectionRepository {
+    private val _carrierId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
+    override val carrierId =
+        _carrierId
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = COL_CARRIER_ID,
+                _carrierId.value,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), _carrierId.value)
+
     private val _isEmergencyOnly = MutableStateFlow(false)
     override val isEmergencyOnly =
         _isEmergencyOnly
@@ -186,6 +199,8 @@ class DemoMobileConnectionRepository(
         dataEnabled.value = true
         networkName.value = NetworkNameModel.IntentDerived(event.name)
 
+        _carrierId.value = event.carrierId ?: INVALID_SUBSCRIPTION_ID
+
         cdmaRoaming.value = event.roaming
         _isRoaming.value = event.roaming
         // TODO(b/261029387): not yet supported
@@ -208,6 +223,8 @@ class DemoMobileConnectionRepository(
         // This is always true here, because we split out disabled states at the data-source level
         dataEnabled.value = true
         networkName.value = NetworkNameModel.IntentDerived(CARRIER_MERGED_NAME)
+        // TODO(b/276943904): is carrierId a thing with carrier merged networks?
+        _carrierId.value = INVALID_SUBSCRIPTION_ID
         numberOfLevels.value = event.numberOfLevels
         cdmaRoaming.value = false
         _primaryLevel.value = event.level

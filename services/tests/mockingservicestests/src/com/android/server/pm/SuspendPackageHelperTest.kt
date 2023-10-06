@@ -20,20 +20,14 @@ import android.content.Intent
 import android.content.pm.SuspendDialogInfo
 import android.os.Binder
 import android.os.PersistableBundle
-import android.util.ArrayMap
-import android.util.SparseArray
-import com.android.server.pm.pkg.PackageStateInternal
-import com.android.server.pm.snapshot.PackageDataSnapshot
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
 import com.android.server.testutils.nullable
-import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mockito.argThat
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
@@ -44,18 +38,21 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     fun setPackagesSuspended() {
         val targetPackages = arrayOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
         val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            targetPackages, true /* suspended */, null /* appExtras */, null /* launcherExtras */,
-            null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)
+                targetPackages, true /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
+                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */)
         testHandler.flush()
 
         verify(pms).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_PACKAGES_SUSPENDED),
             nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-            nullable(), nullable(), nullable())
+            nullable(), nullable(), nullable(), nullable())
         verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_SUSPENDED), nullable(),
-            nullable(), any(), eq(TEST_PACKAGE_1), nullable(), any(), any(), nullable(), nullable())
+            nullable(), any(), eq(TEST_PACKAGE_1), nullable(), any(), any(), nullable(),
+            nullable(), nullable())
         verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_SUSPENDED), nullable(),
-            nullable(), any(), eq(TEST_PACKAGE_2), nullable(), any(), any(), nullable(), nullable())
+            nullable(), any(), eq(TEST_PACKAGE_2), nullable(), any(), any(), nullable(),
+            nullable(), nullable())
 
         var modifiedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
         assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
@@ -65,15 +62,16 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     @Test
     fun setPackagesSuspended_emptyPackageName() {
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            null /* packageNames */, true /* suspended */, null /* appExtras */,
-            null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID,
-            deviceOwnerUid)
+                null /* packageNames */, true /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
+                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */)
 
         assertThat(failedNames).isNull()
 
         failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            arrayOfNulls(0), true /* suspended */, null /* appExtras */, null /* launcherExtras */,
-            null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)
+                arrayOfNulls(0), true /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
+                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */)
 
         assertThat(failedNames).isEmpty()
     }
@@ -81,9 +79,9 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     @Test
     fun setPackagesSuspended_callerIsNotAllowed() {
         val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            arrayOf(TEST_PACKAGE_2), true /* suspended */, null /* appExtras */,
-            null /* launcherExtras */, null /* dialogInfo */, TEST_PACKAGE_1, TEST_USER_ID,
-            Binder.getCallingUid())
+                arrayOf(TEST_PACKAGE_2), true /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, null /* dialogInfo */, TEST_PACKAGE_1, TEST_USER_ID,
+                Binder.getCallingUid(), false /* forQuietMode */)
 
         assertThat(failedNames).asList().hasSize(1)
         assertThat(failedNames).asList().contains(TEST_PACKAGE_2)
@@ -92,9 +90,9 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     @Test
     fun setPackagesSuspended_callerSuspendItself() {
         val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            arrayOf(DEVICE_OWNER_PACKAGE), true /* suspended */, null /* appExtras */,
-            null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID,
-            deviceOwnerUid)
+                arrayOf(DEVICE_OWNER_PACKAGE), true /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
+                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */)
 
         assertThat(failedNames).asList().hasSize(1)
         assertThat(failedNames).asList().contains(DEVICE_OWNER_PACKAGE)
@@ -103,9 +101,9 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     @Test
     fun setPackagesSuspended_nonexistentPackage() {
         val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            arrayOf(NONEXISTENT_PACKAGE), true /* suspended */, null /* appExtras */,
-            null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID,
-            deviceOwnerUid)
+                arrayOf(NONEXISTENT_PACKAGE), true /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
+                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */)
 
         assertThat(failedNames).asList().hasSize(1)
         assertThat(failedNames).asList().contains(NONEXISTENT_PACKAGE)
@@ -116,8 +114,9 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         val knownPackages = arrayOf(DEVICE_ADMIN_PACKAGE, DEFAULT_HOME_PACKAGE, DIALER_PACKAGE,
             INSTALLER_PACKAGE, UNINSTALLER_PACKAGE, VERIFIER_PACKAGE, PERMISSION_CONTROLLER_PACKAGE)
         val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            knownPackages, true /* suspended */, null /* appExtras */, null /* launcherExtras */,
-            null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)!!
+                knownPackages, true /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
+                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */)!!
 
         assertThat(failedNames.size).isEqualTo(knownPackages.size)
         for (pkg in knownPackages) {
@@ -126,28 +125,44 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     }
 
     @Test
+    fun setPackagesSuspended_forQuietMode() {
+        val knownPackages = arrayOf(DEVICE_ADMIN_PACKAGE, DEFAULT_HOME_PACKAGE, DIALER_PACKAGE,
+                INSTALLER_PACKAGE, UNINSTALLER_PACKAGE, VERIFIER_PACKAGE,
+                PERMISSION_CONTROLLER_PACKAGE, MGMT_ROLE_HOLDER_PACKAGE)
+        val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
+                knownPackages, true /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
+                TEST_USER_ID, deviceOwnerUid, true /* forQuietMode */)!!
+
+        assertThat(failedNames.size).isEqualTo(1)
+        assertThat(failedNames[0]).isEqualTo(MGMT_ROLE_HOLDER_PACKAGE)
+    }
+
+    @Test
     fun setPackagesUnsuspended() {
         val targetPackages = arrayOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            targetPackages, true /* suspended */, null /* appExtras */, null /* launcherExtras */,
-            null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)
+                targetPackages, true /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
+                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
         failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            targetPackages, false /* suspended */, null /* appExtras */, null /* launcherExtras */,
-            null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)
+                targetPackages, false /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
+                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */)
         testHandler.flush()
 
         verify(pms, times(2)).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_PACKAGES_UNSUSPENDED),
             nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-            nullable(), nullable(), nullable())
+            nullable(), nullable(), nullable(), nullable())
         verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_UNSUSPENDED),
             nullable(), nullable(), any(), eq(TEST_PACKAGE_1), nullable(), any(), any(),
-            nullable(), nullable())
+            nullable(), nullable(), nullable())
         verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_UNSUSPENDED),
             nullable(), nullable(), any(), eq(TEST_PACKAGE_2), nullable(), any(), any(),
-            nullable(), nullable())
+            nullable(), nullable(), nullable())
 
         var modifiedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
         assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
@@ -185,8 +200,9 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         val appExtras = PersistableBundle()
         appExtras.putString(TEST_PACKAGE_1, TEST_PACKAGE_1)
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            arrayOf(TEST_PACKAGE_1), true /* suspended */, appExtras, null /* launcherExtras */,
-            null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)
+                arrayOf(TEST_PACKAGE_1), true /* suspended */, appExtras, null /* launcherExtras */,
+                null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid,
+                false /* forQuietMode */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
 
@@ -202,8 +218,9 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         appExtras.putString(TEST_PACKAGE_1, TEST_PACKAGE_2)
         val targetPackages = arrayOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            targetPackages, true /* suspended */, appExtras, null /* launcherExtras */,
-            null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)
+                targetPackages, true /* suspended */, appExtras, null /* launcherExtras */,
+                null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid,
+                false /* forQuietMode */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
         assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
@@ -223,13 +240,13 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         verify(pms, times(2)).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_PACKAGES_UNSUSPENDED),
             nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-            nullable(), nullable(), nullable())
+            nullable(), nullable(), nullable(), nullable())
         verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_UNSUSPENDED),
             nullable(), nullable(), any(), eq(TEST_PACKAGE_1), nullable(), any(), any(),
-            nullable(), nullable())
+            nullable(), nullable(), nullable())
         verify(broadcastHelper).doSendBroadcast(eq(Intent.ACTION_MY_PACKAGE_UNSUSPENDED),
             nullable(), nullable(), any(), eq(TEST_PACKAGE_2), nullable(), any(), any(),
-            nullable(), nullable())
+            nullable(), nullable(), nullable())
 
         assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
             TEST_PACKAGE_1, TEST_USER_ID, deviceOwnerUid)).isNull()
@@ -246,8 +263,9 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         val launcherExtras = PersistableBundle()
         launcherExtras.putString(TEST_PACKAGE_2, TEST_PACKAGE_2)
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            arrayOf(TEST_PACKAGE_2), true /* suspended */, null /* appExtras */, launcherExtras,
-            null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)
+                arrayOf(TEST_PACKAGE_2), true /* suspended */, null /* appExtras */, launcherExtras,
+                null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid,
+                false /* forQuietMode */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
 
@@ -260,9 +278,9 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     @Test
     fun isPackageSuspended() {
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            arrayOf(TEST_PACKAGE_1), true /* suspended */, null /* appExtras */,
-            null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID,
-            deviceOwnerUid)
+                arrayOf(TEST_PACKAGE_1), true /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
+                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
 
@@ -275,8 +293,9 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         val launcherExtras = PersistableBundle()
         launcherExtras.putString(TEST_PACKAGE_2, TEST_PACKAGE_2)
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            arrayOf(TEST_PACKAGE_2), true /* suspended */, null /* appExtras */, launcherExtras,
-            null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)
+                arrayOf(TEST_PACKAGE_2), true /* suspended */, null /* appExtras */, launcherExtras,
+                null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid,
+                false /* forQuietMode */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
 
@@ -289,9 +308,9 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         val dialogInfo = SuspendDialogInfo.Builder()
             .setTitle(TEST_PACKAGE_1).build()
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-            arrayOf(TEST_PACKAGE_1), true /* suspended */, null /* appExtras */,
-            null /* launcherExtras */, dialogInfo, DEVICE_OWNER_PACKAGE, TEST_USER_ID,
-            deviceOwnerUid)
+                arrayOf(TEST_PACKAGE_1), true /* suspended */, null /* appExtras */,
+                null /* launcherExtras */, dialogInfo, DEVICE_OWNER_PACKAGE, TEST_USER_ID,
+                deviceOwnerUid, false /* forQuietMode */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
 
@@ -303,15 +322,13 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
 
     @Test
     @Throws(Exception::class)
-    fun sendPackagesSuspendedForUser_withSameVisibilityAllowList() {
-        mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
-        mockAllowList(packageSetting2, allowList(10001, 10002, 10003))
-
-        suspendPackageHelper.sendPackagesSuspendedForUser(pms.snapshotComputer(),
+    fun sendPackagesSuspendedForUser() {
+        suspendPackageHelper.sendPackagesSuspendedForUser(
             Intent.ACTION_PACKAGES_SUSPENDED, packagesToChange, uidsToChange, TEST_USER_ID)
         testHandler.flush()
         verify(broadcastHelper).sendPackageBroadcast(any(), nullable(), bundleCaptor.capture(),
-                anyInt(), nullable(), nullable(), any(), nullable(), any(), nullable())
+                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable(),
+                nullable())
 
         var changedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
         var changedUids = bundleCaptor.value.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
@@ -322,78 +339,19 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
 
     @Test
     @Throws(Exception::class)
-    fun sendPackagesSuspendedForUser_withDifferentVisibilityAllowList() {
-        mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
-        mockAllowList(packageSetting2, allowList(10001, 10002, 10007))
-
-        suspendPackageHelper.sendPackagesSuspendedForUser(pms.snapshotComputer(),
-            Intent.ACTION_PACKAGES_SUSPENDED, packagesToChange, uidsToChange, TEST_USER_ID)
-        testHandler.flush()
-        verify(broadcastHelper, times(2)).sendPackageBroadcast(
-                any(), nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-                nullable(), any(), nullable())
-
-        bundleCaptor.allValues.forEach {
-            var changedPackages = it.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
-            var changedUids = it.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
-            assertThat(changedPackages?.size).isEqualTo(1)
-            assertThat(changedUids?.size).isEqualTo(1)
-            assertThat(changedPackages?.get(0)).isAnyOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
-            assertThat(changedUids?.get(0)).isAnyOf(packageSetting1.appId, packageSetting2.appId)
-        }
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun sendPackagesSuspendedForUser_withNullVisibilityAllowList() {
-        mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
-        mockAllowList(packageSetting2, null)
-
-        suspendPackageHelper.sendPackagesSuspendedForUser(pms.snapshotComputer(),
-            Intent.ACTION_PACKAGES_SUSPENDED, packagesToChange, uidsToChange, TEST_USER_ID)
-        testHandler.flush()
-        verify(broadcastHelper, times(2)).sendPackageBroadcast(
-                any(), nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-                nullable(), nullable(), nullable())
-
-        bundleCaptor.allValues.forEach {
-            var changedPackages = it.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
-            var changedUids = it.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
-            assertThat(changedPackages?.size).isEqualTo(1)
-            assertThat(changedUids?.size).isEqualTo(1)
-            assertThat(changedPackages?.get(0)).isAnyOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
-            assertThat(changedUids?.get(0)).isAnyOf(packageSetting1.appId, packageSetting2.appId)
-        }
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun sendPackagesSuspendModifiedForUser() {
-        suspendPackageHelper.sendPackagesSuspendedForUser(pms.snapshotComputer(),
-            Intent.ACTION_PACKAGES_SUSPENSION_CHANGED, packagesToChange, uidsToChange,
-            TEST_USER_ID)
+        suspendPackageHelper.sendPackagesSuspendedForUser(
+            Intent.ACTION_PACKAGES_SUSPENSION_CHANGED, packagesToChange, uidsToChange, TEST_USER_ID)
         testHandler.flush()
         verify(broadcastHelper).sendPackageBroadcast(
                 eq(Intent.ACTION_PACKAGES_SUSPENSION_CHANGED), nullable(), bundleCaptor.capture(),
-                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
+                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable(),
+                nullable())
 
         var modifiedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
         var modifiedUids = bundleCaptor.value.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
         assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
         assertThat(modifiedUids).asList().containsExactly(
                 packageSetting1.appId, packageSetting2.appId)
-    }
-
-    private fun allowList(vararg uids: Int) = SparseArray<IntArray>().apply {
-        this.put(TEST_USER_ID, uids)
-    }
-
-    private fun mockAllowList(pkgSetting: PackageStateInternal, list: SparseArray<IntArray>?) {
-        whenever(rule.mocks().appsFilter.getVisibilityAllowList(
-                any(PackageDataSnapshot::class.java),
-            argThat { it?.packageName == pkgSetting.packageName }, any(IntArray::class.java),
-            any<ArrayMap<String, out PackageStateInternal>>()
-        ))
-            .thenReturn(list)
     }
 }

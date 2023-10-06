@@ -20,22 +20,23 @@ import android.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A listener registration that stores its own key, and thus can remove itself. By default it will
  * remove itself if any checked exception occurs on listener execution.
  *
- * @param <TRequest>           request type
+ * @param <TKey>               key type
  * @param <TListener>          listener type
  */
-public abstract class RemovableListenerRegistration<TRequest, TListener> extends
-        RequestListenerRegistration<TRequest, TListener> {
+public abstract class RemovableListenerRegistration<TKey, TListener> extends
+        ListenerRegistration<TListener> {
 
-    private volatile @Nullable Object mKey;
+    @Nullable private volatile TKey mKey;
+    private final AtomicBoolean mRemoved = new AtomicBoolean(false);
 
-    protected RemovableListenerRegistration(Executor executor, @Nullable TRequest request,
-            TListener listener) {
-        super(executor, request, listener);
+    protected RemovableListenerRegistration(Executor executor, TListener listener) {
+        super(executor, listener);
     }
 
     /**
@@ -43,46 +44,76 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
      * with. Often this is easiest to accomplish by defining registration subclasses as non-static
      * inner classes of the multiplexer they are to be used with.
      */
-    protected abstract ListenerMultiplexer<?, ? super TListener, ?, ?> getOwner();
+    protected abstract ListenerMultiplexer<TKey, ? super TListener, ?, ?> getOwner();
 
     /**
      * Returns the key associated with this registration. May not be invoked before
      * {@link #onRegister(Object)} or after {@link #onUnregister()}.
      */
-    protected final Object getKey() {
+    protected final TKey getKey() {
         return Objects.requireNonNull(mKey);
     }
 
     /**
-     * Removes this registration. Does nothing if invoked before {@link #onRegister(Object)} or
-     * after {@link #onUnregister()}. It is safe to invoke this from within either function.
+     * Convenience method equivalent to invoking {@link #remove(boolean)} with the
+     * {@code immediately} parameter set to true.
      */
     public final void remove() {
-        Object key = mKey;
-        if (key != null) {
-            getOwner().removeRegistration(key, this);
+        remove(true);
+    }
+
+    /**
+     * Removes this registration. If the {@code immediately} parameter is true, all pending listener
+     * invocations will fail. If the {@code immediately} parameter is false, listener invocations
+     * that were scheduled before remove was invoked (including invocations scheduled within {@link
+     * #onRemove(boolean)}) will continue, but any listener invocations scheduled after remove was
+     * invoked will fail.
+     *
+     * <p>Only the first call to this method will ever go through (and so {@link #onRemove(boolean)}
+     * will only ever be invoked once).
+     *
+     * <p>Does nothing if invoked before {@link #onRegister()} or after {@link #onUnregister()}.
+     */
+    public final void remove(boolean immediately) {
+        TKey key = mKey;
+        if (key != null && !mRemoved.getAndSet(true)) {
+            onRemove(immediately);
+            if (immediately) {
+                getOwner().removeRegistration(key, this);
+            } else {
+                executeOperation(listener -> getOwner().removeRegistration(key, this));
+            }
         }
     }
 
+    /**
+     * Invoked just before this registration is removed due to {@link #remove(boolean)}, on the same
+     * thread as the responsible {@link #remove(boolean)} call.
+     *
+     * <p>This method will only ever be invoked once, no matter how many calls to {@link
+     * #remove(boolean)} are made, as any registration can only be removed once.
+     */
+    protected void onRemove(boolean immediately) {}
+
     @Override
     protected final void onRegister(Object key) {
-        mKey = Objects.requireNonNull(key);
-        onRemovableListenerRegister();
+        super.onRegister(key);
+        mKey = (TKey) Objects.requireNonNull(key);
+        onRegister();
     }
+
+    /**
+     * May be overridden by subclasses. Invoked when registration occurs. Invoked while holding the
+     * owning multiplexer's internal lock.
+     *
+     * <p>If overridden you must ensure the superclass method is invoked (usually as the first thing
+     * in the overridden method).
+     */
+    protected void onRegister() {}
 
     @Override
-    protected final void onUnregister() {
-        onRemovableListenerUnregister();
+    protected void onUnregister() {
         mKey = null;
+        super.onUnregister();
     }
-
-    /**
-     * May be overridden in place of {@link #onRegister(Object)}.
-     */
-    protected void onRemovableListenerRegister() {}
-
-    /**
-     * May be overridden in place of {@link #onUnregister()}.
-     */
-    protected void onRemovableListenerUnregister() {}
 }

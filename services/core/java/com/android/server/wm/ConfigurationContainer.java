@@ -536,16 +536,19 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * Applies app-specific nightMode and {@link LocaleList} on requested configuration.
      * @return true if any of the requested configuration has been updated.
      */
-    public boolean applyAppSpecificConfig(Integer nightMode, LocaleList locales) {
+    public boolean applyAppSpecificConfig(Integer nightMode, LocaleList locales,
+            @Configuration.GrammaticalGender Integer gender) {
         mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
         boolean newNightModeSet = (nightMode != null) && setOverrideNightMode(mRequestsTmpConfig,
                 nightMode);
         boolean newLocalesSet = (locales != null) && setOverrideLocales(mRequestsTmpConfig,
                 locales);
-        if (newNightModeSet || newLocalesSet) {
+        boolean newGenderSet = (gender != null) && setOverrideGender(mRequestsTmpConfig,
+                gender);
+        if (newNightModeSet || newLocalesSet || newGenderSet) {
             onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
         }
-        return newNightModeSet || newLocalesSet;
+        return newNightModeSet || newLocalesSet || newGenderSet;
     }
 
     /**
@@ -576,6 +579,21 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         requestsTmpConfig.setLocales(overrideLocales);
         requestsTmpConfig.userSetLocale = true;
         return true;
+    }
+
+    /**
+     * Overrides the gender to this ConfigurationContainer.
+     *
+     * @return true if the grammatical gender has been changed.
+     */
+    private boolean setOverrideGender(Configuration requestsTmpConfig,
+            @Configuration.GrammaticalGender int gender) {
+        if (mRequestedOverrideConfiguration.getGrammaticalGender() == gender) {
+            return false;
+        } else {
+            requestsTmpConfig.setGrammaticalGender(gender);
+            return true;
+        }
     }
 
     public boolean isActivityTypeDream() {

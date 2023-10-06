@@ -26,6 +26,10 @@
     <xs:element name="displayConfiguration">
         <xs:complexType>
             <xs:sequence>
+                <xs:element type ="xs:string" name="name">
+                    <xs:annotation name="nullable"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <xs:element type="densityMapping" name="densityMapping" minOccurs="0" maxOccurs="1">
                     <xs:annotation name="nullable"/>
                     <xs:annotation name="final"/>
@@ -117,6 +121,11 @@
                 <xs:element type="integer-array" name="screenOffBrightnessSensorValueToLux">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <!-- The version of the Universal Stylus Initiative
+                 (USI, https://universalstylus.org/) protocol supported by the display, if any. -->
+                <xs:element type="usiVersion" name="usiVersion">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -142,12 +151,6 @@
             <xs:element name="timing" type="hbmTiming" minOccurs="1" maxOccurs="1"/>
             <xs:element type="refreshRateRange" name="refreshRate" minOccurs="0" maxOccurs="1">
                 <xs:annotation name="nullable"/>
-                <xs:annotation name="final"/>
-            </xs:element>
-            <!-- The highest (most severe) thermal status at which high-brightness-mode is allowed
-                 to operate. -->
-            <xs:element name="thermalStatusLimit" type="thermalStatus" minOccurs="0" maxOccurs="1">
-                <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
             <xs:element name="allowInLowPowerMode" type="xs:boolean" minOccurs="0" maxOccurs="1">
@@ -202,12 +205,37 @@
     </xs:simpleType>
 
     <xs:complexType name="thermalThrottling">
-        <xs:complexType>
-            <xs:element type="brightnessThrottlingMap" name="brightnessThrottlingMap">
+        <xs:sequence>
+            <xs:element type="brightnessThrottlingMap" name="brightnessThrottlingMap" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="refreshRateThrottlingMap" name="refreshRateThrottlingMap" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateThrottlingMap">
+        <xs:attribute name="id" type="xs:string" />
+        <xs:sequence>
+            <xs:element name="refreshRateThrottlingPoint" type="refreshRateThrottlingPoint" maxOccurs="unbounded">
                 <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
-        </xs:complexType>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateThrottlingPoint">
+        <xs:sequence>
+            <xs:element type="thermalStatus" name="thermalStatus">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="refreshRateRange" name="refreshRateRange">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="brightnessThrottlingMap">
@@ -217,6 +245,7 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
+        <xs:attribute name="id" type="xs:string"/>
     </xs:complexType>
 
     <xs:complexType name="brightnessThrottlingPoint">
@@ -362,8 +391,8 @@
             <xs:annotation name="final"/>
         </xs:element>
         <xs:sequence>
-            <!--  Thresholds as tenths of percent of current brightness level, at each level of
-                brightness -->
+        <!--  Thresholds as tenths of percent of current brightness level, at each level of
+            brightness -->
             <xs:element name="brightnessThresholdPoints" type="thresholdPoints" maxOccurs="1" minOccurs="0">
                 <xs:annotation name="final"/>
             </xs:element>
@@ -472,6 +501,10 @@
                     minOccurs="0" maxOccurs="1">
             <xs:annotation name="final"/>
         </xs:element>
+        <xs:element name="refreshRateZoneProfiles" type="refreshRateZoneProfiles"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
         <xs:element name="defaultRefreshRateInHbmHdr" type="xs:nonNegativeInteger"
                     minOccurs="0" maxOccurs="1">
             <xs:annotation name="final"/>
@@ -486,6 +519,22 @@
         </xs:element>
         <xs:element name="higherBlockingZoneConfigs" type="blockingZoneConfig"
                     minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateZoneProfiles">
+        <xs:sequence>
+            <xs:element name="refreshRateZoneProfile" type="refreshRateZone"
+                        minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateZone">
+        <xs:attribute name="id" use="required" type="xs:string" />
+        <xs:element name="refreshRateRange" type="refreshRateRange">
             <xs:annotation name="final"/>
         </xs:element>
     </xs:complexType>
@@ -514,5 +563,16 @@
         <xs:sequence>
             <xs:element name="item" type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="usiVersion">
+        <xs:element name="majorVersion" type="xs:nonNegativeInteger"
+                    minOccurs="1" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="minorVersion" type="xs:nonNegativeInteger"
+                    minOccurs="1" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
     </xs:complexType>
 </xs:schema>

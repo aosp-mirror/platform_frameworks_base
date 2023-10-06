@@ -467,6 +467,13 @@ public final class AppExitInfoTracker {
             addExitInfoInnerLocked(packages[i], uid, info, recoverable);
         }
 
+        // SDK sandbox exits are stored under both real and package UID
+        if (Process.isSdkSandboxUid(uid)) {
+            for (int i = 0; i < packages.length; i++) {
+                addExitInfoInnerLocked(packages[i], raw.getPackageUid(), info, recoverable);
+            }
+        }
+
         schedulePersistProcessExitInfo(false);
 
         return info;
@@ -700,7 +707,7 @@ public final class AppExitInfoTracker {
                         break;
                 }
             }
-        } catch (IOException | IllegalArgumentException | WireTypeMismatchException e) {
+        } catch (Exception e) {
             Slog.w(TAG, "Error in loading historical app exit info from persistent storage: " + e);
         } finally {
             if (fin != null) {
@@ -1184,7 +1191,7 @@ public final class AppExitInfoTracker {
         final ArraySet<String> allFiles = new ArraySet();
         final File[] files = mProcExitStoreDir.listFiles((f) -> {
             final String name = f.getName();
-            boolean trace = name.startsWith(ActivityManagerService.ANR_FILE_PREFIX)
+            boolean trace = name.startsWith(StackTracesDumpHelper.ANR_FILE_PREFIX)
                     && name.endsWith(APP_TRACE_FILE_SUFFIX);
             if (trace) {
                 allFiles.add(name);
@@ -1400,11 +1407,20 @@ public final class AppExitInfoTracker {
                 }
             }
             // Claim the state information if there is any
-            final int uid = info.getPackageUid();
+            int uid = info.getPackageUid();
+            // SDK sandbox app states and app traces are stored under real UID
+            if (Process.isSdkSandboxUid(info.getRealUid())) {
+                uid = info.getRealUid();
+            }
             final int pid = info.getPid();
-            info.setProcessStateSummary(findAndRemoveFromSparse2dArray(
-                    mActiveAppStateSummary, uid, pid));
-            info.setTraceFile(findAndRemoveFromSparse2dArray(mActiveAppTraces, uid, pid));
+            if (info.getProcessStateSummary() == null) {
+                info.setProcessStateSummary(findAndRemoveFromSparse2dArray(
+                        mActiveAppStateSummary, uid, pid));
+            }
+            if (info.getTraceFile() == null) {
+                info.setTraceFile(findAndRemoveFromSparse2dArray(mActiveAppTraces, uid, pid));
+            }
+
             info.setAppTraceRetriever(mAppTraceRetriever);
             map.append(pid, info);
         }
@@ -1905,15 +1921,15 @@ public final class AppExitInfoTracker {
             }
             final int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
-            final int callingUserId = UserHandle.getCallingUserId();
             final int userId = UserHandle.getUserId(uid);
 
             mService.mUserController.handleIncomingUser(callingPid, callingUid, userId, true,
                     ALLOW_NON_FULL, "getTraceFileDescriptor", null);
-            if (mService.enforceDumpPermissionForPackage(packageName, userId,
-                    callingUid, "getTraceFileDescriptor") != Process.INVALID_UID) {
+            final int filterUid = mService.enforceDumpPermissionForPackage(packageName, userId,
+                    callingUid, "getTraceFileDescriptor");
+            if (filterUid != Process.INVALID_UID) {
                 synchronized (mLock) {
-                    final ApplicationExitInfo info = getExitInfoLocked(packageName, uid, pid);
+                    final ApplicationExitInfo info = getExitInfoLocked(packageName, filterUid, pid);
                     if (info == null) {
                         return null;
                     }

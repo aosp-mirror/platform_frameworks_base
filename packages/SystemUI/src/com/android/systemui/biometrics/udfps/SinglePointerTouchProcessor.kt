@@ -21,7 +21,7 @@ import android.util.RotationUtils
 import android.view.MotionEvent
 import android.view.MotionEvent.INVALID_POINTER_ID
 import android.view.Surface
-import com.android.systemui.biometrics.UdfpsOverlayParams
+import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.biometrics.udfps.TouchProcessorResult.Failure
 import com.android.systemui.biometrics.udfps.TouchProcessorResult.ProcessedTouch
 import com.android.systemui.dagger.SysUISingleton
@@ -46,7 +46,13 @@ class SinglePointerTouchProcessor @Inject constructor(val overlapDetector: Overl
             val touchData = List(event.pointerCount) { event.normalize(it, overlayParams) }
             val pointersOnSensor =
                 touchData
-                    .filter { overlapDetector.isGoodOverlap(it, overlayParams.nativeSensorBounds) }
+                    .filter {
+                        overlapDetector.isGoodOverlap(
+                            it,
+                            overlayParams.nativeSensorBounds,
+                            overlayParams.nativeOverlayBounds
+                        )
+                    }
                     .map { it.pointerId }
             return PreprocessedTouch(touchData, previousPointerOnSensorId, pointersOnSensor)
         }
@@ -92,9 +98,14 @@ private fun processActionMove(touch: PreprocessedTouch): TouchProcessorResult {
         val data = touch.data.find { it.pointerId == pointerOnSensorId } ?: NormalizedTouchData()
         ProcessedTouch(InteractionEvent.DOWN, data.pointerId, data)
     } else if (hadPointerOnSensor && !hasPointerOnSensor) {
-        ProcessedTouch(InteractionEvent.UP, INVALID_POINTER_ID, NormalizedTouchData())
+        val data =
+            touch.data.find { it.pointerId == touch.previousPointerOnSensorId }
+                ?: NormalizedTouchData()
+        ProcessedTouch(InteractionEvent.UP, INVALID_POINTER_ID, data)
     } else {
-        val data = touch.data.find { it.pointerId == pointerOnSensorId } ?: NormalizedTouchData()
+        val data =
+            touch.data.find { it.pointerId == pointerOnSensorId }
+                ?: touch.data.firstOrNull() ?: NormalizedTouchData()
         ProcessedTouch(InteractionEvent.UNCHANGED, pointerOnSensorId, data)
     }
 }
@@ -102,16 +113,15 @@ private fun processActionMove(touch: PreprocessedTouch): TouchProcessorResult {
 private fun processActionUp(touch: PreprocessedTouch, actionId: Int): TouchProcessorResult {
     // Finger lifted and it was the only finger on the sensor
     return if (touch.pointersOnSensor.size == 1 && touch.pointersOnSensor.contains(actionId)) {
-        ProcessedTouch(
-            InteractionEvent.UP,
-            pointerOnSensorId = INVALID_POINTER_ID,
-            NormalizedTouchData()
-        )
+        val data = touch.data.find { it.pointerId == actionId } ?: NormalizedTouchData()
+        ProcessedTouch(InteractionEvent.UP, pointerOnSensorId = INVALID_POINTER_ID, data)
     } else {
         // Pick new pointerOnSensor that's not the finger that was lifted
         val pointerOnSensorId = touch.pointersOnSensor.find { it != actionId } ?: INVALID_POINTER_ID
-        val data = touch.data.find { it.pointerId == pointerOnSensorId } ?: NormalizedTouchData()
-        ProcessedTouch(InteractionEvent.UNCHANGED, data.pointerId, data)
+        val data =
+            touch.data.find { it.pointerId == pointerOnSensorId }
+                ?: touch.data.firstOrNull() ?: NormalizedTouchData()
+        ProcessedTouch(InteractionEvent.UNCHANGED, pointerOnSensorId, data)
     }
 }
 

@@ -16,15 +16,11 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.LegacyAlternateBouncer
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -41,25 +37,9 @@ constructor(
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
     private val systemClock: SystemClock,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    featureFlags: FeatureFlags,
 ) {
-    val isModernAlternateBouncerEnabled = featureFlags.isEnabled(Flags.MODERN_ALTERNATE_BOUNCER)
-    var legacyAlternateBouncer: LegacyAlternateBouncer? = null
-    var legacyAlternateBouncerVisibleTime: Long = NOT_VISIBLE
-
+    var receivedDownTouch = false
     val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
-
-    private val keyguardStateControllerCallback: KeyguardStateController.Callback =
-        object : KeyguardStateController.Callback {
-            override fun onUnlockedChanged() {
-                maybeHide()
-            }
-        }
-
-    init {
-        keyguardStateController.addCallback(keyguardStateControllerCallback)
-    }
 
     /**
      * Sets the correct bouncer states to show the alternate bouncer if it can show.
@@ -67,21 +47,8 @@ constructor(
      * @return whether alternateBouncer is visible
      */
     fun show(): Boolean {
-        return when {
-            isModernAlternateBouncerEnabled -> {
-                bouncerRepository.setAlternateVisible(canShowAlternateBouncerForFingerprint())
-                isVisibleState()
-            }
-            canShowAlternateBouncerForFingerprint() -> {
-                if (legacyAlternateBouncer?.showAlternateBouncer() == true) {
-                    legacyAlternateBouncerVisibleTime = systemClock.uptimeMillis()
-                    true
-                } else {
-                    false
-                }
-            }
-            else -> false
-        }
+        bouncerRepository.setAlternateVisible(canShowAlternateBouncerForFingerprint())
+        return isVisibleState()
     }
 
     /**
@@ -92,21 +59,14 @@ constructor(
      * @return true if the alternate bouncer was newly hidden, else false.
      */
     fun hide(): Boolean {
-        return if (isModernAlternateBouncerEnabled) {
-            val wasAlternateBouncerVisible = isVisibleState()
-            bouncerRepository.setAlternateVisible(false)
-            wasAlternateBouncerVisible && !isVisibleState()
-        } else {
-            legacyAlternateBouncer?.hideAlternateBouncer() ?: false
-        }
+        receivedDownTouch = false
+        val wasAlternateBouncerVisible = isVisibleState()
+        bouncerRepository.setAlternateVisible(false)
+        return wasAlternateBouncerVisible && !isVisibleState()
     }
 
     fun isVisibleState(): Boolean {
-        return if (isModernAlternateBouncerEnabled) {
-            bouncerRepository.alternateBouncerVisible.value
-        } else {
-            legacyAlternateBouncer?.isShowingAlternateBouncer ?: false
-        }
+        return bouncerRepository.alternateBouncerVisible.value
     }
 
     fun setAlternateBouncerUIAvailable(isAvailable: Boolean) {
@@ -114,18 +74,13 @@ constructor(
     }
 
     fun canShowAlternateBouncerForFingerprint(): Boolean {
-        return if (isModernAlternateBouncerEnabled) {
-            bouncerRepository.alternateBouncerUIAvailable.value &&
-                biometricSettingsRepository.isFingerprintEnrolled.value &&
-                biometricSettingsRepository.isStrongBiometricAllowed.value &&
-                biometricSettingsRepository.isFingerprintEnabledByDevicePolicy.value &&
-                !deviceEntryFingerprintAuthRepository.isLockedOut.value &&
-                !keyguardStateController.isUnlocked &&
-                !statusBarStateController.isDozing
-        } else {
-            legacyAlternateBouncer != null &&
-                keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(true)
-        }
+        return bouncerRepository.alternateBouncerUIAvailable.value &&
+            biometricSettingsRepository.isFingerprintEnrolled.value &&
+            biometricSettingsRepository.isStrongBiometricAllowed.value &&
+            biometricSettingsRepository.isFingerprintEnabledByDevicePolicy.value &&
+            !deviceEntryFingerprintAuthRepository.isLockedOut.value &&
+            !keyguardStateController.isUnlocked &&
+            !statusBarStateController.isDozing
     }
 
     /**
@@ -133,22 +88,24 @@ constructor(
      * alternate bouncer and show the primary bouncer.
      */
     fun hasAlternateBouncerShownWithMinTime(): Boolean {
-        return if (isModernAlternateBouncerEnabled) {
-            (systemClock.uptimeMillis() - bouncerRepository.lastAlternateBouncerVisibleTime) >
-                MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS
-        } else {
-            systemClock.uptimeMillis() - legacyAlternateBouncerVisibleTime > 200
-        }
+        return (systemClock.uptimeMillis() - bouncerRepository.lastAlternateBouncerVisibleTime) >
+            MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS
     }
-
-    private fun maybeHide() {
+    /**
+     * Should only be called through StatusBarKeyguardViewManager which propagates the source of
+     * truth to other concerned controllers. Will hide the alternate bouncer if it's no longer
+     * allowed to show.
+     *
+     * @return true if the alternate bouncer was newly hidden, else false.
+     */
+    fun maybeHide(): Boolean {
         if (isVisibleState() && !canShowAlternateBouncerForFingerprint()) {
-            hide()
+            return hide()
         }
+        return false
     }
 
     companion object {
         private const val MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS = 200L
-        private const val NOT_VISIBLE = -1L
     }
 }

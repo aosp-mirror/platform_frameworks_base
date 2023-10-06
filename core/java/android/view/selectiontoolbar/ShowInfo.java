@@ -306,7 +306,7 @@ public final class ShowInfo implements Parcelable {
         boolean isLightTheme = (flg & 0x80) != 0;
         long widgetToken = in.readLong();
         List<ToolbarMenuItem> menuItems = new java.util.ArrayList<>();
-        in.readParcelableList(menuItems, ToolbarMenuItem.class.getClassLoader());
+        in.readParcelableList(menuItems, ToolbarMenuItem.class.getClassLoader(), android.view.selectiontoolbar.ToolbarMenuItem.class);
         Rect contentRect = (Rect) in.readTypedObject(Rect.CREATOR);
         int suggestedWidth = in.readInt();
         Rect viewPortOnScreen = (Rect) in.readTypedObject(Rect.CREATOR);

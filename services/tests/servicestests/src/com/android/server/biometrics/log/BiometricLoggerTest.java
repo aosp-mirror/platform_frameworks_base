@@ -32,7 +32,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.input.InputSensorInfo;
 import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
@@ -70,12 +69,12 @@ public class BiometricLoggerTest {
     @Mock
     private BaseClientMonitor mClient;
 
-    private OperationContext mOpContext;
+    private OperationContextExt mOpContext;
     private BiometricLogger mLogger;
 
     @Before
     public void setUp() {
-        mOpContext = new OperationContext();
+        mOpContext = new OperationContextExt(false);
         mContext.addMockSystemService(SensorManager.class, mSensorManager);
         when(mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)).thenReturn(
                 new Sensor(new InputSensorInfo("", "", 0, 0, Sensor.TYPE_LIGHT, 0, 0, 0, 0, 0, 0,

@@ -17,10 +17,11 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.annotation.UiThread;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
+import android.window.SurfaceSyncGroup;
 
 /**
  * Provides an interface to the root-Surface of a View Hierarchy or Window. This
@@ -137,5 +138,33 @@ public interface AttachedSurfaceControl {
      * @param r The region to use or null to use the entire Layer bounds
      */
     default void setTouchableRegion(@Nullable Region r) {
+    }
+
+    /**
+     * Returns a SurfaceSyncGroup that can be used to sync {@link AttachedSurfaceControl} in a
+     * {@link SurfaceSyncGroup}
+     *
+     * @hide
+     */
+    @Nullable
+    default SurfaceSyncGroup getOrCreateSurfaceSyncGroup() {
+        return null;
+    }
+
+    /**
+     * Set a crop region on all children parented to the layer represented by this
+     * AttachedSurfaceControl. This includes SurfaceView, and an example usage may
+     * be to ensure that SurfaceView with {@link android.view.SurfaceView#setZOrderOnTop}
+     * are cropped to a region not including the app bar.
+     * <p>
+     * This cropped is expressed in terms of insets in window-space. Negative insets
+     * are considered invalid and will produce an exception. Insets of zero will produce
+     * the same result as if this function had never been called.
+     *
+     * @param insets The insets in each direction by which to bound the children
+     *               expressed in window-space.
+     * @throws IllegalArgumentException If negative insets are provided.
+     */
+    default void setChildBoundingInsets(@NonNull Rect insets) {
     }
 }

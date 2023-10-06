@@ -17,8 +17,8 @@
 package com.android.wm.shell.compatui;
 
 import static android.provider.Settings.Secure.LAUNCHER_TASKBAR_EDUCATION_SHOWING;
+import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.content.Context;
@@ -47,12 +47,6 @@ import java.util.function.Consumer;
  */
 class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
 
-    /**
-     * The restart dialog should be the topmost child of the Task in case there can be more
-     * than one child.
-     */
-    private static final int Z_ORDER = Integer.MAX_VALUE;
-
     private final DialogAnimationController<RestartDialogLayout> mAnimationController;
 
     private final Transitions mTransitions;
@@ -71,9 +65,6 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
      * insets).
      */
     private final int mDialogVerticalMargin;
-
-    @NonNull
-    private TaskInfo mTaskInfo;
 
     @Nullable
     @VisibleForTesting
@@ -100,7 +91,6 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
             DialogAnimationController<RestartDialogLayout> animationController,
             CompatUIConfiguration compatUIConfiguration) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
-        mTaskInfo = taskInfo;
         mTransitions = transitions;
         mOnDismissCallback = onDismissCallback;
         mOnRestartCallback = onRestartCallback;
@@ -112,7 +102,7 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected int getZOrder() {
-        return Z_ORDER;
+        return TASK_CHILD_LAYER_COMPAT_UI + 2;
     }
 
     @Override
@@ -130,7 +120,7 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
     protected boolean eligibleToShowLayout() {
         // We don't show this dialog if the user has explicitly selected so clicking on a checkbox.
         return mRequestRestartDialog && !isTaskbarEduShowing() && (mLayout != null
-                || mCompatUIConfiguration.shouldShowRestartDialogAgain(mTaskInfo));
+                || mCompatUIConfiguration.shouldShowRestartDialogAgain(getLastTaskInfo()));
     }
 
     @Override
@@ -148,18 +138,6 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
         mRequestRestartDialog = enabled;
     }
 
-    @Override
-    public boolean updateCompatInfo(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener,
-            boolean canShow) {
-        mTaskInfo = taskInfo;
-        return super.updateCompatInfo(taskInfo, taskListener, canShow);
-    }
-
-    boolean needsToBeRecreated(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener) {
-        return taskInfo.configuration.uiMode != mTaskInfo.configuration.uiMode
-                || !getTaskListener().equals(taskListener);
-    }
-
     private void updateDialogMargins() {
         if (mLayout == null) {
             return;
@@ -170,10 +148,10 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
 
         final Rect taskBounds = getTaskBounds();
         final Rect taskStableBounds = getTaskStableBounds();
-
-        marginParams.topMargin = taskStableBounds.top - taskBounds.top + mDialogVerticalMargin;
-        marginParams.bottomMargin =
-                taskBounds.bottom - taskStableBounds.bottom + mDialogVerticalMargin;
+        // only update margins based on taskbar insets
+        marginParams.topMargin = mDialogVerticalMargin;
+        marginParams.bottomMargin = taskBounds.bottom - taskStableBounds.bottom
+                + mDialogVerticalMargin;
         dialogContainer.setLayoutParams(marginParams);
     }
 
@@ -196,6 +174,7 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
             // Dialog has already been released.
             return;
         }
+        final TaskInfo lastTaskInfo = getLastTaskInfo();
         mLayout.setDismissOnClickListener(this::onDismiss);
         mLayout.setRestartOnClickListener(dontShowAgain -> {
             if (mLayout != null) {
@@ -205,9 +184,9 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
                 });
             }
             if (dontShowAgain) {
-                mCompatUIConfiguration.setDontShowRestartDialogAgain(mTaskInfo);
+                mCompatUIConfiguration.setDontShowRestartDialogAgain(lastTaskInfo);
             }
-            mOnRestartCallback.accept(Pair.create(mTaskInfo, getTaskListener()));
+            mOnRestartCallback.accept(Pair.create(lastTaskInfo, getTaskListener()));
         });
         // Focus on the dialog title for accessibility.
         mLayout.getDialogTitle().sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
@@ -221,7 +200,7 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
         mLayout.setDismissOnClickListener(null);
         mAnimationController.startExitAnimation(mLayout, () -> {
             release();
-            mOnDismissCallback.accept(Pair.create(mTaskInfo, getTaskListener()));
+            mOnDismissCallback.accept(Pair.create(getLastTaskInfo(), getTaskListener()));
         });
     }
 

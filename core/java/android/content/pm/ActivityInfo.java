@@ -39,6 +39,7 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Printer;
+import android.window.OnBackInvokedCallback;
 
 import com.android.internal.util.Parcelling;
 
@@ -221,6 +222,22 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public String launchToken;
 
     /**
+     * Specifies the required display category of the activity. Set from the
+     * {@link android.R.attr#requiredDisplayCategory} attribute. Upon creation, a display can
+     * specify which display categories it supports and one of the category must be present
+     * in the {@code <activity>} element to allow this activity to run. The default value is
+     * {@code null}, which indicates the activity does not have a required display category and
+     * thus can only run on a display that didn't specify any display categories. Each activity
+     * can only specify one required category but a display can support multiple display categories.
+     * <p>
+     * This field should be formatted as a Java-language-style free form string(for example,
+     * com.google.automotive_entertainment), which may contain uppercase or lowercase letters ('A'
+     * through 'Z'), numbers, and underscores ('_') but may only start with letters.
+     */
+    @Nullable
+    public String requiredDisplayCategory;
+
+    /**
      * Activity can not be resized and always occupies the fullscreen area with all windows fully
      * visible.
      * @hide
@@ -333,7 +350,14 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @see android.R.attr#colorMode
      */
     public static final int COLOR_MODE_HDR = 2;
-    // 3 Corresponds to android::uirenderer::ColorMode::Hdr10.
+
+    /**
+     * Comparison point against COLOR_MODE_HDR that uses 1010102
+     * Only for internal test usages
+     * @hide
+     */
+    public static final int COLOR_MODE_HDR10 = 3;
+
     /**
      * Value of {@link #colorMode} indicating that the activity should use an
      * 8 bit alpha buffer if the presentation display supports it.
@@ -608,7 +632,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * See {@link android.R.attr#inheritShowWhenLocked}.
      * @hide
      */
-    public static final int FLAG_INHERIT_SHOW_WHEN_LOCKED = 0x1;
+    public static final int FLAG_INHERIT_SHOW_WHEN_LOCKED = 1 << 0;
 
     /**
      * Bit in {@link #privateFlags} indicating whether a home sound effect should be played if the
@@ -616,13 +640,34 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Set from the {@link android.R.attr#playHomeTransitionSound} attribute.
      * @hide
      */
-    public static final int PRIVATE_FLAG_HOME_TRANSITION_SOUND = 0x2;
+    public static final int PRIVATE_FLAG_HOME_TRANSITION_SOUND = 1 << 1;
+
+    /**
+     * Bit in {@link #privateFlags} indicating {@link android.view.KeyEvent#KEYCODE_BACK} related
+     * events will be replaced by a call to {@link OnBackInvokedCallback#onBackInvoked()} on the
+     * focused window.
+     * @hide
+     * @see android.R.styleable.AndroidManifestActivity_enableOnBackInvokedCallback
+     */
+    public static final int PRIVATE_FLAG_ENABLE_ON_BACK_INVOKED_CALLBACK = 1 << 2;
+
+    /**
+     * Bit in {@link #privateFlags} indicating {@link android.view.KeyEvent#KEYCODE_BACK} related
+     * events will be forwarded to the Activity and its dialogs and views and
+     * the {@link android.app.Activity#onBackPressed()}, {@link android.app.Dialog#onBackPressed}
+     * will be called.
+     * @hide
+     * @see android.R.styleable.AndroidManifestActivity_enableOnBackInvokedCallback
+     */
+    public static final int PRIVATE_FLAG_DISABLE_ON_BACK_INVOKED_CALLBACK = 1 << 3;
 
     /**
      * Options that have been set in the activity declaration in the manifest.
      * These include:
      * {@link #FLAG_INHERIT_SHOW_WHEN_LOCKED},
      * {@link #PRIVATE_FLAG_HOME_TRANSITION_SOUND}.
+     * {@link #PRIVATE_FLAG_ENABLE_ON_BACK_INVOKED_CALLBACK}
+     * {@link #PRIVATE_FLAG_DISABLE_ON_BACK_INVOKED_CALLBACK}
      * @hide
      */
     public int privateFlags;
@@ -791,6 +836,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             CONFIG_LAYOUT_DIRECTION,
             CONFIG_COLOR_MODE,
             CONFIG_FONT_SCALE,
+            CONFIG_GRAMMATICAL_GENDER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Config {}
@@ -901,6 +947,12 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final int CONFIG_COLOR_MODE = 0x4000;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle the change to gender. Set from the
+     * {@link android.R.attr#configChanges} attribute.
+     */
+    public static final int CONFIG_GRAMMATICAL_GENDER = 0x8000;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle asset path changes.  Set from the {@link android.R.attr#configChanges}
      * attribute. This is not a core resource configuration, but a higher-level value, so its
      * constant starts at the high bits.
@@ -930,7 +982,6 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * not a core resource configuration, but a higher-level value, so its
      * constant starts at the high bits.
      */
-
     public static final int CONFIG_FONT_WEIGHT_ADJUSTMENT = 0x10000000;
 
     /** @hide
@@ -954,6 +1005,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         Configuration.NATIVE_CONFIG_DENSITY,                // DENSITY
         Configuration.NATIVE_CONFIG_LAYOUTDIR,              // LAYOUT DIRECTION
         Configuration.NATIVE_CONFIG_COLOR_MODE,             // COLOR_MODE
+        Configuration.NATIVE_CONFIG_GRAMMATICAL_GENDER,
     };
 
     /**
@@ -1031,6 +1083,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION =
             254631730L; // buganizer id
 
@@ -1090,6 +1143,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION =
             263959004L; // buganizer id
 
@@ -1102,6 +1156,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH = 264304459L; // buganizer id
 
     /**
@@ -1114,6 +1169,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE =
             264301586L; // buganizer id
 
@@ -1217,6 +1273,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN = 208648326L;
 
     /**
@@ -1227,6 +1284,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN = 218959984L;
 
     /**
@@ -1238,6 +1296,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS = 263259275L;
 
     // Compat framework that per-app overrides rely on only supports booleans. That's why we have
@@ -1253,6 +1312,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT = 265452344L;
 
     /**
@@ -1264,6 +1324,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR = 265451093L;
 
     /**
@@ -1277,6 +1338,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE = 266124927L;
 
     /**
@@ -1323,6 +1385,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L;
 
     /**
@@ -1394,8 +1457,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * {@link #CONFIG_LOCALE}, {@link #CONFIG_TOUCHSCREEN},
      * {@link #CONFIG_KEYBOARD}, {@link #CONFIG_NAVIGATION},
      * {@link #CONFIG_ORIENTATION}, {@link #CONFIG_SCREEN_LAYOUT},
-     * {@link #CONFIG_DENSITY}, {@link #CONFIG_LAYOUT_DIRECTION} and
-     * {@link #CONFIG_COLOR_MODE}.
+     * {@link #CONFIG_DENSITY}, {@link #CONFIG_LAYOUT_DIRECTION},
+     * {@link #CONFIG_COLOR_MODE}, and {link #CONFIG_GRAMMATICAL_GENDER}.
      * Set from the {@link android.R.attr#configChanges} attribute.
      */
     public int configChanges;
@@ -1508,6 +1571,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         mMaxAspectRatio = orig.mMaxAspectRatio;
         mMinAspectRatio = orig.mMinAspectRatio;
         supportsSizeChanges = orig.supportsSizeChanges;
+        requiredDisplayCategory = orig.requiredDisplayCategory;
     }
 
     /**
@@ -1631,27 +1695,6 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @UnsupportedAppUsage
     public boolean supportsPictureInPicture() {
         return (flags & FLAG_SUPPORTS_PICTURE_IN_PICTURE) != 0;
-    }
-
-    /**
-     * Returns whether the activity supports size changes.
-     * @hide
-     */
-    @SizeChangesSupportMode
-    public int supportsSizeChanges() {
-        if (isChangeEnabled(FORCE_NON_RESIZE_APP)) {
-            return SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
-        }
-
-        if (supportsSizeChanges) {
-            return SIZE_CHANGES_SUPPORTED_METADATA;
-        }
-
-        if (isChangeEnabled(FORCE_RESIZE_APP)) {
-            return SIZE_CHANGES_SUPPORTED_OVERRIDE;
-        }
-
-        return SIZE_CHANGES_UNSUPPORTED_METADATA;
     }
 
     /**
@@ -1801,6 +1844,32 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         return isChangeEnabled(CHECK_MIN_WIDTH_HEIGHT_FOR_MULTI_WINDOW);
     }
 
+    /**
+     * Returns whether the activity will set the
+     * {@link R.styleable.AndroidManifestActivity_enableOnBackInvokedCallback} attribute.
+     *
+     * @hide
+     */
+    public boolean hasOnBackInvokedCallbackEnabled() {
+        return (privateFlags & (PRIVATE_FLAG_ENABLE_ON_BACK_INVOKED_CALLBACK
+                | PRIVATE_FLAG_DISABLE_ON_BACK_INVOKED_CALLBACK)) != 0;
+    }
+
+    /**
+     * Returns whether the activity will use the {@link android.window.OnBackInvokedCallback}
+     * navigation system instead of the {@link android.view.KeyEvent#KEYCODE_BACK} and related
+     * callbacks.
+     *
+     * Valid when the {@link R.styleable.AndroidManifestActivity_enableOnBackInvokedCallback}
+     * attribute has been set, or it won't indicate if the activity should use the
+     * navigation system and the {@link hasOnBackInvokedCallbackEnabled} will return false.
+     * @hide
+     */
+    public boolean isOnBackInvokedCallbackEnabled() {
+        return hasOnBackInvokedCallbackEnabled()
+                && (privateFlags & PRIVATE_FLAG_ENABLE_ON_BACK_INVOKED_CALLBACK) != 0;
+    }
+
     public void dump(Printer pw, String prefix) {
         dump(pw, prefix, DUMP_FLAG_ALL);
     }
@@ -1857,6 +1926,9 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (mKnownActivityEmbeddingCerts != null) {
             pw.println(prefix + "knownActivityEmbeddingCerts=" + mKnownActivityEmbeddingCerts);
         }
+        if (requiredDisplayCategory != null) {
+            pw.println(prefix + "requiredDisplayCategory=" + requiredDisplayCategory);
+        }
         super.dumpBack(pw, prefix, dumpFlags);
     }
 
@@ -1903,6 +1975,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeFloat(mMinAspectRatio);
         dest.writeBoolean(supportsSizeChanges);
         sForStringSet.parcel(mKnownActivityEmbeddingCerts, dest, flags);
+        dest.writeString8(requiredDisplayCategory);
     }
 
     /**
@@ -2028,6 +2101,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (mKnownActivityEmbeddingCerts.isEmpty()) {
             mKnownActivityEmbeddingCerts = null;
         }
+        requiredDisplayCategory = source.readString8();
     }
 
     /**

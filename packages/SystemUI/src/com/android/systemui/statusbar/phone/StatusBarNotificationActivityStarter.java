@@ -16,11 +16,13 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 
 import static com.android.systemui.statusbar.phone.CentralSurfaces.getActivityOptions;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -53,11 +55,10 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -76,13 +77,13 @@ import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.wmshell.BubblesManager;
 
+import dagger.Lazy;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 
 /**
@@ -120,7 +121,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
 
     private final CentralSurfaces mCentralSurfaces;
     private final NotificationPresenter mPresenter;
-    private final NotificationPanelViewController mNotificationPanel;
+    private final ShadeViewController mNotificationPanel;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     private final UserTracker mUserTracker;
@@ -155,7 +156,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             OnUserInteractionCallback onUserInteractionCallback,
             CentralSurfaces centralSurfaces,
             NotificationPresenter presenter,
-            NotificationPanelViewController panel,
+            ShadeViewController panel,
             ActivityLaunchAnimator activityLaunchAnimator,
             NotificationLaunchAnimatorControllerProvider notificationAnimationProvider,
             LaunchFullScreenIntentProvider launchFullScreenIntentProvider,
@@ -303,10 +304,11 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             ActivityManager.getService().resumeAppSwitches();
         } catch (RemoteException e) {
         }
-        // If we are launching a work activity and require to launch
-        // separate work challenge, we defer the activity action and cancel
-        // notification until work challenge is unlocked.
-        if (isActivityIntent) {
+        // If the notification should be cancelled on click and we are launching a work activity in
+        // a locked profile with separate challenge, we defer the activity action and cancelling of
+        // the notification until work challenge is unlocked. If the notification shouldn't be
+        // cancelled, the work challenge will be shown by ActivityManager if necessary anyway.
+        if (isActivityIntent && shouldAutoCancel(entry.getSbn())) {
             final int userId = intent.getCreatorUserHandle().getIdentifier();
             if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
                     && mKeyguardManager.isDeviceLocked(userId)) {
@@ -561,10 +563,6 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             mLogger.logFullScreenIntentSuppressedByVR(entry);
             return;
         }
-        if (mFeatureFlags.isEnabled(Flags.FSI_CHROME)) {
-            // FsiChromeRepo runs its own implementation of launchFullScreenIntent
-            return;
-        }
         // Stop screensaver if the notification has a fullscreen intent.
         // (like an incoming phone call)
         mUiBgExecutor.execute(() -> {
@@ -583,8 +581,14 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
                     entry.getKey());
             mCentralSurfaces.wakeUpForFullScreenIntent();
-            fullScreenIntent.send();
+
+            ActivityOptions options = ActivityOptions.makeBasic();
+            options.setPendingIntentBackgroundActivityStartMode(
+                    MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+            fullScreenIntent.sendAndReturnResult(null, 0, null, null, null, null,
+                    options.toBundle());
             entry.notifyFullScreenIntentLaunched();
+
             mMetricsLogger.count("note_fullscreen", 1);
 
             String activityName;
@@ -612,9 +616,6 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     private static boolean shouldAutoCancel(StatusBarNotification sbn) {
         int flags = sbn.getNotification().flags;
         if ((flags & Notification.FLAG_AUTO_CANCEL) != Notification.FLAG_AUTO_CANCEL) {
-            return false;
-        }
-        if ((flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
             return false;
         }
         return true;

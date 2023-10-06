@@ -65,7 +65,7 @@ class TaskOperations {
                 InputDevice.SOURCE_KEYBOARD);
 
         ev.setDisplayId(mContext.getDisplay().getDisplayId());
-        if (!InputManager.getInstance()
+        if (!mContext.getSystemService(InputManager.class)
                 .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC)) {
             Log.e(TAG, "Inject input event fail");
         }

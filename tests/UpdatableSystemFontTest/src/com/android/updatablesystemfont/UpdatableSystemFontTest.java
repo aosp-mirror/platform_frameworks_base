@@ -69,6 +69,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Tests if fonts can be updated by {@link FontManager} API.
@@ -246,7 +247,10 @@ public class UpdatableSystemFontTest {
     @Test
     public void updateFontFamily() throws Exception {
         assertThat(updateNotoSerifAs("serif")).isEqualTo(FontManager.RESULT_SUCCESS);
-        FontConfig.FontFamily family = findFontFamilyOrThrow("serif");
+        final FontConfig.NamedFamilyList namedFamilyList = findFontFamilyOrThrow("serif");
+        assertThat(namedFamilyList.getFamilies().size()).isEqualTo(1);
+        final FontConfig.FontFamily family = namedFamilyList.getFamilies().get(0);
+
         assertThat(family.getFontList()).hasSize(2);
         assertThat(family.getFontList().get(0).getPostScriptName())
                 .isEqualTo(NOTO_SERIF_REGULAR_POSTSCRIPT_NAME);
@@ -265,7 +269,10 @@ public class UpdatableSystemFontTest {
     public void updateFontFamily_asNewFont() throws Exception {
         assertThat(updateNotoSerifAs("UpdatableSystemFontTest-serif"))
                 .isEqualTo(FontManager.RESULT_SUCCESS);
-        FontConfig.FontFamily family = findFontFamilyOrThrow("UpdatableSystemFontTest-serif");
+        final FontConfig.NamedFamilyList namedFamilyList =
+                findFontFamilyOrThrow("UpdatableSystemFontTest-serif");
+        assertThat(namedFamilyList.getFamilies().size()).isEqualTo(1);
+        final FontConfig.FontFamily family = namedFamilyList.getFamilies().get(0);
         assertThat(family.getFontList()).hasSize(2);
         assertThat(family.getFontList().get(0).getPostScriptName())
                 .isEqualTo(NOTO_SERIF_REGULAR_POSTSCRIPT_NAME);
@@ -434,9 +441,15 @@ public class UpdatableSystemFontTest {
     private String getFontPath(String psName) {
         FontConfig fontConfig =
                 SystemUtil.runWithShellPermissionIdentity(mFontManager::getFontConfig);
-        return fontConfig.getFontFamilies().stream()
+        final List<FontConfig.FontFamily> namedFamilies = fontConfig.getNamedFamilyLists().stream()
+                .flatMap(namedFamily -> namedFamily.getFamilies().stream()).toList();
+
+        return Stream.concat(fontConfig.getFontFamilies().stream(), namedFamilies.stream())
                 .flatMap(family -> family.getFontList().stream())
-                .filter(font -> psName.equals(font.getPostScriptName()))
+                .filter(font -> {
+                    Log.e("Debug", "PsName = " + font.getPostScriptName());
+                    return psName.equals(font.getPostScriptName());
+                })
                 // Return the last match, because the latter family takes precedence if two families
                 // have the same name.
                 .reduce((first, second) -> second)
@@ -445,10 +458,10 @@ public class UpdatableSystemFontTest {
                 .getAbsolutePath();
     }
 
-    private FontConfig.FontFamily findFontFamilyOrThrow(String familyName) {
+    private FontConfig.NamedFamilyList findFontFamilyOrThrow(String familyName) {
         FontConfig fontConfig =
                 SystemUtil.runWithShellPermissionIdentity(mFontManager::getFontConfig);
-        return fontConfig.getFontFamilies().stream()
+        return fontConfig.getNamedFamilyLists().stream()
                 .filter(family -> familyName.equals(family.getName()))
                 // Return the last match, because the latter family takes precedence if two families
                 // have the same name.

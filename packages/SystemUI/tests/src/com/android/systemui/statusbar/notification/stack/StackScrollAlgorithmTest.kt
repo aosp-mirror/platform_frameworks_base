@@ -35,7 +35,6 @@ import org.mockito.Mockito.`when` as whenever
 @SmallTest
 class StackScrollAlgorithmTest : SysuiTestCase() {
 
-
     @JvmField @Rule
     var expect: Expect = Expect.create()
 
@@ -82,26 +81,58 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     fun resetViewStates_defaultHun_yTranslationIsInset() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
-
-        stackScrollAlgorithm.resetViewStates(ambientState, 0)
-
-        assertThat(notificationRow.viewState.yTranslation)
-                .isEqualTo(stackScrollAlgorithm.mHeadsUpInset)
+        resetViewStates_hunYTranslationIsInset()
     }
 
     @Test
-    fun resetViewStates_stackMargin_changesHunYTranslation() {
+    fun resetViewStates_defaultHunWithStackMargin_changesHunYTranslation() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
-        val minHeadsUpTranslation = context.resources
-                .getDimensionPixelSize(R.dimen.notification_side_paddings)
+        resetViewStates_stackMargin_changesHunYTranslation()
+    }
 
-        // split shade case with top margin introduced by shade's status bar
-        ambientState.stackTopMargin = 100
-        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+    @Test
+    fun resetViewStates_hunAnimatingAway_yTranslationIsInset() {
+        whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
+        resetViewStates_hunYTranslationIsInset()
+    }
 
-        // top margin presence should decrease heads up translation up to minHeadsUpTranslation
-        assertThat(notificationRow.viewState.yTranslation).isEqualTo(minHeadsUpTranslation)
+    @Test
+    fun resetViewStates_hunAnimatingAway_StackMarginChangesHunYTranslation() {
+        whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
+        resetViewStates_stackMargin_changesHunYTranslation()
+    }
+
+    @Test
+    fun resetViewStates_hunAnimatingAway_bottomNotClipped() {
+        whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
+
+        assertThat(notificationRow.viewState.clipBottomAmount).isEqualTo(0)
+    }
+
+    @Test
+    fun resetViewStates_hunsOverlapping_bottomHunClipped() {
+        val topHun = mockExpandableNotificationRow()
+        val bottomHun = mockExpandableNotificationRow()
+        whenever(topHun.isHeadsUp).thenReturn(true)
+        whenever(topHun.isPinned).thenReturn(true)
+        whenever(bottomHun.isHeadsUp).thenReturn(true)
+        whenever(bottomHun.isPinned).thenReturn(true)
+
+        resetViewStates_hunsOverlapping_bottomHunClipped(topHun, bottomHun)
+    }
+
+    @Test
+    fun resetViewStates_hunsOverlappingAndBottomHunAnimatingAway_bottomHunClipped() {
+        val topHun = mockExpandableNotificationRow()
+        val bottomHun = mockExpandableNotificationRow()
+        whenever(topHun.isHeadsUp).thenReturn(true)
+        whenever(topHun.isPinned).thenReturn(true)
+        whenever(bottomHun.isHeadsUpAnimatingAway).thenReturn(true)
+
+        resetViewStates_hunsOverlapping_bottomHunClipped(topHun, bottomHun)
     }
 
     @Test
@@ -716,6 +747,94 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 .isLessThan(px(R.dimen.heads_up_pinned_elevation))
     }
 
+    @Test
+    fun aodToLockScreen_hasPulsingNotification_pulsingNotificationRowDoesNotChange() {
+        // Given: Before AOD to LockScreen, there was a pulsing notification
+        val pulsingNotificationView = createPulsingViewMock()
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(pulsingNotificationView)
+        ambientState.setPulsingRow(pulsingNotificationView)
+
+        // When: during AOD to LockScreen, any dozeAmount between (0, 1.0) is equivalent as a middle
+        // stage; here we use 0.5 for testing.
+        // stackScrollAlgorithm.updatePulsingStates is called
+        ambientState.dozeAmount = 0.5f
+        stackScrollAlgorithm.updatePulsingStates(algorithmState, ambientState)
+
+        // Then: ambientState.pulsingRow should still be pulsingNotificationView
+        assertTrue(ambientState.isPulsingRow(pulsingNotificationView))
+    }
+
+    @Test
+    fun deviceOnAod_hasPulsingNotification_recordPulsingNotificationRow() {
+        // Given: Device is on AOD, there is a pulsing notification
+        // ambientState.pulsingRow is null before stackScrollAlgorithm.updatePulsingStates
+        ambientState.dozeAmount = 1.0f
+        val pulsingNotificationView = createPulsingViewMock()
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(pulsingNotificationView)
+        ambientState.setPulsingRow(null)
+
+        // When: stackScrollAlgorithm.updatePulsingStates is called
+        stackScrollAlgorithm.updatePulsingStates(algorithmState, ambientState)
+
+        // Then: ambientState.pulsingRow should record the pulsingNotificationView
+        assertTrue(ambientState.isPulsingRow(pulsingNotificationView))
+    }
+
+    @Test
+    fun deviceOnLockScreen_hasPulsingNotificationBefore_clearPulsingNotificationRowRecord() {
+        // Given: Device finished AOD to LockScreen, there was a pulsing notification, and
+        // ambientState.pulsingRow was not null before AOD to LockScreen
+        // pulsingNotificationView.showingPulsing() returns false since the device is on LockScreen
+        ambientState.dozeAmount = 0.0f
+        val pulsingNotificationView = createPulsingViewMock()
+        whenever(pulsingNotificationView.showingPulsing()).thenReturn(false)
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(pulsingNotificationView)
+        ambientState.setPulsingRow(pulsingNotificationView)
+
+        // When: stackScrollAlgorithm.updatePulsingStates is called
+        stackScrollAlgorithm.updatePulsingStates(algorithmState, ambientState)
+
+        // Then: ambientState.pulsingRow should be null
+        assertTrue(ambientState.isPulsingRow(null))
+    }
+
+    @Test
+    fun aodToLockScreen_hasPulsingNotification_pulsingNotificationRowShowAtFullHeight() {
+        // Given: Before AOD to LockScreen, there was a pulsing notification
+        val pulsingNotificationView = createPulsingViewMock()
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(pulsingNotificationView)
+        ambientState.setPulsingRow(pulsingNotificationView)
+
+        // When: during AOD to LockScreen, any dozeAmount between (0, 1.0) is equivalent as a middle
+        // stage; here we use 0.5 for testing. The expansionFraction is also 0.5.
+        // stackScrollAlgorithm.resetViewStates is called.
+        ambientState.dozeAmount = 0.5f
+        setExpansionFractionWithoutShelfDuringAodToLockScreen(
+                ambientState,
+                algorithmState,
+                fraction = 0.5f
+        )
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        // Then: pulsingNotificationView should show at full height
+        assertEquals(
+                stackScrollAlgorithm.getMaxAllowedChildHeight(pulsingNotificationView),
+                pulsingNotificationView.viewState.height
+        )
+
+        // After: reset dozeAmount and expansionFraction
+        ambientState.dozeAmount = 0f
+        setExpansionFractionWithoutShelfDuringAodToLockScreen(
+                ambientState,
+                algorithmState,
+                fraction = 1f
+        )
+    }
+
     private fun createHunViewMock(
             isShadeOpen: Boolean,
             fullyVisible: Boolean,
@@ -743,6 +862,80 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 }
                 headsUpIsVisible = fullyVisible
             }
+
+    private fun createPulsingViewMock(
+    ) =
+            mock<ExpandableNotificationRow>().apply {
+                whenever(this.viewState).thenReturn(ExpandableViewState())
+                whenever(this.showingPulsing()).thenReturn(true)
+            }
+
+    private fun setExpansionFractionWithoutShelfDuringAodToLockScreen(
+            ambientState: AmbientState,
+            algorithmState: StackScrollAlgorithm.StackScrollAlgorithmState,
+            fraction: Float
+    ) {
+        // showingShelf: false
+        algorithmState.firstViewInShelf = null
+        // scrimPadding: 0, because device is on lock screen
+        ambientState.setStatusBarState(StatusBarState.KEYGUARD)
+        ambientState.dozeAmount = 0.0f
+        // set stackEndHeight and stackHeight
+        // ExpansionFractionWithoutShelf == stackHeight / stackEndHeight
+        ambientState.stackEndHeight = 100f
+        ambientState.stackHeight = ambientState.stackEndHeight * fraction
+    }
+
+    private fun resetViewStates_hunYTranslationIsInset() {
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat(notificationRow.viewState.yTranslation)
+                .isEqualTo(stackScrollAlgorithm.mHeadsUpInset)
+    }
+
+    private fun resetViewStates_stackMargin_changesHunYTranslation() {
+        val stackTopMargin = 50
+        val headsUpTranslationY = stackScrollAlgorithm.mHeadsUpInset - stackTopMargin
+
+        // we need the shelf to mock the real-life behaviour of StackScrollAlgorithm#updateChild
+        ambientState.shelf = notificationShelf
+
+        // split shade case with top margin introduced by shade's status bar
+        ambientState.stackTopMargin = stackTopMargin
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        // heads up translation should be decreased by the top margin
+        assertThat(notificationRow.viewState.yTranslation).isEqualTo(headsUpTranslationY)
+    }
+
+    private fun resetViewStates_hunsOverlapping_bottomHunClipped(
+            topHun: ExpandableNotificationRow,
+            bottomHun: ExpandableNotificationRow
+    ) {
+        val topHunHeight = mContext.resources.getDimensionPixelSize(
+                R.dimen.notification_content_min_height)
+        val bottomHunHeight = mContext.resources.getDimensionPixelSize(
+                R.dimen.notification_max_heads_up_height)
+        whenever(topHun.intrinsicHeight).thenReturn(topHunHeight)
+        whenever(bottomHun.intrinsicHeight).thenReturn(bottomHunHeight)
+
+        // we need the shelf to mock the real-life behaviour of StackScrollAlgorithm#updateChild
+        ambientState.shelf = notificationShelf
+
+        // add two overlapping HUNs
+        hostView.removeAllViews()
+        hostView.addView(topHun)
+        hostView.addView(bottomHun)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
+
+        // the height shouldn't change
+        assertThat(topHun.viewState.height).isEqualTo(topHunHeight)
+        assertThat(bottomHun.viewState.height).isEqualTo(bottomHunHeight)
+        // the HUN at the bottom should be clipped
+        assertThat(topHun.viewState.clipBottomAmount).isEqualTo(0)
+        assertThat(bottomHun.viewState.clipBottomAmount).isEqualTo(bottomHunHeight - topHunHeight)
+    }
 
     private fun resetViewStates_expansionChanging_notificationAlphaUpdated(
             expansionFraction: Float,

@@ -17,6 +17,7 @@
 package android.media.audiofx;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
 import android.content.AttributionSource.ScopedParcelState;
@@ -110,10 +111,18 @@ public class Visualizer {
     public static final int MEASUREMENT_MODE_NONE = 0;
 
     /**
-     * Defines a measurement mode which computes the peak and RMS value in mB, where 0mB is the
-     * maximum sample value, and -9600mB is the minimum value.
-     * Values for peak and RMS can be retrieved with
-     * {@link #getMeasurementPeakRms(MeasurementPeakRms)}.
+     * Defines a measurement mode which computes the peak and RMS value in mB below the
+     * "full scale", where 0mB is normally the maximum sample value (but see the note
+     * below). Minimum value depends on the resolution of audio samples used by the audio
+     * framework. The value of -9600mB is the minimum value for 16-bit audio systems and
+     * -14400mB or below for "high resolution" systems. Values for peak and RMS can be
+     * retrieved with {@link #getMeasurementPeakRms(MeasurementPeakRms)}.
+     *
+     * <p class=note><strong>Note:</strong> when Visualizer effect is attached to the
+     * global session (with session ID 0), it is possible to observe RMS peaks higher than
+     * 0 dBFS, for example in the case when there are multiple audio sources playing
+     * simultaneously. In this case {@link #getMeasurementPeakRms(MeasurementPeakRms)}
+     * method can return a positive value.
      */
     public static final int MEASUREMENT_MODE_PEAK_RMS = 1 << 0;
 
@@ -183,17 +192,17 @@ public class Visualizer {
      * Handler for events coming from the native code
      */
     @GuardedBy("mListenerLock")
-    private Handler mNativeEventHandler = null;
+    @Nullable private Handler mNativeEventHandler = null;
     /**
      *  PCM and FFT capture listener registered by client
      */
     @GuardedBy("mListenerLock")
-    private OnDataCaptureListener mCaptureListener = null;
+    @Nullable private OnDataCaptureListener mCaptureListener = null;
     /**
      *  Server Died listener registered by client
      */
     @GuardedBy("mListenerLock")
-    private OnServerDiedListener mServerDiedListener = null;
+    @Nullable private OnServerDiedListener mServerDiedListener = null;
 
     // accessed by native methods
     private long mNativeVisualizer;  // guarded by a static lock in native code
@@ -618,7 +627,7 @@ public class Visualizer {
      * @return {@link #SUCCESS} in case of success,
      * {@link #ERROR_NO_INIT} or {@link #ERROR_BAD_VALUE} in case of failure.
      */
-    public int setDataCaptureListener(OnDataCaptureListener listener,
+    public int setDataCaptureListener(@Nullable OnDataCaptureListener listener,
             int rate, boolean waveform, boolean fft) {
         if (listener == null) {
             // make sure capture callback is stopped in native code
@@ -678,7 +687,7 @@ public class Visualizer {
      * <p>Call this method with a null listener to stop receiving server death notifications.
      * @return {@link #SUCCESS} in case of success,
      */
-    public int setServerDiedListener(OnServerDiedListener listener) {
+    public int setServerDiedListener(@Nullable OnServerDiedListener listener) {
         synchronized (mListenerLock) {
             mServerDiedListener = listener;
         }

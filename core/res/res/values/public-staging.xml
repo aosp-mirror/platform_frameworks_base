@@ -102,65 +102,65 @@
 <resources>
 
   <!-- ===============================================================
-    Resources added in version U of the platform
+    Resources added in version NEXT of the platform
 
     NOTE: After this version of the platform is forked, changes cannot be made to the root
     branch's groups for that release. Only merge changes to the forked platform branch.
     =============================================================== -->
   <eat-comment/>
 
-  <staging-public-group type="attr" first-id="0x01ce0000">
+  <staging-public-group type="attr" first-id="0x01bd0000">
   </staging-public-group>
 
-  <staging-public-group type="id" first-id="0x01cd0000">
+  <staging-public-group type="id" first-id="0x01bc0000">
   </staging-public-group>
 
-  <staging-public-group type="style" first-id="0x01cc0000">
+  <staging-public-group type="style" first-id="0x01bb0000">
   </staging-public-group>
 
-  <staging-public-group type="string" first-id="0x01cb0000">
+  <staging-public-group type="string" first-id="0x01ba0000">
   </staging-public-group>
 
-  <staging-public-group type="dimen" first-id="0x01ca0000">
+  <staging-public-group type="dimen" first-id="0x01b90000">
   </staging-public-group>
 
-  <staging-public-group type="color" first-id="0x01c90000">
+  <staging-public-group type="color" first-id="0x01b80000">
   </staging-public-group>
 
-  <staging-public-group type="array" first-id="0x01c80000">
+  <staging-public-group type="array" first-id="0x01b70000">
   </staging-public-group>
 
-  <staging-public-group type="drawable" first-id="0x01c70000">
+  <staging-public-group type="drawable" first-id="0x01b60000">
   </staging-public-group>
 
-  <staging-public-group type="layout" first-id="0x01c60000">
+  <staging-public-group type="layout" first-id="0x01b50000">
   </staging-public-group>
 
-  <staging-public-group type="anim" first-id="0x01c50000">
+  <staging-public-group type="anim" first-id="0x01b40000">
   </staging-public-group>
 
-  <staging-public-group type="animator" first-id="0x01c40000">
+  <staging-public-group type="animator" first-id="0x01b30000">
   </staging-public-group>
 
-  <staging-public-group type="interpolator" first-id="0x01c30000">
+  <staging-public-group type="interpolator" first-id="0x01b20000">
   </staging-public-group>
 
-  <staging-public-group type="mipmap" first-id="0x01c20000">
+  <staging-public-group type="mipmap" first-id="0x01b10000">
   </staging-public-group>
 
-  <staging-public-group type="integer" first-id="0x01c10000">
+  <staging-public-group type="integer" first-id="0x01b00000">
   </staging-public-group>
 
-  <staging-public-group type="transition" first-id="0x01c00000">
+  <staging-public-group type="transition" first-id="0x01af0000">
   </staging-public-group>
 
-  <staging-public-group type="raw" first-id="0x01bf0000">
+  <staging-public-group type="raw" first-id="0x01ae0000">
   </staging-public-group>
 
-  <staging-public-group type="bool" first-id="0x01be0000">
+  <staging-public-group type="bool" first-id="0x01ad0000">
   </staging-public-group>
 
-  <staging-public-group type="fraction" first-id="0x01bd0000">
+  <staging-public-group type="fraction" first-id="0x01ac0000">
   </staging-public-group>
 
 </resources>

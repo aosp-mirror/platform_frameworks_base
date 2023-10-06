@@ -41,9 +41,10 @@ import java.util.List;
  * </p>
  *
  * <p>
- * All instances of CameraMetadata are immutable. The list of keys with {@link #getKeys()}
- * never changes, nor do the values returned by any key with {@code #get} throughout
- * the lifetime of the object.
+ * All instances of CameraMetadata are immutable. Beginning with API level 32, the list of keys
+ * returned by {@link #getKeys()} may change depending on the state of the device, as may the
+ * values returned by any key with {@code #get} throughout the lifetime of the object. For
+ * information on whether a specific value is fixed, see the documentation for its key.
  * </p>
  *
  * @see CameraDevice
@@ -159,7 +160,7 @@ public abstract class CameraMetadata<TKey> {
      * Optionally, if {@code filterTags} is not {@code null}, then filter out any keys
      * whose native {@code tag} is not in {@code filterTags}. The {@code filterTags} array will be
      * sorted as a side effect.
-     * {@code includeSynthetic} Includes public syntenthic fields by default.
+     * {@code includeSynthetic} Includes public synthetic fields by default.
      * </p>
      */
      /*package*/ @SuppressWarnings("unchecked")
@@ -1212,7 +1213,8 @@ public abstract class CameraMetadata<TKey> {
      * <ul>
      * <li>Profile {@link android.hardware.camera2.params.DynamicRangeProfiles#HLG10 }</li>
      * <li>All mandatory stream combinations for this specific capability as per
-     *   documentation {@link android.hardware.camera2.CameraDevice#createCaptureSession }</li>
+     *   documentation
+     *   {@link android.hardware.camera2.CameraDevice#10-bit-output-additional-guaranteed-configurations }</li>
      * <li>In case the device is not able to capture some combination of supported
      *   standard 8-bit and/or 10-bit dynamic range profiles within the same capture request,
      *   then those constraints must be listed in
@@ -1251,12 +1253,31 @@ public abstract class CameraMetadata<TKey> {
      * </ul>
      * <p>{@link android.hardware.camera2.CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES }
      * lists all of the supported stream use cases.</p>
-     * <p>Refer to {@link android.hardware.camera2.CameraDevice#createCaptureSession } for the
-     * mandatory stream combinations involving stream use cases, which can also be queried
-     * via {@link android.hardware.camera2.params.MandatoryStreamCombination }.</p>
+     * <p>Refer to
+     * {@link android.hardware.camera2.CameraDevice#stream-use-case-capability-additional-guaranteed-configurations }
+     * for the mandatory stream combinations involving stream use cases, which can also be
+     * queried via {@link android.hardware.camera2.params.MandatoryStreamCombination }.</p>
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE = 19;
+
+    /**
+     * <p>The device supports querying the possible combinations of color spaces, image
+     * formats, and dynamic range profiles supported by the camera and requesting a
+     * particular color space for a session via
+     * {@link android.hardware.camera2.params.SessionConfiguration#setColorSpace }.</p>
+     * <p>Cameras that enable this capability may or may not also implement dynamic range
+     * profiles. If they don't,
+     * {@link android.hardware.camera2.params.ColorSpaceProfiles#getSupportedDynamicRangeProfiles }
+     * will return only
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#STANDARD } and
+     * {@link android.hardware.camera2.params.ColorSpaceProfiles#getSupportedColorSpacesForDynamicRange }
+     * will assume support of the
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#STANDARD }
+     * profile in all combinations of color spaces and image formats.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_COLOR_SPACE_PROFILES = 20;
 
     //
     // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
@@ -1368,6 +1389,18 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_MAX = 0x1000;
 
     //
+    // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP
+    //
+
+    /**
+     * <p>Default value, when not explicitly specified. The Camera device will choose the color
+     * space to employ.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_UNSPECIFIED = -1;
+
+    //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //
 
@@ -1458,6 +1491,31 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
      */
     public static final int SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL = 0x5;
+
+    /**
+     * <p>Cropped RAW stream when the client chooses to crop the field of view.</p>
+     * <p>Certain types of image sensors can run in binned modes in order to improve signal to
+     * noise ratio while capturing frames. However, at certain zoom levels and / or when
+     * other scene conditions are deemed fit, the camera sub-system may choose to un-bin and
+     * remosaic the sensor's output. This results in a RAW frame which is cropped in field
+     * of view and yet has the same number of pixels as full field of view RAW, thereby
+     * improving image detail.</p>
+     * <p>The resultant field of view of the RAW stream will be greater than or equal to
+     * croppable non-RAW streams. The effective crop region for this RAW stream will be
+     * reflected in the CaptureResult key {@link CaptureResult#SCALER_RAW_CROP_REGION android.scaler.rawCropRegion}.</p>
+     * <p>If this stream use case is set on a non-RAW stream, i.e. not one of :</p>
+     * <ul>
+     * <li>{@link android.graphics.ImageFormat#RAW_SENSOR RAW_SENSOR}</li>
+     * <li>{@link android.graphics.ImageFormat#RAW10 RAW10}</li>
+     * <li>{@link android.graphics.ImageFormat#RAW12 RAW12}</li>
+     * </ul>
+     * <p>session configuration is not guaranteed to succeed.</p>
+     * <p>This stream use case may not be supported on some devices.</p>
+     *
+     * @see CaptureResult#SCALER_RAW_CROP_REGION
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
+     */
+    public static final int SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW = 0x6;
 
     /**
      * <p>Vendor defined use cases. These depend on the vendor implementation.</p>
@@ -1666,17 +1724,14 @@ public abstract class CameraMetadata<TKey> {
      * <p>This camera device doesn't support readout timestamp and onReadoutStarted
      * callback.</p>
      * @see CameraCharacteristics#SENSOR_READOUT_TIMESTAMP
-     * @hide
      */
     public static final int SENSOR_READOUT_TIMESTAMP_NOT_SUPPORTED = 0;
 
     /**
      * <p>This camera device supports the onReadoutStarted callback as well as outputting
-     * readout timestamp for streams with TIMESTAMP_BASE_READOUT_SENSOR timestamp base. The
-     * readout timestamp is generated by the camera hardware and it has the same accuracy
-     * and timing characteristics of the start-of-exposure time.</p>
+     * readout timestamps. The readout timestamp is generated by the camera hardware and it
+     * has the same accuracy and timing characteristics of the start-of-exposure time.</p>
      * @see CameraCharacteristics#SENSOR_READOUT_TIMESTAMP
-     * @hide
      */
     public static final int SENSOR_READOUT_TIMESTAMP_HARDWARE = 1;
 
@@ -1699,7 +1754,8 @@ public abstract class CameraMetadata<TKey> {
      * <p>This camera device does not have enough capabilities to qualify as a <code>FULL</code> device or
      * better.</p>
      * <p>Only the stream configurations listed in the <code>LEGACY</code> and <code>LIMITED</code> tables in the
-     * {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are guaranteed to be supported.</p>
+     * {@link android.hardware.camera2.CameraDevice#limited-level-additional-guaranteed-configurations }
+     * documentation are guaranteed to be supported.</p>
      * <p>All <code>LIMITED</code> devices support the <code>BACKWARDS_COMPATIBLE</code> capability, indicating basic
      * support for color image capture. The only exception is that the device may
      * alternatively support only the <code>DEPTH_OUTPUT</code> capability, if it can only output depth
@@ -1726,7 +1782,8 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>This camera device is capable of supporting advanced imaging applications.</p>
      * <p>The stream configurations listed in the <code>FULL</code>, <code>LEGACY</code> and <code>LIMITED</code> tables in the
-     * {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are guaranteed to be supported.</p>
+     * {@link android.hardware.camera2.CameraDevice#full-level-additional-guaranteed-configurations }
+     * documentation are guaranteed to be supported.</p>
      * <p>A <code>FULL</code> device will support below capabilities:</p>
      * <ul>
      * <li><code>BURST_CAPTURE</code> capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
@@ -1754,7 +1811,9 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>This camera device is running in backward compatibility mode.</p>
-     * <p>Only the stream configurations listed in the <code>LEGACY</code> table in the {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are supported.</p>
+     * <p>Only the stream configurations listed in the <code>LEGACY</code> table in the
+     * {@link android.hardware.camera2.CameraDevice#legacy-level-guaranteed-configurations }
+     * documentation are supported.</p>
      * <p>A <code>LEGACY</code> device does not support per-frame control, manual sensor control, manual
      * post-processing, arbitrary cropping regions, and has relaxed performance constraints.
      * No additional capabilities beyond <code>BACKWARD_COMPATIBLE</code> will ever be listed by a
@@ -1777,7 +1836,9 @@ public abstract class CameraMetadata<TKey> {
      * <p>This camera device is capable of YUV reprocessing and RAW data capture, in addition to
      * FULL-level capabilities.</p>
      * <p>The stream configurations listed in the <code>LEVEL_3</code>, <code>RAW</code>, <code>FULL</code>, <code>LEGACY</code> and
-     * <code>LIMITED</code> tables in the {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are guaranteed to be supported.</p>
+     * <code>LIMITED</code> tables in the
+     * {@link android.hardware.camera2.CameraDevice#level-3-additional-guaranteed-configurations }
+     * documentation are guaranteed to be supported.</p>
      * <p>The following additional capabilities are guaranteed to be supported:</p>
      * <ul>
      * <li><code>YUV_REPROCESSING</code> capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
@@ -2256,7 +2317,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>An external flash has been turned on.</p>
      * <p>It informs the camera device that an external flash has been turned on, and that
-     * metering (and continuous focus if active) should be quickly recaculated to account
+     * metering (and continuous focus if active) should be quickly recalculated to account
      * for the external flash. Otherwise, this mode acts like ON.</p>
      * <p>When the external flash is turned off, AE mode should be changed to one of the
      * other available AE modes.</p>
@@ -3172,6 +3233,72 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_EXTENDED_SCENE_MODE_VENDOR_START = 0x40;
 
     //
+    // Enumeration values for CaptureRequest#CONTROL_SETTINGS_OVERRIDE
+    //
+
+    /**
+     * <p>No keys are applied sooner than the other keys when applying CaptureRequest
+     * settings to the camera device. This is the default value.</p>
+     * @see CaptureRequest#CONTROL_SETTINGS_OVERRIDE
+     */
+    public static final int CONTROL_SETTINGS_OVERRIDE_OFF = 0;
+
+    /**
+     * <p>Zoom related keys are applied sooner than the other keys in the CaptureRequest. The
+     * zoom related keys are:</p>
+     * <ul>
+     * <li>{@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}</li>
+     * <li>{@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}</li>
+     * </ul>
+     * <p>Even though {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}, {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions},
+     * and {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions} are not directly zoom related, applications
+     * typically scale these regions together with {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to have a
+     * consistent mapping within the current field of view. In this aspect, they are
+     * related to {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} and {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_REGIONS
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     * @see CaptureRequest#CONTROL_AWB_REGIONS
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CaptureRequest#CONTROL_SETTINGS_OVERRIDE
+     */
+    public static final int CONTROL_SETTINGS_OVERRIDE_ZOOM = 1;
+
+    /**
+     * <p>Vendor defined settingsOverride. These depend on vendor implementation.</p>
+     * @see CaptureRequest#CONTROL_SETTINGS_OVERRIDE
+     * @hide
+     */
+    public static final int CONTROL_SETTINGS_OVERRIDE_VENDOR_START = 0x4000;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_AUTOFRAMING
+    //
+
+    /**
+     * <p>Disable autoframing.</p>
+     * @see CaptureRequest#CONTROL_AUTOFRAMING
+     */
+    public static final int CONTROL_AUTOFRAMING_OFF = 0;
+
+    /**
+     * <p>Enable autoframing to keep people in the frame's field of view.</p>
+     * @see CaptureRequest#CONTROL_AUTOFRAMING
+     */
+    public static final int CONTROL_AUTOFRAMING_ON = 1;
+
+    /**
+     * <p>Automatically select ON or OFF based on the system level preferences.</p>
+     * @see CaptureRequest#CONTROL_AUTOFRAMING
+     * @hide
+     */
+    public static final int CONTROL_AUTOFRAMING_AUTO = 2;
+
+    //
     // Enumeration values for CaptureRequest#EDGE_MODE
     //
 
@@ -3528,17 +3655,13 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>This is the default sensor pixel mode. This is the only sensor pixel mode
-     * supported unless a camera device advertises
-     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.</p>
+     * <p>This is the default sensor pixel mode.</p>
      * @see CaptureRequest#SENSOR_PIXEL_MODE
      */
     public static final int SENSOR_PIXEL_MODE_DEFAULT = 0;
 
     /**
-     * <p>This sensor pixel mode is offered by devices with capability
-     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.
-     * In this mode, sensors typically do not bin pixels, as a result can offer larger
+     * <p>In this mode, sensors typically do not bin pixels, as a result can offer larger
      * image sizes.</p>
      * @see CaptureRequest#SENSOR_PIXEL_MODE
      */
@@ -3923,6 +4046,29 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureResult#CONTROL_AF_SCENE_CHANGE
      */
     public static final int CONTROL_AF_SCENE_CHANGE_DETECTED = 1;
+
+    //
+    // Enumeration values for CaptureResult#CONTROL_AUTOFRAMING_STATE
+    //
+
+    /**
+     * <p>Auto-framing is inactive.</p>
+     * @see CaptureResult#CONTROL_AUTOFRAMING_STATE
+     */
+    public static final int CONTROL_AUTOFRAMING_STATE_INACTIVE = 0;
+
+    /**
+     * <p>Auto-framing is in process - either zooming in, zooming out or pan is taking place.</p>
+     * @see CaptureResult#CONTROL_AUTOFRAMING_STATE
+     */
+    public static final int CONTROL_AUTOFRAMING_STATE_FRAMING = 1;
+
+    /**
+     * <p>Auto-framing has reached a stable state (frame/fov is not being adjusted). The state
+     * may transition back to FRAMING if the scene changes.</p>
+     * @see CaptureResult#CONTROL_AUTOFRAMING_STATE
+     */
+    public static final int CONTROL_AUTOFRAMING_STATE_CONVERGED = 2;
 
     //
     // Enumeration values for CaptureResult#FLASH_STATE

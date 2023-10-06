@@ -16,7 +16,7 @@
 
 package com.android.systemui.media.dream.dagger;
 
-import static com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule.DREAM_MEDIA_COMPLICATION_WEIGHT;
+import static com.android.systemui.complication.dagger.RegisteredComplicationsModule.DREAM_MEDIA_COMPLICATION_WEIGHT;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -24,8 +24,12 @@ import android.content.Context;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.android.systemui.dreams.complication.ComplicationLayoutParams;
+import com.android.systemui.complication.ComplicationLayoutParams;
 import com.android.systemui.media.dream.MediaViewHolder;
+
+import dagger.Module;
+import dagger.Provides;
+import dagger.Subcomponent;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -33,13 +37,9 @@ import java.lang.annotation.Retention;
 import javax.inject.Named;
 import javax.inject.Scope;
 
-import dagger.Module;
-import dagger.Provides;
-import dagger.Subcomponent;
-
 /**
  * {@link MediaComplicationComponent} is responsible for generating dependencies surrounding the
- * media {@link com.android.systemui.dreams.complication.Complication}, such as view controllers
+ * media {@link com.android.systemui.complication.Complication}, such as view controllers
  * and layout details.
  */
 @Subcomponent(modules = {

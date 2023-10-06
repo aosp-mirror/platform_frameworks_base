@@ -294,6 +294,9 @@
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the system app predictor -->
         <flag name="appPredictor" value="0x200000" />
+        <!-- Additional flag from base permission type: this permission can also be granted if the
+             requesting application is included in the mainline module}. -->
+        <flag name="module" value="0x400000" />
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the system companion device manager service -->
         <flag name="companion" value="0x800000" />
@@ -1024,6 +1027,9 @@
         <flag name="layoutDirection" value="0x2000" />
         <!-- The color mode of the screen has changed (color gamut or dynamic range). -->
         <flag name="colorMode" value="0x4000" />
+        <!-- The grammatical gender has changed, for example the user set the grammatical gender
+             from the UI. -->
+        <flag name="grammaticalGender" value="0x8000" />
         <!-- The font scaling factor has changed, that is the user has
              selected a new global font size. -->
         <flag name="fontScale" value="0x40000000" />
@@ -1586,19 +1592,83 @@
          together. -->
     <attr name="foregroundServiceType">
         <!-- Data (photo, file, account) upload/download, backup/restore, import/export, fetch,
-        transfer over network between device and cloud.  -->
+            transfer over network between device and cloud.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, this type should NOT
+            be used: calling
+            {@link android.app.Service#startForeground(int, android.app.Notification, int)} with
+            this type on devices running {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
+            is still allowed, but calling it with this type on devices running future platform
+            releases may get a {@link android.app.InvalidForegroundServiceTypeException}.
+        -->
         <flag name="dataSync" value="0x01" />
-        <!-- Music, video, news or other media play. -->
+        <!-- Music, video, news or other media play.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_MEDIA_PLAYBACK}.
+        -->
         <flag name="mediaPlayback" value="0x02" />
         <!-- Ongoing operations related to phone calls, video conferencing,
-             or similar interactive communication. -->
+            or similar interactive communication.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_PHONE_CALL} and
+            {@link android.Manifest.permission#MANAGE_OWN_CALLS} or holding the default
+            {@link android.app.role.RoleManager#ROLE_DIALER dialer role}.
+        -->
         <flag name="phoneCall" value="0x04" />
-        <!-- GPS, map, navigation location update. -->
+        <!-- GPS, map, navigation location update.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_LOCATION} and one of the
+            following permissions:
+            {@link android.Manifest.permission#ACCESS_COARSE_LOCATION},
+            {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
+        -->
         <flag name="location" value="0x08" />
-        <!-- Auto, bluetooth, TV or other devices connection, monitoring and interaction. -->
+        <!-- Auto, bluetooth, TV or other devices connection, monitoring and interaction.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_CONNECTED_DEVICE} and one of the
+            following permissions:
+            {@link android.Manifest.permission#BLUETOOTH_CONNECT},
+            {@link android.Manifest.permission#CHANGE_NETWORK_STATE},
+            {@link android.Manifest.permission#CHANGE_WIFI_STATE},
+            {@link android.Manifest.permission#CHANGE_WIFI_MULTICAST_STATE},
+            {@link android.Manifest.permission#NFC},
+            {@link android.Manifest.permission#TRANSMIT_IR},
+            or has been granted the access to one of the attached USB devices/accessories.
+        -->
         <flag name="connectedDevice" value="0x10" />
-        <!-- Managing a media projection session, e.g, for screen recording or taking
-             screenshots.-->
+        <!-- Managing a {@link android.media.projection.MediaProjection MediaProjection} session,
+             e.g., for screen recording or takingscreenshots.
+
+             <p>
+             To capture through {@link android.media.projection.MediaProjection}, an app must start
+             a foreground service with the type corresponding to this constant. This type should
+             only be used for {@link android.media.projection.MediaProjection}. Capturing screen
+             contents via
+             {@link android.media.projection.MediaProjection#createVirtualDisplay(String, int, int,
+             int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback,
+             android.os.Handler) createVirtualDisplay} conveniently allows recording, presenting
+             screen contents into a meeting, taking screenshots, or several other scenarios.
+             </p>
+
+             <p>For apps with <code>targetSdkVersion</code>
+             {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a
+             foreground service with this type will require permission
+             {@link android.Manifest.permission#FOREGROUND_SERVICE_MEDIA_PROJECTION}, and the user
+             must have allowed the screen capture request from this app.
+        -->
         <flag name="mediaProjection" value="0x20" />
         <!-- Use the camera device or record video.
 
@@ -1606,6 +1676,12 @@
             and above, a foreground service will not be able to access the camera if this type is
             not specified in the manifest and in
             {@link android.app.Service#startForeground(int, android.app.Notification, int)}.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_CAMERA} and
+            {@link android.Manifest.permission#CAMERA}.
             -->
         <flag name="camera" value="0x40" />
         <!--Use the microphone device or record audio.
@@ -1614,8 +1690,62 @@
             and above, a foreground service will not be able to access the microphone if this type
             is not specified in the manifest and in
             {@link android.app.Service#startForeground(int, android.app.Notification, int)}.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_MICROPHONE} and one of the
+            following permissions:
+            {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT},
+            {@link android.Manifest.permission#RECORD_AUDIO}.
             -->
         <flag name="microphone" value="0x80" />
+        <!--Health, wellness and fitness.
+            <p>Requires the app to hold the permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_HEALTH} and one of the following
+            permissions
+            {@link android.Manifest.permission#ACTIVITY_RECOGNITION},
+            {@link android.Manifest.permission#BODY_SENSORS},
+            {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS}.
+        -->
+        <flag name="health" value="0x100" />
+        <!-- Messaging use cases which host local server to relay messages across devices.
+            <p>Requires the app to hold the permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_REMOTE_MESSAGING} in order to use
+            this type.
+        -->
+        <flag name="remoteMessaging" value="0x200" />
+        <!-- The system exempted foreground service use cases.
+            <p>Requires the app to hold the permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_SYSTEM_EXEMPTED} in order to use
+            this type. Apps are allowed to use this type only in the use cases listed in
+            {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED}.
+        -->
+        <flag name="systemExempted" value="0x400" />
+        <!-- "Short service" foreground service type. See
+           {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}.
+           for more details.
+        -->
+        <flag name="shortService" value="0x800" />
+        <!-- The file management use case which manages files/directories, often involving file I/O
+            across the file system.
+            <p>Requires the app to hold the permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_FILE_MANAGEMENT} in order to use
+            this type.
+
+            TODO: b/258855262 mark this field as {@code hide} once this bug is fixed.
+            <flag name="fileManagement" value="0x1000" />
+        -->
+        <!-- Use cases that can't be categorized into any other foreground service types, but also
+            can't use @link android.app.job.JobInfo.Builder} APIs.
+            See {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SPECIAL_USE} for the
+            best practice of the use of this type.
+
+            <p>Requires the app to hold the permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_SPECIAL_USE} in order to use
+            this type.
+        -->
+        <flag name="specialUse" value="0x40000000" />
     </attr>
 
     <!-- Enable sampled memory bug detection in this process.
@@ -1666,6 +1796,8 @@
       Multiple tags can be specified separated by '|'.
     -->
     <attr name="attributionTags" format="string" />
+
+    <attr name="allowUpdateOwnership" format="boolean" />
 
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
@@ -2084,6 +2216,11 @@
         <attr name="protectionLevel" />
         <attr name="permissionFlags" />
         <attr name="knownCerts" />
+        <!-- Optional: specify the maximum version of the Android OS for which the
+             application wishes to create the permission.  When running on a version
+             of Android higher than the number given here, the permission will not
+             be created.  -->
+        <attr name="maxSdkVersion" />
     </declare-styleable>
 
     <!-- The <code>permission-group</code> tag declares a logical grouping of
@@ -2170,6 +2307,11 @@
         tag; often this is one of the {@link android.Manifest.permission standard
         system permissions}. -->
         <attr name="name" />
+        <!-- Optional: specify the minimum version of the Android OS for which the
+             application wishes to request the permission.  When running on a version
+             of Android lower than the number given here, the permission will not
+             be requested. -->
+        <attr name="minSdkVersion" format="integer|string" />
         <!-- Optional: specify the maximum version of the Android OS for which the
              application wishes to request the permission.  When running on a version
              of Android higher than the number given here, the permission will not
@@ -2840,6 +2982,18 @@
              Context.createAttributionContext() using the first attribution tag
              contained here. -->
         <attr name="attributionTags" />
+        <!-- If true, and this is an {@link android.R.attr#isolatedProcess} service, the service
+             is allowed to be bound in a shared isolated process with other isolated services.
+             Note that these other isolated services can also belong to other apps from different
+             vendors.
+             <p>
+             Shared isolated processes are created when using the
+             {@link android.content.Context#BIND_SHARED_ISOLATED_PROCESS) during service binding.
+             <p>
+             Note that when this flag is used, the {@link android.R.attr#process} attribute is
+             ignored when the process is bound into a shared isolated process by a client.
+        -->
+        <attr name="allowSharedIsolatedProcess" format="boolean" />
     </declare-styleable>
 
     <!-- @hide The <code>apex-system-service</code> tag declares an apex system service
@@ -3052,6 +3206,30 @@
         <attr name="canDisplayOnRemoteDevices" format="boolean"/>
         <attr name="allowUntrustedActivityEmbedding" />
         <attr name="knownActivityEmbeddingCerts" />
+        <!-- Specifies the required display category of the activity. Upon creation, a display can
+             specify which display categories it supports and one of the categories must be present
+             in the {@code <activity>} element to allow this activity to run. The default value is
+             {@code null}, which indicates the activity does not have a required display category
+             and thus can only run on a display that didn't specify any display categories. Each
+             activity can only specify one required category but a display can accommodate multiple
+             display categories.
+
+             <p> This field should be formatted as a Java-language-style free form string(for
+             example, com.google.automotive_entertainment), which may contain uppercase or lowercase
+             letters ('A' through 'Z'), numbers, and underscores ('_') but may only start with
+             letters.
+         -->
+        <attr name="requiredDisplayCategory" format="string"/>
+        <!-- If false, {@link android.view.KeyEvent#KEYCODE_BACK KEYCODE_BACK} and
+             {@link android.app.Activity#onBackPressed Activity.onBackPressed()}
+             and related event will be forwarded to the Activity and its views.
+
+             <p> If true, those events will be replaced by a call to
+             {@link android.window.OnBackInvokedCallback#onBackInvoked} on the focused window.
+
+             <p> By default, the behavior is configured by the same attribute in application.
+        -->
+        <attr name="enableOnBackInvokedCallback" format="boolean"/>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

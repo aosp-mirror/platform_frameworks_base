@@ -17,7 +17,13 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -28,18 +34,32 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioDeviceAttributes;
+import android.media.AudioDeviceInfo;
+import android.media.AudioManager;
+import android.media.audiopolicy.AudioProductStrategy;
 import android.os.Parcel;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
+
+import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
 public class HearingAidDeviceManagerTest {
+    @Rule
+    public MockitoRule mMockitoRule = MockitoJUnit.rule();
+
     private final static long HISYNCID1 = 10;
     private final static long HISYNCID2 = 11;
     private final static String DEVICE_NAME_1 = "TestName_1";
@@ -50,6 +70,15 @@ public class HearingAidDeviceManagerTest {
     private final static String DEVICE_ADDRESS_2 = "AA:BB:CC:DD:EE:22";
     private final BluetoothClass DEVICE_CLASS =
             createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
+
+    private CachedBluetoothDevice mCachedDevice1;
+    private CachedBluetoothDevice mCachedDevice2;
+    private CachedBluetoothDeviceManager mCachedDeviceManager;
+    private HearingAidDeviceManager mHearingAidDeviceManager;
+    private AudioDeviceAttributes mHearingDeviceAttribute;
+    private final Context mContext = ApplicationProvider.getApplicationContext();
+    @Spy
+    private HearingAidAudioRoutingHelper mHelper = new HearingAidAudioRoutingHelper(mContext);
     @Mock
     private LocalBluetoothProfileManager mLocalProfileManager;
     @Mock
@@ -59,14 +88,12 @@ public class HearingAidDeviceManagerTest {
     @Mock
     private HearingAidProfile mHearingAidProfile;
     @Mock
+    private AudioProductStrategy mAudioStrategy;
+    @Mock
     private BluetoothDevice mDevice1;
     @Mock
     private BluetoothDevice mDevice2;
-    private CachedBluetoothDevice mCachedDevice1;
-    private CachedBluetoothDevice mCachedDevice2;
-    private CachedBluetoothDeviceManager mCachedDeviceManager;
-    private HearingAidDeviceManager mHearingAidDeviceManager;
-    private Context mContext;
+
 
     private BluetoothClass createBtClass(int deviceClass) {
         Parcel p = Parcel.obtain();
@@ -80,8 +107,6 @@ public class HearingAidDeviceManagerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        mContext = RuntimeEnvironment.application;
         when(mDevice1.getAddress()).thenReturn(DEVICE_ADDRESS_1);
         when(mDevice2.getAddress()).thenReturn(DEVICE_ADDRESS_2);
         when(mDevice1.getName()).thenReturn(DEVICE_NAME_1);
@@ -93,10 +118,18 @@ public class HearingAidDeviceManagerTest {
         when(mLocalBluetoothManager.getEventManager()).thenReturn(mBluetoothEventManager);
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mLocalProfileManager);
         when(mLocalProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
+        when(mAudioStrategy.getAudioAttributesForLegacyStreamType(
+                AudioManager.STREAM_MUSIC))
+                .thenReturn((new AudioAttributes.Builder()).build());
+        doReturn(List.of(mAudioStrategy)).when(mHelper).getSupportedStrategies(any(int[].class));
 
+        mHearingDeviceAttribute = new AudioDeviceAttributes(
+                AudioDeviceAttributes.ROLE_OUTPUT,
+                AudioDeviceInfo.TYPE_HEARING_AID,
+                DEVICE_ADDRESS_1);
         mCachedDeviceManager = new CachedBluetoothDeviceManager(mContext, mLocalBluetoothManager);
-        mHearingAidDeviceManager = spy(new HearingAidDeviceManager(mLocalBluetoothManager,
-                mCachedDeviceManager.mCachedDevices));
+        mHearingAidDeviceManager = spy(new HearingAidDeviceManager(mContext, mLocalBluetoothManager,
+                mCachedDeviceManager.mCachedDevices, mHelper));
         mCachedDevice1 = spy(new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice1));
         mCachedDevice2 = spy(new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice2));
     }
@@ -106,7 +139,7 @@ public class HearingAidDeviceManagerTest {
      * deviceSide, deviceMode.
      */
     @Test
-    public void initHearingAidDeviceIfNeeded_validHiSyncId_setHearingAidInfos() {
+    public void initHearingAidDeviceIfNeeded_validHiSyncId_setHearingAidInfo() {
         when(mHearingAidProfile.getHiSyncId(mDevice1)).thenReturn(HISYNCID1);
         when(mHearingAidProfile.getDeviceMode(mDevice1)).thenReturn(
                 HearingAidProfile.DeviceMode.MODE_BINAURAL);
@@ -118,21 +151,22 @@ public class HearingAidDeviceManagerTest {
 
         assertThat(mCachedDevice1.getHiSyncId()).isEqualTo(HISYNCID1);
         assertThat(mCachedDevice1.getDeviceMode()).isEqualTo(
-                HearingAidProfile.DeviceMode.MODE_BINAURAL);
+                HearingAidInfo.DeviceMode.MODE_BINAURAL);
         assertThat(mCachedDevice1.getDeviceSide()).isEqualTo(
-                HearingAidProfile.DeviceSide.SIDE_RIGHT);
+                HearingAidInfo.DeviceSide.SIDE_RIGHT);
     }
 
     /**
      * Test initHearingAidDeviceIfNeeded, an invalid HiSyncId will not be assigned
      */
     @Test
-    public void initHearingAidDeviceIfNeeded_invalidHiSyncId_notToSetHiSyncId() {
+    public void initHearingAidDeviceIfNeeded_invalidHiSyncId_notToSetHearingAidInfo() {
         when(mHearingAidProfile.getHiSyncId(mDevice1)).thenReturn(
                 BluetoothHearingAid.HI_SYNC_ID_INVALID);
+
         mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(mCachedDevice1);
 
-        verify(mCachedDevice1, never()).setHiSyncId(anyLong());
+        verify(mCachedDevice1, never()).setHearingAidInfo(any(HearingAidInfo.class));
     }
 
     /**
@@ -140,9 +174,10 @@ public class HearingAidDeviceManagerTest {
      */
     @Test
     public void setSubDeviceIfNeeded_sameHiSyncId_setSubDevice() {
-        mCachedDevice1.setHiSyncId(HISYNCID1);
-        mCachedDevice2.setHiSyncId(HISYNCID1);
+        mCachedDevice1.setHearingAidInfo(getLeftAshaHearingAidInfo(HISYNCID1));
+        mCachedDevice2.setHearingAidInfo(getRightAshaHearingAidInfo(HISYNCID1));
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+
         mHearingAidDeviceManager.setSubDeviceIfNeeded(mCachedDevice2);
 
         assertThat(mCachedDevice1.getSubDevice()).isEqualTo(mCachedDevice2);
@@ -153,9 +188,10 @@ public class HearingAidDeviceManagerTest {
      */
     @Test
     public void setSubDeviceIfNeeded_differentHiSyncId_notSetSubDevice() {
-        mCachedDevice1.setHiSyncId(HISYNCID1);
-        mCachedDevice2.setHiSyncId(HISYNCID2);
+        mCachedDevice1.setHearingAidInfo(getLeftAshaHearingAidInfo(HISYNCID1));
+        mCachedDevice2.setHearingAidInfo(getRightAshaHearingAidInfo(HISYNCID2));
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+
         mHearingAidDeviceManager.setSubDeviceIfNeeded(mCachedDevice2);
 
         assertThat(mCachedDevice1.getSubDevice()).isNull();
@@ -276,9 +312,9 @@ public class HearingAidDeviceManagerTest {
 
         assertThat(mCachedDevice1.getHiSyncId()).isEqualTo(HISYNCID1);
         assertThat(mCachedDevice1.getDeviceMode()).isEqualTo(
-                HearingAidProfile.DeviceMode.MODE_BINAURAL);
+                HearingAidInfo.DeviceMode.MODE_BINAURAL);
         assertThat(mCachedDevice1.getDeviceSide()).isEqualTo(
-                HearingAidProfile.DeviceSide.SIDE_RIGHT);
+                HearingAidInfo.DeviceSide.SIDE_RIGHT);
         verify(mHearingAidDeviceManager).onHiSyncIdChanged(HISYNCID1);
     }
 
@@ -389,11 +425,9 @@ public class HearingAidDeviceManagerTest {
     @Test
     public void onProfileConnectionStateChanged_disconnected_mainDevice_subDeviceConnected_switch()
     {
-        when(mCachedDevice1.getHiSyncId()).thenReturn(HISYNCID1);
-        mCachedDevice1.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_LEFT);
-        when(mCachedDevice2.getHiSyncId()).thenReturn(HISYNCID1);
+        mCachedDevice1.setHearingAidInfo(getLeftAshaHearingAidInfo(HISYNCID1));
+        mCachedDevice2.setHearingAidInfo(getRightAshaHearingAidInfo(HISYNCID1));
         when(mCachedDevice2.isConnected()).thenReturn(true);
-        mCachedDevice2.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_RIGHT);
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
         mCachedDevice1.setSubDevice(mCachedDevice2);
 
@@ -404,10 +438,8 @@ public class HearingAidDeviceManagerTest {
 
         assertThat(mCachedDevice1.mDevice).isEqualTo(mDevice2);
         assertThat(mCachedDevice2.mDevice).isEqualTo(mDevice1);
-        assertThat(mCachedDevice1.getDeviceSide()).isEqualTo(
-                HearingAidProfile.DeviceSide.SIDE_RIGHT);
-        assertThat(mCachedDevice2.getDeviceSide()).isEqualTo(
-                HearingAidProfile.DeviceSide.SIDE_LEFT);
+        assertThat(mCachedDevice1.getDeviceSide()).isEqualTo(HearingAidInfo.DeviceSide.SIDE_RIGHT);
+        assertThat(mCachedDevice2.getDeviceSide()).isEqualTo(HearingAidInfo.DeviceSide.SIDE_LEFT);
         verify(mCachedDevice1).refresh();
     }
 
@@ -446,6 +478,31 @@ public class HearingAidDeviceManagerTest {
     }
 
     @Test
+    public void onActiveDeviceChanged_connected_callSetStrategies() {
+        when(mHelper.getMatchedHearingDeviceAttributes(mCachedDevice1)).thenReturn(
+                mHearingDeviceAttribute);
+        when(mCachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(true);
+
+        mHearingAidDeviceManager.onActiveDeviceChanged(mCachedDevice1);
+
+        verify(mHelper, atLeastOnce()).setPreferredDeviceRoutingStrategies(
+                eq(List.of(mAudioStrategy)), any(AudioDeviceAttributes.class), anyInt());
+    }
+
+    @Test
+    public void onActiveDeviceChanged_disconnected_callSetStrategiesWithAutoValue() {
+        when(mHelper.getMatchedHearingDeviceAttributes(mCachedDevice1)).thenReturn(
+                mHearingDeviceAttribute);
+        when(mCachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(false);
+
+        mHearingAidDeviceManager.onActiveDeviceChanged(mCachedDevice1);
+
+        verify(mHelper, atLeastOnce()).setPreferredDeviceRoutingStrategies(
+                eq(List.of(mAudioStrategy)), /* hearingDevice= */ isNull(),
+                eq(HearingAidAudioRoutingConstants.RoutingValue.AUTO));
+    }
+
+    @Test
     public void findMainDevice() {
         when(mCachedDevice1.getHiSyncId()).thenReturn(HISYNCID1);
         when(mCachedDevice2.getHiSyncId()).thenReturn(HISYNCID1);
@@ -454,5 +511,19 @@ public class HearingAidDeviceManagerTest {
 
         assertThat(mHearingAidDeviceManager.findMainDevice(mCachedDevice2)).
                 isEqualTo(mCachedDevice1);
+    }
+
+    private HearingAidInfo getLeftAshaHearingAidInfo(long hiSyncId) {
+        return new HearingAidInfo.Builder()
+                .setAshaDeviceSide(HearingAidInfo.DeviceSide.SIDE_LEFT)
+                .setHiSyncId(hiSyncId)
+                .build();
+    }
+
+    private HearingAidInfo getRightAshaHearingAidInfo(long hiSyncId) {
+        return new HearingAidInfo.Builder()
+                .setAshaDeviceSide(HearingAidInfo.DeviceSide.SIDE_RIGHT)
+                .setHiSyncId(hiSyncId)
+                .build();
     }
 }

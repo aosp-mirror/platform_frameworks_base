@@ -127,7 +127,7 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
         val userManager = mock<UserManager>()
         val atmService = mock<IActivityTaskManager>()
         val dispatcher = Dispatchers.Unconfined
-        val displayTracker = FakeDisplayTracker(mContext)
+        val displayTracker = FakeDisplayTracker(context)
 
         return object : ScreenshotPolicyImpl(context, userManager, atmService, dispatcher,
                 displayTracker) {

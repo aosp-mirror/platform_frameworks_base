@@ -41,6 +41,7 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -51,7 +52,6 @@ import android.window.WindowContext;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -173,6 +173,7 @@ public class ResourcesManager {
 
     /**
      * The ApkAssets that are being referenced in the wild that we can reuse.
+     * Used as a lock for itself as well.
      */
     private final ArrayMap<ApkKey, WeakReference<ApkAssets>> mCachedApkAssets = new ArrayMap<>();
 
@@ -286,38 +287,43 @@ public class ResourcesManager {
      * try as hard as possible to release any open FDs.
      */
     public void invalidatePath(String path) {
+        final List<ResourcesImpl> implsToFlush = new ArrayList<>();
         synchronized (mLock) {
-            int count = 0;
-
             for (int i = mResourceImpls.size() - 1; i >= 0; i--) {
                 final ResourcesKey key = mResourceImpls.keyAt(i);
                 if (key.isPathReferenced(path)) {
-                    ResourcesImpl impl = mResourceImpls.removeAt(i).get();
-                    if (impl != null) {
-                        impl.flushLayoutCache();
+                    ResourcesImpl resImpl = mResourceImpls.removeAt(i).get();
+                    if (resImpl != null) {
+                        implsToFlush.add(resImpl);
                     }
-                    count++;
                 }
             }
-
-            Log.i(TAG, "Invalidated " + count + " asset managers that referenced " + path);
-
+        }
+        for (int i = 0; i < implsToFlush.size(); i++) {
+            implsToFlush.get(i).flushLayoutCache();
+        }
+        final List<ApkAssets> assetsToClose = new ArrayList<>();
+        synchronized (mCachedApkAssets) {
             for (int i = mCachedApkAssets.size() - 1; i >= 0; i--) {
                 final ApkKey key = mCachedApkAssets.keyAt(i);
                 if (key.path.equals(path)) {
-                    WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.removeAt(i);
-                    if (apkAssetsRef != null && apkAssetsRef.get() != null) {
-                        apkAssetsRef.get().close();
+                    final WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.removeAt(i);
+                    final ApkAssets apkAssets = apkAssetsRef != null ? apkAssetsRef.get() : null;
+                    if (apkAssets != null) {
+                        assetsToClose.add(apkAssets);
                     }
                 }
             }
         }
+        for (int i = 0; i < assetsToClose.size(); i++) {
+            assetsToClose.get(i).close();
+        }
+        Log.i(TAG,
+                "Invalidated " + implsToFlush.size() + " asset managers that referenced " + path);
     }
 
     public Configuration getConfiguration() {
-        synchronized (mLock) {
-            return mResConfiguration;
-        }
+        return mResConfiguration;
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -402,14 +408,12 @@ public class ResourcesManager {
      * @param resources The {@link Resources} backing the display adjustments.
      */
     public Display getAdjustedDisplay(final int displayId, Resources resources) {
-        synchronized (mLock) {
-            final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
-            if (dm == null) {
-                // may be null early in system startup
-                return null;
-            }
-            return dm.getCompatibleDisplay(displayId, resources);
+        final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
+        if (dm == null) {
+            // may be null early in system startup
+            return null;
         }
+        return dm.getCompatibleDisplay(displayId, resources);
     }
 
     /**
@@ -446,16 +450,14 @@ public class ResourcesManager {
         ApkAssets apkAssets;
 
         // Optimistically check if this ApkAssets exists somewhere else.
-        synchronized (mLock) {
-            final WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.get(key);
-            if (apkAssetsRef != null) {
-                apkAssets = apkAssetsRef.get();
-                if (apkAssets != null && apkAssets.isUpToDate()) {
-                    return apkAssets;
-                } else {
-                    // Clean up the reference.
-                    mCachedApkAssets.remove(key);
-                }
+        final WeakReference<ApkAssets> apkAssetsRef;
+        synchronized (mCachedApkAssets) {
+            apkAssetsRef = mCachedApkAssets.get(key);
+        }
+        if (apkAssetsRef != null) {
+            apkAssets = apkAssetsRef.get();
+            if (apkAssets != null && apkAssets.isUpToDate()) {
+                return apkAssets;
             }
         }
 
@@ -472,7 +474,7 @@ public class ResourcesManager {
             apkAssets = ApkAssets.loadFromPath(key.path, flags);
         }
 
-        synchronized (mLock) {
+        synchronized (mCachedApkAssets) {
             mCachedApkAssets.put(key, new WeakReference<>(apkAssets));
         }
 
@@ -584,28 +586,33 @@ public class ResourcesManager {
      * @hide
      */
     public void dump(String prefix, PrintWriter printWriter) {
+        final int references;
+        final int resImpls;
         synchronized (mLock) {
-            IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
-            for (int i = 0; i < prefix.length() / 2; i++) {
-                pw.increaseIndent();
-            }
-
-            pw.println("ResourcesManager:");
-            pw.increaseIndent();
-            pw.print("total apks: ");
-            pw.println(countLiveReferences(mCachedApkAssets.values()));
-
-            pw.print("resources: ");
-
-            int references = countLiveReferences(mResourceReferences);
+            int refs = countLiveReferences(mResourceReferences);
             for (ActivityResources activityResources : mActivityResourceReferences.values()) {
-                references += activityResources.countLiveReferences();
+                refs += activityResources.countLiveReferences();
             }
-            pw.println(references);
-
-            pw.print("resource impls: ");
-            pw.println(countLiveReferences(mResourceImpls.values()));
+            references = refs;
+            resImpls = countLiveReferences(mResourceImpls.values());
         }
+        final int liveAssets;
+        synchronized (mCachedApkAssets) {
+            liveAssets = countLiveReferences(mCachedApkAssets.values());
+        }
+
+        final var pw = new IndentingPrintWriter(printWriter, "  ");
+        for (int i = 0; i < prefix.length() / 2; i++) {
+            pw.increaseIndent();
+        }
+        pw.println("ResourcesManager:");
+        pw.increaseIndent();
+        pw.print("total apks: ");
+        pw.println(liveAssets);
+        pw.print("resources: ");
+        pw.println(references);
+        pw.print("resource impls: ");
+        pw.println(resImpls);
     }
 
     private Configuration generateConfig(@NonNull ResourcesKey key) {

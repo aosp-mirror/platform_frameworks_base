@@ -38,8 +38,7 @@ import java.util.function.Supplier;
  * Abstract {@link HalClientMonitor} subclass that operations eligible/interested in acquisition
  * messages should extend.
  */
-public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implements Interruptable,
-        ErrorConsumer {
+public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implements ErrorConsumer {
 
     private static final String TAG = "Biometrics/AcquisitionClient";
 
@@ -207,14 +206,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         }
     }
 
-    protected final void vibrateError() {
-        Vibrator vibrator = getContext().getSystemService(Vibrator.class);
-        if (vibrator != null && mShouldVibrate) {
-            vibrator.vibrate(Process.myUid(),
-                    getContext().getOpPackageName(),
-                    ERROR_VIBRATION_EFFECT,
-                    getClass().getSimpleName() + "::error",
-                    HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
-        }
+    @Override
+    public boolean isInterruptable() {
+        return true;
     }
 }

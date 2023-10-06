@@ -18,6 +18,7 @@ package android.app;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -29,8 +30,9 @@ import android.os.LocaleList;
 import android.os.RemoteException;
 
 /**
- * This class gives access to system locale services. These services allow applications to control
- * granular locale settings (such as per-app locales).
+ * This class gives access to system locale services. These services allow applications to
+ * control granular locale settings (such as per-app locales) or override their list of supported
+ * locales while running.
  *
  * <p> Third party applications should treat this as a write-side surface, and continue reading
  * locales via their in-process {@link LocaleList}s.
@@ -71,7 +73,7 @@ public class LocaleManager {
      */
     @UserHandleAware
     public void setApplicationLocales(@NonNull LocaleList locales) {
-        setApplicationLocales(mContext.getPackageName(), locales);
+        setApplicationLocales(mContext.getPackageName(), locales, false);
     }
 
     /**
@@ -100,9 +102,14 @@ public class LocaleManager {
     @RequiresPermission(Manifest.permission.CHANGE_CONFIGURATION)
     @UserHandleAware
     public void setApplicationLocales(@NonNull String appPackageName, @NonNull LocaleList locales) {
+        setApplicationLocales(appPackageName, locales, true);
+    }
+
+    private void setApplicationLocales(@NonNull String appPackageName, @NonNull LocaleList locales,
+            boolean fromDelegate) {
         try {
-            mService.setApplicationLocales(appPackageName, mContext.getUser().getIdentifier(),
-                    locales);
+            mService.setApplicationLocales(appPackageName, mContext.getUserId(), locales,
+                    fromDelegate);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -127,6 +134,7 @@ public class LocaleManager {
      * <p>This API can be used by an app's installer
      * (per {@link android.content.pm.InstallSourceInfo#getInstallingPackageName}) to retrieve
      * the app's locales.
+     * <p>This API can be used by the current input method to retrieve locales of another packages.
      * All other cases require {@code android.Manifest.permission#READ_APP_SPECIFIC_LOCALES}.
      * Apps should generally retrieve their own locales via their in-process LocaleLists,
      * or by calling {@link #getApplicationLocales()}.
@@ -138,8 +146,7 @@ public class LocaleManager {
     @NonNull
     public LocaleList getApplicationLocales(@NonNull String appPackageName) {
         try {
-            return mService.getApplicationLocales(appPackageName, mContext.getUser()
-                    .getIdentifier());
+            return mService.getApplicationLocales(appPackageName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -176,6 +183,53 @@ public class LocaleManager {
             Configuration conf = new Configuration();
             conf.setLocales(locales);
             ActivityManager.getService().updatePersistentConfiguration(conf);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the override LocaleConfig for the calling app.
+     *
+     * <p><b>Note:</b> Only the app itself with the same user can override its own LocaleConfig.
+     *
+     * <p><b>Note:</b> This function takes in a {@link LocaleConfig} which is intended to
+     * override the original config in the application&#39;s resources. This LocaleConfig will
+     * become the override config, and stored in a system file for future access.
+     *
+     * <p><b>Note:</b> Using this function, applications can update their list of supported
+     * locales while running, without an update of the application&#39;s software. For more
+     * information, see the <a
+     * href="https://developer.android.com/about/versions/14/features#app-languages">section on
+     * dynamic updates for an app's localeConfig</a>.
+     *
+     * <p>Applications can remove the override LocaleConfig with a {@code null} object.
+     *
+     * @param localeConfig the desired {@link LocaleConfig} for the calling app.
+     */
+    @UserHandleAware
+    public void setOverrideLocaleConfig(@Nullable LocaleConfig localeConfig) {
+        try {
+            // The permission android.Manifest.permission#SET_APP_SPECIFIC_LOCALECONFIG is
+            // required to set an override LocaleConfig of another packages
+            mService.setOverrideLocaleConfig(mContext.getPackageName(), mContext.getUserId(),
+                    localeConfig);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the override LocaleConfig for the calling app.
+     *
+     * @return the override LocaleConfig, or {@code null} if the LocaleConfig isn't overridden.
+     */
+    @Nullable
+    @UserHandleAware
+    public LocaleConfig getOverrideLocaleConfig() {
+        try {
+            return mService.getOverrideLocaleConfig(mContext.getPackageName(),
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

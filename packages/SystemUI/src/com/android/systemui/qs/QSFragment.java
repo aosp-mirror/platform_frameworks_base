@@ -18,9 +18,9 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
-import static com.android.systemui.statusbar.DisableFlagsLogger.DisableState;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
+import static com.android.systemui.statusbar.disableflags.DisableFlagsLogger.DisableState;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -44,10 +44,10 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
+import com.android.app.animation.Interpolators;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dump.DumpManager;
@@ -120,6 +120,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private final QSLogger mLogger;
     private final FooterActionsController mFooterActionsController;
     private final FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
+    private final FooterActionsViewBinder mFooterActionsViewBinder;
     private final ListeningAndVisibilityLifecycleOwner mListeningAndVisibilityLifecycleOwner;
     private boolean mShowCollapsedOnKeyguard;
     private boolean mLastKeyguardAndExpanded;
@@ -177,6 +178,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             DumpManager dumpManager, QSLogger qsLogger,
             FooterActionsController footerActionsController,
             FooterActionsViewModel.Factory footerActionsViewModelFactory,
+            FooterActionsViewBinder footerActionsViewBinder,
             LargeScreenShadeInterpolator largeScreenShadeInterpolator,
             FeatureFlags featureFlags) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
@@ -193,6 +195,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mDumpManager = dumpManager;
         mFooterActionsController = footerActionsController;
         mFooterActionsViewModelFactory = footerActionsViewModelFactory;
+        mFooterActionsViewBinder = footerActionsViewBinder;
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
     }
 
@@ -285,7 +288,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
         if (!ComposeFacade.INSTANCE.isComposeAvailable()) {
             Log.d(TAG, "Binding the View implementation of the QS footer actions");
-            FooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
+            mFooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
                     mListeningAndVisibilityLifecycleOwner);
             return;
         }
@@ -393,9 +396,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
-    public void setFancyClipping(int top, int bottom, int cornerRadius, boolean visible) {
+    public void setFancyClipping(int leftInset, int top, int rightInset, int bottom,
+            int cornerRadius, boolean visible, boolean fullWidth) {
         if (getView() instanceof QSContainerImpl) {
-            ((QSContainerImpl) getView()).setFancyClipping(top, bottom, cornerRadius, visible);
+            ((QSContainerImpl) getView()).setFancyClipping(leftInset, top, rightInset, bottom,
+                    cornerRadius, visible, fullWidth);
         }
     }
 

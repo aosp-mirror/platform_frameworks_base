@@ -23,8 +23,8 @@ import android.view.MotionEvent.PointerProperties
 import android.view.Surface
 import android.view.Surface.Rotation
 import androidx.test.filters.SmallTest
+import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.UdfpsOverlayParams
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -607,12 +607,16 @@ private fun genPositiveTestCases(
                     pointerCoords = pointerCoords
                 )
 
+            val expectedTouchDataPointer =
+                currentPointers.find { it.id == expectedPointerOnSensorId }
+                    ?: currentPointers.find { it.id == previousPointerOnSensorId }
+                        ?: currentPointers[0]
             val expectedTouchData =
-                if (expectedPointerOnSensorId != INVALID_POINTER_ID) {
+                if (motionEventAction != MotionEvent.ACTION_CANCEL) {
                     NORMALIZED_TOUCH_DATA.copy(
-                        pointerId = expectedPointerOnSensorId,
-                        x = ROTATION_0_INPUTS.getNativeX(isWithinSensor = true),
-                        y = ROTATION_0_INPUTS.getNativeY(isWithinSensor = true)
+                        pointerId = expectedTouchDataPointer.id,
+                        x = ROTATION_0_INPUTS.getNativeX(expectedTouchDataPointer.onSensor),
+                        y = ROTATION_0_INPUTS.getNativeY(expectedTouchDataPointer.onSensor)
                     )
                 } else {
                     NormalizedTouchData()

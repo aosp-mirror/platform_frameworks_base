@@ -20,10 +20,10 @@ import com.android.systemui.dreams.touch.scrim.BouncerScrimController;
 import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.dreams.touch.scrim.ScrimController;
 
-import javax.inject.Named;
-
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Named;
 
 /**
  * Module for scrim related dependencies.

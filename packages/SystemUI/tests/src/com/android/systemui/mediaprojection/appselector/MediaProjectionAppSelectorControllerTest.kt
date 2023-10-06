@@ -5,14 +5,15 @@ import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskListProvider
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
@@ -27,22 +28,27 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
     private val callerPackageName = "com.test.caller"
     private val callerComponentName = ComponentName(callerPackageName, "Caller")
 
-    private val hostUserHandle = UserHandle.of(123)
-    private val otherUserHandle = UserHandle.of(456)
+    private val personalUserHandle = UserHandle.of(123)
+    private val workUserHandle = UserHandle.of(456)
 
     private val view: MediaProjectionAppSelectorView = mock()
-    private val featureFlags: FeatureFlags = mock()
+    private val policyResolver: ScreenCaptureDevicePolicyResolver = mock()
 
     private val controller =
         MediaProjectionAppSelectorController(
             taskListProvider,
             view,
-            featureFlags,
-            hostUserHandle,
+            policyResolver,
+            personalUserHandle,
             scope,
             appSelectorComponentName,
             callerPackageName
         )
+
+    @Before
+    fun setup() {
+        givenCaptureAllowed(isAllow = true)
+    }
 
     @Test
     fun initNoRecentTasks_bindsEmptyList() {
@@ -132,16 +138,14 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun initRecentTasksWithAppSelectorTasks_enterprisePoliciesDisabled_bindsOnlyTasksWithHostProfile() {
-        givenEnterprisePoliciesFeatureFlag(enabled = false)
-
+    fun initRecentTasksWithAppSelectorTasks_withEnterprisePolicies_bindsAllTasks() {
         val tasks =
             listOf(
-                createRecentTask(taskId = 1, userId = hostUserHandle.identifier),
-                createRecentTask(taskId = 2, userId = otherUserHandle.identifier),
-                createRecentTask(taskId = 3, userId = hostUserHandle.identifier),
-                createRecentTask(taskId = 4, userId = otherUserHandle.identifier),
-                createRecentTask(taskId = 5, userId = hostUserHandle.identifier),
+                createRecentTask(taskId = 1, userId = personalUserHandle.identifier),
+                createRecentTask(taskId = 2, userId = workUserHandle.identifier),
+                createRecentTask(taskId = 3, userId = personalUserHandle.identifier),
+                createRecentTask(taskId = 4, userId = workUserHandle.identifier),
+                createRecentTask(taskId = 5, userId = personalUserHandle.identifier),
             )
         taskListProvider.tasks = tasks
 
@@ -150,51 +154,41 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
         verify(view)
             .bind(
                 listOf(
-                    createRecentTask(taskId = 1, userId = hostUserHandle.identifier),
-                    createRecentTask(taskId = 3, userId = hostUserHandle.identifier),
-                    createRecentTask(taskId = 5, userId = hostUserHandle.identifier),
+                    createRecentTask(taskId = 1, userId = personalUserHandle.identifier),
+                    createRecentTask(taskId = 2, userId = workUserHandle.identifier),
+                    createRecentTask(taskId = 3, userId = personalUserHandle.identifier),
+                    createRecentTask(taskId = 4, userId = workUserHandle.identifier),
+                    createRecentTask(taskId = 5, userId = personalUserHandle.identifier),
                 )
             )
     }
 
     @Test
-    fun initRecentTasksWithAppSelectorTasks_enterprisePoliciesEnabled_bindsAllTasks() {
-        givenEnterprisePoliciesFeatureFlag(enabled = true)
-
+    fun initRecentTasksWithAppSelectorTasks_withEnterprisePolicies_blocksAllTasks() {
         val tasks =
             listOf(
-                createRecentTask(taskId = 1, userId = hostUserHandle.identifier),
-                createRecentTask(taskId = 2, userId = otherUserHandle.identifier),
-                createRecentTask(taskId = 3, userId = hostUserHandle.identifier),
-                createRecentTask(taskId = 4, userId = otherUserHandle.identifier),
-                createRecentTask(taskId = 5, userId = hostUserHandle.identifier),
+                createRecentTask(taskId = 1, userId = personalUserHandle.identifier),
+                createRecentTask(taskId = 2, userId = workUserHandle.identifier),
+                createRecentTask(taskId = 3, userId = personalUserHandle.identifier),
+                createRecentTask(taskId = 4, userId = workUserHandle.identifier),
+                createRecentTask(taskId = 5, userId = personalUserHandle.identifier),
             )
         taskListProvider.tasks = tasks
 
+        givenCaptureAllowed(isAllow = false)
         controller.init()
 
-        // TODO(b/233348916) should filter depending on the policies
-        verify(view)
-            .bind(
-                listOf(
-                    createRecentTask(taskId = 1, userId = hostUserHandle.identifier),
-                    createRecentTask(taskId = 2, userId = otherUserHandle.identifier),
-                    createRecentTask(taskId = 3, userId = hostUserHandle.identifier),
-                    createRecentTask(taskId = 4, userId = otherUserHandle.identifier),
-                    createRecentTask(taskId = 5, userId = hostUserHandle.identifier),
-                )
-            )
+        verify(view).bind(emptyList())
     }
 
-    private fun givenEnterprisePoliciesFeatureFlag(enabled: Boolean) {
-        whenever(featureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES))
-            .thenReturn(enabled)
+    private fun givenCaptureAllowed(isAllow: Boolean) {
+        whenever(policyResolver.isScreenCaptureAllowed(any(), any())).thenReturn(isAllow)
     }
 
     private fun createRecentTask(
         taskId: Int,
         topActivityComponent: ComponentName? = null,
-        userId: Int = hostUserHandle.identifier
+        userId: Int = personalUserHandle.identifier
     ): RecentTask {
         return RecentTask(
             taskId = taskId,

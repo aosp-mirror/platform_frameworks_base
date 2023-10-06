@@ -65,8 +65,8 @@
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsControllerOverlay.kt
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsDrawable.kt
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsFpDrawable.kt
--packages/SystemUI/src/com/android/systemui/biometrics/UdfpsFpmOtherView.kt
--packages/SystemUI/src/com/android/systemui/biometrics/UdfpsFpmOtherViewController.kt
+-packages/SystemUI/src/com/android/systemui/biometrics/UdfpsFpmEmptyView.kt
+-packages/SystemUI/src/com/android/systemui/biometrics/UdfpsFpmEmptyViewController.kt
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsHapticsSimulator.kt
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsShell.kt
 -packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
@@ -190,6 +190,7 @@
 -packages/SystemUI/src/com/android/systemui/navigationbar/gestural/BackPanel.kt
 -packages/SystemUI/src/com/android/systemui/navigationbar/gestural/BackPanelController.kt
 -packages/SystemUI/src/com/android/systemui/navigationbar/gestural/EdgePanelParams.kt
+-packages/SystemUI/src/com/android/systemui/notetask/NoteTaskEventLogger.kt
 -packages/SystemUI/src/com/android/systemui/power/BatteryStateSnapshot.kt
 -packages/SystemUI/src/com/android/systemui/privacy/AppOpsPrivacyItemMonitor.kt
 -packages/SystemUI/src/com/android/systemui/privacy/MediaProjectionPrivacyItemMonitor.kt
@@ -261,7 +262,6 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/AbstractLockscreenShadeTransitionController.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/ActionClickLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/BlurUtils.kt
--packages/SystemUI/src/com/android/systemui/statusbar/DisableFlagsLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/LockScreenShadeOverScroller.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/LockscreenShadeKeyguardTransitionController.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/LockscreenShadeScrimTransitionController.kt
@@ -284,6 +284,7 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/connectivity/WifiStatusTrackerFactory.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/core/StatusBarInitializer.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/dagger/StartCentralSurfacesModule.kt
+-packages/SystemUI/src/com/android/systemui/statusbar/disableflags/DisableFlagsLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/events/PrivacyDotViewController.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/events/StatusBarEventsModule.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/events/StatusEvent.kt
@@ -371,9 +372,6 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/collection/render/ShadeViewDifferLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/collection/render/ShadeViewManager.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/dagger/NotificationSectionHeadersModule.kt
--packages/SystemUI/src/com/android/systemui/statusbar/notification/fsi/FsiChromeViewBinder.kt
--packages/SystemUI/src/com/android/systemui/statusbar/notification/fsi/FsiDebug.kt
--packages/SystemUI/src/com/android/systemui/statusbar/notification/fsi/FsiTaskViewConfig.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/icon/IconBuilder.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/icon/IconManager.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/init/NotificationsControllerImpl.kt
@@ -455,8 +453,8 @@
 -packages/SystemUI/src/com/android/systemui/unfold/FoldAodAnimationController.kt
 -packages/SystemUI/src/com/android/systemui/unfold/FoldStateLogger.kt
 -packages/SystemUI/src/com/android/systemui/unfold/SysUIUnfoldModule.kt
+-packages/SystemUI/src/com/android/systemui/unfold/UnfoldLightRevealOverlayAnimation.kt
 -packages/SystemUI/src/com/android/systemui/unfold/UnfoldProgressProvider.kt
--packages/SystemUI/src/com/android/systemui/user/UserCreator.kt
 -packages/SystemUI/src/com/android/systemui/user/UserSwitcherPopupMenu.kt
 -packages/SystemUI/src/com/android/systemui/user/UserSwitcherRootView.kt
 -packages/SystemUI/src/com/android/systemui/util/AsyncActivityLauncher.kt
@@ -522,7 +520,6 @@
 -packages/SystemUI/tests/src/com/android/systemui/biometrics/AuthBiometricFingerprintViewTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/biometrics/AuthContainerViewTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/biometrics/AuthRippleControllerTest.kt
--packages/SystemUI/tests/src/com/android/systemui/biometrics/BiometricTestExtensions.kt
 -packages/SystemUI/tests/src/com/android/systemui/biometrics/UdfpsControllerOverlayTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/biometrics/UdfpsViewTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/broadcast/ActionReceiverTest.kt
@@ -551,7 +548,6 @@
 -packages/SystemUI/tests/src/com/android/systemui/controls/management/ControlsRequestReceiverTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/controls/management/FavoritesModelTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/controls/ui/ControlViewHolderTest.kt
--packages/SystemUI/tests/src/com/android/systemui/controls/ui/ControlsUiControllerImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/controls/ui/DetailDialogTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/decor/CutoutDecorProviderFactoryTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/decor/OverlayWindowTest.kt
@@ -569,6 +565,7 @@
 -packages/SystemUI/tests/src/com/android/systemui/keyguard/KeyguardUnlockAnimationControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/keyguard/data/quickaffordance/MuteQuickAffordanceConfigTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/keyguard/data/quickaffordance/MuteQuickAffordanceCoreStartableTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/keyguard/data/repository/KeyguardBouncerRepositoryTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardTransitionInteractorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/lifecycle/InstantTaskExecutorRule.kt
 -packages/SystemUI/tests/src/com/android/systemui/media/muteawait/MediaMuteAwaitConnectionManagerTest.kt
@@ -614,9 +611,9 @@
 -packages/SystemUI/tests/src/com/android/systemui/qs/tiles/DndTileTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/qs/tiles/LocationTileTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/qs/tiles/MicrophoneToggleTileTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/qs/tiles/NightDisplayTileTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/qs/user/UserSwitchDialogControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/screenrecord/ScreenRecordDialogTest.kt
--packages/SystemUI/tests/src/com/android/systemui/screenshot/ImageCaptureImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/screenshot/ScreenshotPolicyImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/settings/UserTrackerImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/settings/brightness/BrightnessSliderControllerTest.kt
@@ -635,7 +632,6 @@
 -packages/SystemUI/tests/src/com/android/systemui/smartspace/LockscreenAndDreamTargetFilterTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/smartspace/LockscreenPreconditionTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/BlurUtilsTest.kt
--packages/SystemUI/tests/src/com/android/systemui/statusbar/DisableFlagsLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/DragDownHelperTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/LSShadeTransitionLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/LightRevealScrimTest.kt
@@ -649,12 +645,12 @@
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/VibratorHelperTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/commandline/CommandRegistryTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/connectivity/AccessPointControllerImplTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/statusbar/disableflags/DisableFlagsLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/disableflags/DisableStateTrackerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/gesture/GenericGestureDetectorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/lockscreen/LockscreenSmartspaceControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/notification/NotificationLaunchAnimatorControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/notification/NotificationSectionsFeatureManagerTest.kt
--packages/SystemUI/tests/src/com/android/systemui/statusbar/notification/NotificationWakeUpCoordinatorLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/notification/collection/NotifLiveDataImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/notification/collection/NotifLiveDataStoreImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/notification/collection/NotifPipelineChoreographerTest.kt
@@ -724,7 +720,6 @@
 -packages/SystemUI/tests/src/com/android/systemui/unfold/util/TestFoldStateProvider.kt
 -packages/SystemUI/tests/src/com/android/systemui/usb/UsbPermissionActivityTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/user/UserCreatorTest.kt
--packages/SystemUI/tests/src/com/android/systemui/user/data/repository/UserRepositoryImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/util/FakeSharedPreferencesTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/util/FloatingContentCoordinatorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/util/ListenerSetTest.kt
@@ -746,7 +741,6 @@
 -packages/SystemUI/unfold/src/com/android/systemui/unfold/compat/SizeScreenStatusProvider.kt
 -packages/SystemUI/unfold/src/com/android/systemui/unfold/config/ResourceUnfoldTransitionConfig.kt
 -packages/SystemUI/unfold/src/com/android/systemui/unfold/dagger/UnfoldMain.kt
--packages/SystemUI/unfold/src/com/android/systemui/unfold/progress/FixedTimingTransitionProgressProvider.kt
 -packages/SystemUI/unfold/src/com/android/systemui/unfold/progress/PhysicsBasedUnfoldTransitionProgressProvider.kt
 -packages/SystemUI/unfold/src/com/android/systemui/unfold/updates/DeviceFoldStateProvider.kt
 -packages/SystemUI/unfold/src/com/android/systemui/unfold/updates/FoldStateProvider.kt

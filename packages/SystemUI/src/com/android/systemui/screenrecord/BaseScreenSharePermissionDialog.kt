@@ -43,28 +43,27 @@ open class BaseScreenSharePermissionDialog(
 ) : SystemUIDialog(context), AdapterView.OnItemSelectedListener {
     private lateinit var dialogTitle: TextView
     private lateinit var startButton: TextView
+    private lateinit var cancelButton: TextView
     private lateinit var warning: TextView
     private lateinit var screenShareModeSpinner: Spinner
     var selectedScreenShareOption: ScreenShareOption = screenShareOptions.first()
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.apply {
-            addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
-            setGravity(Gravity.CENTER)
-        }
+        window?.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
+        window?.setGravity(Gravity.CENTER)
         setContentView(R.layout.screen_share_dialog)
-        dialogTitle = findViewById(R.id.screen_share_dialog_title)
-        warning = findViewById(R.id.text_warning)
-        startButton = findViewById(R.id.button_start)
-        findViewById<TextView>(R.id.button_cancel).setOnClickListener { dismiss() }
+        dialogTitle = requireViewById(R.id.screen_share_dialog_title)
+        warning = requireViewById(R.id.text_warning)
+        startButton = requireViewById(android.R.id.button1)
+        cancelButton = requireViewById(android.R.id.button2)
         updateIcon()
         initScreenShareOptions()
         createOptionsView(getOptionsViewLayoutId())
     }
 
     private fun updateIcon() {
-        val icon = findViewById<ImageView>(R.id.screen_share_dialog_icon)
+        val icon = requireViewById<ImageView>(R.id.screen_share_dialog_icon)
         if (dialogIconTint != null) {
             icon.setColorFilter(context.getColor(dialogIconTint))
         }
@@ -91,7 +90,7 @@ open class BaseScreenSharePermissionDialog(
                 options
             )
         adapter.setDropDownViewResource(R.layout.screen_share_dialog_spinner_item_text)
-        screenShareModeSpinner = findViewById(R.id.screen_share_mode_spinner)
+        screenShareModeSpinner = requireViewById(R.id.screen_share_mode_spinner)
         screenShareModeSpinner.adapter = adapter
         screenShareModeSpinner.onItemSelectedListener = this
     }
@@ -117,13 +116,17 @@ open class BaseScreenSharePermissionDialog(
         startButton.setOnClickListener(listener)
     }
 
+    protected fun setCancelButtonOnClickListener(listener: View.OnClickListener?) {
+        cancelButton.setOnClickListener(listener)
+    }
+
     // Create additional options that is shown under the share mode spinner
     // Eg. the audio and tap toggles in SysUI Recorder
     @LayoutRes protected open fun getOptionsViewLayoutId(): Int? = null
 
     private fun createOptionsView(@LayoutRes layoutId: Int?) {
         if (layoutId == null) return
-        val stub = findViewById<View>(R.id.options_stub) as ViewStub
+        val stub = requireViewById<View>(R.id.options_stub) as ViewStub
         stub.layoutResource = layoutId
         stub.inflate()
     }

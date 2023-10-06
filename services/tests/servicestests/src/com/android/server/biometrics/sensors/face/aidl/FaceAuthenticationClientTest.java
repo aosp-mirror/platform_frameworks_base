@@ -16,6 +16,10 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -30,11 +34,15 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
+import android.hardware.biometrics.common.AuthenticateReason;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.common.WakeReason;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
@@ -44,9 +52,10 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.log.OperationContextExt;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
 import org.junit.Before;
@@ -61,6 +70,7 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Presubmit
 @SmallTest
@@ -68,6 +78,8 @@ public class FaceAuthenticationClientTest {
 
     private static final int USER_ID = 12;
     private static final long OP_ID = 32;
+    private static final int WAKE_REASON = WakeReason.LIFT;
+    private static final int AUTH_REASON = AuthenticateReason.Face.ASSISTANT_VISIBLE;
 
     @Rule
     public final TestableContext mContext = new TestableContext(
@@ -84,8 +96,6 @@ public class FaceAuthenticationClientTest {
     @Mock
     private BiometricContext mBiometricContext;
     @Mock
-    private LockoutCache mLockoutCache;
-    @Mock
     private UsageStats mUsageStats;
     @Mock
     private ClientMonitorCallback mCallback;
@@ -95,8 +105,12 @@ public class FaceAuthenticationClientTest {
     private ActivityTaskManager mActivityTaskManager;
     @Mock
     private ICancellationSignal mCancellationSignal;
+    @Mock
+    private AuthSessionCoordinator mAuthSessionCoordinator;
     @Captor
-    private ArgumentCaptor<OperationContext> mOperationContextCaptor;
+    private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
+    @Captor
+    private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -105,6 +119,7 @@ public class FaceAuthenticationClientTest {
     public void setup() {
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
                 i -> i.getArgument(0));
+        when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
     }
 
     @Test
@@ -124,9 +139,36 @@ public class FaceAuthenticationClientTest {
         InOrder order = inOrder(mHal, mBiometricContext);
         order.verify(mBiometricContext).updateContext(
                 mOperationContextCaptor.capture(), anyBoolean());
-        order.verify(mHal).authenticateWithContext(
-                eq(OP_ID), same(mOperationContextCaptor.getValue()));
+
+        final OperationContext aidlContext = mOperationContextCaptor.getValue().toAidlContext();
+        order.verify(mHal).authenticateWithContext(eq(OP_ID), same(aidlContext));
+        assertThat(aidlContext.wakeReason).isEqualTo(WAKE_REASON);
+        assertThat(aidlContext.authenticateReason.getFaceAuthenticateReason())
+                .isEqualTo(AUTH_REASON);
+
         verify(mHal, never()).authenticate(anyLong());
+    }
+
+    @Test
+    public void notifyHalWhenContextChanges() throws RemoteException {
+        final FaceAuthenticationClient client = createClient();
+        client.start(mCallback);
+
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).authenticateWithContext(eq(OP_ID), captor.capture());
+        OperationContext opContext = captor.getValue();
+
+        // fake an update to the context
+        verify(mBiometricContext).subscribe(
+                mOperationContextCaptor.capture(), mContextInjector.capture());
+        assertThat(opContext).isSameInstanceAs(
+                mOperationContextCaptor.getValue().toAidlContext());
+        mContextInjector.getValue().accept(opContext);
+        verify(mHal).onContextChanged(same(opContext));
+
+        client.stopHalOperation();
+        verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
     }
 
     @Test
@@ -152,13 +194,21 @@ public class FaceAuthenticationClientTest {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
+        final FaceAuthenticateOptions options = new FaceAuthenticateOptions.Builder()
+                .setOpPackageName("test-owner")
+                .setUserId(USER_ID)
+                .setSensorId(9)
+                .setWakeReason(PowerManager.WAKE_REASON_LIFT)
+                .setAuthenticateReason(
+                        FaceAuthenticateOptions.AUTHENTICATE_REASON_ASSISTANT_VISIBLE)
+                .build();
         return new FaceAuthenticationClient(mContext, () -> aidl, mToken,
-                2 /* requestId */, mClientMonitorCallbackConverter, 5 /* targetUserId */, OP_ID,
-                false /* restricted */, "test-owner", 4 /* cookie */,
-                false /* requireConfirmation */, 9 /* sensorId */,
+                2 /* requestId */, mClientMonitorCallbackConverter, OP_ID,
+                false /* restricted */, options, 4 /* cookie */,
+                false /* requireConfirmation */,
                 mBiometricLogger, mBiometricContext, true /* isStrongBiometric */,
-                mUsageStats, mLockoutCache, false /* allowBackgroundAuthentication */,
-                false /* isKeyguardBypassEnabled */, null /* sensorPrivacyManager */) {
+                mUsageStats, null /* mLockoutCache */, false /* allowBackgroundAuthentication */,
+                null /* sensorPrivacyManager */, 0 /* biometricStrength */) {
             @Override
             protected ActivityTaskManager getActivityTaskManager() {
                 return mActivityTaskManager;

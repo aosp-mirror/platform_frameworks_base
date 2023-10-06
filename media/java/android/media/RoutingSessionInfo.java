@@ -18,12 +18,16 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +52,9 @@ public final class RoutingSessionInfo implements Parcelable {
 
     private static final String TAG = "RoutingSessionInfo";
 
+    private static final String KEY_GROUP_ROUTE = "androidx.mediarouter.media.KEY_GROUP_ROUTE";
+    private static final String KEY_VOLUME_HANDLING = "volumeHandling";
+
     final String mId;
     final CharSequence mName;
     final String mOwnerPackageName;
@@ -67,6 +74,7 @@ public final class RoutingSessionInfo implements Parcelable {
     final Bundle mControlHints;
     final boolean mIsSystemSession;
 
+
     RoutingSessionInfo(@NonNull Builder builder) {
         Objects.requireNonNull(builder, "builder must not be null.");
 
@@ -85,24 +93,31 @@ public final class RoutingSessionInfo implements Parcelable {
         mTransferableRoutes = Collections.unmodifiableList(
                 convertToUniqueRouteIds(builder.mTransferableRoutes));
 
-        mVolumeHandling = builder.mVolumeHandling;
         mVolumeMax = builder.mVolumeMax;
         mVolume = builder.mVolume;
 
-        mControlHints = builder.mControlHints;
         mIsSystemSession = builder.mIsSystemSession;
+
+        boolean volumeAdjustmentForRemoteGroupSessions = Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
+        mVolumeHandling = defineVolumeHandling(builder.mVolumeHandling, mSelectedRoutes,
+                volumeAdjustmentForRemoteGroupSessions);
+
+        mControlHints = updateVolumeHandlingInHints(builder.mControlHints, mVolumeHandling);
     }
 
     RoutingSessionInfo(@NonNull Parcel src) {
-        Objects.requireNonNull(src, "src must not be null.");
+        mId = src.readString();
+        Preconditions.checkArgument(!TextUtils.isEmpty(mId));
 
-        mId = ensureString(src.readString());
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(src);
         mOwnerPackageName = src.readString();
         mClientPackageName = ensureString(src.readString());
         mProviderId = src.readString();
 
         mSelectedRoutes = ensureList(src.createStringArrayList());
+        Preconditions.checkArgument(!mSelectedRoutes.isEmpty());
+
         mSelectableRoutes = ensureList(src.createStringArrayList());
         mDeselectableRoutes = ensureList(src.createStringArrayList());
         mTransferableRoutes = ensureList(src.createStringArrayList());
@@ -113,6 +128,34 @@ public final class RoutingSessionInfo implements Parcelable {
 
         mControlHints = src.readBundle();
         mIsSystemSession = src.readBoolean();
+    }
+
+    private static Bundle updateVolumeHandlingInHints(Bundle controlHints, int volumeHandling) {
+        // Workaround to preserve retro-compatibility with androidx.
+        // See b/228021646 for more details.
+        if (controlHints != null && controlHints.containsKey(KEY_GROUP_ROUTE)) {
+            Bundle groupRoute = controlHints.getBundle(KEY_GROUP_ROUTE);
+
+            if (groupRoute != null && groupRoute.containsKey(KEY_VOLUME_HANDLING)
+                    && volumeHandling != groupRoute.getInt(KEY_VOLUME_HANDLING)) {
+                //Creating copy of controlHints with updated value.
+                Bundle newGroupRoute = new Bundle(groupRoute);
+                newGroupRoute.putInt(KEY_VOLUME_HANDLING, volumeHandling);
+                Bundle newControlHints = new Bundle(controlHints);
+                newControlHints.putBundle(KEY_GROUP_ROUTE, newGroupRoute);
+                return newControlHints;
+            }
+        }
+        //Return same Bundle.
+        return controlHints;
+    }
+
+    private static int defineVolumeHandling(int volumeHandling, List<String> selectedRoutes,
+            boolean volumeAdjustmentForRemoteGroupSessions) {
+        if (!volumeAdjustmentForRemoteGroupSessions && selectedRoutes.size() > 1) {
+            return MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
+        }
+        return volumeHandling;
     }
 
     private static String ensureString(String str) {
@@ -137,7 +180,7 @@ public final class RoutingSessionInfo implements Parcelable {
      */
     @NonNull
     public String getId() {
-        if (mProviderId != null) {
+        if (!TextUtils.isEmpty(mProviderId)) {
             return MediaRouter2Utils.toUniqueId(mProviderId, mId);
         } else {
             return mId;
@@ -289,6 +332,34 @@ public final class RoutingSessionInfo implements Parcelable {
         dest.writeBoolean(mIsSystemSession);
     }
 
+    /**
+     * Dumps current state of the instance. Use with {@code dumpsys}.
+     *
+     * See {@link android.os.Binder#dump(FileDescriptor, PrintWriter, String[])}.
+     *
+     * @hide
+     */
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        pw.println(prefix + "RoutingSessionInfo");
+
+        String indent = prefix + "  ";
+
+        pw.println(indent + "mId=" + mId);
+        pw.println(indent + "mName=" + mName);
+        pw.println(indent + "mOwnerPackageName=" + mOwnerPackageName);
+        pw.println(indent + "mClientPackageName=" + mClientPackageName);
+        pw.println(indent + "mProviderId=" + mProviderId);
+        pw.println(indent + "mSelectedRoutes=" + mSelectedRoutes);
+        pw.println(indent + "mSelectableRoutes=" + mSelectableRoutes);
+        pw.println(indent + "mDeselectableRoutes=" + mDeselectableRoutes);
+        pw.println(indent + "mTransferableRoutes=" + mTransferableRoutes);
+        pw.println(indent + "mVolumeHandling=" + mVolumeHandling);
+        pw.println(indent + "mVolumeMax=" + mVolumeMax);
+        pw.println(indent + "mVolume=" + mVolume);
+        pw.println(indent + "mControlHints=" + mControlHints);
+        pw.println(indent + "mIsSystemSession=" + mIsSystemSession);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -346,15 +417,21 @@ public final class RoutingSessionInfo implements Parcelable {
         return result.toString();
     }
 
+    /**
+     * Provides a new list with unique route IDs if {@link #mProviderId} is set, or the original IDs
+     * otherwise.
+     *
+     * @param routeIds list of route IDs to convert
+     * @return new list with unique IDs or original IDs
+     */
+
+    @NonNull
     private List<String> convertToUniqueRouteIds(@NonNull List<String> routeIds) {
-        if (routeIds == null) {
-            Log.w(TAG, "routeIds is null. Returning an empty list");
-            return Collections.emptyList();
-        }
+        Objects.requireNonNull(routeIds, "RouteIds cannot be null.");
 
         // mProviderId can be null if not set. Return the original list for this case.
-        if (mProviderId == null) {
-            return routeIds;
+        if (TextUtils.isEmpty(mProviderId)) {
+            return new ArrayList<>(routeIds);
         }
 
         List<String> result = new ArrayList<>();

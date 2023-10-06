@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,14 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.RemoteException;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.concurrency.FakeExecution;
 
@@ -40,7 +41,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 public class UdfpsDisplayModeTest extends SysuiTestCase {
     private static final int DISPLAY_ID = 0;
@@ -48,7 +50,9 @@ public class UdfpsDisplayModeTest extends SysuiTestCase {
     @Mock
     private AuthController mAuthController;
     @Mock
-    private IUdfpsHbmListener mDisplayCallback;
+    private IUdfpsRefreshRateRequestCallback mDisplayCallback;
+    @Mock
+    private UdfpsLogger mUdfpsLogger;
     @Mock
     private Runnable mOnEnabled;
     @Mock
@@ -66,10 +70,11 @@ public class UdfpsDisplayModeTest extends SysuiTestCase {
         when(contextSpy.getDisplayId()).thenReturn(DISPLAY_ID);
 
         // Set up mocks.
-        when(mAuthController.getUdfpsHbmListener()).thenReturn(mDisplayCallback);
+        when(mAuthController.getUdfpsRefreshRateCallback()).thenReturn(mDisplayCallback);
 
         // Create a real controller with mock dependencies.
-        mHbmController = new UdfpsDisplayMode(contextSpy, mExecution, mAuthController);
+        mHbmController = new UdfpsDisplayMode(contextSpy, mExecution, mAuthController,
+                mUdfpsLogger);
     }
 
     @Test
@@ -78,7 +83,7 @@ public class UdfpsDisplayModeTest extends SysuiTestCase {
         mHbmController.enable(mOnEnabled);
 
         // Should set the appropriate refresh rate for UDFPS and notify the caller.
-        verify(mDisplayCallback).onHbmEnabled(eq(DISPLAY_ID));
+        verify(mDisplayCallback).onRequestEnabled(eq(DISPLAY_ID));
         verify(mOnEnabled).run();
 
         // Disable the UDFPS mode.
@@ -86,7 +91,7 @@ public class UdfpsDisplayModeTest extends SysuiTestCase {
 
         // Should unset the refresh rate and notify the caller.
         verify(mOnDisabled).run();
-        verify(mDisplayCallback).onHbmDisabled(eq(DISPLAY_ID));
+        verify(mDisplayCallback).onRequestDisabled(eq(DISPLAY_ID));
     }
 
     @Test
@@ -95,7 +100,7 @@ public class UdfpsDisplayModeTest extends SysuiTestCase {
         mHbmController.enable(mOnEnabled);
 
         // Should set the appropriate refresh rate for UDFPS and notify the caller.
-        verify(mDisplayCallback).onHbmEnabled(eq(DISPLAY_ID));
+        verify(mDisplayCallback).onRequestEnabled(eq(DISPLAY_ID));
         verify(mOnEnabled).run();
 
         // Second request to enable the UDFPS mode, while it's still enabled.
@@ -112,7 +117,7 @@ public class UdfpsDisplayModeTest extends SysuiTestCase {
         mHbmController.enable(mOnEnabled);
 
         // Should set the appropriate refresh rate for UDFPS and notify the caller.
-        verify(mDisplayCallback).onHbmEnabled(eq(DISPLAY_ID));
+        verify(mDisplayCallback).onRequestEnabled(eq(DISPLAY_ID));
         verify(mOnEnabled).run();
 
         // First request to disable the UDFPS mode.
@@ -120,7 +125,7 @@ public class UdfpsDisplayModeTest extends SysuiTestCase {
 
         // Should unset the refresh rate and notify the caller.
         verify(mOnDisabled).run();
-        verify(mDisplayCallback).onHbmDisabled(eq(DISPLAY_ID));
+        verify(mDisplayCallback).onRequestDisabled(eq(DISPLAY_ID));
 
         // Second request to disable the UDFPS mode, when it's already disabled.
         mHbmController.disable(mOnDisabled);

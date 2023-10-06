@@ -13,11 +13,15 @@ android_test {
         "src/**/*.java",
         "src/**/*.kt",
     ],
+    kotlincflags: [
+        "-Werror",
+    ],
     platform_apis: true,
     certificate: "platform",
     static_libs: [
         "androidx.test.ext.junit",
         "androidx.test.rules",
+        "mockito-target-minus-junit4",
         "services.core.unboosted",
         "testables",
         "truth-prebuilt",

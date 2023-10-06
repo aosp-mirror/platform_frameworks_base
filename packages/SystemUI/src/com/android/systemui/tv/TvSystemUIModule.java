@@ -23,8 +23,6 @@ import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 import android.os.Handler;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.dagger.ReferenceSystemUIModule;
@@ -44,6 +42,7 @@ import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
 import com.android.systemui.screenshot.ReferenceScreenshotModule;
+import com.android.systemui.settings.dagger.MultiUserUtilsModule;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
@@ -74,12 +73,12 @@ import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationHandler;
 import com.android.systemui.volume.dagger.VolumeModule;
 
-import javax.inject.Named;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
+
+import javax.inject.Named;
 
 /**
  * A TV specific version of {@link ReferenceSystemUIModule}.
@@ -91,6 +90,7 @@ import dagger.multibindings.IntoSet;
         includes = {
                 AospPolicyModule.class,
                 GestureModule.class,
+                MultiUserUtilsModule.class,
                 PowerModule.class,
                 QSModule.class,
                 ReferenceScreenshotModule.class,
@@ -103,9 +103,8 @@ public abstract class TvSystemUIModule {
     @SysUISingleton
     @Provides
     @Named(LEAK_REPORT_EMAIL_NAME)
-    @Nullable
     static String provideLeakReportEmail() {
-        return null;
+        return "";
     }
 
     @Binds

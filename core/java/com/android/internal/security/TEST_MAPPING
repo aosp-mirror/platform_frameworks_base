@@ -14,6 +14,19 @@
     {
       "name": "ApkVerityTest",
       "file_patterns": ["VerityUtils\\.java"]
+    },
+    {
+      "name": "UpdatableSystemFontTest",
+      "file_patterns": ["VerityUtils\\.java"]
+    },
+    {
+      "name": "CtsAppSecurityHostTestCases",
+      "options": [
+        {
+          "include-filter": "android.appsecurity.cts.ApkVerityInstallTest"
+        }
+      ],
+      "file_patterns": ["VerityUtils\\.java"]
     }
   ]
 }

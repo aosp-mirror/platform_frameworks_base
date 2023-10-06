@@ -64,4 +64,9 @@ public abstract class ClickableSpan extends CharacterStyle implements UpdateAppe
     public int getId() {
         return mId;
     }
+
+    @Override
+    public String toString() {
+        return "ClickableSpan{}";
+    }
 }

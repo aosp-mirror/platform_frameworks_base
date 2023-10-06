@@ -34,7 +34,6 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -75,7 +74,6 @@ public class StackScrollAlgorithm {
     private float mQuickQsOffsetHeight;
     private float mSmallCornerRadius;
     private float mLargeCornerRadius;
-    private boolean mUseRoundnessSourceTypes;
 
     public StackScrollAlgorithm(
             Context context,
@@ -126,7 +124,7 @@ public class StackScrollAlgorithm {
         updateHeadsUpStates(algorithmState, ambientState);
         updatePulsingStates(algorithmState, ambientState);
 
-        updateDimmedActivatedHideSensitive(ambientState, algorithmState);
+        updateDimmedAndHideSensitive(ambientState, algorithmState);
         updateClipping(algorithmState, ambientState);
         updateSpeedBumpState(algorithmState, speedBumpIndex);
         updateShelfState(algorithmState, ambientState);
@@ -317,7 +315,8 @@ public class StackScrollAlgorithm {
             float newNotificationEnd = newYTranslation + newHeight;
             boolean isHeadsUp = (child instanceof ExpandableNotificationRow) && child.isPinned();
             if (mClipNotificationScrollToTop
-                    && ((isHeadsUp && !firstHeadsUp) || child.isHeadsUpAnimatingAway())
+                    && !firstHeadsUp
+                    && (isHeadsUp || child.isHeadsUpAnimatingAway())
                     && newNotificationEnd > firstHeadsUpEnd
                     && !ambientState.isShadeExpanded()) {
                 // The bottom of this view is peeking out from under the previous view.
@@ -341,25 +340,17 @@ public class StackScrollAlgorithm {
         }
     }
 
-    /**
-     * Updates the dimmed, activated and hiding sensitive states of the children.
-     */
-    private void updateDimmedActivatedHideSensitive(AmbientState ambientState,
-                                                    StackScrollAlgorithmState algorithmState) {
+    /** Updates the dimmed and hiding sensitive states of the children. */
+    private void updateDimmedAndHideSensitive(AmbientState ambientState,
+            StackScrollAlgorithmState algorithmState) {
         boolean dimmed = ambientState.isDimmed();
         boolean hideSensitive = ambientState.isHideSensitive();
-        View activatedChild = ambientState.getActivatedChild();
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState childViewState = child.getViewState();
             childViewState.dimmed = dimmed;
             childViewState.hideSensitive = hideSensitive;
-            boolean isActivatedChild = activatedChild == child;
-            if (dimmed && isActivatedChild) {
-                childViewState.setZTranslation(childViewState.getZTranslation()
-                        + 2.0f * ambientState.getZDistanceBetweenElements());
-            }
         }
     }
 
@@ -512,7 +503,7 @@ public class StackScrollAlgorithm {
         return stackHeight / stackEndHeight;
     }
 
-    public boolean hasOngoingNotifs(StackScrollAlgorithmState algorithmState) {
+    private boolean hasNonDismissableNotifs(StackScrollAlgorithmState algorithmState) {
         for (int i = 0; i < algorithmState.visibleChildren.size(); i++) {
             View child = algorithmState.visibleChildren.get(i);
             if (!(child instanceof ExpandableNotificationRow)) {
@@ -558,7 +549,7 @@ public class StackScrollAlgorithm {
         ExpandableViewState viewState = view.getViewState();
         viewState.location = ExpandableViewState.LOCATION_UNKNOWN;
 
-        final float expansionFraction = getExpansionFractionWithoutShelf(
+        float expansionFraction = getExpansionFractionWithoutShelf(
                 algorithmState, ambientState);
 
         // Add gap between sections.
@@ -594,7 +585,7 @@ public class StackScrollAlgorithm {
                 ((FooterView.FooterViewState) viewState).hideContent =
                         isShelfShowing || noSpaceForFooter
                                 || (ambientState.isClearAllInProgress()
-                                && !hasOngoingNotifs(algorithmState));
+                                && !hasNonDismissableNotifs(algorithmState));
             }
         } else {
             if (view instanceof EmptyShadeView) {
@@ -629,8 +620,12 @@ public class StackScrollAlgorithm {
                     updateViewWithShelf(view, viewState, shelfStart);
                 }
             }
-            // Clip height of view right before shelf.
-            viewState.height = (int) (getMaxAllowedChildHeight(view) * expansionFraction);
+            viewState.height = getMaxAllowedChildHeight(view);
+            if (!view.isPinned() && !view.isHeadsUpAnimatingAway()
+                    && !ambientState.isPulsingRow(view)) {
+                // The expansion fraction should not affect HUNs or pulsing notifications.
+                viewState.height *= expansionFraction;
+            }
         }
 
         algorithmState.mCurrentYPosition +=
@@ -710,9 +705,11 @@ public class StackScrollAlgorithm {
                 && !(child instanceof FooterView);
     }
 
-    private void updatePulsingStates(StackScrollAlgorithmState algorithmState,
+    @VisibleForTesting
+    void updatePulsingStates(StackScrollAlgorithmState algorithmState,
                                      AmbientState ambientState) {
         int childCount = algorithmState.visibleChildren.size();
+        ExpandableNotificationRow pulsingRow = null;
         for (int i = 0; i < childCount; i++) {
             View child = algorithmState.visibleChildren.get(i);
             if (!(child instanceof ExpandableNotificationRow)) {
@@ -724,6 +721,19 @@ public class StackScrollAlgorithm {
             }
             ExpandableViewState viewState = row.getViewState();
             viewState.hidden = false;
+            pulsingRow = row;
+        }
+
+        // Set AmbientState#pulsingRow to the current pulsing row when on AOD.
+        // Set AmbientState#pulsingRow=null when on lockscreen, since AmbientState#pulsingRow
+        // is only used for skipping the unfurl animation for (the notification that was already
+        // showing at full height on AOD) during the AOD=>lockscreen transition, where
+        // dozeAmount=[1f, 0f). We also need to reset the pulsingRow once it is no longer used
+        // because it will interfere with future unfurling animations - for example, during the
+        // LS=>AOD animation, the pulsingRow may stay at full height when it should squish with the
+        // rest of the stack.
+        if (ambientState.getDozeAmount() == 0.0f || ambientState.getDozeAmount() == 1.0f) {
+            ambientState.setPulsingRow(pulsingRow);
         }
     }
 
@@ -763,7 +773,7 @@ public class StackScrollAlgorithm {
             float unmodifiedEndLocation = childState.getYTranslation() + childState.height;
             if (mIsExpanded) {
                 if (row.mustStayOnScreen() && !childState.headsUpIsVisible
-                        && !row.showingPulsing()) {
+                        && !row.showingPulsing() && !ambientState.isOnKeyguard()) {
                     // Ensure that the heads up is always visible even when scrolled off
                     clampHunToTop(mQuickQsOffsetHeight, ambientState.getStackTranslation(),
                             row.getCollapsedHeight(), childState);
@@ -775,6 +785,8 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isPinned()) {
+                // Make sure row yTranslation is at maximum the HUN yTranslation,
+                // which accounts for AmbientState.stackTopMargin in split-shade.
                 childState.setYTranslation(
                         Math.max(childState.getYTranslation(), headsUpTranslation));
                 childState.height = Math.max(row.getIntrinsicHeight(), childState.height);
@@ -799,7 +811,11 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isHeadsUpAnimatingAway()) {
-                childState.setYTranslation(Math.max(childState.getYTranslation(), mHeadsUpInset));
+                // Make sure row yTranslation is at maximum the HUN yTranslation,
+                // which accounts for AmbientState.stackTopMargin in split-shade.
+                childState.setYTranslation(
+                        Math.max(childState.getYTranslation(), headsUpTranslation));
+                // keep it visible for the animation
                 childState.hidden = false;
             }
         }
@@ -844,12 +860,8 @@ public class StackScrollAlgorithm {
                 row.isLastInSection() ? 1f : (mSmallCornerRadius / mLargeCornerRadius);
         final float bottomValue = computeCornerRoundnessForPinnedHun(mHostView.getHeight(),
                 ambientState.getStackY(), getMaxAllowedChildHeight(row), originalCornerRadius);
-        if (mUseRoundnessSourceTypes) {
-            row.requestBottomRoundness(bottomValue, STACK_SCROLL_ALGO);
-            row.addOnDetachResetRoundness(STACK_SCROLL_ALGO);
-        } else {
-            row.requestBottomRoundness(bottomValue, LegacySourceType.OnScroll);
-        }
+        row.requestBottomRoundness(bottomValue, STACK_SCROLL_ALGO);
+        row.addOnDetachResetRoundness(STACK_SCROLL_ALGO);
     }
 
     @VisibleForTesting
@@ -985,14 +997,6 @@ public class StackScrollAlgorithm {
 
     public void setIsExpanded(boolean isExpanded) {
         this.mIsExpanded = isExpanded;
-    }
-
-    /**
-     * Enable the support for rounded corner based on the SourceType
-     * @param enabled true if is supported
-     */
-    public void useRoundnessSourceTypes(boolean enabled) {
-        mUseRoundnessSourceTypes = enabled;
     }
 
     public static class StackScrollAlgorithmState {

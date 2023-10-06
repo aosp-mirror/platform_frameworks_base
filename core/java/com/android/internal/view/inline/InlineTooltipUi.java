@@ -15,7 +15,7 @@
  */
 package com.android.internal.view.inline;
 
-import static android.view.autofill.AutofillManager.DEVICE_CONFIG_AUTOFILL_TOOLTIP_SHOW_UP_DELAY;
+import static android.view.autofill.AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_TOOLTIP_SHOW_UP_DELAY;
 import static android.view.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;

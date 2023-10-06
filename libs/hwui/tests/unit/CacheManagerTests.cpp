@@ -21,6 +21,7 @@
 #include "tests/common/TestUtils.h"
 
 #include <SkImagePriv.h>
+#include "include/gpu/GpuTypes.h" // from Skia
 
 using namespace android;
 using namespace android::uirenderer;
@@ -45,7 +46,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, DISABLED_trimMemory) {
 
     while (getCacheUsage(grContext) <= renderThread.cacheManager().getBackgroundCacheSize()) {
         SkImageInfo info = SkImageInfo::MakeA8(width, height);
-        sk_sp<SkSurface> surface = SkSurface::MakeRenderTarget(grContext, SkBudgeted::kYes, info);
+        sk_sp<SkSurface> surface = SkSurface::MakeRenderTarget(grContext, skgpu::Budgeted::kYes,
+                                                               info);
         surface->getCanvas()->drawColor(SK_AlphaTRANSPARENT);
 
         grContext->flushAndSubmit();
@@ -59,7 +61,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, DISABLED_trimMemory) {
     ASSERT_TRUE(SkImage_pinAsTexture(image.get(), grContext));
 
     // attempt to trim all memory while we still hold strong refs
-    renderThread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
+    renderThread.cacheManager().trimMemory(TrimLevel::COMPLETE);
     ASSERT_TRUE(0 == grContext->getResourceCachePurgeableBytes());
 
     // free the surfaces
@@ -76,11 +78,11 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, DISABLED_trimMemory) {
     ASSERT_TRUE(renderThread.cacheManager().getBackgroundCacheSize() < purgeableBytes);
 
     // UI hidden and make sure only some got purged (unique should remain)
-    renderThread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::UiHidden);
+    renderThread.cacheManager().trimMemory(TrimLevel::UI_HIDDEN);
     ASSERT_TRUE(0 < grContext->getResourceCachePurgeableBytes());
     ASSERT_TRUE(renderThread.cacheManager().getBackgroundCacheSize() > getCacheUsage(grContext));
 
     // complete and make sure all get purged
-    renderThread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
+    renderThread.cacheManager().trimMemory(TrimLevel::COMPLETE);
     ASSERT_TRUE(0 == grContext->getResourceCachePurgeableBytes());
 }

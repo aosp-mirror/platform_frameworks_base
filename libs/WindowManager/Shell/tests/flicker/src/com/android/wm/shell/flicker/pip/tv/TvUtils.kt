@@ -33,32 +33,31 @@ private const val TV_PIP_MENU_FULLSCREEN_BUTTON_ID = "tv_pip_menu_fullscreen_but
 private const val FOCUS_ATTEMPTS = 10
 private const val WAIT_TIME_MS = 3_000L
 
-private val TV_PIP_MENU_SELECTOR =
-        By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_ROOT_ID)
+private val TV_PIP_MENU_SELECTOR = By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_ROOT_ID)
 private val TV_PIP_MENU_BUTTONS_CONTAINER_SELECTOR =
-        By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_BUTTONS_CONTAINER_ID)
+    By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_BUTTONS_CONTAINER_ID)
 private val TV_PIP_MENU_CLOSE_BUTTON_SELECTOR =
-        By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_CLOSE_BUTTON_ID)
+    By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_CLOSE_BUTTON_ID)
 private val TV_PIP_MENU_FULLSCREEN_BUTTON_SELECTOR =
-        By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_FULLSCREEN_BUTTON_ID)
+    By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_FULLSCREEN_BUTTON_ID)
 
 fun UiDevice.waitForTvPipMenu(): UiObject2? =
-        wait(Until.findObject(TV_PIP_MENU_SELECTOR), WAIT_TIME_MS)
+    wait(Until.findObject(TV_PIP_MENU_SELECTOR), WAIT_TIME_MS)
 
 fun UiDevice.waitForTvPipMenuToClose(): Boolean =
-        wait(Until.gone(TV_PIP_MENU_SELECTOR), WAIT_TIME_MS)
+    wait(Until.gone(TV_PIP_MENU_SELECTOR), WAIT_TIME_MS)
 
 fun UiDevice.findTvPipMenuControls(): UiObject2? =
-        findTvPipMenuElement(TV_PIP_MENU_BUTTONS_CONTAINER_SELECTOR)
+    findTvPipMenuElement(TV_PIP_MENU_BUTTONS_CONTAINER_SELECTOR)
 
 fun UiDevice.findTvPipMenuCloseButton(): UiObject2? =
-        findTvPipMenuElement(TV_PIP_MENU_CLOSE_BUTTON_SELECTOR)
+    findTvPipMenuElement(TV_PIP_MENU_CLOSE_BUTTON_SELECTOR)
 
 fun UiDevice.findTvPipMenuFullscreenButton(): UiObject2? =
-        findTvPipMenuElement(TV_PIP_MENU_FULLSCREEN_BUTTON_SELECTOR)
+    findTvPipMenuElement(TV_PIP_MENU_FULLSCREEN_BUTTON_SELECTOR)
 
 fun UiDevice.findTvPipMenuElementWithDescription(desc: String): UiObject2? =
-        findTvPipMenuElement(By.desc(desc))
+    findTvPipMenuElement(By.desc(desc))
 
 private fun UiDevice.findTvPipMenuElement(selector: BySelector): UiObject2? =
     findObject(TV_PIP_MENU_SELECTOR)?.findObject(selector)
@@ -70,11 +69,10 @@ fun UiDevice.waitForTvPipMenuElementWithDescription(desc: String): UiObject2? {
     // descendant and then retrieve the element from the menu and return to the caller of this
     // method.
     val elementSelector = By.desc(desc)
-    val menuContainingElementSelector = By.copy(TV_PIP_MENU_SELECTOR)
-            .hasDescendant(elementSelector)
+    val menuContainingElementSelector = By.copy(TV_PIP_MENU_SELECTOR).hasDescendant(elementSelector)
 
     return wait(Until.findObject(menuContainingElementSelector), WAIT_TIME_MS)
-            ?.findObject(elementSelector)
+        ?.findObject(elementSelector)
 }
 
 fun UiDevice.waitUntilTvPipMenuElementWithDescriptionIsGone(desc: String): Boolean? {
@@ -86,18 +84,17 @@ fun UiDevice.waitUntilTvPipMenuElementWithDescriptionIsGone(desc: String): Boole
 
 fun UiDevice.clickTvPipMenuCloseButton() {
     focusOnAndClickTvPipMenuElement(TV_PIP_MENU_CLOSE_BUTTON_SELECTOR) ||
-            error("Could not focus on the Close button")
+        error("Could not focus on the Close button")
 }
 
 fun UiDevice.clickTvPipMenuFullscreenButton() {
     focusOnAndClickTvPipMenuElement(TV_PIP_MENU_FULLSCREEN_BUTTON_SELECTOR) ||
-            error("Could not focus on the Fullscreen button")
+        error("Could not focus on the Fullscreen button")
 }
 
 fun UiDevice.clickTvPipMenuElementWithDescription(desc: String) {
-    focusOnAndClickTvPipMenuElement(By.desc(desc)
-            .pkg(SYSTEM_UI_PACKAGE_NAME)) ||
-            error("Could not focus on the Pip menu object with \"$desc\" description")
+    focusOnAndClickTvPipMenuElement(By.desc(desc).pkg(SYSTEM_UI_PACKAGE_NAME)) ||
+        error("Could not focus on the Pip menu object with \"$desc\" description")
     // So apparently Accessibility framework on TV is not very reliable and sometimes the state of
     // the tree of accessibility nodes as seen by the accessibility clients kind of lags behind of
     // the "real" state of the "UI tree". It seems, however, that moving focus around the tree
@@ -110,7 +107,8 @@ fun UiDevice.clickTvPipMenuElementWithDescription(desc: String) {
 
 private fun UiDevice.focusOnAndClickTvPipMenuElement(selector: BySelector): Boolean {
     repeat(FOCUS_ATTEMPTS) {
-        val element = findTvPipMenuElement(selector)
+        val element =
+            findTvPipMenuElement(selector)
                 ?: error("The Pip Menu element we try to focus on is gone.")
 
         if (element.isFocusedOrHasFocusedChild) {
@@ -119,10 +117,11 @@ private fun UiDevice.focusOnAndClickTvPipMenuElement(selector: BySelector): Bool
         }
 
         findTvPipMenuElement(By.focused(true))?.let { focused ->
-            if (element.visibleCenter.x < focused.visibleCenter.x)
-                pressDPadLeft() else pressDPadRight()
+            if (element.visibleCenter.x < focused.visibleCenter.x) pressDPadLeft()
+            else pressDPadRight()
             waitForIdle()
-        } ?: error("Pip menu does not contain a focused element")
+        }
+            ?: error("Pip menu does not contain a focused element")
     }
 
     return false
@@ -155,9 +154,8 @@ private fun UiDevice.moveFocus() {
 
 fun UiDevice.pressWindowKey() = pressKeyCode(KeyEvent.KEYCODE_WINDOW)
 
-fun UiObject2.isFullscreen(uiDevice: UiDevice): Boolean = visibleBounds.run {
-    height() == uiDevice.displayHeight && width() == uiDevice.displayWidth
-}
+fun UiObject2.isFullscreen(uiDevice: UiDevice): Boolean =
+    visibleBounds.run { height() == uiDevice.displayHeight && width() == uiDevice.displayWidth }
 
 val UiObject2.isFocusedOrHasFocusedChild: Boolean
     get() = isFocused || findObject(By.focused(true)) != null

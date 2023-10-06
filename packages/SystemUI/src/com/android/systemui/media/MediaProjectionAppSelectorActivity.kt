@@ -20,7 +20,10 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.media.projection.IMediaProjection
+import android.media.projection.IMediaProjectionManager.EXTRA_USER_REVIEW_GRANTED_CONSENT
 import android.media.projection.MediaProjectionManager.EXTRA_MEDIA_PROJECTION
+import android.media.projection.ReviewGrantedConsentResult.RECORD_CANCEL
+import android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_TASK
 import android.os.Binder
 import android.os.Bundle
 import android.os.IBinder
@@ -35,8 +38,6 @@ import com.android.internal.app.ResolverListController
 import com.android.internal.app.chooser.NotSelectableTargetInfo
 import com.android.internal.app.chooser.TargetInfo
 import com.android.systemui.R
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorComponent
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorController
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler
@@ -50,7 +51,6 @@ import javax.inject.Inject
 class MediaProjectionAppSelectorActivity(
     private val componentFactory: MediaProjectionAppSelectorComponent.Factory,
     private val activityLauncher: AsyncActivityLauncher,
-    private val featureFlags: FeatureFlags,
     /** This is used to override the dependency in a screenshot test */
     @VisibleForTesting
     private val listControllerFactory: ((userHandle: UserHandle) -> ResolverListController)?
@@ -59,14 +59,18 @@ class MediaProjectionAppSelectorActivity(
     @Inject
     constructor(
         componentFactory: MediaProjectionAppSelectorComponent.Factory,
-        activityLauncher: AsyncActivityLauncher,
-        featureFlags: FeatureFlags
-    ) : this(componentFactory, activityLauncher, featureFlags, listControllerFactory = null)
+        activityLauncher: AsyncActivityLauncher
+    ) : this(componentFactory, activityLauncher, listControllerFactory = null)
 
     private lateinit var configurationController: ConfigurationController
     private lateinit var controller: MediaProjectionAppSelectorController
     private lateinit var recentsViewController: MediaProjectionRecentsViewController
     private lateinit var component: MediaProjectionAppSelectorComponent
+    // Indicate if we are under the media projection security flow
+    // i.e. when a host app reuses consent token, review the permission and update it to the service
+    private var reviewGrantedConsentRequired = false
+    // If an app is selected, set to true so that we don't send RECORD_CANCEL in onDestroy
+    private var taskSelected = false
 
     override fun getLayoutResource() = R.layout.media_projection_app_selector
 
@@ -85,6 +89,9 @@ class MediaProjectionAppSelectorActivity(
             component.personalProfileUserHandle
         )
 
+        reviewGrantedConsentRequired =
+            intent.getBooleanExtra(EXTRA_USER_REVIEW_GRANTED_CONSENT, false)
+
         super.onCreate(bundle)
         controller.init()
     }
@@ -97,11 +104,7 @@ class MediaProjectionAppSelectorActivity(
     override fun appliedThemeResId(): Int = R.style.Theme_SystemUI_MediaProjectionAppSelector
 
     override fun createBlockerEmptyStateProvider(): EmptyStateProvider =
-        if (featureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)) {
-            component.emptyStateProvider
-        } else {
-            super.createBlockerEmptyStateProvider()
-        }
+        component.emptyStateProvider
 
     override fun createListController(userHandle: UserHandle): ResolverListController =
         listControllerFactory?.invoke(userHandle) ?: super.createListController(userHandle)
@@ -149,6 +152,16 @@ class MediaProjectionAppSelectorActivity(
     }
 
     override fun onDestroy() {
+        // onDestroy is also called when an app is selected, in that case we only want to send
+        // RECORD_CONTENT_TASK but not RECORD_CANCEL
+        if (!taskSelected) {
+            // TODO(b/272010156): Return result to PermissionActivity and update service there
+            MediaProjectionServiceHelper.setReviewedConsentIfNeeded(
+                RECORD_CANCEL,
+                reviewGrantedConsentRequired,
+                /* projection= */ null
+            )
+        }
         activityLauncher.destroy()
         controller.destroy()
         super.onDestroy()
@@ -163,6 +176,7 @@ class MediaProjectionAppSelectorActivity(
     }
 
     override fun returnSelectedApp(launchCookie: IBinder) {
+        taskSelected = true
         if (intent.hasExtra(EXTRA_CAPTURE_REGION_RESULT_RECEIVER)) {
             // The client requested to return the result in the result receiver instead of
             // activity result, let's send the media projection to the result receiver
@@ -174,7 +188,11 @@ class MediaProjectionAppSelectorActivity(
             val captureRegion = MediaProjectionCaptureTarget(launchCookie)
             val data = Bundle().apply { putParcelable(KEY_CAPTURE_TARGET, captureRegion) }
             resultReceiver.send(RESULT_OK, data)
+            // TODO(b/279175710): Ensure consent result is always set here. Skipping this for now
+            //  in ScreenMediaRecorder, since we know the permission grant (projection) is never
+            //  reused in that scenario.
         } else {
+            // TODO(b/272010156): Return result to PermissionActivity and update service there
             // Return the media projection instance as activity result
             val mediaProjectionBinder = intent.getIBinderExtra(EXTRA_MEDIA_PROJECTION)
             val projection = IMediaProjection.Stub.asInterface(mediaProjectionBinder)
@@ -185,6 +203,11 @@ class MediaProjectionAppSelectorActivity(
             intent.putExtra(EXTRA_MEDIA_PROJECTION, projection.asBinder())
             setResult(RESULT_OK, intent)
             setForceSendResultForMediaProjection()
+            MediaProjectionServiceHelper.setReviewedConsentIfNeeded(
+                RECORD_CONTENT_TASK,
+                reviewGrantedConsentRequired,
+                projection
+            )
         }
 
         finish()
@@ -228,7 +251,7 @@ class MediaProjectionAppSelectorActivity(
             putExtra(Intent.EXTRA_INTENT, queryIntent)
 
             // Update the title of the chooser
-            val title = resources.getString(R.string.media_projection_permission_app_selector_title)
+            val title = resources.getString(R.string.screen_share_permission_app_selector_title)
             putExtra(Intent.EXTRA_TITLE, title)
 
             // Select host app's profile tab by default

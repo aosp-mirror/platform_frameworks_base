@@ -17,8 +17,8 @@
 package com.android.systemui.temporarydisplay.chipbar
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.temporarydisplay.TemporaryViewLogger
 import com.android.systemui.temporarydisplay.dagger.ChipbarLog
 import javax.inject.Inject

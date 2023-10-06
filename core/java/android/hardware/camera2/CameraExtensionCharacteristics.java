@@ -30,6 +30,7 @@ import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
 import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.SizeList;
+import android.hardware.camera2.impl.CameraExtensionUtils;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -47,8 +48,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -161,16 +164,19 @@ public final class CameraExtensionCharacteristics {
 
     private final Context mContext;
     private final String mCameraId;
-    private final CameraCharacteristics mChars;
+    private final Map<String, CameraCharacteristics> mCharacteristicsMap;
+    private final Map<String, CameraMetadataNative> mCharacteristicsMapNative;
 
     /**
      * @hide
      */
     public CameraExtensionCharacteristics(Context context, String cameraId,
-            CameraCharacteristics chars) {
+            Map<String, CameraCharacteristics> characteristicsMap) {
         mContext = context;
         mCameraId = cameraId;
-        mChars = chars;
+        mCharacteristicsMap = characteristicsMap;
+        mCharacteristicsMapNative =
+                CameraExtensionUtils.getCharacteristicsMapNative(characteristicsMap);
     }
 
     private static ArrayList<Size> getSupportedSizes(List<SizeList> sizesList,
@@ -468,11 +474,11 @@ public final class CameraExtensionCharacteristics {
      * @hide
      */
     public static boolean isExtensionSupported(String cameraId, int extensionType,
-            CameraCharacteristics chars) {
+            Map<String, CameraMetadataNative> characteristicsMap) {
         if (areAdvancedExtensionsSupported()) {
             try {
                 IAdvancedExtenderImpl extender = initializeAdvancedExtension(extensionType);
-                return extender.isExtensionAvailable(cameraId);
+                return extender.isExtensionAvailable(cameraId, characteristicsMap);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to query extension availability! Extension service does not"
                         + " respond!");
@@ -487,8 +493,10 @@ public final class CameraExtensionCharacteristics {
             }
 
             try {
-                return extenders.first.isExtensionAvailable(cameraId, chars.getNativeMetadata()) &&
-                        extenders.second.isExtensionAvailable(cameraId, chars.getNativeMetadata());
+                return extenders.first.isExtensionAvailable(cameraId,
+                        characteristicsMap.get(cameraId))
+                        && extenders.second.isExtensionAvailable(cameraId,
+                        characteristicsMap.get(cameraId));
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to query extension availability! Extension service does not"
                         + " respond!");
@@ -541,7 +549,8 @@ public final class CameraExtensionCharacteristics {
     private static <T> boolean isOutputSupportedFor(Class<T> klass) {
         Objects.requireNonNull(klass, "klass must not be null");
 
-        if (klass == android.graphics.SurfaceTexture.class) {
+        if ((klass == android.graphics.SurfaceTexture.class) ||
+                (klass == android.view.SurfaceView.class)) {
             return true;
         }
 
@@ -562,7 +571,7 @@ public final class CameraExtensionCharacteristics {
 
         try {
             for (int extensionType : EXTENSION_LIST) {
-                if (isExtensionSupported(mCameraId, extensionType, mChars)) {
+                if (isExtensionSupported(mCameraId, extensionType, mCharacteristicsMapNative)) {
                     ret.add(extensionType);
                 }
             }
@@ -571,6 +580,147 @@ public final class CameraExtensionCharacteristics {
         }
 
         return Collections.unmodifiableList(ret);
+    }
+
+    /**
+     * Checks for postview support of still capture.
+     *
+     * <p>A postview is a preview version of the still capture that is available before the final
+     * image. For example, it can be used as a temporary placeholder for the requested capture
+     * while the final image is being processed. The supported sizes for a still capture's postview
+     * can be retrieved using
+     * {@link CameraExtensionCharacteristics#getPostviewSupportedSizes(int, Size, int)}.
+     * The formats of the still capture and postview should be equivalent upon capture request.</p>
+     *
+     * @param extension the extension type
+     * @return {@code true} in case postview is supported, {@code false} otherwise
+     *
+     * @throws IllegalArgumentException in case the extension type is not a
+     * supported device-specific extension
+     */
+    public boolean isPostviewAvailable(@Extension int extension) {
+        long clientId = registerClient(mContext);
+        if (clientId < 0) {
+            throw new IllegalArgumentException("Unsupported extensions");
+        }
+
+        try {
+            if (!isExtensionSupported(mCameraId, extension, mCharacteristicsMapNative)) {
+                throw new IllegalArgumentException("Unsupported extension");
+            }
+
+            if (areAdvancedExtensionsSupported()) {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId, mCharacteristicsMapNative);
+                return extender.isPostviewAvailable();
+            } else {
+                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                        initializeExtension(extension);
+                extenders.second.init(mCameraId, mCharacteristicsMapNative.get(mCameraId));
+                return extenders.second.isPostviewAvailable();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query the extension for postview availability! Extension "
+                    + "service does not respond!");
+        } finally {
+            unregisterClient(clientId);
+        }
+
+        return false;
+    }
+
+    /**
+     * Get a list of the postview sizes supported for a still capture, using its
+     * capture size {@code captureSize}, to use as an output for the postview request.
+     *
+     * <p>Available postview sizes will always be either equal to or less than the still
+     * capture size. When choosing the most applicable postview size for a usecase, it should
+     * be noted that lower resolution postviews will generally be available more quickly
+     * than larger resolution postviews. For example, when choosing a size for an optimized
+     * postview that will be displayed as a placeholder while the final image is processed,
+     * the resolution closest to the preview size may be most suitable.</p>
+     *
+     * <p>Note that device-specific extensions are allowed to support only a subset
+     * of the camera resolutions advertised by
+     * {@link StreamConfigurationMap#getOutputSizes}.</p>
+     *
+     * @param extension the extension type
+     * @param captureSize size of the still capture for which the postview is requested
+     * @param format device-specific extension output format of the still capture and
+     * postview
+     * @return non-modifiable list of available sizes or an empty list if the format and
+     * size is not supported.
+     * @throws IllegalArgumentException in case of unsupported extension or if postview
+     * feature is not supported by extension.
+     */
+    @NonNull
+    public List<Size> getPostviewSupportedSizes(@Extension int extension,
+            @NonNull Size captureSize, int format) {
+
+        long clientId = registerClient(mContext);
+        if (clientId < 0) {
+            throw new IllegalArgumentException("Unsupported extensions");
+        }
+
+        try {
+            if (!isExtensionSupported(mCameraId, extension, mCharacteristicsMapNative)) {
+                throw new IllegalArgumentException("Unsupported extension");
+            }
+
+            android.hardware.camera2.extension.Size sz =
+                    new android.hardware.camera2.extension.Size();
+            sz.width = captureSize.getWidth();
+            sz.height = captureSize.getHeight();
+
+            StreamConfigurationMap streamMap = mCharacteristicsMap.get(mCameraId).get(
+                    CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+            if (areAdvancedExtensionsSupported()) {
+                switch(format) {
+                    case ImageFormat.YUV_420_888:
+                    case ImageFormat.JPEG:
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported format: " + format);
+                }
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId, mCharacteristicsMapNative);
+                return generateSupportedSizes(extender.getSupportedPostviewResolutions(
+                    sz), format, streamMap);
+            } else {
+                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                        initializeExtension(extension);
+                extenders.second.init(mCameraId, mCharacteristicsMapNative.get(mCameraId));
+                if ((extenders.second.getCaptureProcessor() == null) ||
+                        !isPostviewAvailable(extension)) {
+                    // Extensions that don't implement any capture processor
+                    // and have processing occur in the HAL don't currently support the
+                    // postview feature
+                    throw new IllegalArgumentException("Extension does not support "
+                            + "postview feature");
+                }
+
+                if (format == ImageFormat.YUV_420_888) {
+                    return generateSupportedSizes(
+                            extenders.second.getSupportedPostviewResolutions(sz),
+                            format, streamMap);
+                } else if (format == ImageFormat.JPEG) {
+                    // The framework will perform the additional encoding pass on the
+                    // processed YUV_420 buffers.
+                    return generateJpegSupportedSizes(
+                            extenders.second.getSupportedPostviewResolutions(sz),
+                                    streamMap);
+                } else {
+                    throw new IllegalArgumentException("Unsupported format: " + format);
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query the extension postview supported sizes! Extension "
+                    + "service does not respond!");
+            return Collections.emptyList();
+        } finally {
+            unregisterClient(clientId);
+        }
     }
 
     /**
@@ -583,6 +733,12 @@ public final class CameraExtensionCharacteristics {
      * The {@link android.graphics.SurfaceTexture} class is guaranteed at least one size for
      * backward compatible cameras whereas other output classes are not guaranteed to be supported.
      * </p>
+     *
+     * <p>Starting with Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
+     * {@link android.view.SurfaceView} classes are also guaranteed to be supported and include
+     * the same resolutions as {@link android.graphics.SurfaceTexture}.
+     * Clients must set the desired SurfaceView resolution by calling
+     * {@link android.view.SurfaceHolder#setFixedSize}.</p>
      *
      * @param extension the extension type
      * @param klass     a non-{@code null} {@link Class} object reference
@@ -606,22 +762,23 @@ public final class CameraExtensionCharacteristics {
         }
 
         try {
-            if (!isExtensionSupported(mCameraId, extension, mChars)) {
+            if (!isExtensionSupported(mCameraId, extension, mCharacteristicsMapNative)) {
                 throw new IllegalArgumentException("Unsupported extension");
             }
 
-            StreamConfigurationMap streamMap = mChars.get(
+            StreamConfigurationMap streamMap = mCharacteristicsMap.get(mCameraId).get(
                     CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             if (areAdvancedExtensionsSupported()) {
                 IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
-                extender.init(mCameraId);
+                extender.init(mCameraId, mCharacteristicsMapNative);
                 return generateSupportedSizes(
                         extender.getSupportedPreviewOutputResolutions(mCameraId),
                         ImageFormat.PRIVATE, streamMap);
             } else {
                 Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
                         initializeExtension(extension);
-                extenders.first.init(mCameraId, mChars.getNativeMetadata());
+                extenders.first.init(mCameraId,
+                        mCharacteristicsMapNative.get(mCameraId));
                 return generateSupportedSizes(extenders.first.getSupportedResolutions(),
                         ImageFormat.PRIVATE, streamMap);
             }
@@ -663,11 +820,11 @@ public final class CameraExtensionCharacteristics {
             }
 
             try {
-                if (!isExtensionSupported(mCameraId, extension, mChars)) {
+                if (!isExtensionSupported(mCameraId, extension, mCharacteristicsMapNative)) {
                     throw new IllegalArgumentException("Unsupported extension");
                 }
 
-                StreamConfigurationMap streamMap = mChars.get(
+                StreamConfigurationMap streamMap = mCharacteristicsMap.get(mCameraId).get(
                         CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
                 if (areAdvancedExtensionsSupported()) {
                     switch(format) {
@@ -678,14 +835,14 @@ public final class CameraExtensionCharacteristics {
                             throw new IllegalArgumentException("Unsupported format: " + format);
                     }
                     IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
-                    extender.init(mCameraId);
+                    extender.init(mCameraId, mCharacteristicsMapNative);
                     return generateSupportedSizes(extender.getSupportedCaptureOutputResolutions(
                             mCameraId), format, streamMap);
                 } else {
                     if (format == ImageFormat.YUV_420_888) {
                         Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
                                 initializeExtension(extension);
-                        extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                        extenders.second.init(mCameraId, mCharacteristicsMapNative.get(mCameraId));
                         if (extenders.second.getCaptureProcessor() == null) {
                             // Extensions that don't implement any capture processor are limited to
                             // JPEG only!
@@ -696,7 +853,7 @@ public final class CameraExtensionCharacteristics {
                     } else if (format == ImageFormat.JPEG) {
                         Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
                                 initializeExtension(extension);
-                        extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                        extenders.second.init(mCameraId, mCharacteristicsMapNative.get(mCameraId));
                         if (extenders.second.getCaptureProcessor() != null) {
                             // The framework will perform the additional encoding pass on the
                             // processed YUV_420 buffers.
@@ -752,7 +909,7 @@ public final class CameraExtensionCharacteristics {
         }
 
         try {
-            if (!isExtensionSupported(mCameraId, extension, mChars)) {
+            if (!isExtensionSupported(mCameraId, extension, mCharacteristicsMapNative)) {
                 throw new IllegalArgumentException("Unsupported extension");
             }
 
@@ -762,7 +919,7 @@ public final class CameraExtensionCharacteristics {
             sz.height = captureOutputSize.getHeight();
             if (areAdvancedExtensionsSupported()) {
                 IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
-                extender.init(mCameraId);
+                extender.init(mCameraId, mCharacteristicsMapNative);
                 LatencyRange latencyRange = extender.getEstimatedCaptureLatencyRange(mCameraId,
                         sz, format);
                 if (latencyRange != null) {
@@ -771,7 +928,7 @@ public final class CameraExtensionCharacteristics {
             } else {
                 Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
                         initializeExtension(extension);
-                extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                extenders.second.init(mCameraId, mCharacteristicsMapNative.get(mCameraId));
                 if ((format == ImageFormat.YUV_420_888) &&
                         (extenders.second.getCaptureProcessor() == null) ){
                     // Extensions that don't implement any capture processor are limited to
@@ -802,6 +959,46 @@ public final class CameraExtensionCharacteristics {
     }
 
     /**
+     * Retrieve support for capture progress callbacks via
+     *  {@link CameraExtensionSession.ExtensionCaptureCallback#onCaptureProcessProgressed}.
+     *
+     * @param extension         the extension type
+     * @return {@code true} in case progress callbacks are supported, {@code false} otherwise
+     *
+     * @throws IllegalArgumentException in case of an unsupported extension.
+     */
+    public boolean isCaptureProcessProgressAvailable(@Extension int extension) {
+        long clientId = registerClient(mContext);
+        if (clientId < 0) {
+            throw new IllegalArgumentException("Unsupported extensions");
+        }
+
+        try {
+            if (!isExtensionSupported(mCameraId, extension, mCharacteristicsMapNative)) {
+                throw new IllegalArgumentException("Unsupported extension");
+            }
+
+            if (areAdvancedExtensionsSupported()) {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId, mCharacteristicsMapNative);
+                return extender.isCaptureProcessProgressAvailable();
+            } else {
+                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                        initializeExtension(extension);
+                extenders.second.init(mCameraId, mCharacteristicsMapNative.get(mCameraId));
+                return extenders.second.isCaptureProcessProgressAvailable();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query the extension progress callbacks! Extension service does"
+                    + " not respond!");
+        } finally {
+            unregisterClient(clientId);
+        }
+
+        return false;
+    }
+
+    /**
      * Returns the set of keys supported by a {@link CaptureRequest} submitted in a
      * {@link CameraExtensionSession} with a given extension type.
      *
@@ -824,20 +1021,20 @@ public final class CameraExtensionCharacteristics {
         HashSet<CaptureRequest.Key> ret = new HashSet<>();
 
         try {
-            if (!isExtensionSupported(mCameraId, extension, mChars)) {
+            if (!isExtensionSupported(mCameraId, extension, mCharacteristicsMapNative)) {
                 throw new IllegalArgumentException("Unsupported extension");
             }
 
             CameraMetadataNative captureRequestMeta = null;
             if (areAdvancedExtensionsSupported()) {
                 IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
-                extender.init(mCameraId);
+                extender.init(mCameraId, mCharacteristicsMapNative);
                 captureRequestMeta = extender.getAvailableCaptureRequestKeys(mCameraId);
             } else {
                 Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
                         initializeExtension(extension);
-                extenders.second.onInit(mCameraId, mChars.getNativeMetadata());
-                extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                extenders.second.onInit(mCameraId, mCharacteristicsMapNative.get(mCameraId));
+                extenders.second.init(mCameraId, mCharacteristicsMapNative.get(mCameraId));
                 captureRequestMeta = extenders.second.getAvailableCaptureRequestKeys();
                 extenders.second.onDeInit();
             }
@@ -902,20 +1099,20 @@ public final class CameraExtensionCharacteristics {
 
         HashSet<CaptureResult.Key> ret = new HashSet<>();
         try {
-            if (!isExtensionSupported(mCameraId, extension, mChars)) {
+            if (!isExtensionSupported(mCameraId, extension, mCharacteristicsMapNative)) {
                 throw new IllegalArgumentException("Unsupported extension");
             }
 
             CameraMetadataNative captureResultMeta = null;
             if (areAdvancedExtensionsSupported()) {
                 IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
-                extender.init(mCameraId);
+                extender.init(mCameraId, mCharacteristicsMapNative);
                 captureResultMeta = extender.getAvailableCaptureResultKeys(mCameraId);
             } else {
                 Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
                         initializeExtension(extension);
-                extenders.second.onInit(mCameraId, mChars.getNativeMetadata());
-                extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                extenders.second.onInit(mCameraId, mCharacteristicsMapNative.get(mCameraId));
+                extenders.second.init(mCameraId, mCharacteristicsMapNative.get(mCameraId));
                 captureResultMeta = extenders.second.getAvailableCaptureResultKeys();
                 extenders.second.onDeInit();
             }
