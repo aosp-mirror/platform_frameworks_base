@@ -34,6 +34,7 @@ import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
 import com.android.systemui.bouncer.data.repository.BouncerMessageRepositoryImpl
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor
 import com.android.systemui.bouncer.domain.interactor.CountDownTimerUtil
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor
@@ -144,6 +145,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     lateinit var primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel
     @Mock lateinit var keyEventInteractor: KeyEventInteractor
+    @Mock lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
+    @Mock lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     private val notificationExpansionRepository = NotificationExpansionRepository()
 
     private lateinit var fakeClock: FakeSystemClock
@@ -176,6 +179,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
         featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
         featureFlags.set(Flags.MIGRATE_NSSL, false)
+        featureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, false)
 
         testScope = TestScope()
         fakeClock = FakeSystemClock()
@@ -248,6 +252,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 ),
                 BouncerLogger(logcatLogBuffer("BouncerLog")),
                 keyEventInteractor,
+                primaryBouncerInteractor,
+                alternateBouncerInteractor,
             )
         underTest.setupExpandedStatusBar()
         underTest.setDragDownHelper(dragDownHelper)

@@ -326,7 +326,7 @@ object Flags {
     /** Flag to use a separate view for the alternate bouncer. */
     // TODO(b/300440924): Tracking bug
     @JvmField
-    val ALTERNATE_BOUNCER_REFACTOR: UnreleasedFlag = unreleasedFlag("alternate_bouncer_view")
+    val ALTERNATE_BOUNCER_VIEW: UnreleasedFlag = unreleasedFlag("alternate_bouncer_view")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug

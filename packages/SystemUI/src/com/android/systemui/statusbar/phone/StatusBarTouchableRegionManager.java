@@ -32,6 +32,8 @@ import android.view.WindowInsets;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ScreenDecorations;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
@@ -65,7 +67,6 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
 
     private boolean mIsStatusBarExpanded = false;
     private boolean mShouldAdjustInsets = false;
-    private CentralSurfaces mCentralSurfaces;
     private View mNotificationShadeWindowView;
     private View mNotificationPanelView;
     private boolean mForceCollapsedUntilLayout = false;
@@ -73,6 +74,8 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private Region mTouchableRegion = new Region();
     private int mDisplayCutoutTouchableRegionSize;
     private int mStatusBarHeight;
+    private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
+    private final AlternateBouncerInteractor mAlternateBouncerInteractor;
 
     private final OnComputeInternalInsetsListener mOnComputeInternalInsetsListener;
 
@@ -86,7 +89,9 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             Provider<SceneInteractor> sceneInteractor,
             Provider<JavaAdapter> javaAdapter,
             SceneContainerFlags sceneContainerFlags,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            PrimaryBouncerInteractor primaryBouncerInteractor,
+            AlternateBouncerInteractor alternateBouncerInteractor
     ) {
         mContext = context;
         initResources();
@@ -129,13 +134,12 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
                     this::onShadeExpansionFullyChanged);
         }
 
+        mPrimaryBouncerInteractor = primaryBouncerInteractor;
+        mAlternateBouncerInteractor = alternateBouncerInteractor;
         mOnComputeInternalInsetsListener = this::onComputeInternalInsets;
     }
 
-    protected void setup(
-            @NonNull CentralSurfaces centralSurfaces,
-            @NonNull View notificationShadeWindowView) {
-        mCentralSurfaces = centralSurfaces;
+    protected void setup(@NonNull View notificationShadeWindowView) {
         mNotificationShadeWindowView = notificationShadeWindowView;
         mNotificationPanelView = mNotificationShadeWindowView.findViewById(R.id.notification_panel);
     }
@@ -261,7 +265,8 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         // since we don't want stray touches to go through the light reveal scrim to whatever is
         // underneath.
         return mIsStatusBarExpanded
-                || mCentralSurfaces.isBouncerShowing()
+                || mPrimaryBouncerInteractor.isShowing().getValue()
+                || mAlternateBouncerInteractor.isVisibleState()
                 || mUnlockedScreenOffAnimationController.isAnimationPlaying();
     }
 

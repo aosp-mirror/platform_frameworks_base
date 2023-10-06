@@ -1191,7 +1191,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 });
         mStatusBarInitializer.initializeStatusBar();
 
-        mStatusBarTouchableRegionManager.setup(this, getNotificationShadeWindowView());
+        mStatusBarTouchableRegionManager.setup(getNotificationShadeWindowView());
 
         createNavigationBar(result);
 
@@ -2842,13 +2842,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScrimController.setExpansionAffectsAlpha(!unlocking);
 
         if (mAlternateBouncerInteractor.isVisibleState()) {
-            if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
-                    && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
-                    || mTransitionToFullShadeProgress > 0f)) {
-                mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
-            } else {
-                mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
+            if (!mFeatureFlags.isEnabled(Flags.ALTERNATE_BOUNCER_VIEW)) {
+                if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
+                        && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
+                        || mTransitionToFullShadeProgress > 0f)) {
+                    mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
+                } else {
+                    mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
+                }
             }
+
             // This will cancel the keyguardFadingAway animation if it is running. We need to do
             // this as otherwise it can remain pending and leave keyguard in a weird state.
             mUnlockScrimCallback.onCancelled();
