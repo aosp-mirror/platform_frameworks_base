@@ -65,7 +65,13 @@ class DefaultClockController(
     protected var onSecondaryDisplay: Boolean = false
 
     override val events: DefaultClockEvents
-    override val config = ClockConfig(DEFAULT_CLOCK_ID)
+    override val config: ClockConfig by lazy {
+        ClockConfig(
+            DEFAULT_CLOCK_ID,
+            resources.getString(R.string.clock_default_name),
+            resources.getString(R.string.clock_default_description)
+        )
+    }
 
     init {
         val parent = FrameLayout(ctx)

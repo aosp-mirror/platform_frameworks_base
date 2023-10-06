@@ -192,14 +192,17 @@ enum class ClockTickRate(val value: Int) {
 /** Some data about a clock design */
 data class ClockMetadata(
     val clockId: ClockId,
-    val name: String,
-) {
-    constructor(clockId: ClockId) : this(clockId, clockId) {}
-}
+)
 
 /** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
 data class ClockConfig(
     val id: String,
+
+    /** Localized name of the clock */
+    val name: String,
+
+    /** Localized accessibility description for the clock */
+    val description: String,
 
     /** Transition to AOD should move smartspace like large clock instead of small clock */
     val useAlternateSmartspaceAODTransition: Boolean = false,
