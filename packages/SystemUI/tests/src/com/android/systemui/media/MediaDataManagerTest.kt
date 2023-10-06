@@ -1,22 +1,27 @@
 package com.android.systemui.media
 
+import android.app.IUriGrantsManager
 import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.PendingIntent
+import android.app.UriGrantsManager
 import android.app.smartspace.SmartspaceAction
 import android.app.smartspace.SmartspaceTarget
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.media.MediaDescription
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSession
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -25,6 +30,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
@@ -36,6 +42,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -43,8 +50,10 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
+import org.mockito.MockitoSession
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.quality.Strictness
 
 private const val KEY = "KEY"
 private const val KEY_2 = "KEY_2"
@@ -96,12 +105,23 @@ class MediaDataManagerTest : SysuiTestCase() {
     private val clock = FakeSystemClock()
     @Mock private lateinit var tunerService: TunerService
     @Captor lateinit var tunableCaptor: ArgumentCaptor<TunerService.Tunable>
+    @Mock private lateinit var ugm: IUriGrantsManager
+    @Mock private lateinit var imageSource: ImageDecoder.Source
 
     private val originalSmartspaceSetting = Settings.Secure.getInt(context.contentResolver,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 1)
 
+    private lateinit var staticMockSession: MockitoSession
+
     @Before
     fun setup() {
+        staticMockSession =
+            ExtendedMockito.mockitoSession()
+                .mockStatic<UriGrantsManager>(UriGrantsManager::class.java)
+                .mockStatic<ImageDecoder>(ImageDecoder::class.java)
+                .strictness(Strictness.LENIENT)
+                .startMocking()
+        whenever(UriGrantsManager.getService()).thenReturn(ugm)
         foregroundExecutor = FakeExecutor(clock)
         backgroundExecutor = FakeExecutor(clock)
         smartspaceMediaDataProvider = SmartspaceMediaDataProvider()
@@ -168,6 +188,7 @@ class MediaDataManagerTest : SysuiTestCase() {
 
     @After
     fun tearDown() {
+        staticMockSession.finishMocking()
         session.release()
         mediaDataManager.destroy()
         Settings.Secure.putInt(context.contentResolver,
@@ -176,12 +197,9 @@ class MediaDataManagerTest : SysuiTestCase() {
 
     @Test
     fun testSetTimedOut_active_deactivatesMedia() {
-        val data = MediaData(userId = USER_ID, initialized = true, backgroundColor = 0, app = null,
-                appIcon = null, artist = null, song = null, artwork = null, actions = emptyList(),
-                actionsToShowInCompact = emptyList(), packageName = "INVALID", token = null,
-                clickIntent = null, device = null, active = true, resumeAction = null)
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-        mediaDataManager.onMediaDataLoaded(KEY, oldKey = null, data = data)
+        addNotificationAndLoad()
+        val data = mediaDataCaptor.value
+        assertThat(data.active).isTrue()
 
         mediaDataManager.setTimedOut(KEY, timedOut = true)
         assertThat(data.active).isFalse()
@@ -677,5 +695,104 @@ class MediaDataManagerTest : SysuiTestCase() {
                 eq(0), eq(false))
         assertThat(mediaDataCaptor.value.actionsToShowInCompact.size).isEqualTo(
                 MediaDataManager.MAX_COMPACT_ACTIONS)
+    }
+
+    @Test
+    fun testResumeMediaLoaded_hasArtPermission_artLoaded() {
+        // When resume media is loaded and user/app has permission to access the art URI,
+        whenever(
+                ugm.checkGrantUriPermission_ignoreNonSystem(
+                        anyInt(),
+                        any(),
+                        any(),
+                        anyInt(),
+                        anyInt()
+                    )
+                )
+            .thenReturn(1)
+        val artwork = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val uri = Uri.parse("content://example")
+        whenever(ImageDecoder.createSource(any(), eq(uri))).thenReturn(imageSource)
+        whenever(ImageDecoder.decodeBitmap(any(), any())).thenReturn(artwork)
+
+        val desc =
+            MediaDescription.Builder().run {
+                setTitle(SESSION_TITLE)
+                setIconUri(uri)
+                build()
+            }
+        addResumeControlAndLoad(desc)
+
+        // Then the artwork is loaded
+        assertThat(mediaDataCaptor.value.artwork).isNotNull()
+    }
+
+    @Test
+    fun testResumeMediaLoaded_noArtPermission_noArtLoaded() {
+        // When resume media is loaded and user/app does not have permission to access the art URI
+        whenever(
+            ugm.checkGrantUriPermission_ignoreNonSystem(
+                    anyInt(),
+                    any(),
+                    any(),
+                    anyInt(),
+                    anyInt()
+                )
+            )
+            .thenThrow(SecurityException("Test no permission"))
+        val artwork = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val uri = Uri.parse("content://example")
+        whenever(ImageDecoder.createSource(any(), eq(uri))).thenReturn(imageSource)
+        whenever(ImageDecoder.decodeBitmap(any(), any())).thenReturn(artwork)
+
+        val desc =
+            MediaDescription.Builder().run {
+                setTitle(SESSION_TITLE)
+                setIconUri(uri)
+                build()
+            }
+        addResumeControlAndLoad(desc)
+
+        // Then the artwork is not loaded
+        assertThat(mediaDataCaptor.value.artwork).isNull()
+    }
+
+    /**
+     * Helper function to add a media notification and capture the resulting MediaData
+     */
+    private fun addNotificationAndLoad() {
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
+                eq(0), eq(false))
+    }
+
+    /** Helper function to add a resumption control and capture the resulting MediaData */
+    private fun addResumeControlAndLoad(
+        desc: MediaDescription,
+        packageName: String = PACKAGE_NAME
+    ) {
+        mediaDataManager.addResumptionControls(
+            USER_ID,
+            desc,
+            Runnable {},
+            session.sessionToken,
+            APP_NAME,
+            pendingIntent,
+            packageName
+        )
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(packageName),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
     }
 }

@@ -39,4 +39,7 @@ interface IUriGrantsManager {
     void clearGrantedUriPermissions(in String packageName, int userId);
     ParceledListSlice getUriPermissions(in String packageName, boolean incoming,
             boolean persistedOnly);
+
+    int checkGrantUriPermission_ignoreNonSystem(
+            int sourceUid, String targetPkg, in Uri uri, int modeFlags, int userId);
 }
