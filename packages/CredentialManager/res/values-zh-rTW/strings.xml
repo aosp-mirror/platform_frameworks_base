@@ -17,7 +17,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="4539824758261855508">"憑證管理工具"</string>
+    <string name="app_name" msgid="4539824758261855508">"Credential Manager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"取消"</string>
     <string name="string_continue" msgid="1346732695941131882">"繼續"</string>
     <string name="string_more_options" msgid="2763852250269945472">"儲存其他方式"</string>
