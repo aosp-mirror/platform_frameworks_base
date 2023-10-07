@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Assert;
 
@@ -80,7 +81,7 @@ public final class DozeServiceHost implements DozeHost {
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
-    private final HeadsUpManagerPhone mHeadsUpManagerPhone;
+    private final HeadsUpManager mHeadsUpManager;
     private final BatteryController mBatteryController;
     private final ScrimController mScrimController;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
@@ -106,7 +107,7 @@ public final class DozeServiceHost implements DozeHost {
             WakefulnessLifecycle wakefulnessLifecycle,
             SysuiStatusBarStateController statusBarStateController,
             DeviceProvisionedController deviceProvisionedController,
-            HeadsUpManagerPhone headsUpManagerPhone, BatteryController batteryController,
+            HeadsUpManager headsUpManager, BatteryController batteryController,
             ScrimController scrimController,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             Lazy<AssistManager> assistManagerLazy,
@@ -123,7 +124,7 @@ public final class DozeServiceHost implements DozeHost {
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mDeviceProvisionedController = deviceProvisionedController;
-        mHeadsUpManagerPhone = headsUpManagerPhone;
+        mHeadsUpManager = headsUpManager;
         mBatteryController = batteryController;
         mScrimController = scrimController;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
@@ -135,7 +136,7 @@ public final class DozeServiceHost implements DozeHost {
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
         mAuthController = authController;
         mNotificationIconAreaController = notificationIconAreaController;
-        mHeadsUpManagerPhone.addListener(mOnHeadsUpChangedListener);
+        mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mDozeInteractor = dozeInteractor;
     }
 
@@ -337,8 +338,8 @@ public final class DozeServiceHost implements DozeHost {
         if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_REACH) {
             mScrimController.setWakeLockScreenSensorActive(true);
         }
-        if (mDozeScrimController.isPulsing() && mHeadsUpManagerPhone.hasNotifications()) {
-            mHeadsUpManagerPhone.extendHeadsUp();
+        if (mDozeScrimController.isPulsing() && mHeadsUpManager.hasNotifications()) {
+            mHeadsUpManager.extendHeadsUp();
         } else {
             mDozeScrimController.extendPulse();
         }
@@ -493,7 +494,7 @@ public final class DozeServiceHost implements DozeHost {
                     mDozeScrimController.cancelPendingPulseTimeout();
                 }
             }
-            if (!isHeadsUp && !mHeadsUpManagerPhone.hasNotifications()) {
+            if (!isHeadsUp && !mHeadsUpManager.hasNotifications()) {
                 // There are no longer any notifications to show.  We should end the
                 // pulse now.
                 stopPulsing();

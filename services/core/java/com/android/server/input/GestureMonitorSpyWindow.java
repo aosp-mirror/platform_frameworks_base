@@ -62,10 +62,10 @@ class GestureMonitorSpyWindow {
         mWindowHandle.ownerUid = uid;
         mWindowHandle.scaleFactor = 1.0f;
         mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
-        mWindowHandle.inputConfig =
-                InputConfig.NOT_FOCUSABLE | InputConfig.SPY | InputConfig.TRUSTED_OVERLAY;
+        mWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE | InputConfig.SPY;
 
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        mWindowHandle.setTrustedOverlay(t, mInputSurface, true);
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
         t.setLayer(mInputSurface, InputManagerService.INPUT_OVERLAY_LAYER_GESTURE_MONITOR);
         t.setPosition(mInputSurface, 0, 0);

@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
@@ -39,7 +40,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
     private final ShadeViewController mShadeViewController;
     private final NotificationStackScrollLayoutController mNsslController;
     private final KeyguardBypassController mKeyguardBypassController;
-    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final HeadsUpManager mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
 
@@ -50,7 +51,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
             ShadeViewController shadeViewController,
             NotificationStackScrollLayoutController nsslController,
             KeyguardBypassController keyguardBypassController,
-            HeadsUpManagerPhone headsUpManager,
+            HeadsUpManager headsUpManager,
             StatusBarStateController statusBarStateController,
             NotificationRemoteInputManager notificationRemoteInputManager) {
         mNotificationShadeWindowController = notificationShadeWindowController;

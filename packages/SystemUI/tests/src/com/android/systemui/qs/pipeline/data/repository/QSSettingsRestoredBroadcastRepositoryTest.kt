@@ -4,7 +4,6 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.coroutines.collectLastValue
@@ -24,7 +23,6 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-@RoboPilotTest
 class QSSettingsRestoredBroadcastRepositoryTest : SysuiTestCase() {
     private val dispatcher = StandardTestDispatcher()
     private val testScope = TestScope(dispatcher)

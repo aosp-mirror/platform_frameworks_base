@@ -577,7 +577,8 @@ public class ActivityStartController {
                 .getRootTask(WINDOWING_MODE_UNDEFINED, activityType);
         if (rootTask == null) return false;
         final ActivityRecord r = rootTask.topRunningActivity();
-        if (r == null || r.isVisibleRequested() || !r.attachedToProcess()
+        if (r == null || (r.isVisibleRequested() && rootTask.isTopRootTaskInDisplayArea())
+                || !r.attachedToProcess()
                 || !r.mActivityComponent.equals(intent.getComponent())
                 || !mService.isCallerRecents(r.getUid())
                 // Recents keeps invisible while device is locked.

@@ -30,7 +30,7 @@ android_test {
         "platform-test-annotations",
         "testng",
         "testables",
-        "truth-prebuilt",
+        "truth",
         "platform-compat-test-rules",
     ],
 

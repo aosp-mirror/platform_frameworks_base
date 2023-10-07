@@ -35,10 +35,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.res.R;
-import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,7 +49,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper()
 public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {

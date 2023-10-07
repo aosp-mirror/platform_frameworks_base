@@ -13,3 +13,11 @@ flag {
     description: "Enables all the sysui classic flags that are marked as being in teamfood"
     bug: "302578396"
 }
+
+flag {
+    name: "notifications_footer_view_refactor"
+    namespace: "systemui"
+    description: "Enables the refactored version of the footer view in the notification shade "
+        "(containing the \"Clear all\" button). Should not bring any behavior changes"
+    bug: "293167744"
+}

@@ -52,6 +52,7 @@
             <xs:element name="address" type="xs:nonNegativeInteger"/>
             <xs:element name="position" type="xs:string" minOccurs="0" maxOccurs="1" />
             <xs:element name="brightnessThrottlingMapId" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="powerThrottlingMapId" type="xs:string" minOccurs="0" maxOccurs="1" />
             <xs:element name="refreshRateThermalThrottlingMapId" type="xs:string" minOccurs="0" />
             <xs:element name="leadDisplayAddress" type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="1" />
         </xs:sequence>

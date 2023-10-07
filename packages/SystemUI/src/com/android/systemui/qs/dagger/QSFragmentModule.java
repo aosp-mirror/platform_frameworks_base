@@ -20,34 +20,17 @@ import static com.android.systemui.util.Utils.useCollapsedMediaInLandscape;
 import static com.android.systemui.util.Utils.useQsMediaPlayer;
 
 import android.content.Context;
-import android.view.View;
 
-import com.android.systemui.dagger.qualifiers.RootView;
-import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.qs.QSFragmentLegacy;
-
-import javax.inject.Named;
-
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Named;
 
 /**
  * Dagger Module for {@link QSFragmentComponent}.
  */
 @Module(includes = {QSScopeModule.class})
 public  interface QSFragmentModule {
-
-    @Provides
-    @RootView
-    static View provideRootView(QSFragmentLegacy qsFragment) {
-        return qsFragment.getView();
-    }
-
-    /** */
-    @Binds
-    QS bindQS(QSFragmentLegacy qsFragment);
-
     /** */
     @Provides
     @Named(QSScopeModule.QS_USING_MEDIA_PLAYER)

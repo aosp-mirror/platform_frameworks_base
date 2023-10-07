@@ -28,8 +28,10 @@ import com.android.keyguard.FaceWakeUpTriggersConfig
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FaceSensorInfo
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
 import com.android.systemui.biometrics.shared.model.LockoutMode
+import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor
@@ -156,7 +158,6 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 fakeDeviceEntryFingerprintAuthRepository,
                 fakeUserRepository,
                 facePropertyRepository,
-                fakeKeyguardRepository,
                 faceWakeUpTriggersConfig,
                 powerInteractor,
             )
@@ -437,6 +438,43 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
             runCurrent()
             assertThat(faceAuthRepository.runningAuthRequest.value)
                 .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER, false))
+        }
+
+    @Test
+    fun faceAuthIsRequestedWhenWalletIsLaunchedAndIfFaceAuthIsStrong() =
+        testScope.runTest {
+            underTest.start()
+            facePropertyRepository.setSensorInfo(FaceSensorInfo(1, SensorStrength.STRONG))
+
+            underTest.onWalletLaunched()
+
+            runCurrent()
+            assertThat(faceAuthRepository.runningAuthRequest.value)
+                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_OCCLUDING_APP_REQUESTED, true))
+        }
+
+    @Test
+    fun faceAuthIsNotTriggeredIfFaceAuthIsWeak() =
+        testScope.runTest {
+            underTest.start()
+            facePropertyRepository.setSensorInfo(FaceSensorInfo(1, SensorStrength.WEAK))
+
+            underTest.onWalletLaunched()
+
+            runCurrent()
+            assertThat(faceAuthRepository.runningAuthRequest.value).isNull()
+        }
+
+    @Test
+    fun faceAuthIsNotTriggeredIfFaceAuthIsConvenience() =
+        testScope.runTest {
+            underTest.start()
+            facePropertyRepository.setSensorInfo(FaceSensorInfo(1, SensorStrength.CONVENIENCE))
+
+            underTest.onWalletLaunched()
+
+            runCurrent()
+            assertThat(faceAuthRepository.runningAuthRequest.value).isNull()
         }
 
     @Test

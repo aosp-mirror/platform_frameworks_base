@@ -29,9 +29,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.ClockConfig;
 import com.android.systemui.plugins.ClockController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
@@ -81,7 +81,7 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
     public void updatePosition_primaryClockAnimation() {
         ClockController mockClock = mock(ClockController.class);
         when(mKeyguardClockSwitchController.getClock()).thenReturn(mockClock);
-        when(mockClock.getConfig()).thenReturn(new ClockConfig("MOCK", false, true));
+        when(mockClock.getConfig()).thenReturn(new ClockConfig("MOCK", "", "", false, true));
 
         mController.updatePosition(10, 15, 20f, true);
 
@@ -96,7 +96,7 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
     public void updatePosition_alternateClockAnimation() {
         ClockController mockClock = mock(ClockController.class);
         when(mKeyguardClockSwitchController.getClock()).thenReturn(mockClock);
-        when(mockClock.getConfig()).thenReturn(new ClockConfig("MOCK", true, true));
+        when(mockClock.getConfig()).thenReturn(new ClockConfig("MOCK", "", "", true, true));
 
         mController.updatePosition(10, 15, 20f, true);
 

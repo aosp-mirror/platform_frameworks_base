@@ -16,7 +16,11 @@
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /** View-model for the overflow row of notification icons displayed in the notification shade. */
 class NotificationIconContainerShelfViewModel @Inject constructor() :
-    NotificationIconContainerViewModel
+    NotificationIconContainerViewModel {
+    override val animationsEnabled: Flow<Boolean> = flowOf(true)
+}

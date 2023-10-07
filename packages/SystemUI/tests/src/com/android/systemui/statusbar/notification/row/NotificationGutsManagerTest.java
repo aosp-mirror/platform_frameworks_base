@@ -33,7 +33,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -89,8 +88,8 @@ import com.android.systemui.statusbar.notification.collection.provider.HighPrior
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -152,7 +151,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private AssistantFeedbackController mAssistantFeedbackController;
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock private StatusBarStateController mStatusBarStateController;
-    @Mock private HeadsUpManagerPhone mHeadsUpManagerPhone;
+    @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private ActivityStarter mActivityStarter;
 
     @Mock private UserManager mUserManager;
@@ -171,7 +170,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mTestScope.getBackgroundScope(),
                 new WindowRootViewVisibilityRepository(mBarService, mExecutor),
                 new FakeKeyguardRepository(),
-                mHeadsUpManagerPhone,
+                mHeadsUpManager,
                 PowerInteractorFactory.create().getPowerInteractor());
 
         mGutsManager = new NotificationGutsManager(
@@ -198,7 +197,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mDeviceProvisionedController,
                 mMetricsLogger,
-                mHeadsUpManagerPhone,
+                mHeadsUpManager,
                 mActivityStarter);
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
                 mOnSettingsClickListener);
@@ -239,7 +238,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 anyInt(),
                 anyBoolean(),
                 any(Runnable.class));
-        verify(mHeadsUpManagerPhone).setGutsShown(realRow.getEntry(), true);
+        verify(mHeadsUpManager).setGutsShown(realRow.getEntry(), true);
 
         assertEquals(View.VISIBLE, guts.getVisibility());
         mGutsManager.closeAndSaveGuts(false, false, true, 0, 0, false);
@@ -247,7 +246,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         verify(guts).closeControls(anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyBoolean());
         verify(row, times(1)).setGutsView(any());
         mTestableLooper.processAllMessages();
-        verify(mHeadsUpManagerPhone).setGutsShown(realRow.getEntry(), false);
+        verify(mHeadsUpManager).setGutsShown(realRow.getEntry(), false);
     }
 
     @Test

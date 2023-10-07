@@ -1290,7 +1290,8 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
-    public void testLightStepIdleStateIdlingTimeIncreases() {
+    public void testLightStepIdleStateIdlingTimeIncreasesExponentially() {
+        mConstants.LIGHT_IDLE_INCREASE_LINEARLY = false;
         final long maintenanceTimeMs = 60_000L;
         mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET = maintenanceTimeMs;
         mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET = maintenanceTimeMs;
@@ -1335,13 +1336,88 @@ public class DeviceIdleControllerTest {
                 eq(mInjector.nowElapsed + idlingTimeMs),
                 anyLong(), anyString(), any(), any(Handler.class));
 
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < 10; ++i) {
             // IDLE->MAINTENANCE alarm
             mInjector.nowElapsed = mDeviceIdleController.getNextLightAlarmTimeForTesting();
             alarmListener.onAlarm();
             verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
             long maintenanceExpiryTime = mInjector.nowElapsed + maintenanceTimeMs;
             idlingTimeMs *= mConstants.LIGHT_IDLE_FACTOR;
+            idlingTimeMs = Math.min(idlingTimeMs, mConstants.LIGHT_MAX_IDLE_TIMEOUT);
+            // Set MAINTENANCE->IDLE
+            alarmManagerInOrder.verify(mAlarmManager).setWindow(
+                    eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
+                    eq(maintenanceExpiryTime),
+                    anyLong(), anyString(), any(), any(Handler.class));
+
+            // MAINTENANCE->IDLE alarm
+            mInjector.nowElapsed = mDeviceIdleController.getNextLightAlarmTimeForTesting();
+            alarmListener.onAlarm();
+            verifyLightStateConditions(LIGHT_STATE_IDLE);
+            // Set IDLE->MAINTENANCE again
+            alarmManagerInOrder.verify(mAlarmManager).setWindow(
+                    eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
+                    eq(mInjector.nowElapsed + idlingTimeMs),
+                    anyLong(), anyString(), any(), any(Handler.class));
+        }
+    }
+
+    @Test
+    public void testLightStepIdleStateIdlingTimeIncreasesLinearly() {
+        mConstants.LIGHT_IDLE_INCREASE_LINEARLY = true;
+        final long maintenanceTimeMs = 60_000L;
+        mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET = maintenanceTimeMs;
+        mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET = maintenanceTimeMs;
+        mConstants.LIGHT_IDLE_TIMEOUT = 5 * 60_000L;
+        mConstants.LIGHT_MAX_IDLE_TIMEOUT = 30 * 60_000L;
+        mConstants.LIGHT_IDLE_FACTOR = 2f;
+        mConstants.LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS = 2 * 60_000L;
+
+        setNetworkConnected(true);
+        mDeviceIdleController.setJobsActive(false);
+        mDeviceIdleController.setAlarmsActive(false);
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+
+        InOrder alarmManagerInOrder = inOrder(mAlarmManager);
+
+        final ArgumentCaptor<AlarmManager.OnAlarmListener> alarmListenerCaptor = ArgumentCaptor
+                .forClass(AlarmManager.OnAlarmListener.class);
+        doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
+                eq("DeviceIdleController.light"), alarmListenerCaptor.capture(), any());
+
+        // Set state to INACTIVE.
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+        long idlingTimeMs = mConstants.LIGHT_IDLE_TIMEOUT;
+        final long idleAfterInactiveExpiryTime =
+                mInjector.nowElapsed + mConstants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT;
+        alarmManagerInOrder.verify(mAlarmManager).setWindow(
+                eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
+                eq(idleAfterInactiveExpiryTime),
+                anyLong(), anyString(), any(), any(Handler.class));
+
+        final AlarmManager.OnAlarmListener alarmListener =
+                alarmListenerCaptor.getAllValues().get(0);
+
+        // INACTIVE -> IDLE alarm
+        mInjector.nowElapsed = mDeviceIdleController.getNextLightAlarmTimeForTesting();
+        alarmListener.onAlarm();
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+        alarmManagerInOrder.verify(mAlarmManager).setWindow(
+                eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
+                eq(mInjector.nowElapsed + idlingTimeMs),
+                anyLong(), anyString(), any(), any(Handler.class));
+
+        for (int i = 0; i < 10; ++i) {
+            // IDLE->MAINTENANCE alarm
+            mInjector.nowElapsed = mDeviceIdleController.getNextLightAlarmTimeForTesting();
+            alarmListener.onAlarm();
+            verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+            long maintenanceExpiryTime = mInjector.nowElapsed + maintenanceTimeMs;
+            idlingTimeMs += mConstants.LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS;
+            idlingTimeMs = Math.min(idlingTimeMs, mConstants.LIGHT_MAX_IDLE_TIMEOUT);
             // Set MAINTENANCE->IDLE
             alarmManagerInOrder.verify(mAlarmManager).setWindow(
                     eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),

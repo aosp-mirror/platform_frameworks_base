@@ -26,13 +26,14 @@ import com.android.systemui.Gefingerpoken;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 /**
  * A helper class to handle touches on the heads-up views.
  */
 public class HeadsUpTouchHelper implements Gefingerpoken {
 
-    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final HeadsUpManager mHeadsUpManager;
     private final IStatusBarService mStatusBarService;
     private final Callback mCallback;
     private int mTrackingPointer;
@@ -45,7 +46,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
     private final HeadsUpNotificationViewController mPanel;
     private ExpandableNotificationRow mPickedChild;
 
-    public HeadsUpTouchHelper(HeadsUpManagerPhone headsUpManager,
+    public HeadsUpTouchHelper(HeadsUpManager headsUpManager,
             IStatusBarService statusBarService,
             Callback callback,
             HeadsUpNotificationViewController notificationPanelView) {

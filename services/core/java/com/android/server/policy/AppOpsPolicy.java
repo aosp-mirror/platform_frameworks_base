@@ -42,6 +42,7 @@ import android.os.PackageTagsList;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.permission.flags.Flags;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
 import android.text.TextUtils;
@@ -74,9 +75,6 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private static final String ACTIVITY_RECOGNITION_TAGS_SEPARATOR = ";";
     private static final boolean SYSPROP_HOTWORD_DETECTION_SERVICE_REQUIRED =
             SystemProperties.getBoolean("ro.hotword.detection_service_required", false);
-
-    //TODO(b/289087412): import this from the flag value in set up in device config.
-    private static final boolean IS_VOICE_ACTIVATION_OP_ENABLED = false;
 
     @NonNull
     private final Object mLock = new Object();
@@ -212,7 +210,7 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
      * @return the op that should be noted for the voice activations of the app by detected hotword.
      */
     public static int getVoiceActivationOp() {
-        if (IS_VOICE_ACTIVATION_OP_ENABLED) {
+        if (Flags.voiceActivationPermissionApis()) {
             return OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
         }
         return OP_RECORD_AUDIO_HOTWORD;

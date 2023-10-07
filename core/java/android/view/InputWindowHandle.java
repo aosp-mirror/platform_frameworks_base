@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static com.android.window.flags.Flags.surfaceTrustedOverlay;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Matrix;
@@ -35,7 +37,6 @@ import java.lang.ref.WeakReference;
  * @hide
  */
 public final class InputWindowHandle {
-
     /**
      * An internal annotation for all the {@link android.os.InputConfig} flags that can be
      * specified to {@link #inputConfig} to control the behavior of an input window. Only the
@@ -59,7 +60,6 @@ public final class InputWindowHandle {
             InputConfig.DUPLICATE_TOUCH_TO_WALLPAPER,
             InputConfig.IS_WALLPAPER,
             InputConfig.PAUSE_DISPATCHING,
-            InputConfig.TRUSTED_OVERLAY,
             InputConfig.WATCH_OUTSIDE_TOUCH,
             InputConfig.SLIPPERY,
             InputConfig.DISABLE_USER_ACTIVITY,
@@ -271,5 +271,14 @@ public final class InputWindowHandle {
             return;
         }
         this.inputConfig &= ~inputConfig;
+    }
+
+    public void setTrustedOverlay(SurfaceControl.Transaction t, SurfaceControl sc,
+            boolean isTrusted) {
+        if (surfaceTrustedOverlay()) {
+            t.setTrustedOverlay(sc, isTrusted);
+        } else if (isTrusted) {
+            inputConfig |= InputConfig.TRUSTED_OVERLAY;
+        }
     }
 }

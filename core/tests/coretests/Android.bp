@@ -58,7 +58,7 @@ android_test {
         "androidx.test.uiautomator_uiautomator",
         "platform-test-annotations",
         "platform-compat-test-rules",
-        "truth-prebuilt",
+        "truth",
         "print-test-util-lib",
         "testng",
         "servicestests-utils",
@@ -149,7 +149,7 @@ android_library {
         "androidx.test.runner",
         "androidx.test.rules",
         "mockito-target-minus-junit4",
-        "truth-prebuilt",
+        "truth",
     ],
 
     libs: [

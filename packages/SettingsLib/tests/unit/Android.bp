@@ -31,6 +31,6 @@ android_test {
         "SettingsLib",
         "androidx.test.ext.junit",
         "androidx.test.runner",
-        "truth-prebuilt",
+        "truth",
     ],
 }

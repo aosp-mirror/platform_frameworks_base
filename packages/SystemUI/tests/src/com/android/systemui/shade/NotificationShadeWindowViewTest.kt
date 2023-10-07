@@ -33,6 +33,7 @@ import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
 import com.android.systemui.bouncer.data.repository.BouncerMessageRepositoryImpl
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor
 import com.android.systemui.bouncer.domain.interactor.CountDownTimerUtil
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor
@@ -141,6 +142,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         Optional<UnfoldTransitionProgressProvider>
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    @Mock lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
+    @Mock lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     @Mock
     private lateinit var primaryBouncerToGoneTransitionViewModel:
         PrimaryBouncerToGoneTransitionViewModel
@@ -180,6 +183,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
         featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
         featureFlags.set(Flags.MIGRATE_NSSL, false)
+        featureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, false)
         testScope = TestScope()
         controller =
             NotificationShadeWindowViewController(
@@ -250,6 +254,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 ),
                 BouncerLogger(logcatLogBuffer("BouncerLog")),
                 Mockito.mock(KeyEventInteractor::class.java),
+                primaryBouncerInteractor,
+                alternateBouncerInteractor,
             )
 
         controller.setupExpandedStatusBar()

@@ -4,5 +4,5 @@ flag {
     namespace: "accessibility"
     name: "force_invert_color"
     description: "Enable force force-dark for smart inversion and dark theme everywhere"
-    bug: "239594271"
+    bug: "282821643"
 }

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.WIFI_OTHER_DEVICE_CONNECTION
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.coroutines.collectLastValue
@@ -53,7 +52,6 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class WifiViewModelTest : SysuiTestCase() {
 

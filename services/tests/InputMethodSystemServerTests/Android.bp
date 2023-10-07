@@ -44,7 +44,7 @@ android_test {
         "service-permission.stubs.system_server",
         "servicestests-core-utils",
         "servicestests-utils-mockito-extended",
-        "truth-prebuilt",
+        "truth",
     ],
 
     libs: [
@@ -92,7 +92,7 @@ android_test {
         "service-permission.stubs.system_server",
         "servicestests-core-utils",
         "servicestests-utils-mockito-extended",
-        "truth-prebuilt",
+        "truth",
         "SimpleImeTestingLib",
         "SimpleImeImsLib",
     ],

@@ -231,18 +231,24 @@ private class ShadeNode(val controller: NodeController) {
     fun getChildCount(): Int = controller.getChildCount()
 
     fun addChildAt(child: ShadeNode, index: Int) {
-        controller.addChildAt(child.controller, index)
-        child.controller.onViewAdded()
+        traceSection("ShadeNode#addChildAt") {
+            controller.addChildAt(child.controller, index)
+            child.controller.onViewAdded()
+        }
     }
 
     fun moveChildTo(child: ShadeNode, index: Int) {
-        controller.moveChildTo(child.controller, index)
-        child.controller.onViewMoved()
+        traceSection("ShadeNode#moveChildTo") {
+            controller.moveChildTo(child.controller, index)
+            child.controller.onViewMoved()
+        }
     }
 
     fun removeChild(child: ShadeNode, isTransfer: Boolean) {
-        controller.removeChild(child.controller, isTransfer)
-        child.controller.onViewRemoved()
+        traceSection("ShadeNode#removeChild") {
+            controller.removeChild(child.controller, isTransfer)
+            child.controller.onViewRemoved()
+        }
     }
 
     fun offerToKeepInParentForAnimation(): Boolean {

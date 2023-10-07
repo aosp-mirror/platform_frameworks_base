@@ -118,7 +118,6 @@ constructor(
     private var aodIcons: NotificationIconContainer? = null
     private var aodBindJob: DisposableHandle? = null
     private var aodIconAppearTranslation = 0
-    private var animationsEnabled = false
     private var aodIconTint = 0
     private var aodIconsVisible = false
     private var showLowPriority = true
@@ -157,9 +156,12 @@ constructor(
         }
         this.aodIcons = aodIcons
         this.aodIcons!!.setOnLockScreen(true)
-        aodBindJob = NotificationIconContainerViewBinder.bind(aodIcons, aodIconsViewModel)
+        aodBindJob =
+            NotificationIconContainerViewBinder.bind(
+                aodIcons,
+                aodIconsViewModel,
+            )
         updateAodIconsVisibility(animate = false, forceUpdate = changed)
-        updateAnimations()
         if (changed) {
             updateAodNotificationIcons()
         }
@@ -171,7 +173,10 @@ constructor(
 
     override fun setShelfIcons(icons: NotificationIconContainer) {
         if (shelfRefactor.expectEnabled()) {
-            NotificationIconContainerViewBinder.bind(icons, shelfIconsViewModel)
+            NotificationIconContainerViewBinder.bind(
+                icons,
+                shelfIconsViewModel,
+            )
             shelfIcons = icons
         }
     }
@@ -252,14 +257,10 @@ constructor(
         aodIcons!!.setDozing(isDozing, animate, 0)
     }
 
-    override fun setAnimationsEnabled(enabled: Boolean) {
-        animationsEnabled = enabled
-        updateAnimations()
-    }
+    override fun setAnimationsEnabled(enabled: Boolean) = unsupported
 
     override fun onStateChanged(newState: Int) {
         updateAodIconsVisibility(animate = false, forceUpdate = false)
-        updateAnimations()
     }
 
     override fun onThemeChanged() {
@@ -348,7 +349,10 @@ constructor(
         val layoutInflater = LayoutInflater.from(context)
         notificationIconArea = inflateIconArea(layoutInflater)
         notificationIcons = notificationIconArea?.findViewById(R.id.notificationIcons)
-        NotificationIconContainerViewBinder.bind(notificationIcons!!, statusBarIconsViewModel)
+        NotificationIconContainerViewBinder.bind(
+            notificationIcons!!,
+            statusBarIconsViewModel,
+        )
     }
 
     private fun updateIconLayoutParams(context: Context) {
@@ -598,14 +602,6 @@ constructor(
         v.setDecorColor(tint)
     }
 
-    private fun updateAnimations() {
-        val inShade = statusBarStateController.state == StatusBarState.SHADE
-        if (aodIcons != null) {
-            aodIcons!!.setAnimationsEnabled(animationsEnabled && !inShade)
-        }
-        notificationIcons!!.setAnimationsEnabled(animationsEnabled && inShade)
-    }
-
     private fun animateInAodIconTranslation() {
         if (!statusViewMigrated) {
             aodIcons!!
@@ -702,7 +698,12 @@ constructor(
 
     companion object {
         private const val AOD_ICONS_APPEAR_DURATION: Long = 200
-
         @ColorInt private val DEFAULT_AOD_ICON_COLOR = -0x1
+
+        val unsupported: Nothing
+            get() =
+                error(
+                    "Code path not supported when NOTIFICATION_ICON_CONTAINER_REFACTOR is disabled"
+                )
     }
 }

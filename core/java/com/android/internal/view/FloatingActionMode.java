@@ -222,6 +222,7 @@ public final class FloatingActionMode extends ActionMode {
     private boolean isContentRectWithinBounds() {
         mContext.getDisplayNoVerify().getRealSize(mDisplaySize);
         mScreenRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
+        mScreenRect.offset(mRootViewPositionOnScreen[0], mRootViewPositionOnScreen[1]);
 
         return intersectsClosed(mContentRectOnScreen, mScreenRect)
             && intersectsClosed(mContentRectOnScreen, mViewRectOnScreen);

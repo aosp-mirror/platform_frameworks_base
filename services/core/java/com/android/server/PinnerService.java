@@ -359,8 +359,10 @@ public final class PinnerService extends SystemService {
                     @Override
                     public void onChange(boolean selfChange, Uri uri) {
                         if (userSetupCompleteUri.equals(uri)) {
-                            sendPinAppMessage(KEY_HOME, ActivityManager.getCurrentUser(),
-                                    true /* force */);
+                            if (mConfiguredToPinHome) {
+                                sendPinAppMessage(KEY_HOME, ActivityManager.getCurrentUser(),
+                                        true /* force */);
+                            }
                         }
                     }
                 }, UserHandle.USER_ALL);

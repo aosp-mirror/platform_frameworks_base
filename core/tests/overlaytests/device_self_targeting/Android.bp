@@ -30,7 +30,7 @@ android_test {
         "androidx.test.runner",
         "androidx.test.ext.junit",
         "mockito-target-minus-junit4",
-        "truth-prebuilt",
+        "truth",
     ],
 
     optimize: {

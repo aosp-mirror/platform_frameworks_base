@@ -4802,6 +4802,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
     public static final String EXTRA_REQUEST_PERMISSIONS_DEVICE_ID =
             "android.content.pm.extra.REQUEST_PERMISSIONS_DEVICE_ID";
 

@@ -837,25 +837,41 @@ public class InteractionJankMonitor {
 
     @WorkerThread
     private void updateProperties(DeviceConfig.Properties properties) {
-        mSamplingInterval = properties.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
-                DEFAULT_SAMPLING_INTERVAL);
-        mTraceThresholdMissedFrames = properties.getInt(SETTINGS_THRESHOLD_MISSED_FRAMES_KEY,
-                DEFAULT_TRACE_THRESHOLD_MISSED_FRAMES);
-        mTraceThresholdFrameTimeMillis = properties.getInt(
-                SETTINGS_THRESHOLD_FRAME_TIME_MILLIS_KEY,
-                DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS);
-        // Never allow the debug overlay to be used on user builds
-        boolean debugOverlayEnabled = Build.IS_DEBUGGABLE && properties.getBoolean(
-                SETTINGS_DEBUG_OVERLAY_ENABLED_KEY,
-                DEFAULT_DEBUG_OVERLAY_ENABLED);
-        if (debugOverlayEnabled && mDebugOverlay == null) {
-            mDebugOverlay = new InteractionMonitorDebugOverlay(mLock, mDebugBgColor, mDebugYOffset);
-        } else if (!debugOverlayEnabled && mDebugOverlay != null) {
-            mDebugOverlay.dispose();
-            mDebugOverlay = null;
+        for (String property : properties.getKeyset()) {
+            switch (property) {
+                case SETTINGS_SAMPLING_INTERVAL_KEY:
+                    mSamplingInterval = properties.getInt(property, DEFAULT_SAMPLING_INTERVAL);
+                    break;
+                case SETTINGS_THRESHOLD_MISSED_FRAMES_KEY:
+                    mTraceThresholdMissedFrames =
+                            properties.getInt(property, DEFAULT_TRACE_THRESHOLD_MISSED_FRAMES);
+                    break;
+                case SETTINGS_THRESHOLD_FRAME_TIME_MILLIS_KEY:
+                    mTraceThresholdFrameTimeMillis =
+                            properties.getInt(property, DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS);
+                    break;
+                case SETTINGS_ENABLED_KEY:
+                    mEnabled = properties.getBoolean(property, DEFAULT_ENABLED);
+                    break;
+                case SETTINGS_DEBUG_OVERLAY_ENABLED_KEY:
+                    // Never allow the debug overlay to be used on user builds
+                    boolean debugOverlayEnabled = Build.IS_DEBUGGABLE
+                            && properties.getBoolean(property, DEFAULT_DEBUG_OVERLAY_ENABLED);
+                    if (debugOverlayEnabled && mDebugOverlay == null) {
+                        mDebugOverlay = new InteractionMonitorDebugOverlay(
+                                mLock, mDebugBgColor, mDebugYOffset);
+                    } else if (!debugOverlayEnabled && mDebugOverlay != null) {
+                        mDebugOverlay.dispose();
+                        mDebugOverlay = null;
+                    }
+                    break;
+                default:
+                    if (DEBUG) {
+                        Log.d(TAG, "Got a change event for an unknown property: "
+                                + property + " => " + properties.getString(property, ""));
+                    }
+            }
         }
-        // The memory visibility is powered by the volatile field, mEnabled.
-        mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
     }
 
     @VisibleForTesting

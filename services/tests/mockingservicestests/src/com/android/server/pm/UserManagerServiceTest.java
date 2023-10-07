@@ -308,7 +308,6 @@ public final class UserManagerServiceTest {
         addDefaultProfileAndParent();
 
         mUms.setBootUser(PROFILE_USER_ID);
-
         // Boot user not switchable so return most recently in foreground.
         assertWithMessage("getBootUser")
                 .that(mUmi.getBootUser(/* waitUntilSet= */ false)).isEqualTo(OTHER_USER_ID);
@@ -521,6 +520,24 @@ public final class UserManagerServiceTest {
                 .isFalse();
         assertThat(mUms.hasUserRestriction(DISALLOW_SMS, mainUser.id))
                 .isFalse();
+    }
+
+    @Test
+    public void testCreateUserWithLongName_TruncatesName() {
+        UserInfo user = mUms.createUserWithThrow(generateLongString(), USER_TYPE_FULL_SECONDARY, 0);
+        assertThat(user.name.length()).isEqualTo(500);
+        UserInfo user1 = mUms.createUserWithThrow("Test", USER_TYPE_FULL_SECONDARY, 0);
+        assertThat(user1.name.length()).isEqualTo(4);
+    }
+
+    private String generateLongString() {
+        String partialString = "Test Name Test Name Test Name Test Name Test Name Test Name Test "
+                + "Name Test Name Test Name Test Name "; //String of length 100
+        StringBuilder resultString = new StringBuilder();
+        for (int i = 0; i < 660; i++) {
+            resultString.append(partialString);
+        }
+        return resultString.toString();
     }
 
     private void removeNonSystemUsers() {

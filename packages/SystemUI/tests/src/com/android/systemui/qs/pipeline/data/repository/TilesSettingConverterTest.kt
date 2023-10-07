@@ -2,14 +2,12 @@ package com.android.systemui.qs.pipeline.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RoboPilotTest
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class TilesSettingConverterTest : SysuiTestCase() {

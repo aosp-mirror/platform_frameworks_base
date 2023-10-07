@@ -117,6 +117,7 @@ import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerInternal.LidSwitchCallback;
+import com.android.server.input.debug.FocusEventDebugView;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 

@@ -236,7 +236,7 @@ java_library {
     static_libs: [
         "flickerlib",
         "flickerlib-helpers",
-        "truth-prebuilt",
+        "truth",
         "app-helpers-core",
     ],
 }
@@ -255,7 +255,7 @@ java_library {
         "flickerlib",
         "flickerlib-apphelpers",
         "flickerlib-helpers",
-        "truth-prebuilt",
+        "truth",
         "app-helpers-core",
         "wm-flicker-window-extensions",
     ],

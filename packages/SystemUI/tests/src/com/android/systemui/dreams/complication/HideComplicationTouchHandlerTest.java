@@ -30,7 +30,6 @@ import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.dreams.DreamOverlayStateController;
@@ -49,7 +48,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-@RoboPilotTest
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class HideComplicationTouchHandlerTest extends SysuiTestCase {

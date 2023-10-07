@@ -355,12 +355,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             AnimatorListenerAdapter animationListener) {
         enableAppearDrawing(true);
         mIsHeadsUpAnimation = isHeadsUpAnimation;
-        if (mDrawingAppearAnimation) {
-            startAppearAnimation(false /* isAppearing */, translationDirection,
-                    delay, duration, onFinishedRunnable, animationListener);
-        } else if (onFinishedRunnable != null) {
-            onFinishedRunnable.run();
-        }
+        startAppearAnimation(false /* isAppearing */, translationDirection,
+                delay, duration, onFinishedRunnable, animationListener);
         return 0;
     }
 
@@ -369,10 +365,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             Runnable onFinishRunnable) {
         enableAppearDrawing(true);
         mIsHeadsUpAnimation = isHeadsUpAppear;
-        if (mDrawingAppearAnimation) {
-            startAppearAnimation(true /* isAppearing */, isHeadsUpAppear ? 0.0f : -1.0f, delay,
-                    duration, null, null);
-        }
+        startAppearAnimation(true /* isAppearing */, isHeadsUpAppear ? 0.0f : -1.0f, delay,
+                duration, null, null);
     }
 
     private void startAppearAnimation(boolean isAppearing, float translationDirection, long delay,

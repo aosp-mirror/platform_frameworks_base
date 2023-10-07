@@ -36,7 +36,6 @@ import com.android.internal.logging.UiEventLogger
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate
 import com.android.systemui.biometrics.SideFpsController
@@ -100,7 +99,6 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
@@ -812,6 +810,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Bouncer,
                     flowOf(.5f),
                     false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer, null), "reason")
@@ -827,7 +826,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Bouncer,
                     SceneKey.Gone,
                     flowOf(.5f),
-                    false
+                    false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")
@@ -844,7 +844,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Gone,
                     SceneKey.Bouncer,
                     flowOf(.5f),
-                    false
+                    false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer, null), "reason")
@@ -862,7 +863,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Bouncer,
                     SceneKey.Gone,
                     flowOf(.5f),
-                    false
+                    false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")
@@ -878,6 +880,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Lockscreen,
                     flowOf(.5f),
                     false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen, null), "reason")
@@ -895,6 +898,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     SceneKey.Gone,
                     flowOf(.5f),
                     false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")

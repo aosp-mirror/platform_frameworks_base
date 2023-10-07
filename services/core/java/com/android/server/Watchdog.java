@@ -644,6 +644,16 @@ public class Watchdog implements Dumpable {
     }
 
     /**
+     * Sets a one-off timeout for the next run of the watchdog for the monitor thread.
+     *
+     * <p>Simiar to {@link setOneOffTimeoutForCurrentThread} but used for monitors added through
+     * {@link #addMonitor}
+     */
+    public void setOneOffTimeoutForMonitors(int oneOffTimeoutMillis, String reason) {
+        mMonitorChecker.setOneOffTimeoutLocked(oneOffTimeoutMillis, reason);
+    }
+
+    /**
      * Pauses Watchdog action for the currently running thread. Useful before executing long running
      * operations that could falsely trigger the watchdog. Each call to this will require a matching
      * call to {@link #resumeWatchingCurrentThread}.

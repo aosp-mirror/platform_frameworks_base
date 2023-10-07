@@ -54,6 +54,8 @@ import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreef
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createSplitScreenTask
+import com.android.wm.shell.recents.RecentsTransitionHandler
+import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
@@ -101,11 +103,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock lateinit var launchAdjacentController: LaunchAdjacentController
     @Mock lateinit var desktopModeWindowDecoration: DesktopModeWindowDecoration
     @Mock lateinit var splitScreenController: SplitScreenController
+    @Mock lateinit var recentsTransitionHandler: RecentsTransitionHandler
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var controller: DesktopTasksController
     private lateinit var shellInit: ShellInit
     private lateinit var desktopModeTaskRepository: DesktopModeTaskRepository
+    private lateinit var recentsTransitionStateListener: RecentsTransitionStateListener
 
     private val shellExecutor = TestShellExecutor()
     // Mock running tasks are registered here so we can get the list from mock shell task organizer
@@ -126,6 +130,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
         controller.splitScreenController = splitScreenController
 
         shellInit.init()
+
+        val captor = ArgumentCaptor.forClass(RecentsTransitionStateListener::class.java)
+        verify(recentsTransitionHandler).addTransitionStateListener(captor.capture())
+        recentsTransitionStateListener = captor.value
     }
 
     private fun createController(): DesktopTasksController {
@@ -144,6 +152,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             mToggleResizeDesktopTaskTransitionHandler,
             desktopModeTaskRepository,
             launchAdjacentController,
+            recentsTransitionHandler,
             shellExecutor
         )
     }
@@ -355,7 +364,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     fun moveToDesktop_splitTaskExitsSplit() {
-        var task = setUpSplitScreenTask()
+        val task = setUpSplitScreenTask()
         controller.moveToDesktop(desktopModeWindowDecoration, task)
         val wct = getLatestMoveToDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
@@ -367,7 +376,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     fun moveToDesktop_fullscreenTaskDoesNotExitSplit() {
-        var task = setUpFullscreenTask()
+        val task = setUpFullscreenTask()
         controller.moveToDesktop(desktopModeWindowDecoration, task)
         val wct = getLatestMoveToDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
@@ -663,6 +672,20 @@ class DesktopTasksControllerTest : ShellTestCase() {
                 .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
                 .build()
         assertThat(controller.handleRequest(Binder(), createTransition(task))).isNull()
+    }
+
+    @Test
+    fun handleRequest_recentsAnimationRunning_returnNull() {
+        // Set up a visible freeform task so a fullscreen task should be converted to freeform
+        val freeformTask = setUpFreeformTask()
+        markTaskVisible(freeformTask)
+
+        // Mark recents animation running
+        recentsTransitionStateListener.onAnimationStateChanged(true)
+
+        // Open a fullscreen task, check that it does not result in a WCT with changes to it
+        val fullscreenTask = createFullscreenTask()
+        assertThat(controller.handleRequest(Binder(), createTransition(fullscreenTask))).isNull()
     }
 
     @Test

@@ -19,36 +19,35 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
+import com.android.SysUITestModule
+import com.android.TestMocksModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
+import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
-import com.android.systemui.statusbar.policy.DeviceProvisionedController
-import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.UserDomainLayerModule
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import dagger.BindsInstance
+import dagger.Component
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -60,29 +59,27 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class SharedNotificationContainerViewModelTest : SysuiTestCase() {
-    private val utils = SceneTestUtils(this)
 
-    private val testScope = utils.testScope
+    private lateinit var testComponent: TestComponent
 
-    private val disableFlagsRepository = FakeDisableFlagsRepository()
-    private val userSetupRepository = FakeUserSetupRepository()
-    private val shadeRepository = FakeShadeRepository()
-    private val keyguardRepository = FakeKeyguardRepository()
-    private val sceneContainerFlags = FakeSceneContainerFlags()
-    private val sceneInteractor = utils.sceneInteractor()
-
-    private lateinit var configurationRepository: FakeConfigurationRepository
-    private lateinit var sharedNotificationContainerInteractor:
-        SharedNotificationContainerInteractor
-    private lateinit var underTest: SharedNotificationContainerViewModel
-    private lateinit var keyguardInteractor: KeyguardInteractor
-    private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
-    private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
-    private lateinit var shadeInteractor: ShadeInteractor
+    private val shadeRepository
+        get() = testComponent.shadeRepository
+    private val keyguardRepository
+        get() = testComponent.keyguardRepository
+    private val configurationRepository
+        get() = testComponent.configurationRepository
+    private val sharedNotificationContainerInteractor: SharedNotificationContainerInteractor
+        get() = testComponent.sharedNotificationContainerInteractor
+    private val underTest: SharedNotificationContainerViewModel
+        get() = testComponent.underTest
+    private val keyguardInteractor: KeyguardInteractor
+        get() = testComponent.keyguardInteractor
+    private val keyguardTransitionRepository
+        get() = testComponent.keyguardTransitionRepository
+    private val testScope
+        get() = testComponent.testScope
 
     @Mock private lateinit var notificationStackSizeCalculator: NotificationStackSizeCalculator
-    @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
-    @Mock private lateinit var userInteractor: UserInteractor
     @Mock
     private lateinit var notificationStackScrollLayoutController:
         NotificationStackScrollLayoutController
@@ -94,43 +91,21 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         whenever(notificationStackScrollLayoutController.getView()).thenReturn(mock())
         whenever(notificationStackScrollLayoutController.getShelfHeight()).thenReturn(0)
 
-        configurationRepository = FakeConfigurationRepository()
-        KeyguardTransitionInteractorFactory.create(
-                scope = testScope.backgroundScope,
-            )
-            .also {
-                keyguardInteractor = it.keyguardInteractor
-                keyguardTransitionInteractor = it.keyguardTransitionInteractor
-                keyguardTransitionRepository = it.repository
-            }
-        sharedNotificationContainerInteractor =
-            SharedNotificationContainerInteractor(
-                configurationRepository,
-                mContext,
-                ResourcesSplitShadeStateController()
-            )
-        shadeInteractor =
-            ShadeInteractor(
-                testScope.backgroundScope,
-                disableFlagsRepository,
-                sceneContainerFlags,
-                { sceneInteractor },
-                keyguardRepository,
-                userSetupRepository,
-                deviceProvisionedController,
-                userInteractor,
-                sharedNotificationContainerInteractor,
-                shadeRepository,
-            )
-        underTest =
-            SharedNotificationContainerViewModel(
-                sharedNotificationContainerInteractor,
-                keyguardInteractor,
-                keyguardTransitionInteractor,
-                notificationStackSizeCalculator,
-                notificationStackScrollLayoutController,
-                shadeInteractor
-            )
+        testComponent =
+            DaggerSharedNotificationContainerViewModelTest_TestComponent.factory()
+                .create(
+                    test = this,
+                    featureFlags =
+                        FakeFeatureFlagsClassicModule {
+                            set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+                        },
+                    mocks =
+                        TestMocksModule(
+                            notificationStackSizeCalculator = notificationStackSizeCalculator,
+                            notificationStackScrollLayoutController =
+                                notificationStackScrollLayoutController,
+                        )
+                )
     }
 
     @Test
@@ -403,5 +378,35 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
                 transitionState = TransitionState.FINISHED
             )
         )
+    }
+
+    @SysUISingleton
+    @Component(
+        modules =
+            [
+                SysUITestModule::class,
+                UserDomainLayerModule::class,
+            ]
+    )
+    interface TestComponent {
+
+        val underTest: SharedNotificationContainerViewModel
+
+        val configurationRepository: FakeConfigurationRepository
+        val keyguardRepository: FakeKeyguardRepository
+        val keyguardInteractor: KeyguardInteractor
+        val keyguardTransitionRepository: FakeKeyguardTransitionRepository
+        val shadeRepository: FakeShadeRepository
+        val sharedNotificationContainerInteractor: SharedNotificationContainerInteractor
+        val testScope: TestScope
+
+        @Component.Factory
+        interface Factory {
+            fun create(
+                @BindsInstance test: SysuiTestCase,
+                featureFlags: FakeFeatureFlagsClassicModule,
+                mocks: TestMocksModule,
+            ): TestComponent
+        }
     }
 }

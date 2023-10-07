@@ -60,6 +60,9 @@ import com.android.server.display.config.LuxThrottling;
 import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.NonNegativeFloatToFloatPoint;
 import com.android.server.display.config.Point;
+import com.android.server.display.config.PowerThrottlingConfig;
+import com.android.server.display.config.PowerThrottlingMap;
+import com.android.server.display.config.PowerThrottlingPoint;
 import com.android.server.display.config.PredefinedBrightnessLimitNames;
 import com.android.server.display.config.RefreshRateConfigs;
 import com.android.server.display.config.RefreshRateRange;
@@ -139,6 +142,30 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      </screenBrightnessMap>
  *
  *      <screenBrightnessDefault>0.65</screenBrightnessDefault>
+ *      <powerThrottlingConfig>
+ *        <brightnessLowestCapAllowed>0.1</brightnessLowestCapAllowed>
+ *        <pollingWindowMillis>15</pollingWindowMillis>
+ *          <powerThrottlingMap>
+ *              <powerThrottlingPoint>
+ *                  <thermalStatus>severe</thermalStatus>
+ *                  <powerQuotaMilliWatts>200.6</powerQuotaMilliWatts>
+ *              </powerThrottlingPoint>
+ *              <powerThrottlingPoint>
+ *                  <thermalStatus>critical</thermalStatus>
+ *                  <powerQuotaMilliWatts>300</powerQuotaMilliWatts>
+ *              </powerThrottlingPoint>
+ *          </powerThrottlingMap>
+ *          <powerThrottlingMap id="id_2"> // optional attribute, leave blank for default
+ *             <powerThrottlingPoint>
+ *                 <thermalStatus>moderate</thermalStatus>
+ *                 <powerQuotaMilliWatts>400</powerQuotaMilliWatts>
+ *             </powerThrottlingPoint>
+ *             <powerThrottlingPoint>
+ *                 <thermalStatus>severe</thermalStatus>
+ *                 <powerQuotaMilliWatts>250</powerQuotaMilliWatts>
+ *            </powerThrottlingPoint>
+ *          </powerThrottlingMap>
+ *      </powerThrottlingConfig>
  *
  *      <thermalThrottling>
  *        <brightnessThrottlingMap>
@@ -669,6 +696,8 @@ public class DisplayDeviceConfig {
     private List<String> mQuirks;
     private boolean mIsHighBrightnessModeEnabled = false;
     private HighBrightnessModeData mHbmData;
+    @Nullable
+    private PowerThrottlingConfigData mPowerThrottlingConfigData;
     private DensityMapping mDensityMapping;
     private String mLoadedFrom = null;
     private Spline mSdrToHdrRatioSpline;
@@ -780,6 +809,9 @@ public class DisplayDeviceConfig {
 
     private final HashMap<String, ThermalBrightnessThrottlingData>
             mThermalBrightnessThrottlingDataMapByThrottlingId = new HashMap<>();
+
+    private final HashMap<String, PowerThrottlingData>
+            mPowerThrottlingDataMapByThrottlingId = new HashMap<>();
 
     private final Map<String, SparseArray<SurfaceControl.RefreshRateRange>>
             mRefreshRateThrottlingMap = new HashMap<>();
@@ -1458,6 +1490,14 @@ public class DisplayDeviceConfig {
         return hbmData;
     }
 
+    /**
+     * @return Power throttling configuration data for the display.
+     */
+    @Nullable
+    public PowerThrottlingConfigData getPowerThrottlingConfigData() {
+        return mPowerThrottlingConfigData;
+    }
+
     @NonNull
     public Map<BrightnessLimitMapType, Map<Float, Float>> getLuxThrottlingData() {
         return mLuxThrottlingData;
@@ -1488,6 +1528,14 @@ public class DisplayDeviceConfig {
             @Nullable String id) {
         String key = id == null ? DEFAULT_ID : id;
         return mRefreshRateThrottlingMap.get(key);
+    }
+
+    /**
+     * @return power throttling configuration data for this display, for each throttling id.
+     **/
+    public HashMap<String, PowerThrottlingData>
+            getPowerThrottlingDataMapByThrottlingId() {
+        return mPowerThrottlingDataMapByThrottlingId;
     }
 
     /**
@@ -1702,6 +1750,9 @@ public class DisplayDeviceConfig {
                 + ", mThermalBrightnessThrottlingDataMapByThrottlingId="
                 + mThermalBrightnessThrottlingDataMapByThrottlingId
                 + "\n"
+                + ", mPowerThrottlingDataMapByThrottlingId="
+                + mPowerThrottlingDataMapByThrottlingId
+                + "\n"
                 + "mBrightnessRampFastDecrease=" + mBrightnessRampFastDecrease
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
                 + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
@@ -1853,6 +1904,7 @@ public class DisplayDeviceConfig {
                 loadBrightnessConstraintsFromConfigXml();
                 loadBrightnessMap(config);
                 loadThermalThrottlingConfig(config);
+                loadPowerThrottlingConfigData(config);
                 loadHighBrightnessModeData(config);
                 loadLuxThrottling(config);
                 loadQuirks(config);
@@ -2169,6 +2221,59 @@ public class DisplayDeviceConfig {
             }
             mRefreshRateThrottlingMap.put(id, refreshRates);
         }
+    }
+
+    private boolean loadPowerThrottlingMaps(PowerThrottlingConfig throttlingConfig) {
+        final List<PowerThrottlingMap> maps = throttlingConfig.getPowerThrottlingMap();
+        if (maps == null || maps.isEmpty()) {
+            Slog.i(TAG, "No power throttling map found");
+            return false;
+        }
+
+        for (PowerThrottlingMap map : maps) {
+            final List<PowerThrottlingPoint> points = map.getPowerThrottlingPoint();
+            // At least 1 point is guaranteed by the display device config schema
+            List<PowerThrottlingData.ThrottlingLevel> throttlingLevels =
+                    new ArrayList<>(points.size());
+
+            boolean badConfig = false;
+            for (PowerThrottlingPoint point : points) {
+                ThermalStatus status = point.getThermalStatus();
+                if (!thermalStatusIsValid(status)) {
+                    badConfig = true;
+                    break;
+                }
+
+                throttlingLevels.add(new PowerThrottlingData.ThrottlingLevel(
+                        convertThermalStatus(status),
+                            point.getPowerQuotaMilliWatts().floatValue()));
+            }
+
+            if (!badConfig) {
+                String id = map.getId() == null ? DEFAULT_ID : map.getId();
+                if (mPowerThrottlingDataMapByThrottlingId.containsKey(id)) {
+                    throw new RuntimeException("Power throttling data with ID " + id
+                            + " already exists");
+                }
+                mPowerThrottlingDataMapByThrottlingId.put(id,
+                        PowerThrottlingData.create(throttlingLevels));
+            }
+        }
+        return true;
+    }
+
+    private void loadPowerThrottlingConfigData(DisplayConfiguration config) {
+        final PowerThrottlingConfig powerThrottlingCfg = config.getPowerThrottlingConfig();
+        if (powerThrottlingCfg == null) {
+            return;
+        }
+        if (!loadPowerThrottlingMaps(powerThrottlingCfg)) {
+            return;
+        }
+        float lowestBrightnessCap = powerThrottlingCfg.getBrightnessLowestCapAllowed().floatValue();
+        int pollingWindowMillis = powerThrottlingCfg.getPollingWindowMillis().intValue();
+        mPowerThrottlingConfigData = new PowerThrottlingConfigData(lowestBrightnessCap,
+                                                                   pollingWindowMillis);
     }
 
     private void loadRefreshRateSetting(DisplayConfiguration config) {
@@ -3375,6 +3480,148 @@ public class DisplayDeviceConfig {
                     + ", allowInLowPowerMode: " + allowInLowPowerMode
                     + ", minimumHdrPercentOfScreen: " + minimumHdrPercentOfScreen
                     + "} ";
+        }
+    }
+
+    /**
+     * Container for Power throttling configuration data.
+     * TODO(b/302814899): extract to separate class.
+     */
+    public static class PowerThrottlingConfigData {
+        /** Lowest brightness cap allowed for this device. */
+        public final float brightnessLowestCapAllowed;
+        /** Time window for polling power in seconds. */
+        public final int pollingWindowMillis;
+        public PowerThrottlingConfigData(float brightnessLowestCapAllowed,
+                int pollingWindowMillis) {
+            this.brightnessLowestCapAllowed = brightnessLowestCapAllowed;
+            this.pollingWindowMillis = pollingWindowMillis;
+        }
+
+        @Override
+        public String toString() {
+            return "PowerThrottlingConfigData{"
+                    + "brightnessLowestCapAllowed: "
+                    + brightnessLowestCapAllowed
+                    + ", pollingWindowMillis: " + pollingWindowMillis
+                    + "} ";
+        }
+    }
+
+    /**
+     * Container for power throttling data.
+     * TODO(b/302814899): extract to separate class and unify with ThermalBrightnessThrottlingData.
+     */
+    public static class PowerThrottlingData {
+        public List<ThrottlingLevel> throttlingLevels;
+
+        /**
+         * thermal status to power quota mapping.
+         */
+        public static class ThrottlingLevel {
+            public @PowerManager.ThermalStatus int thermalStatus;
+            public float powerQuotaMilliWatts;
+
+            public ThrottlingLevel(
+                    @PowerManager.ThermalStatus int thermalStatus, float powerQuotaMilliWatts) {
+                this.thermalStatus = thermalStatus;
+                this.powerQuotaMilliWatts = powerQuotaMilliWatts;
+            }
+
+            @Override
+            public String toString() {
+                return "[" + thermalStatus + "," + powerQuotaMilliWatts + "]";
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (!(obj instanceof ThrottlingLevel)) {
+                    return false;
+                }
+                ThrottlingLevel otherThrottlingLevel = (ThrottlingLevel) obj;
+
+                return otherThrottlingLevel.thermalStatus == this.thermalStatus
+                        && otherThrottlingLevel.powerQuotaMilliWatts == this.powerQuotaMilliWatts;
+            }
+
+            @Override
+            public int hashCode() {
+                int result = 1;
+                result = 31 * result + thermalStatus;
+                result = 31 * result + Float.hashCode(powerQuotaMilliWatts);
+                return result;
+            }
+        }
+
+
+        /**
+         * Creates multiple temperature based throttling levels of power quota.
+         */
+        public static PowerThrottlingData create(
+                List<ThrottlingLevel> throttlingLevels) {
+            if (throttlingLevels == null || throttlingLevels.size() == 0) {
+                Slog.e(TAG, "PowerThrottlingData received null or empty throttling levels");
+                return null;
+            }
+
+            ThrottlingLevel prevLevel = throttlingLevels.get(0);
+            final int numLevels = throttlingLevels.size();
+            for (int i = 1; i < numLevels; i++) {
+                ThrottlingLevel thisLevel = throttlingLevels.get(i);
+
+                if (thisLevel.thermalStatus <= prevLevel.thermalStatus) {
+                    Slog.e(TAG, "powerThrottlingMap must be strictly increasing, ignoring "
+                            + "configuration. ThermalStatus " + thisLevel.thermalStatus + " <= "
+                            + prevLevel.thermalStatus);
+                    return null;
+                }
+
+                if (thisLevel.powerQuotaMilliWatts >= prevLevel.powerQuotaMilliWatts) {
+                    Slog.e(TAG, "powerThrottlingMap must be strictly decreasing, ignoring "
+                            + "configuration. powerQuotaMilliWatts "
+                            + thisLevel.powerQuotaMilliWatts + " >= "
+                            + prevLevel.powerQuotaMilliWatts);
+                    return null;
+                }
+
+                prevLevel = thisLevel;
+            }
+            return new PowerThrottlingData(throttlingLevels);
+        }
+
+        @Override
+        public String toString() {
+            return "PowerThrottlingData{"
+                    + "throttlingLevels:" + throttlingLevels
+                    + "} ";
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            if (!(obj instanceof PowerThrottlingData)) {
+                return false;
+            }
+
+            PowerThrottlingData otherData = (PowerThrottlingData) obj;
+            return throttlingLevels.equals(otherData.throttlingLevels);
+        }
+
+        @Override
+        public int hashCode() {
+            return throttlingLevels.hashCode();
+        }
+
+        @VisibleForTesting
+        PowerThrottlingData(List<ThrottlingLevel> inLevels) {
+            throttlingLevels = new ArrayList<>(inLevels.size());
+            for (ThrottlingLevel level : inLevels) {
+                throttlingLevels.add(new ThrottlingLevel(level.thermalStatus,
+                        level.powerQuotaMilliWatts));
+            }
         }
     }
 

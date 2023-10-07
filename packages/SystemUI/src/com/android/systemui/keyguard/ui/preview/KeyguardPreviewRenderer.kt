@@ -27,11 +27,14 @@ import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.view.Display
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.LayoutInflater
 import android.view.SurfaceControlViewHost
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.TYPE_KEYGUARD
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isInvisible
@@ -125,6 +128,8 @@ constructor(
     private val shouldHideClock: Boolean =
         bundle.getBoolean(ClockPreviewConstants.KEY_HIDE_CLOCK, false)
     private val wallpaperColors: WallpaperColors? = bundle.getParcelable(KEY_COLORS)
+    private val displayId = bundle.getInt(KEY_DISPLAY_ID, DEFAULT_DISPLAY)
+    private val display: Display = displayManager.getDisplay(displayId)
 
     private var host: SurfaceControlViewHost
 
@@ -164,7 +169,7 @@ constructor(
             host =
                 SurfaceControlViewHost(
                     context,
-                    displayManager.getDisplay(bundle.getInt(KEY_DISPLAY_ID)),
+                    displayManager.getDisplay(DEFAULT_DISPLAY),
                     hostToken,
                     "KeyguardPreviewRenderer"
                 )
@@ -174,21 +179,27 @@ constructor(
 
     fun render() {
         mainHandler.post {
-            val rootView = FrameLayout(context)
+            val previewContext = context.createDisplayContext(display)
 
-            setupKeyguardRootView(rootView)
+            val rootView = FrameLayout(previewContext)
+
+            setupKeyguardRootView(previewContext, rootView)
 
             if (!featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
                 setUpBottomArea(rootView)
             }
 
+            val windowContext = context.createWindowContext(display, TYPE_KEYGUARD, null)
+            val windowManagerOfDisplay = windowContext.getSystemService(WindowManager::class.java)
             rootView.measure(
                 View.MeasureSpec.makeMeasureSpec(
-                    windowManager.currentWindowMetrics.bounds.width(),
+                    windowManagerOfDisplay?.currentWindowMetrics?.bounds?.width()
+                        ?: windowManager.currentWindowMetrics.bounds.width(),
                     View.MeasureSpec.EXACTLY
                 ),
                 View.MeasureSpec.makeMeasureSpec(
-                    windowManager.currentWindowMetrics.bounds.height(),
+                    windowManagerOfDisplay?.currentWindowMetrics?.bounds?.height()
+                        ?: windowManager.currentWindowMetrics.bounds.height(),
                     View.MeasureSpec.EXACTLY
                 ),
             )
@@ -251,7 +262,7 @@ constructor(
      *
      * The end padding is as follows: Below clock padding end
      */
-    private fun setUpSmartspace(parentView: ViewGroup) {
+    private fun setUpSmartspace(previewContext: Context, parentView: ViewGroup) {
         if (
             !lockscreenSmartspaceController.isEnabled() ||
                 !lockscreenSmartspaceController.isDateWeatherDecoupled()
@@ -263,12 +274,12 @@ constructor(
 
         val topPadding: Int =
             KeyguardPreviewSmartspaceViewModel.getLargeClockSmartspaceTopPadding(
-                context.resources,
+                previewContext.resources,
             )
         val startPadding: Int =
-            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start)
+            previewContext.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start)
         val endPadding: Int =
-            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end)
+            previewContext.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end)
 
         smartSpaceView?.let {
             it.setPaddingRelative(startPadding, topPadding, endPadding, 0)
@@ -308,8 +319,8 @@ constructor(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun setupKeyguardRootView(rootView: FrameLayout) {
-        val keyguardRootView = KeyguardRootView(context, null).apply { removeAllViews() }
+    private fun setupKeyguardRootView(previewContext: Context, rootView: FrameLayout) {
+        val keyguardRootView = KeyguardRootView(previewContext, null).apply { removeAllViews() }
         disposables.add(
             KeyguardRootViewBinder.bind(
                 keyguardRootView,
@@ -333,10 +344,10 @@ constructor(
             if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
                 setupShortcuts(keyguardRootView)
             }
-            setUpUdfps(rootView)
+            setUpUdfps(previewContext, rootView)
 
             if (!shouldHideClock) {
-                setUpClock(rootView)
+                setUpClock(previewContext, rootView)
                 KeyguardPreviewClockViewBinder.bind(
                     largeClockHostView,
                     smallClockHostView,
@@ -344,7 +355,7 @@ constructor(
                 )
             }
 
-            setUpSmartspace(rootView)
+            setUpSmartspace(previewContext, rootView)
             smartSpaceView?.let {
                 KeyguardPreviewSmartspaceViewBinder.bind(it, smartspaceViewModel)
             }
@@ -381,7 +392,7 @@ constructor(
         }
     }
 
-    private fun setUpUdfps(parentView: ViewGroup) {
+    private fun setUpUdfps(previewContext: Context, parentView: ViewGroup) {
         val sensorBounds = udfpsOverlayInteractor.udfpsOverlayParams.value.sensorBounds
 
         // If sensorBounds are default rect, then there is no UDFPS
@@ -399,7 +410,7 @@ constructor(
             sensorBounds.bottom
         )
         val finger =
-            LayoutInflater.from(context)
+            LayoutInflater.from(previewContext)
                 .inflate(
                     R.layout.udfps_keyguard_preview,
                     parentView,
@@ -408,12 +419,12 @@ constructor(
         parentView.addView(finger, fingerprintLayoutParams)
     }
 
-    private fun setUpClock(parentView: ViewGroup) {
+    private fun setUpClock(previewContext: Context, parentView: ViewGroup) {
         largeClockHostView =
             if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
                 parentView.requireViewById<FrameLayout>(R.id.lockscreen_clock_view_large)
             } else {
-                val hostView = FrameLayout(context)
+                val hostView = FrameLayout(previewContext)
                 hostView.layoutParams =
                     FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
@@ -429,7 +440,7 @@ constructor(
                 parentView.requireViewById<FrameLayout>(R.id.lockscreen_clock_view)
             } else {
                 val resources = parentView.resources
-                val hostView = FrameLayout(context)
+                val hostView = FrameLayout(previewContext)
                 val layoutParams =
                     FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.WRAP_CONTENT,

@@ -549,10 +549,12 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         // Let's pretend that the app has crashed.
         firstActivity.app.setThread(null);
-        mRootWindowContainer.finishTopCrashedActivities(firstActivity.app, "test");
+        final Task finishedTask = mRootWindowContainer.finishTopCrashedActivities(
+                firstActivity.app, "test");
 
         // Verify that the root task was removed.
         assertEquals(originalRootTaskCount, defaultTaskDisplayArea.getRootTaskCount());
+        assertEquals(rootTask, finishedTask);
     }
 
     /**

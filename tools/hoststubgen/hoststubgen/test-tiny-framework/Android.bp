@@ -104,7 +104,7 @@ java_library_host {
     ],
     static_libs: [
         "junit",
-        "truth-prebuilt",
+        "truth",
 
         // http://cs/h/googleplex-android/platform/superproject/main/+/main:platform_testing/libraries/annotations/src/android/platform/test/annotations/
         "platform-test-annotations",

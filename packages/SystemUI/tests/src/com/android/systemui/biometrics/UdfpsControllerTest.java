@@ -20,12 +20,15 @@ import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPR
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
+
 import static com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
 import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -74,8 +77,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.res.R;
-import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
@@ -94,6 +95,7 @@ import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -125,7 +127,6 @@ import java.util.Optional;
 import javax.inject.Provider;
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 public class UdfpsControllerTest extends SysuiTestCase {

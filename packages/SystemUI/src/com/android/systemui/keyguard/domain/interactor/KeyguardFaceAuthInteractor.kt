@@ -61,6 +61,7 @@ interface KeyguardFaceAuthInteractor {
     fun onSwipeUpOnBouncer()
     fun onPrimaryBouncerUserInput()
     fun onAccessibilityAction()
+    fun onWalletLaunched()
 }
 
 /**

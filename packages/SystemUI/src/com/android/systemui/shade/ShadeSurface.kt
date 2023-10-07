@@ -20,7 +20,7 @@ import com.android.systemui.statusbar.GestureRecorder
 import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
+import com.android.systemui.statusbar.policy.HeadsUpManager
 
 /**
  * Allows CentralSurfacesImpl to interact with the shade. Only CentralSurfacesImpl should reference
@@ -34,7 +34,7 @@ interface ShadeSurface : ShadeViewController {
         recorder: GestureRecorder,
         hideExpandedRunnable: Runnable,
         notificationShelfController: NotificationShelfController,
-        headsUpManager: HeadsUpManagerPhone
+        headsUpManager: HeadsUpManager
     )
 
     /** Cancels any pending collapses. */

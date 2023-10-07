@@ -60,6 +60,8 @@ import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.TO_DESKTOP_INDICATOR
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.recents.RecentsTransitionHandler
+import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_ENTER_DESKTOP
 import com.android.wm.shell.sysui.ShellCommandHandler
@@ -68,7 +70,6 @@ import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.ShellSharedConstants
 import com.android.wm.shell.transition.OneShotRemoteHandler
 import com.android.wm.shell.transition.Transitions
-import com.android.wm.shell.transition.Transitions.TransitionHandler
 import com.android.wm.shell.util.KtProtoLog
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
@@ -93,6 +94,7 @@ class DesktopTasksController(
         ToggleResizeDesktopTaskTransitionHandler,
         private val desktopModeTaskRepository: DesktopModeTaskRepository,
         private val launchAdjacentController: LaunchAdjacentController,
+        private val recentsTransitionHandler: RecentsTransitionHandler,
         @ShellMainThread private val mainExecutor: ShellExecutor
 ) : RemoteCallable<DesktopTasksController>, Transitions.TransitionHandler {
 
@@ -119,6 +121,8 @@ class DesktopTasksController(
             com.android.wm.shell.R.dimen.desktop_mode_transition_area_width
         )
 
+    private var recentsAnimationRunning = false
+
     // This is public to avoid cyclic dependency; it is set by SplitScreenController
     lateinit var splitScreenController: SplitScreenController
 
@@ -139,6 +143,19 @@ class DesktopTasksController(
         )
         transitions.addHandler(this)
         desktopModeTaskRepository.addVisibleTasksListener(taskVisibilityListener, mainExecutor)
+
+        recentsTransitionHandler.addTransitionStateListener(
+            object : RecentsTransitionStateListener {
+                override fun onAnimationStateChanged(running: Boolean) {
+                    KtProtoLog.v(
+                        WM_SHELL_DESKTOP_MODE,
+                        "DesktopTasksController: recents animation state changed running=%b",
+                        running
+                    )
+                    recentsAnimationRunning = running
+                }
+            }
+        )
     }
 
     /** Show all tasks, that are part of the desktop, on top of launcher */
@@ -644,6 +661,10 @@ class DesktopTasksController(
         val triggerTask = request.triggerTask
         val shouldHandleRequest =
             when {
+                recentsAnimationRunning -> {
+                    reason = "recents animation is running"
+                    false
+                }
                 // Only handle open or to front transitions
                 request.type != TRANSIT_OPEN && request.type != TRANSIT_TO_FRONT -> {
                     reason = "transition type not handled (${request.type})"

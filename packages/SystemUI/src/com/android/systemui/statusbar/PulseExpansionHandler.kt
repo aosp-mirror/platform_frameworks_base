@@ -31,22 +31,22 @@ import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
 import com.android.systemui.Dumpable
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.res.R
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
@@ -63,7 +63,7 @@ constructor(
     context: Context,
     private val wakeUpCoordinator: NotificationWakeUpCoordinator,
     private val bypassController: KeyguardBypassController,
-    private val headsUpManager: HeadsUpManagerPhone,
+    private val headsUpManager: HeadsUpManager,
     private val roundnessManager: NotificationRoundnessManager,
     configurationController: ConfigurationController,
     private val statusBarStateController: StatusBarStateController,

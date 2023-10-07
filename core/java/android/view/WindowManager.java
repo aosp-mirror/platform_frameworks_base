@@ -1850,6 +1850,8 @@ public interface WindowManager extends ViewManager {
                         to = "PHONE"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_ALERT,
                         to = "SYSTEM_ALERT"),
+                @ViewDebug.IntToString(from = TYPE_KEYGUARD,
+                        to = "KEYGUARD"),
                 @ViewDebug.IntToString(from = TYPE_TOAST,
                         to = "TOAST"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_OVERLAY,
@@ -1898,6 +1900,8 @@ public interface WindowManager extends ViewManager {
                         to = "PRIVATE_PRESENTATION"),
                 @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION,
                         to = "VOICE_INTERACTION"),
+                @ViewDebug.IntToString(from = TYPE_ACCESSIBILITY_OVERLAY,
+                        to = "ACCESSIBILITY_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION_STARTING,
                         to = "VOICE_INTERACTION_STARTING"),
                 @ViewDebug.IntToString(from = TYPE_DOCK_DIVIDER,
@@ -1907,7 +1911,13 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.IntToString(from = TYPE_SCREENSHOT,
                         to = "SCREENSHOT"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_OVERLAY,
-                        to = "APPLICATION_OVERLAY")
+                        to = "APPLICATION_OVERLAY"),
+                @ViewDebug.IntToString(from = TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
+                        to = "ACCESSIBILITY_MAGNIFICATION_OVERLAY"),
+                @ViewDebug.IntToString(from = TYPE_NOTIFICATION_SHADE,
+                        to = "NOTIFICATION_SHADE"),
+                @ViewDebug.IntToString(from = TYPE_STATUS_BAR_ADDITIONAL,
+                        to = "STATUS_BAR_ADDITIONAL")
         })
         @WindowType
         public int type;

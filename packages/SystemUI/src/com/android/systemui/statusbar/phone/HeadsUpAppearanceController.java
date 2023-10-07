@@ -26,9 +26,9 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeHeadsUpTracker;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationRoundnessMa
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.ViewController;
@@ -70,7 +71,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     private static final SourceType HEADS_UP = SourceType.from("HeadsUp");
     private static final SourceType PULSING = SourceType.from("Pulsing");
     private final NotificationIconAreaController mNotificationIconAreaController;
-    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final HeadsUpManager mHeadsUpManager;
     private final NotificationStackScrollLayoutController mStackScrollerController;
 
     private final DarkIconDispatcher mDarkIconDispatcher;
@@ -108,7 +109,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     @Inject
     public HeadsUpAppearanceController(
             NotificationIconAreaController notificationIconAreaController,
-            HeadsUpManagerPhone headsUpManager,
+            HeadsUpManager headsUpManager,
             StatusBarStateController stateController,
             PhoneStatusBarTransitions phoneStatusBarTransitions,
             KeyguardBypassController bypassController,

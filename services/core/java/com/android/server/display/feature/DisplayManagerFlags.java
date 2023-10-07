@@ -51,21 +51,9 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_DISPLAY_OFFLOAD,
             Flags::enableDisplayOffload);
 
-    private final FlagState mDisplayResolutionRangeVotingState = new FlagState(
-            Flags.FLAG_ENABLE_DISPLAY_RESOLUTION_RANGE_VOTING,
-            Flags::enableDisplayResolutionRangeVoting);
-
-    private final FlagState mUserPreferredModeVoteState = new FlagState(
-            Flags.FLAG_ENABLE_USER_PREFERRED_MODE_VOTE,
-            Flags::enableUserPreferredModeVote);
-
     private final FlagState mExternalDisplayLimitModeState = new FlagState(
             Flags.FLAG_ENABLE_MODE_LIMIT_FOR_EXTERNAL_DISPLAY,
             Flags::enableModeLimitForExternalDisplay);
-
-    private final FlagState mDisplaysRefreshRatesSynchronizationState = new FlagState(
-            Flags.FLAG_ENABLE_DISPLAYS_REFRESH_RATES_SYNCHRONIZATION,
-            Flags::enableDisplaysRefreshRatesSynchronization);
 
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
@@ -90,7 +78,7 @@ public class DisplayManagerFlags {
 
     /** Returns whether resolution range voting feature is enabled or not. */
     public boolean isDisplayResolutionRangeVotingEnabled() {
-        return mDisplayResolutionRangeVotingState.isEnabled();
+        return isExternalDisplayLimitModeEnabled();
     }
 
     /**
@@ -98,7 +86,7 @@ public class DisplayManagerFlags {
      *      {@link com.android.server.display.mode.DisplayModeDirector}
      */
     public boolean isUserPreferredModeVoteEnabled() {
-        return mUserPreferredModeVoteState.isEnabled();
+        return isExternalDisplayLimitModeEnabled();
     }
 
     /**
@@ -112,7 +100,7 @@ public class DisplayManagerFlags {
      * @return Whether displays refresh rate synchronization is enabled.
      */
     public boolean isDisplaysRefreshRatesSynchronizationEnabled() {
-        return mDisplaysRefreshRatesSynchronizationState.isEnabled();
+        return isExternalDisplayLimitModeEnabled();
     }
 
     /** Returns whether displayoffload is enabled on not */

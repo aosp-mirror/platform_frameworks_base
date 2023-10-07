@@ -25,7 +25,6 @@ import com.android.systemui.plugins.ClockProvider
 import com.android.systemui.plugins.ClockSettings
 
 private val TAG = DefaultClockProvider::class.simpleName
-const val DEFAULT_CLOCK_NAME = "Default Clock"
 const val DEFAULT_CLOCK_ID = "DEFAULT"
 
 /** Provides the default system clock */
@@ -35,8 +34,7 @@ class DefaultClockProvider(
     val resources: Resources,
     val hasStepClockAnimation: Boolean = false
 ) : ClockProvider {
-    override fun getClocks(): List<ClockMetadata> =
-        listOf(ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME))
+    override fun getClocks(): List<ClockMetadata> = listOf(ClockMetadata(DEFAULT_CLOCK_ID))
 
     override fun createClock(settings: ClockSettings): ClockController {
         if (settings.clockId != DEFAULT_CLOCK_ID) {

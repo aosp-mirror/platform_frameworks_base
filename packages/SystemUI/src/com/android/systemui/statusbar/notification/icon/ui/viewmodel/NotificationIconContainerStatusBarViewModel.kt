@@ -15,8 +15,24 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 
 /** View-model for the row of notification icons displayed in the status bar, */
-class NotificationIconContainerStatusBarViewModel @Inject constructor() :
-    NotificationIconContainerViewModel
+class NotificationIconContainerStatusBarViewModel
+@Inject
+constructor(
+    keyguardInteractor: KeyguardInteractor,
+    shadeInteractor: ShadeInteractor,
+) : NotificationIconContainerViewModel {
+    override val animationsEnabled: Flow<Boolean> =
+        combine(
+            shadeInteractor.isShadeTouchable,
+            keyguardInteractor.isKeyguardShowing,
+        ) { panelTouchesEnabled, isKeyguardShowing ->
+            panelTouchesEnabled && !isKeyguardShowing
+        }
+}

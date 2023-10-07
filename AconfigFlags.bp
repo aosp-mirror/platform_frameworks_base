@@ -42,6 +42,7 @@ aconfig_srcjars = [
     ":android.credentials.flags-aconfig-java{.generated_srcjars}",
     ":android.view.contentprotection.flags-aconfig-java{.generated_srcjars}",
     ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
+    ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -414,5 +415,21 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.service.voice.flags-aconfig-java",
     aconfig_declarations: "android.service.voice.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Autofill
+aconfig_declarations {
+    name: "android.service.autofill.flags-aconfig",
+    package: "android.service.autofill",
+    srcs: [
+        "services/autofill/bugfixes.aconfig",
+        "services/autofill/features.aconfig"
+    ],
+}
+
+java_aconfig_library {
+    name: "android.service.autofill.flags-aconfig-java",
+    aconfig_declarations: "android.service.autofill.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

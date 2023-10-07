@@ -21,7 +21,6 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepositoryImpl
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
@@ -58,7 +57,6 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-@RoboPilotTest
 @TestableLooper.RunWithLooper
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :

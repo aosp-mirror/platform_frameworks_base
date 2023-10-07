@@ -49,7 +49,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.complication.ComplicationLayoutEngine;
 import com.android.systemui.dreams.complication.HideComplicationTouchHandler;
@@ -72,7 +71,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-@RoboPilotTest
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DreamOverlayServiceTest extends SysuiTestCase {

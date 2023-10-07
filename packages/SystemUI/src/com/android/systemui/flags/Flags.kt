@@ -304,6 +304,11 @@ object Flags {
     @JvmField
     val WALLPAPER_PICKER_PREVIEW_ANIMATION = releasedFlag("wallpaper_picker_preview_animation")
 
+    /** Flag to enable rest to unlock feature. */
+    // TODO(b/303672286): Tracking bug
+    @JvmField
+    val REST_TO_UNLOCK: UnreleasedFlag = unreleasedFlag("rest_to_unlock")
+
     /**
      * TODO(b/278086361): Tracking bug
      * Complete rewrite of the interactions between System UI and Window Manager involving keyguard
@@ -326,7 +331,7 @@ object Flags {
     /** Flag to use a separate view for the alternate bouncer. */
     // TODO(b/300440924): Tracking bug
     @JvmField
-    val ALTERNATE_BOUNCER_REFACTOR: UnreleasedFlag = unreleasedFlag("alternate_bouncer_view")
+    val ALTERNATE_BOUNCER_VIEW: UnreleasedFlag = unreleasedFlag("alternate_bouncer_view")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug

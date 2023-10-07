@@ -31,14 +31,13 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.res.R;
-import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.SingleTapClassifier;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +46,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
