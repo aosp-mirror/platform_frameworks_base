@@ -1183,10 +1183,8 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Setel aplikasi catatan default di Setelan"</string>
     <string name="install_app" msgid="5066668100199613936">"Instal aplikasi"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Cerminkan ke layar eksternal?"</string>
-    <!-- no translation found for mirror_display (2515262008898122928) -->
-    <skip />
-    <!-- no translation found for dismiss_dialog (2195508495854675882) -->
-    <skip />
+    <string name="mirror_display" msgid="2515262008898122928">"Cerminkan layar"</string>
+    <string name="dismiss_dialog" msgid="2195508495854675882">"Tutup"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofon &amp; Kamera"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Penggunaan aplikasi baru-baru ini"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Lihat akses terbaru"</string>
