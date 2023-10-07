@@ -7,3 +7,11 @@ flag {
     bug: "298055811"
     is_fixed_read_only: true
 }
+
+flag {
+     name: "anr_timer_service_enabled"
+     namespace: "system_performance"
+     is_fixed_read_only: true
+     description: "Feature flag for the ANR timer service"
+     bug: "282428924"
+}

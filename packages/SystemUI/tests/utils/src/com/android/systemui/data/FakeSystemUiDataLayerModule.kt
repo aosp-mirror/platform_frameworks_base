@@ -17,6 +17,7 @@ package com.android.systemui.data
 
 import com.android.systemui.bouncer.data.repository.FakeBouncerDataLayerModule
 import com.android.systemui.common.ui.data.FakeCommonDataLayerModule
+import com.android.systemui.deviceentry.data.FakeDeviceEntryDataLayerModule
 import com.android.systemui.keyguard.data.FakeKeyguardDataLayerModule
 import com.android.systemui.power.data.FakePowerDataLayerModule
 import com.android.systemui.shade.data.repository.FakeShadeDataLayerModule
@@ -28,8 +29,9 @@ import dagger.Module
 @Module(
     includes =
         [
-            FakeCommonDataLayerModule::class,
             FakeBouncerDataLayerModule::class,
+            FakeCommonDataLayerModule::class,
+            FakeDeviceEntryDataLayerModule::class,
             FakeKeyguardDataLayerModule::class,
             FakePowerDataLayerModule::class,
             FakeShadeDataLayerModule::class,

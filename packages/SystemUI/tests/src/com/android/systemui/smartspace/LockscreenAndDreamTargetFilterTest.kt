@@ -25,7 +25,6 @@ import android.provider.Settings
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.smartspace.filters.LockscreenAndDreamTargetFilter
@@ -52,7 +51,6 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @TestableLooper.RunWithLooper
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class LockscreenAndDreamTargetFilterTest : SysuiTestCase() {
     @Mock

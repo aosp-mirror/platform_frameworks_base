@@ -264,6 +264,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.backup.BackupManagerService$Lifecycle";
     private static final String APPWIDGET_SERVICE_CLASS =
             "com.android.server.appwidget.AppWidgetService";
+    private static final String ARC_SYSTEM_HEALTH_SERVICE =
+            "com.android.server.arc.health.ArcSystemHealthService";
     private static final String VOICE_RECOGNITION_MANAGER_SERVICE_CLASS =
             "com.android.server.voiceinteraction.VoiceInteractionManagerService";
     private static final String APP_HIBERNATION_SERVICE_CLASS =
@@ -1285,6 +1287,12 @@ public final class SystemServer implements Dumpable {
                 Watchdog.getInstance().resumeWatchingCurrentThread("moveab");
                 t.traceEnd();
             }
+        }
+
+        if (Build.IS_ARC) {
+            t.traceBegin("StartArcSystemHealthService");
+            mSystemServiceManager.startService(ARC_SYSTEM_HEALTH_SERVICE);
+            t.traceEnd();
         }
 
         t.traceBegin("StartUserManagerService");

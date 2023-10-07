@@ -32,8 +32,8 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.notification.collection.provider.VisualSta
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 
 import org.junit.After;
@@ -71,7 +72,6 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Mock private AccessibilityManagerWrapper mAccessibilityManagerWrapper;
     @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock private UiEventLogger mUiEventLogger;
-    private boolean mLivesPastNormalTime;
 
     private static final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
         TestableHeadsUpManagerPhone(
@@ -149,7 +149,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     @Test
     public void testSnooze() {
-        final HeadsUpManagerPhone hmp = createHeadsUpManagerPhone();
+        final HeadsUpManager hmp = createHeadsUpManagerPhone();
         final NotificationEntry entry = createEntry(/* id = */ 0);
 
         hmp.showNotification(entry);
@@ -160,7 +160,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     @Test
     public void testSwipedOutNotification() {
-        final HeadsUpManagerPhone hmp = createHeadsUpManagerPhone();
+        final HeadsUpManager hmp = createHeadsUpManagerPhone();
         final NotificationEntry entry = createEntry(/* id = */ 0);
 
         hmp.showNotification(entry);
@@ -176,7 +176,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     @Test
     public void testCanRemoveImmediately_swipedOut() {
-        final HeadsUpManagerPhone hmp = createHeadsUpManagerPhone();
+        final HeadsUpManager hmp = createHeadsUpManagerPhone();
         final NotificationEntry entry = createEntry(/* id = */ 0);
 
         hmp.showNotification(entry);
@@ -189,7 +189,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Ignore("b/141538055")
     @Test
     public void testCanRemoveImmediately_notTopEntry() {
-        final HeadsUpManagerPhone hmp = createHeadsUpManagerPhone();
+        final HeadsUpManager hmp = createHeadsUpManagerPhone();
         final NotificationEntry earlierEntry = createEntry(/* id = */ 0);
         final NotificationEntry laterEntry = createEntry(/* id = */ 1);
         laterEntry.setRow(mRow);

@@ -1030,6 +1030,12 @@ public class DeviceIdleController extends SystemService
                 "light_idle_to_initial_flex";
         private static final String KEY_LIGHT_IDLE_TIMEOUT_MAX_FLEX = "light_max_idle_to_flex";
         private static final String KEY_LIGHT_IDLE_FACTOR = "light_idle_factor";
+        private static final String KEY_LIGHT_IDLE_INCREASE_LINEARLY =
+                "light_idle_increase_linearly";
+        private static final String KEY_LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS =
+                "light_idle_linear_increase_factor_ms";
+        private static final String KEY_LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS =
+                "light_idle_flex_linear_increase_factor_ms";
         private static final String KEY_LIGHT_MAX_IDLE_TIMEOUT = "light_max_idle_to";
         private static final String KEY_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET =
                 "light_idle_maintenance_min_budget";
@@ -1079,6 +1085,10 @@ public class DeviceIdleController extends SystemService
         private long mDefaultLightIdleTimeoutMaxFlex =
                 !COMPRESS_TIME ? 15 * 60 * 1000L : 60 * 1000L;
         private float mDefaultLightIdleFactor = 2f;
+        private boolean mDefaultLightIdleIncreaseLinearly;
+        private long mDefaultLightIdleLinearIncreaseFactorMs = mDefaultLightIdleTimeout;
+        private long mDefaultLightIdleFlexLinearIncreaseFactorMs =
+                mDefaultLightIdleTimeoutInitialFlex;
         private long mDefaultLightMaxIdleTimeout =
                 !COMPRESS_TIME ? 15 * 60 * 1000L : 60 * 1000L;
         private long mDefaultLightIdleMaintenanceMinBudget =
@@ -1172,6 +1182,37 @@ public class DeviceIdleController extends SystemService
          * @see #KEY_LIGHT_IDLE_FACTOR
          */
         public float LIGHT_IDLE_FACTOR = mDefaultLightIdleFactor;
+
+        /**
+         * Whether to increase the light idle mode time linearly or exponentially.
+         * If true, will increase linearly
+         * (i.e. {@link #LIGHT_IDLE_TIMEOUT} + x * {@link #LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS}).
+         * If false, will increase by exponentially
+         * (i.e. {@link #LIGHT_IDLE_TIMEOUT} * ({@link #LIGHT_IDLE_FACTOR} ^ x)).
+         * This will also impact how the light idle flex value
+         * ({@link #LIGHT_IDLE_TIMEOUT_INITIAL_FLEX}) is increased (using
+         * {@link #LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS} for the linear increase)..
+         *
+         * @see #KEY_LIGHT_IDLE_INCREASE_LINEARLY
+         */
+        public boolean LIGHT_IDLE_INCREASE_LINEARLY = mDefaultLightIdleIncreaseLinearly;
+
+        /**
+         * Amount of time to increase the light idle time by, if increasing it linearly.
+         *
+         * @see #KEY_LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS
+         * @see #LIGHT_IDLE_INCREASE_LINEARLY
+         */
+        public long LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS = mDefaultLightIdleLinearIncreaseFactorMs;
+
+        /**
+         * Amount of time to increase the light idle flex time by, if increasing it linearly.
+         *
+         * @see #KEY_LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS
+         * @see #LIGHT_IDLE_INCREASE_LINEARLY
+         */
+        public long LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS =
+                mDefaultLightIdleFlexLinearIncreaseFactorMs;
 
         /**
          * This is the maximum time we will stay in light idle mode.
@@ -1409,6 +1450,16 @@ public class DeviceIdleController extends SystemService
                     mDefaultLightIdleTimeoutMaxFlex);
             mDefaultLightIdleFactor = res.getFloat(
                     com.android.internal.R.integer.device_idle_light_idle_factor);
+            mDefaultLightIdleIncreaseLinearly = res.getBoolean(
+                    com.android.internal.R.bool.device_idle_light_idle_increase_linearly);
+            mDefaultLightIdleLinearIncreaseFactorMs = getTimeout(res.getInteger(
+                    com.android.internal.R.integer
+                            .device_idle_light_idle_linear_increase_factor_ms),
+                    mDefaultLightIdleLinearIncreaseFactorMs);
+            mDefaultLightIdleFlexLinearIncreaseFactorMs = getTimeout(res.getInteger(
+                    com.android.internal.R.integer
+                            .device_idle_light_idle_flex_linear_increase_factor_ms),
+                    mDefaultLightIdleFlexLinearIncreaseFactorMs);
             mDefaultLightMaxIdleTimeout = getTimeout(
                     res.getInteger(com.android.internal.R.integer.device_idle_light_max_idle_to_ms),
                     mDefaultLightMaxIdleTimeout);
@@ -1487,6 +1538,9 @@ public class DeviceIdleController extends SystemService
             LIGHT_IDLE_TIMEOUT_INITIAL_FLEX = mDefaultLightIdleTimeoutInitialFlex;
             LIGHT_IDLE_TIMEOUT_MAX_FLEX = mDefaultLightIdleTimeoutMaxFlex;
             LIGHT_IDLE_FACTOR = mDefaultLightIdleFactor;
+            LIGHT_IDLE_INCREASE_LINEARLY = mDefaultLightIdleIncreaseLinearly;
+            LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS = mDefaultLightIdleLinearIncreaseFactorMs;
+            LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS = mDefaultLightIdleFlexLinearIncreaseFactorMs;
             LIGHT_MAX_IDLE_TIMEOUT = mDefaultLightMaxIdleTimeout;
             LIGHT_IDLE_MAINTENANCE_MIN_BUDGET = mDefaultLightIdleMaintenanceMinBudget;
             LIGHT_IDLE_MAINTENANCE_MAX_BUDGET = mDefaultLightIdleMaintenanceMaxBudget;
@@ -1555,6 +1609,21 @@ public class DeviceIdleController extends SystemService
                         case KEY_LIGHT_IDLE_FACTOR:
                             LIGHT_IDLE_FACTOR = Math.max(1, properties.getFloat(
                                     KEY_LIGHT_IDLE_FACTOR, mDefaultLightIdleFactor));
+                            break;
+                        case KEY_LIGHT_IDLE_INCREASE_LINEARLY:
+                            LIGHT_IDLE_INCREASE_LINEARLY = properties.getBoolean(
+                                    KEY_LIGHT_IDLE_INCREASE_LINEARLY,
+                                    mDefaultLightIdleIncreaseLinearly);
+                            break;
+                        case KEY_LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS:
+                            LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS = properties.getLong(
+                                    KEY_LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS,
+                                    mDefaultLightIdleLinearIncreaseFactorMs);
+                            break;
+                        case KEY_LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS:
+                            LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS = properties.getLong(
+                                    KEY_LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS,
+                                    mDefaultLightIdleFlexLinearIncreaseFactorMs);
                             break;
                         case KEY_LIGHT_MAX_IDLE_TIMEOUT:
                             LIGHT_MAX_IDLE_TIMEOUT = properties.getLong(
@@ -1714,6 +1783,20 @@ public class DeviceIdleController extends SystemService
 
             pw.print("    "); pw.print(KEY_LIGHT_IDLE_FACTOR); pw.print("=");
             pw.print(LIGHT_IDLE_FACTOR);
+            pw.println();
+
+            pw.print("    "); pw.print(KEY_LIGHT_IDLE_INCREASE_LINEARLY); pw.print("=");
+            pw.print(LIGHT_IDLE_INCREASE_LINEARLY);
+            pw.println();
+
+            pw.print("    "); pw.print(KEY_LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS);
+            pw.print("=");
+            pw.print(LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS);
+            pw.println();
+
+            pw.print("    "); pw.print(KEY_LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS);
+            pw.print("=");
+            pw.print(LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS);
             pw.println();
 
             pw.print("    "); pw.print(KEY_LIGHT_MAX_IDLE_TIMEOUT); pw.print("=");
@@ -3694,10 +3777,18 @@ public class DeviceIdleController extends SystemService
                 }
                 mMaintenanceStartTime = 0;
                 scheduleLightAlarmLocked(mNextLightIdleDelay, mNextLightIdleDelayFlex, true);
-                mNextLightIdleDelay = Math.min(mConstants.LIGHT_MAX_IDLE_TIMEOUT,
-                        (long) (mNextLightIdleDelay * mConstants.LIGHT_IDLE_FACTOR));
-                mNextLightIdleDelayFlex = Math.min(mConstants.LIGHT_IDLE_TIMEOUT_MAX_FLEX,
-                        (long) (mNextLightIdleDelayFlex * mConstants.LIGHT_IDLE_FACTOR));
+                if (!mConstants.LIGHT_IDLE_INCREASE_LINEARLY) {
+                    mNextLightIdleDelay = Math.min(mConstants.LIGHT_MAX_IDLE_TIMEOUT,
+                            (long) (mNextLightIdleDelay * mConstants.LIGHT_IDLE_FACTOR));
+                    mNextLightIdleDelayFlex = Math.min(mConstants.LIGHT_IDLE_TIMEOUT_MAX_FLEX,
+                            (long) (mNextLightIdleDelayFlex * mConstants.LIGHT_IDLE_FACTOR));
+                } else {
+                    mNextLightIdleDelay = Math.min(mConstants.LIGHT_MAX_IDLE_TIMEOUT,
+                            mNextLightIdleDelay + mConstants.LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS);
+                    mNextLightIdleDelayFlex = Math.min(mConstants.LIGHT_IDLE_TIMEOUT_MAX_FLEX,
+                            mNextLightIdleDelayFlex
+                                    + mConstants.LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS);
+                }
                 moveToLightStateLocked(LIGHT_STATE_IDLE, reason);
                 addEvent(EVENT_LIGHT_IDLE, null);
                 mGoingIdleWakeLock.acquire();

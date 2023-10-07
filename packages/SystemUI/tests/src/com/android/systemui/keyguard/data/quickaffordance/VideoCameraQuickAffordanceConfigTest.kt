@@ -21,7 +21,6 @@ import android.app.admin.DevicePolicyManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.ActivityIntentHelper
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.camera.CameraIntentsWrapper
 import com.android.systemui.coroutines.collectLastValue
@@ -45,7 +44,6 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
 

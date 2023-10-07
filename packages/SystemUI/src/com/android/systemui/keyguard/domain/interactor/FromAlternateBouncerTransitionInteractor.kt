@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @SysUISingleton
 class FromAlternateBouncerTransitionInteractor
@@ -129,11 +130,11 @@ constructor(
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
-            duration = TRANSITION_DURATION_MS
+            duration = TRANSITION_DURATION_MS.inWholeMilliseconds
         }
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 300L
+        val TRANSITION_DURATION_MS = 300.milliseconds
     }
 }

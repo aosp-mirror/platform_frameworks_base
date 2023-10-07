@@ -17,6 +17,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnec
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -84,7 +85,8 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
                         fromScene = SceneKey.Shade,
                         toScene = SceneKey.QuickSettings,
                         progress = MutableStateFlow(0.5f),
-                        isUserInputDriven = false,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
                     )
                 )
             )
@@ -102,7 +104,8 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
                         fromScene = SceneKey.QuickSettings,
                         toScene = SceneKey.Shade,
                         progress = MutableStateFlow(0.5f),
-                        isUserInputDriven = false,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
                     )
                 )
             )
@@ -120,7 +123,8 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
                         fromScene = SceneKey.Gone,
                         toScene = SceneKey.Shade,
                         progress = MutableStateFlow(0.5f),
-                        isUserInputDriven = false,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
                     )
                 )
             )

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.pipeline.wifi.domain.interactor
 import android.net.wifi.WifiManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
@@ -43,7 +42,6 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class WifiInteractorImplTest : SysuiTestCase() {
 

@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -50,6 +51,7 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateSharedFloatAsState
+import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.settingslib.Utils
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
@@ -98,11 +100,11 @@ fun SceneScope.CollapsedShadeHeader(
             ShadeHeader.Keys.transitionProgress,
             ShadeHeader.Elements.FormatPlaceholder
         )
-    val useExpandedFormat by
-        remember(formatProgress) { derivedStateOf { formatProgress.value > 0.5f } }
 
     val cutoutWidth = LocalDisplayCutout.current.width()
     val cutoutLocation = LocalDisplayCutout.current.location
+
+    val useExpandedFormat = formatProgress.value > 0.5f || cutoutLocation != CutoutLocation.CENTER
 
     // This layout assumes it is globally positioned at (0, 0) and is the
     // same size as the screen.
@@ -131,6 +133,14 @@ fun SceneScope.CollapsedShadeHeader(
                 {
                     Row(horizontalArrangement = Arrangement.End) {
                         SystemIconContainer {
+                            when (LocalWindowSizeClass.current.widthSizeClass) {
+                                WindowWidthSizeClass.Medium,
+                                WindowWidthSizeClass.Expanded ->
+                                    ShadeCarrierGroup(
+                                        viewModel = viewModel,
+                                        modifier = Modifier.align(Alignment.CenterVertically),
+                                    )
+                            }
                             StatusIcons(
                                 viewModel = viewModel,
                                 createTintedIconManager = createTintedIconManager,

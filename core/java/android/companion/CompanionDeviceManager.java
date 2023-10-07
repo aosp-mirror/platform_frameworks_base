@@ -240,6 +240,12 @@ public final class CompanionDeviceManager {
     public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
 
     /**
+     * The length limit of Association tag.
+     * @hide
+     */
+    private static final int ASSOCIATION_TAG_LENGTH_LIMIT = 100;
+
+    /**
      * Callback for applications to receive updates about and the outcome of
      * {@link AssociationRequest} issued via {@code associate()} call.
      *
@@ -1409,7 +1415,7 @@ public final class CompanionDeviceManager {
     /**
      * Sets the {@link AssociationInfo#getTag() tag} for this association.
      *
-     * <p>The length of the tag must be at most 20 characters.
+     * <p>The length of the tag must be at most 100 characters to save disk space.
      *
      * <p>This allows to store useful information about the associated devices.
      *
@@ -1421,8 +1427,8 @@ public final class CompanionDeviceManager {
     public void setAssociationTag(int associationId, @NonNull String tag) {
         Objects.requireNonNull(tag, "tag cannot be null");
 
-        if (tag.length() > 20) {
-            throw new IllegalArgumentException("Length of the tag must be at most 20 characters");
+        if (tag.length() > ASSOCIATION_TAG_LENGTH_LIMIT) {
+            throw new IllegalArgumentException("Length of the tag must be at most 100 characters");
         }
 
         try {

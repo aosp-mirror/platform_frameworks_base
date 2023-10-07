@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Assert;
@@ -72,7 +73,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     private ExpandableNotificationRow mRow;
     private NotificationEntry mEntry;
     private HeadsUpStatusBarView mHeadsUpStatusBarView;
-    private HeadsUpManagerPhone mHeadsUpManager;
+    private HeadsUpManager mHeadsUpManager;
     private View mOperatorNameView;
     private StatusBarStateController mStatusbarStateController;
     private PhoneStatusBarTransitions mPhoneStatusBarTransitions;
@@ -93,7 +94,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mEntry = mRow.getEntry();
         mHeadsUpStatusBarView = new HeadsUpStatusBarView(mContext, mock(View.class),
                 mock(TextView.class));
-        mHeadsUpManager = mock(HeadsUpManagerPhone.class);
+        mHeadsUpManager = mock(HeadsUpManager.class);
         mOperatorNameView = new View(mContext);
         mStatusbarStateController = mock(StatusBarStateController.class);
         mPhoneStatusBarTransitions = mock(PhoneStatusBarTransitions.class);

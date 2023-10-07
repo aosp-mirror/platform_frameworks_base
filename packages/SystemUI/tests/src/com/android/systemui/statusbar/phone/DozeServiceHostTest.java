@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -72,7 +73,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
 
     private DozeServiceHost mDozeServiceHost;
 
-    @Mock private HeadsUpManagerPhone mHeadsUpManager;
+    @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private ScrimController mScrimController;
     @Mock private DozeScrimController mDozeScrimController;
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;

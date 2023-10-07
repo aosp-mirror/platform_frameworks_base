@@ -32,7 +32,7 @@ android_test {
         "compatibility-device-util-axt",
         "frameworks-base-testutils",
         "mockito-target-minus-junit4",
-        "truth-prebuilt",
+        "truth",
     ],
     libs: ["android.test.runner"],
     platform_apis: true,

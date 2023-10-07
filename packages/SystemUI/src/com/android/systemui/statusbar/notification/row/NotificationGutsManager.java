@@ -46,7 +46,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -54,6 +53,7 @@ import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.shade.ShadeController;
@@ -69,8 +69,8 @@ import com.android.systemui.statusbar.notification.collection.render.NotifGutsVi
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.wmshell.BubblesManager;
 
@@ -127,7 +127,7 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
     private final ShadeController mShadeController;
     private final WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     private NotifGutsViewListener mGutsListener;
-    private final HeadsUpManagerPhone mHeadsUpManagerPhone;
+    private final HeadsUpManager mHeadsUpManager;
     private final ActivityStarter mActivityStarter;
 
     @Inject
@@ -154,7 +154,7 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
             StatusBarStateController statusBarStateController,
             DeviceProvisionedController deviceProvisionedController,
             MetricsLogger metricsLogger,
-            HeadsUpManagerPhone headsUpManagerPhone,
+            HeadsUpManager headsUpManager,
             ActivityStarter activityStarter) {
         mContext = context;
         mMainHandler = mainHandler;
@@ -179,7 +179,7 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
         mStatusBarStateController = statusBarStateController;
         mDeviceProvisionedController = deviceProvisionedController;
         mMetricsLogger = metricsLogger;
-        mHeadsUpManagerPhone = headsUpManagerPhone;
+        mHeadsUpManager = headsUpManager;
         mActivityStarter = activityStarter;
     }
 
@@ -296,7 +296,7 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
             if (mGutsListener != null) {
                 mGutsListener.onGutsClose(entry);
             }
-            mHeadsUpManagerPhone.setGutsShown(row.getEntry(), false);
+            mHeadsUpManager.setGutsShown(row.getEntry(), false);
         });
 
         View gutsView = item.getGutsView();
@@ -676,7 +676,7 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
                 row.closeRemoteInput();
                 mListContainer.onHeightChanged(row, true /* needsAnimation */);
                 mGutsMenuItem = menuItem;
-                mHeadsUpManagerPhone.setGutsShown(row.getEntry(), true);
+                mHeadsUpManager.setGutsShown(row.getEntry(), true);
             }
         };
         guts.post(mOpenRunnable);

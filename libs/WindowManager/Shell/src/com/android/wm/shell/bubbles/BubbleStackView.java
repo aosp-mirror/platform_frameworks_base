@@ -1864,6 +1864,14 @@ public class BubbleStackView extends FrameLayout
                 : GONE);
     }
 
+    private void updateOverflowDotVisibility(boolean expanding) {
+        if (mBubbleOverflow.showDot()) {
+            mBubbleOverflow.getIconView().animateDotScale(expanding ? 1 : 0f, () -> {
+                mBubbleOverflow.setVisible(expanding ? VISIBLE : GONE);
+            });
+        }
+    }
+
     // via BubbleData.Listener
     void updateBubble(Bubble bubble) {
         animateInFlyoutForBubble(bubble);
@@ -2274,6 +2282,7 @@ public class BubbleStackView extends FrameLayout
             if (mIsExpanded && mExpandedBubble.getExpandedView() != null) {
                 maybeShowManageEdu();
             }
+            updateOverflowDotVisibility(true /* expanding */);
         } /* after */);
         int index;
         if (mExpandedBubble != null && BubbleOverflow.KEY.equals(mExpandedBubble.getKey())) {
@@ -2405,11 +2414,15 @@ public class BubbleStackView extends FrameLayout
         // since we're about to animate collapsed.
         mExpandedAnimationController.notifyPreparingToCollapse();
 
+        updateOverflowDotVisibility(false /* expanding */);
         final Runnable collapseBackToStack = () -> mExpandedAnimationController.collapseBackToStack(
                 mStackAnimationController
                         .getStackPositionAlongNearestHorizontalEdge()
                 /* collapseTo */,
-                () -> mBubbleContainer.setActiveController(mStackAnimationController));
+                () -> {
+                    mBubbleContainer.setActiveController(mStackAnimationController);
+                    updateOverflowVisibility();
+                });
 
         final Runnable after = () -> {
             final BubbleViewProvider previouslySelected = mExpandedBubble;
@@ -2424,7 +2437,6 @@ public class BubbleStackView extends FrameLayout
                 Log.d(TAG, BubbleDebugConfig.formatBubblesString(getBubblesOnScreen(),
                         mExpandedBubble));
             }
-            updateOverflowVisibility();
             updateZOrder();
             updateBadges(true /* setBadgeForCollapsedStack */);
             afterExpandedViewAnimation();

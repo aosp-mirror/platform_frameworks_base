@@ -23,7 +23,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.camera.CameraGestureHelper
 import com.android.systemui.settings.UserTracker
@@ -43,7 +42,6 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class CameraQuickAffordanceConfigTest : SysuiTestCase() {
 

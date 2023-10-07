@@ -26,7 +26,6 @@ import android.os.PowerManager;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -38,7 +37,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RoboPilotTest
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BouncerlessScrimControllerTest extends SysuiTestCase {

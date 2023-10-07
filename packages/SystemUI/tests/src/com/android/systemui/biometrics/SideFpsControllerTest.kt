@@ -53,7 +53,6 @@ import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.res.R
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
@@ -98,7 +97,6 @@ private const val SENSOR_ID = 1
 private const val REAR_DISPLAY_MODE_DEVICE_STATE = 3
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class SideFpsControllerTest : SysuiTestCase() {

@@ -1,0 +1,11 @@
+package: "com.android.window.flags"
+
+# Project link: https://gantry.corp.google.com/projects/android_platform_window_surfaces/changes
+
+flag {
+    namespace: "window_surfaces"
+    name: "surface_trusted_overlay"
+    description: "Whether to add trusted overlay flag on the SurfaceControl or the InputWindow"
+    is_fixed_read_only: true
+    bug: "292032926"
+}

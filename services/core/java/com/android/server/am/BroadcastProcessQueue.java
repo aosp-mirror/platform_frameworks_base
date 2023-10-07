@@ -106,6 +106,14 @@ class BroadcastProcessQueue {
     private boolean mTimeoutScheduled;
 
     /**
+     * Snapshotted value of {@link ProcessRecord#getCpuDelayTime()}, typically
+     * used when deciding if we should extend the soft ANR timeout.
+     *
+     * Required when Flags.anrTimerServiceEnabled is false.
+     */
+    long lastCpuDelayTime;
+
+     /**
      * Snapshotted value of {@link ProcessStateRecord#getCurProcState()} before
      * dispatching the current broadcast to the receiver in this process.
      */

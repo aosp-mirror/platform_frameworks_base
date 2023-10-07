@@ -106,6 +106,7 @@ package com.android.server.display.config {
     method public final com.android.server.display.config.SensorDetails getLightSensor();
     method public com.android.server.display.config.LuxThrottling getLuxThrottling();
     method @Nullable public final String getName();
+    method public com.android.server.display.config.PowerThrottlingConfig getPowerThrottlingConfig();
     method public final com.android.server.display.config.SensorDetails getProxSensor();
     method public com.android.server.display.config.DisplayQuirks getQuirks();
     method public com.android.server.display.config.RefreshRateConfigs getRefreshRate();
@@ -138,6 +139,7 @@ package com.android.server.display.config {
     method public final void setLightSensor(com.android.server.display.config.SensorDetails);
     method public void setLuxThrottling(com.android.server.display.config.LuxThrottling);
     method public final void setName(@Nullable String);
+    method public void setPowerThrottlingConfig(com.android.server.display.config.PowerThrottlingConfig);
     method public final void setProxSensor(com.android.server.display.config.SensorDetails);
     method public void setQuirks(com.android.server.display.config.DisplayQuirks);
     method public void setRefreshRate(com.android.server.display.config.RefreshRateConfigs);
@@ -244,6 +246,30 @@ package com.android.server.display.config {
     method @NonNull public final java.math.BigDecimal getValue();
     method public final void setNits(@NonNull java.math.BigDecimal);
     method public final void setValue(@NonNull java.math.BigDecimal);
+  }
+
+  public class PowerThrottlingConfig {
+    ctor public PowerThrottlingConfig();
+    method @NonNull public final java.math.BigDecimal getBrightnessLowestCapAllowed();
+    method @NonNull public final java.math.BigInteger getPollingWindowMillis();
+    method public final java.util.List<com.android.server.display.config.PowerThrottlingMap> getPowerThrottlingMap();
+    method public final void setBrightnessLowestCapAllowed(@NonNull java.math.BigDecimal);
+    method public final void setPollingWindowMillis(@NonNull java.math.BigInteger);
+  }
+
+  public class PowerThrottlingMap {
+    ctor public PowerThrottlingMap();
+    method public String getId();
+    method @NonNull public final java.util.List<com.android.server.display.config.PowerThrottlingPoint> getPowerThrottlingPoint();
+    method public void setId(String);
+  }
+
+  public class PowerThrottlingPoint {
+    ctor public PowerThrottlingPoint();
+    method @NonNull public final java.math.BigDecimal getPowerQuotaMilliWatts();
+    method @NonNull public final com.android.server.display.config.ThermalStatus getThermalStatus();
+    method public final void setPowerQuotaMilliWatts(@NonNull java.math.BigDecimal);
+    method public final void setThermalStatus(@NonNull com.android.server.display.config.ThermalStatus);
   }
 
   public enum PredefinedBrightnessLimitNames {

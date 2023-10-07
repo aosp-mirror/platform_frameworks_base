@@ -30,7 +30,7 @@ android_test {
         "frameworks-base-testutils",
         "junit",
         "platform-test-annotations",
-        "truth-prebuilt",
+        "truth",
     ],
     libs: ["android.test.runner"],
     platform_apis: true,

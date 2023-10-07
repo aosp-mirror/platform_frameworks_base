@@ -24,7 +24,7 @@ import com.android.systemui.animation.LaunchAnimator
 import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.HeadsUpUtil
 import kotlin.math.ceil
 import kotlin.math.max
@@ -35,7 +35,7 @@ private const val TAG = "NotificationLaunchAnimatorController"
 class NotificationLaunchAnimatorControllerProvider(
     private val notificationExpansionRepository: NotificationExpansionRepository,
     private val notificationListContainer: NotificationListContainer,
-    private val headsUpManager: HeadsUpManagerPhone,
+    private val headsUpManager: HeadsUpManager,
     private val jankMonitor: InteractionJankMonitor
 ) {
     @JvmOverloads
@@ -62,7 +62,7 @@ class NotificationLaunchAnimatorControllerProvider(
 class NotificationLaunchAnimatorController(
     private val notificationExpansionRepository: NotificationExpansionRepository,
     private val notificationListContainer: NotificationListContainer,
-    private val headsUpManager: HeadsUpManagerPhone,
+    private val headsUpManager: HeadsUpManager,
     private val notification: ExpandableNotificationRow,
     private val jankMonitor: InteractionJankMonitor,
     private val onFinishAnimationCallback: Runnable?
@@ -152,16 +152,17 @@ class NotificationLaunchAnimatorController(
         }
     }
 
-    private val headsUpNotificationRow: ExpandableNotificationRow? get() {
-        val summaryEntry = notificationEntry.parent?.summary
+    private val headsUpNotificationRow: ExpandableNotificationRow?
+        get() {
+            val summaryEntry = notificationEntry.parent?.summary
 
-        return when {
-            headsUpManager.isAlerting(notificationKey) -> notification
-            summaryEntry == null -> null
-            headsUpManager.isAlerting(summaryEntry.key) -> summaryEntry.row
-            else -> null
+            return when {
+                headsUpManager.isAlerting(notificationKey) -> notification
+                summaryEntry == null -> null
+                headsUpManager.isAlerting(summaryEntry.key) -> summaryEntry.row
+                else -> null
+            }
         }
-    }
 
     private fun removeHun(animate: Boolean) {
         val row = headsUpNotificationRow ?: return

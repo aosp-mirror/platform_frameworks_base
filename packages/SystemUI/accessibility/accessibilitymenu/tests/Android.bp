@@ -32,7 +32,7 @@ android_test {
         "androidx.test.ext.junit",
         "compatibility-device-util-axt",
         "platform-test-annotations",
-        "truth-prebuilt",
+        "truth",
     ],
     srcs: [
         "src/**/*.java",

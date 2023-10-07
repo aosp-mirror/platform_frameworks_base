@@ -30,7 +30,7 @@ java_test_host {
         "compatibility-host-util",
     ],
     static_libs: [
-        "truth-prebuilt",
+        "truth",
     ],
     data: [
         ":BinaryTransparencyTestApp",

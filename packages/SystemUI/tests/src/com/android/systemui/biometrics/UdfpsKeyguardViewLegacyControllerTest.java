@@ -31,14 +31,12 @@ import android.view.MotionEvent;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.RoboPilotTest;
 import com.android.systemui.statusbar.StatusBarState;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4.class)
 
 @TestableLooper.RunWithLooper(setAsMainLooper = true)

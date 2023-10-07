@@ -42,6 +42,15 @@
     <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_FACTOR -->
     <item name="device_idle_light_idle_factor" format="float" type="integer">2.0</item>
 
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_INCREASE_LINEARLY -->
+    <bool name="device_idle_light_idle_increase_linearly">false</bool>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS -->
+    <integer name="device_idle_light_idle_linear_increase_factor_ms">300000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS -->
+    <integer name="device_idle_light_idle_flex_linear_increase_factor_ms">60000</integer>
+
     <!-- Default for DeviceIdleController.Constants.LIGHT_MAX_IDLE_TIMEOUT -->
     <integer name="device_idle_light_max_idle_to_ms">900000</integer>
 

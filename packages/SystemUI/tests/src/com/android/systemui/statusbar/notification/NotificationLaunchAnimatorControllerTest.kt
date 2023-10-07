@@ -8,15 +8,15 @@ import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.HeadsUpUtil
-import com.android.systemui.res.R
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.test.TestScope
@@ -37,7 +37,7 @@ import org.mockito.junit.MockitoJUnit
 @RunWithLooper
 class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
     @Mock lateinit var notificationListContainer: NotificationListContainer
-    @Mock lateinit var headsUpManager: HeadsUpManagerPhone
+    @Mock lateinit var headsUpManager: HeadsUpManager
     @Mock lateinit var jankMonitor: InteractionJankMonitor
     @Mock lateinit var onFinishAnimationCallback: Runnable
 

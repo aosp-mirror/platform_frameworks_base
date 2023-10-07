@@ -29,9 +29,9 @@ import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.mockito.mock
 import org.junit.Before
 import org.junit.Test
@@ -52,7 +52,7 @@ class PulseExpansionHandlerTest : SysuiTestCase() {
     private val collapsedHeight = 300
     private val wakeUpCoordinator: NotificationWakeUpCoordinator = mock()
     private val bypassController: KeyguardBypassController = mock()
-    private val headsUpManager: HeadsUpManagerPhone = mock()
+    private val headsUpManager: HeadsUpManager = mock()
     private val roundnessManager: NotificationRoundnessManager = mock()
     private val configurationController: ConfigurationController = mock()
     private val statusBarStateController: StatusBarStateController = mock()

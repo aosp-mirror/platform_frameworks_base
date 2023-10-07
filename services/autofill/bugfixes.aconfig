@@ -6,3 +6,10 @@ flag {
   description: "Test flag "
   bug: "297380045"
 }
+
+flag {
+  name: "relayout"
+  namespace: "autofill"
+  description: "Mitigation for relayout issue"
+  bug: "294330426"
+}

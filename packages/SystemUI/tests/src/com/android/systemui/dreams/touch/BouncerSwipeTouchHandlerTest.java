@@ -17,6 +17,7 @@
 package com.android.systemui.dreams.touch;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,7 +41,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dreams.touch.scrim.ScrimController;
@@ -64,7 +64,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.Collections;
 import java.util.Optional;
 
-@RoboPilotTest
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {

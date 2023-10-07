@@ -228,6 +228,7 @@ public class AnrTimerTest {
         TestHandler mTestHandler;
 
         TestInjector(int skip, boolean immediate) {
+            super(mHandler);
             mTracker = new TestTracker(skip);
             mImmediate = immediate;
         }
@@ -249,8 +250,15 @@ public class AnrTimerTest {
             return mTestHandler;
         }
 
+        @Override
         AnrTimer.CpuTracker getTracker() {
             return mTracker;
+        }
+
+        /** For test purposes, always enable the feature. */
+        @Override
+        boolean getFeatureEnabled() {
+            return true;
         }
     }
 
@@ -260,7 +268,6 @@ public class AnrTimerTest {
     // 3. Start a timer.  Shortly thereafter, restart it.  Verify only one expiration.
     // 4. Start a couple of timers.  Verify max active timers.  Discard one and verify the active
     //    count drops by 1.  Accept one and verify the active count drops by 1.
-
 
     @Test
     public void testSimpleTimeout() throws Exception {

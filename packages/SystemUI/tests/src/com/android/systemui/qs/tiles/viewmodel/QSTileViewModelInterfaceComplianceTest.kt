@@ -20,7 +20,6 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.android.internal.logging.InstanceId
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.common.shared.model.ContentDescription
@@ -49,7 +48,6 @@ import org.mockito.MockitoAnnotations
 
 // TODO(b/299909368): Add more tests
 @MediumTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {

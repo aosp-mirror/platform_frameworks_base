@@ -43,6 +43,6 @@ android_test {
         "kotlinx-coroutines-android",
         "flickerlib",
         "flickerlib-trace_processor_shell",
-        "truth-prebuilt",
+        "truth",
     ],
 }

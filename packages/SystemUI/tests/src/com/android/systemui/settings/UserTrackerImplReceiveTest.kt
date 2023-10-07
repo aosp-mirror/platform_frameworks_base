@@ -42,6 +42,7 @@ class UserTrackerImplReceiveTest : SysuiTestCase() {
         @Parameterized.Parameters
         fun data(): Iterable<String> =
             listOf(
+                Intent.ACTION_LOCALE_CHANGED,
                 Intent.ACTION_USER_INFO_CHANGED,
                 Intent.ACTION_MANAGED_PROFILE_AVAILABLE,
                 Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE,

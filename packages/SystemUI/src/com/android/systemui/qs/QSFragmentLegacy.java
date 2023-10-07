@@ -72,7 +72,7 @@ public class QSFragmentLegacy extends LifecycleFragment implements QS {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        QSFragmentComponent qsFragmentComponent = mQsComponentFactory.create(this);
+        QSFragmentComponent qsFragmentComponent = mQsComponentFactory.create(getView());
         mQsImpl = mQsImplProvider.get();
         mQsImpl.onComponentCreated(qsFragmentComponent, savedInstanceState);
     }

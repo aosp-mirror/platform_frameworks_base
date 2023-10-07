@@ -27,10 +27,10 @@ import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarDemoMode;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
-import java.util.Set;
-
 import dagger.BindsInstance;
 import dagger.Subcomponent;
+
+import java.util.Set;
 
 /**
  * A subcomponent that gets re-created each time we create a new {@link CollapsedStatusBarFragment}.
@@ -54,7 +54,7 @@ public interface StatusBarFragmentComponent {
     @Subcomponent.Factory
     interface Factory {
         StatusBarFragmentComponent create(
-                @BindsInstance CollapsedStatusBarFragment collapsedStatusBarFragment);
+                @BindsInstance @RootView PhoneStatusBarView phoneStatusBarView);
     }
 
     /**

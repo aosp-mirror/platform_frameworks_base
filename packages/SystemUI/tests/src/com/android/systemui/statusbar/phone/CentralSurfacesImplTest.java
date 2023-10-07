@@ -85,7 +85,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.InitController;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -117,6 +116,7 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
@@ -219,7 +219,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private KeyguardIndicationController mKeyguardIndicationController;
     @Mock private NotificationStackScrollLayout mStackScroller;
     @Mock private NotificationStackScrollLayoutController mStackScrollerController;
-    @Mock private HeadsUpManagerPhone mHeadsUpManager;
+    @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private ShadeLogger mShadeLogger;
     @Mock private NotificationPanelView mNotificationPanelView;
@@ -336,6 +336,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI, false);
         // Set default value to avoid IllegalStateException.
         mFeatureFlags.set(Flags.SHORTCUT_LIST_SEARCH_LAYOUT, false);
+        mFeatureFlags.setDefault(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR);
         // For the Shade to respond to Back gesture, we must enable the event routing
         mFeatureFlags.set(Flags.WM_SHADE_ALLOW_BACK_GESTURE, true);
         // For the Shade to animate during the Back gesture, we must enable the animation flag.
@@ -343,6 +344,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.LIGHT_REVEAL_MIGRATION, true);
         // Turn AOD on and toggle feature flag for jank fixes
         mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);
+        mFeatureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, false);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
 
         IThermalService thermalService = mock(IThermalService.class);

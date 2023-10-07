@@ -372,8 +372,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             parent.forAllTasks(t -> {
                 // Skip transient-launch task
                 if (t == transientRootTask) return false;
-                if (t.isVisibleRequested() && !t.isAlwaysOnTop()
-                        && !t.getWindowConfiguration().tasksAreFloating()) {
+                if (t.isVisibleRequested() && !t.isAlwaysOnTop()) {
                     if (t.isRootTask()) {
                         mTransientHideTasks.add(t);
                     }

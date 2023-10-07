@@ -35,7 +35,7 @@ android_test {
         "services.core.unboosted",
         "testables",
         "testng",
-        "truth-prebuilt",
+        "truth",
     ],
     libs: [
         "android.test.mock",

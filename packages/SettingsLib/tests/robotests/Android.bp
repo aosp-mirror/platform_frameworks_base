@@ -96,6 +96,6 @@ java_library {
     libs: [
         "Robolectric_all-target_upstream",
         "mockito-robolectric-prebuilt",
-        "truth-prebuilt",
+        "truth",
     ],
 }

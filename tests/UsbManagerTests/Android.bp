@@ -31,7 +31,7 @@ android_test {
         "androidx.test.rules",
         "mockito-target-inline-minus-junit4",
         "platform-test-annotations",
-        "truth-prebuilt",
+        "truth",
         "UsbManagerTestLib",
     ],
     jni_libs: ["libdexmakerjvmtiagent"],
