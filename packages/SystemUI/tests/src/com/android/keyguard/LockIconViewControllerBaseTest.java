@@ -42,6 +42,7 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthRippleController;
+import com.android.systemui.bouncer.domain.interactor.BouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.doze.util.BurnInHelperKt;
 import com.android.systemui.dump.DumpManager;
@@ -51,6 +52,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.SceneTestUtils;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -75,6 +77,8 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
 
     protected MockitoSession mStaticMockSession;
 
+    protected final SceneTestUtils mSceneTestUtils = new SceneTestUtils(this);
+    protected @Mock BouncerInteractor mBouncerInteractor;
     protected @Mock LockIconView mLockIconView;
     protected @Mock AnimatedStateListDrawable mIconDrawable;
     protected @Mock Context mContext;
@@ -93,6 +97,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
     protected @Mock AuthRippleController mAuthRippleController;
     protected FakeExecutor mDelayableExecutor = new FakeExecutor(new FakeSystemClock());
     protected FakeFeatureFlags mFeatureFlags;
+
     protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
 
     protected LockIconViewController mUnderTest;
@@ -148,6 +153,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
         mFeatureFlags.set(MIGRATE_LOCK_ICON, false);
         mFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
         mFeatureFlags.set(LOCKSCREEN_ENABLE_LANDSCAPE, false);
+
         mUnderTest = new LockIconViewController(
                 mStatusBarStateController,
                 mKeyguardUpdateMonitor,
@@ -168,7 +174,9 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 KeyguardInteractorFactory.create(mFeatureFlags).getKeyguardInteractor(),
                 mFeatureFlags,
                 mPrimaryBouncerInteractor,
-                mContext
+                mContext,
+                () -> mBouncerInteractor,
+                mSceneTestUtils.getSceneContainerFlags()
         );
     }
 
@@ -227,8 +235,8 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
         setupLockIconViewMocks();
     }
 
-    protected void init(boolean useMigrationFlag) {
-        mFeatureFlags.set(DOZING_MIGRATION_1, useMigrationFlag);
+    protected void init(boolean useDozeMigrationFlag) {
+        mFeatureFlags.set(DOZING_MIGRATION_1, useDozeMigrationFlag);
         mUnderTest.setLockIconView(mLockIconView);
     }
 }

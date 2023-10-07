@@ -54,9 +54,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -132,7 +132,8 @@ public class FeedbackInfoTest extends SysuiTestCase {
     public void testBindNotification_SetsTextApplicationName() {
         when(mMockPackageManager.getApplicationLabel(any())).thenReturn("App Name");
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(),
-                mMockNotificationRow, mAssistantFeedbackController);
+                mMockNotificationRow, mAssistantFeedbackController, mStatusBarService,
+                mNotificationGutsManager);
         final TextView textView = mFeedbackInfo.findViewById(R.id.pkg_name);
         assertTrue(textView.getText().toString().contains("App Name"));
     }
@@ -143,7 +144,8 @@ public class FeedbackInfoTest extends SysuiTestCase {
         when(mMockPackageManager.getApplicationIcon(any(ApplicationInfo.class)))
                 .thenReturn(iconDrawable);
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(),
-                mMockNotificationRow, mAssistantFeedbackController);
+                mMockNotificationRow, mAssistantFeedbackController, mStatusBarService,
+                mNotificationGutsManager);
         final ImageView iconView = mFeedbackInfo.findViewById(R.id.pkg_icon);
         assertEquals(iconDrawable, iconView.getDrawable());
     }
@@ -153,7 +155,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
         when(mAssistantFeedbackController.getFeedbackStatus(any(NotificationEntry.class)))
                 .thenReturn(STATUS_SILENCED);
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(), mMockNotificationRow,
-                mAssistantFeedbackController);
+                mAssistantFeedbackController, mStatusBarService, mNotificationGutsManager);
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was automatically demoted to Silent by the system. "
                         + "Let the developer know your feedback. Was this correct?",
@@ -165,7 +167,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
         when(mAssistantFeedbackController.getFeedbackStatus(any(NotificationEntry.class)))
                 .thenReturn(STATUS_PROMOTED);
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(), mMockNotificationRow,
-                mAssistantFeedbackController);
+                mAssistantFeedbackController, mStatusBarService, mNotificationGutsManager);
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was automatically ranked higher in your shade. "
                         + "Let the developer know your feedback. Was this correct?",
@@ -177,7 +179,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
         when(mAssistantFeedbackController.getFeedbackStatus(any(NotificationEntry.class)))
                 .thenReturn(STATUS_ALERTED);
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(), mMockNotificationRow,
-                mAssistantFeedbackController);
+                mAssistantFeedbackController, mStatusBarService, mNotificationGutsManager);
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was automatically promoted to Default by the system. "
                         + "Let the developer know your feedback. Was this correct?",
@@ -189,7 +191,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
         when(mAssistantFeedbackController.getFeedbackStatus(any(NotificationEntry.class)))
                 .thenReturn(STATUS_DEMOTED);
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(), mMockNotificationRow,
-                mAssistantFeedbackController);
+                mAssistantFeedbackController, mStatusBarService, mNotificationGutsManager);
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was automatically ranked lower in your shade. "
                         + "Let the developer know your feedback. Was this correct?",
@@ -199,7 +201,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
     @Test
     public void testPositiveFeedback() {
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(), mMockNotificationRow,
-                mAssistantFeedbackController);
+                mAssistantFeedbackController, mStatusBarService, mNotificationGutsManager);
 
         final View yes = mFeedbackInfo.findViewById(R.id.yes);
         yes.performClick();
@@ -216,7 +218,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
                 .thenReturn(true);
 
         mFeedbackInfo.bindGuts(mMockPackageManager, mSbn, getEntry(), mMockNotificationRow,
-                mAssistantFeedbackController);
+                mAssistantFeedbackController, mStatusBarService, mNotificationGutsManager);
 
         final View no = mFeedbackInfo.findViewById(R.id.no);
         no.performClick();

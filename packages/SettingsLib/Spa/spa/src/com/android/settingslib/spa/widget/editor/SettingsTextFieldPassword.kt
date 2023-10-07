@@ -29,8 +29,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -46,6 +46,7 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 fun SettingsTextFieldPassword(
     value: String,
     label: String,
+    enabled: Boolean = true,
     onTextChange: (String) -> Unit,
 ) {
     var visibility by remember { mutableStateOf(false) }
@@ -60,6 +61,7 @@ fun SettingsTextFieldPassword(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Send
         ),
+        enabled = enabled,
         trailingIcon = {
             Icon(
                 imageVector = if (visibility) Icons.Outlined.VisibilityOff
