@@ -44,7 +44,7 @@ android_test {
         "flickerlib",
         "flickerlib-apphelpers",
         "flickerlib-helpers",
-        "truth-prebuilt",
+        "truth",
         "launcher-helper-lib",
         "launcher-aosp-tapl",
         "platform-test-annotations",
@@ -71,7 +71,7 @@ java_library {
     static_libs: [
         "flickerlib",
         "flickerlib-helpers",
-        "truth-prebuilt",
+        "truth",
         "app-helpers-core",
     ],
 }
@@ -90,7 +90,7 @@ java_library {
         "flickerlib",
         "flickerlib-apphelpers",
         "flickerlib-helpers",
-        "truth-prebuilt",
+        "truth",
         "app-helpers-core",
         "wm-flicker-window-extensions",
     ],

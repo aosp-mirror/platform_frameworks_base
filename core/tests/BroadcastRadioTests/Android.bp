@@ -38,7 +38,7 @@ android_test {
     static_libs: [
         "services.core",
         "androidx.test.rules",
-        "truth-prebuilt",
+        "truth",
         "testng",
         "mockito-target-extended",
     ],

@@ -32,7 +32,7 @@ android_test {
         "androidx.test.rules",
         "services.core",
         "services.net",
-        "truth-prebuilt",
+        "truth",
     ],
     libs: ["android.test.runner"],
     jni_libs: [
