@@ -354,7 +354,7 @@ android_library {
         "hamcrest-library",
         "androidx.test.rules",
         "testables",
-        "truth-prebuilt",
+        "truth",
         "monet",
         "dagger2",
         "jsr330",
@@ -461,7 +461,7 @@ android_robolectric_test {
         "android.test.runner",
         "android.test.base",
         "android.test.mock",
-        "truth-prebuilt",
+        "truth",
     ],
 
     upstream: true,

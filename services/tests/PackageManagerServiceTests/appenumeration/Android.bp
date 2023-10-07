@@ -29,7 +29,7 @@ android_test {
     static_libs: [
         "compatibility-device-util-axt",
         "androidx.test.runner",
-        "truth-prebuilt",
+        "truth",
         "Harrier",
     ],
     platform_apis: true,
