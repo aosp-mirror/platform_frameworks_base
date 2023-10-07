@@ -311,6 +311,11 @@ java_aconfig_library {
     name: "android.permission.flags-aconfig-java",
     aconfig_declarations: "android.permission.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    min_sdk_version: "30",
+    apex_available: [
+        "com.android.permission",
+    ],
+
 }
 
 // Biometrics
