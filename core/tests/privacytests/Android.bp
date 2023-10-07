@@ -14,7 +14,7 @@ android_test {
         "junit",
         "rappor-tests",
         "androidx.test.rules",
-        "truth-prebuilt",
+        "truth",
     ],
     libs: ["android.test.runner"],
     platform_apis: true,
