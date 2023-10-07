@@ -53,6 +53,15 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
         mCandidateProviderDataList = new ArrayList<>(candidateProviderDataList);
     }
 
+    /**
+     * Returns candidate provider data list.
+     *
+     * @hide
+     */
+    public List<GetCredentialProviderData> getCandidateProviderDataList() {
+        return mCandidateProviderDataList;
+    }
+
     protected GetCandidateCredentialsResponse(Parcel in) {
         List<GetCredentialProviderData> candidateProviderDataList = new ArrayList<>();
         in.readTypedList(candidateProviderDataList, GetCredentialProviderData.CREATOR);

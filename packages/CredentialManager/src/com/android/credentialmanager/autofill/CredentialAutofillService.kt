@@ -18,21 +18,23 @@ package com.android.credentialmanager.autofill
 
 import android.app.assist.AssistStructure
 import android.content.Context
-import android.credentials.GetCredentialRequest
 import android.credentials.CredentialManager
-import android.credentials.GetCandidateCredentialsResponse
 import android.credentials.CredentialOption
 import android.credentials.GetCandidateCredentialsException
+import android.credentials.GetCandidateCredentialsResponse
+import android.credentials.GetCredentialRequest
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
-import android.service.autofill.FillRequest
 import android.service.autofill.AutofillService
-import android.service.autofill.FillResponse
 import android.service.autofill.FillCallback
-import android.service.autofill.SaveRequest
+import android.service.autofill.FillRequest
+import android.service.autofill.FillResponse
 import android.service.autofill.SaveCallback
+import android.service.autofill.SaveRequest
+import android.service.credentials.CredentialProviderService
 import android.util.Log
+import android.view.autofill.AutofillId
 import org.json.JSONObject
 import java.util.concurrent.Executors
 
@@ -129,27 +131,31 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun traverseNode(
-            viewNode: AssistStructure.ViewNode?,
+            viewNode: AssistStructure.ViewNode,
             cmRequests: MutableList<CredentialOption>
     ) {
-        val options = getCredentialOptionsFromViewNode(viewNode)
-        cmRequests.addAll(options)
+        viewNode.autofillId?.let {
+            val options = getCredentialOptionsFromViewNode(viewNode, it)
+            cmRequests.addAll(options)
+        }
 
-        val children: List<AssistStructure.ViewNode>? =
-                viewNode?.run {
+        val children: List<AssistStructure.ViewNode> =
+                viewNode.run {
                     (0 until childCount).map { getChildAt(it) }
                 }
 
-        children?.forEach { childNode: AssistStructure.ViewNode ->
+        children.forEach { childNode: AssistStructure.ViewNode ->
             traverseNode(childNode, cmRequests)
         }
     }
 
-    private fun getCredentialOptionsFromViewNode(viewNode: AssistStructure.ViewNode?):
-            List<CredentialOption> {
+    private fun getCredentialOptionsFromViewNode(
+            viewNode: AssistStructure.ViewNode,
+            autofillId: AutofillId
+    ): List<CredentialOption> {
         // TODO(b/293945193) Replace with isCredential check from viewNode
         val credentialHints: MutableList<String> = mutableListOf()
-        if (viewNode != null && viewNode.autofillHints != null) {
+        if (viewNode.autofillHints != null) {
             for (hint in viewNode.autofillHints!!) {
                 if (hint.startsWith(CRED_HINT_PREFIX)) {
                     credentialHints.add(hint.substringAfter(CRED_HINT_PREFIX))
@@ -159,12 +165,14 @@ class CredentialAutofillService : AutofillService() {
 
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
         for (credentialHint in credentialHints) {
-            convertJsonToCredentialOption(credentialHint).let { credentialOptions.addAll(it) }
+            convertJsonToCredentialOption(credentialHint, autofillId)
+                    .let { credentialOptions.addAll(it) }
         }
         return credentialOptions
     }
 
-    private fun convertJsonToCredentialOption(jsonString: String): List<CredentialOption> {
+    private fun convertJsonToCredentialOption(jsonString: String, autofillId: AutofillId):
+            List<CredentialOption> {
         // TODO(b/302000646) Move this logic to jetpack so that is consistent
         //  with building the json
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
@@ -173,11 +181,14 @@ class CredentialAutofillService : AutofillService() {
         val options = json.getJSONArray(CRED_OPTIONS_KEY)
         for (i in 0 until options.length()) {
             val option = options.getJSONObject(i)
-
+            val candidateBundle = convertJsonToBundle(option.getJSONObject(CANDIDATE_DATA_KEY))
+            candidateBundle.putParcelable(
+                    CredentialProviderService.EXTRA_AUTOFILL_ID,
+                    autofillId)
             credentialOptions.add(CredentialOption(
                     option.getString(TYPE_KEY),
                     convertJsonToBundle(option.getJSONObject(REQUEST_DATA_KEY)),
-                    convertJsonToBundle(option.getJSONObject(CANDIDATE_DATA_KEY)),
+                    candidateBundle,
                     option.getBoolean(SYS_PROVIDER_REQ_KEY),
             ))
         }
