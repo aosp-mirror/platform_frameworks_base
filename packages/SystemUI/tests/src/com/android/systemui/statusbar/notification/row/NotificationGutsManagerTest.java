@@ -195,6 +195,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mWindowRootViewVisibilityInteractor,
                 mNotificationLockscreenUserManager,
                 mStatusBarStateController,
+                mBarService,
                 mDeviceProvisionedController,
                 mMetricsLogger,
                 mHeadsUpManager,

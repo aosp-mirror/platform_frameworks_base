@@ -24,6 +24,7 @@ import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -1660,8 +1661,21 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
 
+            final String pkg = componentName.getPackageName();
+            final ProviderId id;
+            if (!mPackageManagerInternal.isSameApp(pkg, callingUid, userId)) {
+                // If the calling process is requesting to pin appwidgets from another process,
+                // check if the calling process has the necessary permission.
+                if (!injectHasAccessWidgetsPermission(Binder.getCallingPid(), callingUid)) {
+                    return false;
+                }
+                id = new ProviderId(mPackageManagerInternal.getPackageUid(
+                        pkg, 0 /* flags */, userId), componentName);
+            } else {
+                id = new ProviderId(callingUid, componentName);
+            }
             // Look for the widget associated with the caller.
-            Provider provider = lookupProviderLocked(new ProviderId(callingUid, componentName));
+            Provider provider = lookupProviderLocked(id);
             if (provider == null || provider.zombie) {
                 return false;
             }
@@ -1673,6 +1687,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         return LocalServices.getService(ShortcutServiceInternal.class)
                 .requestPinAppWidget(callingPackage, info, extras, resultSender, userId);
+    }
+
+    /**
+     * Returns true if the caller has the proper permission to access app widgets.
+     */
+    private boolean injectHasAccessWidgetsPermission(int callingPid, int callingUid) {
+        return mContext.checkPermission(Manifest.permission.CLEAR_APP_USER_DATA,
+                callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -4131,7 +4153,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return false;
         }
 
-        @GuardedBy("mLock")
+        @GuardedBy("AppWidgetServiceImpl.mLock")
         public AppWidgetProviderInfo getInfoLocked(Context context) {
             if (!mInfoParsed) {
                 // parse
@@ -4159,18 +4181,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
          * be completely parsed and only contain placeHolder information like
          * {@link AppWidgetProviderInfo#providerInfo}
          */
-        @GuardedBy("mLock")
+        @GuardedBy("AppWidgetServiceImpl.mLock")
         public AppWidgetProviderInfo getPartialInfoLocked() {
             return info;
         }
 
-        @GuardedBy("mLock")
+        @GuardedBy("AppWidgetServiceImpl.mLock")
         public void setPartialInfoLocked(AppWidgetProviderInfo info) {
             this.info = info;
             mInfoParsed = false;
         }
 
-        @GuardedBy("mLock")
+        @GuardedBy("AppWidgetServiceImpl.mLock")
         public void setInfoLocked(AppWidgetProviderInfo info) {
             this.info = info;
             mInfoParsed = true;
