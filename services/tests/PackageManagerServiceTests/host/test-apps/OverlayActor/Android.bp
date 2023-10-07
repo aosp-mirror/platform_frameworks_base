@@ -28,6 +28,6 @@ android_test_helper_app {
         "androidx.test.runner",
         "junit",
         "kotlin-test",
-        "truth-prebuilt",
+        "truth",
     ],
 }
