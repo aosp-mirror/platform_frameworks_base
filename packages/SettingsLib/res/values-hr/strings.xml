@@ -618,7 +618,7 @@
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Time će se izbrisati aplikacije i podaci iz trenutačne gostujuće sesije."</string>
     <string name="grant_admin" msgid="4323199171790522574">"Da, dodijeli status administratora"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"Ne, nemoj dodijeliti status administratora"</string>
-    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Izlaz"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Izađi"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Želite li spremiti aktivnosti gosta?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Možete spremiti aktivnosti iz ove sesije ili izbrisati sve aplikacije i podatke"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Izbriši"</string>
