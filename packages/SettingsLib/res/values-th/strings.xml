@@ -595,7 +595,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"ข้อมูลโปรไฟล์"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ก่อนที่คุณจะสามารถสร้างโปรไฟล์ที่ถูกจำกัดได้ คุณจะต้องตั้งค่าล็อกหน้าจอเพื่อปกป้องแอปและข้อมูลส่วนตัวของคุณ"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"ตั้งค่าล็อก"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"เปลี่ยนเป็น <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"เปลี่ยนเป็น<xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"กำลังสร้างผู้ใช้ใหม่…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"กำลังสร้างผู้ใช้ชั่วคราวใหม่…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"สร้างผู้ใช้ใหม่ไม่ได้"</string>
