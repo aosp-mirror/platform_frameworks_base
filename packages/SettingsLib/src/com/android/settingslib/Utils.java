@@ -67,8 +67,7 @@ public class Utils {
     static final String STORAGE_MANAGER_ENABLED_PROPERTY =
             "ro.storage_manager.enabled";
 
-    @VisibleForTesting
-    static final String INCOMPATIBLE_CHARGER_WARNING_DISABLED =
+    public static final String INCOMPATIBLE_CHARGER_WARNING_DISABLED =
             "incompatible_charger_warning_disabled";
 
     private static Signature[] sSystemSignature;
