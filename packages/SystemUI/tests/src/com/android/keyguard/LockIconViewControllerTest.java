@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -404,6 +405,49 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
 
         // THEN uses perform haptic feedback
         verify(mVibrator).performHapticFeedback(any(), eq(UdfpsController.LONG_PRESS));
+    }
 
+    @Test
+    public void longPress_showBouncer_sceneContainerNotEnabled() {
+        init(/* useMigrationFlag= */ false);
+        mSceneTestUtils.getSceneContainerFlags().setEnabled(false);
+        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
+        when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(false);
+
+        // WHEN longPress
+        mUnderTest.onLongPress();
+
+        // THEN show primary bouncer via keyguard view controller, not scene container
+        verify(mKeyguardViewController).showPrimaryBouncer(anyBoolean());
+        verify(mBouncerInteractor, never()).showOrUnlockDevice(any());
+    }
+
+    @Test
+    public void longPress_showBouncer() {
+        init(/* useMigrationFlag= */ false);
+        mSceneTestUtils.getSceneContainerFlags().setEnabled(true);
+        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
+        when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(false);
+
+        // WHEN longPress
+        mUnderTest.onLongPress();
+
+        // THEN show primary bouncer
+        verify(mKeyguardViewController, never()).showPrimaryBouncer(anyBoolean());
+        verify(mBouncerInteractor).showOrUnlockDevice(any());
+    }
+
+    @Test
+    public void longPress_falsingTriggered_doesNotShowBouncer() {
+        init(/* useMigrationFlag= */ false);
+        mSceneTestUtils.getSceneContainerFlags().setEnabled(true);
+        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
+        when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(true);
+
+        // WHEN longPress
+        mUnderTest.onLongPress();
+
+        // THEN don't show primary bouncer
+        verify(mBouncerInteractor, never()).showOrUnlockDevice(any());
     }
 }
