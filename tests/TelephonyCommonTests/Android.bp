@@ -32,11 +32,11 @@ android_test {
     static_libs: [
         "mockito-target-extended",
         "androidx.test.rules",
-        "truth-prebuilt",
+        "truth",
         "platform-test-annotations",
         "androidx.core_core",
         "androidx.fragment_fragment",
-        "androidx.test.ext.junit"
+        "androidx.test.ext.junit",
     ],
 
     jni_libs: ["libdexmakerjvmtiagent"],
