@@ -58,16 +58,14 @@ public class FooterPreferenceTest {
     @Test
     public void setLearnMoreText_shouldSetAsTextInLearnMore() {
         final PreferenceViewHolder holder = PreferenceViewHolder.createInstanceForTests(
-                LayoutInflater.from(mContext)
-                        .inflate(com.android.settingslib.widget.R.layout.preference_footer, null));
+                LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null));
         mFooterPreference.setLearnMoreText("Custom learn more");
         mFooterPreference.setLearnMoreAction(view -> { /* do nothing */ } /* listener */);
 
         mFooterPreference.onBindViewHolder(holder);
 
-        assertThat(((TextView) holder.findViewById(
-                com.android.settingslib.widget.R.id.settingslib_learn_more)).getText().toString())
-                .isEqualTo("Custom learn more");
+        TextView learnMoreView = (TextView) holder.findViewById(R.id.settingslib_learn_more);
+        assertThat(learnMoreView.getText().toString()).isEqualTo("Custom learn more");
     }
 
     @Test
@@ -95,8 +93,7 @@ public class FooterPreferenceTest {
     @Test
     public void onBindViewHolder_whenTitleIsNull_shouldNotRaiseNpe() {
         PreferenceViewHolder viewHolder = spy(PreferenceViewHolder.createInstanceForTests(
-                LayoutInflater.from(mContext)
-                        .inflate(R.layout.preference_footer, null)));
+                LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null)));
         when(viewHolder.findViewById(androidx.core.R.id.title)).thenReturn(null);
 
         Throwable actualThrowable = null;
@@ -112,10 +109,8 @@ public class FooterPreferenceTest {
     @Test
     public void onBindViewHolder_whenLearnMoreIsNull_shouldNotRaiseNpe() {
         PreferenceViewHolder viewHolder = spy(PreferenceViewHolder.createInstanceForTests(
-                LayoutInflater.from(mContext)
-                        .inflate(com.android.settingslib.widget.R.layout.preference_footer, null)));
-        when(viewHolder.findViewById(com.android.settingslib.widget.R.id.settingslib_learn_more))
-                .thenReturn(null);
+                LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null)));
+        when(viewHolder.findViewById(R.id.settingslib_learn_more)).thenReturn(null);
 
         Throwable actualThrowable = null;
         try {
@@ -130,8 +125,7 @@ public class FooterPreferenceTest {
     @Test
     public void onBindViewHolder_whenIconFrameIsNull_shouldNotRaiseNpe() {
         PreferenceViewHolder viewHolder = spy(PreferenceViewHolder.createInstanceForTests(
-                LayoutInflater.from(mContext)
-                        .inflate(com.android.settingslib.widget.R.layout.preference_footer, null)));
+                LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null)));
         when(viewHolder.findViewById(R.id.icon_frame)).thenReturn(null);
 
         Throwable actualThrowable = null;

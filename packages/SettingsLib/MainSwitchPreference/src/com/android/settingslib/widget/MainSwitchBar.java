@@ -31,11 +31,10 @@ import android.widget.TextView;
 import androidx.annotation.ColorInt;
 
 import com.android.settingslib.utils.BuildCompatUtils;
+import com.android.settingslib.widget.mainswitch.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.android.settingslib.widget.mainswitch.R;
 
 /**
  * MainSwitchBar is a View with a customized Switch.
@@ -77,7 +76,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
             final TypedArray a = context.obtainStyledAttributes(
                     new int[]{android.R.attr.colorAccent});
             mBackgroundActivatedColor = a.getColor(0, 0);
-            mBackgroundColor = context.getColor(R.color.material_grey_600);
+            mBackgroundColor = context.getColor(androidx.appcompat.R.color.material_grey_600);
             a.recycle();
         }
 
