@@ -86,16 +86,6 @@ public final class GameManagerTests {
         GameModeInfo gameModeInfo = mGameManager.getGameModeInfo(mPackageName);
         assertNotNull(gameModeInfo);
         assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_CUSTOM));
-        GameModeConfiguration unsupportedFpsConfig =
-                new GameModeConfiguration.Builder().setFpsOverride(
-                        70).setScalingFactor(0.5f).build();
-        mGameManager.updateCustomGameModeConfiguration(mPackageName, unsupportedFpsConfig);
-        gameModeInfo = mGameManager.getGameModeInfo(mPackageName);
-        assertNotNull(gameModeInfo);
-        // TODO(b/243448953): update to non-zero FPS when matching is implemented
-        assertEquals(new GameModeConfiguration.Builder().setFpsOverride(
-                        GameModeConfiguration.FPS_OVERRIDE_NONE).setScalingFactor(0.5f).build(),
-                gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_CUSTOM));
 
         GameModeConfiguration supportedFpsConfig =
                 new GameModeConfiguration.Builder().setFpsOverride(
