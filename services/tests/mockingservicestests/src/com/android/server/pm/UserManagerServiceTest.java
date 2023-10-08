@@ -15,9 +15,12 @@
  */
 package com.android.server.pm;
 
+import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
@@ -400,6 +403,24 @@ public final class UserManagerServiceTest {
         assertWithMessage("getPreviousFullUserToEnterForeground should skip removing users")
                 .that(mUms.getPreviousFullUserToEnterForeground())
                 .isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void testCreateUserWithLongName_TruncatesName() {
+        UserInfo user = mUms.createUserWithThrow(generateLongString(), USER_TYPE_FULL_SECONDARY, 0);
+        assertThat(user.name.length()).isEqualTo(500);
+        UserInfo user1 = mUms.createUserWithThrow("Test", USER_TYPE_FULL_SECONDARY, 0);
+        assertThat(user1.name.length()).isEqualTo(4);
+    }
+
+    private String generateLongString() {
+        String partialString = "Test Name Test Name Test Name Test Name Test Name Test Name Test "
+                + "Name Test Name Test Name Test Name "; //String of length 100
+        StringBuilder resultString = new StringBuilder();
+        for (int i = 0; i < 660; i++) {
+            resultString.append(partialString);
+        }
+        return resultString.toString();
     }
 
     private void mockCurrentUser(@UserIdInt int userId) {
