@@ -65,6 +65,7 @@ import android.os.Environment;
 import android.os.FactoryTest;
 import android.os.FileUtils;
 import android.os.IBinder;
+import android.os.IBinderCallback;
 import android.os.IIncidentManager;
 import android.os.Looper;
 import android.os.Message;
@@ -968,6 +969,14 @@ public final class SystemServer implements Dumpable {
                         "SystemServer init took too long. uptimeMillis=" + uptimeMillis);
             }
         }
+
+        // Set binder transaction callback after starting system services
+        Binder.setTransactionCallback(new IBinderCallback() {
+            @Override
+            public void onTransactionError(int pid, int code, int flags, int err) {
+                mActivityManagerService.frozenBinderTransactionDetected(pid, code, flags, err);
+            }
+        });
 
         // Loop forever.
         Looper.loop();

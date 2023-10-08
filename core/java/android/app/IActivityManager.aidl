@@ -924,4 +924,14 @@ interface IActivityManager {
     void unregisterUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     int[] getUidFrozenState(in int[] uids);
+
+    /**
+     * Notify AMS about binder transactions to frozen apps.
+     *
+     * @param debugPid The binder transaction sender
+     * @param code The binder transaction code
+     * @param flags The binder transaction flags
+     * @param err The binder transaction error
+     */
+    oneway void frozenBinderTransactionDetected(int debugPid, int code, int flags, int err);
 }

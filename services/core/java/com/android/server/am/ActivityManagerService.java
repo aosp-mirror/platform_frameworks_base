@@ -20122,7 +20122,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long token = Binder.clearCallingIdentity();
 
         try {
-            return mOomAdjuster.mCachedAppOptimizer.isFreezerSupported();
+            return CachedAppOptimizer.isFreezerSupported();
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -20249,5 +20249,22 @@ public class ActivityManagerService extends IActivityManager.Stub
             final int index = mMediaProjectionTokenMap.indexOfKey(uid);
             return index >= 0 && !mMediaProjectionTokenMap.valueAt(index).isEmpty();
         }
+    }
+
+    /**
+     * Deal with binder transactions to frozen apps.
+     *
+     * @param debugPid The binder transaction sender
+     * @param code The binder transaction code
+     * @param flags The binder transaction flags
+     * @param err The binder transaction error
+     */
+    @Override
+    public void frozenBinderTransactionDetected(int debugPid, int code, int flags, int err) {
+        final ProcessRecord app;
+        synchronized (mPidsSelfLocked) {
+            app = mPidsSelfLocked.get(debugPid);
+        }
+        mOomAdjuster.mCachedAppOptimizer.binderError(debugPid, app, code, flags, err);
     }
 }

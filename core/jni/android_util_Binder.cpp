@@ -75,6 +75,7 @@ static struct bindernative_offsets_t
     jclass mClass;
     jmethodID mExecTransact;
     jmethodID mGetInterfaceDescriptor;
+    jmethodID mTransactionCallback;
 
     // Object state.
     jfieldID mObject;
@@ -1121,6 +1122,8 @@ static int int_register_android_os_Binder(JNIEnv* env)
     gBinderOffsets.mExecTransact = GetMethodIDOrDie(env, clazz, "execTransact", "(IJJI)Z");
     gBinderOffsets.mGetInterfaceDescriptor = GetMethodIDOrDie(env, clazz, "getInterfaceDescriptor",
         "()Ljava/lang/String;");
+    gBinderOffsets.mTransactionCallback =
+            GetStaticMethodIDOrDie(env, clazz, "transactionCallback", "(IIII)V");
     gBinderOffsets.mObject = GetFieldIDOrDie(env, clazz, "mObject", "J");
 
     return RegisterMethodsOrDie(
@@ -1452,7 +1455,12 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
 
     if (err == NO_ERROR) {
         return JNI_TRUE;
-    } else if (err == UNKNOWN_TRANSACTION) {
+    }
+
+    env->CallStaticVoidMethod(gBinderOffsets.mClass, gBinderOffsets.mTransactionCallback, getpid(),
+                              code, flags, err);
+
+    if (err == UNKNOWN_TRANSACTION) {
         return JNI_FALSE;
     }
 
