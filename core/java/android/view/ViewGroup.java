@@ -2536,7 +2536,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int childrenCount = mChildrenCount;
         if (childrenCount != 0) {
             final float x = event.getXDispatchLocation(0);
-            final float y = event.getXDispatchLocation(0);
+            final float y = event.getYDispatchLocation(0);
 
             final ArrayList<View> preorderedList = buildOrderedChildList();
             final boolean customOrder = preorderedList == null
