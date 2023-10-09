@@ -371,13 +371,6 @@ public class PackageInstaller {
             "android.content.pm.extra.UNARCHIVE_ALL_USERS";
 
     /**
-     * A list of warnings that occurred during installation.
-     *
-     * @hide
-     */
-    public static final String EXTRA_WARNINGS = "android.content.pm.extra.WARNINGS";
-
-    /**
      * Streaming installation pending.
      * Caller should make sure DataLoader is able to prepare image and reinitiate the operation.
      *

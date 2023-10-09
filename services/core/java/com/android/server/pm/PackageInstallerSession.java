@@ -5189,10 +5189,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (!TextUtils.isEmpty(existing)) {
                 fillIn.putExtra(PackageInstaller.EXTRA_OTHER_PACKAGE_NAME, existing);
             }
-            ArrayList<String> warnings = extras.getStringArrayList(PackageInstaller.EXTRA_WARNINGS);
-            if (!ArrayUtils.isEmpty(warnings)) {
-                fillIn.putStringArrayListExtra(PackageInstaller.EXTRA_WARNINGS, warnings);
-            }
         }
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();

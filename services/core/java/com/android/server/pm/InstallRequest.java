@@ -22,8 +22,6 @@ import static android.content.pm.PackageManager.INSTALL_SCENARIO_DEFAULT;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.os.Process.INVALID_UID;
 
-import static com.android.server.art.model.DexoptResult.DexContainerFileDexoptResult;
-import static com.android.server.art.model.DexoptResult.PackageDexoptResult;
 import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.TAG;
@@ -58,7 +56,6 @@ import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 final class InstallRequest {
@@ -149,9 +146,6 @@ final class InstallRequest {
     private int[] mUpdateBroadcastUserIds = EMPTY_INT_ARRAY;
     @NonNull
     private int[] mUpdateBroadcastInstantUserIds = EMPTY_INT_ARRAY;
-
-    @NonNull
-    private ArrayList<String> mWarnings = new ArrayList<>();
 
     // New install
     InstallRequest(InstallingSession params) {
@@ -664,11 +658,6 @@ final class InstallRequest {
         return mUpdateBroadcastInstantUserIds;
     }
 
-    @NonNull
-    public ArrayList<String> getWarnings() {
-        return mWarnings;
-    }
-
     public void setScanFlags(int scanFlags) {
         mScanFlags = scanFlags;
     }
@@ -866,10 +855,6 @@ final class InstallRequest {
         }
     }
 
-    public void addWarning(@NonNull String warning) {
-        mWarnings.add(warning);
-    }
-
     public void onPrepareStarted() {
         if (mPackageMetrics != null) {
             mPackageMetrics.onStepStarted(PackageMetrics.STEP_PREPARE);
@@ -919,37 +904,22 @@ final class InstallRequest {
     }
 
     public void onDexoptFinished(DexoptResult dexoptResult) {
-        // Only report external profile warnings when installing from adb. The goal is to warn app
-        // developers if they have provided bad external profiles, so it's not beneficial to report
-        // those warnings in the normal app install workflow.
-        if (isInstallFromAdb()) {
-            var externalProfileErrors = new LinkedHashSet<String>();
-            for (PackageDexoptResult packageResult : dexoptResult.getPackageDexoptResults()) {
-                for (DexContainerFileDexoptResult fileResult :
-                        packageResult.getDexContainerFileDexoptResults()) {
-                    externalProfileErrors.addAll(fileResult.getExternalProfileErrors());
-                }
-            }
-            if (!externalProfileErrors.isEmpty()) {
-                addWarning("Error occurred during dexopt when processing external profiles:\n  "
-                        + String.join("\n  ", externalProfileErrors));
+        if (mPackageMetrics == null) {
+            return;
+        }
+        mDexoptStatus = dexoptResult.getFinalStatus();
+        if (mDexoptStatus != DexoptResult.DEXOPT_PERFORMED) {
+            return;
+        }
+        long durationMillis = 0;
+        for (DexoptResult.PackageDexoptResult packageResult :
+                dexoptResult.getPackageDexoptResults()) {
+            for (DexoptResult.DexContainerFileDexoptResult fileResult :
+                    packageResult.getDexContainerFileDexoptResults()) {
+                durationMillis += fileResult.getDex2oatWallTimeMillis();
             }
         }
-
-        // Report dexopt metrics.
-        if (mPackageMetrics != null) {
-            mDexoptStatus = dexoptResult.getFinalStatus();
-            if (mDexoptStatus == DexoptResult.DEXOPT_PERFORMED) {
-                long durationMillis = 0;
-                for (PackageDexoptResult packageResult : dexoptResult.getPackageDexoptResults()) {
-                    for (DexContainerFileDexoptResult fileResult :
-                            packageResult.getDexContainerFileDexoptResults()) {
-                        durationMillis += fileResult.getDex2oatWallTimeMillis();
-                    }
-                }
-                mPackageMetrics.onStepFinished(PackageMetrics.STEP_DEXOPT, durationMillis);
-            }
-        }
+        mPackageMetrics.onStepFinished(PackageMetrics.STEP_DEXOPT, durationMillis);
     }
 
     public void onInstallCompleted() {

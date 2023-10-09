@@ -4397,21 +4397,10 @@ class PackageManagerShellCommand extends ShellCommand {
             session.commit(receiver.getIntentSender());
             if (!session.isStaged()) {
                 final Intent result = receiver.getResult();
-                int status = result.getIntExtra(
-                        PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
-                List<String> warnings =
-                        result.getStringArrayListExtra(PackageInstaller.EXTRA_WARNINGS);
+                final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                        PackageInstaller.STATUS_FAILURE);
                 if (status == PackageInstaller.STATUS_SUCCESS) {
-                    if (!ArrayUtils.isEmpty(warnings)) {
-                        // Don't start the output string with "Success" because that will make adb
-                        // treat this as a success.
-                        for (String warning : warnings) {
-                            pw.println("Warning: " + warning);
-                        }
-                        // Treat warnings as failure to draw app developers' attention.
-                        status = PackageInstaller.STATUS_FAILURE;
-                        pw.println("Completed with warning(s)");
-                    } else if (logSuccess) {
+                    if (logSuccess) {
                         pw.println("Success");
                     }
                 } else {
