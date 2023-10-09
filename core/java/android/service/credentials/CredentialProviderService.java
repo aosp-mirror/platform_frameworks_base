@@ -153,6 +153,18 @@ public abstract class CredentialProviderService extends Service {
     public static final String EXTRA_BEGIN_GET_CREDENTIAL_REQUEST =
             "android.service.credentials.extra.BEGIN_GET_CREDENTIAL_REQUEST";
 
+    /**
+     * The key to autofillId associated with the requested credential option and the corresponding
+     * credential entry. The associated autofillId will be contained inside the candidate query
+     * bundle of {@link android.credentials.CredentialOption} if requested through the
+     * {@link com.android.credentialmanager.autofill.CredentialAutofillService}. The resulting
+     * credential entry will  contain the autofillId inside its framework extras intent.
+     *
+     * @hide
+     */
+    public static final String EXTRA_AUTOFILL_ID =
+            "android.service.credentials.extra.AUTOFILL_ID";
+
     private static final String TAG = "CredProviderService";
 
      /**
