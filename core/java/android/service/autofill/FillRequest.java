@@ -97,8 +97,6 @@ public final class FillRequest implements Parcelable {
      */
     public static final @RequestFlags int FLAG_VIEW_NOT_FOCUSED = 0x10;
 
-    // The flag value 0x20 has been defined in AutofillManager.
-
     /**
      * Indicates the request supports fill dialog presentation for the fields, the
      * system will send the request when the activity just started.
