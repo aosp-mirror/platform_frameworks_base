@@ -35,15 +35,18 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import com.android.compose.animation.scene.Back
+import com.android.compose.animation.scene.Edge as SceneTransitionEdge
 import com.android.compose.animation.scene.ObservableTransitionState as SceneTransitionObservableTransitionState
 import com.android.compose.animation.scene.SceneKey as SceneTransitionSceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction as SceneTransitionUserAction
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.Direction
+import com.android.systemui.scene.shared.model.Edge
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -181,12 +184,24 @@ private fun SceneTransitionSceneKey.toModel(): SceneModel {
 private fun UserAction.toTransitionUserAction(): SceneTransitionUserAction {
     return when (this) {
         is UserAction.Swipe ->
-            when (this.direction) {
-                Direction.LEFT -> Swipe.Left
-                Direction.UP -> Swipe.Up
-                Direction.RIGHT -> Swipe.Right
-                Direction.DOWN -> Swipe.Down
-            }
+            Swipe(
+                pointerCount = pointerCount,
+                fromEdge =
+                    when (this.fromEdge) {
+                        null -> null
+                        Edge.LEFT -> SceneTransitionEdge.Left
+                        Edge.TOP -> SceneTransitionEdge.Top
+                        Edge.RIGHT -> SceneTransitionEdge.Right
+                        Edge.BOTTOM -> SceneTransitionEdge.Bottom
+                    },
+                direction =
+                    when (this.direction) {
+                        Direction.LEFT -> SwipeDirection.Left
+                        Direction.UP -> SwipeDirection.Up
+                        Direction.RIGHT -> SwipeDirection.Right
+                        Direction.DOWN -> SwipeDirection.Down
+                    }
+            )
         is UserAction.Back -> Back
     }
 }
