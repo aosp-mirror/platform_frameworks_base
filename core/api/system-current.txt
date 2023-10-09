@@ -14777,6 +14777,7 @@ package android.telephony.data {
     method @Deprecated public int getMtu();
     method public int getMtuV4();
     method public int getMtuV6();
+    method @FlaggedApi("com.android.internal.telephony.flags.network_validation") public int getNetworkValidationStatus();
     method @NonNull public java.util.List<java.net.InetAddress> getPcscfAddresses();
     method public int getPduSessionId();
     method public int getProtocolType();
@@ -14813,6 +14814,7 @@ package android.telephony.data {
     method @Deprecated @NonNull public android.telephony.data.DataCallResponse.Builder setMtu(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setMtuV4(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setMtuV6(int);
+    method @FlaggedApi("com.android.internal.telephony.flags.network_validation") @NonNull public android.telephony.data.DataCallResponse.Builder setNetworkValidationStatus(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setPcscfAddresses(@NonNull java.util.List<java.net.InetAddress>);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setPduSessionId(@IntRange(from=android.telephony.data.DataCallResponse.PDU_SESSION_ID_NOT_SET, to=15) int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setProtocolType(int);
@@ -14892,6 +14894,7 @@ package android.telephony.data {
     method public final void notifyDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
     method public final void notifyDataProfileUnthrottled(@NonNull android.telephony.data.DataProfile);
     method public void requestDataCallList(@NonNull android.telephony.data.DataServiceCallback);
+    method @FlaggedApi("com.android.internal.telephony.flags.network_validation") public void requestValidation(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method public void setDataProfile(@NonNull java.util.List<android.telephony.data.DataProfile>, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @NonNull android.telephony.data.DataServiceCallback);
@@ -14953,6 +14956,7 @@ package android.telephony.data {
     method public final int getSlotIndex();
     method public void reportEmergencyDataNetworkPreferredTransportChanged(int);
     method public void reportThrottleStatusChanged(@NonNull java.util.List<android.telephony.data.ThrottleStatus>);
+    method @FlaggedApi("com.android.internal.telephony.flags.network_validation") public void requestNetworkValidation(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method public final void updateQualifiedNetworkTypes(int, @NonNull java.util.List<java.lang.Integer>);
   }
 
