@@ -60,7 +60,7 @@ import java.util.Objects;
 public class LockscreenCredential implements Parcelable, AutoCloseable {
 
     private final int mType;
-    // Stores raw credential bytes, or null if credential has been zeroized. An empty password
+    // Stores raw credential bytes, or null if credential has been zeroized. A none credential
     // is represented as a byte array of length 0.
     private byte[] mCredential;
 
@@ -80,14 +80,20 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
             Preconditions.checkArgument(type == CREDENTIAL_TYPE_PIN
                     || type == CREDENTIAL_TYPE_PASSWORD
                     || type == CREDENTIAL_TYPE_PATTERN);
-            Preconditions.checkArgument(credential.length > 0);
+            // Do not validate credential.length yet.  All non-none credentials have a minimum
+            // length requirement; however, one of the uses of LockscreenCredential is to represent
+            // a proposed credential that might be too short.  For example, a LockscreenCredential
+            // with type CREDENTIAL_TYPE_PIN and length 0 represents an attempt to set an empty PIN.
+            // This differs from an actual attempt to set a none credential.  We have to allow the
+            // LockscreenCredential object to be constructed so that the validation logic can run,
+            // even though the validation logic will ultimately reject the credential as too short.
         }
         mType = type;
         mCredential = credential;
     }
 
     /**
-     * Creates a LockscreenCredential object representing empty password.
+     * Creates a LockscreenCredential object representing a none credential.
      */
     public static LockscreenCredential createNone() {
         return new LockscreenCredential(CREDENTIAL_TYPE_NONE, new byte[0]);
@@ -130,7 +136,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
 
     /**
      * Creates a LockscreenCredential object representing the given alphabetic password.
-     * If the supplied password is empty, create an empty credential object.
+     * If the supplied password is empty, create a none credential object.
      */
     public static LockscreenCredential createPasswordOrNone(@Nullable CharSequence password) {
         if (TextUtils.isEmpty(password)) {
@@ -142,7 +148,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
 
     /**
      * Creates a LockscreenCredential object representing the given numeric PIN.
-     * If the supplied password is empty, create an empty credential object.
+     * If the supplied password is empty, create a none credential object.
      */
     public static LockscreenCredential createPinOrNone(@Nullable CharSequence pin) {
         if (TextUtils.isEmpty(pin)) {
@@ -175,7 +181,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         return mCredential;
     }
 
-    /** Returns whether this is an empty credential */
+    /** Returns whether this is a none credential */
     public boolean isNone() {
         ensureNotZeroized();
         return mType == CREDENTIAL_TYPE_NONE;
