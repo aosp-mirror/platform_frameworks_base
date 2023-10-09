@@ -65,6 +65,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageMonitor;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
 import com.android.server.infra.AbstractMasterSystemService;
@@ -89,7 +90,7 @@ import java.util.stream.Collectors;
  */
 public final class CredentialManagerService
         extends AbstractMasterSystemService<
-        CredentialManagerService, CredentialManagerServiceImpl> {
+                CredentialManagerService, CredentialManagerServiceImpl> {
 
     private static final String TAG = "CredManSysService";
     private static final String PERMISSION_DENIED_ERROR = "permission_denied";
@@ -110,8 +111,7 @@ public final class CredentialManagerService
 
     /** Cache of all ongoing request sessions per user id. */
     @GuardedBy("mLock")
-    private final SparseArray<Map<IBinder, RequestSession>> mRequestSessions =
-            new SparseArray<>();
+    private final SparseArray<Map<IBinder, RequestSession>> mRequestSessions = new SparseArray<>();
 
     private final SessionManager mSessionManager = new SessionManager();
 
@@ -123,6 +123,8 @@ public final class CredentialManagerService
                 null,
                 PACKAGE_UPDATE_POLICY_REFRESH_EAGER);
         mContext = context;
+
+        mPackageMonitor.register(context, context.getMainLooper(), false);
     }
 
     @NonNull
@@ -139,8 +141,7 @@ public final class CredentialManagerService
         serviceInfos.forEach(
                 info -> {
                     services.add(
-                            new CredentialManagerServiceImpl(this, mLock, resolvedUserId,
-                                    info));
+                            new CredentialManagerServiceImpl(this, mLock, resolvedUserId, info));
                 });
         return services;
     }
@@ -216,8 +217,8 @@ public final class CredentialManagerService
         for (CredentialManagerServiceImpl serviceToBeRemoved : servicesToBeRemoved) {
             removeServiceFromCache(serviceToBeRemoved, userId);
             removeServiceFromSystemServicesCache(serviceToBeRemoved, userId);
-            removeServiceFromMultiModeSettings(serviceToBeRemoved.getComponentName()
-                    .flattenToString(), userId);
+            removeServiceFromMultiModeSettings(
+                    serviceToBeRemoved.getComponentName().flattenToString(), userId);
             CredentialDescriptionRegistry.forUser(userId)
                     .evictProviderWithPackageName(serviceToBeRemoved.getServicePackageName());
         }
@@ -286,13 +287,20 @@ public final class CredentialManagerService
     }
 
     private static Set<ComponentName> getPrimaryProvidersForUserId(Context context, int userId) {
-        final int resolvedUserId = ActivityManager.handleIncomingUser(
-                Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, false, false,
-                "getPrimaryProvidersForUserId", null);
-        SecureSettingsServiceNameResolver resolver = new SecureSettingsServiceNameResolver(
-                context, Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
-                /* isMultipleMode= */ true);
+        final int resolvedUserId =
+                ActivityManager.handleIncomingUser(
+                        Binder.getCallingPid(),
+                        Binder.getCallingUid(),
+                        userId,
+                        false,
+                        false,
+                        "getPrimaryProvidersForUserId",
+                        null);
+        SecureSettingsServiceNameResolver resolver =
+                new SecureSettingsServiceNameResolver(
+                        context,
+                        Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                        /* isMultipleMode= */ true);
         String[] serviceNames = resolver.readServiceNameList(resolvedUserId);
         if (serviceNames == null) {
             return new HashSet<ComponentName>();
@@ -329,7 +337,8 @@ public final class CredentialManagerService
         final long origId = Binder.clearCallingIdentity();
         try {
             return DeviceConfig.getBoolean(
-                    DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API,
+                    DeviceConfig.NAMESPACE_CREDENTIAL,
+                    DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API,
                     false);
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -345,13 +354,14 @@ public final class CredentialManagerService
         List<ProviderSession> providerSessions = new ArrayList<>();
         for (Pair<CredentialOption, CredentialDescriptionRegistry.FilterResult> result :
                 activeCredentialContainers) {
-            ProviderSession providerSession = ProviderRegistryGetSession.createNewSession(
-                    mContext,
-                    UserHandle.getCallingUserId(),
-                    session,
-                    session.mClientAppInfo,
-                    result.second.mPackageName,
-                    result.first);
+            ProviderSession providerSession =
+                    ProviderRegistryGetSession.createNewSession(
+                            mContext,
+                            UserHandle.getCallingUserId(),
+                            session,
+                            session.mClientAppInfo,
+                            result.second.mPackageName,
+                            result.first);
             providerSessions.add(providerSession);
             session.addProviderSession(providerSession.getComponentName(), providerSession);
         }
@@ -367,23 +377,23 @@ public final class CredentialManagerService
         List<ProviderSession> providerSessions = new ArrayList<>();
         for (Pair<CredentialOption, CredentialDescriptionRegistry.FilterResult> result :
                 activeCredentialContainers) {
-            ProviderSession providerSession = ProviderRegistryGetSession.createNewSession(
-                    mContext,
-                    UserHandle.getCallingUserId(),
-                    session,
-                    session.mClientAppInfo,
-                    result.second.mPackageName,
-                    result.first);
+            ProviderSession providerSession =
+                    ProviderRegistryGetSession.createNewSession(
+                            mContext,
+                            UserHandle.getCallingUserId(),
+                            session,
+                            session.mClientAppInfo,
+                            result.second.mPackageName,
+                            result.first);
             providerSessions.add(providerSession);
             session.addProviderSession(providerSession.getComponentName(), providerSession);
         }
         return providerSessions;
     }
 
-
     @NonNull
     private Set<Pair<CredentialOption, CredentialDescriptionRegistry.FilterResult>>
-    getFilteredResultFromRegistry(List<CredentialOption> options) {
+            getFilteredResultFromRegistry(List<CredentialOption> options) {
         // Session for active/provisioned credential descriptions;
         CredentialDescriptionRegistry registry =
                 CredentialDescriptionRegistry.forUser(UserHandle.getCallingUserId());
@@ -393,10 +403,12 @@ public final class CredentialManagerService
                 options.stream()
                         .map(
                                 getCredentialOption ->
-                                        new HashSet<>(getCredentialOption
-                                                .getCredentialRetrievalData()
-                                                .getStringArrayList(
-                                                        CredentialOption.SUPPORTED_ELEMENT_KEYS)))
+                                        new HashSet<>(
+                                                getCredentialOption
+                                                        .getCredentialRetrievalData()
+                                                        .getStringArrayList(
+                                                                CredentialOption
+                                                                        .SUPPORTED_ELEMENT_KEYS)))
                         .collect(Collectors.toSet());
 
         // All requested credential descriptions based on the given request.
@@ -408,12 +420,14 @@ public final class CredentialManagerService
 
         for (CredentialDescriptionRegistry.FilterResult filterResult : filterResults) {
             for (CredentialOption credentialOption : options) {
-                Set<String> requestedElementKeys = new HashSet<>(
-                        credentialOption
-                                .getCredentialRetrievalData()
-                                .getStringArrayList(CredentialOption.SUPPORTED_ELEMENT_KEYS));
-                if (CredentialDescriptionRegistry.checkForMatch(filterResult.mElementKeys,
-                        requestedElementKeys)) {
+                Set<String> requestedElementKeys =
+                        new HashSet<>(
+                                credentialOption
+                                        .getCredentialRetrievalData()
+                                        .getStringArrayList(
+                                                CredentialOption.SUPPORTED_ELEMENT_KEYS));
+                if (CredentialDescriptionRegistry.checkForMatch(
+                        filterResult.mElementKeys, requestedElementKeys)) {
                     result.add(new Pair<>(credentialOption, filterResult));
                 }
             }
@@ -449,9 +463,7 @@ public final class CredentialManagerService
     }
 
     private CallingAppInfo constructCallingAppInfo(
-            String realPackageName,
-            int userId,
-            @Nullable String origin) {
+            String realPackageName, int userId, @Nullable String origin) {
         final PackageInfo packageInfo;
         CallingAppInfo callingAppInfo;
         try {
@@ -477,8 +489,7 @@ public final class CredentialManagerService
                 GetCredentialRequest request,
                 IGetCandidateCredentialsCallback callback,
                 final String callingPackage) {
-            Slog.i(TAG, "starting getCandidateCredentials with callingPackage: "
-                    + callingPackage);
+            Slog.i(TAG, "starting getCandidateCredentials with callingPackage: " + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
             final int userId = UserHandle.getCallingUserId();
@@ -496,8 +507,7 @@ public final class CredentialManagerService
                             request,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
                             getEnabledProvidersForUser(userId),
-                            CancellationSignal.fromTransport(cancelTransport)
-                    );
+                            CancellationSignal.fromTransport(cancelTransport));
             addSessionLocked(userId, session);
 
             List<ProviderSession> providerSessions =
@@ -531,8 +541,7 @@ public final class CredentialManagerService
                 IGetCredentialCallback callback,
                 final String callingPackage) {
             final long timestampBegan = System.nanoTime();
-            Slog.i(TAG, "starting executeGetCredential with callingPackage: "
-                    + callingPackage);
+            Slog.i(TAG, "starting executeGetCredential with callingPackage: " + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
             final int userId = UserHandle.getCallingUserId();
@@ -557,8 +566,7 @@ public final class CredentialManagerService
                             timestampBegan);
             addSessionLocked(userId, session);
 
-            List<ProviderSession> providerSessions =
-                    prepareProviderSessions(request, session);
+            List<ProviderSession> providerSessions = prepareProviderSessions(request, session);
 
             if (providerSessions.isEmpty()) {
                 try {
@@ -617,15 +625,17 @@ public final class CredentialManagerService
             if (providerSessions.isEmpty()) {
                 try {
                     prepareGetCredentialCallback.onResponse(
-                            new PrepareGetCredentialResponseInternal(PermissionUtils.hasPermission(
-                                    mContext,
-                                    callingPackage,
-                                    Manifest.permission
-                                            .CREDENTIAL_MANAGER_QUERY_CANDIDATE_CREDENTIALS),
-                                    /*credentialResultTypes=*/null,
-                                    /*hasAuthenticationResults=*/false,
-                                    /*hasRemoteResults=*/false,
-                                    /*pendingIntent=*/null));
+                            new PrepareGetCredentialResponseInternal(
+                                    PermissionUtils.hasPermission(
+                                            mContext,
+                                            callingPackage,
+                                            Manifest.permission
+                                                    .CREDENTIAL_MANAGER_QUERY_CANDIDATE_CREDENTIALS
+                                                    ),
+                                    /* credentialResultTypes= */ null,
+                                    /* hasAuthenticationResults= */ false,
+                                    /* hasRemoteResults= */ false,
+                                    /* pendingIntent= */ null));
                 } catch (RemoteException e) {
                     Slog.e(
                             TAG,
@@ -641,27 +651,32 @@ public final class CredentialManagerService
         }
 
         private List<ProviderSession> prepareProviderSessions(
-                GetCredentialRequest request,
-                GetRequestSession session) {
+                GetCredentialRequest request, GetRequestSession session) {
             List<ProviderSession> providerSessions;
 
             if (isCredentialDescriptionApiEnabled()) {
                 List<CredentialOption> optionsThatRequireActiveCredentials =
                         request.getCredentialOptions().stream()
-                                .filter(credentialOption -> credentialOption
-                                        .getCredentialRetrievalData()
-                                        .getStringArrayList(
-                                                CredentialOption
-                                                        .SUPPORTED_ELEMENT_KEYS) != null)
+                                .filter(
+                                        credentialOption ->
+                                                credentialOption
+                                                                .getCredentialRetrievalData()
+                                                                .getStringArrayList(
+                                                                        CredentialOption
+                                                                        .SUPPORTED_ELEMENT_KEYS)
+                                                        != null)
                                 .toList();
 
                 List<CredentialOption> optionsThatDoNotRequireActiveCredentials =
                         request.getCredentialOptions().stream()
-                                .filter(credentialOption -> credentialOption
-                                        .getCredentialRetrievalData()
-                                        .getStringArrayList(
-                                                CredentialOption
-                                                        .SUPPORTED_ELEMENT_KEYS) == null)
+                                .filter(
+                                        credentialOption ->
+                                                credentialOption
+                                                                .getCredentialRetrievalData()
+                                                                .getStringArrayList(
+                                                                        CredentialOption
+                                                                        .SUPPORTED_ELEMENT_KEYS)
+                                                        == null)
                                 .toList();
 
                 List<ProviderSession> sessionsWithoutRemoteService =
@@ -706,8 +721,7 @@ public final class CredentialManagerService
                 ICreateCredentialCallback callback,
                 String callingPackage) {
             final long timestampBegan = System.nanoTime();
-            Slog.i(TAG, "starting executeCreateCredential with callingPackage: "
-                    + callingPackage);
+            Slog.i(TAG, "starting executeCreateCredential with callingPackage: " + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
             if (request.getOrigin() != null) {
@@ -756,8 +770,8 @@ public final class CredentialManagerService
                 } catch (RemoteException e) {
                     Slog.e(
                             TAG,
-                            "Issue invoking onError on ICreateCredentialCallback "
-                                    + "callback: ", e);
+                            "Issue invoking onError on ICreateCredentialCallback " + "callback: ",
+                            e);
                 }
             }
 
@@ -770,8 +784,8 @@ public final class CredentialManagerService
             try {
                 var initMetric = session.mRequestSessionMetric.getInitialPhaseMetric();
                 initMetric.setCredentialServiceBeginQueryTimeNanoseconds(System.nanoTime());
-                MetricUtilities.logApiCalledInitialPhase(initMetric,
-                        session.mRequestSessionMetric.returnIncrementSequence());
+                MetricUtilities.logApiCalledInitialPhase(
+                        initMetric, session.mRequestSessionMetric.returnIncrementSequence());
             } catch (Exception e) {
                 Slog.i(TAG, "Unexpected error during metric logging: ", e);
             }
@@ -779,23 +793,30 @@ public final class CredentialManagerService
 
         @Override
         public void setEnabledProviders(
-                List<String> primaryProviders, List<String> providers, int userId,
+                List<String> primaryProviders,
+                List<String> providers,
+                int userId,
                 ISetEnabledProvidersCallback callback) {
             final int callingUid = Binder.getCallingUid();
             if (!hasWriteSecureSettingsPermission()) {
                 try {
                     MetricUtilities.logApiCalledSimpleV2(
-                            ApiName.SET_ENABLED_PROVIDERS,
-                            ApiStatus.FAILURE, callingUid);
+                            ApiName.SET_ENABLED_PROVIDERS, ApiStatus.FAILURE, callingUid);
                     callback.onError(
                             PERMISSION_DENIED_ERROR, PERMISSION_DENIED_WRITE_SECURE_SETTINGS_ERROR);
                 } catch (RemoteException e) {
                     MetricUtilities.logApiCalledSimpleV2(
-                            ApiName.SET_ENABLED_PROVIDERS,
-                            ApiStatus.FAILURE, callingUid);
+                            ApiName.SET_ENABLED_PROVIDERS, ApiStatus.FAILURE, callingUid);
                     Slog.e(TAG, "Issue with invoking response: ", e);
                 }
                 return;
+            }
+
+            // If we don't have any primary providers enabled anymore then
+            // we should erase all the providers since the feature is
+            // now disabled.
+            if (primaryProviders.isEmpty()) {
+                providers.clear();
             }
 
             userId =
@@ -808,17 +829,19 @@ public final class CredentialManagerService
                             "setEnabledProviders",
                             null);
 
-            Set<String> enableProvider = new HashSet<>(providers);
-            enableProvider.addAll(primaryProviders);
+            Set<String> enabledProviders = new HashSet<>(providers);
+            enabledProviders.addAll(primaryProviders);
 
             boolean writeEnabledStatus =
-                    Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                    Settings.Secure.putStringForUser(
+                            getContext().getContentResolver(),
                             Settings.Secure.CREDENTIAL_SERVICE,
-                            String.join(":", enableProvider),
+                            String.join(":", enabledProviders),
                             userId);
 
             boolean writePrimaryStatus =
-                    Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                    Settings.Secure.putStringForUser(
+                            getContext().getContentResolver(),
                             Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
                             String.join(":", primaryProviders),
                             userId);
@@ -827,15 +850,13 @@ public final class CredentialManagerService
                 Slog.e(TAG, "Failed to store setting containing enabled or primary providers");
                 try {
                     MetricUtilities.logApiCalledSimpleV2(
-                            ApiName.SET_ENABLED_PROVIDERS,
-                            ApiStatus.FAILURE, callingUid);
+                            ApiName.SET_ENABLED_PROVIDERS, ApiStatus.FAILURE, callingUid);
                     callback.onError(
                             "failed_setting_store",
                             "Failed to store setting containing enabled or primary providers");
                 } catch (RemoteException e) {
                     MetricUtilities.logApiCalledSimpleV2(
-                            ApiName.SET_ENABLED_PROVIDERS,
-                            ApiStatus.FAILURE, callingUid);
+                            ApiName.SET_ENABLED_PROVIDERS, ApiStatus.FAILURE, callingUid);
                     Slog.e(TAG, "Issue with invoking error response: ", e);
                     return;
                 }
@@ -844,13 +865,11 @@ public final class CredentialManagerService
             // Call the callback.
             try {
                 MetricUtilities.logApiCalledSimpleV2(
-                        ApiName.SET_ENABLED_PROVIDERS,
-                        ApiStatus.SUCCESS, callingUid);
+                        ApiName.SET_ENABLED_PROVIDERS, ApiStatus.SUCCESS, callingUid);
                 callback.onResponse();
             } catch (RemoteException e) {
                 MetricUtilities.logApiCalledSimpleV2(
-                        ApiName.SET_ENABLED_PROVIDERS,
-                        ApiStatus.FAILURE, callingUid);
+                        ApiName.SET_ENABLED_PROVIDERS, ApiStatus.FAILURE, callingUid);
                 Slog.e(TAG, "Issue with invoking response: ", e);
                 // TODO: Propagate failure
             }
@@ -859,8 +878,10 @@ public final class CredentialManagerService
         @Override
         public boolean isEnabledCredentialProviderService(
                 ComponentName componentName, String callingPackage) {
-            Slog.i(TAG, "isEnabledCredentialProviderService with componentName: "
-                    + componentName.flattenToString());
+            Slog.i(
+                    TAG,
+                    "isEnabledCredentialProviderService with componentName: "
+                            + componentName.flattenToString());
 
             // TODO(253157366): Check additional set of services.
             final int userId = UserHandle.getCallingUserId();
@@ -877,7 +898,8 @@ public final class CredentialManagerService
                             // The component name and the package name do not match.
                             MetricUtilities.logApiCalledSimpleV2(
                                     ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
-                                    ApiStatus.FAILURE, callingUid);
+                                    ApiStatus.FAILURE,
+                                    callingUid);
                             Slog.w(
                                     TAG,
                                     "isEnabledCredentialProviderService: Component name does "
@@ -886,7 +908,8 @@ public final class CredentialManagerService
                         }
                         MetricUtilities.logApiCalledSimpleV2(
                                 ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
-                                ApiStatus.SUCCESS, callingUid);
+                                ApiStatus.SUCCESS,
+                                callingUid);
                         return true;
                     }
                 }
@@ -901,13 +924,14 @@ public final class CredentialManagerService
             verifyGetProvidersPermission();
             final int callingUid = Binder.getCallingUid();
             MetricUtilities.logApiCalledSimpleV2(
-                    ApiName.GET_CREDENTIAL_PROVIDER_SERVICES,
-                    ApiStatus.SUCCESS, callingUid);
-            return CredentialProviderInfoFactory
-                    .getCredentialProviderServices(
-                            mContext, userId, providerFilter, getEnabledProvidersForUser(userId),
-                            getPrimaryProvidersForUserId(mContext, userId));
+                    ApiName.GET_CREDENTIAL_PROVIDER_SERVICES, ApiStatus.SUCCESS, callingUid);
 
+            return CredentialProviderInfoFactory.getCredentialProviderServices(
+                    mContext,
+                    userId,
+                    providerFilter,
+                    getEnabledProvidersForUser(userId),
+                    getPrimaryProvidersForUserId(mContext, userId));
         }
 
         @Override
@@ -917,7 +941,10 @@ public final class CredentialManagerService
 
             final int userId = UserHandle.getCallingUserId();
             return CredentialProviderInfoFactory.getCredentialProviderServicesForTesting(
-                    mContext, userId, providerFilter, getEnabledProvidersForUser(userId),
+                    mContext,
+                    userId,
+                    providerFilter,
+                    getEnabledProvidersForUser(userId),
                     getPrimaryProvidersForUserId(mContext, userId));
         }
 
@@ -935,15 +962,22 @@ public final class CredentialManagerService
         }
 
         private Set<ComponentName> getEnabledProvidersForUser(int userId) {
-            final int resolvedUserId = ActivityManager.handleIncomingUser(
-                    Binder.getCallingPid(), Binder.getCallingUid(),
-                    userId, false, false,
-                    "getEnabledProvidersForUser", null);
+            final int resolvedUserId =
+                    ActivityManager.handleIncomingUser(
+                            Binder.getCallingPid(),
+                            Binder.getCallingUid(),
+                            userId,
+                            false,
+                            false,
+                            "getEnabledProvidersForUser",
+                            null);
 
             Set<ComponentName> enabledProviders = new HashSet<>();
-            String directValue = Settings.Secure.getStringForUser(
-                    mContext.getContentResolver(), Settings.Secure.CREDENTIAL_SERVICE,
-                    resolvedUserId);
+            String directValue =
+                    Settings.Secure.getStringForUser(
+                            mContext.getContentResolver(),
+                            Settings.Secure.CREDENTIAL_SERVICE,
+                            resolvedUserId);
 
             if (!TextUtils.isEmpty(directValue)) {
                 String[] components = directValue.split(":");
@@ -964,8 +998,7 @@ public final class CredentialManagerService
                 IClearCredentialStateCallback callback,
                 String callingPackage) {
             final long timestampBegan = System.nanoTime();
-            Slog.i(TAG, "starting clearCredentialState with callingPackage: "
-                    + callingPackage);
+            Slog.i(TAG, "starting clearCredentialState with callingPackage: " + callingPackage);
             final int userId = UserHandle.getCallingUserId();
             int callingUid = Binder.getCallingUid();
             enforceCallingPackage(callingPackage, callingUid);
@@ -996,13 +1029,13 @@ public final class CredentialManagerService
             if (providerSessions.isEmpty()) {
                 try {
                     // TODO("Replace with properly defined error type")
-                    callback.onError("UNKNOWN", "No credentials available on "
-                            + "this device");
+                    callback.onError("UNKNOWN", "No credentials available on " + "this device");
                 } catch (RemoteException e) {
                     Slog.e(
                             TAG,
                             "Issue invoking onError on IClearCredentialStateCallback "
-                                    + "callback: ", e);
+                                    + "callback: ",
+                            e);
                 }
             }
 
@@ -1035,9 +1068,7 @@ public final class CredentialManagerService
         public void unregisterCredentialDescription(
                 UnregisterCredentialDescriptionRequest request, String callingPackage)
                 throws IllegalArgumentException {
-            Slog.i(TAG, "unregisterCredentialDescription with callingPackage: "
-                    + callingPackage);
-
+            Slog.i(TAG, "unregisterCredentialDescription with callingPackage: " + callingPackage);
 
             if (!isCredentialDescriptionApiEnabled()) {
                 throw new UnsupportedOperationException("Feature not supported");
@@ -1061,18 +1092,18 @@ public final class CredentialManagerService
     }
 
     private void enforcePermissionForAllowedProviders(GetCredentialRequest request) {
-        boolean containsAllowedProviders = request.getCredentialOptions()
-                .stream()
-                .anyMatch(option -> option.getAllowedProviders() != null
-                        && !option.getAllowedProviders().isEmpty());
+        boolean containsAllowedProviders =
+                request.getCredentialOptions().stream()
+                        .anyMatch(
+                                option ->
+                                        option.getAllowedProviders() != null
+                                                && !option.getAllowedProviders().isEmpty());
         if (containsAllowedProviders) {
-            mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS,
-                    null);
+            mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS, null);
         }
     }
 
-    private void addSessionLocked(@UserIdInt int userId,
-            RequestSession requestSession) {
+    private void addSessionLocked(@UserIdInt int userId, RequestSession requestSession) {
         synchronized (mLock) {
             mSessionManager.addSession(userId, requestSession.mRequestId, requestSession);
         }
@@ -1080,11 +1111,11 @@ public final class CredentialManagerService
 
     private void enforceCallingPackage(String callingPackage, int callingUid) {
         int packageUid;
-        PackageManager pm = mContext.createContextAsUser(
-                UserHandle.getUserHandleForUid(callingUid), 0).getPackageManager();
+        PackageManager pm =
+                mContext.createContextAsUser(UserHandle.getUserHandleForUid(callingUid), 0)
+                        .getPackageManager();
         try {
-            packageUid = pm.getPackageUid(callingPackage,
-                    PackageManager.PackageInfoFlags.of(0));
+            packageUid = pm.getPackageUid(callingPackage, PackageManager.PackageInfoFlags.of(0));
         } catch (PackageManager.NameNotFoundException e) {
             throw new SecurityException(callingPackage + " not found");
         }
@@ -1110,4 +1141,72 @@ public final class CredentialManagerService
             mRequestSessions.get(userId).put(token, requestSession);
         }
     }
+
+    /** Updates settings when packages are removed. */
+    private final PackageMonitor mPackageMonitor =
+            new PackageMonitor() {
+                
+                @Override
+                public void onPackageRemoved(String packageName, int uid) {
+                    Slog.d(TAG, "onPackageRemoved: " + packageName);
+
+                    // Remove any providers from the primary setting that contain the package name
+                    // being removed.
+                    Set<String> primaryProviders =
+                            getStoredProviders(
+                                    Settings.Secure.CREDENTIAL_SERVICE_PRIMARY, packageName);
+                    if (!Settings.Secure.putString(
+                            getContext().getContentResolver(),
+                            Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                            String.join(":", primaryProviders))) {
+                        Slog.w(TAG, "Failed to remove primary package: " + packageName);
+                        return;
+                    }
+
+                    // Get the secondary providers and if there are no primary providers then
+                    // we should erase all the providers from the secondary list because the
+                    // feature is now disabled.
+                    if (!primaryProviders.isEmpty()) {
+                        return;
+                    }
+
+                    if (!Settings.Secure.putString(
+                            getContext().getContentResolver(),
+                            Settings.Secure.CREDENTIAL_SERVICE,
+                            "")) {
+                        Slog.w(TAG, "Failed to remove secondary package: " + packageName);
+                        return;
+                    }
+                }
+
+                private Set<String> getStoredProviders(String key, String packageName) {
+                    // Get the current providers.
+                    String rawProviders =
+                            Settings.Secure.getStringForUser(
+                                getContext().getContentResolver(), key,
+                                UserHandle.myUserId());
+                    if (rawProviders == null) {
+                        Slog.w(TAG, "settings key is null: " + key);
+                        return new HashSet<>();
+                    }
+
+                    // If the app being removed matches any of the package names from
+                    // this list then don't add it in the output.
+                    Set<String> providers = new HashSet<>();
+                    for (String rawComponentName : rawProviders.split(":")) {
+                        if (TextUtils.isEmpty(rawComponentName)
+                                || rawComponentName.equals("null")) {
+                            Slog.d(TAG, "provider component name is empty or null");
+                            continue;
+                        }
+
+                        ComponentName cn = ComponentName.unflattenFromString(rawComponentName);
+                        if (cn != null && !cn.getPackageName().equals(packageName)) {
+                            providers.add(cn.flattenToString());
+                        }
+                    }
+
+                    return providers;
+                }
+            };
 }
