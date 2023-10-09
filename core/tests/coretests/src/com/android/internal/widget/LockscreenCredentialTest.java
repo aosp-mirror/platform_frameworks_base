@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -37,16 +36,16 @@ import java.util.Arrays;
 public class LockscreenCredentialTest {
 
     @Test
-    public void testEmptyCredential() {
-        LockscreenCredential empty = LockscreenCredential.createNone();
+    public void testNoneCredential() {
+        LockscreenCredential none = LockscreenCredential.createNone();
 
-        assertTrue(empty.isNone());
-        assertEquals(0, empty.size());
-        assertNotNull(empty.getCredential());
+        assertTrue(none.isNone());
+        assertEquals(0, none.size());
+        assertArrayEquals(new byte[0], none.getCredential());
 
-        assertFalse(empty.isPin());
-        assertFalse(empty.isPassword());
-        assertFalse(empty.isPattern());
+        assertFalse(none.isPin());
+        assertFalse(none.isPassword());
+        assertFalse(none.isPattern());
     }
 
     @Test
@@ -92,6 +91,24 @@ public class LockscreenCredentialTest {
         assertFalse(pattern.isNone());
         assertFalse(pattern.isPin());
         assertFalse(pattern.isPassword());
+    }
+
+    // Constructing a LockscreenCredential with a too-short length, even 0, should not throw an
+    // exception.  This is because LockscreenCredential needs to be able to represent a request to
+    // set a credential that is too short.
+    @Test
+    public void testZeroLengthCredential() {
+        LockscreenCredential credential = LockscreenCredential.createPin("");
+        assertTrue(credential.isPin());
+        assertEquals(0, credential.size());
+
+        credential = createPattern("");
+        assertTrue(credential.isPattern());
+        assertEquals(0, credential.size());
+
+        credential = LockscreenCredential.createPassword("");
+        assertTrue(credential.isPassword());
+        assertEquals(0, credential.size());
     }
 
     @Test
