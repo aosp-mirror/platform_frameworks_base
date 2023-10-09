@@ -1850,6 +1850,10 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_GESTURE,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_MAGNIFICATION_GESTURE);
+        dumpSetting(s, p,
                 Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
                 SecureSettingsProto.Accessibility.HEARING_AID_RINGTONE_ROUTING);
         dumpSetting(s, p,
