@@ -138,7 +138,7 @@ private:
         TvMessageEventWrapper() {}
 
         static TvMessageEventWrapper createEventWrapper(
-                const AidlTvMessageEvent& aidlTvMessageEvent);
+                const AidlTvMessageEvent& aidlTvMessageEvent, bool isLegacyMessage);
 
         int streamId;
         int deviceId;
@@ -195,6 +195,7 @@ private:
         ::ndk::ScopedAStatus getTvMessageQueueDesc(
                 MQDescriptor<int8_t, SynchronizedReadWrite>* out_queue, int32_t in_deviceId,
                 int32_t in_streamId);
+        ::ndk::ScopedAStatus getAidlInterfaceVersion(int32_t* _aidl_return);
 
     private:
         ::ndk::ScopedAStatus hidlSetCallback(const std::shared_ptr<TvInputCallback>& in_callback);
