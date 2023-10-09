@@ -113,7 +113,6 @@ constructor(
                     .launchIn(this)
 
                 deviceItemInteractor.deviceItemUpdate
-                    .filterNotNull()
                     .onEach {
                         dialog!!.onDeviceItemUpdated(
                             it.take(MAX_DEVICE_ITEM_ENTRY),
