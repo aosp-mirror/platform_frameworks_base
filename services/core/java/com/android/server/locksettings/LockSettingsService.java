@@ -115,7 +115,6 @@ import android.system.keystore2.Domain;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
@@ -861,9 +860,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override // binder interface
     public void systemReady() {
-        if (mContext.checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
-            EventLog.writeEvent(0x534e4554, "28251513", getCallingUid(), "");  // SafetyNet
-        }
         checkWritePermission();
 
         mHasSecureLockScreen = mContext.getPackageManager()
@@ -1108,9 +1104,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private final void checkPasswordHavePermission() {
-        if (mContext.checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
-            EventLog.writeEvent(0x534e4554, "28251513", getCallingUid(), "");  // SafetyNet
-        }
         mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsHave");
     }
 
