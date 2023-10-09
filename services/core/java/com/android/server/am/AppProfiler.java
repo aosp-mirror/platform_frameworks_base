@@ -1205,6 +1205,8 @@ public class AppProfiler {
             trackerMemFactor = mService.mProcessStats.getMemFactorLocked();
         }
 
+        mLastMemoryLevel = memFactor;
+        mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
         if (mService.mConstants.USE_MODERN_TRIM) {
             // Modern trim is not sent based on lowmem state
             // Dispatch UI_HIDDEN to processes that need it
@@ -1235,8 +1237,6 @@ public class AppProfiler {
             return false;
         }
 
-        mLastMemoryLevel = memFactor;
-        mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
         if (memFactor != ADJ_MEM_FACTOR_NORMAL) {
             if (mLowRamStartTime == 0) {
                 mLowRamStartTime = now;
