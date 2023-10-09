@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import android.view.MotionEvent;
+import android.widget.flags.FakeFeatureFlagsImpl;
+import android.widget.flags.Flags;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -54,6 +56,8 @@ public class DifferentialMotionFlingHelperTest {
     private final TestDifferentialMotionFlingTarget mFlingTarget =
             new TestDifferentialMotionFlingTarget();
 
+    private final FakeFeatureFlagsImpl mFakeWidgetFeatureFlags = new FakeFeatureFlagsImpl();
+
     private DifferentialMotionFlingHelper mFlingHelper;
 
     @Before
@@ -62,7 +66,10 @@ public class DifferentialMotionFlingHelperTest {
                 ApplicationProvider.getApplicationContext(),
                 mFlingTarget,
                 mVelocityThresholdCalculator,
-                mVelocityProvider);
+                mVelocityProvider,
+                mFakeWidgetFeatureFlags);
+        mFakeWidgetFeatureFlags.setFlag(
+                Flags.FLAG_ENABLE_PLATFORM_WIDGET_DIFFERENTIAL_MOTION_FLING, true);
     }
 
     @Test
@@ -136,6 +143,18 @@ public class DifferentialMotionFlingHelperTest {
         deliverEventWithVelocity(createPointerEvent(), MotionEvent.AXIS_VSCROLL, 3000);
 
         assertEquals(100, mFlingTarget.mLastFlingVelocity, /* delta= */ 0);
+    }
+
+    @Test
+    public void flingFeatureFlagDisabled_noFlingCalculation() {
+        mFakeWidgetFeatureFlags.setFlag(
+                Flags.FLAG_ENABLE_PLATFORM_WIDGET_DIFFERENTIAL_MOTION_FLING, false);
+        mMinVelocity = 50;
+        mMaxVelocity = 100;
+        deliverEventWithVelocity(createPointerEvent(), MotionEvent.AXIS_VSCROLL, 60);
+
+        assertFalse(mVelocityCalculated);
+        assertEquals(0, mFlingTarget.mLastFlingVelocity, /* delta= */ 0);
     }
 
     @Test

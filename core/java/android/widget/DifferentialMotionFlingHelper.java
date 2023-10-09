@@ -21,6 +21,8 @@ import android.content.Context;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
+import android.widget.flags.FeatureFlags;
+import android.widget.flags.FeatureFlagsImpl;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -49,6 +51,8 @@ public class DifferentialMotionFlingHelper {
 
     private final FlingVelocityThresholdCalculator mVelocityThresholdCalculator;
     private final DifferentialVelocityProvider mVelocityProvider;
+
+    private final FeatureFlags mWidgetFeatureFlags;
 
     @Nullable private VelocityTracker mVelocityTracker;
 
@@ -134,7 +138,8 @@ public class DifferentialMotionFlingHelper {
         this(context,
                 target,
                 DifferentialMotionFlingHelper::calculateFlingVelocityThresholds,
-                DifferentialMotionFlingHelper::getCurrentVelocity);
+                DifferentialMotionFlingHelper::getCurrentVelocity,
+                /* widgetFeatureFlags= */ new FeatureFlagsImpl());
     }
 
     @VisibleForTesting
@@ -142,11 +147,13 @@ public class DifferentialMotionFlingHelper {
             Context context,
             DifferentialMotionFlingTarget target,
             FlingVelocityThresholdCalculator velocityThresholdCalculator,
-            DifferentialVelocityProvider velocityProvider) {
+            DifferentialVelocityProvider velocityProvider,
+            FeatureFlags widgetFeatureFlags) {
         mContext = context;
         mTarget = target;
         mVelocityThresholdCalculator = velocityThresholdCalculator;
         mVelocityProvider = velocityProvider;
+        mWidgetFeatureFlags = widgetFeatureFlags;
     }
 
     /**
@@ -156,6 +163,9 @@ public class DifferentialMotionFlingHelper {
      * @param axis the axis being processed by the target View.
      */
     public void onMotionEvent(MotionEvent event, int axis) {
+        if (!mWidgetFeatureFlags.enablePlatformWidgetDifferentialMotionFling()) {
+            return;
+        }
         boolean flingParamsChanged = calculateFlingVelocityThresholds(event, axis);
         if (mFlingVelocityThresholds[0] == Integer.MAX_VALUE) {
             // Integer.MAX_VALUE means that the device does not support fling for the current
