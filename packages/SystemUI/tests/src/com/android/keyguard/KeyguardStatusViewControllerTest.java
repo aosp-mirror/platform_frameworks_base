@@ -16,19 +16,24 @@
 
 package com.android.keyguard;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.animation.LayoutTransition;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 
+import com.android.app.animation.Interpolators;
+import com.android.systemui.animation.ViewHierarchyAnimator;
 import com.android.systemui.plugins.ClockConfig;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.res.R;
@@ -38,6 +43,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+
+import java.lang.reflect.Field;
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -142,19 +149,7 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
     }
 
     @Test
-    public void onInit_addsOnLayoutChangeListenerToMediaHostContainer() {
-        when(mKeyguardStatusView.findViewById(R.id.status_view_media_container)).thenReturn(
-                mMediaHostContainer);
-
-        mController.onInit();
-
-        ArgumentCaptor<View.OnLayoutChangeListener> captor =
-                ArgumentCaptor.forClass(View.OnLayoutChangeListener.class);
-        verify(mMediaHostContainer).addOnLayoutChangeListener(captor.capture());
-    }
-
-    @Test
-    public void clockSwitchHeightChanged_mediaChangingLayoutTransitionEnabled() {
+    public void clockSwitchHeightChanged_animatesMediaHostContainer() {
         when(mKeyguardStatusView.findViewById(R.id.status_view_media_container)).thenReturn(
                 mMediaHostContainer);
 
@@ -167,6 +162,10 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
         // Above here is the same as `onInit_addsOnLayoutChangeListenerToClockSwitch`.
         // Below here is the actual test.
 
+        ViewHierarchyAnimator.Companion animator = ViewHierarchyAnimator.Companion;
+        ViewHierarchyAnimator.Companion spiedAnimator = spy(animator);
+        setCompanion(spiedAnimator);
+
         View.OnLayoutChangeListener listener = captor.getValue();
 
         mController.setSplitShadeEnabled(true);
@@ -174,17 +173,20 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
         when(mKeyguardUpdateMonitor.isKeyguardVisible()).thenReturn(true);
         when(mMediaHostContainer.getVisibility()).thenReturn(View.VISIBLE);
         when(mMediaHostContainer.getHeight()).thenReturn(200);
-        when(mMediaHostContainer.getLayoutTransition()).thenReturn(mMediaLayoutTransition);
 
         when(mKeyguardClockSwitch.getHeight()).thenReturn(0);
         listener.onLayoutChange(mKeyguardClockSwitch, /* left= */ 0, /* top= */ 0, /* right= */
                 0, /* bottom= */ 0, /* oldLeft= */ 0, /* oldTop= */ 0, /* oldRight= */
                 0, /* oldBottom = */ 200);
-        verify(mMediaLayoutTransition).enableTransitionType(LayoutTransition.CHANGING);
+        verify(spiedAnimator).animateNextUpdate(mMediaHostContainer,
+                Interpolators.STANDARD, /* duration= */ 500L, /* animateChildren= */ false);
+
+        // Resets ViewHierarchyAnimator.Companion to its original value
+        setCompanion(animator);
     }
 
     @Test
-    public void clockSwitchHeightNotChanged_mediaChangingLayoutTransitionNotEnabled() {
+    public void clockSwitchHeightNotChanged_doesNotAnimateMediaOutputContainer() {
         when(mKeyguardStatusView.findViewById(R.id.status_view_media_container)).thenReturn(
                 mMediaHostContainer);
 
@@ -197,6 +199,10 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
         // Above here is the same as `onInit_addsOnLayoutChangeListenerToClockSwitch`.
         // Below here is the actual test.
 
+        ViewHierarchyAnimator.Companion animator = ViewHierarchyAnimator.Companion;
+        ViewHierarchyAnimator.Companion spiedAnimator = spy(animator);
+        setCompanion(spiedAnimator);
+
         View.OnLayoutChangeListener listener = captor.getValue();
 
         mController.setSplitShadeEnabled(true);
@@ -204,36 +210,24 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
         when(mKeyguardUpdateMonitor.isKeyguardVisible()).thenReturn(true);
         when(mMediaHostContainer.getVisibility()).thenReturn(View.VISIBLE);
         when(mMediaHostContainer.getHeight()).thenReturn(200);
-        when(mMediaHostContainer.getLayoutTransition()).thenReturn(mMediaLayoutTransition);
 
         when(mKeyguardClockSwitch.getHeight()).thenReturn(200);
         listener.onLayoutChange(mKeyguardClockSwitch, /* left= */ 0, /* top= */ 0, /* right= */
                 0, /* bottom= */ 0, /* oldLeft= */ 0, /* oldTop= */ 0, /* oldRight= */
                 0, /* oldBottom = */ 200);
-        verify(mMediaLayoutTransition, never()).enableTransitionType(LayoutTransition.CHANGING);
+        verify(spiedAnimator, never()).animateNextUpdate(any(), any(), anyLong(), anyBoolean());
+
+        // Resets ViewHierarchyAnimator.Companion to its original value
+        setCompanion(animator);
     }
 
-    @Test
-    public void onMediaHostContainerLayout_disablesChangingLayoutTransition() {
-        when(mKeyguardStatusView.findViewById(R.id.status_view_media_container)).thenReturn(
-                mMediaHostContainer);
-
-        mController.onInit();
-
-        ArgumentCaptor<View.OnLayoutChangeListener> captor =
-                ArgumentCaptor.forClass(View.OnLayoutChangeListener.class);
-        verify(mMediaHostContainer).addOnLayoutChangeListener(captor.capture());
-
-        // Above here is the same as `onInit_addsOnLayoutChangeListenerToMediaHostContainer`.
-        // Below here is the actual test.
-
-        View.OnLayoutChangeListener listener = captor.getValue();
-
-        when(mMediaHostContainer.getLayoutTransition()).thenReturn(mMediaLayoutTransition);
-
-        when(mMediaLayoutTransition.isTransitionTypeEnabled(LayoutTransition.CHANGING)).thenReturn(
-                true);
-        listener.onLayoutChange(mMediaHostContainer, 1, 2, 3, 4, 1, 2, 3, 4);
-        verify(mMediaLayoutTransition).disableTransitionType(LayoutTransition.CHANGING);
+    private void setCompanion(ViewHierarchyAnimator.Companion companion) {
+        try {
+            Field field = ViewHierarchyAnimator.class.getDeclaredField("Companion");
+            field.setAccessible(true);
+            field.set(null, companion);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

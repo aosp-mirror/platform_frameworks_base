@@ -20,7 +20,6 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.animation.LayoutTransition;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
@@ -69,7 +68,6 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
 
     @Mock protected KeyguardClockSwitch mKeyguardClockSwitch;
     @Mock protected FrameLayout mMediaHostContainer;
-    @Mock protected LayoutTransition mMediaLayoutTransition;
 
     @Before
     public void setup() {
