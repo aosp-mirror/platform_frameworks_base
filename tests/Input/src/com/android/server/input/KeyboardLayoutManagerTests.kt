@@ -100,6 +100,7 @@ class KeyboardLayoutManagerTests {
         const val RECEIVER_NAME = "DummyReceiver"
         private const val ENGLISH_US_LAYOUT_NAME = "keyboard_layout_english_us"
         private const val ENGLISH_UK_LAYOUT_NAME = "keyboard_layout_english_uk"
+        private const val GERMAN_LAYOUT_NAME = "keyboard_layout_german"
         private const val VENDOR_SPECIFIC_LAYOUT_NAME = "keyboard_layout_vendorId:1,productId:1"
         const val LAYOUT_TYPE_QWERTZ = 2
         const val LAYOUT_TYPE_QWERTY = 1
@@ -108,6 +109,7 @@ class KeyboardLayoutManagerTests {
 
     private val ENGLISH_US_LAYOUT_DESCRIPTOR = createLayoutDescriptor(ENGLISH_US_LAYOUT_NAME)
     private val ENGLISH_UK_LAYOUT_DESCRIPTOR = createLayoutDescriptor(ENGLISH_UK_LAYOUT_NAME)
+    private val GERMAN_LAYOUT_DESCRIPTOR = createLayoutDescriptor(GERMAN_LAYOUT_NAME)
     private val VENDOR_SPECIFIC_LAYOUT_DESCRIPTOR =
         createLayoutDescriptor(VENDOR_SPECIFIC_LAYOUT_NAME)
 
@@ -710,7 +712,7 @@ class KeyboardLayoutManagerTests {
             assertCorrectLayout(
                 keyboardDevice,
                 createImeSubtypeForLanguageTag("de"),
-                createLayoutDescriptor("keyboard_layout_german")
+                GERMAN_LAYOUT_DESCRIPTOR
             )
             assertCorrectLayout(
                 keyboardDevice,
@@ -775,13 +777,13 @@ class KeyboardLayoutManagerTests {
             assertCorrectLayout(
                 keyboardDevice,
                 createImeSubtypeForLanguageTagAndLayoutType("de", "qwertz"),
-                createLayoutDescriptor("keyboard_layout_german")
+                GERMAN_LAYOUT_DESCRIPTOR
             )
             // Wrong layout type should match with language if provided layout type not available
             assertCorrectLayout(
                 keyboardDevice,
                 createImeSubtypeForLanguageTagAndLayoutType("de", "qwerty"),
-                createLayoutDescriptor("keyboard_layout_german")
+                GERMAN_LAYOUT_DESCRIPTOR
             )
             assertCorrectLayout(
                 keyboardDevice,
@@ -856,7 +858,7 @@ class KeyboardLayoutManagerTests {
                         ArgumentMatchers.eq(createByteArray(
                                 KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
                                 LAYOUT_TYPE_DEFAULT,
-                                "German",
+                                GERMAN_LAYOUT_NAME,
                                 KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD,
                                 "de-Latn",
                                 LAYOUT_TYPE_QWERTZ))
@@ -882,7 +884,7 @@ class KeyboardLayoutManagerTests {
                         ArgumentMatchers.eq(createByteArray(
                                 "en",
                                 LAYOUT_TYPE_QWERTY,
-                                "English (US)",
+                                ENGLISH_US_LAYOUT_NAME,
                                 KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE,
                                 "de-Latn",
                                 LAYOUT_TYPE_QWERTZ))
