@@ -469,9 +469,10 @@ static void nativeSetDefaultBufferSize(JNIEnv* env, jclass clazz, jlong nativeOb
     }
 }
 
-static void nativeApplyTransaction(JNIEnv* env, jclass clazz, jlong transactionObj, jboolean sync) {
+static void nativeApplyTransaction(JNIEnv* env, jclass clazz, jlong transactionObj, jboolean sync,
+                                   jboolean oneWay) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->apply(sync);
+    transaction->apply(sync, oneWay);
 }
 
 static void nativeMergeTransaction(JNIEnv* env, jclass clazz,
@@ -2119,7 +2120,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDefaultBufferSize},
     {"nativeCreateTransaction", "()J",
             (void*)nativeCreateTransaction },
-    {"nativeApplyTransaction", "(JZ)V",
+    {"nativeApplyTransaction", "(JZZ)V",
             (void*)nativeApplyTransaction },
     {"nativeGetNativeTransactionFinalizer", "()J",
             (void*)nativeGetNativeTransactionFinalizer },

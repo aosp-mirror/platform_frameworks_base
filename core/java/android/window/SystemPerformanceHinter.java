@@ -17,6 +17,8 @@
 package android.window;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
+import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN;
 import static android.view.SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_SELF;
 
@@ -28,8 +30,6 @@ import android.os.PerformanceHintManager;
 import android.os.Trace;
 import android.util.Log;
 import android.view.SurfaceControl;
-
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -148,7 +148,6 @@ public class SystemPerformanceHinter {
      * Constructor for the hinter.
      * @hide
      */
-    @VisibleForTesting
     public SystemPerformanceHinter(@NonNull Context context,
             @Nullable DisplayRootProvider displayRootProvider,
             @Nullable Supplier<SurfaceControl.Transaction> transactionSupplier) {
@@ -208,11 +207,14 @@ public class SystemPerformanceHinter {
         boolean transactionChanged = false;
         // Per-display flags
         if (nowEnabled(oldPerDisplayFlags, newPerDisplayFlags, HINT_SF_FRAME_RATE)) {
-            mTransaction.setFrameRateSelectionStrategy(
-                    mDisplayRootProvider.getRootForDisplay(session.displayId),
+            SurfaceControl displaySurfaceControl = mDisplayRootProvider.getRootForDisplay(
+                    session.displayId);
+            mTransaction.setFrameRateSelectionStrategy(displaySurfaceControl,
                     FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
+            mTransaction.setFrameRateCategory(displaySurfaceControl, FRAME_RATE_CATEGORY_HIGH);
             transactionChanged = true;
-            Trace.beginAsyncSection("PerfHint-framerate-" + session.reason, session.traceCookie);
+            Trace.beginAsyncSection("PerfHint-framerate-" + session.displayId + "-"
+                    + session.reason, session.traceCookie);
         }
 
         // Global flags
@@ -226,7 +228,7 @@ public class SystemPerformanceHinter {
             Trace.beginAsyncSection("PerfHint-adpf-" + session.reason, session.traceCookie);
         }
         if (transactionChanged) {
-            mTransaction.apply();
+            mTransaction.applyAsyncUnsafe();
         }
     }
 
@@ -245,9 +247,11 @@ public class SystemPerformanceHinter {
         boolean transactionChanged = false;
         // Per-display flags
         if (nowDisabled(oldPerDisplayFlags, newPerDisplayFlags, HINT_SF_FRAME_RATE)) {
-            mTransaction.setFrameRateSelectionStrategy(
-                    mDisplayRootProvider.getRootForDisplay(session.displayId),
+            SurfaceControl displaySurfaceControl = mDisplayRootProvider.getRootForDisplay(
+                    session.displayId);
+            mTransaction.setFrameRateSelectionStrategy(displaySurfaceControl,
                     FRAME_RATE_SELECTION_STRATEGY_SELF);
+            mTransaction.setFrameRateCategory(displaySurfaceControl, FRAME_RATE_CATEGORY_DEFAULT);
             transactionChanged = true;
             Trace.endAsyncSection("PerfHint-framerate-" + session.reason, session.traceCookie);
         }
@@ -263,7 +267,7 @@ public class SystemPerformanceHinter {
             Trace.endAsyncSection("PerfHint-adpf-" + session.reason, session.traceCookie);
         }
         if (transactionChanged) {
-            mTransaction.apply();
+            mTransaction.applyAsyncUnsafe();
         }
     }
 
