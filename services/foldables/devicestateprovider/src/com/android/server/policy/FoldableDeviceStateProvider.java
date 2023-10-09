@@ -57,7 +57,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Device state provider for foldable devices.
@@ -93,6 +93,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
     private final Sensor mHingeAngleSensor;
     private final DisplayManager mDisplayManager;
     private final Sensor mHallSensor;
+    private static final Predicate<FoldableDeviceStateProvider> ALLOWED = p -> true;
 
     @Nullable
     @GuardedBy("mLock")
@@ -202,14 +203,12 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
 
     private void initialiseStateConditions(DeviceStateConfiguration configuration) {
         mStateConditions.put(configuration.mDeviceState.getIdentifier(), () ->
-                configuration.mActiveStatePredicate.apply(this));
+                configuration.mActiveStatePredicate.test(this));
     }
 
     private void initialiseStateAvailabilityConditions(DeviceStateConfiguration configuration) {
-        if (configuration.mAvailabilityPredicate != null) {
             mStateAvailabilityConditions.put(configuration.mDeviceState.getIdentifier(), () ->
-                    configuration.mAvailabilityPredicate.apply(this));
-        }
+                    configuration.mAvailabilityPredicate.test(this));
     }
 
     @Override
@@ -419,19 +418,20 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
      */
     public static class DeviceStateConfiguration {
         private final DeviceState mDeviceState;
-        private final Function<FoldableDeviceStateProvider, Boolean> mActiveStatePredicate;
-        private final Function<FoldableDeviceStateProvider, Boolean> mAvailabilityPredicate;
+        private final Predicate<FoldableDeviceStateProvider> mActiveStatePredicate;
+        private final Predicate<FoldableDeviceStateProvider> mAvailabilityPredicate;
 
         private DeviceStateConfiguration(
-                DeviceState deviceState,
-                Function<FoldableDeviceStateProvider, Boolean> predicate) {
-            this(deviceState, predicate, null);
+                @NonNull DeviceState deviceState,
+                @NonNull Predicate<FoldableDeviceStateProvider> predicate) {
+            this(deviceState, predicate, ALLOWED);
         }
 
         private DeviceStateConfiguration(
-                DeviceState deviceState,
-                Function<FoldableDeviceStateProvider, Boolean> activeStatePredicate,
-                Function<FoldableDeviceStateProvider, Boolean> availabilityPredicate) {
+                @NonNull DeviceState deviceState,
+                @NonNull Predicate<FoldableDeviceStateProvider> activeStatePredicate,
+                @NonNull Predicate<FoldableDeviceStateProvider> availabilityPredicate) {
+
             mDeviceState = deviceState;
             mActiveStatePredicate = activeStatePredicate;
             mAvailabilityPredicate = availabilityPredicate;
@@ -441,19 +441,19 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
                 @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier,
                 @NonNull String name,
                 @DeviceState.DeviceStateFlags int flags,
-                Function<FoldableDeviceStateProvider, Boolean> predicate
+                @NonNull Predicate<FoldableDeviceStateProvider> activeStatePredicate
         ) {
             return new DeviceStateConfiguration(new DeviceState(identifier, name, flags),
-                    predicate);
+                    activeStatePredicate);
         }
 
         public static DeviceStateConfiguration createConfig(
                 @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier,
                 @NonNull String name,
-                Function<FoldableDeviceStateProvider, Boolean> predicate
+                @NonNull Predicate<FoldableDeviceStateProvider> activeStatePredicate
         ) {
             return new DeviceStateConfiguration(new DeviceState(identifier, name, /* flags= */ 0),
-                    predicate);
+                    activeStatePredicate);
         }
 
         /** Create a configuration with availability predicate **/
@@ -461,11 +461,11 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
                 @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier,
                 @NonNull String name,
                 @DeviceState.DeviceStateFlags int flags,
-                Function<FoldableDeviceStateProvider, Boolean> predicate,
-                Function<FoldableDeviceStateProvider, Boolean> availabilityPredicate
+                @NonNull Predicate<FoldableDeviceStateProvider> activeStatePredicate,
+                @NonNull Predicate<FoldableDeviceStateProvider> availabilityPredicate
         ) {
             return new DeviceStateConfiguration(new DeviceState(identifier, name, flags),
-                predicate, availabilityPredicate);
+                    activeStatePredicate, availabilityPredicate);
         }
 
         /**

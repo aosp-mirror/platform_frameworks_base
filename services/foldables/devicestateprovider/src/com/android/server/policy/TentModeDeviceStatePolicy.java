@@ -36,6 +36,8 @@ import com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfigur
 import com.android.server.policy.feature.flags.FeatureFlags;
 import com.android.server.policy.feature.flags.FeatureFlagsImpl;
 
+import java.util.function.Predicate;
+
 /**
  * Device state policy for a foldable device that supports tent mode: a mode when the device
  * keeps the outer display on until reaching a certain hinge angle threshold.
@@ -58,6 +60,8 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
     private final DeviceStateProvider mProvider;
 
     private final boolean mIsDualDisplayBlockingEnabled;
+    private static final Predicate<FoldableDeviceStateProvider> ALLOWED = p -> true;
+    private static final Predicate<FoldableDeviceStateProvider> NOT_ALLOWED = p -> false;
 
     /**
      * Creates TentModeDeviceStatePolicy
@@ -102,17 +106,17 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
                         }),
                 createConfig(DEVICE_STATE_OPENED,
                         /* name= */ "OPENED",
-                        /* activeStatePredicate= */ (provider) -> true),
+                        /* activeStatePredicate= */ ALLOWED),
                 createConfig(DEVICE_STATE_REAR_DISPLAY_STATE,
                         /* name= */ "REAR_DISPLAY_STATE",
                         /* flags= */ FLAG_EMULATED_ONLY,
-                        /* activeStatePredicate= */ (provider) -> false),
+                        /* activeStatePredicate= */ NOT_ALLOWED),
                 createConfig(DEVICE_STATE_CONCURRENT_INNER_DEFAULT,
                         /* name= */ "CONCURRENT_INNER_DEFAULT",
                         /* flags= */ FLAG_EMULATED_ONLY | FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP
                                 | FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
                                 | FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE,
-                        /* activeStatePredicate= */ (provider) -> false,
+                        /* activeStatePredicate= */ NOT_ALLOWED,
                         /* availabilityPredicate= */
                         provider -> !mIsDualDisplayBlockingEnabled
                                 || provider.hasNoConnectedExternalDisplay())
