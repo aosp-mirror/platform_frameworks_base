@@ -256,7 +256,7 @@ object Flags {
     // TODO(b/290652751): Tracking bug.
     @JvmField
     val MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA =
-        unreleasedFlag("migrate_split_keyguard_bottom_area", teamfood = true)
+        releasedFlag("migrate_split_keyguard_bottom_area")
 
     // TODO(b/297037052): Tracking bug.
     @JvmField
