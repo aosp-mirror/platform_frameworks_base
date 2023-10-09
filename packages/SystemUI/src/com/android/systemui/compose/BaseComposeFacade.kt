@@ -72,4 +72,9 @@ interface BaseComposeFacade {
         windowInsets: StateFlow<WindowInsets?>,
         sceneByKey: Map<SceneKey, Scene>,
     ): View
+
+    /** Create a [View] that represents the communal hub. */
+    fun createCommunalView(
+        context: Context,
+    ): View
 }
