@@ -114,6 +114,7 @@ public class Canvas extends BaseCanvas {
             throw new IllegalStateException("Immutable bitmap passed to Canvas constructor");
         }
         throwIfCannotDraw(bitmap);
+        bitmap.setGainmap(null);
         mNativeCanvasWrapper = nInitRaster(bitmap.getNativeInstance());
         mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                 this, mNativeCanvasWrapper);
@@ -178,7 +179,7 @@ public class Canvas extends BaseCanvas {
                 throw new IllegalStateException();
             }
             throwIfCannotDraw(bitmap);
-
+            bitmap.setGainmap(null);
             nSetBitmap(mNativeCanvasWrapper, bitmap.getNativeInstance());
             mDensity = bitmap.mDensity;
         }
