@@ -1903,7 +1903,7 @@ package android.media {
     method public android.media.PlaybackParams setAudioStretchMode(int);
   }
 
-  public final class RingtoneSelection {
+  @FlaggedApi("android.os.vibrator.haptics_customization_enabled") public final class RingtoneSelection {
     method @NonNull public static android.media.RingtoneSelection fromUri(@Nullable android.net.Uri, int);
     method public int getSoundSource();
     method @Nullable public android.net.Uri getSoundUri();
@@ -1915,14 +1915,16 @@ package android.media {
     field public static final int FROM_URI_RINGTONE_SELECTION_ONLY = 3; // 0x3
     field public static final int FROM_URI_RINGTONE_SELECTION_OR_SOUND = 1; // 0x1
     field public static final int FROM_URI_RINGTONE_SELECTION_OR_VIBRATION = 2; // 0x2
-    field public static final int SOUND_SOURCE_DEFAULT = 0; // 0x0
     field public static final int SOUND_SOURCE_OFF = 1; // 0x1
+    field public static final int SOUND_SOURCE_SYSTEM_DEFAULT = 3; // 0x3
+    field public static final int SOUND_SOURCE_UNSPECIFIED = 0; // 0x0
     field public static final int SOUND_SOURCE_URI = 2; // 0x2
-    field public static final int VIBRATION_SOURCE_APPLICATION_PROVIDED = 3; // 0x3
+    field public static final int VIBRATION_SOURCE_APPLICATION_DEFAULT = 4; // 0x4
     field public static final int VIBRATION_SOURCE_AUDIO_CHANNEL = 10; // 0xa
-    field public static final int VIBRATION_SOURCE_DEFAULT = 0; // 0x0
     field public static final int VIBRATION_SOURCE_HAPTIC_GENERATOR = 11; // 0xb
     field public static final int VIBRATION_SOURCE_OFF = 1; // 0x1
+    field public static final int VIBRATION_SOURCE_SYSTEM_DEFAULT = 3; // 0x3
+    field public static final int VIBRATION_SOURCE_UNSPECIFIED = 0; // 0x0
     field public static final int VIBRATION_SOURCE_URI = 2; // 0x2
   }
 
