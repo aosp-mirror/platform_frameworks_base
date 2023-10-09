@@ -253,27 +253,37 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     }
 
     /**
-     * Check if the credential meets minimal length requirement.
+     * Checks whether the credential meets basic requirements for setting it as a new credential.
      *
-     * @throws IllegalArgumentException if the credential is too short.
+     * This is redundant if {@link android.app.admin.PasswordMetrics#validateCredential()}, which
+     * does more comprehensive checks, is correctly called first (which it should be).
+     *
+     * @throws IllegalArgumentException if the credential contains invalid characters or is too
+     * short
      */
-    public void checkLength() {
-        if (isNone()) {
-            return;
-        }
-        if (isPattern()) {
-            if (size() < LockPatternUtils.MIN_LOCK_PATTERN_SIZE) {
-                throw new IllegalArgumentException("pattern must not be null and at least "
-                        + LockPatternUtils.MIN_LOCK_PATTERN_SIZE + " dots long.");
-            }
-            return;
-        }
-        if (isPassword() || isPin()) {
-            if (size() < LockPatternUtils.MIN_LOCK_PASSWORD_SIZE) {
-                throw new IllegalArgumentException("password must not be null and at least "
-                        + "of length " + LockPatternUtils.MIN_LOCK_PASSWORD_SIZE);
-            }
-            return;
+    public void validateBasicRequirements() {
+        switch (getType()) {
+            case CREDENTIAL_TYPE_PATTERN:
+                if (size() < LockPatternUtils.MIN_LOCK_PATTERN_SIZE) {
+                    throw new IllegalArgumentException("pattern must be at least "
+                            + LockPatternUtils.MIN_LOCK_PATTERN_SIZE + " dots long.");
+                }
+                break;
+            case CREDENTIAL_TYPE_PIN:
+                if (size() < LockPatternUtils.MIN_LOCK_PASSWORD_SIZE) {
+                    throw new IllegalArgumentException("PIN must be at least "
+                            + LockPatternUtils.MIN_LOCK_PASSWORD_SIZE + " digits long.");
+                }
+                break;
+            case CREDENTIAL_TYPE_PASSWORD:
+                if (mHasInvalidChars) {
+                    throw new IllegalArgumentException("password contains invalid characters");
+                }
+                if (size() < LockPatternUtils.MIN_LOCK_PASSWORD_SIZE) {
+                    throw new IllegalArgumentException("password must be at least "
+                            + LockPatternUtils.MIN_LOCK_PASSWORD_SIZE + " characters long.");
+                }
+                break;
         }
     }
 

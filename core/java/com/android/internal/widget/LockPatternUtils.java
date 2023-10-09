@@ -96,7 +96,7 @@ public class LockPatternUtils {
     public static final int MIN_LOCK_PATTERN_SIZE = 4;
 
     /**
-     * The minimum size of a valid password.
+     * The minimum size of a valid password or PIN.
      */
     public static final int MIN_LOCK_PASSWORD_SIZE = 4;
 
@@ -771,7 +771,6 @@ public class LockPatternUtils {
      * and return false if the given credential is wrong.
      * @throws RuntimeException if password change encountered an unrecoverable error.
      * @throws UnsupportedOperationException secure lockscreen is not supported on this device.
-     * @throws IllegalArgumentException if new credential is too short.
      */
     public boolean setLockCredential(@NonNull LockscreenCredential newCredential,
             @NonNull LockscreenCredential savedCredential, int userHandle) {
@@ -779,7 +778,6 @@ public class LockPatternUtils {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
         }
-        newCredential.checkLength();
 
         try {
             if (!getLockSettings().setLockCredential(newCredential, savedCredential, userHandle)) {
@@ -1543,7 +1541,6 @@ public class LockPatternUtils {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
         }
-        credential.checkLength();
         LockSettingsInternal localService = getLockSettingsInternal();
 
         return localService.setLockCredentialWithToken(credential, tokenHandle, token, userHandle);
