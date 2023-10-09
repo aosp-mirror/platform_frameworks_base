@@ -24,6 +24,11 @@ aidl_interface {
     backend: {
         java: {
             sdk_version: "module_current",
+            apex_available: [
+                "//apex_available:platform",
+                "com.android.nfcservices",
+            ],
+
         },
         rust: {
             enabled: true,
