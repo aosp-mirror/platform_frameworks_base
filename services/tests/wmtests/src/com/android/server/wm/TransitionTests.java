@@ -48,6 +48,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -60,6 +61,7 @@ import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -84,6 +86,7 @@ import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskOrganizer;
 import android.window.ITransitionPlayer;
 import android.window.RemoteTransition;
+import android.window.SystemPerformanceHinter;
 import android.window.TaskFragmentOrganizer;
 import android.window.TransitionInfo;
 
@@ -2431,6 +2434,45 @@ public class TransitionTests extends WindowTestsBase {
         transitC.setAllReady();
         mSyncEngine.tryFinishForTest(transitC.getSyncId());
         assertTrue((player.mLastReady.getFlags() & FLAG_SYNC) == 0);
+    }
+
+    @Test
+    public void testTransitionsTriggerPerformanceHints() {
+        assumeTrue(explicitRefreshRateHints());
+        SystemPerformanceHinter systemPerformanceHinter = mock(SystemPerformanceHinter.class);
+        final TransitionController controller = new TestTransitionController(mAtm);
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+
+        mSyncEngine = createTestBLASTSyncEngine();
+        controller.setSyncEngine(mSyncEngine);
+        controller.setSystemPerformanceHinter(systemPerformanceHinter);
+        SystemPerformanceHinter.HighPerfSession session = mock(
+                SystemPerformanceHinter.HighPerfSession.class);
+        doReturn(session).when(systemPerformanceHinter).startSession(anyInt(), anyInt(),
+                anyString());
+
+        final Transition transitA = createTestTransition(TRANSIT_OPEN, controller);
+        final Task task = createTask(mDisplayContent,
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
+        final ActivityRecord act = createActivityRecord(task);
+        act.setVisibleRequested(true);
+        act.setVisible(true);
+
+        controller.startCollectOrQueue(transitA, (deferred) -> {
+        });
+        transitA.collect(act);
+
+        verify(systemPerformanceHinter).startSession(
+                eq(SystemPerformanceHinter.HINT_SF), anyInt(), eq("Transition collected"));
+
+        transitA.start();
+        transitA.setAllReady();
+
+        // Aborting here doesn't abort the transition, it aborts the sync allowing the transition to
+        // finish successfully.
+        mSyncEngine.abort(transitA.getSyncId());
+        controller.finishTransition(transitA);
+        verify(session).close();
     }
 
     private static void makeTaskOrganized(Task... tasks) {

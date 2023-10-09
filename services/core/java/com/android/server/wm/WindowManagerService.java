@@ -304,6 +304,7 @@ import android.window.ClientWindowFrames;
 import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ScreenCapture;
+import android.window.SystemPerformanceHinter;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 import android.window.WindowContextInfo;
@@ -1038,6 +1039,8 @@ public class WindowManagerService extends IWindowManager.Stub
         sThreadPriorityBooster.reset();
     }
 
+    SystemPerformanceHinter mSystemPerformanceHinter;
+
     void openSurfaceTransaction() {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "openSurfaceTransaction");
@@ -1332,6 +1335,13 @@ public class WindowManagerService extends IWindowManager.Stub
         mBlurController = new BlurController(mContext, mPowerManager);
         mTaskFpsCallbackController = new TaskFpsCallbackController(mContext);
         mAccessibilityController = new AccessibilityController(this);
+        mSystemPerformanceHinter = new SystemPerformanceHinter(mContext, displayId -> {
+            synchronized (mGlobalLock) {
+                DisplayContent dc = mRoot.getDisplayContent(displayId);
+                return (dc == null) ? null : dc.getSurfaceControl();
+            }
+
+        }, mTransactionFactory);
     }
 
     DisplayAreaPolicy.Provider getDisplayAreaPolicyProvider() {
