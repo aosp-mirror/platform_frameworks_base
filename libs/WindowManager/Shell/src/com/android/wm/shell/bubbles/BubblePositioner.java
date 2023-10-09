@@ -54,10 +54,6 @@ public class BubblePositioner {
     public static final float FLYOUT_MAX_WIDTH_PERCENT_LARGE_SCREEN = 0.3f;
     /** The max percent of screen width to use for the flyout on phone. */
     public static final float FLYOUT_MAX_WIDTH_PERCENT = 0.6f;
-    /** The percent of screen width for the expanded view on a large screen. **/
-    private static final float EXPANDED_VIEW_LARGE_SCREEN_LANDSCAPE_WIDTH_PERCENT = 0.48f;
-    /** The percent of screen width for the expanded view on a large screen. **/
-    private static final float EXPANDED_VIEW_LARGE_SCREEN_PORTRAIT_WIDTH_PERCENT = 0.70f;
     /** The percent of screen width for the expanded view on a small tablet. **/
     private static final float EXPANDED_VIEW_SMALL_TABLET_WIDTH_PERCENT = 0.72f;
     /** The percent of screen width for the expanded view when shown in the bubble bar. **/
@@ -95,6 +91,7 @@ public class BubblePositioner {
     private int mPointerWidth;
     private int mPointerHeight;
     private int mPointerOverlap;
+    private int mManageButtonHeightIncludingMargins;
     private int mManageButtonHeight;
     private int mOverflowHeight;
     private int mMinimumFlyoutWidthLargeScreen;
@@ -176,21 +173,20 @@ public class BubblePositioner {
             mExpandedViewLargeScreenWidth = (int) (bounds.width()
                     * EXPANDED_VIEW_SMALL_TABLET_WIDTH_PERCENT);
         } else {
-            mExpandedViewLargeScreenWidth = isLandscape()
-                    ? (int) (bounds.width() * EXPANDED_VIEW_LARGE_SCREEN_LANDSCAPE_WIDTH_PERCENT)
-                    : (int) (bounds.width() * EXPANDED_VIEW_LARGE_SCREEN_PORTRAIT_WIDTH_PERCENT);
+            mExpandedViewLargeScreenWidth =
+                    res.getDimensionPixelSize(R.dimen.bubble_expanded_view_largescreen_width);
         }
         if (mIsLargeScreen) {
-            if (isLandscape() && !mIsSmallTablet) {
+            if (mIsSmallTablet) {
+                final int centeredInset = (bounds.width() - mExpandedViewLargeScreenWidth) / 2;
+                mExpandedViewLargeScreenInsetClosestEdge = centeredInset;
+                mExpandedViewLargeScreenInsetFurthestEdge = centeredInset;
+            } else {
                 mExpandedViewLargeScreenInsetClosestEdge = res.getDimensionPixelSize(
                         R.dimen.bubble_expanded_view_largescreen_landscape_padding);
                 mExpandedViewLargeScreenInsetFurthestEdge = bounds.width()
                         - mExpandedViewLargeScreenInsetClosestEdge
                         - mExpandedViewLargeScreenWidth;
-            } else {
-                final int centeredInset = (bounds.width() - mExpandedViewLargeScreenWidth) / 2;
-                mExpandedViewLargeScreenInsetClosestEdge = centeredInset;
-                mExpandedViewLargeScreenInsetFurthestEdge = centeredInset;
             }
         } else {
             mExpandedViewLargeScreenInsetClosestEdge = mExpandedViewPadding;
@@ -202,7 +198,9 @@ public class BubblePositioner {
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
         mPointerOverlap = res.getDimensionPixelSize(R.dimen.bubble_pointer_overlap);
-        mManageButtonHeight = res.getDimensionPixelSize(R.dimen.bubble_manage_button_total_height);
+        mManageButtonHeightIncludingMargins =
+                res.getDimensionPixelSize(R.dimen.bubble_manage_button_total_height);
+        mManageButtonHeight = res.getDimensionPixelSize(R.dimen.bubble_manage_button_height);
         mExpandedViewMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
         mOverflowHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height);
         mMinimumFlyoutWidthLargeScreen = res.getDimensionPixelSize(
@@ -420,7 +418,7 @@ public class BubblePositioner {
         int pointerSize = showBubblesVertically()
                 ? mPointerWidth
                 : (mPointerHeight + mPointerMargin);
-        int bottomPadding = isOverflow ? mExpandedViewPadding : mManageButtonHeight;
+        int bottomPadding = isOverflow ? mExpandedViewPadding : mManageButtonHeightIncludingMargins;
         return getAvailableRect().height()
                 - expandedContainerY
                 - paddingTop
@@ -438,6 +436,15 @@ public class BubblePositioner {
             // overflow in landscape on phone is max
             return MAX_HEIGHT;
         }
+
+        if (mIsLargeScreen && !mIsSmallTablet && !isOverflow) {
+            // the expanded view height on large tablets is calculated based on the shortest screen
+            // size and is the same in both portrait and landscape
+            int maxVerticalInset = Math.max(mInsets.top, mInsets.bottom);
+            int shortestScreenSide = Math.min(mScreenRect.height(), mScreenRect.width());
+            return shortestScreenSide - 2 * maxVerticalInset - mManageButtonHeight;
+        }
+
         float desiredHeight = isOverflow
                 ? mOverflowHeight
                 : ((Bubble) bubble).getDesiredHeight(mContext);
@@ -466,7 +473,8 @@ public class BubblePositioner {
             return topAlignment;
         }
         // If we're here, we're showing vertically & developer has made height less than maximum.
-        int manageButtonHeight = isOverflow ? mExpandedViewPadding : mManageButtonHeight;
+        int manageButtonHeight =
+                isOverflow ? mExpandedViewPadding : mManageButtonHeightIncludingMargins;
         float pointerPosition = getPointerPosition(bubblePosition);
         float bottomIfCentered = pointerPosition + (expandedViewHeight / 2) + manageButtonHeight;
         float topIfCentered = pointerPosition - (expandedViewHeight / 2);
