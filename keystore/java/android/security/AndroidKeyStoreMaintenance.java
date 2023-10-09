@@ -28,8 +28,8 @@ import android.system.keystore2.ResponseCode;
 import android.util.Log;
 
 /**
- * @hide This is the client side for IKeystoreUserManager AIDL.
- * It shall only be used by the LockSettingsService.
+ * @hide This is the client side for IKeystoreMaintenance AIDL.
+ * It is used mainly by LockSettingsService.
  */
 public class AndroidKeyStoreMaintenance {
     private static final String TAG = "AndroidKeyStoreMaintenance";
@@ -66,7 +66,7 @@ public class AndroidKeyStoreMaintenance {
     }
 
     /**
-     * Informs Keystore 2.0 about removing a usergit mer
+     * Informs Keystore 2.0 about removing a user
      *
      * @param userId - Android user id of the user being removed
      * @return 0 if successful or a {@code ResponseCode}
@@ -91,7 +91,7 @@ public class AndroidKeyStoreMaintenance {
      *
      * @param userId   - Android user id of the user
      * @param password - a secret derived from the synthetic password provided by the
-     *                 LockSettingService
+     *                 LockSettingsService
      * @return 0 if successful or a {@code ResponseCode}
      * @hide
      */
@@ -110,7 +110,7 @@ public class AndroidKeyStoreMaintenance {
     }
 
     /**
-     * Informs Keystore 2.0 that an app was uninstalled and the corresponding namspace is to
+     * Informs Keystore 2.0 that an app was uninstalled and the corresponding namespace is to
      * be cleared.
      */
     public static int clearNamespace(@Domain int domain, long namespace) {
@@ -172,10 +172,10 @@ public class AndroidKeyStoreMaintenance {
      *                    namespace.
      *
      * @return * 0 on success
-     *         * KEY_NOT_FOUND if the source did not exists.
+     *         * KEY_NOT_FOUND if the source did not exist.
      *         * PERMISSION_DENIED if any of the required permissions was missing.
      *         * INVALID_ARGUMENT if the destination was occupied or any domain value other than
-     *                   the allowed once were specified.
+     *                   the allowed ones was specified.
      *         * SYSTEM_ERROR if an unexpected error occurred.
      */
     public static int migrateKeyNamespace(KeyDescriptor source, KeyDescriptor destination) {
