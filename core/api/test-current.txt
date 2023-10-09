@@ -2612,17 +2612,17 @@ package android.os.vibrator {
 
 package android.os.vibrator.persistence {
 
-  public class ParsedVibration {
+  @FlaggedApi("android.os.vibrator.enable_vibration_serialization_apis") public class ParsedVibration {
     method @NonNull public java.util.List<android.os.VibrationEffect> getVibrationEffects();
     method @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
   }
 
-  public final class VibrationXmlParser {
+  @FlaggedApi("android.os.vibrator.enable_vibration_serialization_apis") public final class VibrationXmlParser {
     method @Nullable public static android.os.vibrator.persistence.ParsedVibration parseDocument(@NonNull java.io.Reader) throws java.io.IOException;
     method @Nullable public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.Reader) throws java.io.IOException;
   }
 
-  public final class VibrationXmlSerializer {
+  @FlaggedApi("android.os.vibrator.enable_vibration_serialization_apis") public final class VibrationXmlSerializer {
     method public static void serialize(@NonNull android.os.VibrationEffect, @NonNull java.io.Writer) throws java.io.IOException, android.os.vibrator.persistence.VibrationXmlSerializer.SerializationFailedException;
   }
 
