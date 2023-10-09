@@ -105,16 +105,21 @@ public class HdrClamper {
     public void resetHdrConfig(HdrBrightnessData data, int width, int height,
             float minimumHdrPercentOfScreen, IBinder displayToken) {
         mHdrBrightnessData = data;
-        mHdrListener.mHdrMinPixels = (float) (width * height) * minimumHdrPercentOfScreen;
+        mHdrListener.mHdrMinPixels = minimumHdrPercentOfScreen <= 0 ? -1
+                : (float) (width * height) * minimumHdrPercentOfScreen;
         if (displayToken != mRegisteredDisplayToken) { // token changed, resubscribe
             if (mRegisteredDisplayToken != null) { // previous token not null, unsubscribe
                 mHdrListener.unregister(mRegisteredDisplayToken);
                 mHdrVisible = false;
+                mRegisteredDisplayToken = null;
             }
-            if (displayToken != null) { // new token not null, subscribe
+            // new token not null and hdr min % of the screen is set, subscribe.
+            // e.g. for virtual display, HBM data will be missing and HdrListener
+            // should not be registered
+            if (displayToken != null && mHdrListener.mHdrMinPixels > 0) {
                 mHdrListener.register(displayToken);
+                mRegisteredDisplayToken = displayToken;
             }
-            mRegisteredDisplayToken = displayToken;
         }
         recalculateBrightnessCap(data, mAmbientLux, mHdrVisible);
     }
