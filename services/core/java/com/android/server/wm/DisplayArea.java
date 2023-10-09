@@ -44,6 +44,7 @@ import android.util.proto.ProtoOutputStream;
 import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -77,6 +78,12 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     private final DisplayAreaOrganizerController mOrganizerController;
     IDisplayAreaOrganizer mOrganizer;
     private final Configuration mTmpConfiguration = new Configuration();
+
+    /**
+     * Prevent duplicate calls to onDisplayAreaAppeared, or early call of onDisplayAreaInfoChanged.
+     */
+    @VisibleForTesting
+    boolean mDisplayAreaAppearedSent;
 
     /**
      * Whether this {@link DisplayArea} should ignore fixed-orientation request. If {@code true}, it
@@ -582,18 +589,31 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         sendDisplayAreaVanished(lastOrganizer);
         if (!skipDisplayAreaAppeared) {
             sendDisplayAreaAppeared();
+        } else if (organizer != null) {
+            // Set as sent since the DisplayAreaAppearedInfo will be sent back when registered.
+            mDisplayAreaAppearedSent = true;
         }
     }
 
+    @VisibleForTesting
     void sendDisplayAreaAppeared() {
-        if (mOrganizer == null) return;
+        if (mOrganizer == null || mDisplayAreaAppearedSent) return;
         mOrganizerController.onDisplayAreaAppeared(mOrganizer, this);
+        mDisplayAreaAppearedSent = true;
     }
 
+    @VisibleForTesting
+    void sendDisplayAreaInfoChanged() {
+        if (mOrganizer == null || !mDisplayAreaAppearedSent) return;
+        mOrganizerController.onDisplayAreaInfoChanged(mOrganizer, this);
+    }
+
+    @VisibleForTesting
     void sendDisplayAreaVanished(IDisplayAreaOrganizer organizer) {
-        if (organizer == null) return;
+        if (organizer == null || !mDisplayAreaAppearedSent) return;
         migrateToNewSurfaceControl(getSyncTransaction());
         mOrganizerController.onDisplayAreaVanished(organizer, this);
+        mDisplayAreaAppearedSent = false;
     }
 
     @Override
@@ -603,7 +623,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         super.onConfigurationChanged(newParentConfig);
 
         if (mOrganizer != null && getConfiguration().diff(mTmpConfiguration) != 0) {
-            mOrganizerController.onDisplayAreaInfoChanged(mOrganizer, this);
+            sendDisplayAreaInfoChanged();
         }
     }
 

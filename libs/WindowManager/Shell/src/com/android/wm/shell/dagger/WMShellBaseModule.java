@@ -110,12 +110,12 @@ import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
-import java.util.Optional;
-
 import dagger.BindsOptionalOf;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Optional;
 
 /**
  * Provides basic dependencies from {@link com.android.wm.shell}, these dependencies are only
@@ -658,15 +658,15 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static RootTaskDisplayAreaOrganizer provideRootTaskDisplayAreaOrganizer(
-            @ShellMainThread ShellExecutor mainExecutor, Context context) {
-        return new RootTaskDisplayAreaOrganizer(mainExecutor, context);
+            @ShellMainThread ShellExecutor mainExecutor, Context context, ShellInit shellInit) {
+        return new RootTaskDisplayAreaOrganizer(mainExecutor, context, shellInit);
     }
 
     @WMSingleton
     @Provides
     static RootDisplayAreaOrganizer provideRootDisplayAreaOrganizer(
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new RootDisplayAreaOrganizer(mainExecutor);
+            @ShellMainThread ShellExecutor mainExecutor, ShellInit shellInit) {
+        return new RootDisplayAreaOrganizer(mainExecutor, shellInit);
     }
 
     @WMSingleton

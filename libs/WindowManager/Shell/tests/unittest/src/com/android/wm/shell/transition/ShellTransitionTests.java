@@ -50,6 +50,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
@@ -92,6 +93,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
@@ -145,7 +147,9 @@ public class ShellTransitionTests extends ShellTestCase {
         final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
                 mOrganizer, mTransactionPool, createTestDisplayController(), mMainExecutor,
                 mMainHandler, mAnimExecutor);
-        verify(shellInit, times(1)).addInitCallback(any(), eq(t));
+        // One from Transitions, one from RootTaskDisplayAreaOrganizer
+        verify(shellInit).addInitCallback(any(), eq(t));
+        verify(shellInit).addInitCallback(any(), isA(RootTaskDisplayAreaOrganizer.class));
     }
 
     @Test

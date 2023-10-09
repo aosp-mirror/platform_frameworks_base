@@ -18,6 +18,7 @@ package com.android.wm.shell;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 
+import android.annotation.SuppressLint;
 import android.annotation.UiContext;
 import android.app.ResourcesManager;
 import android.content.Context;
@@ -38,6 +39,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -69,10 +71,17 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
 
     private final Context mContext;
 
-    public RootTaskDisplayAreaOrganizer(Executor executor, Context context) {
+    public RootTaskDisplayAreaOrganizer(@NonNull Executor executor, @NonNull Context context,
+            @NonNull ShellInit shellInit) {
         super(executor);
         mContext = context;
-        List<DisplayAreaAppearedInfo> infos = registerOrganizer(FEATURE_DEFAULT_TASK_CONTAINER);
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    @SuppressLint("MissingPermission") // Only called by SysUI.
+    private void onInit() {
+        final List<DisplayAreaAppearedInfo> infos =
+                registerOrganizer(FEATURE_DEFAULT_TASK_CONTAINER);
         for (int i = infos.size() - 1; i >= 0; --i) {
             onDisplayAreaAppeared(infos.get(i).getDisplayAreaInfo(), infos.get(i).getLeash());
         }

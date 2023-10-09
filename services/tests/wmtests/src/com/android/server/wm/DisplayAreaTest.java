@@ -46,10 +46,13 @@ import static com.android.server.wm.testing.Assert.assertThrows;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -583,6 +586,7 @@ public class DisplayAreaTest extends WindowTestsBase {
         final IDisplayAreaOrganizer mockDisplayAreaOrganizer = mock(IDisplayAreaOrganizer.class);
         doReturn(mock(IBinder.class)).when(mockDisplayAreaOrganizer).asBinder();
         displayArea.mOrganizer = mockDisplayAreaOrganizer;
+        displayArea.mDisplayAreaAppearedSent = true;
         spyOn(mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController);
         mDisplayContent.addChild(displayArea, 0);
 
@@ -685,6 +689,56 @@ public class DisplayAreaTest extends WindowTestsBase {
 
         assertEquals(parent.getChildAt(1), alwaysOnTopChild);
         assertEquals(parent.getChildAt(0), child);
+    }
+
+    @Test
+    public void testSetOrganizer() {
+        final TaskDisplayArea displayArea = createTaskDisplayArea(
+                mDisplayContent, mWm, "NewArea", FEATURE_VENDOR_FIRST);
+
+        assertNull(displayArea.mOrganizer);
+        assertFalse(displayArea.mDisplayAreaAppearedSent);
+
+        final IDisplayAreaOrganizer organizer = mock(IDisplayAreaOrganizer.class);
+        final DisplayAreaOrganizerController controller =
+                mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController;
+        spyOn(controller);
+        doNothing().when(controller).onDisplayAreaVanished(any(), any());
+
+        displayArea.setOrganizer(organizer);
+
+        assertEquals(organizer, displayArea.mOrganizer);
+        assertTrue(displayArea.mDisplayAreaAppearedSent);
+        verify(controller).onDisplayAreaAppeared(organizer, displayArea);
+
+        // No duplicated appeared sent.
+        clearInvocations(controller);
+        displayArea.sendDisplayAreaAppeared();
+
+        verify(controller, never()).onDisplayAreaAppeared(any(), any());
+
+        // Sent info changed after appeared.
+        displayArea.sendDisplayAreaInfoChanged();
+
+        verify(controller).onDisplayAreaInfoChanged(organizer, displayArea);
+
+        // Sent info vanished after appeared.
+        displayArea.setOrganizer(null);
+
+        verify(controller).onDisplayAreaVanished(organizer, displayArea);
+        assertNull(displayArea.mOrganizer);
+        assertFalse(displayArea.mDisplayAreaAppearedSent);
+
+        // No callback until appeared sent.
+        clearInvocations(controller);
+
+        displayArea.sendDisplayAreaAppeared();
+        displayArea.sendDisplayAreaInfoChanged();
+        displayArea.sendDisplayAreaVanished(organizer);
+
+        verify(controller, never()).onDisplayAreaAppeared(any(), any());
+        verify(controller, never()).onDisplayAreaInfoChanged(any(), any());
+        verify(controller, never()).onDisplayAreaVanished(any(), any());
     }
 
     private static class TestDisplayArea<T extends WindowContainer> extends DisplayArea<T> {
