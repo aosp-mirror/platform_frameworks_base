@@ -63,6 +63,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.media.flags.Flags;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 
@@ -161,11 +162,13 @@ class MediaRouter2ServiceImpl {
         mPowerManager = mContext.getSystemService(PowerManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
-        IntentFilter screenOnOffIntentFilter = new IntentFilter();
-        screenOnOffIntentFilter.addAction(ACTION_SCREEN_ON);
-        screenOnOffIntentFilter.addAction(ACTION_SCREEN_OFF);
+        if (!Flags.disableScreenOffBroadcastReceiver()) {
+            IntentFilter screenOnOffIntentFilter = new IntentFilter();
+            screenOnOffIntentFilter.addAction(ACTION_SCREEN_ON);
+            screenOnOffIntentFilter.addAction(ACTION_SCREEN_OFF);
+            mContext.registerReceiver(mScreenOnOffReceiver, screenOnOffIntentFilter);
+        }
 
-        mContext.registerReceiver(mScreenOnOffReceiver, screenOnOffIntentFilter);
         mContext.getPackageManager().addOnPermissionsChangeListener(this::onPermissionsChanged);
 
         MediaFeatureFlagManager.getInstance()
@@ -2778,7 +2781,8 @@ class MediaRouter2ServiceImpl {
             List<ManagerRecord> managerRecords = getManagerRecords();
 
             boolean isManagerScanning = false;
-            if (service.mPowerManager.isInteractive()) {
+            if (Flags.disableScreenOffBroadcastReceiver()
+                    || service.mPowerManager.isInteractive()) {
                 isManagerScanning = managerRecords.stream().anyMatch(manager ->
                         manager.mIsScanning && service.mActivityManager
                                 .getPackageImportance(manager.mOwnerPackageName)
