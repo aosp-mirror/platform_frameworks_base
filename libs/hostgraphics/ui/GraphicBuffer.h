@@ -35,6 +35,9 @@ class GraphicBuffer : public ANativeObjectBase<ANativeWindowBuffer, GraphicBuffe
 public:
     GraphicBuffer(uint32_t w, uint32_t h):width(w),height(h) {
         data.resize(w*h);
+        reserved[0] = data.data();
+        width = w;
+        height = h;
     }
     uint32_t getWidth() const           { return static_cast<uint32_t>(width); }
     uint32_t getHeight() const          { return static_cast<uint32_t>(height); }
