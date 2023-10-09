@@ -30,9 +30,12 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.TestUiOffloadThread
+import com.android.systemui.UiOffloadThread
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationTemplateViewWrapper.ActionPendingIntentCancellationHandler
+import com.android.systemui.util.leak.ReferenceTestUtils.waitForCondition
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -60,6 +63,12 @@ class NotificationTemplateViewWrapperTest : SysuiTestCase() {
     fun setUp() {
         looper = TestableLooper.get(this)
         allowTestableLooperAsMainThread()
+        // Use main thread instead of UI offload thread to fix flakes.
+        mDependency.injectTestDependency(
+            UiOffloadThread::class.java,
+            TestUiOffloadThread(looper.looper)
+        )
+
         helper = NotificationTestHelper(mContext, mDependency, looper)
         row = helper.createRow()
         // Some code in the view iterates through parents so we need some extra containers around
@@ -88,12 +97,11 @@ class NotificationTemplateViewWrapperTest : SysuiTestCase() {
         val action2 = createActionWithPendingIntent()
         val action3 = createActionWithPendingIntent()
         wrapper.onContentUpdated(row)
-        waitForUiOffloadThread() // Wait for cancellation registration to execute.
 
         val pi3 = getPendingIntent(action3)
         pi3.cancel()
-        looper.processAllMessages() // Wait for listener callbacks to execute
 
+        waitForActionDisabled(action3)
         assertThat(action1.isEnabled).isTrue()
         assertThat(action2.isEnabled).isTrue()
         assertThat(action3.isEnabled).isFalse()
@@ -109,12 +117,12 @@ class NotificationTemplateViewWrapperTest : SysuiTestCase() {
         val wrapper = NotificationTemplateViewWrapper(mContext, view, row)
         val action = createActionWithPendingIntent()
         wrapper.onContentUpdated(row)
-        waitForUiOffloadThread() // Wait for cancellation registration to execute.
 
         // Cancel the intent and check action is now false.
         val pi = getPendingIntent(action)
         pi.cancel()
-        looper.processAllMessages() // Wait for listener callbacks to execute
+
+        waitForActionDisabled(action)
         assertThat(action.isEnabled).isFalse()
 
         // Create a NEW action and make sure that one will also be cancelled with same PI.
@@ -134,12 +142,13 @@ class NotificationTemplateViewWrapperTest : SysuiTestCase() {
         val action2 = createActionWithPendingIntent()
         val action3 = createActionWithPendingIntent(getPendingIntent(action2))
         wrapper.onContentUpdated(row)
-        waitForUiOffloadThread() // Wait for cancellation registration to execute.
+        looper.processAllMessages()
 
         val pi = getPendingIntent(action2)
         pi.cancel()
-        looper.processAllMessages() // Wait for listener callbacks to execute
 
+        waitForActionDisabled(action2)
+        waitForActionDisabled(action3)
         assertThat(action1.isEnabled).isTrue()
         assertThat(action2.isEnabled).isFalse()
         assertThat(action3.isEnabled).isFalse()
@@ -152,10 +161,12 @@ class NotificationTemplateViewWrapperTest : SysuiTestCase() {
         val action = createActionWithPendingIntent()
         wrapper.onContentUpdated(row)
         getPendingIntent(action).cancel()
-        ViewUtils.attachView(root)
-        waitForUiOffloadThread()
         looper.processAllMessages()
 
+        ViewUtils.attachView(root)
+        looper.processAllMessages()
+
+        waitForActionDisabled(action)
         assertThat(action.isEnabled).isFalse()
     }
 
@@ -173,7 +184,6 @@ class NotificationTemplateViewWrapperTest : SysuiTestCase() {
         val wrapper = NotificationTemplateViewWrapper(mContext, view, row)
         wrapper.onContentUpdated(row)
         ViewUtils.detachView(root)
-        waitForUiOffloadThread()
         looper.processAllMessages()
 
         val captor = ArgumentCaptor.forClass(CancelListener::class.java)
@@ -194,7 +204,6 @@ class NotificationTemplateViewWrapperTest : SysuiTestCase() {
         val action = createActionWithPendingIntent(spy)
         val wrapper = NotificationTemplateViewWrapper(mContext, view, row)
         wrapper.onContentUpdated(row)
-        waitForUiOffloadThread()
         looper.processAllMessages()
 
         // Grab set attach listener
@@ -213,7 +222,6 @@ class NotificationTemplateViewWrapperTest : SysuiTestCase() {
             )
         action.setTagInternal(R.id.pending_intent_tag, newPi)
         wrapper.onContentUpdated(row)
-        waitForUiOffloadThread()
         looper.processAllMessages()
 
         // Listeners for original pending intent need to be cleaned up now.
@@ -250,5 +258,12 @@ class NotificationTemplateViewWrapperTest : SysuiTestCase() {
         val pendingIntent = action.getTag(R.id.pending_intent_tag) as PendingIntent
         assertThat(pendingIntent).isNotNull()
         return pendingIntent
+    }
+
+    private fun waitForActionDisabled(action: View) {
+        waitForCondition {
+            looper.processAllMessages()
+            !action.isEnabled
+        }
     }
 }
