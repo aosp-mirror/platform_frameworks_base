@@ -1335,13 +1335,13 @@ public final class JobServiceContext implements ServiceConnection {
     private void handleOpTimeoutLocked() {
         switch (mVerb) {
             case VERB_BINDING:
-                onSlowAppResponseLocked(/* reschedule */ false, /* updateStopReasons */ true,
+                // The system may have been too busy. Don't drop the job or trigger an ANR.
+                onSlowAppResponseLocked(/* reschedule */ true, /* updateStopReasons */ true,
                         /* texCounterMetricId */
                         "job_scheduler.value_cntr_w_uid_slow_app_response_binding",
                         /* debugReason */ "timed out while binding",
                         /* anrMessage */ "Timed out while trying to bind",
-                        CompatChanges.isChangeEnabled(ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES,
-                            mRunningJob.getUid()));
+                        /* triggerAnr */ false);
                 break;
             case VERB_STARTING:
                 // Client unresponsive - wedged or failed to respond in time. We don't really
