@@ -560,6 +560,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
+    public void reportDecorViewGestureInterceptionChanged(IWindow window, boolean intercepted) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mService.reportDecorViewGestureChanged(this, window, intercepted);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void reportKeepClearAreasChanged(IWindow window, List<Rect> restricted,
             List<Rect> unrestricted) {
         if (!mSetsUnrestrictedKeepClearAreas && !unrestricted.isEmpty()) {

@@ -48,6 +48,7 @@ import android.view.IScrollCaptureResponseListener;
 import android.view.RemoteAnimationAdapter;
 import android.view.IRotationWatcher;
 import android.view.ISystemGestureExclusionListener;
+import android.view.IDecorViewGestureListener;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindow;
 import android.view.IWindowSession;
@@ -1062,4 +1063,18 @@ interface IWindowManager
      @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
              + ".permission.ACCESS_SURFACE_FLINGER)")
     boolean replaceContentOnDisplay(int displayId, in SurfaceControl sc);
+
+    /**
+     * Registers a DecorView gesture listener for a given display.
+     */
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MONITOR_INPUT)")
+    void registerDecorViewGestureListener(IDecorViewGestureListener listener, int displayId);
+
+    /**
+     * Unregisters a DecorView gesture listener for a given display.
+     */
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MONITOR_INPUT)")
+    void unregisterDecorViewGestureListener(IDecorViewGestureListener listener, int displayId);
 }

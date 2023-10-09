@@ -584,9 +584,13 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void reportKeepClearAreasChanged(android.view.IWindow window, List<Rect> restrictedRects,
-            List<Rect> unrestrictedRects) {
-    }
+    public void reportDecorViewGestureInterceptionChanged(IWindow window, boolean intercepted) {}
+
+    @Override
+    public void reportKeepClearAreasChanged(
+            android.view.IWindow window,
+            List<Rect> restrictedRects,
+            List<Rect> unrestrictedRects) {}
 
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface, IWindow window,
