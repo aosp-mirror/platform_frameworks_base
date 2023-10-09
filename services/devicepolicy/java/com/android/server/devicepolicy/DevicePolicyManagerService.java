@@ -5130,8 +5130,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             boolean deviceWideOnly) {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle)
-                && (isSystemUid(caller) || hasCallingOrSelfPermission(
-                permission.SET_INITIAL_LOCK)));
+                && (isSystemUid(caller)
+                    // Accept any permission that ILockSettings#setLockCredential() accepts.
+                    || hasCallingOrSelfPermission(permission.SET_INITIAL_LOCK)
+                    || hasCallingOrSelfPermission(permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS)
+                    || hasCallingOrSelfPermission(permission.ACCESS_KEYGUARD_SECURE_STORAGE)));
         return getPasswordMinimumMetricsUnchecked(userHandle, deviceWideOnly);
     }
 
