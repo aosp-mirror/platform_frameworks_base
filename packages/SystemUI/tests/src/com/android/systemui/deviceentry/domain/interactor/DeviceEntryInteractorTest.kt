@@ -218,14 +218,14 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     fun isBypassEnabled_enabledInRepository_true() =
         testScope.runTest {
             utils.deviceEntryRepository.setBypassEnabled(true)
-            assertThat(underTest.isBypassEnabled()).isTrue()
+            assertThat(underTest.isBypassEnabled.value).isTrue()
         }
 
     @Test
     fun isBypassEnabled_disabledInRepository_false() =
         testScope.runTest {
             utils.deviceEntryRepository.setBypassEnabled(false)
-            assertThat(underTest.isBypassEnabled()).isFalse()
+            assertThat(underTest.isBypassEnabled.value).isFalse()
         }
 
     private fun switchToScene(sceneKey: SceneKey) {

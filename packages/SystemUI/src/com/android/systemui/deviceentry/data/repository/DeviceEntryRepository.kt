@@ -2,7 +2,7 @@ package com.android.systemui.deviceentry.data.repository
 
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -51,7 +51,7 @@ interface DeviceEntryRepository {
      * When this is `false`, an automatically-triggered face unlock shouldn't automatically dismiss
      * the lockscreen.
      */
-    fun isBypassEnabled(): Boolean
+    val isBypassEnabled: StateFlow<Boolean>
 }
 
 /** Encapsulates application state for device entry. */
@@ -68,7 +68,7 @@ constructor(
 ) : DeviceEntryRepository {
 
     override val isUnlocked =
-        ConflatedCallbackFlow.conflatedCallbackFlow {
+        conflatedCallbackFlow {
                 val callback =
                     object : KeyguardStateController.Callback {
                         override fun onUnlockedChanged() {
@@ -112,7 +112,24 @@ constructor(
         }
     }
 
-    override fun isBypassEnabled() = keyguardBypassController.bypassEnabled
+    override val isBypassEnabled: StateFlow<Boolean> =
+        conflatedCallbackFlow {
+                val listener =
+                    object : KeyguardBypassController.OnBypassStateChangedListener {
+                        override fun onBypassStateChanged(isEnabled: Boolean) {
+                            trySend(isEnabled)
+                        }
+                    }
+                keyguardBypassController.registerOnBypassStateChangedListener(listener)
+                awaitClose {
+                    keyguardBypassController.unregisterOnBypassStateChangedListener(listener)
+                }
+            }
+            .stateIn(
+                applicationScope,
+                SharingStarted.Eagerly,
+                initialValue = keyguardBypassController.bypassEnabled,
+            )
 
     companion object {
         private const val TAG = "DeviceEntryRepositoryImpl"

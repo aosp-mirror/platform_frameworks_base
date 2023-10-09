@@ -42,6 +42,7 @@ import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICA
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -51,7 +52,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * Hooks up business logic that manipulates the state of the [SceneInteractor] for the system UI
@@ -142,7 +142,7 @@ constructor(
                                 // When the device becomes unlocked in Lockscreen, go to Gone if
                                 // bypass is enabled.
                                 renderedScenes.contains(SceneKey.Lockscreen) ->
-                                    if (deviceEntryInteractor.isBypassEnabled()) {
+                                    if (deviceEntryInteractor.isBypassEnabled.value) {
                                         SceneKey.Gone to
                                             "device unlocked in Lockscreen scene with bypass"
                                     } else {
@@ -179,36 +179,34 @@ constructor(
         }
 
         applicationScope.launch {
-            powerInteractor.isAsleep
-                .collect { isAsleep ->
-                    if (isAsleep) {
-                        switchToScene(
-                                targetSceneKey = SceneKey.Lockscreen,
-                                loggingReason = "device is starting to sleep",
-                        )
-                    } else {
-                        val authMethod = authenticationInteractor.getAuthenticationMethod()
-                        val isUnlocked = deviceEntryInteractor.isUnlocked.value
-                        when {
-                            authMethod == AuthenticationMethodModel.None -> {
-                                switchToScene(
-                                        targetSceneKey = SceneKey.Gone,
-                                        loggingReason =
-                                        "device is starting to wake up while auth method is" +
-                                                " none",
-                                )
-                            }
-                            authMethod.isSecure && isUnlocked -> {
-                                switchToScene(
-                                        targetSceneKey = SceneKey.Gone,
-                                        loggingReason =
-                                        "device is starting to wake up while unlocked with a" +
-                                                " secure auth method",
-                                )
-                            }
+            powerInteractor.isAsleep.collect { isAsleep ->
+                if (isAsleep) {
+                    switchToScene(
+                        targetSceneKey = SceneKey.Lockscreen,
+                        loggingReason = "device is starting to sleep",
+                    )
+                } else {
+                    val authMethod = authenticationInteractor.getAuthenticationMethod()
+                    val isUnlocked = deviceEntryInteractor.isUnlocked.value
+                    when {
+                        authMethod == AuthenticationMethodModel.None -> {
+                            switchToScene(
+                                targetSceneKey = SceneKey.Gone,
+                                loggingReason =
+                                    "device is starting to wake up while auth method is" + " none",
+                            )
+                        }
+                        authMethod.isSecure && isUnlocked -> {
+                            switchToScene(
+                                targetSceneKey = SceneKey.Gone,
+                                loggingReason =
+                                    "device is starting to wake up while unlocked with a" +
+                                        " secure auth method",
+                            )
                         }
                     }
                 }
+            }
         }
     }
 

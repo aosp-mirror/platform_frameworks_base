@@ -106,5 +106,5 @@ constructor(
      * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
      * lock screen.
      */
-    fun isBypassEnabled() = repository.isBypassEnabled()
+    val isBypassEnabled: StateFlow<Boolean> = repository.isBypassEnabled
 }
