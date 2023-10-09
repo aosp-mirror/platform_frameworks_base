@@ -238,7 +238,7 @@ public class TelephonyRegistryManager {
     }
 
     /**
-     * To check the SDK version for {@link #listenFromListener}.
+     * To check the SDK version for {@code #listenFromListener}.
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.P)

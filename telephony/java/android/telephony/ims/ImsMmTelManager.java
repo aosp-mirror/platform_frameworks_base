@@ -561,7 +561,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @param c The MmTel {@link CapabilityCallback} to be registered.
      * @see #unregisterMmTelCapabilityCallback(CapabilityCallback)
      * @throws ImsException if the subscription associated with this callback is valid, but
-     * the {@link ImsService} associated with the subscription is not available. This can happen if
+     * the {@code ImsService} associated with the subscription is not available. This can happen if
      * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
      * reason.
      */
