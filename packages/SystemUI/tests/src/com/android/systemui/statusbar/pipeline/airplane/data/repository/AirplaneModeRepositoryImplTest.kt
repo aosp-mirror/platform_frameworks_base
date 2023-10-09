@@ -18,12 +18,11 @@ package com.android.systemui.statusbar.pipeline.airplane.data.repository
 
 import android.os.Handler
 import android.os.Looper
-import android.os.UserHandle
 import android.provider.Settings.Global
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.FakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -48,15 +47,14 @@ class AirplaneModeRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var logger: TableLogBuffer
     private lateinit var bgHandler: Handler
     private lateinit var scope: CoroutineScope
-    private lateinit var settings: FakeSettings
+    private lateinit var settings: FakeGlobalSettings
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         bgHandler = Handler(Looper.getMainLooper())
         scope = CoroutineScope(IMMEDIATE)
-        settings = FakeSettings()
-        settings.userId = UserHandle.USER_ALL
+        settings = FakeGlobalSettings()
 
         underTest =
             AirplaneModeRepositoryImpl(

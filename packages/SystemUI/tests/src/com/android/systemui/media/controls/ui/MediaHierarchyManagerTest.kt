@@ -24,7 +24,6 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
@@ -32,6 +31,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController

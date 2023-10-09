@@ -25,7 +25,6 @@ import android.view.ContextThemeWrapper
 import androidx.test.filters.SmallTest
 import com.android.settingslib.Utils
 import com.android.settingslib.drawable.UserIconDrawable
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.shared.model.ContentDescription
@@ -35,6 +34,7 @@ import com.android.systemui.qs.FakeFgsManagerController
 import com.android.systemui.qs.QSSecurityFooterUtils
 import com.android.systemui.qs.footer.FooterActionsTestUtils
 import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig
+import com.android.systemui.res.R
 import com.android.systemui.security.data.model.SecurityModel
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.statusbar.policy.FakeSecurityController
@@ -44,7 +44,7 @@ import com.android.systemui.statusbar.policy.MockUserSwitcherControllerWrapper
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.FakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -128,7 +128,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
     fun userSwitcher() = runTest {
         val picture: Drawable = mock()
         val userInfoController = FakeUserInfoController(FakeInfo(picture = picture))
-        val settings = FakeSettings()
+        val settings = FakeGlobalSettings()
         val userId = 42
         val userTracker = FakeUserTracker(userId)
         val userSwitcherControllerWrapper =
@@ -167,14 +167,9 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         // for the current user will be fired to notify us of that change.
         isUserSwitcherEnabled = true
 
-        // Update the setting for a random user: nothing should change, given that at this point we
-        // weren't notified of the change yet.
-        utils.setUserSwitcherEnabled(settings, true, 3)
-        assertThat(currentUserSwitcher()).isNull()
-
         // Update the setting for the observed user: now we will be notified and the button should
         // be there.
-        utils.setUserSwitcherEnabled(settings, true, userId)
+        utils.setUserSwitcherEnabled(settings, true)
         val userSwitcher = currentUserSwitcher()
         assertThat(userSwitcher).isNotNull()
         assertThat(userSwitcher!!.icon)

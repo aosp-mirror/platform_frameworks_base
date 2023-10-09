@@ -83,7 +83,7 @@ import com.android.systemui.decor.RoundedCornerDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerResDelegateImpl;
 import com.android.systemui.decor.ScreenDecorCommand;
 import com.android.systemui.log.ScreenDecorationsLogger;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
@@ -163,7 +163,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     ScreenDecorHwcLayer mScreenDecorHwcLayer;
     private WindowManager mWindowManager;
     private int mRotation;
-    private SettingObserver mColorInversionSetting;
+    private UserSettingObserver mColorInversionSetting;
     @Nullable
     private DelayableExecutor mExecutor;
     private Handler mHandler;
@@ -684,7 +684,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
 
             // Watch color inversion and invert the overlay as needed.
             if (mColorInversionSetting == null) {
-                mColorInversionSetting = new SettingObserver(mSecureSettings, mHandler,
+                mColorInversionSetting = new UserSettingObserver(mSecureSettings, mHandler,
                         Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
                         mUserTracker.getUserId()) {
                     @Override
