@@ -71,6 +71,7 @@ import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -99,7 +100,7 @@ import java.util.stream.Stream;
  *
  * @hide
  */
-final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
+class KeyboardLayoutManager implements InputManager.InputDeviceListener {
 
     private static final String TAG = "KeyboardLayoutManager";
 
@@ -1295,7 +1296,8 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     }
 
     @SuppressLint("MissingPermission")
-    private List<ImeInfo> getImeInfoListForLayoutMapping() {
+    @VisibleForTesting
+    public List<ImeInfo> getImeInfoListForLayoutMapping() {
         List<ImeInfo> imeInfoList = new ArrayList<>();
         UserManager userManager = Objects.requireNonNull(
                 mContext.getSystemService(UserManager.class));
@@ -1402,7 +1404,8 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         }
     }
 
-    private static class ImeInfo {
+    @VisibleForTesting
+    public static class ImeInfo {
         @UserIdInt int mUserId;
         @NonNull InputMethodSubtypeHandle mImeSubtypeHandle;
         @Nullable InputMethodSubtype mImeSubtype;
