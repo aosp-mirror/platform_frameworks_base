@@ -34,6 +34,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.customization.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.DisplaySpecific
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.DOZING_MIGRATION_1
@@ -79,7 +80,7 @@ constructor(
     private val batteryController: BatteryController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val configurationController: ConfigurationController,
-    @Main private val resources: Resources,
+    @DisplaySpecific private val resources: Resources,
     private val context: Context,
     @Main private val mainExecutor: DelayableExecutor,
     @Background private val bgExecutor: Executor,
