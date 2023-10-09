@@ -220,6 +220,7 @@ genrule {
     name: "aapt2-protos",
     tools: [":soong_zip"],
     srcs: [
+        "ApkInfo.proto",
         "Configuration.proto",
         "ResourcesInternal.proto",
         "ResourceMetadata.proto",
