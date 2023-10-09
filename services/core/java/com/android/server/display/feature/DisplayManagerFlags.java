@@ -138,19 +138,20 @@ public class DisplayManagerFlags {
         }
 
         private boolean flagOrSystemProperty(Supplier<Boolean> flagFunction, String flagName) {
-            // TODO(b/299462337) Remove when the infrastructure is ready.
-            if ((Build.IS_ENG || Build.IS_USERDEBUG)
-                    && SystemProperties.getBoolean("persist.sys." + flagName, false)) {
-                return true;
-            }
+            boolean flagValue = false;
             try {
-                return flagFunction.get();
+                flagValue = flagFunction.get();
             } catch (Throwable ex) {
                 if (DEBUG) {
                     Slog.i(TAG, "Flags not ready yet. Return false for " + flagName, ex);
                 }
-                return false;
             }
+            // TODO(b/299462337) Remove when the infrastructure is ready.
+            if (Build.IS_ENG || Build.IS_USERDEBUG) {
+                return SystemProperties.getBoolean("persist.sys." + flagName + "-override",
+                        flagValue);
+            }
+            return flagValue;
         }
     }
 }
