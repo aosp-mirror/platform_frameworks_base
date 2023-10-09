@@ -60,6 +60,7 @@ import com.android.internal.widget.IWeakEscrowTokenRemovedListener;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.PasswordValidationError;
 import com.android.internal.widget.VerifyCredentialResponse;
 
 import java.nio.charset.Charset;
@@ -916,17 +917,14 @@ public class KeyguardManager {
         if (!checkInitialLockMethodUsage()) {
             return false;
         }
+        Objects.requireNonNull(password, "Password cannot be null.");
         complexity = PasswordMetrics.sanitizeComplexityLevel(complexity);
-        // TODO: b/131755827 add devicePolicyManager support for Auto
-        DevicePolicyManager devicePolicyManager =
-                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
         PasswordMetrics adminMetrics =
-                devicePolicyManager.getPasswordMinimumMetrics(mContext.getUserId());
-        // Check if the password fits the mold of a pin or pattern.
-        boolean isPinOrPattern = lockType != PASSWORD;
-
-        return PasswordMetrics.validatePassword(
-                adminMetrics, complexity, isPinOrPattern, password).size() == 0;
+                mLockPatternUtils.getRequestedPasswordMetrics(mContext.getUserId());
+        try (LockscreenCredential credential = createLockscreenCredential(lockType, password)) {
+            return PasswordMetrics.validateCredential(adminMetrics, complexity,
+                    credential).size() == 0;
+        }
     }
 
     /**
@@ -945,11 +943,8 @@ public class KeyguardManager {
             return -1;
         }
         complexity = PasswordMetrics.sanitizeComplexityLevel(complexity);
-        // TODO: b/131755827 add devicePolicyManager support for Auto
-        DevicePolicyManager devicePolicyManager =
-                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
         PasswordMetrics adminMetrics =
-                devicePolicyManager.getPasswordMinimumMetrics(mContext.getUserId());
+                mLockPatternUtils.getRequestedPasswordMetrics(mContext.getUserId());
         PasswordMetrics minMetrics =
                 PasswordMetrics.applyComplexity(adminMetrics, isPin, complexity);
         return minMetrics.length;
@@ -1171,6 +1166,14 @@ public class KeyguardManager {
                 currentLockType, currentPassword);
         LockscreenCredential newCredential = createLockscreenCredential(
                 newLockType, newPassword);
+        PasswordMetrics adminMetrics =
+                mLockPatternUtils.getRequestedPasswordMetrics(mContext.getUserId());
+        List<PasswordValidationError> errors = PasswordMetrics.validateCredential(adminMetrics,
+                DevicePolicyManager.PASSWORD_COMPLEXITY_NONE, newCredential);
+        if (!errors.isEmpty()) {
+            Log.e(TAG, "New credential is not valid: " + errors.get(0));
+            return false;
+        }
         return mLockPatternUtils.setLockCredential(newCredential, currentCredential, userId);
     }
 

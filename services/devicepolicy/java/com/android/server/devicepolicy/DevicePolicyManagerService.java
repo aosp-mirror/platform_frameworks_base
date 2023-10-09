@@ -5127,8 +5127,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             boolean deviceWideOnly) {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle)
-                && (isSystemUid(caller) || hasCallingOrSelfPermission(
-                permission.SET_INITIAL_LOCK)));
+                && (isSystemUid(caller)
+                    // Accept any permission that ILockSettings#setLockCredential() accepts.
+                    || hasCallingOrSelfPermission(permission.SET_INITIAL_LOCK)
+                    || hasCallingOrSelfPermission(permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS)
+                    || hasCallingOrSelfPermission(permission.ACCESS_KEYGUARD_SECURE_STORAGE)));
         return getPasswordMinimumMetricsUnchecked(userHandle, deviceWideOnly);
     }
 
@@ -5725,20 +5728,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int callingUid = caller.getUid();
         final int userHandle = UserHandle.getUserId(callingUid);
         final boolean isPin = PasswordMetrics.isNumericOnly(password);
+        final LockscreenCredential newCredential;
+        if (isPin) {
+            newCredential = LockscreenCredential.createPin(password);
+        } else {
+            newCredential = LockscreenCredential.createPasswordOrNone(password);
+        }
         synchronized (getLockObject()) {
             final PasswordMetrics minMetrics = getPasswordMinimumMetricsUnchecked(userHandle);
-            final List<PasswordValidationError> validationErrors;
             final int complexity = getAggregatedPasswordComplexityLocked(userHandle);
-            // TODO: Consider changing validation API to take LockscreenCredential.
-            if (password.isEmpty()) {
-                validationErrors = PasswordMetrics.validatePasswordMetrics(
-                        minMetrics, complexity, new PasswordMetrics(CREDENTIAL_TYPE_NONE));
-            } else {
-                // TODO(b/120484642): remove getBytes() below
-                validationErrors = PasswordMetrics.validatePassword(
-                        minMetrics, complexity, isPin, password.getBytes());
-            }
-
+            final List<PasswordValidationError> validationErrors =
+                    PasswordMetrics.validateCredential(minMetrics, complexity, newCredential);
             if (!validationErrors.isEmpty()) {
                 Slogf.w(LOG_TAG, "Failed to reset password due to constraint violation: %s",
                         validationErrors.get(0));
@@ -5762,12 +5762,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Don't do this with the lock held, because it is going to call
         // back in to the service.
         final long ident = mInjector.binderClearCallingIdentity();
-        final LockscreenCredential newCredential;
-        if (isPin) {
-            newCredential = LockscreenCredential.createPin(password);
-        } else {
-            newCredential = LockscreenCredential.createPasswordOrNone(password);
-        }
         try {
             if (tokenHandle == 0 || token == null) {
                 if (!mLockPatternUtils.setLockCredential(newCredential,

@@ -115,7 +115,6 @@ import android.system.keystore2.Domain;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
@@ -861,15 +860,11 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override // binder interface
     public void systemReady() {
-        if (mContext.checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
-            EventLog.writeEvent(0x534e4554, "28251513", getCallingUid(), "");  // SafetyNet
-        }
         checkWritePermission();
 
         mHasSecureLockScreen = mContext.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN);
         migrateOldData();
-        getGateKeeperService();
         getAuthSecretHal();
         mDeviceProvisionedObserver.onSystemReady();
 
@@ -1109,9 +1104,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private final void checkPasswordHavePermission() {
-        if (mContext.checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
-            EventLog.writeEvent(0x534e4554, "28251513", getCallingUid(), "");  // SafetyNet
-        }
         mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsHave");
     }
 
@@ -1676,6 +1668,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                                 + PERMISSION);
             }
         }
+        credential.validateBasicRequirements();
 
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -2239,17 +2232,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // credential has matched
                 mBiometricDeferredQueue.addPendingLockoutResetForUser(userId,
                         authResult.syntheticPassword.deriveGkPassword());
-
-                // perform verifyChallenge with synthetic password which generates the real GK auth
-                // token and response for the current user
-                response = mSpManager.verifyChallenge(getGateKeeperService(),
-                        authResult.syntheticPassword, 0L /* challenge */, userId);
-                if (response.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
-                    // This shouldn't really happen: the unwrapping of SP succeeds, but SP doesn't
-                    // match the recorded GK password handle.
-                    Slog.wtf(TAG, "verifyChallenge with SP failed.");
-                    return VerifyCredentialResponse.ERROR;
-                }
             }
         }
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
@@ -2645,7 +2627,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             return mGateKeeperService;
         }
 
-        final IBinder service = ServiceManager.getService(Context.GATEKEEPER_SERVICE);
+        final IBinder service = ServiceManager.waitForService(Context.GATEKEEPER_SERVICE);
         if (service != null) {
             try {
                 service.linkToDeath(new GateKeeperDiedRecipient(), 0);
@@ -2883,7 +2865,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      *
      * Also maintains the invariants described in {@link SyntheticPasswordManager} by
      * setting/clearing the protection (by the SP) on the user's auth-bound Keystore keys when the
-     * LSKF is added/removed, respectively.  If the new LSKF is nonempty, then the Gatekeeper auth
+     * LSKF is added/removed, respectively.  If an LSKF is being added, then the Gatekeeper auth
      * token is also refreshed.
      */
     @GuardedBy("mSpManager")
@@ -2900,9 +2882,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // not needed by synchronizeUnifiedWorkChallengeForProfiles()
             profilePasswords = null;
 
-            if (mSpManager.hasSidForUser(userId)) {
-                mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
-            } else {
+            if (!mSpManager.hasSidForUser(userId)) {
                 mSpManager.newSidForUser(getGateKeeperService(), sp, userId);
                 mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
                 setKeystorePassword(sp.deriveKeyStorePassword(), userId);
@@ -3118,6 +3098,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private boolean setLockCredentialWithToken(LockscreenCredential credential, long tokenHandle,
             byte[] token, int userId) {
         boolean result;
+        credential.validateBasicRequirements();
         synchronized (mSpManager) {
             if (!mSpManager.hasEscrowData(userId)) {
                 throw new SecurityException("Escrow token is disabled on the current user");
