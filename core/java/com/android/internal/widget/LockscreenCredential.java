@@ -64,9 +64,9 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     // is represented as a byte array of length 0.
     private byte[] mCredential;
 
-    // This indicates that the credential is a password that used characters outside ASCII 32–127.
+    // This indicates that the credential used characters outside ASCII 32–127.
     //
-    // Such passwords were never intended to be allowed.  However, Android 10–14 had a bug where
+    // Such credentials were never intended to be allowed.  However, Android 10–14 had a bug where
     // conversion from the chars the user entered to the credential bytes used a simple truncation.
     // Thus, any 'char' whose remainder mod 256 was in the range 32–127 was accepted and was
     // equivalent to some ASCII character.  For example, ™, which is U+2122, was truncated to ASCII
@@ -102,7 +102,6 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
             // LockscreenCredential object to be constructed so that the validation logic can run,
             // even though the validation logic will ultimately reject the credential as too short.
         }
-        Preconditions.checkArgument(!hasInvalidChars || type == CREDENTIAL_TYPE_PASSWORD);
         mType = type;
         mCredential = credential;
         mHasInvalidChars = hasInvalidChars;
@@ -262,6 +261,9 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      * short
      */
     public void validateBasicRequirements() {
+        if (mHasInvalidChars) {
+            throw new IllegalArgumentException("credential contains invalid characters");
+        }
         switch (getType()) {
             case CREDENTIAL_TYPE_PATTERN:
                 if (size() < LockPatternUtils.MIN_LOCK_PATTERN_SIZE) {
@@ -276,9 +278,6 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
                 }
                 break;
             case CREDENTIAL_TYPE_PASSWORD:
-                if (mHasInvalidChars) {
-                    throw new IllegalArgumentException("password contains invalid characters");
-                }
                 if (size() < LockPatternUtils.MIN_LOCK_PASSWORD_SIZE) {
                     throw new IllegalArgumentException("password must be at least "
                             + LockPatternUtils.MIN_LOCK_PASSWORD_SIZE + " characters long.");
