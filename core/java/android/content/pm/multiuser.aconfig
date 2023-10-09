@@ -8,6 +8,14 @@ flag {
 }
 
 flag {
+    name: "save_global_and_guest_restrictions_on_system_user_xml_read_only"
+    namespace: "multiuser"
+    description: "Save guest and device policy global restrictions on the SYSTEM user's XML file. (Read only flag)"
+    bug: "301067944"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "bind_wallpaper_service_on_its_own_thread_during_a_user_switch"
     namespace: "multiuser"
     description: "Bind wallpaper service on its own thread instead of system_server's main handler during a user switch."
