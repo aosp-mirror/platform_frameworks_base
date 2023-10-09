@@ -22,6 +22,9 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -94,6 +97,37 @@ public class HdrClamperTest {
         verify(mMockInjector).getHdrListener(listenerCaptor.capture(), eq(mTestHandler));
         mHdrChangeListener = listenerCaptor.getValue();
         configureClamper();
+    }
+
+    @Test
+    public void testRegisterHdrListener() {
+        verify(mMockHdrInfoListener).register(mMockBinder);
+    }
+
+    @Test
+    public void testRegisterOtherHdrListenerWhenCalledWithOtherToken() {
+        IBinder otherBinder = mock(IBinder.class);
+        mHdrClamper.resetHdrConfig(TEST_HDR_DATA, WIDTH, HEIGHT, MIN_HDR_PERCENT, otherBinder);
+
+        verify(mMockHdrInfoListener).unregister(mMockBinder);
+        verify(mMockHdrInfoListener).register(otherBinder);
+    }
+
+    @Test
+    public void testRegisterHdrListenerOnceWhenCalledWithSameToken() {
+        mHdrClamper.resetHdrConfig(TEST_HDR_DATA, WIDTH, HEIGHT, MIN_HDR_PERCENT, mMockBinder);
+
+        verify(mMockHdrInfoListener, never()).unregister(mMockBinder);
+        verify(mMockHdrInfoListener, times(1)).register(mMockBinder);
+    }
+
+    @Test
+    public void testRegisterNotCalledIfHbmConfigIsMissing() {
+        IBinder otherBinder = mock(IBinder.class);
+        mHdrClamper.resetHdrConfig(TEST_HDR_DATA, WIDTH, HEIGHT, -1, otherBinder);
+
+        verify(mMockHdrInfoListener).unregister(mMockBinder);
+        verify(mMockHdrInfoListener, never()).register(otherBinder);
     }
 
     @Test
