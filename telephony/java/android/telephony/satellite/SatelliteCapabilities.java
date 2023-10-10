@@ -16,11 +16,14 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +37,7 @@ import java.util.Set;
  * @hide
  */
 @SystemApi
+@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public final class SatelliteCapabilities implements Parcelable {
     /**
      * List of technologies supported by the satellite modem.
@@ -76,11 +80,13 @@ public final class SatelliteCapabilities implements Parcelable {
     }
 
     @Override
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public int describeContents() {
         return 0;
     }
 
     @Override
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void writeToParcel(@NonNull Parcel out, int flags) {
         if (mSupportedRadioTechnologies != null && !mSupportedRadioTechnologies.isEmpty()) {
             out.writeInt(mSupportedRadioTechnologies.size());
@@ -106,6 +112,7 @@ public final class SatelliteCapabilities implements Parcelable {
         }
     }
 
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     @NonNull public static final Creator<SatelliteCapabilities> CREATOR = new Creator<>() {
         @Override
         public SatelliteCapabilities createFromParcel(Parcel in) {
@@ -165,6 +172,7 @@ public final class SatelliteCapabilities implements Parcelable {
     /**
      * @return The list of technologies supported by the satellite modem.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     @NonNull @SatelliteManager.NTRadioTechnology public Set<Integer>
             getSupportedRadioTechnologies() {
         return mSupportedRadioTechnologies;
@@ -176,6 +184,7 @@ public final class SatelliteCapabilities implements Parcelable {
      * @return {@code true} if UE needs to point to a satellite to send and receive data and
      *         {@code false} otherwise.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public boolean isPointingRequired() {
         return mIsPointingRequired;
     }
@@ -185,6 +194,7 @@ public final class SatelliteCapabilities implements Parcelable {
      *
      * @return The maximum number of bytes per datagram that can be sent over satellite.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public int getMaxBytesPerOutgoingDatagram() {
         return mMaxBytesPerOutgoingDatagram;
     }
@@ -195,6 +205,7 @@ public final class SatelliteCapabilities implements Parcelable {
      * @return Map key: {@link SatelliteManager.DeviceHoldPosition} value: AntennaPosition
      */
     @NonNull
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public Map<Integer, AntennaPosition> getAntennaPositionMap() {
         return mAntennaPositionMap;
     }

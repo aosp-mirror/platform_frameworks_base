@@ -16,10 +16,13 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.util.Objects;
 
@@ -38,6 +41,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
+@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public final class AntennaDirection implements Parcelable {
     /** Antenna x axis direction. */
     private float mX;
@@ -62,11 +66,13 @@ public final class AntennaDirection implements Parcelable {
     }
 
     @Override
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public int describeContents() {
         return 0;
     }
 
     @Override
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeFloat(mX);
         out.writeFloat(mY);
@@ -74,6 +80,7 @@ public final class AntennaDirection implements Parcelable {
     }
 
     @NonNull
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final Creator<AntennaDirection> CREATOR =
             new Creator<>() {
                 @Override
@@ -118,14 +125,17 @@ public final class AntennaDirection implements Parcelable {
         return Objects.hash(mX, mY, mZ);
     }
 
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public float getX() {
         return mX;
     }
 
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public float getY() {
         return mY;
     }
 
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public float getZ() {
         return mZ;
     }
