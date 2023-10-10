@@ -1050,7 +1050,7 @@ public final class DexOptHelper {
                 context.unregisterReceiver(this);
                 artManager.scheduleBackgroundDexoptJob();
             }
-        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+        }, new IntentFilter(Intent.ACTION_LOCKED_BOOT_COMPLETED));
     }
 
     /**
