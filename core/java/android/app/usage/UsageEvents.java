@@ -714,7 +714,7 @@ public final class UsageEvents implements Parcelable {
     @UnsupportedAppUsage
     private Parcel mParcel = null;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private final int mEventCount;
+    private int mEventCount;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mIndex = 0;
@@ -735,6 +735,23 @@ public final class UsageEvents implements Parcelable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public UsageEvents(Parcel in) {
+        if (Flags.useParceledList()) {
+            readUsageEventsFromParcelWithParceledList(in);
+        } else {
+            readUsageEventsFromParcelWithBlob(in);
+        }
+
+        mIncludeTaskRoots = true;
+    }
+
+    private void readUsageEventsFromParcelWithParceledList(Parcel in) {
+        mIndex = in.readInt();
+        mEventsToWrite = in.readParcelable(UsageEvents.class.getClassLoader(),
+            ParcelableUsageEventList.class).getList();
+        mEventCount = mEventsToWrite.size();
+    }
+
+    private void readUsageEventsFromParcelWithBlob(Parcel in) {
         byte[] bytes = in.readBlob();
         Parcel data = Parcel.obtain();
         data.unmarshall(bytes, 0, bytes.length);
@@ -752,7 +769,6 @@ public final class UsageEvents implements Parcelable {
             mParcel.setDataSize(mParcel.dataPosition());
             mParcel.setDataPosition(positionInParcel);
         }
-        mIncludeTaskRoots = true;
     }
 
     /**
@@ -810,6 +826,10 @@ public final class UsageEvents implements Parcelable {
             return false;
         }
 
+        if (Flags.useParceledList()) {
+            return getNextEventFromParceledList(eventOut);
+        }
+
         if (mParcel != null) {
             readEventFromParcel(mParcel, eventOut);
         } else {
@@ -821,6 +841,12 @@ public final class UsageEvents implements Parcelable {
             mParcel.recycle();
             mParcel = null;
         }
+        return true;
+    }
+
+    private boolean getNextEventFromParceledList(Event eventOut) {
+        eventOut.copyFrom(mEventsToWrite.get(mIndex));
+        mIndex++;
         return true;
     }
 
@@ -968,7 +994,7 @@ public final class UsageEvents implements Parcelable {
             case Event.CHOOSER_ACTION:
                 eventOut.mAction = p.readString();
                 eventOut.mContentType = p.readString();
-                eventOut.mContentAnnotations = p.createStringArray();
+                eventOut.mContentAnnotations = p.readStringArray();
                 break;
             case Event.STANDBY_BUCKET_CHANGED:
                 eventOut.mBucketAndReason = p.readInt();
@@ -990,6 +1016,19 @@ public final class UsageEvents implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        if (Flags.useParceledList()) {
+            writeUsageEventsToParcelWithParceledList(dest, flags);
+        } else {
+            writeUsageEventsToParcelWithBlob(dest, flags);
+        }
+    }
+
+    private void writeUsageEventsToParcelWithParceledList(Parcel dest, int flags) {
+        dest.writeInt(mIndex);
+        dest.writeParcelable(new ParcelableUsageEventList(mEventsToWrite), flags);
+    }
+
+    private void writeUsageEventsToParcelWithBlob(Parcel dest, int flags) {
         Parcel data = Parcel.obtain();
         data.writeInt(mEventCount);
         data.writeInt(mIndex);
