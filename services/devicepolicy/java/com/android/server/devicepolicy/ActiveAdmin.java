@@ -21,6 +21,8 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static android.app.admin.WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST;
 import static android.app.admin.WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST;
+import static android.app.admin.flags.Flags.dumpsysPolicyEngineMigrationEnabled;
+import static android.app.admin.flags.Flags.policyEngineMigrationV2Enabled;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 
 import static com.android.server.devicepolicy.DevicePolicyManagerService.LOG_TAG;
@@ -1295,8 +1297,29 @@ class ActiveAdmin {
         pw.print("encryptionRequested=");
         pw.println(encryptionRequested);
 
-        pw.print("disableCamera=");
-        pw.println(disableCamera);
+        if (!dumpsysPolicyEngineMigrationEnabled()) {
+            pw.print("disableCamera=");
+            pw.println(disableCamera);
+
+            pw.print("disableScreenCapture=");
+            pw.println(disableScreenCapture);
+
+            pw.print("requireAutoTime=");
+            pw.println(requireAutoTime);
+
+            if (permittedInputMethods != null) {
+                pw.print("permittedInputMethods=");
+                pw.println(permittedInputMethods);
+            }
+
+            pw.println("userRestrictions:");
+            UserRestrictionsUtils.dumpRestrictions(pw, "  ", userRestrictions);
+        }
+
+        if (!policyEngineMigrationV2Enabled() || !dumpsysPolicyEngineMigrationEnabled()) {
+            pw.print("mUsbDataSignaling=");
+            pw.println(mUsbDataSignalingEnabled);
+        }
 
         pw.print("disableCallerId=");
         pw.println(disableCallerId);
@@ -1306,12 +1329,6 @@ class ActiveAdmin {
 
         pw.print("disableBluetoothContactSharing=");
         pw.println(disableBluetoothContactSharing);
-
-        pw.print("disableScreenCapture=");
-        pw.println(disableScreenCapture);
-
-        pw.print("requireAutoTime=");
-        pw.println(requireAutoTime);
 
         pw.print("forceEphemeralUsers=");
         pw.println(forceEphemeralUsers);
@@ -1328,11 +1345,6 @@ class ActiveAdmin {
         if (permittedAccessiblityServices != null) {
             pw.print("permittedAccessibilityServices=");
             pw.println(permittedAccessiblityServices);
-        }
-
-        if (permittedInputMethods != null) {
-            pw.print("permittedInputMethods=");
-            pw.println(permittedInputMethods);
         }
 
         if (permittedNotificationListeners != null) {
@@ -1367,9 +1379,6 @@ class ActiveAdmin {
             pw.print("organizationName=");
             pw.println(organizationName);
         }
-
-        pw.println("userRestrictions:");
-        UserRestrictionsUtils.dumpRestrictions(pw, "  ", userRestrictions);
 
         pw.print("defaultEnabledRestrictionsAlreadySet=");
         pw.println(defaultEnabledRestrictionsAlreadySet);
@@ -1441,9 +1450,6 @@ class ActiveAdmin {
 
         pw.print("mAdminCanGrantSensorsPermissions=");
         pw.println(mAdminCanGrantSensorsPermissions);
-
-        pw.print("mUsbDataSignaling=");
-        pw.println(mUsbDataSignalingEnabled);
 
         pw.print("mWifiMinimumSecurityLevel=");
         pw.println(mWifiMinimumSecurityLevel);

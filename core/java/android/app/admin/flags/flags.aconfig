@@ -41,3 +41,10 @@ flag {
   description: "Improve access to security logging in the context of Zero Trust."
   bug: "295324350"
 }
+
+flag {
+  name: "dumpsys_policy_engine_migration_enabled"
+  namespace: "enterprise"
+  description: "Update DumpSys to include information about migrated APIs in DPE"
+  bug: "304999634"
+}

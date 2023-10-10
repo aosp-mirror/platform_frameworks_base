@@ -59,6 +59,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.telephony.TelephonyManager;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -1575,6 +1576,25 @@ final class DevicePolicyEngine {
         synchronized (mLock) {
             return mEnforcingAdmins.contains(userId)
                     ? mEnforcingAdmins.get(userId) : Collections.emptySet();
+        }
+    }
+
+    public void dump(IndentingPrintWriter pw) {
+        synchronized (mLock) {
+            pw.println("Local Policies: ");
+            for (int i = 0; i < mLocalPolicies.size(); i++) {
+                for (PolicyKey policy : mLocalPolicies.get(mLocalPolicies.keyAt(i)).keySet()) {
+                    PolicyState<?> policyState = mLocalPolicies.get(
+                            mLocalPolicies.keyAt(i)).get(policy);
+                    pw.println(policyState);
+                }
+            }
+            pw.println();
+            pw.println("Global Policies: ");
+            for (PolicyKey policy : mGlobalPolicies.keySet()) {
+                PolicyState<?> policyState = mGlobalPolicies.get(policy);
+                pw.println(policyState);
+            }
         }
     }
 

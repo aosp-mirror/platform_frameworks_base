@@ -189,9 +189,10 @@ final class PolicyState<V> {
 
     @Override
     public String toString() {
-        return "PolicyState { mPolicyDefinition= " + mPolicyDefinition + ", mPoliciesSetByAdmins= "
-                + mPoliciesSetByAdmins + ", mCurrentResolvedPolicy= " + mCurrentResolvedPolicy
-                + " }";
+        return "\nPolicyKey - " + mPolicyDefinition.getPolicyKey()
+                + "\nmPolicyDefinition= \n\t" + mPolicyDefinition
+                + "\nmPoliciesSetByAdmins= \n\t" + mPoliciesSetByAdmins
+                + ",\nmCurrentResolvedPolicy= \n\t" + mCurrentResolvedPolicy + " }";
     }
 
     void saveToXml(TypedXmlSerializer serializer) throws IOException {
