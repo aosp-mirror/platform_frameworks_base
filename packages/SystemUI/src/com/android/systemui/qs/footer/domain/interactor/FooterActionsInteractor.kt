@@ -42,7 +42,7 @@ import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig
 import com.android.systemui.security.data.repository.SecurityRepository
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.user.data.repository.UserSwitcherRepository
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -102,7 +102,7 @@ constructor(
     private val deviceProvisionedController: DeviceProvisionedController,
     private val qsSecurityFooterUtils: QSSecurityFooterUtils,
     private val fgsManagerController: FgsManagerController,
-    private val userInteractor: UserInteractor,
+    private val userSwitcherInteractor: UserSwitcherInteractor,
     securityRepository: SecurityRepository,
     foregroundServicesRepository: ForegroundServicesRepository,
     userSwitcherRepository: UserSwitcherRepository,
@@ -178,6 +178,6 @@ constructor(
     }
 
     override fun showUserSwitcher(expandable: Expandable) {
-        userInteractor.showUserSwitcher(expandable)
+        userSwitcherInteractor.showUserSwitcher(expandable)
     }
 }

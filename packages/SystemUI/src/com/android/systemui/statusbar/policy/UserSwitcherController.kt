@@ -27,7 +27,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower
 import com.android.systemui.user.data.source.UserRecord
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import dagger.Lazy
 import java.io.PrintWriter
@@ -41,7 +41,7 @@ class UserSwitcherController
 @Inject
 constructor(
     @Application private val applicationContext: Context,
-    private val userInteractorLazy: Lazy<UserInteractor>,
+    private val userSwitcherInteractorLazy: Lazy<UserSwitcherInteractor>,
     private val guestUserInteractorLazy: Lazy<GuestUserInteractor>,
     private val keyguardInteractorLazy: Lazy<KeyguardInteractor>,
     private val activityStarter: ActivityStarter,
@@ -53,26 +53,29 @@ constructor(
         fun onUserSwitched()
     }
 
-    private val userInteractor: UserInteractor by lazy { userInteractorLazy.get() }
+    private val mUserSwitcherInteractor: UserSwitcherInteractor by lazy {
+        userSwitcherInteractorLazy.get()
+    }
     private val guestUserInteractor: GuestUserInteractor by lazy { guestUserInteractorLazy.get() }
     private val keyguardInteractor: KeyguardInteractor by lazy { keyguardInteractorLazy.get() }
 
-    private val callbackCompatMap = mutableMapOf<UserSwitchCallback, UserInteractor.UserCallback>()
+    private val callbackCompatMap =
+        mutableMapOf<UserSwitchCallback, UserSwitcherInteractor.UserCallback>()
 
     /** The current list of [UserRecord]. */
     val users: ArrayList<UserRecord>
-        get() = userInteractor.userRecords.value
+        get() = mUserSwitcherInteractor.userRecords.value
 
     /** Whether the user switcher experience should use the simple experience. */
     val isSimpleUserSwitcher: Boolean
-        get() = userInteractor.isSimpleUserSwitcher
+        get() = mUserSwitcherInteractor.isSimpleUserSwitcher
 
     val isUserSwitcherEnabled: Boolean
-        get() = userInteractor.isUserSwitcherEnabled
+        get() = mUserSwitcherInteractor.isUserSwitcherEnabled
 
     /** The [UserRecord] of the current user or `null` when none. */
     val currentUserRecord: UserRecord?
-        get() = userInteractor.selectedUserRecord.value
+        get() = mUserSwitcherInteractor.selectedUserRecord.value
 
     /** The name of the current user of the device or `null`, when none is selected. */
     val currentUserName: String?
@@ -81,8 +84,8 @@ constructor(
                 LegacyUserUiHelper.getUserRecordName(
                     context = applicationContext,
                     record = it,
-                    isGuestUserAutoCreated = userInteractor.isGuestUserAutoCreated,
-                    isGuestUserResetting = userInteractor.isGuestUserResetting,
+                    isGuestUserAutoCreated = mUserSwitcherInteractor.isGuestUserAutoCreated,
+                    isGuestUserResetting = mUserSwitcherInteractor.isGuestUserResetting,
                 )
             }
 
@@ -98,21 +101,21 @@ constructor(
      * @param dialogShower An optional [DialogShower] in case we need to show dialogs.
      */
     fun onUserSelected(userId: Int, dialogShower: DialogShower?) {
-        userInteractor.selectUser(userId, dialogShower)
+        mUserSwitcherInteractor.selectUser(userId, dialogShower)
     }
 
     /** Whether the guest user is configured to always be present on the device. */
     val isGuestUserAutoCreated: Boolean
-        get() = userInteractor.isGuestUserAutoCreated
+        get() = mUserSwitcherInteractor.isGuestUserAutoCreated
 
     /** Whether the guest user is currently being reset. */
     val isGuestUserResetting: Boolean
-        get() = userInteractor.isGuestUserResetting
+        get() = mUserSwitcherInteractor.isGuestUserResetting
 
     /** Registers an adapter to notify when the users change. */
     fun addAdapter(adapter: WeakReference<BaseUserSwitcherAdapter>) {
-        userInteractor.addCallback(
-            object : UserInteractor.UserCallback {
+        mUserSwitcherInteractor.addCallback(
+            object : UserSwitcherInteractor.UserCallback {
                 override fun isEvictable(): Boolean {
                     return adapter.get() == null
                 }
@@ -129,7 +132,7 @@ constructor(
         record: UserRecord,
         dialogShower: DialogShower?,
     ) {
-        userInteractor.onRecordSelected(record, dialogShower)
+        mUserSwitcherInteractor.onRecordSelected(record, dialogShower)
     }
 
     /**
@@ -152,7 +155,7 @@ constructor(
      *   `UserHandle.USER_NULL`, then switch immediately to the newly created guest user.
      */
     fun removeGuestUser(guestUserId: Int, targetUserId: Int) {
-        userInteractor.removeGuestUser(
+        mUserSwitcherInteractor.removeGuestUser(
             guestUserId = guestUserId,
             targetUserId = targetUserId,
         )
@@ -168,7 +171,7 @@ constructor(
      *   only if its ephemeral, else keep guest
      */
     fun exitGuestUser(guestUserId: Int, targetUserId: Int, forceRemoveGuestOnExit: Boolean) {
-        userInteractor.exitGuestUser(guestUserId, targetUserId, forceRemoveGuestOnExit)
+        mUserSwitcherInteractor.exitGuestUser(guestUserId, targetUserId, forceRemoveGuestOnExit)
     }
 
     /**
@@ -194,31 +197,31 @@ constructor(
      * The pictures are only loaded if they have not been loaded yet.
      */
     fun refreshUsers() {
-        userInteractor.refreshUsers()
+        mUserSwitcherInteractor.refreshUsers()
     }
 
     /** Adds a subscriber to when user switches. */
     fun addUserSwitchCallback(callback: UserSwitchCallback) {
         val interactorCallback =
-            object : UserInteractor.UserCallback {
+            object : UserSwitcherInteractor.UserCallback {
                 override fun onUserStateChanged() {
                     callback.onUserSwitched()
                 }
             }
         callbackCompatMap[callback] = interactorCallback
-        userInteractor.addCallback(interactorCallback)
+        mUserSwitcherInteractor.addCallback(interactorCallback)
     }
 
     /** Removes a previously-added subscriber. */
     fun removeUserSwitchCallback(callback: UserSwitchCallback) {
         val interactorCallback = callbackCompatMap.remove(callback)
         if (interactorCallback != null) {
-            userInteractor.removeCallback(interactorCallback)
+            mUserSwitcherInteractor.removeCallback(interactorCallback)
         }
     }
 
     fun dump(pw: PrintWriter, args: Array<out String>) {
-        userInteractor.dump(pw)
+        mUserSwitcherInteractor.dump(pw)
     }
 
     companion object {

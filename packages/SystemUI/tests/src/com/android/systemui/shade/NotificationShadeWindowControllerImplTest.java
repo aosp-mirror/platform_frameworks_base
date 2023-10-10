@@ -90,7 +90,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
-import com.android.systemui.user.domain.interactor.UserInteractor;
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
 
 import com.google.common.util.concurrent.MoreExecutors;
 
@@ -230,7 +230,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                         keyguardTransitionInteractor,
                         powerInteractor,
                         new FakeUserSetupRepository(),
-                        mock(UserInteractor.class),
+                        mock(UserSwitcherInteractor.class),
                         new SharedNotificationContainerInteractor(
                                 configurationRepository,
                                 mContext,

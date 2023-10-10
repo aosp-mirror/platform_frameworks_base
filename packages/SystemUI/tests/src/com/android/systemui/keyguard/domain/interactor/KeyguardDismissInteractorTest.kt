@@ -58,8 +58,6 @@ class KeyguardDismissInteractorTest : SysuiTestCase() {
             KeyguardDismissInteractorFactory.create(
                 context = context,
                 testScope = testScope,
-                broadcastDispatcher = fakeBroadcastDispatcher,
-                dispatcher = dispatcher,
             )
         underTest = underTestDependencies.interactor
         underTestDependencies.userRepository.setUserInfos(listOf(userInfo))

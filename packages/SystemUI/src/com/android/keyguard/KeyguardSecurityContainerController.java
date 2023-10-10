@@ -91,7 +91,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.user.domain.interactor.UserInteractor;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -420,7 +420,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     showPrimarySecurityScreen(false);
                 }
             };
-    private final UserInteractor mUserInteractor;
+    private final SelectedUserInteractor mSelectedUserInteractor;
     private final Provider<DeviceEntryInteractor> mDeviceEntryInteractor;
     private final Provider<JavaAdapter> mJavaAdapter;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -453,7 +453,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
             BouncerMessageInteractor bouncerMessageInteractor,
             Provider<JavaAdapter> javaAdapter,
-            UserInteractor userInteractor,
+            SelectedUserInteractor selectedUserInteractor,
             DeviceProvisionedController deviceProvisionedController,
             FaceAuthAccessibilityDelegate faceAuthAccessibilityDelegate,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
@@ -487,7 +487,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mAudioManager = audioManager;
         mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
         mBouncerMessageInteractor = bouncerMessageInteractor;
-        mUserInteractor = userInteractor;
+        mSelectedUserInteractor = selectedUserInteractor;
         mDeviceEntryInteractor = deviceEntryInteractor;
         mJavaAdapter = javaAdapter;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
@@ -523,7 +523,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 mDeviceEntryInteractor.get().isDeviceEntered(),
                     isDeviceEntered -> {
                     if (isDeviceEntered) {
-                        final int selectedUserId = mUserInteractor.getSelectedUserId();
+                        final int selectedUserId = mSelectedUserInteractor.getSelectedUserId();
                         showNextSecurityScreenOrFinish(
                             /* authenticated= */ true,
                             selectedUserId,

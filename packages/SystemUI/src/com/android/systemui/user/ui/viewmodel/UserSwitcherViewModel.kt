@@ -20,35 +20,34 @@ package com.android.systemui.user.ui.viewmodel
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.drawable.CircularDrawable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.res.R
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
-import javax.inject.Inject
-import kotlin.math.ceil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import kotlin.math.ceil
 
 /** Models UI state for the user switcher feature. */
 @SysUISingleton
 class UserSwitcherViewModel
 @Inject
 constructor(
-    private val userInteractor: UserInteractor,
+    private val userSwitcherInteractor: UserSwitcherInteractor,
     private val guestUserInteractor: GuestUserInteractor,
 ) {
 
     /** The currently selected user. */
     val selectedUser: Flow<UserViewModel> =
-        userInteractor.selectedUser.map { user -> toViewModel(user) }
+        userSwitcherInteractor.selectedUser.map { user -> toViewModel(user) }
 
     /** On-device users. */
     val users: Flow<List<UserViewModel>> =
-        userInteractor.users.map { models -> models.map { user -> toViewModel(user) } }
+        userSwitcherInteractor.users.map { models -> models.map { user -> toViewModel(user) } }
 
     /** The maximum number of columns that the user selection grid should use. */
     val maximumUserColumns: Flow<Int> = users.map { getMaxUserSwitcherItemColumns(it.size) }
@@ -61,7 +60,9 @@ constructor(
     val isMenuVisible: Flow<Boolean> = _isMenuVisible
     /** The user action menu. */
     val menu: Flow<List<UserActionViewModel>> =
-        userInteractor.actions.map { actions -> actions.map { action -> toViewModel(action) } }
+        userSwitcherInteractor.actions.map { actions ->
+            actions.map { action -> toViewModel(action) }
+        }
 
     /** Whether the button to open the user action menu is visible. */
     val isOpenMenuButtonVisible: Flow<Boolean> = menu.map { it.isNotEmpty() }
@@ -175,7 +176,7 @@ constructor(
                     isTablet = true,
                 ),
             onClicked = {
-                userInteractor.executeAction(action = model)
+                userSwitcherInteractor.executeAction(action = model)
                 // We don't finish because we want to show a dialog over the full-screen UI and
                 // that dialog can be dismissed in case the user changes their mind and decides not
                 // to add a user.
@@ -195,7 +196,7 @@ constructor(
             null
         } else {
             {
-                userInteractor.selectUser(model.id)
+                userSwitcherInteractor.selectUser(model.id)
                 userSwitched.value = true
             }
         }

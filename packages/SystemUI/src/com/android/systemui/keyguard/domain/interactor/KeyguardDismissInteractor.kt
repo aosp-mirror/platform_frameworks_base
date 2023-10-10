@@ -24,15 +24,15 @@ import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.sample
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import javax.inject.Inject
 
 /** Encapsulates business logic for requesting the keyguard to dismiss/finish/done. */
 @SysUISingleton
@@ -40,11 +40,11 @@ class KeyguardDismissInteractor
 @Inject
 constructor(
     trustRepository: TrustRepository,
-    val keyguardRepository: KeyguardRepository,
-    val primaryBouncerInteractor: PrimaryBouncerInteractor,
-    val alternateBouncerInteractor: AlternateBouncerInteractor,
-    val powerInteractor: PowerInteractor,
-    val userInteractor: UserInteractor,
+    private val keyguardRepository: KeyguardRepository,
+    primaryBouncerInteractor: PrimaryBouncerInteractor,
+    alternateBouncerInteractor: AlternateBouncerInteractor,
+    powerInteractor: PowerInteractor,
+    private val selectedUserInteractor: SelectedUserInteractor,
 ) {
     /*
      * Updates when a biometric has authenticated the device and is requesting to dismiss
@@ -82,7 +82,7 @@ constructor(
      */
     private val primaryAuthenticated: Flow<Unit> =
         primaryBouncerInteractor.keyguardAuthenticatedPrimaryAuth
-            .filter { authedUserId -> authedUserId == userInteractor.getSelectedUserId() }
+            .filter { authedUserId -> authedUserId == selectedUserInteractor.getSelectedUserId() }
             .map {} // map to Unit
 
     /*
@@ -92,7 +92,7 @@ constructor(
      */
     private val userRequestedBouncerWhenAlreadyAuthenticated: Flow<Unit> =
         primaryBouncerInteractor.userRequestedBouncerWhenAlreadyAuthenticated
-            .filter { authedUserId -> authedUserId == userInteractor.getSelectedUserId() }
+            .filter { authedUserId -> authedUserId == selectedUserInteractor.getSelectedUserId() }
             .map {} // map to Unit
 
     /** Updates when keyguardDone should be requested. */

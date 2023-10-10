@@ -34,10 +34,8 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.Share
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepository
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.util.kotlin.pairwise
-import javax.inject.Inject
-import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
@@ -53,6 +51,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
+import javax.inject.Inject
+import javax.inject.Provider
 
 /** Business logic for shade interactions. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -71,7 +71,7 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     powerInteractor: PowerInteractor,
     userSetupRepository: UserSetupRepository,
-    userInteractor: UserInteractor,
+    userSwitcherInteractor: UserSwitcherInteractor,
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     repository: ShadeRepository,
 ) {
@@ -227,7 +227,7 @@ constructor(
             isDeviceProvisioned &&
                 // Disallow QS during setup if it's a simple user switcher. (The user intends to
                 // use the lock screen user switcher, QS is not needed.)
-                (isUserSetup || !userInteractor.isSimpleUserSwitcher) &&
+                (isUserSetup || !userSwitcherInteractor.isSimpleUserSwitcher) &&
                 isShadeEnabled &&
                 disableFlags.isQuickSettingsEnabled() &&
                 !isDozing

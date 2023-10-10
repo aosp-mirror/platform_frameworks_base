@@ -51,7 +51,7 @@ import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.user.data.repository.UserSwitcherRepository
 import com.android.systemui.user.data.repository.UserSwitcherRepositoryImpl
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.settings.GlobalSettings
@@ -102,7 +102,7 @@ class FooterActionsTestUtils(
         deviceProvisionedController: DeviceProvisionedController = mock(),
         qsSecurityFooterUtils: QSSecurityFooterUtils = mock(),
         fgsManagerController: FgsManagerController = mock(),
-        userInteractor: UserInteractor = mock(),
+        userSwitcherInteractor: UserSwitcherInteractor = mock(),
         securityRepository: SecurityRepository = securityRepository(),
         foregroundServicesRepository: ForegroundServicesRepository = foregroundServicesRepository(),
         userSwitcherRepository: UserSwitcherRepository = userSwitcherRepository(),
@@ -116,7 +116,7 @@ class FooterActionsTestUtils(
             deviceProvisionedController,
             qsSecurityFooterUtils,
             fgsManagerController,
-            userInteractor,
+            userSwitcherInteractor,
             securityRepository,
             foregroundServicesRepository,
             userSwitcherRepository,
