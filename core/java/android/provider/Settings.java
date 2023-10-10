@@ -10442,20 +10442,6 @@ public final class Settings {
                 "assist_long_press_home_enabled";
 
         /**
-         * Control whether Trust Agents are in active unlock or extend unlock mode.
-         * @hide
-         */
-        @Readable
-        public static final String TRUST_AGENTS_EXTEND_UNLOCK = "trust_agents_extend_unlock";
-
-        /**
-         * Control whether the screen locks when trust is lost.
-         * @hide
-         */
-        @Readable
-        public static final String LOCK_SCREEN_WHEN_TRUST_LOST = "lock_screen_when_trust_lost";
-
-        /**
          * Control whether Night display is currently activated.
          * @hide
          */
