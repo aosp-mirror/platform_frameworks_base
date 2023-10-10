@@ -15,8 +15,6 @@
  */
 package com.android.systemui;
 
-import static com.android.systemui.animation.FakeDialogLaunchAnimatorKt.fakeDialogLaunchAnimator;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -37,14 +35,11 @@ import androidx.core.animation.AndroidXAnimatorIsolationRule;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.FakeBroadcastDispatcher;
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -93,10 +88,7 @@ public abstract class SysuiTestCase {
         if (isRobolectricTest()) {
             mContext = mContext.createDefaultDisplayContext();
         }
-        SystemUIInitializer initializer = new SystemUIInitializerImpl(mContext);
-        initializer.init(true);
-        mDependency = new TestableDependency(initializer.getSysUIComponent().createDependency());
-        Dependency.setInstance(mDependency);
+        mDependency = SysuiTestDependencyKt.installSysuiTestDependency(mContext);
         mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(
                 mContext,
                 mContext.getMainExecutor(),
@@ -123,13 +115,6 @@ public abstract class SysuiTestCase {
         // reference and are never sent to the Context. This will also prevent a real
         // BroadcastDispatcher from actually registering receivers.
         mDependency.injectTestDependency(BroadcastDispatcher.class, mFakeBroadcastDispatcher);
-        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
-
-        // Make sure that all tests on any SystemUIDialog does not crash because this dependency
-        // is missing (constructing the actual one would throw).
-        // TODO(b/219008720): Remove this.
-        mDependency.injectMockDependency(SystemUIDialogManager.class);
-        mDependency.injectTestDependency(DialogLaunchAnimator.class, fakeDialogLaunchAnimator());
     }
 
     protected boolean shouldFailOnLeakedReceiver() {
