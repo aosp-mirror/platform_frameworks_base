@@ -113,7 +113,8 @@ public class TakeScreenshotService extends Service {
     @Inject
     public TakeScreenshotService(ScreenshotController.Factory screenshotControllerFactory,
             UserManager userManager, DevicePolicyManager devicePolicyManager,
-            UiEventLogger uiEventLogger, ScreenshotNotificationsController notificationsController,
+            UiEventLogger uiEventLogger,
+            ScreenshotNotificationsController.Factory notificationsControllerFactory,
             Context context, @Background Executor bgExecutor, FeatureFlags featureFlags,
             RequestProcessor processor, Provider<TakeScreenshotExecutor> takeScreenshotExecutor) {
         if (DEBUG_SERVICE) {
@@ -123,7 +124,7 @@ public class TakeScreenshotService extends Service {
         mUserManager = userManager;
         mDevicePolicyManager = devicePolicyManager;
         mUiEventLogger = uiEventLogger;
-        mNotificationsController = notificationsController;
+        mNotificationsController = notificationsControllerFactory.create(Display.DEFAULT_DISPLAY);
         mContext = context;
         mBgExecutor = bgExecutor;
         mFeatureFlags = featureFlags;
@@ -246,15 +247,17 @@ public class TakeScreenshotService extends Service {
         Log.d(TAG, "Processing screenshot data");
 
 
-        ScreenshotData screenshotData = ScreenshotData.fromRequest(
-                request, Display.DEFAULT_DISPLAY);
+        if (mFeatureFlags.isEnabled(MULTI_DISPLAY_SCREENSHOT)) {
+            mTakeScreenshotExecutor.get().executeScreenshotsAsync(request, onSaved, callback);
+            return;
+        }
+        // TODO(b/295143676): Delete the following after the flag is released.
         try {
-            if (mFeatureFlags.isEnabled(MULTI_DISPLAY_SCREENSHOT)) {
-                mTakeScreenshotExecutor.get().executeScreenshotsAsync(request, onSaved, callback);
-            } else {
-                mProcessor.processAsync(screenshotData, (data) ->
-                        dispatchToController(data, onSaved, callback));
-            }
+            ScreenshotData screenshotData = ScreenshotData.fromRequest(
+                    request, Display.DEFAULT_DISPLAY);
+            mProcessor.processAsync(screenshotData, (data) ->
+                    dispatchToController(data, onSaved, callback));
+
         } catch (IllegalStateException e) {
             Log.e(TAG, "Failed to process screenshot request!", e);
             logFailedRequest(request);
@@ -264,6 +267,7 @@ public class TakeScreenshotService extends Service {
         }
     }
 
+    // TODO(b/295143676): Delete this.
     private void dispatchToController(ScreenshotData screenshot,
             Consumer<Uri> uriConsumer, RequestCallback callback) {
         mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(screenshot.getSource()), 0,
