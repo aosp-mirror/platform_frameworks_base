@@ -253,14 +253,15 @@ public class SystemPerformanceHinter {
                     FRAME_RATE_SELECTION_STRATEGY_SELF);
             mTransaction.setFrameRateCategory(displaySurfaceControl, FRAME_RATE_CATEGORY_DEFAULT);
             transactionChanged = true;
-            Trace.endAsyncSection("PerfHint-framerate-" + session.reason, session.traceCookie);
+            Trace.endAsyncSection("PerfHint-framerate-" + session.displayId + "-" + session.reason,
+                    session.traceCookie);
         }
 
         // Global flags
         if (nowDisabled(oldGlobalFlags, newGlobalFlags, HINT_SF_EARLY_WAKEUP)) {
             mTransaction.setEarlyWakeupEnd();
             transactionChanged = true;
-            Trace.endAsyncSection("PerfHint-early_wakeup" + session.reason, session.traceCookie);
+            Trace.endAsyncSection("PerfHint-early_wakeup-" + session.reason, session.traceCookie);
         }
         if (nowDisabled(oldGlobalFlags, newGlobalFlags, HINT_ADPF)) {
             mAdpfSession.sendHint(PerformanceHintManager.Session.CPU_LOAD_RESET);
