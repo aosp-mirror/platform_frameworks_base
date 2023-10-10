@@ -1371,7 +1371,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Se ha detectado un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositivo adjunto no es compatible con este teléfono. Toca para obtener más información."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB activa"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar depuración USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar la depuración USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para inhabilitar la depuración por USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Depuración inalámbrica conectada"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca para desactivar la depuración inalámbrica"</string>
@@ -1568,7 +1568,7 @@
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Compartir con"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Compartir con <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Mantén pulsado el icono de desbloqueo y deslízalo."</string>
-    <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Desliza el dedo para desbloquear."</string>
+    <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Desliza para desbloquear"</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Ir al escritorio"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Desplazarse hacia arriba"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Más opciones"</string>

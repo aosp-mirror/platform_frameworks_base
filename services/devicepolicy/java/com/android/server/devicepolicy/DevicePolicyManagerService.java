@@ -241,7 +241,6 @@ import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
 import static android.provider.Telephony.Carriers.INVALID_APN_ID;
 import static android.security.keystore.AttestationUtils.USE_INDIVIDUAL_ATTESTATION;
-
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
@@ -540,6 +539,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -16645,16 +16646,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public PackagePolicy getCredentialManagerPolicy() {
+    public PackagePolicy getCredentialManagerPolicy(int userId) {
         if (!mHasFeature) {
             return null;
         }
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
                 canWriteCredentialManagerPolicy(caller) || canQueryAdminPolicy(caller));
+        if (userId != caller.getUserId()) {
+            Preconditions.checkCallAuthorization(
+                    hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS));
+        }
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(userId);
             return (admin != null) ? admin.mCredentialManagerPolicy : null;
         }
     }
@@ -18803,10 +18808,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         });
     }
 
+    ThreadPoolExecutor calculateHasIncompatibleAccountsExecutor = new ThreadPoolExecutor(
+            1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
     @Override
     public void calculateHasIncompatibleAccounts() {
+        if (calculateHasIncompatibleAccountsExecutor.getQueue().size() > 1) {
+            return;
+        }
         new CalculateHasIncompatibleAccountsTask().executeOnExecutor(
-                AsyncTask.THREAD_POOL_EXECUTOR, null);
+                calculateHasIncompatibleAccountsExecutor, null);
     }
 
     @Nullable

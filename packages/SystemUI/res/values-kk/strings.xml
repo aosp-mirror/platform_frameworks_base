@@ -270,7 +270,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Түс инверсиясы"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Түсті түзету"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Қаріп өлшемі"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Пайдаланушыларды басқару"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Параметрлер"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Дайын"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Жабу"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Қосылды"</string>
@@ -301,8 +301,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Күн шыққанға дейін"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Қосылу уақыты: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> дейін"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Ұйқы уақытында"</string>
-    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Ұйқы уақыты аяқталғанға дейін"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Ұйқы режимінде"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Ұйқы режимі аяқталғанға дейін"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC өшірулі"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC қосулы"</string>
@@ -911,7 +911,7 @@
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Үйлесімді басқару элементтері қолжетімді емес."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Басқа"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Құрылғы басқару элементтеріне қосу"</string>
-    <string name="controls_dialog_ok" msgid="2770230012857881822">"Енгізу"</string>
+    <string name="controls_dialog_ok" msgid="2770230012857881822">"Қосу"</string>
     <string name="controls_dialog_remove" msgid="3775288002711561936">"Жою"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ұсынған"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Құрылғы құлыпталды."</string>
@@ -1090,7 +1090,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Суретті алдын ала көру"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"өзгерту"</string>
     <string name="add" msgid="81036585205287996">"Қосу"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Пайдаланушыларды басқару"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Параметрлер"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Бұл хабарландыруды бөлінген экранға сүйреп апару мүмкін емес."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi қолжетімсіз"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Басымдық режимі"</string>

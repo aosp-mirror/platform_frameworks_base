@@ -144,6 +144,7 @@ public class PackageManagerServiceInjector {
     private final Singleton<IBackupManager> mIBackupManager;
     private final Singleton<SharedLibrariesImpl> mSharedLibrariesProducer;
     private final Singleton<CrossProfileIntentFilterHelper> mCrossProfileIntentFilterHelperProducer;
+    private final Singleton<UpdateOwnershipHelper> mUpdateOwnershipHelperProducer;
 
     PackageManagerServiceInjector(Context context, PackageManagerTracedLock lock,
             Installer installer, Object installLock, PackageAbiHelper abiHelper,
@@ -183,7 +184,8 @@ public class PackageManagerServiceInjector {
             Producer<BackgroundDexOptService> backgroundDexOptService,
             Producer<IBackupManager> iBackupManager,
             Producer<SharedLibrariesImpl> sharedLibrariesProducer,
-            Producer<CrossProfileIntentFilterHelper> crossProfileIntentFilterHelperProducer) {
+            Producer<CrossProfileIntentFilterHelper> crossProfileIntentFilterHelperProducer,
+            Producer<UpdateOwnershipHelper> updateOwnershipHelperProducer) {
         mContext = context;
         mLock = lock;
         mInstaller = installer;
@@ -238,6 +240,7 @@ public class PackageManagerServiceInjector {
         mSharedLibrariesProducer = new Singleton<>(sharedLibrariesProducer);
         mCrossProfileIntentFilterHelperProducer = new Singleton<>(
                 crossProfileIntentFilterHelperProducer);
+        mUpdateOwnershipHelperProducer = new Singleton<>(updateOwnershipHelperProducer);
     }
 
     /**
@@ -422,6 +425,11 @@ public class PackageManagerServiceInjector {
     public SharedLibrariesImpl getSharedLibrariesImpl() {
         return mSharedLibrariesProducer.get(this, mPackageManager);
     }
+
+    public UpdateOwnershipHelper getUpdateOwnershipHelper() {
+        return mUpdateOwnershipHelperProducer.get(this, mPackageManager);
+    }
+
 
     /** Provides an abstraction to static access to system state. */
     public interface SystemWrapper {

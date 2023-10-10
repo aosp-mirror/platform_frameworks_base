@@ -1468,6 +1468,19 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>Only constrains auto-exposure (AE) algorithm, not
      * manual control of {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime} and
      * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}.</p>
+     * <p>Note that the actual achievable max framerate also depends on the minimum frame
+     * duration of the output streams. The max frame rate will be
+     * <code>min(aeTargetFpsRange.maxFps, 1 / max(individual stream min durations)</code>. For example,
+     * if the application sets this key to <code>{60, 60}</code>, but the maximum minFrameDuration among
+     * all configured streams is 33ms, the maximum framerate won't be 60fps, but will be
+     * 30fps.</p>
+     * <p>To start a CaptureSession with a target FPS range different from the
+     * capture request template's default value, the application
+     * is strongly recommended to call
+     * {@link SessionConfiguration#setSessionParameters }
+     * with the target fps range before creating the capture session. The aeTargetFpsRange is
+     * typically a session parameter. Specifying it at session creation time helps avoid
+     * session reconfiguration delays in cases like 60fps or high speed recording.</p>
      * <p><b>Units</b>: Frames per second (FPS)</p>
      * <p><b>Range of valid values:</b><br>
      * Any of the entries in {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges}</p>
@@ -2140,6 +2153,12 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE android.control.videoStabilizationMode} field will return
      * OFF if the recording output is not stabilized, or if there are no output
      * Surface types that can be stabilized.</p>
+     * <p>The application is strongly recommended to call
+     * {@link SessionConfiguration#setSessionParameters }
+     * with the desired video stabilization mode before creating the capture session.
+     * Video stabilization mode is a session parameter on many devices. Specifying
+     * it at session creation time helps avoid reconfiguration delay caused by difference
+     * between the default value and the first CaptureRequest.</p>
      * <p>If a camera device supports both this mode and OIS
      * ({@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode}), turning both modes on may
      * produce undesirable interaction, so it is recommended not to enable
@@ -3535,7 +3554,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_DEFAULT } mode.
      * They can be queried through
      * {@link android.hardware.camera2.CameraCharacteristics#get } with
-     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION) }.
+     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION }.
      * Unless reported by both
      * {@link android.hardware.camera2.params.StreamConfigurationMap }s, the outputs from
      * <code>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION android.scaler.streamConfigurationMapMaximumResolution}</code> and
@@ -3550,13 +3569,12 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <ul>
      * <li>
      * <p>The mandatory stream combinations listed in
-     *   {@link android.hardware.camera2.CameraCharacteristics.mandatoryMaximumResolutionStreamCombinations }
-     *   would not apply.</p>
+     *   {@link CameraCharacteristics#SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS android.scaler.mandatoryMaximumResolutionStreamCombinations}  would not apply.</p>
      * </li>
      * <li>
      * <p>The bayer pattern of {@code RAW} streams when
      *   {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }
-     *   is selected will be the one listed in {@link android.sensor.info.binningFactor }.</p>
+     *   is selected will be the one listed in {@link CameraCharacteristics#SENSOR_INFO_BINNING_FACTOR android.sensor.info.binningFactor}.</p>
      * </li>
      * <li>
      * <p>The following keys will always be present:</p>
@@ -3576,9 +3594,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
+     * @see CameraCharacteristics#SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION
+     * @see CameraCharacteristics#SENSOR_INFO_BINNING_FACTOR
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE_MAXIMUM_RESOLUTION
      * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION
      * @see #SENSOR_PIXEL_MODE_DEFAULT
@@ -4193,9 +4213,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This control allows Camera extension clients to configure the strength of the applied
      * extension effect. Strength equal to 0 means that the extension must not apply any
      * post-processing and return a regular captured frame. Strength equal to 100 is the
-     * default level of post-processing applied when the control is not supported or not set
-     * by the client. Values between 0 and 100 will have different effect depending on the
-     * extension type as described below:</p>
+     * maximum level of post-processing. Values between 0 and 100 will have different effect
+     * depending on the extension type as described below:</p>
      * <ul>
      * <li>{@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_BOKEH BOKEH} -
      * the strength is expected to control the amount of blur.</li>
@@ -4210,7 +4229,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@link android.hardware.camera2.CameraExtensionCharacteristics#getAvailableCaptureRequestKeys }.
      * The control is only defined and available to clients sending capture requests via
      * {@link android.hardware.camera2.CameraExtensionSession }.
-     * The default value is 100.</p>
+     * If the client doesn't specify the extension strength value, then a default value will
+     * be set by the extension. Clients can retrieve the default value by checking the
+     * corresponding capture result.</p>
      * <p><b>Range of valid values:</b><br>
      * 0 - 100</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>

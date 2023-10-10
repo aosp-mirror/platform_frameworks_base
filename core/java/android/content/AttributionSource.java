@@ -212,6 +212,11 @@ public final class AttributionSource implements Parcelable {
     }
 
     /** @hide */
+    public AttributionSource withDefaultToken() {
+        return withToken(sDefaultToken);
+    }
+
+    /** @hide */
     public AttributionSource withPid(int pid) {
         return new AttributionSource(getUid(), pid, getPackageName(), getAttributionTag(),
                 getToken(), mAttributionSourceState.renouncedPermissions, getNext());
@@ -520,16 +525,28 @@ public final class AttributionSource implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AttributionSource that = (AttributionSource) o;
-        return mAttributionSourceState.uid == that.mAttributionSourceState.uid
+        return equalsExceptToken(that) && Objects.equals(
+                mAttributionSourceState.token, that.mAttributionSourceState.token);
+    }
+
+    /**
+     * We store trusted attribution sources without their token (the token is the key to the map)
+     * to avoid having a strong reference to the token. This means, when checking the equality of a
+     * supplied AttributionSource in PermissionManagerService.isTrustedAttributionSource, we want to
+     * compare everything except the token.
+     *
+     * @hide
+     */
+    public boolean equalsExceptToken(@Nullable AttributionSource o) {
+        if (o == null) return false;
+        return mAttributionSourceState.uid == o.mAttributionSourceState.uid
                 && Objects.equals(mAttributionSourceState.packageName,
-                        that.mAttributionSourceState.packageName)
+                o.mAttributionSourceState.packageName)
                 && Objects.equals(mAttributionSourceState.attributionTag,
-                        that.mAttributionSourceState.attributionTag)
-                && Objects.equals(mAttributionSourceState.token,
-                        that.mAttributionSourceState.token)
+                o.mAttributionSourceState.attributionTag)
                 && Arrays.equals(mAttributionSourceState.renouncedPermissions,
-                        that.mAttributionSourceState.renouncedPermissions)
-                && Objects.equals(getNext(), that.getNext());
+                o.mAttributionSourceState.renouncedPermissions)
+                && Objects.equals(getNext(), o.getNext());
     }
 
     @Override

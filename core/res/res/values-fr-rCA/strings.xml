@@ -312,14 +312,14 @@
     <string name="permgrouplab_storage" msgid="17339216290379241">"Fichiers"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"accéder aux fichiers sur votre appareil"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musique et audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accédez aux fichiers musicaux et audio sur votre appareil"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accéder aux fichiers musicaux et audio sur votre appareil"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Photos et vidéos"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accédez aux photos et aux vidéos sur votre appareil"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accéder aux photos et aux vidéos sur votre appareil"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder à vos activités physiques"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"appareil photo"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"prendre des photos et filmer des vidéos"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Appareils à proximité"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"découvrir les appareils à proximité et s\'y connecter"</string>
@@ -807,7 +807,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller la tablette ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Surveillez le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouillez votre appareil Android TV ou effacez toutes les données qu\'il contient en cas d\'un nombre trop élevé de tentatives."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Surveillez le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouillez le système d\'infodivertissement ou effacez toutes ses données en cas d\'un nombre trop élevé de tentatives."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouille le téléphone ou efface toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran est contrôlé. Si le nombre maximal de tentatives de saisie du mot de passe est atteint, le téléphone est verrouillé ou toutes ses données sont effacées."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Surveille le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouille la tablette ou efface toutes les données de l\'utilisateur en cas d\'un nombre trop élevé de tentatives."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Surveillez le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouillez votre appareil Android TV ou effacez toutes les données de l\'utilisateur en cas d\'un nombre trop élevé de tentatives."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Surveillez le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouillez le système d\'infodivertissement ou effacez toutes les données de ce profil en cas d\'un nombre trop élevé de tentatives."</string>
@@ -820,7 +820,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Effacer les données de la tablette sans avertissement, en rétablissant les paramètres par défaut"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Effacez les données de votre appareil Android TV sans avertissement en effectuant une réinitialisation des paramètres d\'usine."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Effacez les données du système d\'infodivertissement sans avertissement en rétablissant les paramètres par défaut."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Effacer les données du téléphone sans avertissement en rétablissant les paramètres par défaut."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Les données du téléphone sont effacées sans avertissement en rétablissant les paramètres par défaut."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Effacer les données de profil"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Effacer les données de l\'utilisateur"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Effacer les données de l\'utilisateur sur cette tablette sans avertissement."</string>
@@ -2324,11 +2324,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permet à une application compagnon en arrière-plan de lancer des services d\'avant-plan."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Le microphone est accessible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Le microphone est bloqué"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Double écran"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Le double écran est activé"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen activé"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> utilise les deux écrans pour afficher le contenu"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"L\'appareil est trop chaud"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Le double écran n\'est pas accessible, car votre téléphone est trop chaud"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen n\'est pas accessible, car votre téléphone est trop chaud"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"La fonctionnalité Dual Screen n\'est pas accessible"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"La fonctionnalité Dual Screen n\'est pas accessible, car l\'économiseur de pile est activé. Vous pouvez désactiver cette option dans les paramètres."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Accéder aux paramètres"</string>

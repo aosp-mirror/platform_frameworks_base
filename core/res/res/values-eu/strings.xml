@@ -476,7 +476,7 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"atzitu kokapen-hornitzaileen komando gehigarriak"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Kokapen-hornitzailearen agindu gehigarriak erabiltzeko baimena ematen die aplikazioei. Horrela, agian aplikazioek GPSaren edo bestelako kokapenaren iturburuen funtzionamenduan eragina izan dezakete."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"lortu kokapen zehatza aurreko planoan bakarrik"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Abian denean, aplikazioak kokapen zehatza lor dezake kokapen-zerbitzuen bidez. Aplikazioak kokapena lortu ahal izateko, kokapen-zerbitzuek aktibatuta egon behar dute gailuan. Bateria-erabilera areagotzen du horrek."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Abian denean, aplikazioak kokapen zehatza lor dezake kokapen-zerbitzuen bidez. Aplikazioak kokapena lortu ahal izateko, kokapen-zerbitzuek aktibatuta egon behar dute gailuan. Agian bateria gehiago erabiliko du."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"atzitu gutxi gorabeherako kokapena aurreko planoan bakarrik"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Abian denean, aplikazioak gutxi gorabeherako kokapena lor dezake kokapen-zerbitzuen bidez. Aplikazioak kokapena lortu ahal izateko, kokapen-zerbitzuek aktibatuta egon behar dute gailuan."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"atzitu kokapena atzeko planoan"</string>
@@ -670,7 +670,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Sakatu hau aurpegi-eredua ezabatzeko eta, gero, gehitu aurpegia berriro"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguratu Aurpegi bidez desblokeatzea"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonoa desblokeatzeko, begira iezaiozu"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aurpegi bidez desblokeatzeko aukera erabiltzeko, aktibatu "<b>"kamera erabiltzeko baimena"</b>" Ezarpenak &gt; Pribatutasuna atalean"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aurpegi bidez desblokeatzeko eginbidea erabiltzeko, aktibatu "<b>"kamera erabiltzeko baimena"</b>" Ezarpenak &gt; Pribatutasuna atalean"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguratu telefonoa desblokeatzeko modu gehiago"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Sakatu hau hatz-marka bat gehitzeko"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Hatz-marka bidez desblokeatzea"</string>
@@ -934,7 +934,7 @@
     <string name="relationTypeAssistant" msgid="4057605157116589315">"Laguntzailea"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"Anaia/Neba"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"Semea/Alaba"</string>
-    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Izatezko bikotea"</string>
+    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Izatezko bikotekidea"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"Aita"</string>
     <string name="relationTypeFriend" msgid="3192092625893980574">"Laguna"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"Kudeatzailea"</string>
@@ -1563,7 +1563,7 @@
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Maius"</string>
     <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Sartu"</string>
     <string name="activitychooserview_choose_application" msgid="3500574466367891463">"Aukeratu aplikazio bat"</string>
-    <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Ezin izan da <xliff:g id="APPLICATION_NAME">%s</xliff:g> abiarazi"</string>
+    <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Ezin izan da exekutatu <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Partekatu hauekin"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Partekatu <xliff:g id="APPLICATION_NAME">%s</xliff:g> aplikazioarekin"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Lerratze-euskarria. Ukitu eta eutsi."</string>
@@ -1611,7 +1611,7 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Aukeratu jarduera"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Partekatu hauekin:"</string>
     <string name="sending" msgid="206925243621664438">"Bidaltzen…"</string>
-    <string name="launchBrowserDefault" msgid="6328349989932924119">"Arakatzailea abiarazi nahi duzu?"</string>
+    <string name="launchBrowserDefault" msgid="6328349989932924119">"Arakatzailea exekutatu nahi duzu?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Deia onartu nahi duzu?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Beti"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Behin soilik"</string>
@@ -2127,7 +2127,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Aplikazioak ez du grabatzeko baimenik, baina baliteke audioa grabatzea USB bidezko gailu horren bidez."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Pantaila nagusia"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Atzera"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Erabilitako azken aplikazioak"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Azkenaldian erabilitako aplikazioak"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Jakinarazpenak"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Ezarpen bizkorrak"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Piztu edo itzaltzeko leihoa"</string>
@@ -2323,11 +2323,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Aurreko planoko zerbitzuak atzeko planotik abiarazteko baimena ematen die aplikazio osagarriei."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Erabilgarri dago mikrofonoa"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Blokeatuta dago mikrofonoa"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Bi pantailako modua"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Bi pantailako modua aktibatuta dago"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen aktibatuta dago"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> bi pantailak erabiltzen ari da edukia erakusteko"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Gailua beroegi dago"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Bi pantailako modua ez dago erabilgarri telefonoa berotzen ari delako"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen ez dago erabilgarri telefonoa berotzen ari delako"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen ez dago erabilgarri"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen ez dago erabilgarri, bateria-aurreztailea aktibatuta dagoelako. Aukera hori desaktibatzeko, joan ezarpenetara."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Joan Ezarpenak atalera"</string>

@@ -53,16 +53,16 @@ class ThemeTest : public ::testing::Test {
   }
 
  protected:
-  std::unique_ptr<const ApkAssets> system_assets_;
-  std::unique_ptr<const ApkAssets> style_assets_;
-  std::unique_ptr<const ApkAssets> libclient_assets_;
-  std::unique_ptr<const ApkAssets> lib_one_assets_;
-  std::unique_ptr<const ApkAssets> lib_two_assets_;
+  AssetManager2::ApkAssetsPtr system_assets_;
+  AssetManager2::ApkAssetsPtr style_assets_;
+  AssetManager2::ApkAssetsPtr libclient_assets_;
+  AssetManager2::ApkAssetsPtr lib_one_assets_;
+  AssetManager2::ApkAssetsPtr lib_two_assets_;
 };
 
 TEST_F(ThemeTest, EmptyTheme) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({style_assets_.get()});
+  assetmanager.SetApkAssets({style_assets_});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
   EXPECT_EQ(0u, theme->GetChangingConfigurations());
@@ -72,7 +72,7 @@ TEST_F(ThemeTest, EmptyTheme) {
 
 TEST_F(ThemeTest, SingleThemeNoParent) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({style_assets_.get()});
+  assetmanager.SetApkAssets({style_assets_});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
   ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleOne).has_value());
@@ -92,7 +92,7 @@ TEST_F(ThemeTest, SingleThemeNoParent) {
 
 TEST_F(ThemeTest, SingleThemeWithParent) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({style_assets_.get()});
+  assetmanager.SetApkAssets({style_assets_});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
   ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo).has_value());
@@ -121,7 +121,7 @@ TEST_F(ThemeTest, SingleThemeWithParent) {
 
 TEST_F(ThemeTest, TryToUseBadResourceId) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({style_assets_.get()});
+  assetmanager.SetApkAssets({style_assets_});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
   ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo).has_value());
@@ -130,7 +130,7 @@ TEST_F(ThemeTest, TryToUseBadResourceId) {
 
 TEST_F(ThemeTest, MultipleThemesOverlaidNotForce) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({style_assets_.get()});
+  assetmanager.SetApkAssets({style_assets_});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
   ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo).has_value());
@@ -160,7 +160,7 @@ TEST_F(ThemeTest, MultipleThemesOverlaidNotForce) {
 
 TEST_F(ThemeTest, MultipleThemesOverlaidForced) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({style_assets_.get()});
+  assetmanager.SetApkAssets({style_assets_});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
   ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo).has_value());
@@ -190,8 +190,7 @@ TEST_F(ThemeTest, MultipleThemesOverlaidForced) {
 
 TEST_F(ThemeTest, ResolveDynamicAttributesAndReferencesToSharedLibrary) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets(
-      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
+  assetmanager.SetApkAssets({lib_two_assets_, lib_one_assets_, libclient_assets_});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
   ASSERT_TRUE(theme->ApplyStyle(libclient::R::style::Theme, false /*force*/).has_value());
@@ -216,7 +215,7 @@ TEST_F(ThemeTest, ResolveDynamicAttributesAndReferencesToSharedLibrary) {
 
 TEST_F(ThemeTest, CopyThemeSameAssetManager) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({style_assets_.get()});
+  assetmanager.SetApkAssets({style_assets_});
 
   std::unique_ptr<Theme> theme_one = assetmanager.NewTheme();
   ASSERT_TRUE(theme_one->ApplyStyle(app::R::style::StyleOne).has_value());
@@ -253,10 +252,10 @@ TEST_F(ThemeTest, CopyThemeSameAssetManager) {
 
 TEST_F(ThemeTest, ThemeRebase) {
   AssetManager2 am;
-  am.SetApkAssets({style_assets_.get()});
+  am.SetApkAssets({style_assets_});
 
   AssetManager2 am_night;
-  am_night.SetApkAssets({style_assets_.get()});
+  am_night.SetApkAssets({style_assets_});
 
   ResTable_config night{};
   night.uiMode = ResTable_config::UI_MODE_NIGHT_YES;
@@ -327,12 +326,11 @@ TEST_F(ThemeTest, ThemeRebase) {
 
 TEST_F(ThemeTest, OnlyCopySameAssetsThemeWhenAssetManagersDiffer) {
   AssetManager2 assetmanager_dst;
-  assetmanager_dst.SetApkAssets({system_assets_.get(), lib_one_assets_.get(), style_assets_.get(),
-                                 libclient_assets_.get()});
+  assetmanager_dst.SetApkAssets(
+      {system_assets_, lib_one_assets_, style_assets_, libclient_assets_});
 
   AssetManager2 assetmanager_src;
-  assetmanager_src.SetApkAssets({system_assets_.get(), lib_two_assets_.get(), lib_one_assets_.get(),
-                                 style_assets_.get()});
+  assetmanager_src.SetApkAssets({system_assets_, lib_two_assets_, lib_one_assets_, style_assets_});
 
   auto theme_dst = assetmanager_dst.NewTheme();
   ASSERT_TRUE(theme_dst->ApplyStyle(app::R::style::StyleOne).has_value());
@@ -376,10 +374,10 @@ TEST_F(ThemeTest, OnlyCopySameAssetsThemeWhenAssetManagersDiffer) {
 
 TEST_F(ThemeTest, CopyNonReferencesWhenPackagesDiffer) {
   AssetManager2 assetmanager_dst;
-  assetmanager_dst.SetApkAssets({system_assets_.get()});
+  assetmanager_dst.SetApkAssets({system_assets_});
 
   AssetManager2 assetmanager_src;
-  assetmanager_src.SetApkAssets({system_assets_.get(), style_assets_.get()});
+  assetmanager_src.SetApkAssets({system_assets_, style_assets_});
 
   auto theme_dst = assetmanager_dst.NewTheme();
   auto theme_src = assetmanager_src.NewTheme();

@@ -511,17 +511,31 @@ public class DatabaseUtils {
      */
     public static void appendEscapedSQLString(StringBuilder sb, String sqlString) {
         sb.append('\'');
-        if (sqlString.indexOf('\'') != -1) {
-            int length = sqlString.length();
-            for (int i = 0; i < length; i++) {
-                char c = sqlString.charAt(i);
-                if (c == '\'') {
-                    sb.append('\'');
+        int length = sqlString.length();
+        for (int i = 0; i < length; i++) {
+            char c = sqlString.charAt(i);
+            if (Character.isHighSurrogate(c)) {
+                if (i == length - 1) {
+                    continue;
                 }
-                sb.append(c);
+                if (Character.isLowSurrogate(sqlString.charAt(i + 1))) {
+                    // add them both
+                    sb.append(c);
+                    sb.append(sqlString.charAt(i + 1));
+                    continue;
+                } else {
+                    // this is a lone surrogate, skip it
+                    continue;
+                }
             }
-        } else
-            sb.append(sqlString);
+            if (Character.isLowSurrogate(c)) {
+                continue;
+            }
+            if (c == '\'') {
+                sb.append('\'');
+            }
+            sb.append(c);
+        }
         sb.append('\'');
     }
 

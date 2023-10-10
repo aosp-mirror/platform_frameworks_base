@@ -299,8 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Système Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Passer au profil personnel"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Passer au profil pro"</string>
-    <string name="user_owner_app_label" msgid="1553595155465750298">"Passer au <xliff:g id="APP_NAME">%1$s</xliff:g> personnel"</string>
-    <string name="managed_profile_app_label" msgid="367401088383965725">"Passer au <xliff:g id="APP_NAME">%1$s</xliff:g> professionnel"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Passer à l\'application <xliff:g id="APP_NAME">%1$s</xliff:g> personnelle"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Passer à l\'application <xliff:g id="APP_NAME">%1$s</xliff:g> professionnelle"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"accéder à vos contacts"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Position"</string>
@@ -1591,9 +1591,9 @@
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Vous avez dépassé votre limite définie de <xliff:g id="SIZE">%s</xliff:g>"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Données en arrière-plan limitées"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Appuyez pour suppr. restriction."</string>
-    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Conso données mobiles élevée"</string>
+    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Conso élevée des données mobiles"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Vos applications ont utilisé plus de données que d\'habitude"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> a utilisé plus de données que d\'habitude"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"L\'application <xliff:g id="APP">%s</xliff:g> a utilisé plus de données que d\'habitude"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Certificat de sécurité"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"Ce certificat est valide."</string>
     <string name="issued_to" msgid="5975877665505297662">"Délivré à :"</string>
@@ -1645,7 +1645,7 @@
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", sécurisé"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"J\'ai oublié le schéma"</string>
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Schéma incorrect."</string>
-    <string name="kg_wrong_password" msgid="2384677900494439426">"Mot de passe incorrect."</string>
+    <string name="kg_wrong_password" msgid="2384677900494439426">"Mot de passe incorrect"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Code PIN incorrect."</string>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Tracez votre schéma"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Saisissez le code PIN de la carte SIM."</string>
@@ -2123,7 +2123,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Le Bluetooth restera activé en mode Avion"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Chargement…"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # fichier}one{{file_name} + # fichier}many{{file_name} + # fichiers}other{{file_name} + # fichiers}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Aucune recommandation de personnes avec lesquelles effectuer un partage"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Aucun destinataire recommandé"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Liste des applications"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Cette application n\'a pas reçu l\'autorisation d\'enregistrer des contenus audio, mais peut le faire via ce périphérique USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Accueil"</string>

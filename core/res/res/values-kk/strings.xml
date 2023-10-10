@@ -802,7 +802,7 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Бұған дейін орнатылған қолданбаның автоматты түрде жаңартылуына мүмкіндік береді."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Құпия сөз ережелерін тағайындау"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Экран құлпын ашу әркеттерін бақылау"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Экран құлпын ашу әрекеттерін бақылау"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және планшетті бекіту немесе тым көп қате құпия сөздер терілген болса, планшеттің бүкіл деректерін өшіру."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Экранның құлпын ашу кезінде қате енгізілген құпия сөздердің санын бақылау, құпия сөз тым көп қате енгізілген жағдайда, Android TV құрылғысын құлыптау және Android TV құрылғыңыздың барлық деректерінен тазарту."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Экран құлпын ашқан кезде, терілген қате құпия сөздердің саны бақыланады, сондай-ақ құпия сөздер бірнеше рет қате терілсе, ақпараттық-сауықтық жүйе құлыпталады немесе оның барлық дерегі жойылады."</string>
@@ -815,7 +815,7 @@
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Экран құлпын өзгерте алады."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Экранды құлыптау"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Экранның қашан және қалай құлыпталатынын басқара алады."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Барлық деректерді өшіру"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Барлық деректі өшіру"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Планшет дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Зауыттық деректерді қалпына келтіру арқылы Android TV құрылғыңыздың деректерін ескертусіз тазартыңыз."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Зауыттық деректерді қалпына келтіру арқылы ақпараттық-сауықтық жүйе дерегі ескертусіз өшіріледі."</string>
@@ -2323,11 +2323,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Қосымша қолданбаға экрандық режимдегі қызметтерді фоннан іске қосуға рұқсат беріледі."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон қолжетімді."</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон блокталған."</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Қос экран"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Қос экран функциясы қосулы"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen функциясы қосулы"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы контентті көрсету үшін екі дисплейді де пайдаланады."</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Құрылғы қатты қызып кетті."</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Қос экран функциясы істемейді, себебі телефон қатты қызып кетеді."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen функциясы істемейді, себебі телефон қатты қызып кетеді."</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen қолжетімсіз"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Батареяны үнемдеу режимі қосулы болғандықтан, Dual Screen қолжетімсіз. Мұны параметрлерден өшіруге болады."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Параметрлерге өту"</string>
