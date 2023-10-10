@@ -35,11 +35,12 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
-import com.android.server.pm.UserManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
+import com.android.server.pm.UserManagerInternal;
 
 import libcore.io.IoUtils;
 
@@ -53,6 +54,9 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -114,21 +118,26 @@ public class PersistentDataBlockService extends SystemService {
     private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
-    private static final int HEADER_SIZE = 8;
+    @VisibleForTesting
+    static final int HEADER_SIZE = 8;
     // Magic number to mark block device as adhering to the format consumed by this service
     private static final int PARTITION_TYPE_MARKER = 0x19901873;
     /** Size of the block reserved for FRP credential, including 4 bytes for the size header. */
     private static final int FRP_CREDENTIAL_RESERVED_SIZE = 1000;
     /** Maximum size of the FRP credential handle that can be stored. */
-    private static final int MAX_FRP_CREDENTIAL_HANDLE_SIZE = FRP_CREDENTIAL_RESERVED_SIZE - 4;
+    @VisibleForTesting
+    static final int MAX_FRP_CREDENTIAL_HANDLE_SIZE = FRP_CREDENTIAL_RESERVED_SIZE - 4;
     /**
      * Size of the block reserved for Test Harness Mode data, including 4 bytes for the size header.
      */
     private static final int TEST_MODE_RESERVED_SIZE = 10000;
     /** Maximum size of the Test Harness Mode data that can be stored. */
-    private static final int MAX_TEST_MODE_DATA_SIZE = TEST_MODE_RESERVED_SIZE - 4;
+    @VisibleForTesting
+    static final int MAX_TEST_MODE_DATA_SIZE = TEST_MODE_RESERVED_SIZE - 4;
+
     // Limit to 100k as blocks larger than this might cause strain on Binder.
-    private static final int MAX_DATA_BLOCK_SIZE = 1024 * 100;
+    @VisibleForTesting
+    static final int MAX_DATA_BLOCK_SIZE = 1024 * 100;
 
     public static final int DIGEST_SIZE_BYTES = 32;
     private static final String OEM_UNLOCK_PROP = "sys.oem_unlock_allowed";
@@ -138,12 +147,12 @@ public class PersistentDataBlockService extends SystemService {
 
     private final Context mContext;
     private final String mDataBlockFile;
-    private final boolean mIsRunningDSU;
+    private final boolean mIsFileBacked;
     private final Object mLock = new Object();
     private final CountDownLatch mInitDoneSignal = new CountDownLatch(1);
 
     private int mAllowedUid = -1;
-    private long mBlockDeviceSize;
+    private long mBlockDeviceSize = -1; // Load lazily
 
     @GuardedBy("mLock")
     private boolean mIsWritable = true;
@@ -151,13 +160,23 @@ public class PersistentDataBlockService extends SystemService {
     public PersistentDataBlockService(Context context) {
         super(context);
         mContext = context;
-        mIsRunningDSU = SystemProperties.getBoolean(GSI_RUNNING_PROP, false);
-        if (mIsRunningDSU) {
+        if (SystemProperties.getBoolean(GSI_RUNNING_PROP, false)) {
+            mIsFileBacked = true;
             mDataBlockFile = GSI_SANDBOX;
         } else {
+            mIsFileBacked = false;
             mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
         }
-        mBlockDeviceSize = -1; // Load lazily
+    }
+
+    @VisibleForTesting
+    PersistentDataBlockService(Context context, boolean isFileBacked, String dataBlockFile,
+            long blockDeviceSize) {
+        super(context);
+        mContext = context;
+        mIsFileBacked = isFileBacked;
+        mDataBlockFile = dataBlockFile;
+        mBlockDeviceSize = blockDeviceSize;
     }
 
     private int getAllowedUid() {
@@ -212,6 +231,11 @@ public class PersistentDataBlockService extends SystemService {
         super.onBootPhase(phase);
     }
 
+    @VisibleForTesting
+    void setAllowedUid(int uid) {
+        mAllowedUid = uid;
+    }
+
     private void formatIfOemUnlockEnabled() {
         boolean enabled = doGetOemUnlockEnabled();
         if (enabled) {
@@ -220,7 +244,7 @@ public class PersistentDataBlockService extends SystemService {
             }
         }
 
-        SystemProperties.set(OEM_UNLOCK_PROP, enabled ? "1" : "0");
+        setProperty(OEM_UNLOCK_PROP, enabled ? "1" : "0");
     }
 
     private void enforceOemUnlockReadPermission() {
@@ -278,7 +302,7 @@ public class PersistentDataBlockService extends SystemService {
     private long getBlockDeviceSize() {
         synchronized (mLock) {
             if (mBlockDeviceSize == -1) {
-                if (mIsRunningDSU) {
+                if (mIsFileBacked) {
                     mBlockDeviceSize = MAX_DATA_BLOCK_SIZE;
                 } else {
                     mBlockDeviceSize = nativeGetBlockDeviceSize(mDataBlockFile);
@@ -289,12 +313,24 @@ public class PersistentDataBlockService extends SystemService {
         return mBlockDeviceSize;
     }
 
-    private long getFrpCredentialDataOffset() {
-        return getBlockDeviceSize() - 1 - FRP_CREDENTIAL_RESERVED_SIZE;
+    @VisibleForTesting
+    int getMaximumFrpDataSize() {
+        return (int) (getTestHarnessModeDataOffset() - DIGEST_SIZE_BYTES - HEADER_SIZE);
     }
 
-    private long getTestHarnessModeDataOffset() {
+    @VisibleForTesting
+    long getFrpCredentialDataOffset() {
+        return getOemUnlockDataOffset() - FRP_CREDENTIAL_RESERVED_SIZE;
+    }
+
+    @VisibleForTesting
+    long getTestHarnessModeDataOffset() {
         return getFrpCredentialDataOffset() - TEST_MODE_RESERVED_SIZE;
+    }
+
+    @VisibleForTesting
+    long getOemUnlockDataOffset() {
+        return getBlockDeviceSize() - 1;
     }
 
     private boolean enforceChecksumValidity() {
@@ -385,7 +421,8 @@ public class PersistentDataBlockService extends SystemService {
         return md.digest();
     }
 
-    private void formatPartitionLocked(boolean setOemUnlockEnabled) {
+    @VisibleForTesting
+    void formatPartitionLocked(boolean setOemUnlockEnabled) {
 
         try {
             FileChannel channel = getBlockOutputChannel();
@@ -448,8 +485,13 @@ public class PersistentDataBlockService extends SystemService {
             Slog.e(TAG, "unable to access persistent partition", e);
             return;
         } finally {
-            SystemProperties.set(OEM_UNLOCK_PROP, enabled ? "1" : "0");
+            setProperty(OEM_UNLOCK_PROP, enabled ? "1" : "0");
         }
+    }
+
+    @VisibleForTesting
+    void setProperty(String name, String value) {
+        SystemProperties.set(name, value);
     }
 
     private boolean doGetOemUnlockEnabled() {
@@ -482,6 +524,16 @@ public class PersistentDataBlockService extends SystemService {
 
     private native long nativeGetBlockDeviceSize(String path);
     private native int nativeWipe(String path);
+
+    @VisibleForTesting
+    IPersistentDataBlockService getInterfaceForTesting() {
+        return IPersistentDataBlockService.Stub.asInterface(mService);
+    }
+
+    @VisibleForTesting
+    PersistentDataBlockManagerInternal getInternalInterfaceForTesting() {
+        return mInternalService;
+    }
 
     private final IBinder mService = new IPersistentDataBlockService.Stub() {
 
@@ -588,7 +640,18 @@ public class PersistentDataBlockService extends SystemService {
             enforceOemUnlockWritePermission();
 
             synchronized (mLock) {
-                int ret = nativeWipe(mDataBlockFile);
+                int ret;
+                if (mIsFileBacked) {
+                    try {
+                        Files.write(Paths.get(mDataBlockFile), new byte[MAX_DATA_BLOCK_SIZE],
+                                StandardOpenOption.TRUNCATE_EXISTING);
+                        ret = 0;
+                    } catch (IOException e) {
+                        ret = -1;
+                    }
+                } else {
+                    ret = nativeWipe(mDataBlockFile);
+                }
 
                 if (ret < 0) {
                     Slog.e(TAG, "failed to wipe persistent partition");
@@ -699,7 +762,7 @@ public class PersistentDataBlockService extends SystemService {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             pw.println("mDataBlockFile: " + mDataBlockFile);
-            pw.println("mIsRunningDSU: " + mIsRunningDSU);
+            pw.println("mIsFileBacked: " + mIsFileBacked);
             pw.println("mInitDoneSignal: " + mInitDoneSignal);
             pw.println("mAllowedUid: " + mAllowedUid);
             pw.println("mBlockDeviceSize: " + mBlockDeviceSize);
