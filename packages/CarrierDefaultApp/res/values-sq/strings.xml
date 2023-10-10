@@ -5,7 +5,7 @@
     <string name="android_system_label" msgid="2797790869522345065">"Operatori celular"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"Të dhënat celulare kanë përfunduar"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Të dhënat celulare janë çaktivizuar"</string>
-    <string name="portal_notification_detail" msgid="2295729385924660881">"Trokit për të vizituar sajtin e uebit të %s"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Trokit për të vizituar uebsajtin e %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Kontakto me ofruesin e shërbimit %s"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Nuk ka lidhje të të dhënave celulare"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"Shto plan të dhënash ose plan roaming përmes %s"</string>
@@ -16,7 +16,7 @@
     <string name="ssl_error_continue" msgid="1138548463994095584">"Vazhdo gjithsesi nëpërmjet shfletuesit"</string>
     <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Përforcimi i performancës"</string>
     <string name="performance_boost_notification_title" msgid="3126203390685781861">"Opsionet 5G nga operatori yt celular"</string>
-    <string name="performance_boost_notification_detail" msgid="216569851036236346">"Vizito sajtin e uebit të %s për të parë opsione për përvojën tënde me aplikacionin"</string>
+    <string name="performance_boost_notification_detail" msgid="216569851036236346">"Vizito uebsajtin e %s për të parë opsione për përvojën tënde me aplikacionin"</string>
     <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Jo tani"</string>
     <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Menaxho"</string>
     <string name="slice_purchase_app_label" msgid="7170191659233241166">"Bli një paketë përforcimi të performancës."</string>

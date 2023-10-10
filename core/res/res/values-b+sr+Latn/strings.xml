@@ -803,7 +803,7 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Dozvoljava vlasniku da ažurira aplikaciju koju je prethodno instalirala bez radnji korisnika"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Podešavanje pravila za lozinku"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontroliše dužinu i znakove dozvoljene u lozinkama i PIN-ovima za zaključavanje ekrana."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadgledajte pokušaje otključavanja ekrana"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadzor pokušaja otključavanja ekrana"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Prati broj netačno unetih lozinki prilikom otključavanja ekrana i zaključava tablet ili briše podatke sa tableta ako je netačna lozinka uneta previše puta."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava Android TV uređaj ili briše sve podatke sa Android TV uređaja ako se unese previše netačnih lozinki."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Prati broj netačno unetih lozinki pri otključavanju ekrana i zaključava sistem za info-zabavu ili briše sve podatke sa sistema za info-zabavu ako je netačna lozinka uneta previše puta."</string>

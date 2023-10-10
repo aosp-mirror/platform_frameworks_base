@@ -111,7 +111,7 @@
     <string name="screenrecord_continue" msgid="4055347133700593164">"Začít"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Nahrávání obrazovky"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Nahrávání obrazovky a zvuku"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Zobrazovat klepnutí na obrazovku"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Zobrazovat klepnutí na displej"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Zastavit"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Sdílet"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Nahrávka obrazovky se uložila"</string>
