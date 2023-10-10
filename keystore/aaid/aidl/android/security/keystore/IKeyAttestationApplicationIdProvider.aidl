@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2016, The Android Open Source Project
+/**
+ * Copyright (c) 2023, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-package android.security.keymaster;
+package android.security.keystore;
 
-/* The cpp_header is relative to system/security/keystore/include
- * Link against libkeystore_binder to make use of the native implementation of this Parcelable.
- */
-parcelable KeyAttestationPackageInfo cpp_header "keystore/KeyAttestationPackageInfo.h";
+import android.security.keystore.KeyAttestationApplicationId;
+
+/** @hide */
+interface IKeyAttestationApplicationIdProvider {
+    /**
+     * Provides information describing the possible applications identified by a UID.
+     * @hide
+     */
+    KeyAttestationApplicationId getKeyAttestationApplicationId(int uid);
+}
