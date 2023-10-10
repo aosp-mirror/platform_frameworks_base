@@ -107,11 +107,11 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dalvik.annotation.optimization.NeverCompile;
 
-import dagger.Lazy;
-
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
+
+import dagger.Lazy;
 
 /** Handles QuickSettings touch handling, expansion and animation state
  * TODO (b/264460656) make this dumpable
@@ -724,7 +724,9 @@ public class QuickSettingsController implements Dumpable {
 
     /** Closes the Qs customizer. */
     public void closeQsCustomizer() {
-        mQs.closeCustomizer();
+        if (mQs != null) {
+            mQs.closeCustomizer();
+        }
     }
 
     /** Returns whether touches from the notification panel should be disallowed */

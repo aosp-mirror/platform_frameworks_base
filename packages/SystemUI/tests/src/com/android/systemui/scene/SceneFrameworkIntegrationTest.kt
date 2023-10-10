@@ -20,6 +20,7 @@ package com.android.systemui.scene
 
 import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
+import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
@@ -39,6 +40,7 @@ import com.android.systemui.model.SysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -182,6 +184,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private var bouncerSceneJob: Job? = null
 
+    private val qsFlexiglassAdapter = FakeQSSceneAdapter(inflateDelegate = { _, _ -> mock<View>() })
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -232,6 +236,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 applicationScope = testScope.backgroundScope,
                 deviceEntryInteractor = deviceEntryInteractor,
                 shadeHeaderViewModel = shadeHeaderViewModel,
+                qsSceneAdapter = qsFlexiglassAdapter,
             )
 
         utils.deviceEntryRepository.setUnlocked(false)
