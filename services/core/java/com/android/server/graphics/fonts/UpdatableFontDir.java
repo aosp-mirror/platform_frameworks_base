@@ -619,8 +619,8 @@ final class UpdatableFontDir {
         }
 
         return new FontConfig(
-                config.getFontFamilies(), config.getAliases(), mergedFamilies, mLastModifiedMillis,
-                mConfigVersion);
+                config.getFontFamilies(), config.getAliases(), mergedFamilies,
+                config.getLocaleFallbackCustomizations(), mLastModifiedMillis, mConfigVersion);
     }
 
     private PersistentSystemFontConfig.Config readPersistentConfig() {

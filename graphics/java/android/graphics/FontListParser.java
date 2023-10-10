@@ -236,7 +236,9 @@ public class FontListParser {
             }
         }
 
-        return new FontConfig(families, filtered, resultNamedFamilies, lastModifiedDate,
+        return new FontConfig(families, filtered, resultNamedFamilies,
+                customization.getLocaleFamilyCustomizations(),
+                lastModifiedDate,
                 configVersion);
     }
 
