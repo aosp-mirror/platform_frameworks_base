@@ -166,6 +166,9 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         waitForIdleSync()
         verify(controller).onLaunchAnimationCancelled()
         verify(controller, never()).onLaunchAnimationStart(anyBoolean())
+        verify(listener).onLaunchAnimationCancelled()
+        verify(listener, never()).onLaunchAnimationStart()
+        assertNull(runner.delegate)
     }
 
     @Test
@@ -176,6 +179,9 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         waitForIdleSync()
         verify(controller).onLaunchAnimationCancelled()
         verify(controller, never()).onLaunchAnimationStart(anyBoolean())
+        verify(listener).onLaunchAnimationCancelled()
+        verify(listener, never()).onLaunchAnimationStart()
+        assertNull(runner.delegate)
     }
 
     @Test
@@ -192,6 +198,15 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         assertThrows(IllegalArgumentException::class.java) {
             ActivityLaunchAnimator.Controller.fromView(FrameLayout(mContext))
         }
+    }
+
+    @Test
+    fun disposeRunner_delegateDereferenced() {
+        val runner = activityLaunchAnimator.createRunner(controller)
+        assertNotNull(runner.delegate)
+        runner.dispose()
+        waitForIdleSync()
+        assertNull(runner.delegate)
     }
 
     private fun fakeWindow(): RemoteAnimationTarget {
