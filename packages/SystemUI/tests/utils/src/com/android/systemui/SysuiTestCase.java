@@ -17,7 +17,6 @@ package com.android.systemui;
 
 import static com.android.systemui.Flags.FLAG_EXAMPLE_FLAG;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -38,11 +37,7 @@ import androidx.core.animation.AndroidXAnimatorIsolationRule;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.FakeBroadcastDispatcher;
-import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger;
-import com.android.systemui.dump.DumpManager;
-import com.android.systemui.settings.UserTracker;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -53,7 +48,6 @@ import org.mockito.Mockito;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 /**
@@ -86,7 +80,7 @@ public abstract class SysuiTestCase {
 
     public TestableDependency mDependency;
     private Instrumentation mRealInstrumentation;
-    private FakeBroadcastDispatcher mFakeBroadcastDispatcher;
+    private SysuiTestDependency mSysuiDependency;
 
     @Before
     public void SysuiSetup() throws Exception {
@@ -97,18 +91,8 @@ public abstract class SysuiTestCase {
         // Set the value of a single gantry flag inside the com.android.systemui package to
         // ensure all flags in that package are faked (and thus require a value to be set).
         mSetFlagsRule.disableFlags(FLAG_EXAMPLE_FLAG);
-
-        mDependency = SysuiTestDependencyKt.installSysuiTestDependency(mContext);
-        mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(
-                mContext,
-                mContext.getMainExecutor(),
-                mock(Looper.class),
-                mock(Executor.class),
-                mock(DumpManager.class),
-                mock(BroadcastDispatcherLogger.class),
-                mock(UserTracker.class),
-                shouldFailOnLeakedReceiver());
-
+        mSysuiDependency = new SysuiTestDependency(mContext, shouldFailOnLeakedReceiver());
+        mDependency = mSysuiDependency.install();
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
         Instrumentation inst = spy(mRealInstrumentation);
         when(inst.getContext()).thenAnswer(invocation -> {
@@ -120,11 +104,6 @@ public abstract class SysuiTestCase {
                     "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext");
         });
         InstrumentationRegistry.registerInstance(inst, InstrumentationRegistry.getArguments());
-        // Many tests end up creating a BroadcastDispatcher. Instead, give them a fake that will
-        // record receivers registered. They are not actually leaked as they are kept just as a weak
-        // reference and are never sent to the Context. This will also prevent a real
-        // BroadcastDispatcher from actually registering receivers.
-        mDependency.injectTestDependency(BroadcastDispatcher.class, mFakeBroadcastDispatcher);
     }
 
     protected boolean shouldFailOnLeakedReceiver() {
@@ -144,8 +123,9 @@ public abstract class SysuiTestCase {
         }
         disallowTestableLooperAsMainThread();
         mContext.cleanUpReceivers(this.getClass().getSimpleName());
-        if (mFakeBroadcastDispatcher != null) {
-            mFakeBroadcastDispatcher.cleanUpReceivers(this.getClass().getSimpleName());
+        FakeBroadcastDispatcher dispatcher = getFakeBroadcastDispatcher();
+        if (dispatcher != null) {
+            dispatcher.cleanUpReceivers(this.getClass().getSimpleName());
         }
     }
 
@@ -172,7 +152,7 @@ public abstract class SysuiTestCase {
     }
 
     public FakeBroadcastDispatcher getFakeBroadcastDispatcher() {
-        return mFakeBroadcastDispatcher;
+        return mSysuiDependency.getFakeBroadcastDispatcher();
     }
 
     public SysuiTestableContext getContext() {
