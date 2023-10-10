@@ -24,10 +24,17 @@ import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationResultModel
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
+import dagger.Binds
+import dagger.Module
+import dagger.Provides
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.currentTime
 
 class FakeAuthenticationRepository(
     private val deviceEntryRepository: FakeDeviceEntryRepository,
@@ -199,5 +206,21 @@ class FakeAuthenticationRepository(
         private fun List<AuthenticationPatternCoordinate>.toCells(): List<LockPatternView.Cell> {
             return map { coordinate -> LockPatternView.Cell.of(coordinate.y, coordinate.x) }
         }
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@Module(includes = [FakeAuthenticationRepositoryModule.Bindings::class])
+object FakeAuthenticationRepositoryModule {
+    @Provides
+    @SysUISingleton
+    fun provideFake(
+        deviceEntryRepository: FakeDeviceEntryRepository,
+        scope: TestScope,
+    ) = FakeAuthenticationRepository(deviceEntryRepository, currentTime = { scope.currentTime })
+
+    @Module
+    interface Bindings {
+        @Binds fun bindFake(fake: FakeAuthenticationRepository): AuthenticationRepository
     }
 }

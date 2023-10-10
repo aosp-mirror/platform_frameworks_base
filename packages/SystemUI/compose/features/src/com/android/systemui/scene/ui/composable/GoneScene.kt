@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Direction
+import com.android.systemui.scene.shared.model.Edge
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
@@ -41,7 +42,12 @@ class GoneScene @Inject constructor() : ComposableScene {
     override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow<Map<UserAction, SceneModel>>(
                 mapOf(
-                    UserAction.Swipe(Direction.DOWN) to SceneModel(SceneKey.Shade),
+                    UserAction.Swipe(
+                        pointerCount = 2,
+                        fromEdge = Edge.TOP,
+                        direction = Direction.DOWN,
+                    ) to SceneModel(SceneKey.QuickSettings),
+                    UserAction.Swipe(direction = Direction.DOWN) to SceneModel(SceneKey.Shade),
                 )
             )
             .asStateFlow()

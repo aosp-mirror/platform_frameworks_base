@@ -1486,13 +1486,13 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
 
     /**
-     * Allows the assistant app to get the training data from the PCC sandbox to improve the
+     * Allows the assistant app to get the training data from the trusted process to improve the
      * hotword training model.
      *
      * @hide
      */
-    public static final int OP_RECEIVE_SANDBOX_TRAINING_DATA =
-            AppProtoEnums.APP_OP_RECEIVE_SANDBOX_TRAINING_DATA;
+    public static final int OP_RECEIVE_TRUSTED_PROCESS_TRAINING_DATA =
+            AppProtoEnums.APP_OP_RECEIVE_TRUSTED_PROCESS_TRAINING_DATA;
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -1640,7 +1640,7 @@ public class AppOpsManager {
             OPSTR_CAMERA_SANDBOXED,
             OPSTR_RECORD_AUDIO_SANDBOXED,
             OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
-            OPSTR_RECEIVE_SANDBOX_TRAINING_DATA
+            OPSTR_RECEIVE_TRUSTED_PROCESS_TRAINING_DATA
     })
     public @interface AppOpString {}
 
@@ -2261,13 +2261,13 @@ public class AppOpsManager {
             "android:receive_sandbox_trigger_audio";
 
     /**
-     * Allows the assistant app to get the training data from the PCC sandbox to improve
+     * Allows the assistant app to get the training data from the trusted process to improve
      * the hotword training model.
      *
      * @hide
      */
-    public static final String OPSTR_RECEIVE_SANDBOX_TRAINING_DATA =
-            "android:receive_sandbox_training_data";
+    public static final String OPSTR_RECEIVE_TRUSTED_PROCESS_TRAINING_DATA =
+            "android:receive_trusted_process_training_data";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -2811,9 +2811,9 @@ public class AppOpsManager {
                 OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
                 "RECEIVE_SANDBOX_TRIGGER_AUDIO")
                 .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
-        new AppOpInfo.Builder(OP_RECEIVE_SANDBOX_TRAINING_DATA,
-                OPSTR_RECEIVE_SANDBOX_TRAINING_DATA,
-                "RECEIVE_SANDBOX_TRAINING_DATA").build()
+        new AppOpInfo.Builder(OP_RECEIVE_TRUSTED_PROCESS_TRAINING_DATA,
+                OPSTR_RECEIVE_TRUSTED_PROCESS_TRAINING_DATA,
+                "RECEIVE_TRUSTED_PROCESS_TRAINING_DATA").build()
     };
 
     // The number of longs needed to form a full bitmask of app ops

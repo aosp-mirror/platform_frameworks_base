@@ -553,6 +553,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
         openAidlClients(/* numClients= */ 1);
         ProgramSelector initialSel = TestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
         mTunerSessions[0].tune(initialSel);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onCurrentProgramInfoChanged(any());
         doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
 
         mTunerSessions[0].cancel();

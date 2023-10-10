@@ -28,6 +28,7 @@ import com.android.systemui.res.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.settings.UserTracker;
@@ -46,6 +47,7 @@ import dagger.assisted.AssistedInject;
 /**
  * Manages notification when a guest session is resumed.
  */
+@SysUISingleton
 public class GuestResumeSessionReceiver {
 
     @VisibleForTesting

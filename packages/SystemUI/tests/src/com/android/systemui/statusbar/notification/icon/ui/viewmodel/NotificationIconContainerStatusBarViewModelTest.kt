@@ -82,6 +82,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
             DaggerNotificationIconContainerStatusBarViewModelTest_TestComponent.factory()
                 .create(
                     test = this,
+                    // Configurable bindings
                     featureFlags =
                         FakeFeatureFlagsClassicModule {
                             set(Flags.FACE_AUTH_REFACTOR, value = false)
@@ -248,6 +249,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
         modules =
             [
                 SysUITestModule::class,
+                // Real impls
                 BiometricsDomainLayerModule::class,
                 UserDomainLayerModule::class,
             ]

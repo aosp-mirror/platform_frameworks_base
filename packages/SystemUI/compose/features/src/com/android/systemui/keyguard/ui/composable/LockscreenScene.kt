@@ -36,13 +36,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.isVisible
 import com.android.compose.animation.scene.SceneScope
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.qualifiers.KeyguardRootView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
+import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Direction
+import com.android.systemui.scene.shared.model.Edge
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
@@ -99,7 +100,9 @@ constructor(
         return buildMap {
             up?.let { this[UserAction.Swipe(Direction.UP)] = SceneModel(up) }
             left?.let { this[UserAction.Swipe(Direction.LEFT)] = SceneModel(left) }
-            this[UserAction.Swipe(Direction.DOWN)] = SceneModel(SceneKey.Shade)
+            this[UserAction.Swipe(fromEdge = Edge.TOP, direction = Direction.DOWN)] =
+                SceneModel(SceneKey.QuickSettings)
+            this[UserAction.Swipe(direction = Direction.DOWN)] = SceneModel(SceneKey.Shade)
         }
     }
 }

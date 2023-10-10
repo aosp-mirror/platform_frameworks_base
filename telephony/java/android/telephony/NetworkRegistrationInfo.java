@@ -625,7 +625,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
-     * @return The access network technology {@link NetworkType}.
+     * @return The access network technology network type..
      */
     public @NetworkType int getAccessNetworkTechnology() {
         return mAccessNetworkTechnology;

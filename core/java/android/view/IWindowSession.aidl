@@ -284,6 +284,11 @@ interface IWindowSession {
     oneway void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
 
     /**
+     * Called when the DecorView gesture interception state has changed.
+     */
+    oneway void reportDecorViewGestureInterceptionChanged(IWindow window, in boolean intercepted);
+
+    /**
      * Called when the keep-clear areas for this window have changed.
      */
     oneway void reportKeepClearAreasChanged(IWindow window, in List<Rect> restricted,

@@ -15,12 +15,18 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
+import com.android.systemui.util.ui.AnimatedValue
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 
 /** View-model for the overflow row of notification icons displayed in the notification shade. */
 class NotificationIconContainerShelfViewModel @Inject constructor() :
     NotificationIconContainerViewModel {
     override val animationsEnabled: Flow<Boolean> = flowOf(true)
+    override val isDozing: Flow<AnimatedValue<Boolean>> = emptyFlow()
+    override val isVisible: Flow<AnimatedValue<Boolean>> = emptyFlow()
+    override fun completeDozeAnimation() {}
+    override fun completeVisibilityAnimation() {}
 }

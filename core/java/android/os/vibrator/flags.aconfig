@@ -20,3 +20,10 @@ flag {
     description: "Enables the usage of the new RingtoneV2 class"
     bug: "241918098"
 }
+
+flag {
+    namespace: "haptics"
+    name: "enable_vibration_serialization_apis"
+    description: "Enables the APIs for vibration serialization/deserialization."
+    bug: "245129509"
+}

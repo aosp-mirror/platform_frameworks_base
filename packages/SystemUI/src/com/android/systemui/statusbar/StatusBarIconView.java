@@ -51,6 +51,7 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
 
 import com.android.app.animation.Interpolators;
@@ -959,12 +960,17 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     public void setDozing(boolean dozing, boolean fade, long delay) {
+        setDozing(dozing, fade, delay, /* onChildCompleted= */ null);
+    }
+
+    public void setDozing(boolean dozing, boolean fade, long delay,
+            @Nullable Runnable endRunnable) {
         mDozer.setDozing(f -> {
             mDozeAmount = f;
             updateDecorColor();
             updateIconColor();
             updateAllowAnimation();
-        }, dozing, fade, delay, this);
+        }, dozing, fade, delay, this, endRunnable);
     }
 
     private void updateAllowAnimation() {

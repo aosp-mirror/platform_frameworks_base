@@ -16,6 +16,7 @@
 
 package android.os.vibrator.persistence;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
@@ -42,6 +43,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@FlaggedApi(android.os.vibrator.Flags.FLAG_ENABLE_VIBRATION_SERIALIZATION_APIS)
 @TestApi
 public final class VibrationXmlSerializer {
 

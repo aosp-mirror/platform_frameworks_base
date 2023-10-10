@@ -875,6 +875,10 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void simulateVhalFingerDown(int userId, int sensorId) {
         Slog.d(getTag(), "Simulate virtual HAL finger down event");
         final AidlSession session = mFingerprintSensors.get(sensorId).getSessionForUser(userId);
+        if (session == null) {
+            Slog.e(getTag(), "no existing hal session found - aborting");
+            return;
+        }
         final PointerContext pc = new PointerContext();
         try {
             session.getSession().onPointerDownWithContext(pc);

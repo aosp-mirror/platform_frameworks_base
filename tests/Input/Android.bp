@@ -9,6 +9,10 @@ package {
 
 android_test {
     name: "InputTests",
+    defaults: [
+        // For ExtendedMockito dependencies.
+        "modules-utils-testable-device-config-defaults",
+    ],
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",

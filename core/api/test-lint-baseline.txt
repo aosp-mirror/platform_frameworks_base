@@ -191,8 +191,14 @@ UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_DEFAULT:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_DEFAULT
 UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_OFF:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_OFF
+UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_SYSTEM_DEFAULT:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_SYSTEM_DEFAULT
+UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_UNSPECIFIED:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_UNSPECIFIED
 UnflaggedApi: android.media.RingtoneSelection#SOUND_SOURCE_URI:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.SOUND_SOURCE_URI
+UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_APPLICATION_DEFAULT:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_APPLICATION_DEFAULT
 UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_APPLICATION_PROVIDED:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_APPLICATION_PROVIDED
 UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_AUDIO_CHANNEL:
@@ -203,6 +209,10 @@ UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_HAPTIC_GENERATOR:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_HAPTIC_GENERATOR
 UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_OFF:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_OFF
+UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_SYSTEM_DEFAULT:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_SYSTEM_DEFAULT
+UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_UNSPECIFIED:
+    New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_UNSPECIFIED
 UnflaggedApi: android.media.RingtoneSelection#VIBRATION_SOURCE_URI:
     New API must be flagged with @FlaggedApi: field android.media.RingtoneSelection.VIBRATION_SOURCE_URI
 UnflaggedApi: android.media.RingtoneSelection#fromUri(android.net.Uri, int):

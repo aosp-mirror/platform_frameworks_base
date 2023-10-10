@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
+import com.android.systemui.util.ui.AnimatedValue
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -24,4 +25,22 @@ import kotlinx.coroutines.flow.Flow
 interface NotificationIconContainerViewModel {
     /** Are changes to the icon container animated? */
     val animationsEnabled: Flow<Boolean>
+
+    /** Should icons be rendered in "dozing" mode? */
+    val isDozing: Flow<AnimatedValue<Boolean>>
+
+    /** Is the icon container visible? */
+    val isVisible: Flow<AnimatedValue<Boolean>>
+
+    /**
+     * Signal completion of the [isDozing] animation; if [isDozing]'s [AnimatedValue.isAnimating]
+     * property was `true`, calling this method will update it to `false.
+     */
+    fun completeDozeAnimation()
+
+    /**
+     * Signal completion of the [isVisible] animation; if [isVisible]'s [AnimatedValue.isAnimating]
+     * property was `true`, calling this method will update it to `false.
+     */
+    fun completeVisibilityAnimation()
 }

@@ -948,8 +948,8 @@ public class TelephonyCallback {
          * subscription ID. Otherwise, this callback applies to
          * {@link SubscriptionManager#getDefaultSubscriptionId()}.
          *
-         * @param disconnectCause        {@link DisconnectCause}.
-         * @param preciseDisconnectCause {@link PreciseDisconnectCause}.
+         * @param disconnectCause        the disconnect cause
+         * @param preciseDisconnectCause the precise disconnect cause
          */
         @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
         void onCallDisconnectCauseChanged(@Annotation.DisconnectCauses int disconnectCause,
