@@ -20,3 +20,10 @@ flag {
      description: "Use Audio Policies implementation for device and Bluetooth route controllers."
      bug: "280576228"
 }
+
+flag {
+    namespace: "media_solutions"
+     name: "disable_screen_off_broadcast_receiver"
+     description: "Disables the broadcast receiver that prevents scanning when the screen is off."
+     bug: "304234628"
+}
