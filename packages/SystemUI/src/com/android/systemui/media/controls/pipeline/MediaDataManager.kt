@@ -60,7 +60,6 @@ import com.android.internal.annotations.Keep
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -83,6 +82,7 @@ import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationMediaManager.isConnectingState
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
@@ -1429,8 +1429,6 @@ class MediaDataManager(
     }
 
     private fun onSessionDestroyed(key: String) {
-        if (!mediaFlags.isRetainingPlayersEnabled()) return
-
         if (DEBUG) Log.d(TAG, "session destroyed for $key")
         val entry = mediaEntries.remove(key) ?: return
         // Clear token since the session is no longer valid
@@ -1474,7 +1472,7 @@ class MediaDataManager(
             if (DEBUG) Log.d(TAG, "Removing still-active player $key")
             notifyMediaDataRemoved(key)
             logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
-        } else {
+        } else if (mediaFlags.isRetainingPlayersEnabled() || isAbleToResume(removed)) {
             // Convert to resume
             if (DEBUG) {
                 Log.d(
@@ -1484,6 +1482,11 @@ class MediaDataManager(
                 )
             }
             convertToResumePlayer(key, removed)
+        } else {
+            // Retaining players flag is off and app doesn't support resume: remove player.
+            if (DEBUG) Log.d(TAG, "Removing player $key")
+            notifyMediaDataRemoved(key)
+            logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
         }
     }
 
