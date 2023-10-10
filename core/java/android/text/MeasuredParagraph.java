@@ -16,6 +16,9 @@
 
 package android.text;
 
+import static com.android.text.flags.Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN;
+
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -416,10 +419,12 @@ public class MeasuredParagraph {
      * @hide
      */
     @TestApi
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public interface StyleRunCallback {
         /**
          * Called when a single style run is identified.
          */
+        @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
         void onAppendStyleRun(@NonNull Paint paint,
                 @Nullable LineBreakConfig lineBreakConfig, @IntRange(from = 0) int length,
                 boolean isRtl);
@@ -427,6 +432,7 @@ public class MeasuredParagraph {
         /**
          * Called when a single replacement run is identified.
          */
+        @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
         void onAppendReplacementRun(@NonNull Paint paint,
                 @IntRange(from = 0) int length, @Px @FloatRange(from = 0) float width);
     }
@@ -488,6 +494,7 @@ public class MeasuredParagraph {
     @SuppressLint("ExecutorRegistration")
     @TestApi
     @NonNull
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public static MeasuredParagraph buildForStaticLayoutTest(
             @NonNull TextPaint paint,
             @Nullable LineBreakConfig lineBreakConfig,
