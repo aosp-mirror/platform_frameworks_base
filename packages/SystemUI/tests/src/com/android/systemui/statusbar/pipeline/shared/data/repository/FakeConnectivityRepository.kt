@@ -41,6 +41,7 @@ class FakeConnectivityRepository : ConnectivityRepository {
      * setting mobile connected && validated, since the default state is disconnected && not
      * validated
      */
+    @JvmOverloads
     fun setMobileConnected(
         default: Boolean = true,
         validated: Boolean = true,
@@ -53,6 +54,7 @@ class FakeConnectivityRepository : ConnectivityRepository {
     }
 
     /** Similar convenience method for ethernet */
+    @JvmOverloads
     fun setEthernetConnected(
         default: Boolean = true,
         validated: Boolean = true,
@@ -64,6 +66,7 @@ class FakeConnectivityRepository : ConnectivityRepository {
             )
     }
 
+    @JvmOverloads
     fun setWifiConnected(
         default: Boolean = true,
         validated: Boolean = true,
