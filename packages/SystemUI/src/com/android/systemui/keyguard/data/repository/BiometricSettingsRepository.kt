@@ -90,7 +90,7 @@ interface BiometricSettingsRepository {
      * If the current user can use face auth to enter the device. This is true when the user has
      * face auth enrolled, and is enabled in settings/device policy.
      */
-    val isFaceAuthEnrolledAndEnabled: Flow<Boolean>
+    val isFaceAuthEnrolledAndEnabled: StateFlow<Boolean>
 
     /**
      * If the current user can use face auth to enter the device right now. This is true when
@@ -348,10 +348,11 @@ constructor(
             .and(isFingerprintBiometricAllowed)
             .stateIn(scope, SharingStarted.Eagerly, false)
 
-    override val isFaceAuthEnrolledAndEnabled: Flow<Boolean> =
+    override val isFaceAuthEnrolledAndEnabled: StateFlow<Boolean> =
         isFaceAuthenticationEnabled
             .and(isFaceEnrolled)
             .and(mobileConnectionsRepository.isAnySimSecure.isFalse())
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isFaceAuthCurrentlyAllowed: Flow<Boolean> =
         isFaceAuthEnrolledAndEnabled

@@ -43,7 +43,7 @@ import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
-import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -123,6 +123,8 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         facePropertyRepository = FakeFacePropertyRepository()
         fakeKeyguardRepository = FakeKeyguardRepository()
         powerInteractor = PowerInteractorFactory.create().powerInteractor
+        val fakeBiometricSettingsRepository = FakeBiometricSettingsRepository()
+
         underTest =
             SystemUIKeyguardFaceAuthInteractor(
                 mContext,
@@ -147,7 +149,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                     mock(StatusBarStateController::class.java),
                     mock(KeyguardStateController::class.java),
                     bouncerRepository,
-                    mock(BiometricSettingsRepository::class.java),
+                    fakeBiometricSettingsRepository,
                     FakeSystemClock(),
                     keyguardUpdateMonitor,
                 ),
@@ -160,6 +162,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 facePropertyRepository,
                 faceWakeUpTriggersConfig,
                 powerInteractor,
+                fakeBiometricSettingsRepository,
             )
     }
 
