@@ -131,7 +131,7 @@ public class TrustAgentWrapper {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ComponentName component = intent.getParcelableExtra(EXTRA_COMPONENT_NAME);
+            ComponentName component = intent.getParcelableExtra(EXTRA_COMPONENT_NAME, android.content.ComponentName.class);
             if (TRUST_EXPIRED_ACTION.equals(intent.getAction())
                     && mName.equals(component)) {
                 mHandler.removeMessages(MSG_TRUST_TIMEOUT);
@@ -159,7 +159,13 @@ public class TrustAgentWrapper {
                     mDisplayTrustGrantedMessage = (flags & FLAG_GRANT_TRUST_DISPLAY_MESSAGE) != 0;
                     if ((flags & FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0) {
                         mWaitingForTrustableDowngrade = true;
-                        setSecurityWindowTimer();
+                        resultCallback.thenAccept(result -> {
+                            if (result.getStatus() == GrantTrustResult.STATUS_UNLOCKED_BY_GRANT) {
+                                // if we are not unlocked by grantTrust, then we don't need to
+                                // have the timer for the security window
+                                setSecurityWindowTimer();
+                            }
+                        });
                     } else {
                         mWaitingForTrustableDowngrade = false;
                     }
@@ -563,6 +569,7 @@ public class TrustAgentWrapper {
      * @see android.service.trust.TrustAgentService#onDeviceLocked()
      */
     public void onDeviceLocked() {
+        mWithinSecurityLockdownWindow = false;
         try {
             if (mTrustAgentService != null) mTrustAgentService.onDeviceLocked();
         } catch (RemoteException e) {
@@ -659,6 +666,10 @@ public class TrustAgentWrapper {
 
     public boolean isTrustable() {
         return mTrustable && mManagingTrust && !mTrustDisabledByDpm;
+    }
+
+    public boolean isTrustableOrWaitingForDowngrade() {
+        return mWaitingForTrustableDowngrade || isTrustable();
     }
 
     /** Set the trustagent as not trustable */

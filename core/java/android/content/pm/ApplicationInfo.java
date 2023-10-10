@@ -18,9 +18,11 @@ package android.content.pm;
 
 import static android.os.Build.VERSION_CODES.DONUT;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -45,7 +47,6 @@ import android.window.OnBackInvokedCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForBoolean;
-import com.android.server.SystemConfig;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -678,8 +679,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_PROFILEABLE_BY_SHELL = 1 << 23;
 
     /**
-     * Indicates whether this package requires access to non-SDK APIs.
-     * Only system apps and tests are allowed to use this property.
+     * Indicates whether this application has declared its user data as fragile,
+     * causing the system to prompt the user on whether to keep the user data
+     * on uninstall.
      * @hide
      */
     public static final int PRIVATE_FLAG_HAS_FRAGILE_USER_DATA = 1 << 24;
@@ -803,7 +805,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE = 1 << 2;
 
-
     /**
      * If false, {@link android.view.KeyEvent#KEYCODE_BACK} related events will be forwarded to
      * the Activities, Dialogs and Views and {@link android.app.Activity#onBackPressed()},
@@ -815,12 +816,31 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK = 1 << 3;
 
+    /**
+     * Whether or not this package is allowed to access hidden APIs. Replacement for legacy
+     * implementation of {@link #isPackageWhitelistedForHiddenApis()}.
+     *
+     * This is an internal flag and should never be used outside of this class. The real API for
+     * the hidden API enforcement policy is {@link #getHiddenApiEnforcementPolicy()}.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS = 1 << 4;
+
+    /**
+     * Whether AbiOverride was used when installing this application.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_EXT_CPU_OVERRIDE = 1 << 5;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_EXT_" }, value = {
             PRIVATE_FLAG_EXT_PROFILEABLE,
             PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION,
             PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE,
             PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK,
+            PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS,
+            PRIVATE_FLAG_EXT_CPU_OVERRIDE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlagsExt {}
@@ -941,21 +961,27 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * The names of all installed split APKs, ordered lexicographically.
+     * May be null if no splits are installed.
      */
+    @Nullable
     public String[] splitNames;
 
     /**
-     * Full paths to zero or more split APKs, indexed by the same order as {@link #splitNames}.
+     * Full paths to split APKs, indexed by the same order as {@link #splitNames}.
+     * May be null if no splits are installed.
      */
+    @Nullable
     public String[] splitSourceDirs;
 
     /**
      * Full path to the publicly available parts of {@link #splitSourceDirs},
      * including resources and manifest. This may be different from
      * {@link #splitSourceDirs} if an application is forward locked.
+     * May be null if no splits are installed.
      *
      * @see #splitSourceDirs
      */
+    @Nullable
     public String[] splitPublicSourceDirs;
 
     /**
@@ -1512,12 +1538,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * the application, e.g. the target SDK version.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int HIDDEN_API_ENFORCEMENT_DEFAULT = -1;
     /**
      * No API enforcement; the app can access the entire internal private API. Only for use by
      * system apps.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int HIDDEN_API_ENFORCEMENT_DISABLED = 0;
     /**
      * No API enforcement, but enable the detection logic and warnings. Observed behaviour is the
@@ -1525,11 +1553,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * APIs are accessed.
      * @hide
      * */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int HIDDEN_API_ENFORCEMENT_JUST_WARN = 1;
     /**
      * Dark grey list enforcement. Enforces the dark grey and black lists
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int HIDDEN_API_ENFORCEMENT_ENABLED = 2;
 
     private static final int HIDDEN_API_ENFORCEMENT_MIN = HIDDEN_API_ENFORCEMENT_DEFAULT;
@@ -2216,7 +2246,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     private boolean isPackageWhitelistedForHiddenApis() {
-        return SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(packageName);
+        return (privateFlagsExt & PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS) != 0;
     }
 
     /**
@@ -2233,6 +2263,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.DELETE_PACKAGES)
     public boolean hasFragileUserData() {
         return (privateFlags & PRIVATE_FLAG_HAS_FRAGILE_USER_DATA) != 0;
     }
@@ -2467,8 +2499,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY) != 0;
     }
 
-    /** @hide */
+    /**
+     * @return {@code true} if the application is permitted to hold privileged permissions.
+     *
+     * @hide */
     @TestApi
+    @SystemApi
+    @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
     public boolean isPrivilegedApp() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
@@ -2547,7 +2584,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * Returns whether attributions provided by the application are meant to be user-visible.
      * Defaults to false if application info is retrieved without
-     * {@link PackageManager#GET_ATTRIBUTIONS}.
+     * {@link PackageManager#GET_ATTRIBUTIONS_LONG}.
      */
     public boolean areAttributionsUserVisible() {
         return (privateFlagsExt & PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE) != 0;
@@ -2588,6 +2625,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public boolean isOnBackInvokedCallbackEnabled() {
         return ((privateFlagsExt & PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK)) != 0;
     }

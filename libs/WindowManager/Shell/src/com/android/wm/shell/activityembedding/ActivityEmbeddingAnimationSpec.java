@@ -36,7 +36,7 @@ import android.window.TransitionInfo;
 import androidx.annotation.NonNull;
 
 import com.android.internal.policy.TransitionAnimation;
-import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.TransitionUtil;
 
 /** Animation spec for ActivityEmbedding transition. */
 // TODO(b/206557124): provide an easier way to customize animation
@@ -73,8 +73,17 @@ class ActivityEmbeddingAnimationSpec {
     @NonNull
     static Animation createNoopAnimation(@NonNull TransitionInfo.Change change) {
         // Noop but just keep the window showing/hiding.
-        final float alpha = Transitions.isClosingType(change.getMode()) ? 0f : 1f;
+        final float alpha = TransitionUtil.isClosingType(change.getMode()) ? 0f : 1f;
         return new AlphaAnimation(alpha, alpha);
+    }
+
+    /**
+     * Animation that intended to show snapshot for closing animation because the closing end bounds
+     * are changed.
+     */
+    @NonNull
+    static Animation createShowSnapshotForClosingAnimation() {
+        return new AlphaAnimation(1f, 1f);
     }
 
     /** Animation for window that is opening in a change transition. */
@@ -198,7 +207,7 @@ class ActivityEmbeddingAnimationSpec {
     @NonNull
     Animation loadOpenAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
-        final boolean isEnter = Transitions.isOpeningType(change.getMode());
+        final boolean isEnter = TransitionUtil.isOpeningType(change.getMode());
         final Animation animation;
         if (shouldShowBackdrop(info, change)) {
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
@@ -222,7 +231,7 @@ class ActivityEmbeddingAnimationSpec {
     @NonNull
     Animation loadCloseAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
-        final boolean isEnter = Transitions.isOpeningType(change.getMode());
+        final boolean isEnter = TransitionUtil.isOpeningType(change.getMode());
         final Animation animation;
         if (shouldShowBackdrop(info, change)) {
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
@@ -246,7 +255,7 @@ class ActivityEmbeddingAnimationSpec {
     private boolean shouldShowBackdrop(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change) {
         final Animation a = loadAttributeAnimation(info, change, WALLPAPER_TRANSITION_NONE,
-                mTransitionAnimation);
+                mTransitionAnimation, false);
         return a != null && a.getShowBackdrop();
     }
 }

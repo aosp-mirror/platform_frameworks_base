@@ -41,13 +41,15 @@ android_test {
     static_libs: [
         "androidx.test.ext.junit",
         "flickerlib",
-        "truth-prebuilt",
+        "flickerlib-apphelpers",
+        "flickerlib-helpers",
+        "truth",
         "app-helpers-core",
         "launcher-helper-lib",
         "launcher-aosp-tapl",
         "wm-flicker-common-assertions",
         "wm-flicker-common-app-helpers",
         "platform-test-annotations",
-        "wmshell-flicker-test-components",
+        "flickertestapplib",
     ],
 }

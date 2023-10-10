@@ -30,7 +30,6 @@ import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.TrafficStateCallback
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
-import com.android.settingslib.Utils
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -41,6 +40,8 @@ import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
+import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
+import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl.Companion.getMainOrUnderlyingWifiInfo
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiInputLogger
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
@@ -70,6 +72,7 @@ class WifiRepositoryImpl
 constructor(
     broadcastDispatcher: BroadcastDispatcher,
     connectivityManager: ConnectivityManager,
+    connectivityRepository: ConnectivityRepository,
     logger: WifiInputLogger,
     @WifiTableLog wifiTableLogBuffer: TableLogBuffer,
     @Main mainExecutor: Executor,
@@ -105,39 +108,9 @@ constructor(
             )
 
     override val isWifiDefault: StateFlow<Boolean> =
-        conflatedCallbackFlow {
-                // Note: This callback doesn't do any logging because we already log every network
-                // change in the [wifiNetwork] callback.
-                val callback =
-                    object : ConnectivityManager.NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
-                        override fun onCapabilitiesChanged(
-                            network: Network,
-                            networkCapabilities: NetworkCapabilities
-                        ) {
-                            logger.logOnCapabilitiesChanged(
-                                network,
-                                networkCapabilities,
-                                isDefaultNetworkCallback = true,
-                            )
-
-                            // This method will always be called immediately after the network
-                            // becomes the default, in addition to any time the capabilities change
-                            // while the network is the default.
-                            // If this network is a wifi network, then wifi is the default network.
-                            trySend(isWifiNetwork(networkCapabilities))
-                        }
-
-                        override fun onLost(network: Network) {
-                            logger.logOnLost(network, isDefaultNetworkCallback = true)
-                            // The system no longer has a default network, so wifi is definitely not
-                            // default.
-                            trySend(false)
-                        }
-                    }
-
-                connectivityManager.registerDefaultNetworkCallback(callback)
-                awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
-            }
+        connectivityRepository.defaultConnections
+            // TODO(b/274493701): Should wifi be considered default if it's carrier merged?
+            .map { it.wifi.isDefault || it.carrierMerged.isDefault }
             .distinctUntilChanged()
             .logDiffsForTable(
                 wifiTableLogBuffer,
@@ -165,7 +138,8 @@ constructor(
 
                             wifiNetworkChangeEvents.tryEmit(Unit)
 
-                            val wifiInfo = networkCapabilitiesToWifiInfo(networkCapabilities)
+                            val wifiInfo =
+                                networkCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
                             if (wifiInfo?.isPrimary == true) {
                                 val wifiNetworkModel =
                                     createWifiNetworkModel(
@@ -186,8 +160,10 @@ constructor(
 
                             val wifi = currentWifi
                             if (
-                                wifi is WifiNetworkModel.Active &&
-                                    wifi.networkId == network.getNetId()
+                                (wifi is WifiNetworkModel.Active &&
+                                    wifi.networkId == network.getNetId()) ||
+                                    (wifi is WifiNetworkModel.CarrierMerged &&
+                                        wifi.networkId == network.getNetId())
                             ) {
                                 val newNetworkModel = WifiNetworkModel.Inactive
                                 currentWifi = newNetworkModel
@@ -247,34 +223,6 @@ constructor(
         // [ConnectivityManager.NetworkCallback] results instead. So, for now we'll just rely on the
         // NetworkCallback inside [wifiNetwork] for our wifi network information.
         val WIFI_NETWORK_DEFAULT = WifiNetworkModel.Inactive
-
-        private fun networkCapabilitiesToWifiInfo(
-            networkCapabilities: NetworkCapabilities
-        ): WifiInfo? {
-            return when {
-                networkCapabilities.hasTransport(TRANSPORT_CELLULAR) ->
-                    // Sometimes, cellular networks can act as wifi networks (known as VCN --
-                    // virtual carrier network). So, see if this cellular network has wifi info.
-                    Utils.tryGetWifiInfoForVcn(networkCapabilities)
-                networkCapabilities.hasTransport(TRANSPORT_WIFI) ->
-                    if (networkCapabilities.transportInfo is WifiInfo) {
-                        networkCapabilities.transportInfo as WifiInfo
-                    } else {
-                        null
-                    }
-                else -> null
-            }
-        }
-
-        /** True if these capabilities represent a wifi network. */
-        private fun isWifiNetwork(networkCapabilities: NetworkCapabilities): Boolean {
-            return when {
-                networkCapabilities.hasTransport(TRANSPORT_WIFI) -> true
-                networkCapabilities.hasTransport(TRANSPORT_CELLULAR) ->
-                    Utils.tryGetWifiInfoForVcn(networkCapabilities) != null
-                else -> false
-            }
-        }
 
         private fun createWifiNetworkModel(
             wifiInfo: WifiInfo,
@@ -337,6 +285,7 @@ constructor(
     constructor(
         private val broadcastDispatcher: BroadcastDispatcher,
         private val connectivityManager: ConnectivityManager,
+        private val connectivityRepository: ConnectivityRepository,
         private val logger: WifiInputLogger,
         @WifiTableLog private val wifiTableLogBuffer: TableLogBuffer,
         @Main private val mainExecutor: Executor,
@@ -346,6 +295,7 @@ constructor(
             return WifiRepositoryImpl(
                 broadcastDispatcher,
                 connectivityManager,
+                connectivityRepository,
                 logger,
                 wifiTableLogBuffer,
                 mainExecutor,

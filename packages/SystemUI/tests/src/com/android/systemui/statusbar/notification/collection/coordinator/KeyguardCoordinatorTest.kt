@@ -24,6 +24,7 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.advanceTimeBy
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -97,8 +98,6 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun unseenFilterSuppressesSeenNotifWhileKeyguardShowing() {
-        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
-
         // GIVEN: Keyguard is not showing, shade is expanded, and a notification is present
         keyguardRepository.setKeyguardShowing(false)
         whenever(statusBarStateController.isExpanded).thenReturn(true)
@@ -124,8 +123,6 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun unseenFilterStopsMarkingSeenNotifWhenTransitionToAod() {
-        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
-
         // GIVEN: Keyguard is not showing, shade is not expanded, and a notification is present
         keyguardRepository.setKeyguardShowing(false)
         whenever(statusBarStateController.isExpanded).thenReturn(false)
@@ -151,8 +148,6 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun unseenFilter_headsUpMarkedAsSeen() {
-        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
-
         // GIVEN: Keyguard is not showing, shade is not expanded
         keyguardRepository.setKeyguardShowing(false)
         whenever(statusBarStateController.isExpanded).thenReturn(false)
@@ -183,14 +178,12 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun unseenFilterDoesNotSuppressSeenOngoingNotifWhileKeyguardShowing() {
-        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
-
         // GIVEN: Keyguard is not showing, shade is expanded, and an ongoing notification is present
         keyguardRepository.setKeyguardShowing(false)
         whenever(statusBarStateController.isExpanded).thenReturn(true)
         runKeyguardCoordinatorTest {
             val fakeEntry = NotificationEntryBuilder()
-                .setNotification(Notification.Builder(mContext).setOngoing(true).build())
+                    .setNotification(Notification.Builder(mContext, "id").setOngoing(true).build())
                 .build()
             collectionListener.onEntryAdded(fakeEntry)
 
@@ -205,8 +198,6 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun unseenFilterDoesNotSuppressSeenMediaNotifWhileKeyguardShowing() {
-        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
-
         // GIVEN: Keyguard is not showing, shade is expanded, and a media notification is present
         keyguardRepository.setKeyguardShowing(false)
         whenever(statusBarStateController.isExpanded).thenReturn(true)
@@ -229,8 +220,6 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun unseenFilterUpdatesSeenProviderWhenSuppressing() {
-        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
-
         // GIVEN: Keyguard is not showing, shade is expanded, and a notification is present
         keyguardRepository.setKeyguardShowing(false)
         whenever(statusBarStateController.isExpanded).thenReturn(true)
@@ -255,8 +244,6 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun unseenFilterInvalidatesWhenSettingChanges() {
-        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
-
         // GIVEN: Keyguard is not showing, and shade is expanded
         keyguardRepository.setKeyguardShowing(false)
         whenever(statusBarStateController.isExpanded).thenReturn(true)
@@ -292,8 +279,6 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun unseenFilterAllowsNewNotif() {
-        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
-
         // GIVEN: Keyguard is showing, no notifications present
         keyguardRepository.setKeyguardShowing(true)
         runKeyguardCoordinatorTest {
@@ -308,8 +293,6 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun unseenFilterSeenGroupSummaryWithUnseenChild() {
-        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
-
         // GIVEN: Keyguard is not showing, shade is expanded, and a notification is present
         keyguardRepository.setKeyguardShowing(false)
         whenever(statusBarStateController.isExpanded).thenReturn(true)
@@ -342,11 +325,9 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun unseenNotificationIsMarkedAsSeenWhenKeyguardGoesAway() {
-        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
-
         // GIVEN: Keyguard is showing, not dozing, unseen notification is present
         keyguardRepository.setKeyguardShowing(true)
-        keyguardRepository.setDozing(false)
+        keyguardRepository.setIsDozing(false)
         runKeyguardCoordinatorTest {
             val fakeEntry = NotificationEntryBuilder().build()
             collectionListener.onEntryAdded(fakeEntry)
@@ -370,8 +351,6 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun unseenNotificationIsNotMarkedAsSeenIfShadeNotExpanded() {
-        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
-
         // GIVEN: Keyguard is showing, unseen notification is present
         keyguardRepository.setKeyguardShowing(true)
         runKeyguardCoordinatorTest {
@@ -402,10 +381,12 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         val keyguardCoordinator =
             KeyguardCoordinator(
                 testDispatcher,
+                mock<DumpManager>(),
                 headsUpManager,
                 keyguardNotifVisibilityProvider,
                 keyguardRepository,
                 keyguardTransitionRepository,
+                mock<KeyguardCoordinatorLogger>(),
                 notifPipelineFlags,
                 testScope.backgroundScope,
                 sectionHeaderVisibilityProvider,
@@ -441,20 +422,15 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         val unseenFilter: NotifFilter
             get() = keyguardCoordinator.unseenNotifFilter
 
-        // TODO(254647461): Remove lazy from these properties once
-        //    Flags.FILTER_UNSEEN_NOTIFS_ON_KEYGUARD is enabled and removed
-
-        val collectionListener: NotifCollectionListener by lazy {
-            withArgCaptor { verify(notifPipeline).addCollectionListener(capture()) }
+        val collectionListener: NotifCollectionListener = withArgCaptor {
+            verify(notifPipeline).addCollectionListener(capture())
         }
 
-        val onHeadsUpChangedListener: OnHeadsUpChangedListener by lazy {
+        val onHeadsUpChangedListener: OnHeadsUpChangedListener get() =
             withArgCaptor { verify(headsUpManager).addListener(capture()) }
-        }
 
-        val statusBarStateListener: StatusBarStateController.StateListener by lazy {
+        val statusBarStateListener: StatusBarStateController.StateListener get() =
             withArgCaptor { verify(statusBarStateController).addCallback(capture()) }
-        }
 
         var showOnlyUnseenNotifsOnKeyguardSetting: Boolean
             get() =

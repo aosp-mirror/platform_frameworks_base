@@ -107,4 +107,32 @@ public class SeekBarWithIconButtonsViewTest extends SysuiTestCase {
 
         assertThat(mSeekbar.getProgress()).isEqualTo(0);
     }
+
+    @Test
+    public void setProgressStateLabels_getExpectedStateDescriptionOnInitialization() {
+        String[] stateLabels = new String[]{"1", "2", "3", "4", "5"};
+        mIconDiscreteSliderLinearLayout.setMax(stateLabels.length);
+        mIconDiscreteSliderLinearLayout.setProgress(1);
+        mIconDiscreteSliderLinearLayout.setProgressStateLabels(stateLabels);
+
+        final int currentProgress = mSeekbar.getProgress();
+        final CharSequence stateDescription = mSeekbar.getStateDescription();
+
+        assertThat(currentProgress).isEqualTo(1);
+        assertThat(stateDescription).isEqualTo(stateLabels[currentProgress]);
+    }
+
+    @Test
+    public void setProgressStateLabels_progressChanged_getExpectedStateDescription() {
+        String[] stateLabels = new String[]{"1", "2", "3", "4", "5"};
+        mIconDiscreteSliderLinearLayout.setMax(stateLabels.length);
+        mIconDiscreteSliderLinearLayout.setProgressStateLabels(stateLabels);
+        mIconDiscreteSliderLinearLayout.setProgress(1);
+
+        final int currentProgress = mSeekbar.getProgress();
+        final CharSequence stateDescription = mSeekbar.getStateDescription();
+
+        assertThat(currentProgress).isEqualTo(1);
+        assertThat(stateDescription).isEqualTo(stateLabels[currentProgress]);
+    }
 }

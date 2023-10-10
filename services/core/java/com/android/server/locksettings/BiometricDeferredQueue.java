@@ -19,6 +19,7 @@ package com.android.server.locksettings;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
@@ -44,16 +45,17 @@ import java.util.Set;
 public class BiometricDeferredQueue {
     private static final String TAG = "BiometricDeferredQueue";
 
-    @NonNull private final Context mContext;
     @NonNull private final SyntheticPasswordManager mSpManager;
     @NonNull private final Handler mHandler;
     @Nullable private FingerprintManager mFingerprintManager;
     @Nullable private FaceManager mFaceManager;
+    @Nullable private BiometricManager mBiometricManager;
 
     // Entries added by LockSettingsService once a user's synthetic password is known. At this point
     // things are still keyed by userId.
     @NonNull private final ArrayList<UserAuthInfo> mPendingResetLockoutsForFingerprint;
     @NonNull private final ArrayList<UserAuthInfo> mPendingResetLockoutsForFace;
+    @NonNull private final ArrayList<UserAuthInfo> mPendingResetLockouts;
 
     /**
      * Authentication info for a successful user unlock via Synthetic Password. This can be used to
@@ -126,24 +128,23 @@ public class BiometricDeferredQueue {
     }
 
     @Nullable private FaceResetLockoutTask mFaceResetLockoutTask;
-
     private final FaceResetLockoutTask.FinishCallback mFaceFinishCallback = () -> {
         mFaceResetLockoutTask = null;
     };
 
-    BiometricDeferredQueue(@NonNull Context context, @NonNull SyntheticPasswordManager spManager,
-            @NonNull Handler handler) {
-        mContext = context;
+    BiometricDeferredQueue(@NonNull SyntheticPasswordManager spManager, @NonNull Handler handler) {
         mSpManager = spManager;
         mHandler = handler;
         mPendingResetLockoutsForFingerprint = new ArrayList<>();
         mPendingResetLockoutsForFace = new ArrayList<>();
+        mPendingResetLockouts = new ArrayList<>();
     }
 
     public void systemReady(@Nullable FingerprintManager fingerprintManager,
-            @Nullable FaceManager faceManager) {
+            @Nullable FaceManager faceManager, @Nullable BiometricManager biometricManager) {
         mFingerprintManager = fingerprintManager;
         mFaceManager = faceManager;
+        mBiometricManager = biometricManager;
     }
 
     /**
@@ -154,7 +155,7 @@ public class BiometricDeferredQueue {
      * Note that this should only ever be invoked for successful authentications, otherwise it will
      * consume a Gatekeeper authentication attempt and potentially wipe the user/device.
      *
-     * @param userId The user that the operation will apply for.
+     * @param userId             The user that the operation will apply for.
      * @param gatekeeperPassword The Gatekeeper Password
      */
     void addPendingLockoutResetForUser(int userId, @NonNull byte[] gatekeeperPassword) {
@@ -168,6 +169,12 @@ public class BiometricDeferredQueue {
                     && mFingerprintManager.hasEnrolledFingerprints(userId)) {
                 Slog.d(TAG, "Fingerprint addPendingLockoutResetForUser: " + userId);
                 mPendingResetLockoutsForFingerprint.add(new UserAuthInfo(userId,
+                        gatekeeperPassword));
+            }
+
+            if (mBiometricManager != null) {
+                Slog.d(TAG, "Fingerprint addPendingLockoutResetForUser: " + userId);
+                mPendingResetLockouts.add(new UserAuthInfo(userId,
                         gatekeeperPassword));
             }
         });
@@ -187,6 +194,14 @@ public class BiometricDeferredQueue {
                         new ArrayList<>(mPendingResetLockoutsForFingerprint));
                 mPendingResetLockoutsForFingerprint.clear();
             }
+
+            if (!mPendingResetLockouts.isEmpty()) {
+                Slog.d(TAG, "Processing pending resetLockouts(Generic)");
+                processPendingLockoutsGeneric(
+                        new ArrayList<>(mPendingResetLockouts));
+                mPendingResetLockouts.clear();
+            }
+
         });
     }
 
@@ -260,6 +275,17 @@ public class BiometricDeferredQueue {
         }
     }
 
+    private void processPendingLockoutsGeneric(List<UserAuthInfo> pendingResetLockouts) {
+        for (UserAuthInfo user : pendingResetLockouts) {
+            Slog.d(TAG, "Resetting biometric lockout for user: " + user.userId);
+            final byte[] hat = requestHatFromGatekeeperPassword(mSpManager, user,
+                    0 /* challenge */);
+            if (hat != null) {
+                mBiometricManager.resetLockout(user.userId, hat);
+            }
+        }
+    }
+
     @Nullable
     private static byte[] requestHatFromGatekeeperPassword(
             @NonNull SyntheticPasswordManager spManager,
@@ -285,7 +311,7 @@ public class BiometricDeferredQueue {
 
     @Nullable
     private static synchronized IGateKeeperService getGatekeeperService() {
-        final IBinder service = ServiceManager.getService(Context.GATEKEEPER_SERVICE);
+        final IBinder service = ServiceManager.waitForService(Context.GATEKEEPER_SERVICE);
         if (service == null) {
             Slog.e(TAG, "Unable to acquire GateKeeperService");
             return null;

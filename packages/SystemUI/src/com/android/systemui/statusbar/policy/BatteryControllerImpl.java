@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static android.os.BatteryManager.BATTERY_HEALTH_OVERHEAT;
-import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
-import static android.os.BatteryManager.EXTRA_HEALTH;
+import static android.os.BatteryManager.CHARGING_POLICY_ADAPTIVE_LONGLIFE;
+import static android.os.BatteryManager.CHARGING_POLICY_DEFAULT;
+import static android.os.BatteryManager.EXTRA_CHARGING_STATUS;
 import static android.os.BatteryManager.EXTRA_PRESENT;
+
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_QS;
 
 import android.annotation.WorkerThread;
 import android.content.BroadcastReceiver;
@@ -92,7 +94,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     protected boolean mPowerSave;
     private boolean mAodPowerSave;
     private boolean mWirelessCharging;
-    private boolean mIsOverheated = false;
+    private boolean mIsBatteryDefender = false;
     private boolean mTestMode = false;
     @VisibleForTesting
     boolean mHasReceivedBattery = false;
@@ -161,7 +163,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         pw.print("  mPluggedIn="); pw.println(mPluggedIn);
         pw.print("  mCharging="); pw.println(mCharging);
         pw.print("  mCharged="); pw.println(mCharged);
-        pw.print("  mIsOverheated="); pw.println(mIsOverheated);
+        pw.print("  mIsBatteryDefender="); pw.println(mIsBatteryDefender);
         pw.print("  mPowerSave="); pw.println(mPowerSave);
         pw.print("  mStateUnknown="); pw.println(mStateUnknown);
     }
@@ -169,7 +171,8 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     @Override
     public void setPowerSaveMode(boolean powerSave, View view) {
         if (powerSave) mPowerSaverStartView.set(new WeakReference<>(view));
-        BatterySaverUtils.setPowerSaveMode(mContext, powerSave, /*needFirstTimeWarning*/ true);
+        BatterySaverUtils.setPowerSaveMode(mContext, powerSave, /*needFirstTimeWarning*/ true,
+                SAVER_ENABLED_QS);
     }
 
     @Override
@@ -194,7 +197,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         cb.onPowerSaveChanged(mPowerSave);
         cb.onBatteryUnknownStateChanged(mStateUnknown);
         cb.onWirelessChargingChanged(mWirelessCharging);
-        cb.onIsOverheatedChanged(mIsOverheated);
+        cb.onIsBatteryDefenderChanged(mIsBatteryDefender);
     }
 
     @Override
@@ -233,11 +236,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
                 fireBatteryUnknownStateChanged();
             }
 
-            int batteryHealth = intent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
-            boolean isOverheated = batteryHealth == BATTERY_HEALTH_OVERHEAT;
-            if (isOverheated != mIsOverheated) {
-                mIsOverheated = isOverheated;
-                fireIsOverheatedChanged();
+            int chargingStatus = intent.getIntExtra(EXTRA_CHARGING_STATUS, CHARGING_POLICY_DEFAULT);
+            boolean isBatteryDefender = chargingStatus == CHARGING_POLICY_ADAPTIVE_LONGLIFE;
+            if (isBatteryDefender != mIsBatteryDefender) {
+                mIsBatteryDefender = isBatteryDefender;
+                fireIsBatteryDefenderChanged();
             }
 
             fireBatteryLevelChanged();
@@ -310,8 +313,8 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         return mPluggedChargingSource == BatteryManager.BATTERY_PLUGGED_WIRELESS;
     }
 
-    public boolean isOverheated() {
-        return mIsOverheated;
+    public boolean isBatteryDefender() {
+        return mIsBatteryDefender;
     }
 
     @Override
@@ -425,11 +428,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         }
     }
 
-    private void fireIsOverheatedChanged() {
+    private void fireIsBatteryDefenderChanged() {
         synchronized (mChangeCallbacks) {
             final int n = mChangeCallbacks.size();
             for (int i = 0; i < n; i++) {
-                mChangeCallbacks.get(i).onIsOverheatedChanged(mIsOverheated);
+                mChangeCallbacks.get(i).onIsBatteryDefenderChanged(mIsBatteryDefender);
             }
         }
     }
@@ -444,7 +447,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         String plugged = args.getString("plugged");
         String powerSave = args.getString("powersave");
         String present = args.getString("present");
-        String overheated = args.getString("overheated");
+        String defender = args.getString("defender");
         if (level != null) {
             mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
         }
@@ -459,9 +462,9 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             mStateUnknown = !present.equals("true");
             fireBatteryUnknownStateChanged();
         }
-        if (overheated != null) {
-            mIsOverheated = overheated.equals("true");
-            fireIsOverheatedChanged();
+        if (defender != null) {
+            mIsBatteryDefender = defender.equals("true");
+            fireIsBatteryDefenderChanged();
         }
         fireBatteryLevelChanged();
     }

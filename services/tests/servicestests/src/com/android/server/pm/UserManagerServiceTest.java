@@ -174,6 +174,26 @@ public class UserManagerServiceTest {
     }
 
     @Test
+    public void testHasUserRestriction_NonExistentUserReturnsFalse() {
+        int nonExistentUserId = UserHandle.USER_NULL;
+        assertThat(mUserManagerService.hasUserRestriction(DISALLOW_USER_SWITCH, nonExistentUserId))
+                .isFalse();
+    }
+
+    @Test
+    public void testSetUserRestrictionWithIncorrectID() throws Exception {
+        int incorrectId = 1;
+        while (mUserManagerService.userExists(incorrectId)) {
+            incorrectId++;
+        }
+        assertThat(mUserManagerService.hasUserRestriction(DISALLOW_USER_SWITCH, incorrectId))
+                .isFalse();
+        mUserManagerService.setUserRestriction(DISALLOW_USER_SWITCH, true, incorrectId);
+        assertThat(mUserManagerService.hasUserRestriction(DISALLOW_USER_SWITCH, incorrectId))
+                .isFalse();
+    }
+
+    @Test
     public void assertIsUserSwitcherEnabledOnMultiUserSettings() throws Exception {
         int userId = ActivityManager.getCurrentUser();
         resetUserSwitcherEnabled();
@@ -199,6 +219,25 @@ public class UserManagerServiceTest {
         assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
     }
 
+    @Test
+    public void assertIsUserSwitcherEnabled()  throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+        setMaxSupportedUsers(8);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(true, userId)).isTrue();
+
+        setUserSwitch(false);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(true, userId)).isFalse();
+
+        setUserSwitch(true);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(false, userId)).isTrue();
+
+        mUserManagerService.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, userId);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(false, userId)).isFalse();
+
+        mUserManagerService.setUserRestriction(UserManager.DISALLOW_ADD_USER, false, userId);
+        setMaxSupportedUsers(1);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(true, userId)).isFalse();
+    }
 
     @Test
     public void assertIsUserSwitcherEnabledOnShowMultiuserUI()  throws Exception {

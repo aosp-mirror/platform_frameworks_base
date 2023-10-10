@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -28,6 +29,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.WindowConfiguration;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.input.InputManager;
@@ -46,10 +49,12 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,12 +65,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /** Tests of {@link DesktopModeWindowDecorViewModel} */
 @SmallTest
 public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
 
     private static final String TAG = "DesktopModeWindowDecorViewModelTests";
+    private static  final Rect STABLE_INSETS = new Rect(0, 100, 0, 0);
 
     @Mock private DesktopModeWindowDecoration mDesktopModeWindowDecoration;
     @Mock private DesktopModeWindowDecoration.Factory mDesktopModeWindowDecorFactory;
@@ -74,14 +81,17 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
     @Mock private Choreographer mMainChoreographer;
     @Mock private ShellTaskOrganizer mTaskOrganizer;
     @Mock private DisplayController mDisplayController;
+    @Mock private DisplayLayout mDisplayLayout;
     @Mock private SplitScreenController mSplitScreenController;
     @Mock private SyncTransactionQueue mSyncQueue;
     @Mock private DesktopModeController mDesktopModeController;
     @Mock private DesktopTasksController mDesktopTasksController;
     @Mock private InputMonitor mInputMonitor;
     @Mock private InputManager mInputManager;
-
+    @Mock private Transitions mTransitions;
     @Mock private DesktopModeWindowDecorViewModel.InputMonitorFactory mMockInputMonitorFactory;
+    @Mock private Supplier<SurfaceControl.Transaction> mTransactionFactory;
+    @Mock private SurfaceControl.Transaction mTransaction;
     private final List<InputManager> mMockInputManagers = new ArrayList<>();
 
     private DesktopModeWindowDecorViewModel mDesktopModeWindowDecorViewModel;
@@ -98,16 +108,21 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
                 mTaskOrganizer,
                 mDisplayController,
                 mSyncQueue,
+                mTransitions,
                 Optional.of(mDesktopModeController),
                 Optional.of(mDesktopTasksController),
                 Optional.of(mSplitScreenController),
                 mDesktopModeWindowDecorFactory,
-                mMockInputMonitorFactory
+                mMockInputMonitorFactory,
+                mTransactionFactory
             );
 
         doReturn(mDesktopModeWindowDecoration)
             .when(mDesktopModeWindowDecorFactory)
             .create(any(), any(), any(), any(), any(), any(), any(), any());
+        doReturn(mTransaction).when(mTransactionFactory).get();
+        doReturn(mDisplayLayout).when(mDisplayController).getDisplayLayout(anyInt());
+        doReturn(STABLE_INSETS).when(mDisplayLayout).stableInsets();
 
         when(mMockInputMonitorFactory.create(any(), any())).thenReturn(mInputMonitor);
         // InputChannel cannot be mocked because it passes to InputEventReceiver.
@@ -250,7 +265,7 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
     }
 
     private static ActivityManager.RunningTaskInfo createTaskInfo(int taskId,
-            int displayId, int windowingMode) {
+            int displayId, @WindowConfiguration.WindowingMode int windowingMode) {
         ActivityManager.RunningTaskInfo taskInfo =
                  new TestRunningTaskInfoBuilder()
                 .setDisplayId(displayId)

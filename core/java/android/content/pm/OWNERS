@@ -8,3 +8,4 @@ per-file *Capability* = file:/core/java/android/content/pm/SHORTCUT_OWNERS
 per-file *Shortcut* = file:/core/java/android/content/pm/SHORTCUT_OWNERS
 per-file *Launcher* = file:/core/java/android/content/pm/LAUNCHER_OWNERS
 per-file UserInfo* = file:/MULTIUSER_OWNERS
+per-file *UserProperties* = file:/MULTIUSER_OWNERS

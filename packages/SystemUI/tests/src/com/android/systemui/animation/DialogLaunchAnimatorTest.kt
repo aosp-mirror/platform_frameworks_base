@@ -70,7 +70,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         assertTrue(dialog.isShowing)
 
         // The dialog is now fullscreen.
-        val window = dialog.window
+        val window = checkNotNull(dialog.window)
         val decorView = window.decorView as DecorView
         assertEquals(MATCH_PARENT, window.attributes.width)
         assertEquals(MATCH_PARENT, window.attributes.height)
@@ -172,14 +172,15 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         // Important: the power menu animation relies on this behavior to know when to animate (see
         // http://ag/16774605).
         val dialog = runOnMainThreadAndWaitForIdleSync { TestDialog(context) }
-        dialog.window.setWindowAnimations(0)
-        assertEquals(0, dialog.window.attributes.windowAnimations)
+        val window = checkNotNull(dialog.window)
+        window.setWindowAnimations(0)
+        assertEquals(0, window.attributes.windowAnimations)
 
         val touchSurface = createTouchSurface()
         runOnMainThreadAndWaitForIdleSync {
             dialogLaunchAnimator.showFromView(dialog, touchSurface)
         }
-        assertNotEquals(0, dialog.window.attributes.windowAnimations)
+        assertNotEquals(0, window.attributes.windowAnimations)
     }
 
     @Test
@@ -351,13 +352,14 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
         init {
             // We need to set the window type for dialogs shown by SysUI, otherwise WM will throw.
-            window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
+            checkNotNull(window).setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
         }
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             setContentView(contentView)
 
+            val window = checkNotNull(window)
             window.setLayout(DIALOG_WIDTH, DIALOG_HEIGHT)
             window.setBackgroundDrawable(windowBackground)
         }

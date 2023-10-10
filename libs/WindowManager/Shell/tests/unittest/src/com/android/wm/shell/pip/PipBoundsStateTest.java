@@ -27,11 +27,13 @@ import android.content.ComponentName;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.testing.TestableResources;
 import android.util.Size;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.function.TriConsumer;
+import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 
@@ -52,13 +54,23 @@ public class PipBoundsStateTest extends ShellTestCase {
     private static final Size DEFAULT_SIZE = new Size(10, 10);
     private static final float DEFAULT_SNAP_FRACTION = 1.0f;
 
+    /** The minimum possible size of the override min size's width or height */
+    private static final int OVERRIDABLE_MIN_SIZE = 40;
+
     private PipBoundsState mPipBoundsState;
     private ComponentName mTestComponentName1;
     private ComponentName mTestComponentName2;
 
     @Before
     public void setUp() {
-        mPipBoundsState = new PipBoundsState(mContext, new PipSizeSpecHandler(mContext));
+        final TestableResources res = mContext.getOrCreateTestableResources();
+        res.addOverride(
+                R.dimen.overridable_minimal_size_pip_resizable_task,
+                OVERRIDABLE_MIN_SIZE);
+
+        PipDisplayLayoutState pipDisplayLayoutState = new PipDisplayLayoutState(mContext);
+        mPipBoundsState = new PipBoundsState(mContext,
+                new PipSizeSpecHandler(mContext, pipDisplayLayoutState), pipDisplayLayoutState);
         mTestComponentName1 = new ComponentName(mContext, "component1");
         mTestComponentName2 = new ComponentName(mContext, "component2");
     }

@@ -19,6 +19,8 @@ package com.android.systemui.biometrics
 import android.content.Context
 import android.hardware.biometrics.BiometricAuthenticator.Modality
 import android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE
+import android.hardware.biometrics.BiometricConstants
+import android.hardware.face.FaceManager
 import android.util.AttributeSet
 import com.android.systemui.R
 
@@ -27,6 +29,7 @@ class AuthBiometricFingerprintAndFaceView(
     context: Context,
     attrs: AttributeSet?
 ) : AuthBiometricFingerprintView(context, attrs) {
+    var isFaceClass3 = false
 
     constructor (context: Context) : this(context, null)
 
@@ -34,10 +37,22 @@ class AuthBiometricFingerprintAndFaceView(
 
     override fun forceRequireConfirmation(@Modality modality: Int) = modality == TYPE_FACE
 
-    override fun ignoreUnsuccessfulEventsFrom(@Modality modality: Int) = modality == TYPE_FACE
-
-    override fun onPointerDown(failedModalities: Set<Int>) = failedModalities.contains(TYPE_FACE)
+    override fun ignoreUnsuccessfulEventsFrom(@Modality modality: Int, unsuccessfulReason: String) =
+        modality == TYPE_FACE && !(isFaceClass3 && isLockoutErrorString(unsuccessfulReason))
 
     override fun createIconController(): AuthIconController =
         AuthBiometricFingerprintAndFaceIconController(mContext, mIconView, mIconViewOverlay)
+
+    override fun isCoex() = true
+
+    private fun isLockoutErrorString(unsuccessfulReason: String) =
+        unsuccessfulReason == FaceManager.getErrorString(
+            mContext,
+            BiometricConstants.BIOMETRIC_ERROR_LOCKOUT,
+            0 /*vendorCode */
+        ) || unsuccessfulReason == FaceManager.getErrorString(
+            mContext,
+            BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
+            0 /*vendorCode */
+        )
 }

@@ -16,44 +16,37 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
-import android.app.Instrumentation
 import android.content.Context
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.flicker.FlickerBuilderProvider
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
+import com.android.wm.shell.flicker.BaseBenchmarkTest
 
-abstract class SplitScreenBase(protected val testSpec: FlickerTestParameter) {
-    protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    protected val taplInstrumentation = LauncherInstrumentation()
+abstract class SplitScreenBase(flicker: FlickerTest) : BaseBenchmarkTest(flicker) {
     protected val context: Context = instrumentation.context
-    protected val primaryApp = SplitScreenHelper.getPrimary(instrumentation)
-    protected val secondaryApp = SplitScreenHelper.getSecondary(instrumentation)
+    protected val primaryApp = SplitScreenUtils.getPrimary(instrumentation)
+    protected val secondaryApp = SplitScreenUtils.getSecondary(instrumentation)
 
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            transition(this)
+    protected open val defaultSetup: FlickerBuilder.() -> Unit = {
+        setup {
+            tapl.setEnableRotation(true)
+            setRotation(flicker.scenario.startRotation)
+            tapl.setExpectedRotation(flicker.scenario.startRotation.value)
+            tapl.workspace.switchToOverview().dismissAllTasks()
         }
     }
 
-    protected open val transition: FlickerBuilder.() -> Unit
-        get() = {
-            setup {
-                test {
-                    taplInstrumentation.setEnableRotation(true)
-                    setRotation(testSpec.startRotation)
-                    taplInstrumentation.setExpectedRotation(testSpec.startRotation)
-                }
-            }
-            teardown {
-                eachRun {
-                    primaryApp.exit(wmHelper)
-                    secondaryApp.exit(wmHelper)
-                }
-            }
+    protected open val defaultTeardown: FlickerBuilder.() -> Unit = {
+        teardown {
+            primaryApp.exit(wmHelper)
+            secondaryApp.exit(wmHelper)
         }
+    }
+
+    protected open val withoutTracing: FlickerBuilder.() -> Unit = {
+        withoutLayerTracing()
+        withoutWindowManagerTracing()
+        withoutTransitionTracing()
+        withoutTransactionsTracing()
+    }
 }

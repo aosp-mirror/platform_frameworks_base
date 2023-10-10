@@ -17,20 +17,20 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
-import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UI_VISIBILITY;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_ACTIVITY;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_STARTED_SERVICE;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
-import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_ACTIVITY;
-import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER;
-import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_STARTED_SERVICE;
 import static com.android.server.am.ProcessRecord.TAG;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.os.SystemClock;
-import android.util.ArraySet;
+import android.os.Trace;
 import android.util.Slog;
 import android.util.TimeUtils;
 
@@ -44,6 +44,9 @@ import java.io.PrintWriter;
  * The state info of the process, including proc state, oom adj score, et al.
  */
 final class ProcessStateRecord {
+    // Enable this to trace all OomAdjuster state transitions
+    private static final boolean TRACE_OOM_ADJ = false;
+
     private final ProcessRecord mApp;
     private final ActivityManagerService mService;
     private final ActivityManagerGlobalLock mProcLock;
@@ -764,7 +767,7 @@ final class ProcessStateRecord {
             Slog.i(TAG, "Setting runningRemoteAnimation=" + runningRemoteAnimation
                     + " for pid=" + mApp.getPid());
         }
-        mService.updateOomAdjLocked(mApp, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
+        mService.updateOomAdjLocked(mApp, OOM_ADJ_REASON_UI_VISIBILITY);
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -917,6 +920,12 @@ final class ProcessStateRecord {
 
     @GuardedBy("mService")
     void setAdjType(String adjType) {
+        if (TRACE_OOM_ADJ) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "oom:" + mApp.processName + "/u" + mApp.uid, 0);
+            Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "oom:" + mApp.processName + "/u" + mApp.uid, adjType, 0);
+        }
         mAdjType = adjType;
     }
 
@@ -1058,14 +1067,12 @@ final class ProcessStateRecord {
     }
 
     @GuardedBy("mService")
-    boolean getCachedIsReceivingBroadcast(ArraySet<BroadcastQueue> tmpQueue) {
+    boolean getCachedIsReceivingBroadcast(int[] outSchedGroup) {
         if (mCachedIsReceivingBroadcast == VALUE_INVALID) {
-            tmpQueue.clear();
-            mCachedIsReceivingBroadcast = mService.isReceivingBroadcastLocked(mApp, tmpQueue)
+            mCachedIsReceivingBroadcast = mService.isReceivingBroadcastLocked(mApp, outSchedGroup)
                     ? VALUE_TRUE : VALUE_FALSE;
             if (mCachedIsReceivingBroadcast == VALUE_TRUE) {
-                mCachedSchedGroup = tmpQueue.contains(mService.mFgBroadcastQueue)
-                        ? ProcessList.SCHED_GROUP_DEFAULT : ProcessList.SCHED_GROUP_BACKGROUND;
+                mCachedSchedGroup = outSchedGroup[0];
                 mApp.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER);
             } else {
                 mApp.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER);
@@ -1156,6 +1163,10 @@ final class ProcessStateRecord {
 
     @GuardedBy({"mService", "mProcLock"})
     void onCleanupApplicationRecordLSP() {
+        if (TRACE_OOM_ADJ) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "oom:" + mApp.processName + "/u" + mApp.uid, 0);
+        }
         setHasForegroundActivities(false);
         mHasShownUi = false;
         mForcingToImportant = null;
@@ -1166,11 +1177,6 @@ final class ProcessStateRecord {
         for (int i = 0; i < mCachedCompatChanges.length; i++) {
             mCachedCompatChanges[i] = VALUE_INVALID;
         }
-    }
-
-    @GuardedBy("mService")
-    boolean isAllowedStartFgs() {
-        return mCurProcState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
     }
 
     @GuardedBy("mService")

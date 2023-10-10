@@ -43,6 +43,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -1337,6 +1338,14 @@ public class ApnSetting implements Parcelable {
     public ContentValues toContentValues() {
         ContentValues apnValue = new ContentValues();
         apnValue.put(Telephony.Carriers.NUMERIC, nullToEmpty(mOperatorNumeric));
+        // If the APN is editable, the user may be able to set an invalid numeric. The numeric must
+        // always be 5 or 6 characters (depending on the length of the MNC), so skip if it is
+        // potentially invalid.
+        if (!TextUtils.isEmpty(mOperatorNumeric)
+                && (mOperatorNumeric.length() == 5 || mOperatorNumeric.length() == 6)) {
+            apnValue.put(Telephony.Carriers.MCC, mOperatorNumeric.substring(0, 3));
+            apnValue.put(Telephony.Carriers.MNC, mOperatorNumeric.substring(3));
+        }
         apnValue.put(Telephony.Carriers.NAME, nullToEmpty(mEntryName));
         apnValue.put(Telephony.Carriers.APN, nullToEmpty(mApnName));
         apnValue.put(Telephony.Carriers.PROXY, nullToEmpty(mProxyAddress));
@@ -1356,6 +1365,7 @@ public class ApnSetting implements Parcelable {
                 getProtocolStringFromInt(mRoamingProtocol));
         apnValue.put(Telephony.Carriers.CARRIER_ENABLED, mCarrierEnabled);
         apnValue.put(Telephony.Carriers.MVNO_TYPE, getMvnoTypeStringFromInt(mMvnoType));
+        apnValue.put(Telephony.Carriers.MVNO_MATCH_DATA, nullToEmpty(mMvnoMatchData));
         apnValue.put(Telephony.Carriers.NETWORK_TYPE_BITMASK, mNetworkTypeBitmask);
         apnValue.put(Telephony.Carriers.LINGERING_NETWORK_TYPE_BITMASK,
                 mLingeringNetworkTypeBitmask);
@@ -1442,7 +1452,7 @@ public class ApnSetting implements Parcelable {
      */
     @SystemApi
     public static @ApnType int getApnTypeInt(@NonNull @ApnTypeString String apnType) {
-        return APN_TYPE_STRING_MAP.getOrDefault(apnType.toLowerCase(), 0);
+        return APN_TYPE_STRING_MAP.getOrDefault(apnType.toLowerCase(Locale.ROOT), 0);
     }
 
     /**
@@ -1457,7 +1467,7 @@ public class ApnSetting implements Parcelable {
         } else {
             int result = 0;
             for (String str : types.split(",")) {
-                Integer type = APN_TYPE_STRING_MAP.get(str.toLowerCase());
+                Integer type = APN_TYPE_STRING_MAP.get(str.toLowerCase(Locale.ROOT));
                 if (type != null) {
                     result |= type;
                 }
@@ -1468,7 +1478,8 @@ public class ApnSetting implements Parcelable {
 
     /** @hide */
     public static int getMvnoTypeIntFromString(String mvnoType) {
-        String mvnoTypeString = TextUtils.isEmpty(mvnoType) ? mvnoType : mvnoType.toLowerCase();
+        String mvnoTypeString = TextUtils.isEmpty(mvnoType)
+                ? mvnoType : mvnoType.toLowerCase(Locale.ROOT);
         Integer mvnoTypeInt = MVNO_TYPE_STRING_MAP.get(mvnoTypeString);
         return  mvnoTypeInt == null ? UNSPECIFIED_INT : mvnoTypeInt;
     }

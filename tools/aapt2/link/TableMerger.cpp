@@ -37,7 +37,7 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* out_table,
   CHECK(main_package_ != nullptr) << "package name or ID already taken";
 }
 
-bool TableMerger::Merge(const Source& src, ResourceTable* table, bool overlay) {
+bool TableMerger::Merge(const android::Source& src, ResourceTable* table, bool overlay) {
   TRACE_CALL();
   // We allow adding new resources if this is not an overlay, or if the options allow overlays
   // to add new resources.
@@ -45,7 +45,8 @@ bool TableMerger::Merge(const Source& src, ResourceTable* table, bool overlay) {
 }
 
 // This will merge packages with the same package name (or no package name).
-bool TableMerger::MergeImpl(const Source& src, ResourceTable* table, bool overlay, bool allow_new) {
+bool TableMerger::MergeImpl(const android::Source& src, ResourceTable* table, bool overlay,
+                            bool allow_new) {
   bool error = false;
   for (auto& package : table->packages) {
     // Only merge an empty package or the package we're building.
@@ -65,13 +66,14 @@ bool TableMerger::MergeImpl(const Source& src, ResourceTable* table, bool overla
 
 // This will merge and mangle resources from a static library. It is assumed that all FileReferences
 // have correctly set their io::IFile*.
-bool TableMerger::MergeAndMangle(const Source& src, const StringPiece& package_name,
+bool TableMerger::MergeAndMangle(const android::Source& src, StringPiece package_name,
                                  ResourceTable* table) {
   bool error = false;
   for (auto& package : table->packages) {
     // Warn of packages with an unrelated ID.
     if (package_name != package->name) {
-      context_->GetDiagnostics()->Warn(DiagMessage(src) << "ignoring package " << package->name);
+      context_->GetDiagnostics()->Warn(android::DiagMessage(src)
+                                       << "ignoring package " << package->name);
       continue;
     }
 
@@ -82,8 +84,8 @@ bool TableMerger::MergeAndMangle(const Source& src, const StringPiece& package_n
   return !error;
 }
 
-static bool MergeType(IAaptContext* context, const Source& src, ResourceTableType* dst_type,
-                      ResourceTableType* src_type) {
+static bool MergeType(IAaptContext* context, const android::Source& src,
+                      ResourceTableType* dst_type, ResourceTableType* src_type) {
   if (src_type->visibility_level >= dst_type->visibility_level) {
     // The incoming type's visibility is stronger, so we should override the visibility.
     dst_type->visibility_level = src_type->visibility_level;
@@ -91,15 +93,15 @@ static bool MergeType(IAaptContext* context, const Source& src, ResourceTableTyp
   return true;
 }
 
-static bool MergeEntry(IAaptContext* context, const Source& src,
-                       ResourceEntry* dst_entry, ResourceEntry* src_entry,
-                       bool strict_visibility) {
+static bool MergeEntry(IAaptContext* context, const android::Source& src, ResourceEntry* dst_entry,
+                       ResourceEntry* src_entry, bool strict_visibility) {
   if (strict_visibility
       && dst_entry->visibility.level != Visibility::Level::kUndefined
       && src_entry->visibility.level != dst_entry->visibility.level) {
-      context->GetDiagnostics()->Error(
-          DiagMessage(src) << "cannot merge resource '" << dst_entry->name << "' with conflicting visibilities: "
-                           << "public and private");
+    context->GetDiagnostics()->Error(android::DiagMessage(src)
+                                     << "cannot merge resource '" << dst_entry->name
+                                     << "' with conflicting visibilities: "
+                                     << "public and private");
     return false;
   }
 
@@ -114,8 +116,9 @@ static bool MergeEntry(IAaptContext* context, const Source& src,
              dst_entry->visibility.level == Visibility::Level::kPublic && dst_entry->id &&
              src_entry->id && src_entry->id != dst_entry->id) {
     // Both entries are public and have different IDs.
-    context->GetDiagnostics()->Error(DiagMessage(src) << "cannot merge entry '" << src_entry->name
-                                                      << "': conflicting public IDs");
+    context->GetDiagnostics()->Error(android::DiagMessage(src)
+                                     << "cannot merge entry '" << src_entry->name
+                                     << "': conflicting public IDs");
     return false;
   }
 
@@ -139,11 +142,12 @@ static bool MergeEntry(IAaptContext* context, const Source& src,
 
         // Do not allow a resource with an overlayable declaration to have that overlayable
         // declaration redefined.
-        context->GetDiagnostics()->Error(DiagMessage(src_entry->overlayable_item.value().source)
-                                             << "duplicate overlayable declaration for resource '"
-                                             << src_entry->name << "'");
-        context->GetDiagnostics()->Error(DiagMessage(dst_entry->overlayable_item.value().source)
-                                             << "previous declaration here");
+        context->GetDiagnostics()->Error(
+            android::DiagMessage(src_entry->overlayable_item.value().source)
+            << "duplicate overlayable declaration for resource '" << src_entry->name << "'");
+        context->GetDiagnostics()->Error(
+            android::DiagMessage(dst_entry->overlayable_item.value().source)
+            << "previous declaration here");
         return false;
       }
     }
@@ -154,10 +158,10 @@ static bool MergeEntry(IAaptContext* context, const Source& src,
   if (src_entry->staged_id) {
     if (dst_entry->staged_id &&
         dst_entry->staged_id.value().id != src_entry->staged_id.value().id) {
-      context->GetDiagnostics()->Error(DiagMessage(src_entry->staged_id.value().source)
+      context->GetDiagnostics()->Error(android::DiagMessage(src_entry->staged_id.value().source)
                                        << "conflicting staged id declaration for resource '"
                                        << src_entry->name << "'");
-      context->GetDiagnostics()->Error(DiagMessage(dst_entry->staged_id.value().source)
+      context->GetDiagnostics()->Error(android::DiagMessage(dst_entry->staged_id.value().source)
                                        << "previous declaration here");
     }
     dst_entry->staged_id = std::move(src_entry->staged_id);
@@ -174,7 +178,7 @@ static bool MergeEntry(IAaptContext* context, const Source& src,
 // If both values are Styleables/Styles, we just merge them into the existing value.
 static ResourceTable::CollisionResult ResolveMergeCollision(
     bool override_styles_instead_of_overlaying, Value* existing, Value* incoming,
-    StringPool* pool) {
+    android::StringPool* pool) {
   if (Styleable* existing_styleable = ValueCast<Styleable>(existing)) {
     if (Styleable* incoming_styleable = ValueCast<Styleable>(incoming)) {
       // Styleables get merged.
@@ -194,13 +198,10 @@ static ResourceTable::CollisionResult ResolveMergeCollision(
   return ResourceTable::ResolveValueCollision(existing, incoming);
 }
 
-static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
-                                                       const ResourceNameRef& res_name,
-                                                       bool overlay,
-                                                       bool override_styles_instead_of_overlaying,
-                                                       ResourceConfigValue* dst_config_value,
-                                                       ResourceConfigValue* src_config_value,
-                                                       StringPool* pool) {
+static ResourceTable::CollisionResult MergeConfigValue(
+    IAaptContext* context, const ResourceNameRef& res_name, bool overlay,
+    bool override_styles_instead_of_overlaying, ResourceConfigValue* dst_config_value,
+    ResourceConfigValue* src_config_value, android::StringPool* pool) {
   using CollisionResult = ResourceTable::CollisionResult;
 
   Value* dst_value = dst_config_value->value.get();
@@ -220,22 +221,22 @@ static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
     }
 
     // Error!
-    context->GetDiagnostics()->Error(DiagMessage(src_value->GetSource())
+    context->GetDiagnostics()->Error(android::DiagMessage(src_value->GetSource())
                                      << "resource '" << res_name << "' has a conflicting value for "
                                      << "configuration (" << src_config_value->config << ")");
-    context->GetDiagnostics()->Note(DiagMessage(dst_value->GetSource())
+    context->GetDiagnostics()->Note(android::DiagMessage(dst_value->GetSource())
                                     << "originally defined here");
     return CollisionResult::kConflict;
   }
   return collision_result;
 }
 
-bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, bool mangle_package,
-                          bool overlay, bool allow_new_resources) {
+bool TableMerger::DoMerge(const android::Source& src, ResourceTablePackage* src_package,
+                          bool mangle_package, bool overlay, bool allow_new_resources) {
   bool error = false;
 
   for (auto& src_type : src_package->types) {
-    ResourceTableType* dst_type = main_package_->FindOrCreateType(src_type->type);
+    ResourceTableType* dst_type = main_package_->FindOrCreateType(src_type->named_type);
     if (!MergeType(context_, src, dst_type, src_type.get())) {
       error = true;
       continue;
@@ -254,14 +255,15 @@ bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, 
         dst_entry = dst_type->FindEntry(entry_name);
       }
 
-      const ResourceNameRef res_name(src_package->name, src_type->type, src_entry->name);
+      const ResourceNameRef res_name(src_package->name, src_type->named_type, src_entry->name);
 
       if (!dst_entry) {
-        context_->GetDiagnostics()->Error(DiagMessage(src)
+        context_->GetDiagnostics()->Error(android::DiagMessage(src)
                                           << "resource " << res_name
                                           << " does not override an existing resource");
-        context_->GetDiagnostics()->Note(DiagMessage(src) << "define an <add-resource> tag or use "
-                                                          << "--auto-add-overlay");
+        context_->GetDiagnostics()->Note(android::DiagMessage(src)
+                                         << "define an <add-resource> tag or use "
+                                         << "--auto-add-overlay");
         error = true;
         continue;
       }
@@ -324,8 +326,8 @@ std::unique_ptr<FileReference> TableMerger::CloneAndMangleFile(
     const std::string& package, const FileReference& file_ref) {
   StringPiece prefix, entry, suffix;
   if (util::ExtractResFilePathParts(*file_ref.path, &prefix, &entry, &suffix)) {
-    std::string mangled_entry = NameMangler::MangleEntry(package, entry.to_string());
-    std::string newPath = prefix.to_string() + mangled_entry + suffix.to_string();
+    std::string mangled_entry = NameMangler::MangleEntry(package, entry);
+    std::string newPath = (std::string(prefix) += mangled_entry) += suffix;
     std::unique_ptr<FileReference> new_file_ref =
         util::make_unique<FileReference>(main_table_->string_pool.MakeRef(newPath));
     new_file_ref->SetComment(file_ref.GetComment());
@@ -349,7 +351,7 @@ bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFi
   file_ref->file = file;
 
   ResourceTablePackage* pkg = table.FindOrCreatePackage(file_desc.name.package);
-  pkg->FindOrCreateType(file_desc.name.type.type)
+  pkg->FindOrCreateType(file_desc.name.type)
       ->FindOrCreateEntry(file_desc.name.entry)
       ->FindOrCreateValue(file_desc.config, {})
       ->value = std::move(file_ref);

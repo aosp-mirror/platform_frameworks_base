@@ -23,6 +23,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import static com.android.systemui.util.DumpUtilsKt.asIndenting;
+
 import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -44,6 +46,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.provider.Settings.Secure;
 import android.util.DisplayUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Size;
 import android.view.Display;
@@ -87,6 +90,8 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.settings.SecureSettings;
 
+import kotlin.Pair;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,8 +99,6 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import kotlin.Pair;
 
 /**
  * An overlay that draws screen decorations in software (e.g for rounded corners or display cutout)
@@ -251,11 +254,13 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             new CameraAvailabilityListener.CameraTransitionCallback() {
         @Override
         public void onApplyCameraProtection(@NonNull Path protectionPath, @NonNull Rect bounds) {
+            mLogger.cameraProtectionEvent("onApplyCameraProtection");
             showCameraProtection(protectionPath, bounds);
         }
 
         @Override
         public void onHideCameraProtection() {
+            mLogger.cameraProtectionEvent("onHideCameraProtection");
             hideCameraProtection();
         }
     };
@@ -1005,39 +1010,55 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("ScreenDecorations state:");
-        pw.println("  DEBUG_DISABLE_SCREEN_DECORATIONS:" + DEBUG_DISABLE_SCREEN_DECORATIONS);
+        IndentingPrintWriter ipw = asIndenting(pw);
+        ipw.increaseIndent();
+        ipw.println("DEBUG_DISABLE_SCREEN_DECORATIONS:" + DEBUG_DISABLE_SCREEN_DECORATIONS);
         if (DEBUG_DISABLE_SCREEN_DECORATIONS) {
             return;
         }
 
-        pw.println("  mIsPrivacyDotEnabled:" + isPrivacyDotEnabled());
-        pw.println("  shouldOptimizeOverlayVisibility:" + shouldOptimizeVisibility());
+        ipw.println("mIsPrivacyDotEnabled:" + isPrivacyDotEnabled());
+        ipw.println("shouldOptimizeOverlayVisibility:" + shouldOptimizeVisibility());
         final boolean supportsShowingFaceScanningAnim = mFaceScanningFactory.getHasProviders();
-        pw.println("    supportsShowingFaceScanningAnim:" + supportsShowingFaceScanningAnim);
+        ipw.println("supportsShowingFaceScanningAnim:" + supportsShowingFaceScanningAnim);
         if (supportsShowingFaceScanningAnim) {
-            pw.println("      canShowFaceScanningAnim:"
+            ipw.increaseIndent();
+            ipw.println("canShowFaceScanningAnim:"
                     + mFaceScanningFactory.canShowFaceScanningAnim());
-            pw.println("      shouldShowFaceScanningAnim (at time dump was taken):"
+            ipw.println("shouldShowFaceScanningAnim (at time dump was taken):"
                     + mFaceScanningFactory.shouldShowFaceScanningAnim());
+            ipw.decreaseIndent();
         }
-        pw.println("  mPendingConfigChange:" + mPendingConfigChange);
+        FaceScanningOverlay faceScanningOverlay =
+                (FaceScanningOverlay) getOverlayView(mFaceScanningViewId);
+        if (faceScanningOverlay != null) {
+            faceScanningOverlay.dump(ipw);
+        }
+        ipw.println("mPendingConfigChange:" + mPendingConfigChange);
         if (mHwcScreenDecorationSupport != null) {
-            pw.println("  mHwcScreenDecorationSupport:");
-            pw.println("    format="
+            ipw.increaseIndent();
+            ipw.println("mHwcScreenDecorationSupport:");
+            ipw.increaseIndent();
+            ipw.println("format="
                     + PixelFormat.formatToString(mHwcScreenDecorationSupport.format));
-            pw.println("    alphaInterpretation="
+            ipw.println("alphaInterpretation="
                     + alphaInterpretationToString(mHwcScreenDecorationSupport.alphaInterpretation));
+            ipw.decreaseIndent();
+            ipw.decreaseIndent();
         } else {
-            pw.println("  mHwcScreenDecorationSupport: null");
+            ipw.increaseIndent();
+            pw.println("mHwcScreenDecorationSupport: null");
+            ipw.decreaseIndent();
         }
         if (mScreenDecorHwcLayer != null) {
-            pw.println("  mScreenDecorHwcLayer:");
-            pw.println("    transparentRegion=" + mScreenDecorHwcLayer.transparentRect);
+            ipw.increaseIndent();
+            mScreenDecorHwcLayer.dump(ipw);
+            ipw.decreaseIndent();
         } else {
-            pw.println("  mScreenDecorHwcLayer: null");
+            ipw.println("mScreenDecorHwcLayer: null");
         }
         if (mOverlays != null) {
-            pw.println("  mOverlays(left,top,right,bottom)=("
+            ipw.println("mOverlays(left,top,right,bottom)=("
                     + (mOverlays[BOUNDS_POSITION_LEFT] != null) + ","
                     + (mOverlays[BOUNDS_POSITION_TOP] != null) + ","
                     + (mOverlays[BOUNDS_POSITION_RIGHT] != null) + ","

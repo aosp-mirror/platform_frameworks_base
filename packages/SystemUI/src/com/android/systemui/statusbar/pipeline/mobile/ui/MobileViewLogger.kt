@@ -20,8 +20,8 @@ import android.view.View
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.statusbar.pipeline.dagger.MobileViewLog
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
 import java.io.PrintWriter
@@ -40,15 +40,6 @@ constructor(
     }
 
     private val collectionStatuses = mutableMapOf<String, Boolean>()
-
-    fun logUiAdapterSubIdsUpdated(subs: List<Int>) {
-        buffer.log(
-            TAG,
-            LogLevel.INFO,
-            { str1 = subs.toString() },
-            { "Sub IDs in MobileUiAdapter updated internally: $str1" },
-        )
-    }
 
     fun logUiAdapterSubIdsSentToIconController(subs: List<Int>) {
         buffer.log(

@@ -16,19 +16,19 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.content.Context.CONTEXT_RESTRICTED;
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-
-import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MAX_ANIMATION_DURATION;
-import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MINIMAL_ANIMATION_DURATION;
 
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -48,9 +48,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -58,7 +60,9 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.window.SplashScreenView;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowInfo.StartingWindowType;
@@ -88,6 +92,25 @@ import java.util.function.UnaryOperator;
  */
 public class SplashscreenContentDrawer {
     private static final String TAG = StartingWindowController.TAG;
+
+    /**
+     * The minimum duration during which the splash screen is shown when the splash screen icon is
+     * animated.
+     */
+    static final long MINIMAL_ANIMATION_DURATION = 400L;
+
+    /**
+     * Allow the icon style splash screen to be displayed for longer to give time for the animation
+     * to finish, i.e. the extra buffer time to keep the splash screen if the animation is slightly
+     * longer than the {@link #MINIMAL_ANIMATION_DURATION} duration.
+     */
+    static final long TIME_WINDOW_DURATION = 100L;
+
+    /**
+     * The maximum duration during which the splash screen will be shown if the application is ready
+     * to show before the icon animation finishes.
+     */
+    static final long MAX_ANIMATION_DURATION = MINIMAL_ANIMATION_DURATION + TIME_WINDOW_DURATION;
 
     // The acceptable area ratio of foreground_icon_area/background_icon_area, if there is an
     // icon which it's non-transparent foreground area is similar to it's background area, then
@@ -133,6 +156,144 @@ public class SplashscreenContentDrawer {
         mColorCache = new ColorCache(mContext, mSplashscreenWorkerHandler);
     }
 
+    /**
+     * Help method to create a layout parameters for a window.
+     */
+    static Context createContext(Context initContext, StartingWindowInfo windowInfo,
+            int theme, @StartingWindowInfo.StartingWindowType int suggestType,
+            DisplayManager displayManager) {
+        final ActivityManager.RunningTaskInfo taskInfo = windowInfo.taskInfo;
+        final ActivityInfo activityInfo = windowInfo.targetActivityInfo != null
+                ? windowInfo.targetActivityInfo
+                : taskInfo.topActivityInfo;
+        if (activityInfo == null || activityInfo.packageName == null) {
+            return null;
+        }
+
+        final int displayId = taskInfo.displayId;
+        final int taskId = taskInfo.taskId;
+
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                "addSplashScreen for package: %s with theme: %s for task: %d, suggestType: %d",
+                activityInfo.packageName, Integer.toHexString(theme), taskId, suggestType);
+        final Display display = displayManager.getDisplay(displayId);
+        if (display == null) {
+            // Can't show splash screen on requested display, so skip showing at all.
+            return null;
+        }
+        Context context = displayId == DEFAULT_DISPLAY
+                ? initContext : initContext.createDisplayContext(display);
+        if (context == null) {
+            return null;
+        }
+        if (theme != context.getThemeResId()) {
+            try {
+                context = context.createPackageContextAsUser(activityInfo.packageName,
+                        CONTEXT_RESTRICTED, UserHandle.of(taskInfo.userId));
+                context.setTheme(theme);
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.w(TAG, "Failed creating package context with package name "
+                        + activityInfo.packageName + " for user " + taskInfo.userId, e);
+                return null;
+            }
+        }
+
+        final Configuration taskConfig = taskInfo.getConfiguration();
+        if (taskConfig.diffPublicOnly(context.getResources().getConfiguration()) != 0) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                    "addSplashScreen: creating context based on task Configuration %s",
+                    taskConfig);
+            final Context overrideContext = context.createConfigurationContext(taskConfig);
+            overrideContext.setTheme(theme);
+            final TypedArray typedArray = overrideContext.obtainStyledAttributes(
+                    com.android.internal.R.styleable.Window);
+            final int resId = typedArray.getResourceId(R.styleable.Window_windowBackground, 0);
+            try {
+                if (resId != 0 && overrideContext.getDrawable(resId) != null) {
+                    // We want to use the windowBackground for the override context if it is
+                    // available, otherwise we use the default one to make sure a themed starting
+                    // window is displayed for the app.
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                            "addSplashScreen: apply overrideConfig %s",
+                            taskConfig);
+                    context = overrideContext;
+                }
+            } catch (Resources.NotFoundException e) {
+                Slog.w(TAG, "failed creating starting window for overrideConfig at taskId: "
+                        + taskId, e);
+                return null;
+            }
+            typedArray.recycle();
+        }
+        return context;
+    }
+
+    /**
+     * Creates the window layout parameters for splashscreen window.
+     */
+    static WindowManager.LayoutParams createLayoutParameters(Context context,
+            StartingWindowInfo windowInfo,
+            @StartingWindowInfo.StartingWindowType int suggestType,
+            CharSequence title, int pixelFormat, IBinder appToken) {
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
+        params.setFitInsetsSides(0);
+        params.setFitInsetsTypes(0);
+        params.format = pixelFormat;
+        int windowFlags = WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+        final TypedArray a = context.obtainStyledAttributes(R.styleable.Window);
+        if (a.getBoolean(R.styleable.Window_windowShowWallpaper, false)) {
+            windowFlags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+        }
+        if (suggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
+            if (a.getBoolean(R.styleable.Window_windowDrawsSystemBarBackgrounds, false)) {
+                windowFlags |= WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+            }
+        } else {
+            windowFlags |= WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        }
+        params.layoutInDisplayCutoutMode = a.getInt(
+                R.styleable.Window_windowLayoutInDisplayCutoutMode,
+                params.layoutInDisplayCutoutMode);
+        params.windowAnimations = a.getResourceId(R.styleable.Window_windowAnimationStyle, 0);
+        a.recycle();
+
+        final ActivityManager.RunningTaskInfo taskInfo = windowInfo.taskInfo;
+        final ActivityInfo activityInfo = windowInfo.targetActivityInfo != null
+                ? windowInfo.targetActivityInfo
+                : taskInfo.topActivityInfo;
+        final int displayId = taskInfo.displayId;
+        // Assumes it's safe to show starting windows of launched apps while
+        // the keyguard is being hidden. This is okay because starting windows never show
+        // secret information.
+        // TODO(b/113840485): Occluded may not only happen on default display
+        if (displayId == DEFAULT_DISPLAY && windowInfo.isKeyguardOccluded) {
+            windowFlags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+        }
+
+        // Force the window flags: this is a fake window, so it is not really
+        // touchable or focusable by the user.  We also add in the ALT_FOCUSABLE_IM
+        // flag because we do know that the next window will take input
+        // focus, so we want to get the IME window up on top of us right away.
+        // Touches will only pass through to the host activity window and will be blocked from
+        // passing to any other windows.
+        windowFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        params.flags = windowFlags;
+        params.token = appToken;
+        params.packageName = activityInfo.packageName;
+        params.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+
+        if (!context.getResources().getCompatibilityInfo().supportsScreen()) {
+            params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
+        }
+
+        params.setTitle("Splash Screen " + title);
+        return params;
+    }
     /**
      * Create a SplashScreenView object.
      *
@@ -223,10 +384,10 @@ public class SplashscreenContentDrawer {
 
     private static int estimateWindowBGColor(Drawable themeBGDrawable) {
         final DrawableColorTester themeBGTester = new DrawableColorTester(
-                themeBGDrawable, DrawableColorTester.TRANSPARENT_FILTER /* filterType */);
-        if (themeBGTester.passFilterRatio() == 0) {
-            // the window background is transparent, unable to draw
-            Slog.w(TAG, "Window background is transparent, fill background with black color");
+                themeBGDrawable, DrawableColorTester.TRANSLUCENT_FILTER /* filterType */);
+        if (themeBGTester.passFilterRatio() != 1) {
+            // the window background is translucent, unable to draw
+            Slog.w(TAG, "Window background is translucent, fill background with black color");
             return getSystemBGColor();
         } else {
             return themeBGTester.getDominateColor();
@@ -248,6 +409,26 @@ public class SplashscreenContentDrawer {
         return null;
     }
 
+    /**
+     * Creates a SplashScreenView without read animatable icon and branding image.
+     */
+    SplashScreenView makeSimpleSplashScreenContentView(Context context,
+            StartingWindowInfo info, int themeBGColor) {
+        updateDensity();
+        mTmpAttrs.reset();
+        final ActivityInfo ai = info.targetActivityInfo != null
+                ? info.targetActivityInfo
+                : info.taskInfo.topActivityInfo;
+
+        final SplashViewBuilder builder = new SplashViewBuilder(context, ai);
+        final SplashScreenView view = builder
+                .setWindowBGColor(themeBGColor)
+                .chooseStyle(STARTING_WINDOW_TYPE_SPLASH_SCREEN)
+                .build();
+        view.setNotCopyable();
+        return view;
+    }
+
     private SplashScreenView makeSplashScreenContentView(Context context, StartingWindowInfo info,
             @StartingWindowType int suggestType, Consumer<Runnable> uiThreadInitConsumer) {
         updateDensity();
@@ -263,7 +444,8 @@ public class SplashscreenContentDrawer {
         final int themeBGColor = legacyDrawable != null
                 ? getBGColorFromCache(ai, () -> estimateWindowBGColor(legacyDrawable))
                 : getBGColorFromCache(ai, () -> peekWindowBGColor(context, mTmpAttrs));
-        return new StartingWindowViewBuilder(context, ai)
+
+        return new SplashViewBuilder(context, ai)
                 .setWindowBGColor(themeBGColor)
                 .overlayDrawable(legacyDrawable)
                 .chooseStyle(suggestType)
@@ -322,6 +504,14 @@ public class SplashscreenContentDrawer {
         private Drawable mSplashScreenIcon = null;
         private Drawable mBrandingImage = null;
         private int mIconBgColor = Color.TRANSPARENT;
+
+        void reset() {
+            mWindowBgResId = 0;
+            mWindowBgColor = Color.TRANSPARENT;
+            mSplashScreenIcon = null;
+            mBrandingImage = null;
+            mIconBgColor = Color.TRANSPARENT;
+        }
     }
 
     /**
@@ -351,7 +541,7 @@ public class SplashscreenContentDrawer {
         return appReadyDuration;
     }
 
-    private class StartingWindowViewBuilder {
+    private class SplashViewBuilder {
         private final Context mContext;
         private final ActivityInfo mActivityInfo;
 
@@ -364,27 +554,28 @@ public class SplashscreenContentDrawer {
         /** @see #setAllowHandleSolidColor(boolean) **/
         private boolean mAllowHandleSolidColor;
 
-        StartingWindowViewBuilder(@NonNull Context context, @NonNull ActivityInfo aInfo) {
+        SplashViewBuilder(@NonNull Context context, @NonNull ActivityInfo aInfo) {
             mContext = context;
             mActivityInfo = aInfo;
         }
 
-        StartingWindowViewBuilder setWindowBGColor(@ColorInt int background) {
+        SplashViewBuilder setWindowBGColor(@ColorInt int background) {
             mThemeColor = background;
             return this;
         }
 
-        StartingWindowViewBuilder overlayDrawable(Drawable overlay) {
+        SplashViewBuilder overlayDrawable(Drawable overlay) {
             mOverlayDrawable = overlay;
             return this;
         }
 
-        StartingWindowViewBuilder chooseStyle(int suggestType) {
+        SplashViewBuilder chooseStyle(int suggestType) {
             mSuggestType = suggestType;
             return this;
         }
 
-        StartingWindowViewBuilder setUiThreadInitConsumer(Consumer<Runnable> uiThreadInitTask) {
+        // Set up the UI thread for the View.
+        SplashViewBuilder setUiThreadInitConsumer(Consumer<Runnable> uiThreadInitTask) {
             mUiThreadInitTask = uiThreadInitTask;
             return this;
         }
@@ -395,7 +586,7 @@ public class SplashscreenContentDrawer {
          * android.window.SplashScreen.OnExitAnimationListener#onSplashScreenExit(SplashScreenView)}
          * callback, effectively copying the {@link SplashScreenView} into the client process.
          */
-        StartingWindowViewBuilder setAllowHandleSolidColor(boolean allowHandleSolidColor) {
+        SplashViewBuilder setAllowHandleSolidColor(boolean allowHandleSolidColor) {
             mAllowHandleSolidColor = allowHandleSolidColor;
             return this;
         }
@@ -679,7 +870,7 @@ public class SplashscreenContentDrawer {
             @Override
             public float passFilterRatio() {
                 final int alpha = mColorDrawable.getAlpha();
-                return (float) (alpha / 255);
+                return alpha / 255.0f;
             }
 
             @Override

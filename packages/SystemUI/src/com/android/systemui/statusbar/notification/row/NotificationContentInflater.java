@@ -966,7 +966,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
             @Override
             public ApplicationInfo getApplicationInfo() {
-                ApplicationInfo applicationInfo = super.getApplicationInfo();
+                ApplicationInfo applicationInfo = new ApplicationInfo(super.getApplicationInfo());
                 applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_RTL;
                 return applicationInfo;
             }

@@ -236,7 +236,8 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
         `when`(precondition.conditionsMet()).thenReturn(true)
 
         // Given a session is created
-        val weatherView = controller.buildAndConnectWeatherView(fakeParent, customView)
+        val weatherView =
+            checkNotNull(controller.buildAndConnectWeatherView(fakeParent, customView))
         controller.stateChangeListener.onViewAttachedToWindow(weatherView)
         verify(smartspaceManager).createSmartspaceSession(any())
 
@@ -258,7 +259,8 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
 
         // Given a session is created
         val customView = Mockito.mock(TestView::class.java)
-        val weatherView = controller.buildAndConnectWeatherView(fakeParent, customView)
+        val weatherView =
+            checkNotNull(controller.buildAndConnectWeatherView(fakeParent, customView))
         controller.stateChangeListener.onViewAttachedToWindow(weatherView)
         verify(smartspaceManager).createSmartspaceSession(any())
 

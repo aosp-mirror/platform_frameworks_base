@@ -31,7 +31,7 @@ import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
-import android.view.InsetsVisibilities;
+import android.view.WindowInsets;
 
 import androidx.test.filters.SmallTest;
 
@@ -43,19 +43,22 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.DisableFlagsLogger;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
+
+import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -66,8 +69,6 @@ import org.mockito.stubbing.Answer;
 
 import java.util.Optional;
 
-import dagger.Lazy;
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
@@ -76,7 +77,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private ShadeController mShadeController;
     @Mock private CommandQueue mCommandQueue;
     @Mock private QuickSettingsController mQuickSettingsController;
-    @Mock private NotificationPanelViewController mNotificationPanelViewController;
+    @Mock private ShadeViewController mShadeViewController;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -96,6 +97,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
     @Mock private UserTracker mUserTracker;
     @Mock private QSHost mQSHost;
+    @Mock private ActivityStarter mActivityStarter;
 
     CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
@@ -110,7 +112,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mContext.getResources(),
                 mShadeController,
                 mCommandQueue,
-                mNotificationPanelViewController,
+                mShadeViewController,
                 mRemoteInputQuickSettingsDisabler,
                 mMetricsLogger,
                 mKeyguardUpdateMonitor,
@@ -131,7 +133,8 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mSystemBarAttributesListener,
                 mCameraLauncherLazy,
                 mUserTracker,
-                mQSHost);
+                mQSHost,
+                mActivityStarter);
 
         when(mUserTracker.getUserHandle()).thenReturn(
                 UserHandle.of(ActivityManager.getCurrentUser()));
@@ -153,9 +156,9 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
         // Trying to open it does nothing.
         mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mNotificationPanelViewController, never()).expandShadeToNotifications();
+        verify(mShadeViewController, never()).expandToNotifications();
         mSbcqCallbacks.animateExpandSettingsPanel(null);
-        verify(mNotificationPanelViewController, never()).expand(anyBoolean());
+        verify(mShadeViewController, never()).expand(anyBoolean());
     }
 
     @Test
@@ -171,9 +174,9 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
         // Can now be opened.
         mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mNotificationPanelViewController).expandShadeToNotifications();
+        verify(mShadeViewController).expandToNotifications();
         mSbcqCallbacks.animateExpandSettingsPanel(null);
-        verify(mNotificationPanelViewController).expandWithQs();
+        verify(mShadeViewController).expandToQs();
     }
 
     @Test
@@ -195,7 +198,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{};
         boolean navbarColorManagedByIme = true;
         int behavior = 456;
-        InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        int requestedVisibleTypes = WindowInsets.Type.systemBars();
         String packageName = "test package name";
         LetterboxDetails[] letterboxDetails = new LetterboxDetails[]{};
 
@@ -205,7 +208,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 appearanceRegions,
                 navbarColorManagedByIme,
                 behavior,
-                requestedVisibilities,
+                requestedVisibleTypes,
                 packageName,
                 letterboxDetails);
 
@@ -215,7 +218,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 appearanceRegions,
                 navbarColorManagedByIme,
                 behavior,
-                requestedVisibilities,
+                requestedVisibleTypes,
                 packageName,
                 letterboxDetails
         );
@@ -227,7 +230,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{};
         boolean navbarColorManagedByIme = true;
         int behavior = 456;
-        InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        int requestedVisibleTypes = WindowInsets.Type.systemBars();
         String packageName = "test package name";
         LetterboxDetails[] letterboxDetails = new LetterboxDetails[]{};
 
@@ -237,7 +240,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 appearanceRegions,
                 navbarColorManagedByIme,
                 behavior,
-                requestedVisibilities,
+                requestedVisibleTypes,
                 packageName,
                 letterboxDetails);
 

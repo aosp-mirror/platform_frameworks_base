@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static android.content.pm.PackageManager.DELETE_SUCCEEDED;
 import static android.content.pm.PackageManager.MATCH_KNOWN_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
@@ -35,15 +36,16 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ApplicationExitInfo;
 import android.app.ApplicationPackageManager;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDeleteObserver2;
-import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Binder;
@@ -61,8 +63,8 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -164,7 +166,7 @@ final class DeletePackageHelper {
                 return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
             }
 
-            if (PackageManagerServiceUtils.isSystemApp(uninstalledPs)
+            if (PackageManagerServiceUtils.isUpdatedSystemApp(uninstalledPs)
                     && ((deleteFlags & PackageManager.DELETE_SYSTEM_APP) == 0)) {
                 UserInfo userInfo = mUserManagerInternal.getUserInfo(userId);
                 if (userInfo == null || (!userInfo.isAdmin() && !mUserManagerInternal.getUserInfo(
@@ -185,11 +187,11 @@ final class DeletePackageHelper {
 
             if (pkg != null) {
                 SharedLibraryInfo libraryInfo = null;
-                if (pkg.getStaticSharedLibName() != null) {
-                    libraryInfo = computer.getSharedLibraryInfo(pkg.getStaticSharedLibName(),
-                            pkg.getStaticSharedLibVersion());
-                } else if (pkg.getSdkLibName() != null) {
-                    libraryInfo = computer.getSharedLibraryInfo(pkg.getSdkLibName(),
+                if (pkg.getStaticSharedLibraryName() != null) {
+                    libraryInfo = computer.getSharedLibraryInfo(pkg.getStaticSharedLibraryName(),
+                            pkg.getStaticSharedLibraryVersion());
+                } else if (pkg.getSdkLibraryName() != null) {
+                    libraryInfo = computer.getSharedLibraryInfo(pkg.getSdkLibraryName(),
                             pkg.getSdkLibVersionMajor());
                 }
 
@@ -237,7 +239,7 @@ final class DeletePackageHelper {
         synchronized (mPm.mInstallLock) {
             if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
             try (PackageFreezer freezer = mPm.freezePackageForDelete(packageName, freezeUser,
-                    deleteFlags, "deletePackageX")) {
+                    deleteFlags, "deletePackageX", ApplicationExitInfo.REASON_OTHER)) {
                 res = deletePackageLIF(packageName, UserHandle.of(removeUser), true, allUsers,
                         deleteFlags | PackageManager.DELETE_CHATTY, info, true);
             }
@@ -262,6 +264,7 @@ final class DeletePackageHelper {
             final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
             info.sendPackageRemovedBroadcasts(killApp, removedBySystem);
             info.sendSystemPackageUpdatedBroadcasts();
+            PackageMetrics.onUninstallSucceeded(info, deleteFlags, removeUser);
         }
 
         // Force a gc to clear up things.
@@ -272,7 +275,8 @@ final class DeletePackageHelper {
         // other processes clean up before deleting resources.
         synchronized (mPm.mInstallLock) {
             if (info.mArgs != null) {
-                info.mArgs.doPostDeleteLI(true);
+                mRemovePackageHelper.cleanUpResources(info.mArgs.mCodeFile,
+                        info.mArgs.mInstructionSets);
             }
 
             boolean reEnableStub = false;
@@ -336,12 +340,13 @@ final class DeletePackageHelper {
             packageInstallerService.onInstallerPackageDeleted(uninstalledPs.getAppId(), removeUser);
         }
 
-        return res ? PackageManager.DELETE_SUCCEEDED : PackageManager.DELETE_FAILED_INTERNAL_ERROR;
+        return res ? DELETE_SUCCEEDED : PackageManager.DELETE_FAILED_INTERNAL_ERROR;
     }
 
     /*
      * This method handles package deletion in general
      */
+    @GuardedBy("mPm.mInstallLock")
     public boolean deletePackageLIF(@NonNull String packageName, UserHandle user,
             boolean deleteCodeAndResources, @NonNull int[] allUserHandles, int flags,
             PackageRemovedInfo outInfo, boolean writeSettings) {
@@ -394,8 +399,18 @@ final class DeletePackageHelper {
         return new DeletePackageAction(ps, disabledPs, outInfo, flags, user);
     }
 
+    public void executeDeletePackage(DeletePackageAction action, String packageName,
+            boolean deleteCodeAndResources, @NonNull int[] allUserHandles, boolean writeSettings)
+            throws SystemDeleteException {
+        synchronized (mPm.mInstallLock) {
+            executeDeletePackageLIF(action, packageName, deleteCodeAndResources, allUserHandles,
+                    writeSettings);
+        }
+    }
+
     /** Deletes a package. Only throws when install of a disabled package fails. */
-    public void executeDeletePackageLIF(DeletePackageAction action,
+    @GuardedBy("mPm.mInstallLock")
+    private void executeDeletePackageLIF(DeletePackageAction action,
             String packageName, boolean deleteCodeAndResources,
             @NonNull int[] allUserHandles, boolean writeSettings) throws SystemDeleteException {
         final PackageSetting ps = action.mDeletingPs;
@@ -438,6 +453,7 @@ final class DeletePackageHelper {
                         // We need to set it back to 'installed' so the uninstall
                         // broadcasts will be sent correctly.
                         if (DEBUG_REMOVE) Slog.d(TAG, "Not installed by other users, full delete");
+                        ps.setPkg(null);
                         ps.setInstalled(true, userId);
                         mPm.mSettings.writeKernelMappingLPr(ps);
                         clearPackageStateAndReturn = false;
@@ -488,7 +504,9 @@ final class DeletePackageHelper {
 
         // Take a note whether we deleted the package for all users
         if (outInfo != null) {
-            outInfo.mRemovedForAllUsers = mPm.mPackages.get(ps.getPackageName()) == null;
+            synchronized (mPm.mLock) {
+                outInfo.mRemovedForAllUsers = mPm.mPackages.get(ps.getPackageName()) == null;
+            }
         }
     }
 
@@ -522,7 +540,7 @@ final class DeletePackageHelper {
                     nextUserId);
             mPm.mDomainVerificationManager.clearPackageForUser(ps.getPackageName(), nextUserId);
         }
-        mPermissionManager.onPackageUninstalled(ps.getPackageName(), ps.getAppId(), pkg,
+        mPermissionManager.onPackageUninstalled(ps.getPackageName(), ps.getAppId(), ps, pkg,
                 sharedUserPkgs, userId);
 
         if (outInfo != null) {
@@ -530,15 +548,17 @@ final class DeletePackageHelper {
                 outInfo.mDataRemoved = true;
             }
             outInfo.mRemovedPackage = ps.getPackageName();
-            outInfo.mInstallerPackageName = ps.getInstallSource().installerPackageName;
-            outInfo.mIsStaticSharedLib = pkg != null && pkg.getStaticSharedLibName() != null;
+            outInfo.mInstallerPackageName = ps.getInstallSource().mInstallerPackageName;
+            outInfo.mIsStaticSharedLib = pkg != null && pkg.getStaticSharedLibraryName() != null;
             outInfo.mRemovedAppId = ps.getAppId();
             outInfo.mRemovedUsers = userIds;
             outInfo.mBroadcastUsers = userIds;
             outInfo.mIsExternal = ps.isExternalStorage();
+            outInfo.mRemovedPackageVersionCode = ps.getVersionCode();
         }
     }
 
+    @GuardedBy("mPm.mInstallLock")
     private void deleteInstalledPackageLIF(PackageSetting ps,
             boolean deleteCodeAndResources, int flags, @NonNull int[] allUserHandles,
             PackageRemovedInfo outInfo, boolean writeSettings) {
@@ -557,9 +577,9 @@ final class DeletePackageHelper {
 
         // Delete application code and resources only for parent packages
         if (deleteCodeAndResources && (outInfo != null)) {
-            outInfo.mArgs = new FileInstallArgs(
+            outInfo.mArgs = new InstallArgs(
                     ps.getPathString(), getAppDexInstructionSets(
-                            ps.getPrimaryCpuAbi(), ps.getSecondaryCpuAbi()), mPm);
+                            ps.getPrimaryCpuAbiLegacy(), ps.getSecondaryCpuAbiLegacy()));
             if (DEBUG_SD_INSTALL) Slog.i(TAG, "args=" + outInfo.mArgs);
         }
     }
@@ -637,7 +657,10 @@ final class DeletePackageHelper {
             flags |= PackageManager.DELETE_KEEP_DATA;
         }
 
-        deleteInstalledPackageLIF(deletedPs, true, flags, allUserHandles, outInfo, writeSettings);
+        synchronized (mPm.mInstallLock) {
+            deleteInstalledPackageLIF(deletedPs, true, flags, allUserHandles, outInfo,
+                    writeSettings);
+        }
     }
 
     public void deletePackageVersionedInternal(VersionedPackage versionedPackage,
@@ -688,7 +711,8 @@ final class DeletePackageHelper {
         final int uid = Binder.getCallingUid();
         if (!isOrphaned(snapshot, internalPackageName)
                 && !allowSilentUninstall
-                && !isCallerAllowedToSilentlyUninstall(snapshot, uid, internalPackageName)) {
+                && !isCallerAllowedToSilentlyUninstall(
+                        snapshot, uid, internalPackageName, userId)) {
             mPm.mHandler.post(() -> {
                 try {
                     final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
@@ -754,6 +778,34 @@ final class DeletePackageHelper {
                 if (!deleteAllUsers) {
                     returnCode = deletePackageX(internalPackageName, versionCode,
                             userId, deleteFlags, false /*removedBySystem*/);
+
+                    // Delete package in child only if successfully deleted in parent.
+                    if (returnCode == DELETE_SUCCEEDED && packageState != null) {
+                        // Get a list of child user profiles and delete if package is
+                        // present in that profile.
+                        int[] childUserIds = mUserManagerInternal.getProfileIds(userId, true);
+                        int returnCodeOfChild;
+                        for (int childId : childUserIds) {
+                            if (childId == userId) continue;
+
+                            // If package is not present in child then don't attempt to delete.
+                            if (!packageState.getUserStateOrDefault(childId).isInstalled()) {
+                                continue;
+                            }
+
+                            UserProperties userProperties = mUserManagerInternal
+                                    .getUserProperties(childId);
+                            if (userProperties != null && userProperties.getDeleteAppWithParent()) {
+                                returnCodeOfChild = deletePackageX(internalPackageName, versionCode,
+                                        childId, deleteFlags, false /*removedBySystem*/);
+                                if (returnCodeOfChild != DELETE_SUCCEEDED) {
+                                    Slog.w(TAG, "Package delete failed for user " + childId
+                                            + ", returnCode " + returnCodeOfChild);
+                                    returnCode = PackageManager.DELETE_FAILED_FOR_CHILD_PROFILE;
+                                }
+                            }
+                        }
+                    }
                 } else {
                     int[] blockUninstallUserIds = getBlockUninstallForUsers(innerSnapshot,
                             internalPackageName, users);
@@ -768,7 +820,7 @@ final class DeletePackageHelper {
                             if (!ArrayUtils.contains(blockUninstallUserIds, userId1)) {
                                 returnCode = deletePackageX(internalPackageName, versionCode,
                                         userId1, userFlags, false /*removedBySystem*/);
-                                if (returnCode != PackageManager.DELETE_SUCCEEDED) {
+                                if (returnCode != DELETE_SUCCEEDED) {
                                     Slog.w(TAG, "Package delete failed for user " + userId1
                                             + ", returnCode " + returnCode);
                                 }
@@ -787,7 +839,6 @@ final class DeletePackageHelper {
             } catch (RemoteException e) {
                 Log.i(TAG, "Observer no longer exists.");
             } //end catch
-            notifyPackageChangeObserversOnDelete(packageName, versionCode);
 
             // Prune unused static shared libraries which have been cached a period of time
             mPm.schedulePruneUnusedStaticSharedLibraries(true /* delay */);
@@ -796,26 +847,27 @@ final class DeletePackageHelper {
 
     private boolean isOrphaned(@NonNull Computer snapshot, String packageName) {
         final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
-        return packageState != null && packageState.getInstallSource().isOrphaned;
+        return packageState != null && packageState.getInstallSource().mIsOrphaned;
     }
 
     private boolean isCallerAllowedToSilentlyUninstall(@NonNull Computer snapshot, int callingUid,
-            String pkgName) {
-        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID
+            String pkgName, int userId) {
+        if (PackageManagerServiceUtils.isRootOrShell(callingUid)
                 || UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
             return true;
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
         // If the caller installed the pkgName, then allow it to silently uninstall.
-        if (callingUid == snapshot.getPackageUid(snapshot.getInstallerPackageName(pkgName), 0,
-                callingUserId)) {
+        if (callingUid == snapshot.getPackageUid(
+                snapshot.getInstallerPackageName(pkgName, userId), 0, callingUserId)) {
             return true;
         }
 
         // Allow package verifier to silently uninstall.
-        if (mPm.mRequiredVerifierPackage != null && callingUid == snapshot
-                .getPackageUid(mPm.mRequiredVerifierPackage, 0, callingUserId)) {
-            return true;
+        for (String verifierPackageName : mPm.mRequiredVerifierPackages) {
+            if (callingUid == snapshot.getPackageUid(verifierPackageName, 0, callingUserId)) {
+                return true;
+            }
         }
 
         // Allow package uninstaller to silently uninstall.
@@ -845,18 +897,6 @@ final class DeletePackageHelper {
             }
         }
         return result;
-    }
-
-    private void notifyPackageChangeObserversOnDelete(String packageName, long version) {
-        PackageChangeEvent pkgChangeEvent = new PackageChangeEvent();
-        pkgChangeEvent.packageName = packageName;
-        pkgChangeEvent.version = version;
-        pkgChangeEvent.lastUpdateTimeMillis = 0L;
-        pkgChangeEvent.newInstalled = false;
-        pkgChangeEvent.dataRemoved = false;
-        pkgChangeEvent.isDeleted = true;
-
-        mPm.notifyPackageChangeObservers(pkgChangeEvent);
     }
 
     private static class TempUserState {
@@ -890,8 +930,8 @@ final class DeletePackageHelper {
             final String packageName = ps.getPkg().getPackageName();
             // Skip over if system app, static shared library or and SDK library.
             if ((ps.getFlags() & ApplicationInfo.FLAG_SYSTEM) != 0
-                    || !TextUtils.isEmpty(ps.getPkg().getStaticSharedLibName())
-                    || !TextUtils.isEmpty(ps.getPkg().getSdkLibName())) {
+                    || !TextUtils.isEmpty(ps.getPkg().getStaticSharedLibraryName())
+                    || !TextUtils.isEmpty(ps.getPkg().getSdkLibraryName())) {
                 continue;
             }
             if (DEBUG_CLEAN_APKS) {

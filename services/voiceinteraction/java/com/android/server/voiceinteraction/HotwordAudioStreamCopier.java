@@ -36,6 +36,8 @@ import android.service.voice.HotwordAudioStream;
 import android.service.voice.HotwordDetectedResult;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -60,10 +62,12 @@ final class HotwordAudioStreamCopier {
     private static final String OP_MESSAGE = "Streaming hotword audio to VoiceInteractionService";
     private static final String TASK_ID_PREFIX = "HotwordDetectedResult@";
     private static final String THREAD_NAME_PREFIX = "Copy-";
+    @VisibleForTesting
+    static final int DEFAULT_COPY_BUFFER_LENGTH_BYTES = 32_768;
 
     // Corresponds to the OS pipe capacity in bytes
-    private static final int MAX_COPY_BUFFER_LENGTH_BYTES = 65_536;
-    private static final int DEFAULT_COPY_BUFFER_LENGTH_BYTES = 32_768;
+    @VisibleForTesting
+    static final int MAX_COPY_BUFFER_LENGTH_BYTES = 65_536;
 
     private final AppOpsManager mAppOpsManager;
     private final int mDetectorType;
@@ -278,6 +282,7 @@ final class HotwordAudioStreamCopier {
         private final ParcelFileDescriptor mAudioSource;
         private final ParcelFileDescriptor mAudioSink;
         private final int mCopyBufferLength;
+
         private final int mDetectorType;
         private final int mUid;
 
@@ -334,7 +339,11 @@ final class HotwordAudioStreamCopier {
             } catch (IOException e) {
                 mAudioSource.closeWithError(e.getMessage());
                 mAudioSink.closeWithError(e.getMessage());
-                Slog.e(TAG, mStreamTaskId + ": Failed to copy audio stream", e);
+                // This is expected when VIS closes the read side of the pipe on their end,
+                // so when the HotwordAudioStreamCopier tries to write, we will get that broken
+                // pipe error. HDS is also closing the write side of the pipe (the system is on the
+                // read end of that pipe).
+                Slog.i(TAG, mStreamTaskId + ": Failed to copy audio stream", e);
                 HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
                         HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__CLOSE_ERROR_FROM_SYSTEM,
                         mUid, /* streamSizeBytes= */ 0, /* bundleSizeBytes= */ 0,

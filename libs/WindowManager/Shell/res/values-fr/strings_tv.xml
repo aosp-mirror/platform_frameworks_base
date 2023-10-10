@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"Déplacer"</string>
     <string name="pip_expand" msgid="1051966011679297308">"Développer"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"Réduire"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" Menu de commandes : appuyez deux fois sur "<annotation icon="home_icon">"ACCUEIL"</annotation></string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"Commandes : appuyez deux fois sur "<annotation icon="home_icon">"ACCUEIL"</annotation></string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Menu \"Picture-in-picture\"."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Déplacer vers la gauche"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Déplacer vers la droite"</string>

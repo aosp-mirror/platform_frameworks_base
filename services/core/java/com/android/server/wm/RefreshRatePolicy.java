@@ -16,15 +16,18 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
-import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
+import static android.hardware.display.DisplayManager.SWITCHING_TYPE_NONE;
+import static android.hardware.display.DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY;
 
-import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
+import android.hardware.display.DisplayManager;
 import android.view.Display;
 import android.view.Display.Mode;
 import android.view.DisplayInfo;
+import android.view.Surface;
+import android.view.SurfaceControl.RefreshRateRange;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Policy to select a lower refresh rate for the display if applicable.
@@ -134,7 +137,7 @@ class RefreshRatePolicy {
         // to run in default refresh rate. But if the display size of default mode is different
         // from the using preferred mode, then still keep the preferred mode to avoid disturbing
         // the animation.
-        if (w.isAnimating(TRANSITION | PARENTS)) {
+        if (w.isAnimationRunningSelfOrParent()) {
             Display.Mode preferredMode = null;
             for (Display.Mode mode : mDisplayInfo.supportedModes) {
                 if (preferredDisplayModeId == mode.getModeId()) {
@@ -183,42 +186,111 @@ class RefreshRatePolicy {
         return LAYER_PRIORITY_UNSET;
     }
 
-    float getPreferredRefreshRate(WindowState w) {
+    public static class FrameRateVote {
+        float mRefreshRate;
+        @Surface.FrameRateCompatibility int mCompatibility;
+
+        FrameRateVote(float refreshRate, @Surface.FrameRateCompatibility int compatibility) {
+            update(refreshRate, compatibility);
+        }
+
+        FrameRateVote() {
+            reset();
+        }
+
+        boolean update(float refreshRate, @Surface.FrameRateCompatibility int compatibility) {
+            if (!refreshRateEquals(refreshRate) || mCompatibility != compatibility) {
+                mRefreshRate = refreshRate;
+                mCompatibility = compatibility;
+                return true;
+            }
+            return false;
+        }
+
+        boolean reset() {
+            return update(0, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof FrameRateVote)) {
+                return false;
+            }
+
+            FrameRateVote other = (FrameRateVote) o;
+            return refreshRateEquals(other.mRefreshRate)
+                    && mCompatibility == other.mCompatibility;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mRefreshRate, mCompatibility);
+        }
+
+        @Override
+        public String toString() {
+            return "mRefreshRate=" + mRefreshRate + ", mCompatibility=" + mCompatibility;
+        }
+
+        private boolean refreshRateEquals(float refreshRate) {
+            return mRefreshRate <= refreshRate + RefreshRateRange.FLOAT_TOLERANCE
+                    && mRefreshRate >= refreshRate - RefreshRateRange.FLOAT_TOLERANCE;
+        }
+    }
+
+    boolean updateFrameRateVote(WindowState w) {
+        @DisplayManager.SwitchingType int refreshRateSwitchingType =
+                mWmService.mDisplayManagerInternal.getRefreshRateSwitchingType();
+
+        // If refresh rate switching is disabled there is no point to set the frame rate on the
+        // surface as the refresh rate will be limited by display manager to a single value
+        // and SurfaceFlinger wouldn't be able to change it anyways.
+        if (refreshRateSwitchingType == SWITCHING_TYPE_NONE) {
+            return w.mFrameRateVote.reset();
+        }
+
         // If app is animating, it's not able to control refresh rate because we want the animation
         // to run in default refresh rate.
-        if (w.isAnimating(TRANSITION | PARENTS)) {
-            return 0;
+        if (w.isAnimationRunningSelfOrParent()) {
+            return w.mFrameRateVote.reset();
         }
 
         // If the app set a preferredDisplayModeId, the preferred refresh rate is the refresh rate
         // of that mode id.
-        final int preferredModeId = w.mAttrs.preferredDisplayModeId;
-        if (preferredModeId > 0) {
-            for (Display.Mode mode : mDisplayInfo.supportedModes) {
-                if (preferredModeId == mode.getModeId()) {
-                    return mode.getRefreshRate();
+        if (refreshRateSwitchingType != SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY) {
+            final int preferredModeId = w.mAttrs.preferredDisplayModeId;
+            if (preferredModeId > 0) {
+                for (Display.Mode mode : mDisplayInfo.supportedModes) {
+                    if (preferredModeId == mode.getModeId()) {
+                        return w.mFrameRateVote.update(mode.getRefreshRate(),
+                                Surface.FRAME_RATE_COMPATIBILITY_EXACT);
+                    }
                 }
             }
         }
 
         if (w.mAttrs.preferredRefreshRate > 0) {
-            return w.mAttrs.preferredRefreshRate;
+            return w.mFrameRateVote.update(w.mAttrs.preferredRefreshRate,
+                    Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
         }
 
         // If the app didn't set a preferred mode id or refresh rate, but it is part of the deny
         // list, we return the low refresh rate as the preferred one.
-        final String packageName = w.getOwningPackage();
-        if (mHighRefreshRateDenylist.isDenylisted(packageName)) {
-            return mLowRefreshRateMode.getRefreshRate();
+        if (refreshRateSwitchingType != SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY) {
+            final String packageName = w.getOwningPackage();
+            if (mHighRefreshRateDenylist.isDenylisted(packageName)) {
+                return w.mFrameRateVote.update(mLowRefreshRateMode.getRefreshRate(),
+                        Surface.FRAME_RATE_COMPATIBILITY_EXACT);
+            }
         }
 
-        return 0;
+        return w.mFrameRateVote.reset();
     }
 
     float getPreferredMinRefreshRate(WindowState w) {
         // If app is animating, it's not able to control refresh rate because we want the animation
         // to run in default refresh rate.
-        if (w.isAnimating(TRANSITION | PARENTS)) {
+        if (w.isAnimationRunningSelfOrParent()) {
             return 0;
         }
 
@@ -241,7 +313,7 @@ class RefreshRatePolicy {
     float getPreferredMaxRefreshRate(WindowState w) {
         // If app is animating, it's not able to control refresh rate because we want the animation
         // to run in default refresh rate.
-        if (w.isAnimating(TRANSITION | PARENTS)) {
+        if (w.isAnimationRunningSelfOrParent()) {
             return 0;
         }
 

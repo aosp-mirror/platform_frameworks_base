@@ -69,9 +69,9 @@ class LaunchParamsUtil {
      * DP size, but if this is null, the portrait phone size is used.
      */
     static Size getDefaultFreeformSize(@NonNull ActivityRecord activityRecord,
-                                       @NonNull TaskDisplayArea displayArea,
-                                       @NonNull ActivityInfo.WindowLayout layout, int orientation,
-                                       @NonNull Rect stableBounds) {
+            @NonNull TaskDisplayArea displayArea,
+            @NonNull ActivityInfo.WindowLayout layout, int orientation,
+            @NonNull Rect stableBounds) {
         // Get window size based on Nexus 5x screen, we assume that this is enough to show content
         // of activities.
         final float density = (float) displayArea.getConfiguration().densityDpi / DENSITY_DEFAULT;

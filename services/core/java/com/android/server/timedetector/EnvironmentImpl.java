@@ -16,25 +16,21 @@
 
 package com.android.server.timedetector;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
-import android.annotation.UserIdInt;
-import android.app.AlarmManager;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.database.ContentObserver;
-import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.os.UserManager;
-import android.provider.Settings;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
-import com.android.server.timezonedetector.ConfigurationChangeListener;
+import com.android.server.AlarmManagerInternal;
+import com.android.server.LocalServices;
+import com.android.server.SystemClockTime;
+import com.android.server.SystemClockTime.TimeConfidence;
+import com.android.server.timezonedetector.StateChangeListener;
 
-import java.time.Instant;
+import java.io.PrintWriter;
 import java.util.Objects;
 
 /**
@@ -44,22 +40,13 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
 
     private static final String LOG_TAG = TimeDetectorService.TAG;
 
-    @NonNull private final Context mContext;
     @NonNull private final Handler mHandler;
     @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
-    @NonNull private final ContentResolver mContentResolver;
     @NonNull private final PowerManager.WakeLock mWakeLock;
-    @NonNull private final AlarmManager mAlarmManager;
-    @NonNull private final UserManager mUserManager;
-
-    // @NonNull after setConfigChangeListener() is called.
-    @GuardedBy("this")
-    private ConfigurationChangeListener mConfigChangeListener;
+    @NonNull private final AlarmManagerInternal mAlarmManagerInternal;
 
     EnvironmentImpl(@NonNull Context context, @NonNull Handler handler,
             @NonNull ServiceConfigAccessor serviceConfigAccessor) {
-        mContext = Objects.requireNonNull(context);
-        mContentResolver = Objects.requireNonNull(context.getContentResolver());
         mHandler = Objects.requireNonNull(handler);
         mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
 
@@ -67,74 +54,21 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
         mWakeLock = Objects.requireNonNull(
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOG_TAG));
 
-        mAlarmManager = Objects.requireNonNull(context.getSystemService(AlarmManager.class));
-
-        mUserManager = Objects.requireNonNull(context.getSystemService(UserManager.class));
-
-        // Wire up the config change listeners. All invocations are performed on the mHandler
-        // thread.
-
-        ContentResolver contentResolver = context.getContentResolver();
-        contentResolver.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.AUTO_TIME), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        handleAutoTimeDetectionChangedOnHandlerThread();
-                    }
-                });
-        mServiceConfigAccessor.addListener(
-                () -> mHandler.post(
-                        EnvironmentImpl.this::handleAutoTimeDetectionChangedOnHandlerThread));
-    }
-
-    /** Internal method for handling the auto time setting being changed. */
-    private void handleAutoTimeDetectionChangedOnHandlerThread() {
-        synchronized (this) {
-            if (mConfigChangeListener == null) {
-                Slog.wtf(LOG_TAG, "mConfigChangeListener is unexpectedly null");
-            }
-            mConfigChangeListener.onChange();
-        }
+        mAlarmManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(AlarmManagerInternal.class));
     }
 
     @Override
-    public void setConfigChangeListener(@NonNull ConfigurationChangeListener listener) {
-        synchronized (this) {
-            mConfigChangeListener = Objects.requireNonNull(listener);
-        }
+    public void setConfigurationInternalChangeListener(
+            @NonNull StateChangeListener listener) {
+        StateChangeListener stateChangeListener =
+                () -> mHandler.post(listener::onChange);
+        mServiceConfigAccessor.addConfigurationInternalChangeListener(stateChangeListener);
     }
 
     @Override
-    public int systemClockUpdateThresholdMillis() {
-        return mServiceConfigAccessor.systemClockUpdateThresholdMillis();
-    }
-
-    @Override
-    public boolean isAutoTimeDetectionEnabled() {
-        try {
-            return Settings.Global.getInt(mContentResolver, Settings.Global.AUTO_TIME) != 0;
-        } catch (Settings.SettingNotFoundException snfe) {
-            return true;
-        }
-    }
-
-    @Override
-    public Instant autoTimeLowerBound() {
-        return mServiceConfigAccessor.autoTimeLowerBound();
-    }
-
-    @Override
-    public int[] autoOriginPriorities() {
-        return mServiceConfigAccessor.getOriginPriorities();
-    }
-
-    @Override
-    public ConfigurationInternal configurationInternal(@UserIdInt int userId) {
-        return new ConfigurationInternal.Builder(userId)
-                .setUserConfigAllowed(isUserConfigAllowed(userId))
-                .setAutoDetectionEnabled(isAutoTimeDetectionEnabled())
-                .build();
+    public ConfigurationInternal getCurrentUserConfigurationInternal() {
+        return mServiceConfigAccessor.getCurrentUserConfigurationInternal();
     }
 
     @Override
@@ -156,9 +90,22 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
     }
 
     @Override
-    public void setSystemClock(long newTimeMillis) {
+    public @TimeConfidence int systemClockConfidence() {
+        return SystemClockTime.getTimeConfidence();
+    }
+
+    @Override
+    public void setSystemClock(
+            @CurrentTimeMillisLong long newTimeMillis, @TimeConfidence int confidence,
+            @NonNull String logMsg) {
         checkWakeLockHeld();
-        mAlarmManager.setTime(newTimeMillis);
+        mAlarmManagerInternal.setTime(newTimeMillis, confidence, logMsg);
+    }
+
+    @Override
+    public void setSystemClockConfidence(@TimeConfidence int confidence, @NonNull String logMsg) {
+        checkWakeLockHeld();
+        SystemClockTime.setConfidence(confidence, logMsg);
     }
 
     @Override
@@ -167,19 +114,24 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
         mWakeLock.release();
     }
 
-    @Override
-    public boolean deviceHasY2038Issue() {
-        return Build.SUPPORTED_32_BIT_ABIS.length > 0;
-    }
-
     private void checkWakeLockHeld() {
         if (!mWakeLock.isHeld()) {
             Slog.wtf(LOG_TAG, "WakeLock " + mWakeLock + " not held");
         }
     }
 
-    private boolean isUserConfigAllowed(@UserIdInt int userId) {
-        UserHandle userHandle = UserHandle.of(userId);
-        return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_DATE_TIME, userHandle);
+    @Override
+    public void addDebugLogEntry(@NonNull String logMsg) {
+        SystemClockTime.addDebugLogEntry(logMsg);
+    }
+
+    @Override
+    public void dumpDebugLog(@NonNull PrintWriter printWriter) {
+        SystemClockTime.dump(printWriter);
+    }
+
+    @Override
+    public void runAsync(@NonNull Runnable runnable) {
+        mHandler.post(runnable);
     }
 }

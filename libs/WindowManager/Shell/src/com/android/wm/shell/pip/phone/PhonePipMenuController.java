@@ -31,6 +31,8 @@ import android.os.RemoteException;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
+import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -131,6 +133,8 @@ public class PhonePipMenuController implements PipMenuController {
 
     private PipMenuView mPipMenuView;
 
+    private SurfaceControl mLeash;
+
     private ActionListener mMediaActionListener = new ActionListener() {
         @Override
         public void onMediaActionsChanged(List<RemoteAction> mediaActions) {
@@ -166,6 +170,7 @@ public class PhonePipMenuController implements PipMenuController {
      */
     @Override
     public void attach(SurfaceControl leash) {
+        mLeash = leash;
         attachPipMenuView();
     }
 
@@ -176,6 +181,7 @@ public class PhonePipMenuController implements PipMenuController {
     public void detach() {
         hideMenu();
         detachPipMenuView();
+        mLeash = null;
     }
 
     void attachPipMenuView() {
@@ -185,8 +191,38 @@ public class PhonePipMenuController implements PipMenuController {
         }
         mPipMenuView = new PipMenuView(mContext, this, mMainExecutor, mMainHandler,
                 mSplitScreenController, mPipUiEventLogger);
+        mPipMenuView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+                v.getViewRootImpl().addSurfaceChangedCallback(
+                        new ViewRootImpl.SurfaceChangedCallback() {
+                            @Override
+                            public void surfaceCreated(SurfaceControl.Transaction t) {
+                                final SurfaceControl sc = getSurfaceControl();
+                                if (sc != null) {
+                                    t.reparent(sc, mLeash);
+                                    // make menu on top of the surface
+                                    t.setLayer(sc, Integer.MAX_VALUE);
+                                }
+                            }
+
+                            @Override
+                            public void surfaceReplaced(SurfaceControl.Transaction t) {
+                            }
+
+                            @Override
+                            public void surfaceDestroyed() {
+                            }
+                        });
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+            }
+        });
+
         mSystemWindows.addView(mPipMenuView,
-                getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
+                getPipMenuLayoutParams(mContext, MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
                 0, SHELL_ROOT_LAYER_PIP);
         setShellRootAccessibilityWindow();
 
@@ -210,7 +246,7 @@ public class PhonePipMenuController implements PipMenuController {
     @Override
     public void updateMenuBounds(Rect destinationBounds) {
         mSystemWindows.updateViewLayout(mPipMenuView,
-                getPipMenuLayoutParams(MENU_WINDOW_TITLE, destinationBounds.width(),
+                getPipMenuLayoutParams(mContext, MENU_WINDOW_TITLE, destinationBounds.width(),
                         destinationBounds.height()));
         updateMenuLayout(destinationBounds);
     }
@@ -298,7 +334,8 @@ public class PhonePipMenuController implements PipMenuController {
         }
 
         // Sync the menu bounds before showing it in case it is out of sync.
-        movePipMenu(null /* pipLeash */, null /* transaction */, stackBounds);
+        movePipMenu(null /* pipLeash */, null /* transaction */, stackBounds,
+                PipMenuController.ALPHA_NO_CHANGE);
         updateMenuBounds(stackBounds);
 
         mPipMenuView.showMenu(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay,
@@ -311,7 +348,7 @@ public class PhonePipMenuController implements PipMenuController {
     @Override
     public void movePipMenu(@Nullable SurfaceControl pipLeash,
             @Nullable SurfaceControl.Transaction t,
-            Rect destinationBounds) {
+            Rect destinationBounds, float alpha) {
         if (destinationBounds.isEmpty()) {
             return;
         }
@@ -320,30 +357,10 @@ public class PhonePipMenuController implements PipMenuController {
             return;
         }
 
-        // If there is no pip leash supplied, that means the PiP leash is already finalized
-        // resizing and the PiP menu is also resized. We then want to do a scale from the current
-        // new menu bounds.
+        // TODO(b/286307861) transaction should be applied outside of PiP menu controller
         if (pipLeash != null && t != null) {
-            mPipMenuView.getBoundsOnScreen(mTmpSourceBounds);
-        } else {
-            mTmpSourceBounds.set(0, 0, destinationBounds.width(), destinationBounds.height());
+            t.apply();
         }
-
-        mTmpSourceRectF.set(mTmpSourceBounds);
-        mTmpDestinationRectF.set(destinationBounds);
-        mMoveTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
-        final SurfaceControl surfaceControl = getSurfaceControl();
-        if (surfaceControl == null) {
-            return;
-        }
-        final SurfaceControl.Transaction menuTx =
-                mSurfaceControlTransactionFactory.getTransaction();
-        menuTx.setMatrix(surfaceControl, mMoveTransform, mTmpTransform);
-        if (pipLeash != null && t != null) {
-            // Merge the two transactions, vsyncId has been set on menuTx.
-            menuTx.merge(t);
-        }
-        menuTx.apply();
     }
 
     /**
@@ -361,18 +378,10 @@ public class PhonePipMenuController implements PipMenuController {
             return;
         }
 
-        final SurfaceControl surfaceControl = getSurfaceControl();
-        if (surfaceControl == null) {
-            return;
-        }
-        final SurfaceControl.Transaction menuTx =
-                mSurfaceControlTransactionFactory.getTransaction();
-        menuTx.setCrop(surfaceControl, destinationBounds);
+        // TODO(b/286307861) transaction should be applied outside of PiP menu controller
         if (pipLeash != null && t != null) {
-            // Merge the two transactions, vsyncId has been set on menuTx.
-            menuTx.merge(t);
+            t.apply();
         }
-        menuTx.apply();
     }
 
     private boolean checkPipMenuState() {

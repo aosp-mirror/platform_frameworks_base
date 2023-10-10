@@ -16,19 +16,37 @@
 
 package android.app;
 
+import android.app.GameModeConfiguration;
 import android.app.GameModeInfo;
 import android.app.GameState;
+import android.app.IGameModeListener;
 
 /**
  * @hide
  */
 interface IGameManagerService {
     int getGameMode(String packageName, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
     void setGameMode(String packageName, int gameMode, int userId);
-    int[] getAvailableGameModes(String packageName);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
+    int[] getAvailableGameModes(String packageName, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
     boolean isAngleEnabled(String packageName, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
     void notifyGraphicsEnvironmentSetup(String packageName, int userId);
     void setGameState(String packageName, in GameState gameState, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
     GameModeInfo getGameModeInfo(String packageName, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_GAME_SERVICE)")
     void setGameServiceProvider(String packageName);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
+    void updateResolutionScalingFactor(String packageName, int gameMode, float scalingFactor, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
+    float getResolutionScalingFactor(String packageName, int gameMode, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
+    void updateCustomGameModeConfiguration(String packageName, in GameModeConfiguration gameModeConfig, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
+    void addGameModeListener(IGameModeListener gameModeListener);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
+    void removeGameModeListener(IGameModeListener gameModeListener);
 }

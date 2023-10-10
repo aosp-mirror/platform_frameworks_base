@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"이동"</string>
     <string name="pip_expand" msgid="1051966011679297308">"펼치기"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"접기"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" 제어 메뉴에 액세스하려면 "<annotation icon="home_icon">" 홈 "</annotation>"을 두 번 누르세요."</string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"제어 메뉴에 액세스하려면 "<annotation icon="home_icon">"홈"</annotation>"을 두 번 누르세요."</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"PIP 모드 메뉴입니다."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"왼쪽으로 이동"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"오른쪽으로 이동"</string>

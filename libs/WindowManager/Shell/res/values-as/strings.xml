@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"ছেটিং"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"বিভাজিত স্ক্ৰীন ম’ডলৈ যাওক"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"মেনু"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"চিত্ৰৰ ভিতৰৰ চিত্ৰ মেনু"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> চিত্ৰৰ ভিতৰৰ চিত্ৰত আছে"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"আপুনি যদি <xliff:g id="NAME">%s</xliff:g> সুবিধাটো ব্যৱহাৰ কৰিব নোখোজে, তেন্তে ছেটিং খুলিবলৈ টিপক আৰু তালৈ গৈ ইয়াক অফ কৰক।"</string>
     <string name="pip_play" msgid="3496151081459417097">"প্লে কৰক"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"আকাৰ সলনি কৰক"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"লুকুৱাওক"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"দেখুৱাওক"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"এপ্‌টোৱে বিভাজিত স্ক্ৰীনৰ সৈতে কাম নকৰিব পাৰে।"</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"এপ্‌টোৱে বিভাজিত স্ক্ৰীন সমৰ্থন নকৰে।"</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"এপ্‌টোৱে বিভাজিত স্ক্ৰীনৰ সৈতে কাম নকৰিব পাৰে"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"এপ্‌টোৱে বিভাজিত স্ক্ৰীন সমৰ্থন নকৰে"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"এই এপ্‌টো কেৱল ১ খন ৱিণ্ড’ত খুলিব পাৰি।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"গৌণ ডিছপ্লেত এপে সঠিকভাৱে কাম নকৰিব পাৰে।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"গৌণ ডিছপ্লেত এপ্ লঞ্চ কৰিব নোৱাৰি।"</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"স্প্লিট স্ক্ৰীনৰ বিভাজক"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"স্প্লিট স্ক্ৰীনৰ বিভাজক"</string>
+    <string name="divider_title" msgid="1963391955593749442">"স্প্লিট স্ক্ৰীনৰ বিভাজক"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"বাওঁফালৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"বাওঁফালৰ স্ক্ৰীনখন ৭০% কৰক"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"বাওঁফালৰ স্ক্ৰীনখন ৫০% কৰক"</string>
@@ -82,7 +84,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"এইটো সমাধান কৰা নাই নেকি?\nপূৰ্বাৱস্থালৈ নিবলৈ টিপক"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"কেমেৰাৰ কোনো সমস্যা নাই নেকি? অগ্ৰাহ্য কৰিবলৈ টিপক।"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"চাওক আৰু অধিক কৰক"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"বিভাজিত স্ক্ৰীনৰ বাবে অন্য এটা এপ্‌ টানি আনি এৰক"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"বিভাজিত স্ক্ৰীনৰ বাবে অন্য এটা এপ্‌ টানি আনি এৰক"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"এপ্‌টোৰ স্থান সলনি কৰিবলৈ ইয়াৰ বাহিৰত দুবাৰ টিপক"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"বুজি পালোঁ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"অধিক তথ্যৰ বাবে বিস্তাৰ কৰক।"</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"স্ক্ৰীনশ্বট"</string>
     <string name="close_text" msgid="4986518933445178928">"বন্ধ কৰক"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"মেনু বন্ধ কৰক"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"মেনু খোলক"</string>
 </resources>

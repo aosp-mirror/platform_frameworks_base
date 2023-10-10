@@ -26,5 +26,5 @@ oneway interface IWallpaperService {
     void attach(IWallpaperConnection connection,
             IBinder windowToken, int windowType, boolean isPreview,
             int reqWidth, int reqHeight, in Rect padding, int displayId, int which);
-    void detach();
+    void detach(IBinder windowToken);
 }

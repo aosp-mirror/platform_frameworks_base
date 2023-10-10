@@ -16,16 +16,21 @@
 
 package android.widget;
 
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.shapes.RectShape;
 import android.graphics.drawable.shapes.Shape;
 import android.util.AttributeSet;
+import android.util.PluralsMessageFormatter;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
+
+import java.util.HashMap;
+
 
 /**
  * A RatingBar is an extension of SeekBar and ProgressBar that shows a rating in
@@ -51,6 +56,20 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#RatingBar_isIndicator
  */
 public class RatingBar extends AbsSeekBar {
+
+    /**
+     * Key used for generating Text-to-Speech output regarding the current star rating.
+     * @hide
+     */
+    @TestApi
+    public static final String PLURALS_RATING = "rating";
+
+    /**
+     * Key used for generating Text-to-Speech output regarding the maximum star count.
+     * @hide
+     */
+    @TestApi
+    public static final String PLURALS_MAX = "max";
 
     /**
      * A callback that notifies clients when the rating has been changed. This
@@ -354,6 +373,16 @@ public class RatingBar extends AbsSeekBar {
         if (canUserSetProgress()) {
             info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS);
         }
+
+        final float scaledMax = getMax() * getStepSize();
+        final HashMap<String, Object> params = new HashMap();
+        params.put(PLURALS_RATING, getRating());
+        params.put(PLURALS_MAX, scaledMax);
+        info.setStateDescription(PluralsMessageFormatter.format(
+                getContext().getResources(),
+                params,
+                R.string.rating_label
+        ));
     }
 
     @Override

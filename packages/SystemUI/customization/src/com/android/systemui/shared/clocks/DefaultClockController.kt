@@ -24,13 +24,16 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.customization.R
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.ClockAnimations
+import com.android.systemui.plugins.ClockConfig
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
+import com.android.systemui.plugins.ClockFaceConfig
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.ClockSettings
-import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.WeatherData
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
@@ -48,6 +51,7 @@ class DefaultClockController(
     private val layoutInflater: LayoutInflater,
     private val resources: Resources,
     private val settings: ClockSettings?,
+    private val hasStepClockAnimation: Boolean = false,
 ) : ClockController {
     override val smallClock: DefaultClockFaceController
     override val largeClock: LargeClockFaceController
@@ -60,8 +64,7 @@ class DefaultClockController(
     private val defaultLineSpacing = resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale)
 
     override val events: DefaultClockEvents
-    override lateinit var animations: DefaultClockAnimations
-        private set
+    override val config = ClockConfig()
 
     init {
         val parent = FrameLayout(ctx)
@@ -80,13 +83,13 @@ class DefaultClockController(
         clocks = listOf(smallClock.view, largeClock.view)
 
         events = DefaultClockEvents()
-        animations = DefaultClockAnimations(0f, 0f)
         events.onLocaleChanged(Locale.getDefault())
     }
 
     override fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
         largeClock.recomputePadding(null)
-        animations = DefaultClockAnimations(dozeFraction, foldFraction)
+        largeClock.animations = LargeClockAnimations(largeClock.view, dozeFraction, foldFraction)
+        smallClock.animations = DefaultClockAnimations(smallClock.view, dozeFraction, foldFraction)
         events.onColorPaletteChanged(resources)
         events.onTimeZoneChanged(TimeZone.getDefault())
         smallClock.events.onTimeTick()
@@ -103,11 +106,16 @@ class DefaultClockController(
         private var isRegionDark = false
         protected var targetRegion: Rect? = null
 
+        override val config = ClockFaceConfig()
+
         override var logBuffer: LogBuffer?
             get() = view.logBuffer
             set(value) {
                 view.logBuffer = value
             }
+
+        override var animations: DefaultClockAnimations = DefaultClockAnimations(view, 0f, 0f)
+            internal set
 
         init {
             if (seedColor != null) {
@@ -164,6 +172,13 @@ class DefaultClockController(
         view: AnimatableClockView,
         seedColor: Int?,
     ) : DefaultClockFaceController(view, seedColor) {
+        override val config =
+            ClockFaceConfig(hasCustomPositionUpdatedAnimation = hasStepClockAnimation)
+
+        init {
+            animations = LargeClockAnimations(view, 0f, 0f)
+        }
+
         override fun recomputePadding(targetRegion: Rect?) {
             // We center the view within the targetRegion instead of within the parent
             // view by computing the difference and adding that to the padding.
@@ -177,8 +192,9 @@ class DefaultClockController(
             view.setLayoutParams(lp)
         }
 
-        fun moveForSplitShade(fromRect: Rect, toRect: Rect, fraction: Float) {
-            view.moveForSplitShade(fromRect, toRect, fraction)
+        /** See documentation at [AnimatableClockView.offsetGlyphsForStepClockAnimation]. */
+        fun offsetGlyphsForStepClockAnimation(fromLeft: Int, direction: Int, fraction: Float) {
+            view.offsetGlyphsForStepClockAnimation(fromLeft, direction, fraction)
         }
     }
 
@@ -212,9 +228,12 @@ class DefaultClockController(
 
             clocks.forEach { it.refreshFormat() }
         }
+
+        override fun onWeatherDataChanged(data: WeatherData) {}
     }
 
-    inner class DefaultClockAnimations(
+    open inner class DefaultClockAnimations(
+        val view: AnimatableClockView,
         dozeFraction: Float,
         foldFraction: Float,
     ) : ClockAnimations {
@@ -223,40 +242,52 @@ class DefaultClockController(
 
         init {
             if (foldState.isActive) {
-                clocks.forEach { it.animateFoldAppear(false) }
+                view.animateFoldAppear(false)
             } else {
-                clocks.forEach { it.animateDoze(dozeState.isActive, false) }
+                view.animateDoze(dozeState.isActive, false)
             }
         }
 
         override fun enter() {
             if (!dozeState.isActive) {
-                clocks.forEach { it.animateAppearOnLockscreen() }
+                view.animateAppearOnLockscreen()
             }
         }
 
-        override fun charge() = clocks.forEach { it.animateCharge { dozeState.isActive } }
+        override fun charge() = view.animateCharge { dozeState.isActive }
 
         override fun fold(fraction: Float) {
             val (hasChanged, hasJumped) = foldState.update(fraction)
             if (hasChanged) {
-                clocks.forEach { it.animateFoldAppear(!hasJumped) }
+                view.animateFoldAppear(!hasJumped)
             }
         }
 
         override fun doze(fraction: Float) {
             val (hasChanged, hasJumped) = dozeState.update(fraction)
             if (hasChanged) {
-                clocks.forEach { it.animateDoze(dozeState.isActive, !hasJumped) }
+                view.animateDoze(dozeState.isActive, !hasJumped)
             }
         }
 
-        override fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {
-            largeClock.moveForSplitShade(fromRect, toRect, fraction)
+        override fun onPickerCarouselSwiping(swipingFraction: Float) {
+            // TODO(b/278936436): refactor this part when we change recomputePadding
+            // when on the side, swipingFraction = 0, translationY should offset
+            // the top margin change in recomputePadding to make clock be centered
+            view.translationY = 0.5f * view.bottom * (1 - swipingFraction)
         }
 
-        override val hasCustomPositionUpdatedAnimation: Boolean
-            get() = true
+        override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {}
+    }
+
+    inner class LargeClockAnimations(
+        view: AnimatableClockView,
+        dozeFraction: Float,
+        foldFraction: Float,
+    ) : DefaultClockAnimations(view, dozeFraction, foldFraction) {
+        override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {
+            largeClock.offsetGlyphsForStepClockAnimation(fromLeft, direction, fraction)
+        }
     }
 
     class AnimationState(

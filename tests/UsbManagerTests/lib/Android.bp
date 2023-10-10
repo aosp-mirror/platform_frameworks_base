@@ -34,7 +34,7 @@ android_library {
         "services.core",
         "services.net",
         "services.usb",
-        "truth-prebuilt",
+        "truth",
         "androidx.core_core",
     ],
     libs: [

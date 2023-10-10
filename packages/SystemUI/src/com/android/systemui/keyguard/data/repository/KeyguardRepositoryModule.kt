@@ -16,8 +16,14 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import com.android.systemui.CoreStartable
+import com.android.systemui.keyguard.bouncer.data.repository.BouncerMessageRepository
+import com.android.systemui.keyguard.bouncer.data.repository.BouncerMessageRepositoryImpl
+import com.android.systemui.keyguard.bouncer.domain.interactor.BouncerMessageAuditLogger
 import dagger.Binds
 import dagger.Module
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 
 @Module
 interface KeyguardRepositoryModule {
@@ -45,4 +51,14 @@ interface KeyguardRepositoryModule {
 
     @Binds
     fun keyguardBouncerRepository(impl: KeyguardBouncerRepositoryImpl): KeyguardBouncerRepository
+
+    @Binds
+    fun bouncerMessageRepository(impl: BouncerMessageRepositoryImpl): BouncerMessageRepository
+
+    @Binds
+    @IntoMap
+    @ClassKey(BouncerMessageAuditLogger::class)
+    fun bind(impl: BouncerMessageAuditLogger): CoreStartable
+
+    @Binds fun trustRepository(impl: TrustRepositoryImpl): TrustRepository
 }

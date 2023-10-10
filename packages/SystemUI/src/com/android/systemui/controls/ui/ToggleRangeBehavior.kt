@@ -38,7 +38,7 @@ import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MAX_LEVEL
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MIN_LEVEL
 import java.util.IllegalFormatException
@@ -244,7 +244,7 @@ class ToggleRangeBehavior : Behavior {
                     cvh.clipLayer.level = it.animatedValue as Int
                 }
                 addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         rangeAnimator = null
                     }
                 })
@@ -335,7 +335,7 @@ class ToggleRangeBehavior : Behavior {
         }
 
         override fun onScroll(
-            e1: MotionEvent,
+            e1: MotionEvent?,
             e2: MotionEvent,
             xDiff: Float,
             yDiff: Float

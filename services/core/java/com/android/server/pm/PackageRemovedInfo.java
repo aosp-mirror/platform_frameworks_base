@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.PowerExemptionManager;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
@@ -42,14 +43,15 @@ final class PackageRemovedInfo {
     int[] mRemovedUsers = null;
     int[] mBroadcastUsers = null;
     int[] mInstantUserIds = null;
-    SparseArray<Integer> mInstallReasons;
-    SparseArray<Integer> mUninstallReasons;
+    SparseIntArray mInstallReasons;
+    SparseIntArray mUninstallReasons;
     boolean mIsRemovedPackageSystemUpdate = false;
     boolean mIsUpdate;
     boolean mDataRemoved;
     boolean mRemovedForAllUsers;
     boolean mIsStaticSharedLib;
     boolean mIsExternal;
+    long mRemovedPackageVersionCode;
     // a two dimensional array mapping userId to the set of appIds that can receive notice
     // of package changes
     SparseArray<int[]> mBroadcastAllowList;
@@ -110,16 +112,11 @@ final class PackageRemovedInfo {
     }
 
     private void sendPackageRemovedBroadcastInternal(boolean killApp, boolean removedBySystem) {
-        // Don't send static shared library removal broadcasts as these
-        // libs are visible only the apps that depend on them an one
-        // cannot remove the library if it has a dependency.
-        if (mIsStaticSharedLib) {
-            return;
-        }
         Bundle extras = new Bundle();
         final int removedUid = mRemovedAppId >= 0  ? mRemovedAppId : mUid;
         extras.putInt(Intent.EXTRA_UID, removedUid);
         extras.putBoolean(Intent.EXTRA_DATA_REMOVED, mDataRemoved);
+        extras.putBoolean(Intent.EXTRA_SYSTEM_UPDATE_UNINSTALL, mIsRemovedPackageSystemUpdate);
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, !killApp);
         extras.putBoolean(Intent.EXTRA_USER_INITIATED, !removedBySystem);
         final boolean isReplace = mIsUpdate || mIsRemovedPackageSystemUpdate;
@@ -127,15 +124,22 @@ final class PackageRemovedInfo {
             extras.putBoolean(Intent.EXTRA_REPLACING, true);
         }
         extras.putBoolean(Intent.EXTRA_REMOVED_FOR_ALL_USERS, mRemovedForAllUsers);
+
+        // Send PACKAGE_REMOVED broadcast to the respective installer.
+        if (mRemovedPackage != null && mInstallerPackageName != null) {
+            mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
+                    mRemovedPackage, extras, 0 /*flags*/,
+                    mInstallerPackageName, null, mBroadcastUsers, mInstantUserIds, null, null);
+        }
+        if (mIsStaticSharedLib) {
+            // When uninstalling static shared libraries, only the package's installer needs to be
+            // sent a PACKAGE_REMOVED broadcast. There are no other intended recipients.
+            return;
+        }
         if (mRemovedPackage != null) {
             mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
                     mRemovedPackage, extras, 0, null /*targetPackage*/, null,
                     mBroadcastUsers, mInstantUserIds, mBroadcastAllowList, null);
-            if (mInstallerPackageName != null) {
-                mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
-                        mRemovedPackage, extras, 0 /*flags*/,
-                        mInstallerPackageName, null, mBroadcastUsers, mInstantUserIds, null, null);
-            }
             mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED_INTERNAL,
                     mRemovedPackage, extras, 0 /*flags*/, PLATFORM_PACKAGE_NAME,
                     null /*finishedReceiver*/, mBroadcastUsers, mInstantUserIds,

@@ -3,8 +3,8 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import android.util.Log
 
 import com.android.systemui.log.dagger.NotificationHeadsUpLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import javax.inject.Inject
 
 private const val TAG = "HeadsUpCoordinator"
@@ -61,20 +61,31 @@ class HeadsUpCoordinatorLogger constructor(
         })
     }
 
-    fun logEntryUpdatedByRanking(key: String, shouldHun: Boolean) {
+    fun logEntryUpdatedByRanking(key: String, shouldHun: Boolean, reason: String) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = key
             bool1 = shouldHun
+            str2 = reason
         }, {
-            "updating entry via ranking applied: $str1 updated shouldHeadsUp=$bool1"
+            "updating entry via ranking applied: $str1 updated shouldHeadsUp=$bool1 because $str2"
         })
     }
 
-    fun logEntryUpdatedToFullScreen(key: String) {
+    fun logEntryUpdatedToFullScreen(key: String, reason: String) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = key
+            str2 = reason
         }, {
-            "updating entry to launch full screen intent: $str1"
+            "updating entry to launch full screen intent: $str1 because $str2"
+        })
+    }
+
+    fun logEntryDisqualifiedFromFullScreen(key: String, reason: String) {
+        buffer.log(TAG, LogLevel.DEBUG, {
+            str1 = key
+            str2 = reason
+        }, {
+            "updated entry no longer qualifies for full screen intent: $str1 because $str2"
         })
     }
 

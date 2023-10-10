@@ -34,11 +34,11 @@ java_test_host {
         "compatibility-host-util",
         "cts-install-lib-host",
         "frameworks-base-hostutils",
-        "truth-prebuilt",
+        "truth",
         "modules-utils-build-testing",
     ],
     test_suites: [
         "device-tests",
-        "mts-core",
+        "mts-mainline-infra",
     ],
 }

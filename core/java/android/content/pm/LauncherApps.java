@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import static android.Manifest.permission;
+import static android.Manifest.permission.READ_FRAME_BUFFER;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -64,9 +65,11 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.window.IDumpCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
@@ -762,10 +765,6 @@ public class LauncherApps {
     @Nullable
     public PendingIntent getMainActivityLaunchIntent(@NonNull ComponentName component,
             @Nullable Bundle startActivityOptions, @NonNull UserHandle user) {
-        if (mContext.checkSelfPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.w(TAG, "Only allowed for recents.");
-        }
         logErrorForInvalidProfileAccess(user);
         if (DEBUG) {
             Log.i(TAG, "GetMainActivityLaunchIntent " + component + " " + user);
@@ -793,10 +792,42 @@ public class LauncherApps {
             if (ai == null) {
                 return null;
             }
-            return new LauncherActivityInfo(mContext, user, ai);
+            return new LauncherActivityInfo(mContext, ai);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns overrides for the activities that should be launched for the shortcuts of certain
+     * package names.
+     *
+     * @return {@link Map} whose keys are package names and whose values are the
+     * {@link LauncherActivityInfo}s that should be used for those packages' shortcuts. If there are
+     * no activity overrides, an empty {@link Map} will be returned.
+     *
+     * @hide
+     */
+    @NonNull
+    public Map<String, LauncherActivityInfo> getActivityOverrides() {
+        Map<String, LauncherActivityInfo> activityOverrides = new ArrayMap<>();
+        try {
+            Map<String, LauncherActivityInfoInternal> activityOverridesInternal =
+                    mService.getActivityOverrides(mContext.getPackageName(), mContext.getUserId());
+            for (Map.Entry<String, LauncherActivityInfoInternal> packageToOverride :
+                    activityOverridesInternal.entrySet()) {
+                activityOverrides.put(
+                        packageToOverride.getKey(),
+                        new LauncherActivityInfo(
+                                mContext,
+                                packageToOverride.getValue()
+                        )
+                );
+            }
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+        return activityOverrides;
     }
 
     /**
@@ -916,7 +947,7 @@ public class LauncherApps {
         }
         ArrayList<LauncherActivityInfo> lais = new ArrayList<>();
         for (LauncherActivityInfoInternal internal : internals.getList()) {
-            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, user, internal);
+            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, internal);
             if (DEBUG) {
                 Log.v(TAG, "Returning activity for profile " + user + " : "
                         + lai.getComponentName());
@@ -1136,6 +1167,32 @@ public class LauncherApps {
             }
         }
         return shortcuts;
+    }
+
+    /**
+     * Register a callback to be called right before the wmtrace data is moved to the bugreport.
+     * @hide
+     */
+    @RequiresPermission(READ_FRAME_BUFFER)
+    public void registerDumpCallback(IDumpCallback cb) {
+        try {
+            mService.registerDumpCallback(cb);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Unregister a callback, so that it won't be called when LauncherApps dumps.
+     * @hide
+     */
+    @RequiresPermission(READ_FRAME_BUFFER)
+    public void unRegisterDumpCallback(IDumpCallback cb) {
+        try {
+            mService.unRegisterDumpCallback(cb);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
     }
 
     /**
@@ -2067,7 +2124,7 @@ public class LauncherApps {
      * the {@link #EXTRA_PIN_ITEM_REQUEST} extra.
      */
     public PinItemRequest getPinItemRequest(Intent intent) {
-        return intent.getParcelableExtra(EXTRA_PIN_ITEM_REQUEST);
+        return intent.getParcelableExtra(EXTRA_PIN_ITEM_REQUEST, android.content.pm.LauncherApps.PinItemRequest.class);
     }
 
     /**

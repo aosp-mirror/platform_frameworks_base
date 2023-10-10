@@ -100,7 +100,7 @@ public class NavigationBarController implements
 
     // Tracks config changes that will actually recreate the nav bar
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
-            ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_SCREEN_LAYOUT
+            ActivityInfo.CONFIG_FONT_SCALE
                     | ActivityInfo.CONFIG_UI_MODE);
 
     @Inject
@@ -226,6 +226,18 @@ public class NavigationBarController implements
         }
     }
 
+    private boolean shouldCreateNavBarAndTaskBar(int displayId) {
+        final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
+
+        try {
+            return wms.hasNavigationBar(displayId);
+        } catch (RemoteException e) {
+            // Cannot get wms, just return false with warning message.
+            Log.w(TAG, "Cannot get WindowManager.");
+            return false;
+        }
+    }
+
     /** @see #initializeTaskbarIfNecessary() */
     private boolean updateNavbarForTaskbar() {
         boolean taskbarShown = initializeTaskbarIfNecessary();
@@ -238,8 +250,8 @@ public class NavigationBarController implements
     /** @return {@code true} if taskbar is enabled, false otherwise */
     private boolean initializeTaskbarIfNecessary() {
         // Enable for large screens or (phone AND flag is set); assuming phone = !mIsLargeScreen
-        boolean taskbarEnabled = mIsLargeScreen || mFeatureFlags.isEnabled(
-                Flags.HIDE_NAVBAR_WINDOW);
+        boolean taskbarEnabled = (mIsLargeScreen || mFeatureFlags.isEnabled(
+                Flags.HIDE_NAVBAR_WINDOW)) && shouldCreateNavBarAndTaskBar(mContext.getDisplayId());
 
         if (taskbarEnabled) {
             Trace.beginSection("NavigationBarController#initializeTaskbarIfNecessary");
@@ -331,23 +343,16 @@ public class NavigationBarController implements
         final int displayId = display.getDisplayId();
         final boolean isOnDefaultDisplay = displayId == mDisplayTracker.getDefaultDisplayId();
 
+        if (!shouldCreateNavBarAndTaskBar(displayId)) {
+            return;
+        }
+
         // We may show TaskBar on the default display for large screen device. Don't need to create
         // navigation bar for this case.
         if (isOnDefaultDisplay && initializeTaskbarIfNecessary()) {
             return;
         }
 
-        final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
-
-        try {
-            if (!wms.hasNavigationBar(displayId)) {
-                return;
-            }
-        } catch (RemoteException e) {
-            // Cannot get wms, just return with warning message.
-            Log.w(TAG, "Cannot get WindowManager.");
-            return;
-        }
         final Context context = isOnDefaultDisplay
                 ? mContext
                 : mContext.createDisplayContext(display);

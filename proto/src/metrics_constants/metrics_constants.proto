@@ -2794,8 +2794,9 @@ message MetricsEvent {
     // OPEN: Settings > User > Confirm remove dialog
     DIALOG_USER_REMOVE = 591;
 
+    // DEPRECATED: Feature has been moved and dialog is no longer shown
     // OPEN: Settings > User > Enable calling dialog
-    DIALOG_USER_ENABLE_CALLING = 592;
+    DIALOG_USER_ENABLE_CALLING = 592 [deprecated=true];
 
     // OPEN: Settings > User > Enable calling and sms dialog
     DIALOG_USER_ENABLE_CALLING_AND_SMS = 593;

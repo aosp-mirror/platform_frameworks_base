@@ -27,7 +27,7 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "apct-perftests-utils",
-        "truth-prebuilt",
+        "truth",
     ],
     platform_apis: true,
     certificate: "platform",

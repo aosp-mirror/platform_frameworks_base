@@ -40,8 +40,10 @@ import android.graphics.drawable.ColorStateListDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableContainer;
 import android.icu.text.PluralRules;
+import android.net.Uri;
 import android.os.Build;
 import android.os.LocaleList;
+import android.os.ParcelFileDescriptor;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -60,6 +62,8 @@ import libcore.util.NativeAllocationRegistry;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -452,6 +456,8 @@ public class ResourcesImpl {
                 // Protect against an unset fontScale.
                 mMetrics.scaledDensity = mMetrics.density *
                         (mConfiguration.fontScale != 0 ? mConfiguration.fontScale : 1.0f);
+                mMetrics.fontScaleConverter =
+                        FontScaleConverterFactory.forScale(mConfiguration.fontScale);
 
                 final int width, height;
                 if (mMetrics.widthPixels >= mMetrics.heightPixels) {
@@ -482,7 +488,8 @@ public class ResourcesImpl {
                         mConfiguration.smallestScreenWidthDp,
                         mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,
                         mConfiguration.screenLayout, mConfiguration.uiMode,
-                        mConfiguration.colorMode, Build.VERSION.RESOURCES_SDK_INT);
+                        mConfiguration.colorMode, mConfiguration.getGrammaticalGender(),
+                        Build.VERSION.RESOURCES_SDK_INT);
 
                 if (DEBUG_CONFIG) {
                     Slog.i(TAG, "**** Updating config of " + this + ": final config is "
@@ -661,11 +668,12 @@ public class ResourcesImpl {
                 key = (((long) value.assetCookie) << 32) | value.data;
             }
 
+            int cacheGeneration = caches.getGeneration();
             // First, check whether we have a cached version of this drawable
             // that was inflated against the specified theme. Skip the cache if
             // we're currently preloading or we're not using the cache.
             if (!mPreloading && useCache) {
-                final Drawable cachedDrawable = caches.getInstance(key, wrapper, theme);
+                Drawable cachedDrawable = caches.getInstance(key, wrapper, theme);
                 if (cachedDrawable != null) {
                     cachedDrawable.setChangingConfigurations(value.changingConfigurations);
                     return cachedDrawable;
@@ -713,7 +721,8 @@ public class ResourcesImpl {
             if (dr != null) {
                 dr.setChangingConfigurations(value.changingConfigurations);
                 if (useCache) {
-                    cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr);
+                    cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr,
+                            cacheGeneration);
                     if (needsNewDrawableAfterCache) {
                         Drawable.ConstantState state = dr.getConstantState();
                         if (state != null) {
@@ -744,7 +753,7 @@ public class ResourcesImpl {
     }
 
     private void cacheDrawable(TypedValue value, boolean isColorDrawable, DrawableCache caches,
-            Resources.Theme theme, boolean usesTheme, long key, Drawable dr) {
+            Resources.Theme theme, boolean usesTheme, long key, Drawable dr, int cacheGeneration) {
         final Drawable.ConstantState cs = dr.getConstantState();
         if (cs == null) {
             return;
@@ -772,7 +781,7 @@ public class ResourcesImpl {
             }
         } else {
             synchronized (mAccessLock) {
-                caches.put(key, theme, cs, usesTheme);
+                caches.put(key, theme, cs, cacheGeneration, usesTheme);
             }
         }
     }
@@ -821,7 +830,21 @@ public class ResourcesImpl {
     private Drawable decodeImageDrawable(@NonNull AssetInputStream ais,
             @NonNull Resources wrapper, @NonNull TypedValue value) {
         ImageDecoder.Source src = new ImageDecoder.AssetInputStreamSource(ais,
-                            wrapper, value);
+                wrapper, value);
+        try {
+            return ImageDecoder.decodeDrawable(src, (decoder, info, s) -> {
+                decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+            });
+        } catch (IOException ioe) {
+            // This is okay. This may be something that ImageDecoder does not
+            // support, like SVG.
+            return null;
+        }
+    }
+
+    @Nullable
+    private Drawable decodeImageDrawable(@NonNull FileInputStream fis, @NonNull Resources wrapper) {
+        ImageDecoder.Source src = ImageDecoder.createSource(wrapper, fis);
         try {
             return ImageDecoder.decodeDrawable(src, (decoder, info, s) -> {
                 decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
@@ -882,6 +905,17 @@ public class ResourcesImpl {
                     } else {
                         dr = loadXmlDrawable(wrapper, value, id, density, file);
                     }
+                } else if (file.startsWith("frro://")) {
+                    Uri uri = Uri.parse(file);
+                    File f = new File('/' + uri.getHost() + uri.getPath());
+                    ParcelFileDescriptor pfd = ParcelFileDescriptor.open(f,
+                            ParcelFileDescriptor.MODE_READ_ONLY);
+                    AssetFileDescriptor afd = new AssetFileDescriptor(
+                            pfd,
+                            Long.parseLong(uri.getQueryParameter("offset")),
+                            Long.parseLong(uri.getQueryParameter("size")));
+                    FileInputStream is = afd.createInputStream();
+                    dr = decodeImageDrawable(is, wrapper);
                 } else {
                     final InputStream is = mAssets.openNonAsset(
                             value.assetCookie, file, AssetManager.ACCESS_STREAMING);
@@ -992,6 +1026,7 @@ public class ResourcesImpl {
         if (complexColor != null) {
             return complexColor;
         }
+        int cacheGeneration = cache.getGeneration();
 
         final android.content.res.ConstantState<ComplexColor> factory =
                 sPreloadedComplexColors.get(key);
@@ -1012,7 +1047,7 @@ public class ResourcesImpl {
                     sPreloadedComplexColors.put(key, complexColor.getConstantState());
                 }
             } else {
-                cache.put(key, theme, complexColor.getConstantState());
+                cache.put(key, theme, complexColor.getConstantState(), cacheGeneration);
             }
         }
         return complexColor;

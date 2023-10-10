@@ -17,7 +17,11 @@
 package com.android.server.companion.virtual;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.sensor.VirtualSensor;
+import android.os.LocaleList;
+import android.util.ArraySet;
 
 import java.util.Set;
 
@@ -35,7 +39,6 @@ public abstract class VirtualDeviceManagerInternal {
         /** Notifies that a virtual display was removed. */
         void onVirtualDisplayRemoved(int displayId);
     }
-
 
     /** Interface to listen to the changes on the list of app UIDs running on any virtual device. */
     public interface AppsOnVirtualDeviceListener {
@@ -67,9 +70,37 @@ public abstract class VirtualDeviceManagerInternal {
     public abstract void onAppsOnVirtualDeviceChanged();
 
     /**
-     * Validate the virtual device.
+     * Notifies that an authentication prompt is about to be shown for an app with the given uid.
      */
-    public abstract boolean isValidVirtualDevice(IVirtualDevice virtualDevice);
+    public abstract void onAuthenticationPrompt(int uid);
+
+    /**
+     * Gets the owner uid for a deviceId.
+     *
+     * @param deviceId which device we're asking about
+     * @return the uid of the app which created and owns the VirtualDevice with the given deviceId,
+     * or {@link android.os.Process#INVALID_UID} if no such device exists.
+     */
+    public abstract int getDeviceOwnerUid(int deviceId);
+
+    /**
+     * Returns the VirtualSensor for the given deviceId and sensor handle, if any.
+     *
+     * @param deviceId the virtual device that owns the sensor
+     * @param handle the sensor handle
+     * @return the VirtualSensor with the given handle, or {@code null} if no such sensor exists.
+     */
+    public abstract @Nullable VirtualSensor getVirtualSensor(int deviceId, int handle);
+
+    /**
+     * Finds VirtualDevices where an app is running.
+     *
+     * @param uid - the app's uid
+     * @return a set of id's of VirtualDevices where the app with the given uid is running.
+     * *Note* this only checks VirtualDevices, and does not include information about whether
+     * the app is running on the default device or not.
+     */
+    public abstract @NonNull ArraySet<Integer> getDeviceIdsForUid(int uid);
 
     /**
      * Notifies that a virtual display is created.
@@ -93,10 +124,18 @@ public abstract class VirtualDeviceManagerInternal {
     public abstract int getBaseVirtualDisplayFlags(IVirtualDevice virtualDevice);
 
     /**
-     * Returns true if the given {@code uid} is the owner of any virtual devices that are
-     * currently active.
+     * Returns the preferred locale hints of the Virtual Device on which the given app is running,
+     * or {@code null} if the hosting virtual device doesn't have a virtual keyboard or the app is
+     * not on any virtual device.
+     *
+     * If an app is on multiple virtual devices, the locale of the virtual device created the
+     * earliest will be returned.
+     *
+     * See {@link android.hardware.input.VirtualKeyboardConfig#setLanguageTag() for how the locale
+     * is specified for virtual keyboard.
      */
-    public abstract boolean isAppOwnerOfAnyVirtualDevice(int uid);
+    @Nullable
+    public abstract LocaleList getPreferredLocaleListForUid(int uid);
 
     /**
      * Returns true if the given {@code uid} is currently running on any virtual devices. This is
@@ -109,4 +148,12 @@ public abstract class VirtualDeviceManagerInternal {
      * Returns true if the {@code displayId} is owned by any virtual device
      */
     public abstract boolean isDisplayOwnedByAnyVirtualDevice(int displayId);
+
+    /**
+     * Gets the ids of VirtualDisplays owned by a VirtualDevice.
+     *
+     * @param deviceId which device we're asking about
+     * @return the set of display ids for all VirtualDisplays owned by the device
+     */
+    public abstract @NonNull ArraySet<Integer> getDisplayIdsForDevice(int deviceId);
 }

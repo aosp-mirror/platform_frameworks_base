@@ -74,7 +74,8 @@
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
     <uses-permission android:name="android.permission.CONFIGURE_DISPLAY_BRIGHTNESS"/>
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG"/>
-    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG"/>
+    <uses-permission android:name="android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG"/>
+    <uses-permission android:name="android.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG"/>
     <uses-permission android:name="android.permission.HARDWARE_TEST"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
@@ -98,6 +99,7 @@
     <uses-permission android:name="android.permission.MAINLINE_NETWORK_STACK"/>
     <uses-permission
         android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"/>
+    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
     <uses-permission android:name="android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY" />
     <uses-permission android:name="android.permission.READ_NEARBY_STREAMING_POLICY" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
@@ -107,16 +109,20 @@
     <uses-permission android:name="android.permission.UPDATE_LOCK_TASK_PACKAGES" />
     <uses-permission android:name="android.permission.ACCESS_CONTEXT_HUB" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC_INTERNAL" />
+    <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION" />
 
     <queries>
         <package android:name="com.android.servicestests.apps.suspendtestapp" />
+        <intent>
+            <action android:name="android.media.browse.MediaBrowserService" />
+        </intent>
     </queries>
 
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"
          android:targetSdkVersion="26"/>
 
-    <application android:testOnly="true">
+    <application android:testOnly="true" android:debuggable="true">
         <uses-library android:name="android.test.runner"/>
 
         <service android:name="com.android.server.accounts.TestAccountType1AuthenticatorService"

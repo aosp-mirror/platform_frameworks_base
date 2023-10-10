@@ -129,7 +129,7 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
             close();
         }
         mCancellation = null;
-        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, START_CAPTURE, mTraceId);
+        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, mTraceId);
     }
 
     @BinderThread
@@ -164,7 +164,7 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
         } finally {
             mCancellation = null;
         }
-        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, REQUEST_IMAGE, mTraceId);
+        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, mTraceId);
     }
 
     @BinderThread
@@ -200,8 +200,8 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
             mCancellation = null;
             close();
         }
-        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, END_CAPTURE, mTraceId);
-        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, SESSION, mTraceId);
+        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, mTraceId);
+        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, mTraceId);
     }
 
     @Override

@@ -16,8 +16,11 @@
 
 package android.telephony.ims.stub;
 
+import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.os.Bundle;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.ims.ImsCallProfile;
@@ -36,6 +39,8 @@ import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
 import com.android.internal.telephony.util.TelephonyUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -66,6 +71,48 @@ public class ImsCallSessionImplBase implements AutoCloseable {
      * Request USSD Mode
      */
     public static final int USSD_MODE_REQUEST = 1;
+
+    /** @hide */
+    @IntDef(
+        prefix = "MEDIA_STREAM_TYPE_",
+        value = {
+            MEDIA_STREAM_TYPE_AUDIO,
+            MEDIA_STREAM_TYPE_VIDEO
+        })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaStreamType {}
+
+    /**
+     * Media Stream Type - Audio
+     * @hide
+     */
+    public static final int MEDIA_STREAM_TYPE_AUDIO = 1;
+    /**
+     * Media Stream Type - Video
+     * @hide
+     */
+    public static final int MEDIA_STREAM_TYPE_VIDEO = 2;
+
+    /** @hide */
+    @IntDef(
+        prefix = "MEDIA_STREAM_DIRECTION_",
+        value = {
+            MEDIA_STREAM_DIRECTION_UPLINK,
+            MEDIA_STREAM_DIRECTION_DOWNLINK
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaStreamDirection {}
+
+    /**
+     * Media Stream Direction - Uplink
+     * @hide
+     */
+    public static final int MEDIA_STREAM_DIRECTION_UPLINK = 1;
+    /**
+     * Media Stream Direction - Downlink
+     * @hide
+     */
+    public static final int MEDIA_STREAM_DIRECTION_DOWNLINK = 2;
 
     /**
      * Defines IMS call session state.
@@ -327,6 +374,12 @@ public class ImsCallSessionImplBase implements AutoCloseable {
                     new ArraySet<RtpHeaderExtension>(extensions)), "sendRtpHeaderExtensions");
         }
 
+        @Override
+        public void callSessionNotifyAnbr(int mediaType, int direction, int bitsPerSecond) {
+            executeMethodAsync(() -> ImsCallSessionImplBase.this.callSessionNotifyAnbr(
+                    mediaType, direction, bitsPerSecond), "callSessionNotifyAnbr");
+        }
+
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
         // the future to return.
         private void executeMethodAsync(Runnable r, String errorLogName) {
@@ -367,7 +420,11 @@ public class ImsCallSessionImplBase implements AutoCloseable {
      *
      * @param listener {@link ImsCallSessionListener} used to notify the framework of updates
      * to the ImsCallSession
+
+     * @deprecated use {@link android.telephony.ims.feature.MmTelFeature#notifyIncomingCall(
+     * ImsCallSessionImplBase, String, Bundle)} to get the listener instead
      */
+    @Deprecated
     public void setListener(ImsCallSessionListener listener) {
     }
 
@@ -724,6 +781,22 @@ public class ImsCallSessionImplBase implements AutoCloseable {
      * @param rtpHeaderExtensions The RTP header extensions to be included in the next RTP header.
      */
     public void sendRtpHeaderExtensions(@NonNull Set<RtpHeaderExtension> rtpHeaderExtensions) {
+    }
+
+    /**
+     * Deliver the bitrate for the indicated media type, direction and bitrate to the upper layer.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate received from the NW through the Recommended
+     *        bitrate MAC Control Element message and ImsStack converts this value from MAC bitrate
+     *        to audio/video codec bitrate (defined in TS26.114).
+     * @hide
+     */
+    public void callSessionNotifyAnbr(@MediaStreamType int mediaType,
+            @MediaStreamDirection int direction, @IntRange(from = 0) int bitsPerSecond) {
+        // Base Implementation - Should be overridden by IMS service
+        Log.i(LOG_TAG, "ImsCallSessionImplBase callSessionNotifyAnbr - mediaType: " + mediaType);
     }
 
     /** @hide */

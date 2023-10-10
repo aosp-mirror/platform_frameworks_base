@@ -19,28 +19,19 @@ package com.android.server.notification;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
-import android.app.PendingIntent;
-import android.content.Intent;
-import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.Adjustment;
-import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Objects;
 
 public class NotificationRecordExtractorDataTest extends UiServiceTestCase {
 
@@ -65,7 +56,8 @@ public class NotificationRecordExtractorDataTest extends UiServiceTestCase {
                 r.getImportance(),
                 r.getRankingScore(),
                 r.isConversation(),
-                r.getProposedImportance());
+                r.getProposedImportance(),
+                r.hasSensitiveContent());
 
         assertFalse(extractorData.hasDiffForRankingLocked(r, 1));
         assertFalse(extractorData.hasDiffForLoggingLocked(r, 1));
@@ -92,10 +84,80 @@ public class NotificationRecordExtractorDataTest extends UiServiceTestCase {
                 r.getImportance(),
                 r.getRankingScore(),
                 r.isConversation(),
-                r.getProposedImportance());
+                r.getProposedImportance(),
+                r.hasSensitiveContent());
 
         Bundle signals = new Bundle();
         signals.putInt(Adjustment.KEY_IMPORTANCE_PROPOSAL, IMPORTANCE_HIGH);
+        Adjustment adjustment = new Adjustment("pkg", r.getKey(), signals, "", 0);
+        r.addAdjustment(adjustment);
+        r.applyAdjustments();
+
+        assertTrue(extractorData.hasDiffForRankingLocked(r, 1));
+        assertTrue(extractorData.hasDiffForLoggingLocked(r, 1));
+    }
+
+    @Test
+    public void testHasDiffs_autoBundled() {
+        NotificationRecord r = generateRecord();
+
+        NotificationRecordExtractorData extractorData = new NotificationRecordExtractorData(
+                1,
+                r.getPackageVisibilityOverride(),
+                r.canShowBadge(),
+                r.canBubble(),
+                r.getNotification().isBubbleNotification(),
+                r.getChannel(),
+                r.getGroupKey(),
+                r.getPeopleOverride(),
+                r.getSnoozeCriteria(),
+                r.getUserSentiment(),
+                r.getSuppressedVisualEffects(),
+                r.getSystemGeneratedSmartActions(),
+                r.getSmartReplies(),
+                r.getImportance(),
+                r.getRankingScore(),
+                r.isConversation(),
+                r.getProposedImportance(),
+                r.hasSensitiveContent());
+
+        Bundle signals = new Bundle();
+        signals.putString(Adjustment.KEY_GROUP_KEY, "ranker_group");
+        Adjustment adjustment = new Adjustment("pkg", r.getKey(), signals, "", 0);
+        r.addAdjustment(adjustment);
+        NotificationAdjustmentExtractor adjustmentExtractor = new NotificationAdjustmentExtractor();
+        adjustmentExtractor.process(r);
+
+        assertTrue(extractorData.hasDiffForRankingLocked(r, 1));
+        assertTrue(extractorData.hasDiffForLoggingLocked(r, 1));
+    }
+
+    @Test
+    public void testHasDiffs_sensitiveContentChange() {
+        NotificationRecord r = generateRecord();
+
+        NotificationRecordExtractorData extractorData = new NotificationRecordExtractorData(
+                1,
+                r.getPackageVisibilityOverride(),
+                r.canShowBadge(),
+                r.canBubble(),
+                r.getNotification().isBubbleNotification(),
+                r.getChannel(),
+                r.getGroupKey(),
+                r.getPeopleOverride(),
+                r.getSnoozeCriteria(),
+                r.getUserSentiment(),
+                r.getSuppressedVisualEffects(),
+                r.getSystemGeneratedSmartActions(),
+                r.getSmartReplies(),
+                r.getImportance(),
+                r.getRankingScore(),
+                r.isConversation(),
+                r.getProposedImportance(),
+                r.hasSensitiveContent());
+
+        Bundle signals = new Bundle();
+        signals.putBoolean(Adjustment.KEY_SENSITIVE_CONTENT, true);
         Adjustment adjustment = new Adjustment("pkg", r.getKey(), signals, "", 0);
         r.addAdjustment(adjustment);
         r.applyAdjustments();

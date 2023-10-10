@@ -586,11 +586,211 @@ public class VibratorTest {
         assertEquals(new VibrationAttributes.Builder().build(), vibrationAttributes);
     }
 
+    @Test
+    public void areVibrationFeaturesSupported_noAmplitudeControl_fractionalAmplitudes() {
+        Vibrator vibrator =
+                createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                        .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                        .setSupportedEffects(VibrationEffect.EFFECT_THUD)
+                        .build());
+
+        // Have at least one fractional amplitude (amplitude not min (0) or max (255) or DEFAULT).
+        assertFalse(vibrator.areVibrationFeaturesSupported(waveformWithAmplitudes(10, 30)));
+        assertFalse(vibrator.areVibrationFeaturesSupported(waveformWithAmplitudes(10, 255)));
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, /* amplitude= */ 40)));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_noAmplitudeControl_nonFractionalAmplitudes() {
+        Vibrator vibrator =
+                createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                        .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                        .setSupportedEffects(VibrationEffect.EFFECT_THUD)
+                        .build());
+
+        // All amplitudes are min, max, or default. Requires no amplitude control.
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                waveformWithAmplitudes(255, 0, VibrationEffect.DEFAULT_AMPLITUDE, 255)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createWaveform(
+                        /* timings= */ new long[] {1, 2, 3}, /* repeatIndex= */ -1)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, /* amplitude= */ 255)));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_withAmplitudeControl() {
+        Vibrator vibrator =
+                createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                        .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+                        .build());
+
+        // All forms of amplitudes are valid when amplitude control is available.
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                waveformWithAmplitudes(255, 0, VibrationEffect.DEFAULT_AMPLITUDE, 255)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createWaveform(
+                        /* timings= */ new long[] {1, 2, 3}, /* repeatIndex= */ -1)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(waveformWithAmplitudes(10, 30, 50)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                waveformWithAmplitudes(7, 255, 0, 0, 60)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, /* amplitude= */ 255)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, /* amplitude= */ 40)));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_primitiveCompositionsWithSupportedPrimitives() {
+        Vibrator vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .build());
+
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .compose()));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(
+                                VibrationEffect.Composition.PRIMITIVE_CLICK,
+                                /* scale= */ 0.2f,
+                                /* delay= */ 200)
+                        .compose()));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_primitiveCompositionsWithUnupportedPrimitives() {
+        Vibrator vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .build());
+
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD)
+                        .compose()));
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)
+                        .compose()));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_composedEffects_allComponentsSupported() {
+        Vibrator vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS | IVibrator.CAP_AMPLITUDE_CONTROL)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedEffects(VibrationEffect.EFFECT_TICK, VibrationEffect.EFFECT_POP)
+                .build());
+
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addEffect(VibrationEffect.createWaveform(
+                                /* timings= */ new long[] {1, 2, 3},
+                                /* amplitudes= */ new int[] {10, 20, 255},
+                                /* repeatIndex= */ -1))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_POP))
+                        .compose()));
+
+        vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD, 10)
+                .setSupportedEffects(VibrationEffect.EFFECT_POP, VibrationEffect.EFFECT_CLICK)
+                .build());
+
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD)
+                        .addEffect(VibrationEffect.createWaveform(
+                                // These timings are given either 0 or default amplitudes, which
+                                // do not require vibrator's amplitude control.
+                                /* timings= */ new long[] {1, 2, 3},
+                                /* repeatIndex= */ -1))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_POP))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                        .compose()));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_composedEffects_someComponentsUnupported() {
+        Vibrator vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS | IVibrator.CAP_AMPLITUDE_CONTROL)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedEffects(VibrationEffect.EFFECT_TICK, VibrationEffect.EFFECT_POP)
+                .build());
+
+        // Not supported due to the TICK primitive, which the vibrator has no support for.
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
+                        .addEffect(VibrationEffect.createWaveform(
+                                /* timings= */ new long[] {1, 2, 3},
+                                /* amplitudes= */ new int[] {10, 20, 255},
+                                /* repeatIndex= */ -1))
+                        .compose()));
+        // Not supported due to the THUD effect, which the vibrator has no support for.
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addEffect(VibrationEffect.createWaveform(
+                                /* timings= */ new long[] {1, 2, 3},
+                                /* amplitudes= */ new int[] {10, 20, 255},
+                                /* repeatIndex= */ -1))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_THUD))
+                        .compose()));
+
+        vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD, 10)
+                .setSupportedEffects(VibrationEffect.EFFECT_POP)
+                .build());
+
+        // Not supported due to fractional amplitudes (amplitudes not min (0) or max (255) or
+        // DEFAULT), because the vibrator has no amplitude control.
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD)
+                        .addEffect(VibrationEffect.createWaveform(
+                                /* timings= */ new long[] {1, 2, 3},
+                                /* amplitudes= */ new int[] {10, 20, 255},
+                                /* repeatIndex= */ -1))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_POP))
+                        .compose()));
+    }
+
     /**
      * Asserts that the frequency profile is empty, and therefore frequency control isn't supported.
      */
     void assertEmptyFrequencyProfileAndControl(VibratorInfo info) {
         assertTrue(info.getFrequencyProfile().isEmpty());
         assertEquals(false, info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL));
+    }
+
+    private Vibrator createVibratorWithCustomInfo(VibratorInfo info) {
+        return new SystemVibrator(mContextSpy) {
+            @Override
+            public VibratorInfo getInfo() {
+                return info;
+            }
+        };
+    }
+
+    private static VibrationEffect waveformWithAmplitudes(int...amplitudes) {
+        long[] timings = new long[amplitudes.length];
+        for (int i = 0; i < timings.length; i++) {
+            timings[i] = i * 2; // Arbitrary timings.
+        }
+        return VibrationEffect.createWaveform(timings, amplitudes, /* repeatIndex= */ -1);
     }
 }

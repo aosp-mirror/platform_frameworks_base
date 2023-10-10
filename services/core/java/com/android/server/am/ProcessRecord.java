@@ -16,15 +16,22 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_ACTIVITY;
+
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 
+import static java.util.Objects.requireNonNull;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ApplicationExitInfo;
 import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
+import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
@@ -40,6 +47,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.server.ServerProtoEnums;
+import android.system.OsConstants;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -54,13 +62,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.Zygote;
+import com.android.server.FgThread;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Full information about a particular process that
@@ -143,6 +151,13 @@ class ProcessRecord implements WindowProcessListener {
     private IApplicationThread mThread;
 
     /**
+     * Instance of {@link #mThread} that will always meet the {@code oneway}
+     * contract, possibly by using {@link SameProcessApplicationThread}.
+     */
+    @CompositeRWLock({"mService", "mProcLock"})
+    private IApplicationThread mOnewayThread;
+
+    /**
      * Always keep this application running?
      */
     private volatile boolean mPersistent;
@@ -164,6 +179,12 @@ class ProcessRecord implements WindowProcessListener {
      */
     @GuardedBy("mService")
     private boolean mPendingStart;
+
+    /**
+     * Process finish attach application is pending.
+     */
+    @GuardedBy("mService")
+    private boolean mPendingFinishAttach;
 
     /**
      * Seq no. Indicating the latest process start associated with this process record.
@@ -190,6 +211,11 @@ class ProcessRecord implements WindowProcessListener {
      * When the process is started. (before zygote fork)
      */
     private volatile long mStartElapsedTime;
+
+    /**
+     * When the process was sent the bindApplication request
+     */
+    private volatile long mBindApplicationTime;
 
     /**
      * This will be same as {@link #uid} usually except for some apps used during factory testing.
@@ -321,6 +347,24 @@ class ProcessRecord implements WindowProcessListener {
     private boolean mInFullBackup;
 
     /**
+     * A set of tokens that currently contribute to this process being temporarily allowed
+     * to start certain components (eg. activities or foreground services) even if it's not
+     * in the foreground.
+     */
+    @GuardedBy("mBackgroundStartPrivileges")
+    private final ArrayMap<Binder, BackgroundStartPrivileges> mBackgroundStartPrivileges =
+            new ArrayMap<>();
+
+    /**
+     * The merged BackgroundStartPrivileges based on what's in {@link #mBackgroundStartPrivileges}.
+     * This is lazily generated using {@link #getBackgroundStartPrivileges()}.
+     */
+    @Nullable
+    @GuardedBy("mBackgroundStartPrivileges")
+    private BackgroundStartPrivileges mBackgroundStartPrivilegesMerged =
+            BackgroundStartPrivileges.NONE;
+
+    /**
      * Controller for driving the process state on the window manager side.
      */
     private final WindowProcessController mWindowProcessController;
@@ -379,6 +423,16 @@ class ProcessRecord implements WindowProcessListener {
      * <p>Note: It should be accessed from process start thread only.</p>
      */
     Runnable mSuccessorStartRunnable;
+
+    /**
+     * Whether or not the process group of this process has been created.
+     */
+    volatile boolean mProcessGroupCreated;
+
+    /**
+     * Whether or not we should skip the process group creation.
+     */
+    volatile boolean mSkipProcessGroupCreation;
 
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startUptime, long startElapsedTime) {
@@ -536,7 +590,9 @@ class ProcessRecord implements WindowProcessListener {
         processName = _processName;
         sdkSandboxClientAppPackage = _sdkSandboxClientAppPackage;
         if (isSdkSandbox) {
-            sdkSandboxClientAppVolumeUuid = getClientInfoForSdkSandbox().volumeUuid;
+            final ApplicationInfo clientInfo = getClientInfoForSdkSandbox();
+            sdkSandboxClientAppVolumeUuid = clientInfo != null
+                    ? clientInfo.volumeUuid : null;
         } else {
             sdkSandboxClientAppVolumeUuid = null;
         }
@@ -598,21 +654,47 @@ class ProcessRecord implements WindowProcessListener {
         }
     }
 
+    @GuardedBy({"mService", "mProcLock"})
+    int getSetAdj() {
+        return mState.getSetAdj();
+    }
+
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     IApplicationThread getThread() {
         return mThread;
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    IApplicationThread getOnewayThread() {
+        return mOnewayThread;
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    int getCurProcState() {
+        return mState.getCurProcState();
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    int getSetProcState() {
+        return mState.getSetProcState();
     }
 
     @GuardedBy({"mService", "mProcLock"})
     public void makeActive(IApplicationThread thread, ProcessStatsService tracker) {
         mProfile.onProcessActive(thread, tracker);
         mThread = thread;
+        if (mPid == Process.myPid()) {
+            mOnewayThread = new SameProcessApplicationThread(thread, FgThread.getHandler());
+        } else {
+            mOnewayThread = thread;
+        }
         mWindowProcessController.setThread(thread);
     }
 
     @GuardedBy({"mService", "mProcLock"})
     public void makeInactive(ProcessStatsService tracker) {
         mThread = null;
+        mOnewayThread = null;
         mWindowProcessController.setThread(null);
         mProfile.onProcessInactive(tracker);
     }
@@ -678,6 +760,16 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @GuardedBy("mService")
+    void setPendingFinishAttach(boolean pendingFinishAttach) {
+        mPendingFinishAttach = pendingFinishAttach;
+    }
+
+    @GuardedBy("mService")
+    boolean isPendingFinishAttach() {
+        return mPendingFinishAttach;
+    }
+
+    @GuardedBy("mService")
     long getStartSeq() {
         return mStartSeq;
     }
@@ -718,6 +810,14 @@ class ProcessRecord implements WindowProcessListener {
 
     long getStartElapsedTime() {
         return mStartElapsedTime;
+    }
+
+    long getBindApplicationTime() {
+        return mBindApplicationTime;
+    }
+
+    void setBindApplicationTime(long bindApplicationTime) {
+        mBindApplicationTime = bindApplicationTime;
     }
 
     int getStartUid() {
@@ -971,7 +1071,13 @@ class ProcessRecord implements WindowProcessListener {
         mInFullBackup = inFullBackup;
     }
 
+    @GuardedBy("mService")
+    public void setCached(boolean cached) {
+        mState.setCached(cached);
+    }
+
     @Override
+    @GuardedBy("mService")
     public boolean isCached() {
         return mState.isCached();
     }
@@ -986,6 +1092,11 @@ class ProcessRecord implements WindowProcessListener {
 
     boolean hasRecentTasks() {
         return mWindowProcessController.hasRecentTasks();
+    }
+
+    @GuardedBy("mService")
+    public ApplicationInfo getApplicationInfo() {
+        return info;
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -1056,18 +1167,30 @@ class ProcessRecord implements WindowProcessListener {
 
     @GuardedBy("mService")
     void killLocked(String reason, @Reason int reasonCode, boolean noisy) {
-        killLocked(reason, reasonCode, ApplicationExitInfo.SUBREASON_UNKNOWN, noisy);
+        killLocked(reason, reasonCode, ApplicationExitInfo.SUBREASON_UNKNOWN, noisy, true);
     }
 
     @GuardedBy("mService")
     void killLocked(String reason, @Reason int reasonCode, @SubReason int subReason,
             boolean noisy) {
-        killLocked(reason, reason, reasonCode, subReason, noisy);
+        killLocked(reason, reason, reasonCode, subReason, noisy, true);
     }
 
     @GuardedBy("mService")
     void killLocked(String reason, String description, @Reason int reasonCode,
             @SubReason int subReason, boolean noisy) {
+        killLocked(reason, description, reasonCode, subReason, noisy, true);
+    }
+
+    @GuardedBy("mService")
+    void killLocked(String reason, @Reason int reasonCode, @SubReason int subReason,
+            boolean noisy, boolean asyncKPG) {
+        killLocked(reason, reason, reasonCode, subReason, noisy, asyncKPG);
+    }
+
+    @GuardedBy("mService")
+    void killLocked(String reason, String description, @Reason int reasonCode,
+            @SubReason int subReason, boolean noisy, boolean asyncKPG) {
         if (!mKilledByAm) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "kill");
             if (reasonCode == ApplicationExitInfo.REASON_ANR
@@ -1079,12 +1202,15 @@ class ProcessRecord implements WindowProcessListener {
                         "Killing " + toShortString() + " (adj " + mState.getSetAdj()
                         + "): " + reason, info.uid);
             }
+            // Since the process is getting killed, reset the freezable related state.
+            mOptRecord.setPendingFreeze(false);
+            mOptRecord.setFrozen(false);
             if (mPid > 0) {
                 mService.mProcessList.noteAppKill(this, reasonCode, subReason, description);
                 EventLog.writeEvent(EventLogTags.AM_KILL,
                         userId, mPid, processName, mState.getSetAdj(), reason);
                 Process.killProcessQuiet(mPid);
-                ProcessList.killProcessGroup(uid, mPid);
+                killProcessGroupIfNecessaryLocked(asyncKPG);
             } else {
                 mPendingStart = false;
             }
@@ -1096,6 +1222,30 @@ class ProcessRecord implements WindowProcessListener {
                 }
             }
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
+    @GuardedBy("mService")
+    void killProcessGroupIfNecessaryLocked(boolean async) {
+        final boolean killProcessGroup;
+        if (mHostingRecord != null
+                && (mHostingRecord.usesWebviewZygote() || mHostingRecord.usesAppZygote())) {
+            synchronized (ProcessRecord.this) {
+                killProcessGroup = mProcessGroupCreated;
+                if (!killProcessGroup) {
+                    // The process group hasn't been created, request to skip it.
+                    mSkipProcessGroupCreation = true;
+                }
+            }
+        } else {
+            killProcessGroup = true;
+        }
+        if (killProcessGroup) {
+            if (async) {
+                ProcessList.killProcessGroup(uid, mPid);
+            } else {
+                Process.sendSignalToProcessGroup(uid, mPid, OsConstants.SIGKILL);
+            }
         }
     }
 
@@ -1253,16 +1403,58 @@ class ProcessRecord implements WindowProcessListener {
      * {@param originatingToken} if you have one such originating token, this is useful for tracing
      * back the grant in the case of the notification token.
      */
-    void addOrUpdateAllowBackgroundActivityStartsToken(Binder entity,
-            @Nullable IBinder originatingToken) {
-        Objects.requireNonNull(entity);
-        mWindowProcessController.addOrUpdateAllowBackgroundActivityStartsToken(entity,
-                originatingToken);
+    void addOrUpdateBackgroundStartPrivileges(@NonNull Binder entity,
+            @NonNull BackgroundStartPrivileges backgroundStartPrivileges) {
+        requireNonNull(entity, "entity");
+        requireNonNull(backgroundStartPrivileges, "backgroundStartPrivileges");
+        checkArgument(backgroundStartPrivileges.allowsAny(),
+                "backgroundStartPrivileges does not allow anything");
+        mWindowProcessController.addOrUpdateBackgroundStartPrivileges(entity,
+                backgroundStartPrivileges);
+        setBackgroundStartPrivileges(entity, backgroundStartPrivileges);
     }
 
-    void removeAllowBackgroundActivityStartsToken(Binder entity) {
-        Objects.requireNonNull(entity);
-        mWindowProcessController.removeAllowBackgroundActivityStartsToken(entity);
+    void removeBackgroundStartPrivileges(@NonNull Binder entity) {
+        requireNonNull(entity, "entity");
+        mWindowProcessController.removeBackgroundStartPrivileges(entity);
+        setBackgroundStartPrivileges(entity, null);
+    }
+
+    @NonNull
+    BackgroundStartPrivileges getBackgroundStartPrivileges() {
+        synchronized (mBackgroundStartPrivileges) {
+            if (mBackgroundStartPrivilegesMerged == null) {
+                // Lazily generate the merged version when it's actually needed.
+                mBackgroundStartPrivilegesMerged = BackgroundStartPrivileges.NONE;
+                for (int i = mBackgroundStartPrivileges.size() - 1; i >= 0; --i) {
+                    mBackgroundStartPrivilegesMerged =
+                            mBackgroundStartPrivilegesMerged.merge(
+                                    mBackgroundStartPrivileges.valueAt(i));
+                }
+            }
+            return mBackgroundStartPrivilegesMerged;
+        }
+    }
+
+    private void setBackgroundStartPrivileges(@NonNull Binder entity,
+            @Nullable BackgroundStartPrivileges backgroundStartPrivileges) {
+        synchronized (mBackgroundStartPrivileges) {
+            final boolean changed;
+            if (backgroundStartPrivileges == null) {
+                changed = mBackgroundStartPrivileges.remove(entity) != null;
+            } else {
+                final BackgroundStartPrivileges oldBsp =
+                        mBackgroundStartPrivileges.put(entity, backgroundStartPrivileges);
+                // BackgroundStartPrivileges tries to reuse the same object and avoid creating
+                // additional objects. For now, we just compare the reference to see if something
+                // has changed.
+                // TODO: actually compare the individual values to see if there's a change
+                changed = backgroundStartPrivileges != oldBsp;
+            }
+            if (changed) {
+                mBackgroundStartPrivilegesMerged = null;
+            }
+        }
     }
 
     @Override
@@ -1309,7 +1501,7 @@ class ProcessRecord implements WindowProcessListener {
             }
             mService.updateLruProcessLocked(this, activityChange, null /* client */);
             if (updateOomAdj) {
-                mService.updateOomAdjLocked(this, OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
+                mService.updateOomAdjLocked(this, OOM_ADJ_REASON_ACTIVITY);
             }
         }
     }
@@ -1321,6 +1513,10 @@ class ProcessRecord implements WindowProcessListener {
     @Override
     public long getCpuTime() {
         return mService.mAppProfiler.getCpuTimeForPid(mPid);
+    }
+
+    public long getCpuDelayTime() {
+        return mService.mAppProfiler.getCpuDelayTimeForPid(mPid);
     }
 
     @Override

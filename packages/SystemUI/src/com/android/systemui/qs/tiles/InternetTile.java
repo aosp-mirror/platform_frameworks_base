@@ -51,6 +51,7 @@ import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.AlphaControlledSignalTileView;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
@@ -90,6 +91,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
     @Inject
     public InternetTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -101,7 +103,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
             AccessPointController accessPointController,
             InternetDialogFactory internetDialogFactory
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mInternetDialogFactory = internetDialogFactory;
         mHandler = mainHandler;
@@ -456,13 +458,28 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 getTileSpec(), mLastTileState, arg == null ? "null" : arg.toString());
         if (arg instanceof CellularCallbackInfo) {
             mLastTileState = LAST_STATE_CELLULAR;
-            handleUpdateCellularState(state, arg);
+            CellularCallbackInfo cb = (CellularCallbackInfo) arg;
+            CellularCallbackInfo cellularInfo = new CellularCallbackInfo();
+            synchronized (cb) {
+                cb.copyTo(cellularInfo);
+            }
+            handleUpdateCellularState(state, cellularInfo);
         } else if (arg instanceof WifiCallbackInfo) {
             mLastTileState = LAST_STATE_WIFI;
-            handleUpdateWifiState(state, arg);
+            WifiCallbackInfo cb = (WifiCallbackInfo) arg;
+            WifiCallbackInfo wifiInfo = new WifiCallbackInfo();
+            synchronized (cb) {
+                cb.copyTo(wifiInfo);
+            }
+            handleUpdateWifiState(state, wifiInfo);
         } else if (arg instanceof EthernetCallbackInfo) {
             mLastTileState = LAST_STATE_ETHERNET;
-            handleUpdateEthernetState(state, arg);
+            EthernetCallbackInfo cb = (EthernetCallbackInfo) arg;
+            EthernetCallbackInfo ethernetInfo = new EthernetCallbackInfo();
+            synchronized (cb) {
+                cb.copyTo(ethernetInfo);
+            }
+            handleUpdateEthernetState(state, ethernetInfo);
         } else {
             // handleUpdateState will be triggered when user expands the QuickSetting panel with
             // arg = null, in this case the last updated CellularCallbackInfo or WifiCallbackInfo
@@ -474,11 +491,11 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 }
                 handleUpdateCellularState(state, cellularInfo);
             } else if (mLastTileState == LAST_STATE_WIFI) {
-                WifiCallbackInfo mifiInfo = new WifiCallbackInfo();
+                WifiCallbackInfo wifiInfo = new WifiCallbackInfo();
                 synchronized (mSignalCallback.mWifiInfo) {
-                    mSignalCallback.mWifiInfo.copyTo(mifiInfo);
+                    mSignalCallback.mWifiInfo.copyTo(wifiInfo);
                 }
-                handleUpdateWifiState(state, mifiInfo);
+                handleUpdateWifiState(state, wifiInfo);
             } else if (mLastTileState == LAST_STATE_ETHERNET) {
                 EthernetCallbackInfo ethernetInfo = new EthernetCallbackInfo();
                 synchronized (mSignalCallback.mEthernetInfo) {
@@ -665,10 +682,15 @@ public class InternetTile extends QSTileImpl<SignalState> {
         }
 
         @Override
+        @NonNull
         public Drawable getDrawable(Context context) {
             SignalDrawable d = new SignalDrawable(context);
             d.setLevel(getState());
             return d;
+        }
+        @Override
+        public String toString() {
+            return String.format("SignalIcon[mState=0x%08x]", mState);
         }
     }
 

@@ -576,10 +576,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return res;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     @Override
     public byte[] getCurrentStats(List<ParcelFileDescriptor> historic) {
-        mAm.mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.PACKAGE_USAGE_STATS, null);
+        super.getCurrentStats_enforcePermission();
+
         Parcel current = Parcel.obtain();
         synchronized (mLock) {
             long now = SystemClock.uptimeMillis();
@@ -631,11 +632,12 @@ public final class ProcessStatsService extends IProcessStats.Stub {
      * @return List of proto binary of individual commit files or one that is merged from them;
      *         the merged, final ProcessStats object.
      */
+    @android.annotation.EnforcePermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     @Override
     public long getCommittedStatsMerged(long highWaterMarkMs, int section, boolean doAggregate,
             List<ParcelFileDescriptor> committedStats, ProcessStats mergedStats) {
-        mAm.mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.PACKAGE_USAGE_STATS, null);
+
+        super.getCommittedStatsMerged_enforcePermission();
 
         long newHighWaterMark = highWaterMarkMs;
         mFileLock.lock();
@@ -644,7 +646,6 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             if (files != null) {
                 String highWaterMarkStr =
                         DateFormat.format("yyyy-MM-dd-HH-mm-ss", highWaterMarkMs).toString();
-                ProcessStats stats = new ProcessStats(false);
                 for (int i = files.size() - 1; i >= 0; i--) {
                     String fileName = files.get(i);
                     try {
@@ -657,7 +658,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                                     new File(fileName),
                                     ParcelFileDescriptor.MODE_READ_ONLY);
                             InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
-                            stats.reset();
+                            final ProcessStats stats = new ProcessStats(false);
                             stats.read(is);
                             is.close();
                             if (stats.mTimePeriodStartClock > newHighWaterMark) {
@@ -720,10 +721,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return fds[0];
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     @Override
     public ParcelFileDescriptor getStatsOverTime(long minTime) {
-        mAm.mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.PACKAGE_USAGE_STATS, null);
+        super.getStatsOverTime_enforcePermission();
+
         Parcel current = Parcel.obtain();
         long curTime;
         synchronized (mLock) {

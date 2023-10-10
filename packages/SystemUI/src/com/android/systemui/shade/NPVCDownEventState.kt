@@ -13,11 +13,11 @@
  */
 package com.android.systemui.shade
 
+import android.icu.text.SimpleDateFormat
 import android.view.MotionEvent
+import com.android.systemui.common.buffer.RingBuffer
 import com.android.systemui.dump.DumpsysTableLogger
 import com.android.systemui.dump.Row
-import com.android.systemui.plugins.util.RingBuffer
-import java.text.SimpleDateFormat
 import java.util.Locale
 
 /** Container for storing information about [MotionEvent.ACTION_DOWN] on

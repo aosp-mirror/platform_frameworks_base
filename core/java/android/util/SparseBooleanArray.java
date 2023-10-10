@@ -51,7 +51,7 @@ public class SparseBooleanArray implements Cloneable {
      * Creates a new SparseBooleanArray containing no mappings.
      */
     public SparseBooleanArray() {
-        this(10);
+        this(0);
     }
 
     /**

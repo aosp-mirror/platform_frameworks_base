@@ -39,7 +39,6 @@ import androidx.exifinterface.media.ExifInterface;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -294,11 +293,9 @@ public class ImageExporter {
             final ContentValues values = createMetadata(time, format, fileName);
 
             Uri baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-            if (flags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)
-                    && UserHandle.myUserId() != owner.getIdentifier()) {
-                baseUri = ContentProvider.maybeAddUserId(baseUri, owner.getIdentifier());
-            }
-            Uri uri = resolver.insert(baseUri, values);
+            Uri uriWithUserId = ContentProvider.maybeAddUserId(baseUri, owner.getIdentifier());
+
+            Uri uri = resolver.insert(uriWithUserId, values);
             if (uri == null) {
                 throw new ImageExportException(RESOLVER_INSERT_RETURNED_NULL);
             }

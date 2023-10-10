@@ -40,7 +40,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -51,6 +53,8 @@ import android.app.servertransaction.RefreshCallbackItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo.ScreenOrientation;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Configuration.Orientation;
 import android.hardware.camera2.CameraManager;
@@ -84,7 +88,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     private static final String TEST_PACKAGE_2 = "com.test.package.two";
     private static final String CAMERA_ID_1 = "camera-1";
     private static final String CAMERA_ID_2 = "camera-2";
-
+    private static final String TEST_PACKAGE_1_LABEL = "testPackage1";
     private CameraManager mMockCameraManager;
     private Handler mMockHandler;
     private LetterboxConfiguration mLetterboxConfiguration;
@@ -133,17 +137,27 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     }
 
     @Test
-    public void testOpenedCameraInSplitScreen_showToast() {
+    public void testOpenedCameraInSplitScreen_showToast() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         spyOn(mTask);
         spyOn(mDisplayRotationCompatPolicy);
         doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivity).getWindowingMode();
         doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mTask).getWindowingMode();
 
+        final PackageManager mockPackageManager = mock(PackageManager.class);
+        final ApplicationInfo mockApplicationInfo = mock(ApplicationInfo.class);
+        when(mContext.getPackageManager()).thenReturn(mockPackageManager);
+        when(mockPackageManager.getApplicationInfo(anyString(), anyInt()))
+                .thenReturn(mockApplicationInfo);
+
+        doReturn(TEST_PACKAGE_1_LABEL).when(mockPackageManager)
+                .getApplicationLabel(mockApplicationInfo);
+
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
         verify(mDisplayRotationCompatPolicy).showToast(
-                R.string.display_rotation_camera_compat_toast_in_split_screen);
+                R.string.display_rotation_camera_compat_toast_in_multi_window,
+                TEST_PACKAGE_1_LABEL);
     }
 
     @Test
@@ -157,7 +171,8 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
         verify(mDisplayRotationCompatPolicy, never()).showToast(
-                R.string.display_rotation_camera_compat_toast_in_split_screen);
+                R.string.display_rotation_camera_compat_toast_in_multi_window,
+                TEST_PACKAGE_1_LABEL);
     }
 
     @Test
@@ -479,11 +494,26 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_displayRotationNotChanging_noRefresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        doReturn(false).when(mActivity.mLetterboxUiController)
+                .isCameraCompatSplitScreenAspectRatioAllowed();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ false);
 
         assertActivityRefreshRequested(/* refreshRequested */ false);
+    }
+
+    @Test
+    public void testOnActivityConfigurationChanging_splitScreenAspectRatioAllowed_refresh()
+            throws Exception {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        doReturn(true).when(mActivity.mLetterboxUiController)
+                .isCameraCompatSplitScreenAspectRatioAllowed();
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ false);
+
+        assertActivityRefreshRequested(/* refreshRequested */ true);
     }
 
     @Test

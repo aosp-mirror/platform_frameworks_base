@@ -54,6 +54,7 @@ message WindowManagerServiceDumpProto {
     optional int32 focused_display_id = 9;
     optional bool hard_keyboard_available = 10;
     optional bool window_frames_valid = 11;
+    optional BackNavigationProto back_navigation = 12;
 }
 
 /* represents RootWindowContainer object */
@@ -388,6 +389,11 @@ message ActivityRecordProto {
     optional bool provides_max_bounds = 34;
     optional bool enable_recents_screenshot = 35;
     optional int32 last_drop_input_mode = 36;
+    optional int32 override_orientation = 37 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation"];
+    optional bool should_send_compat_fake_focus = 38;
+    optional bool should_force_rotate_for_camera_compat = 39;
+    optional bool should_refresh_activity_for_camera_compat = 40;
+    optional bool should_refresh_activity_via_pause_for_camera_compat = 41;
 }
 
 /* represents WindowToken */
@@ -452,6 +458,7 @@ message WindowStateProto {
     optional float global_scale = 44;
     repeated .android.graphics.RectProto keep_clear_areas = 45;
     repeated .android.graphics.RectProto unrestricted_keep_clear_areas = 46;
+    repeated .android.view.InsetsSourceProto mergedLocalInsetsSources = 47;
 }
 
 message IdentifierProto {
@@ -594,4 +601,12 @@ message ImeInsetsSourceProviderProto {
     optional InsetsSourceProviderProto insets_source_provider = 1;
     optional WindowStateProto ime_target_from_ime = 2;
     optional bool is_ime_layout_drawn = 3;
+}
+
+message BackNavigationProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional bool animation_in_progress = 1;
+    optional int32 last_back_type = 2;
+    optional bool show_wallpaper = 3;
 }

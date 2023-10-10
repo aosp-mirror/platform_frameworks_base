@@ -25,7 +25,6 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.os.Handler
 import android.os.IBinder
 import android.os.UserManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
@@ -34,38 +33,57 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.ScrollView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
-import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakePromptRepository
+import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
+import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
+import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
+import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
+import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel
+import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
+import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import org.junit.After
+import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
-class AuthContainerViewTest : SysuiTestCase() {
+open class AuthContainerViewTest : SysuiTestCase() {
 
     @JvmField @Rule
     var mockitoRule = MockitoJUnit.rule()
+
+    private val featureFlags = FakeFeatureFlags()
 
     @Mock
     lateinit var callback: AuthDialogCallback
@@ -76,11 +94,49 @@ class AuthContainerViewTest : SysuiTestCase() {
     @Mock
     lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock
+    lateinit var panelInteractionDetector: AuthDialogPanelInteractionDetector
+    @Mock
     lateinit var windowToken: IBinder
     @Mock
     lateinit var interactionJankMonitor: InteractionJankMonitor
 
+    // TODO(b/278622168): remove with flag
+    open val useNewBiometricPrompt = false
+
+    private val testScope = TestScope(StandardTestDispatcher())
+    private val fakeExecutor = FakeExecutor(FakeSystemClock())
+    private val biometricPromptRepository = FakePromptRepository()
+    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
+    private val credentialInteractor = FakeCredentialInteractor()
+    private val bpCredentialInteractor = PromptCredentialInteractor(
+        Dispatchers.Main.immediate,
+        biometricPromptRepository,
+        credentialInteractor,
+    )
+    private val promptSelectorInteractor by lazy {
+        PromptSelectorInteractorImpl(
+            biometricPromptRepository,
+            lockPatternUtils,
+        )
+    }
+    private val displayStateInteractor = DisplayStateInteractorImpl(
+        testScope.backgroundScope,
+        mContext,
+        fakeExecutor,
+        rearDisplayStateRepository
+    )
+
+    private val authBiometricFingerprintViewModel = AuthBiometricFingerprintViewModel(
+        displayStateInteractor
+    )
+    private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
+
     private var authContainer: TestAuthContainerView? = null
+
+    @Before
+    fun setup() {
+        featureFlags.set(Flags.BIOMETRIC_BP_STRONG, useNewBiometricPrompt)
+    }
 
     @After
     fun tearDown() {
@@ -92,7 +148,7 @@ class AuthContainerViewTest : SysuiTestCase() {
     @Test
     fun testNotifiesAnimatedIn() {
         initializeFingerprintContainer()
-        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L)
+        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
     }
 
     @Test
@@ -131,13 +187,13 @@ class AuthContainerViewTest : SysuiTestCase() {
         container.dismissFromSystemServer()
         waitForIdleSync()
 
-        verify(callback, never()).onDialogAnimatedIn(anyLong())
+        verify(callback, never()).onDialogAnimatedIn(anyLong(), anyBoolean())
 
         container.addToView()
         waitForIdleSync()
 
         // attaching the view resets the state and allows this to happen again
-        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L)
+        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
     }
 
     @Test
@@ -152,76 +208,19 @@ class AuthContainerViewTest : SysuiTestCase() {
 
         // the first time is triggered by initializeFingerprintContainer()
         // the second time was triggered by dismissWithoutCallback()
-        verify(callback, times(2)).onDialogAnimatedIn(authContainer?.requestId ?: 0L)
+        verify(callback, times(2)).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
     }
 
     @Test
-    fun testDismissesOnFocusLoss() {
+    fun testActionCancel_panelInteractionDetectorDisable() {
         val container = initializeFingerprintContainer()
-        waitForIdleSync()
-
-        val requestID = authContainer?.requestId ?: 0L
-
-        verify(callback).onDialogAnimatedIn(requestID)
-
-        container.onWindowFocusChanged(false)
-        waitForIdleSync()
-
-        verify(callback).onDismissed(
-                eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
-                eq<ByteArray?>(null), /* credentialAttestation */
-                eq(requestID)
+        container.mBiometricCallback.onAction(
+                AuthBiometricView.Callback.ACTION_USER_CANCELED
         )
-        assertThat(container.parent).isNull()
+        waitForIdleSync()
+        verify(panelInteractionDetector).disable()
     }
 
-    @Test
-    fun testFocusLossAfterRotating() {
-        val container = initializeFingerprintContainer()
-        waitForIdleSync()
-
-        val requestID = authContainer?.requestId ?: 0L
-
-        verify(callback).onDialogAnimatedIn(requestID)
-        container.onOrientationChanged()
-        container.onWindowFocusChanged(false)
-        waitForIdleSync()
-
-        verify(callback, never()).onDismissed(
-                eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
-                eq<ByteArray?>(null), /* credentialAttestation */
-                eq(requestID)
-        )
-    }
-
-    @Test
-    fun testDismissesOnFocusLoss_hidesKeyboardWhenVisible() {
-        val container = initializeFingerprintContainer(
-            authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
-        )
-        waitForIdleSync()
-
-        val requestID = authContainer?.requestId ?: 0L
-
-        // Simulate keyboard was shown on the credential view
-        val windowInsetsController = container.windowInsetsController
-        spyOn(windowInsetsController)
-        spyOn(container.rootWindowInsets)
-        doReturn(true).`when`(container.rootWindowInsets).isVisible(WindowInsets.Type.ime())
-
-        container.onWindowFocusChanged(false)
-        waitForIdleSync()
-
-        // Expect hiding IME request will be invoked when dismissing the view
-        verify(windowInsetsController)?.hide(WindowInsets.Type.ime())
-
-        verify(callback).onDismissed(
-            eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
-            eq<ByteArray?>(null), /* credentialAttestation */
-            eq(requestID)
-        )
-        assertThat(container.parent).isNull()
-    }
 
     @Test
     fun testActionAuthenticated_sendsDismissedAuthenticated() {
@@ -304,6 +303,7 @@ class AuthContainerViewTest : SysuiTestCase() {
         assertThat(authContainer!!.parent).isNull()
     }
 
+    @Ignore("b/279650412")
     @Test
     fun testActionUseDeviceCredential_sendsOnDeviceCredentialPressed() {
         val container = initializeFingerprintContainer(
@@ -435,7 +435,7 @@ class AuthContainerViewTest : SysuiTestCase() {
     ): TestAuthContainerView {
         whenever(userManager.getCredentialOwnerProfile(anyInt())).thenReturn(20)
         whenever(lockPatternUtils.getKeyguardStoredPasswordQuality(eq(20))).thenReturn(
-                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
+            DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
         )
 
         // In the credential view, clicking on the background (to cancel authentication) is not
@@ -502,26 +502,52 @@ class AuthContainerViewTest : SysuiTestCase() {
                 this.authenticators = authenticators
             }
         },
+        featureFlags,
+        testScope.backgroundScope,
         fingerprintProps,
         faceProps,
         wakefulnessLifecycle,
+        panelInteractionDetector,
         userManager,
         lockPatternUtils,
         interactionJankMonitor,
+        { authBiometricFingerprintViewModel },
+        { promptSelectorInteractor },
+        { bpCredentialInteractor },
+        PromptViewModel(promptSelectorInteractor),
+        { credentialViewModel },
         Handler(TestableLooper.get(this).looper),
-        FakeExecutor(FakeSystemClock())
+        fakeExecutor
     ) {
         override fun postOnAnimation(runnable: Runnable) {
             runnable.run()
         }
     }
 
-    override fun waitForIdleSync() = TestableLooper.get(this).processAllMessages()
+    override fun waitForIdleSync() {
+        testScope.runCurrent()
+        TestableLooper.get(this).processAllMessages()
+    }
 
     private fun AuthContainerView.addToView() {
         ViewUtils.attachView(this)
         waitForIdleSync()
-        assertThat(isAttachedToWindow).isTrue()
+        assertThat(isAttachedToWindow()).isTrue()
+    }
+
+    @Test
+    fun testLayoutParams_hasCutoutModeAlwaysFlag() {
+        val layoutParams = AuthContainerView.getLayoutParams(windowToken, "")
+        val lpFlags = layoutParams.flags
+
+        assertThat((lpFlags and WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS)
+                != 0).isTrue()
+    }
+
+    @Test
+    fun testLayoutParams_excludesSystemBarInsets() {
+        val layoutParams = AuthContainerView.getLayoutParams(windowToken, "")
+        assertThat((layoutParams.fitInsetsTypes and WindowInsets.Type.systemBars()) == 0).isTrue()
     }
 }
 

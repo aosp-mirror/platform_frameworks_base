@@ -32,4 +32,13 @@
         <item>TUV</item><!-- 8 -->
         <item>WXYZ</item><!-- 9 -->
     </string-array>
+
+    <integer-array name="bouncer_pin_shapes">
+        <item>@drawable/pin_dot_shape_1_avd</item>
+        <item>@drawable/pin_dot_shape_2_avd</item>
+        <item>@drawable/pin_dot_shape_3_avd</item>
+        <item>@drawable/pin_dot_shape_4_avd</item>
+        <item>@drawable/pin_dot_shape_5_avd</item>
+        <item>@drawable/pin_dot_shape_6_avd</item>
+    </integer-array>
 </resources>

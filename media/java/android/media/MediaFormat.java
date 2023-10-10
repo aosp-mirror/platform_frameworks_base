@@ -251,13 +251,14 @@ public final class MediaFormat {
      * To decode such an image, {@link MediaCodec} decoder for
      * {@link #MIMETYPE_VIDEO_HEVC} shall be used. The client needs to form
      * the correct {@link #MediaFormat} based on additional information in
-     * the track format, and send it to {@link MediaCodec#configure}.
+     * the track format (shown in the next paragraph), and send it to
+     * {@link MediaCodec#configure}.
      *
      * The track's MediaFormat will come with {@link #KEY_WIDTH} and
      * {@link #KEY_HEIGHT} keys, which describes the width and height
      * of the image. If the image doesn't contain grid (i.e. none of
      * {@link #KEY_TILE_WIDTH}, {@link #KEY_TILE_HEIGHT},
-     * {@link #KEY_GRID_ROWS}, {@link #KEY_GRID_COLUMNS} are present}), the
+     * {@link #KEY_GRID_ROWS}, {@link #KEY_GRID_COLUMNS} are present), the
      * track will contain a single sample of coded data for the entire image,
      * and the image width and height should be used to set up the decoder.
      *
@@ -273,6 +274,36 @@ public final class MediaFormat {
      * side, if the tiled area is larger than the image width and height.
      */
     public static final String MIMETYPE_IMAGE_ANDROID_HEIC = "image/vnd.android.heic";
+
+    /**
+     * MIME type for AVIF still image data encoded in AV1.
+     *
+     * To decode such an image, {@link MediaCodec} decoder for
+     * {@link #MIMETYPE_VIDEO_AV1} shall be used. The client needs to form
+     * the correct {@link #MediaFormat} based on additional information in
+     * the track format (shown in the next paragraph), and send it to
+     * {@link MediaCodec#configure}.
+     *
+     * The track's MediaFormat will come with {@link #KEY_WIDTH} and
+     * {@link #KEY_HEIGHT} keys, which describes the width and height
+     * of the image. If the image doesn't contain grid (i.e. none of
+     * {@link #KEY_TILE_WIDTH}, {@link #KEY_TILE_HEIGHT},
+     * {@link #KEY_GRID_ROWS}, {@link #KEY_GRID_COLUMNS} are present), the
+     * track will contain a single sample of coded data for the entire image,
+     * and the image width and height should be used to set up the decoder.
+     *
+     * If the image does come with grid, each sample from the track will
+     * contain one tile in the grid, of which the size is described by
+     * {@link #KEY_TILE_WIDTH} and {@link #KEY_TILE_HEIGHT}. This size
+     * (instead of {@link #KEY_WIDTH} and {@link #KEY_HEIGHT}) should be
+     * used to set up the decoder. The track contains {@link #KEY_GRID_ROWS}
+     * by {@link #KEY_GRID_COLUMNS} samples in row-major, top-row first,
+     * left-to-right order. The output image should be reconstructed by
+     * first tiling the decoding results of the tiles in the correct order,
+     * then trimming (before rotation is applied) on the bottom and right
+     * side, if the tiled area is larger than the image width and height.
+     */
+    public static final String MIMETYPE_IMAGE_AVIF = "image/avif";
 
     /**
      * MIME type for WebVTT subtitle data.
@@ -494,9 +525,11 @@ public final class MediaFormat {
 
     /**
      * A key describing the width (in pixels) of each tile of the content in a
-     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track. The associated value is an integer.
+     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} / {@link #MIMETYPE_IMAGE_AVIF} track.
+     * The associated value is an integer.
      *
-     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
+     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} / {@link #MIMETYPE_IMAGE_AVIF} on decoding
+     * instructions of such tracks.
      *
      * @see #KEY_TILE_HEIGHT
      * @see #KEY_GRID_ROWS
@@ -506,9 +539,11 @@ public final class MediaFormat {
 
     /**
      * A key describing the height (in pixels) of each tile of the content in a
-     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track. The associated value is an integer.
+     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} / {@link #MIMETYPE_IMAGE_AVIF} track.
+     * The associated value is an integer.
      *
-     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
+     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} / {@link #MIMETYPE_IMAGE_AVIF} on decoding
+     * instructions of such tracks.
      *
      * @see #KEY_TILE_WIDTH
      * @see #KEY_GRID_ROWS
@@ -518,9 +553,11 @@ public final class MediaFormat {
 
     /**
      * A key describing the number of grid rows in the content in a
-     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track. The associated value is an integer.
+     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} / {@link #MIMETYPE_IMAGE_AVIF} track.
+     * The associated value is an integer.
      *
-     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
+     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} / {@link #MIMETYPE_IMAGE_AVIF} on decoding
+     * instructions of such tracks.
      *
      * @see #KEY_TILE_WIDTH
      * @see #KEY_TILE_HEIGHT
@@ -530,9 +567,11 @@ public final class MediaFormat {
 
     /**
      * A key describing the number of grid columns in the content in a
-     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track. The associated value is an integer.
+     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} / {@link #MIMETYPE_IMAGE_AVIF} track.
+     * The associated value is an integer.
      *
-     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
+     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} / {@link #MIMETYPE_IMAGE_AVIF} on decoding
+     * instructions of such tracks.
      *
      * @see #KEY_TILE_WIDTH
      * @see #KEY_TILE_HEIGHT
@@ -1362,9 +1401,9 @@ public final class MediaFormat {
      * selected in the absence of a specific user choice.
      * This is currently used in two scenarios:
      * 1) for subtitle tracks, when the user selected 'Default' for the captioning locale.
-     * 2) for a {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track, indicating the image is the
-     * primary item in the file.
-
+     * 2) for a {@link #MIMETYPE_IMAGE_ANDROID_HEIC} / {@link #MIMETYPE_IMAGE_AVIF} track,
+     * indicating the image is the primary item in the file.
+     *
      * The associated value is an integer, where non-0 means TRUE.  This is an optional
      * field; if not specified, DEFAULT is considered to be FALSE.
      */

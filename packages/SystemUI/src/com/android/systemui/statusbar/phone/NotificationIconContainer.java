@@ -36,10 +36,10 @@ import android.view.animation.Interpolator;
 import androidx.annotation.VisibleForTesting;
 import androidx.collection.ArrayMap;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.stack.AnimationFilter;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -136,11 +136,13 @@ public class NotificationIconContainer extends ViewGroup {
         }
     }.setDuration(CONTENT_FADE_DURATION);
 
-    private static final int MAX_ICONS_ON_AOD = 3;
+    /* Maximum number of icons on AOD when also showing overflow dot. */
+    private int mMaxIconsOnAod;
 
     /* Maximum number of icons in short shelf on lockscreen when also showing overflow dot. */
-    public static final int MAX_ICONS_ON_LOCKSCREEN = 3;
-    public static final int MAX_STATIC_ICONS = 4;
+    private int mMaxIconsOnLockscreen;
+    /* Maximum number of icons in the status bar when also showing overflow dot. */
+    private int mMaxStaticIcons;
 
     private boolean mIsStaticLayout = true;
     private final HashMap<View, IconState> mIconStates = new HashMap<>();
@@ -174,14 +176,19 @@ public class NotificationIconContainer extends ViewGroup {
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initDimens();
+        initResources();
         setWillNotDraw(!(DEBUG || DEBUG_OVERFLOW));
     }
 
-    private void initDimens() {
+    private void initResources() {
+        mMaxIconsOnAod = getResources().getInteger(R.integer.max_notif_icons_on_aod);
+        mMaxIconsOnLockscreen = getResources().getInteger(R.integer.max_notif_icons_on_lockscreen);
+        mMaxStaticIcons = getResources().getInteger(R.integer.max_notif_static_icons);
+
         mDotPadding = getResources().getDimensionPixelSize(R.dimen.overflow_icon_dot_padding);
         mStaticDotRadius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
         mStaticDotDiameter = 2 * mStaticDotRadius;
+
         final Context themedContext = new ContextThemeWrapper(getContext(),
                 com.android.internal.R.style.Theme_DeviceDefault_DayNight);
         mThemedTextColorPrimary = Utils.getColorAttr(themedContext,
@@ -225,7 +232,7 @@ public class NotificationIconContainer extends ViewGroup {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        initDimens();
+        initResources();
     }
 
     @Override
@@ -424,7 +431,7 @@ public class NotificationIconContainer extends ViewGroup {
             return 0f;
         }
         final float contentWidth =
-                mIconSize * MathUtils.min(numIcons, MAX_ICONS_ON_LOCKSCREEN + 1);
+                mIconSize * MathUtils.min(numIcons, mMaxIconsOnLockscreen + 1);
         return getActualPaddingStart()
                 + contentWidth
                 + getActualPaddingEnd();
@@ -539,8 +546,8 @@ public class NotificationIconContainer extends ViewGroup {
     }
 
     private int getMaxVisibleIcons(int childCount) {
-        return mOnLockScreen ? MAX_ICONS_ON_AOD :
-                mIsStaticLayout ? MAX_STATIC_ICONS : childCount;
+        return mOnLockScreen ? mMaxIconsOnAod :
+                mIsStaticLayout ? mMaxStaticIcons : childCount;
     }
 
     private float getLayoutEnd() {

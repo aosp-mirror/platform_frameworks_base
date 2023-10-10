@@ -16,18 +16,15 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data
 
-import android.net.Network
-import android.net.NetworkCapabilities
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.TelephonyDisplayInfo
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.statusbar.pipeline.dagger.MobileInputLog
-import com.android.systemui.statusbar.pipeline.shared.LoggerHelper
 import javax.inject.Inject
 
 /** Logs for inputs into the mobile pipeline. */
@@ -37,24 +34,6 @@ class MobileInputLogger
 constructor(
     @MobileInputLog private val buffer: LogBuffer,
 ) {
-    fun logOnCapabilitiesChanged(
-        network: Network,
-        networkCapabilities: NetworkCapabilities,
-        isDefaultNetworkCallback: Boolean,
-    ) {
-        LoggerHelper.logOnCapabilitiesChanged(
-            buffer,
-            TAG,
-            network,
-            networkCapabilities,
-            isDefaultNetworkCallback,
-        )
-    }
-
-    fun logOnLost(network: Network, isDefaultNetworkCallback: Boolean) {
-        LoggerHelper.logOnLost(buffer, TAG, network, isDefaultNetworkCallback)
-    }
-
     fun logOnServiceStateChanged(serviceState: ServiceState, subId: Int) {
         buffer.log(
             TAG,

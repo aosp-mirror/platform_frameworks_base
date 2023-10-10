@@ -23,8 +23,10 @@
     <bool name="def_airplane_mode_on">false</bool>
     <bool name="def_theater_mode_on">false</bool>
     <!-- Comma-separated list of bluetooth, wifi, and cell. -->
-    <string name="def_airplane_mode_radios" translatable="false">cell,bluetooth,wifi,nfc,wimax</string>
-    <string name="airplane_mode_toggleable_radios" translatable="false">bluetooth,wifi,nfc</string>
+    <string name="def_airplane_mode_radios" translatable="false">cell,bluetooth,uwb,wifi,wimax</string>
+    <string name="airplane_mode_toggleable_radios" translatable="false">bluetooth,wifi</string>
+    <string name="def_satellite_mode_radios" translatable="false"></string>
+    <integer name="def_satellite_mode_enabled" translatable="false">0</integer>
     <string name="def_bluetooth_disabled_profiles" translatable="false">0</string>
     <bool name="def_auto_time">true</bool>
     <bool name="def_auto_time_zone">true</bool>
@@ -41,6 +43,8 @@
     <bool name="def_install_non_market_apps">false</bool>
     <!-- 0 == off, 3 == on -->
     <integer name="def_location_mode">3</integer>
+    <!-- 0 == off, 1 == on-->
+    <integer name="def_paired_device_location_mode">1</integer>
     <bool name="assisted_gps_enabled">true</bool>
     <bool name="def_netstats_enabled">true</bool>
     <bool name="def_usb_mass_storage_enabled">true</bool>
@@ -277,9 +281,6 @@
 
     <!-- Whether to enable mute when off body by default. -->
     <bool name="def_wearable_muteWhenOffBodyEnabled">true</bool>
-
-    <!-- If a square screen, how rounded the corners are. Same as CSS border-radius property. -->
-    <integer name="def_wearable_squareScreenCornerRoundness">0</integer>
 
     <!-- Side button present -->
     <bool name="def_wearable_sideButtonPresent">true</bool>

@@ -63,6 +63,8 @@ import com.android.server.wm.LaunchParamsController.LaunchParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+
 /**
  * Tests for the {@link TaskDisplayArea} container.
  *
@@ -349,22 +351,23 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     @Test
     public void testReuseTaskAsRootTask() {
         final Task candidateTask = createTask(mDisplayContent);
-        final int type = ACTIVITY_TYPE_STANDARD;
-        assertGetOrCreateRootTask(WINDOWING_MODE_FULLSCREEN, type, candidateTask,
-                true /* reuseCandidate */);
-        assertGetOrCreateRootTask(WINDOWING_MODE_UNDEFINED, type, candidateTask,
-                true /* reuseCandidate */);
-        assertGetOrCreateRootTask(WINDOWING_MODE_FREEFORM, type, candidateTask,
-                true /* reuseCandidate */);
-        assertGetOrCreateRootTask(WINDOWING_MODE_MULTI_WINDOW, type, candidateTask,
-                true /* reuseCandidate */);
-        assertGetOrCreateRootTask(WINDOWING_MODE_PINNED, type, candidateTask,
-                true /* reuseCandidate */);
+        List<Integer> activityTypesWithReusableRootTask = List.of(ACTIVITY_TYPE_STANDARD,
+                ACTIVITY_TYPE_RECENTS);
+        for (Integer type : activityTypesWithReusableRootTask) {
+            assertGetOrCreateRootTask(WINDOWING_MODE_FULLSCREEN, type, candidateTask,
+                    true /* reuseCandidate */);
+            assertGetOrCreateRootTask(WINDOWING_MODE_UNDEFINED, type, candidateTask,
+                    true /* reuseCandidate */);
+            assertGetOrCreateRootTask(WINDOWING_MODE_FREEFORM, type, candidateTask,
+                    true /* reuseCandidate */);
+            assertGetOrCreateRootTask(WINDOWING_MODE_MULTI_WINDOW, type, candidateTask,
+                    true /* reuseCandidate */);
+            assertGetOrCreateRootTask(WINDOWING_MODE_PINNED, type, candidateTask,
+                    true /* reuseCandidate */);
+        }
 
         final int windowingMode = WINDOWING_MODE_FULLSCREEN;
         assertGetOrCreateRootTask(windowingMode, ACTIVITY_TYPE_HOME, candidateTask,
-                false /* reuseCandidate */);
-        assertGetOrCreateRootTask(windowingMode, ACTIVITY_TYPE_RECENTS, candidateTask,
                 false /* reuseCandidate */);
         assertGetOrCreateRootTask(windowingMode, ACTIVITY_TYPE_ASSISTANT, candidateTask,
                 false /* reuseCandidate */);
@@ -671,7 +674,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final Task pinnedRootTask = mRootWindowContainer.getDefaultTaskDisplayArea()
                 .createRootTask(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, ON_TOP);
         final Task pinnedTask = new TaskBuilder(mAtm.mTaskSupervisor)
-                .setParentTaskFragment(pinnedRootTask).build();
+                .setParentTask(pinnedRootTask).build();
         new ActivityBuilder(mAtm).setActivityFlags(FLAG_ALWAYS_FOCUSABLE)
                 .setTask(pinnedTask).build();
         pinnedRootTask.moveToFront("movePinnedRootTaskToFront");

@@ -19,6 +19,7 @@ package com.android.wm.shell.common;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Region;
@@ -46,6 +47,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
+import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 
 import com.android.internal.os.IResultReceiver;
@@ -221,7 +223,7 @@ public class SystemWindows {
             }
             final Display display = mDisplayController.getDisplay(mDisplayId);
             SurfaceControlViewHost viewRoot =
-                    new SurfaceControlViewHost(view.getContext(), display, wwm);
+                    new SurfaceControlViewHost(view.getContext(), display, wwm, "SystemWindows");
             attrs.flags |= FLAG_HARDWARE_ACCELERATED;
             viewRoot.setView(view, attrs);
             mViewRoots.put(view, viewRoot);
@@ -304,7 +306,9 @@ public class SystemWindows {
             }
         }
 
-        protected void attachToParentSurface(IWindow window, SurfaceControl.Builder b) {
+        @Override
+        protected SurfaceControl getParentSurface(IWindow window,
+                WindowManager.LayoutParams attrs) {
             SurfaceControl leash = new SurfaceControl.Builder(new SurfaceSession())
                   .setContainerLayer()
                   .setName("SystemWindowLeash")
@@ -314,7 +318,7 @@ public class SystemWindows {
             synchronized (this) {
                 mLeashForWindow.put(window.asBinder(), leash);
             }
-            b.setParent(leash);
+            return leash;
         }
 
         @Override
@@ -344,17 +348,17 @@ public class SystemWindows {
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration newMergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
-                int resizeMode) {}
+                boolean dragResizing) {}
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
                 InsetsSourceControl[] activeControls) {}
 
         @Override
-        public void showInsets(int types, boolean fromIme) {}
+        public void showInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {}
 
         @Override
-        public void hideInsets(int types, boolean fromIme) {}
+        public void hideInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {}
 
         @Override
         public void moved(int newX, int newY) {}

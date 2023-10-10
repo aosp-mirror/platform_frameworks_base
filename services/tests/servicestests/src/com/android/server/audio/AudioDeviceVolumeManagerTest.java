@@ -17,6 +17,7 @@
 package com.android.server.audio;
 
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -27,11 +28,8 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.VolumeInfo;
 import android.os.test.TestLooper;
-import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
-
-import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,12 +37,16 @@ import org.junit.Test;
 public class AudioDeviceVolumeManagerTest {
     private static final String TAG = "AudioDeviceVolumeManagerTest";
 
+    private static final AudioDeviceAttributes DEVICE_SPEAKER_OUT = new AudioDeviceAttributes(
+            AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, "");
+
     private Context mContext;
     private String mPackageName;
     private AudioSystemAdapter mSpyAudioSystem;
     private SystemServerAdapter mSystemServer;
     private SettingsAdapter mSettingsAdapter;
     private TestLooper mTestLooper;
+    private AudioPolicyFacade mAudioPolicyMock = mock(AudioPolicyFacade.class);
 
     private AudioService mAudioService;
 
@@ -59,7 +61,7 @@ public class AudioDeviceVolumeManagerTest {
         mSystemServer = new NoOpSystemServerAdapter();
         mSettingsAdapter = new NoOpSettingsAdapter();
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSystemServer,
-                mSettingsAdapter, mTestLooper.getLooper()) {
+                mSettingsAdapter, mAudioPolicyMock, mTestLooper.getLooper()) {
             @Override
             public int getDeviceForStream(int stream) {
                 return AudioSystem.DEVICE_OUT_SPEAKER;
@@ -93,11 +95,5 @@ public class AudioDeviceVolumeManagerTest {
         mTestLooper.dispatchAll();
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
                 AudioManager.STREAM_MUSIC, midIndex, AudioSystem.DEVICE_OUT_USB_DEVICE);
-
-        final VolumeInfo vi = mAudioService.getDeviceVolume(volMin, usbDevice, mPackageName);
-        Assert.assertEquals("getDeviceVolume doesn't return expected value in " + vi
-                + " after setting " + volMid,
-                (volMid.getMaxVolumeIndex() - volMid.getMinVolumeIndex()) / 2,
-                (vi.getMaxVolumeIndex() - vi.getMinVolumeIndex()) / 2);
     }
 }

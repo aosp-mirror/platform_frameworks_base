@@ -42,6 +42,7 @@ import com.android.wifitrackerlib.WifiEntry;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -52,6 +53,7 @@ import org.mockito.MockitoSession;
 
 import java.util.List;
 
+@Ignore("b/257089187")
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -527,9 +529,8 @@ public class InternetDialogTest extends SysuiTestCase {
         AlertDialog dialog = dialogArgumentCaptor.getValue();
         dialog.show();
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick();
-        // TODO(b/253399304)
-        // TestableLooper.get(this).processAllMessages();
-        // verify(mInternetDialogController).setAutoDataSwitchMobileDataPolicy(1, false);
+        TestableLooper.get(this).processAllMessages();
+        verify(mInternetDialogController).setAutoDataSwitchMobileDataPolicy(1, false);
 
         // Tap the secondary sub info
         secondaryLayout.performClick();

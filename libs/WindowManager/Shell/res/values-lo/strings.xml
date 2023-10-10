@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"ການຕັ້ງຄ່າ"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"ເຂົ້າການແບ່ງໜ້າຈໍ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"ເມນູ"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"ເມນູການສະແດງຜົນຊ້ອນກັນ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ແມ່ນເປັນການສະແດງຜົນຫຼາຍຢ່າງພ້ອມກັນ"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"ຫາກທ່ານບໍ່ຕ້ອງການ <xliff:g id="NAME">%s</xliff:g> ໃຫ້ໃຊ້ຄຸນສົມບັດນີ້, ໃຫ້ແຕະເພື່ອເປີດການຕັ້ງຄ່າ ແລ້ວປິດມັນໄວ້."</string>
     <string name="pip_play" msgid="3496151081459417097">"ຫຼິ້ນ"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ປ່ຽນຂະໜາດ"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"ເກັບໄວ້ບ່ອນເກັບສ່ວນຕົວ"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ເອົາອອກຈາກບ່ອນເກັບສ່ວນຕົວ"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"ແອັບອາດໃຊ້ບໍ່ໄດ້ກັບການແບ່ງໜ້າຈໍ."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ແອັບບໍ່ຮອງຮັບໜ້າຈໍແບບແຍກກັນ."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"ແອັບອາດໃຊ້ບໍ່ໄດ້ກັບໂໝດແບ່ງໜ້າຈໍ"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ແອັບບໍ່ຮອງຮັບການແບ່ງໜ້າຈໍ"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ແອັບນີ້ສາມາດເປີດໄດ້ໃນ 1 ໜ້າຈໍເທົ່ານັ້ນ."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ແອັບອາດບໍ່ສາມາດໃຊ້ໄດ້ໃນໜ້າຈໍທີສອງ."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ແອັບບໍ່ຮອງຮັບການເປີດໃນໜ້າຈໍທີສອງ."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"ຕົວຂັ້ນການແບ່ງໜ້າຈໍ"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"ເສັ້ນແບ່ງໜ້າຈໍ"</string>
+    <string name="divider_title" msgid="1963391955593749442">"ເສັ້ນແບ່ງໜ້າຈໍ"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ເຕັມໜ້າຈໍຊ້າຍ"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"ຊ້າຍ 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"ຊ້າຍ 50%"</string>
@@ -82,7 +84,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ບໍ່ໄດ້ແກ້ໄຂມັນບໍ?\nແຕະເພື່ອແປງກັບຄືນ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ບໍ່ມີບັນຫາກ້ອງຖ່າຍຮູບບໍ? ແຕະເພື່ອ​ປິດ​ໄວ້."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ເບິ່ງ ແລະ ເຮັດຫຼາຍຂຶ້ນ"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"ລາກແອັບອື່ນເຂົ້າມາເພື່ອແບ່ງໜ້າຈໍ"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ລາກໄປໄວ້ໃນແອັບອື່ນເພື່ອແບ່ງໜ້າຈໍ"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ແຕະສອງເທື່ອໃສ່ນອກແອັບໃດໜຶ່ງເພື່ອຈັດຕຳແໜ່ງຂອງມັນຄືນໃໝ່"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ເຂົ້າໃຈແລ້ວ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ຂະຫຍາຍເພື່ອເບິ່ງຂໍ້ມູນເພີ່ມເຕີມ."</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"ຮູບໜ້າຈໍ"</string>
     <string name="close_text" msgid="4986518933445178928">"ປິດ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ປິດເມນູ"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"ເປີດເມນູ"</string>
 </resources>

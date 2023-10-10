@@ -22,7 +22,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
@@ -34,9 +33,6 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -62,6 +58,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
@@ -88,19 +85,6 @@ public class RemoteViewsTest {
         mContext = InstrumentationRegistry.getContext();
         mPackage = mContext.getPackageName();
         mContainer = new LinearLayout(mContext);
-    }
-
-    @Test
-    public void clone_doesNotCopyBitmap() {
-        RemoteViews original = new RemoteViews(mPackage, R.layout.remote_views_test);
-        Bitmap bitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888);
-
-        original.setImageViewBitmap(R.id.image, bitmap);
-        RemoteViews clone = original.clone();
-        View inflated = clone.apply(mContext, mContainer);
-
-        Drawable drawable = ((ImageView) inflated.findViewById(R.id.image)).getDrawable();
-        assertSame(bitmap, ((BitmapDrawable)drawable).getBitmap());
     }
 
     @Test
@@ -331,7 +315,9 @@ public class RemoteViewsTest {
         RemoteViews nested = new RemoteViews(mPackage, R.layout.remote_views_text);
         nested.setOnClickPendingIntent(
                 R.id.text,
-                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE)
         );
 
         RemoteViews listItem = new RemoteViews(mPackage, R.layout.remote_view_host);
@@ -348,7 +334,9 @@ public class RemoteViewsTest {
         RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
         inner.setOnClickPendingIntent(
                 R.id.text,
-                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE)
         );
 
         RemoteViews listItem = new RemoteViews(inner, inner);
@@ -364,7 +352,9 @@ public class RemoteViewsTest {
         RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
         inner.setOnClickPendingIntent(
                 R.id.text,
-                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE)
         );
 
         RemoteViews listItem = new RemoteViews(
@@ -566,7 +556,9 @@ public class RemoteViewsTest {
         RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
         for (int i = 1; i < 10; i++) {
             PendingIntent pi = PendingIntent.getBroadcast(mContext, 0,
-                    new Intent("android.widget.RemoteViewsTest_" + i), PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    new Intent("android.widget.RemoteViewsTest_" + i)
+                            .setPackage(mContext.getPackageName()),
+                    PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE);
             views.setOnClickPendingIntent(i, pi);
         }
         try {
@@ -582,7 +574,8 @@ public class RemoteViewsTest {
 
         RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
         PendingIntent pi = PendingIntent.getBroadcast(mContext, 0,
-                new Intent("test"), PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                new Intent("test").setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE);
         views.setOnClickPendingIntent(1, pi);
         RemoteViews withCookie = parcelAndRecreateWithPendingIntentCookie(views, whitelistToken);
 
@@ -613,8 +606,9 @@ public class RemoteViewsTest {
     public void sharedElement_pendingIntent_notifyParent() throws Exception {
         RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
         PendingIntent pi = PendingIntent.getBroadcast(mContext, 0,
-                new Intent("android.widget.RemoteViewsTest_shared_element"),
-                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                new Intent("android.widget.RemoteViewsTest_shared_element")
+                        .setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE);
         views.setOnClickResponse(R.id.image, RemoteViews.RemoteResponse.fromPendingIntent(pi)
                 .addSharedElement(0, "e0")
                 .addSharedElement(1, "e1")
@@ -723,6 +717,43 @@ public class RemoteViewsTest {
     }
 
     @Test
+    public void visitUris_themedIcons() {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        final Icon iconLight = Icon.createWithContentUri("content://light/icon");
+        final Icon iconDark = Icon.createWithContentUri("content://dark/icon");
+        views.setIcon(R.id.layout, "setLargeIcon", iconLight, iconDark);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        views.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(iconLight.getUri()));
+        verify(visitor, times(1)).accept(eq(iconDark.getUri()));
+    }
+
+    @Test
+    public void visitUris_nestedViews() {
+        final RemoteViews outer = new RemoteViews(mPackage, R.layout.remote_views_test);
+
+        final RemoteViews inner = new RemoteViews(mPackage, 33);
+        final Uri imageUriI = Uri.parse("content://inner/image");
+        final Icon icon1 = Icon.createWithContentUri("content://inner/icon1");
+        final Icon icon2 = Icon.createWithContentUri("content://inner/icon2");
+        final Icon icon3 = Icon.createWithContentUri("content://inner/icon3");
+        final Icon icon4 = Icon.createWithContentUri("content://inner/icon4");
+        inner.setImageViewUri(R.id.image, imageUriI);
+        inner.setTextViewCompoundDrawables(R.id.text, icon1, icon2, icon3, icon4);
+
+        outer.addView(R.id.layout, inner);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        outer.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(imageUriI));
+        verify(visitor, times(1)).accept(eq(icon1.getUri()));
+        verify(visitor, times(1)).accept(eq(icon2.getUri()));
+        verify(visitor, times(1)).accept(eq(icon3.getUri()));
+        verify(visitor, times(1)).accept(eq(icon4.getUri()));
+    }
+
+    @Test
     public void visitUris_separateOrientation() {
         final RemoteViews landscape = new RemoteViews(mPackage, R.layout.remote_views_test);
         final Uri imageUriL = Uri.parse("content://landscape/image");
@@ -756,5 +787,44 @@ public class RemoteViewsTest {
         verify(visitor, times(1)).accept(eq(icon2P.getUri()));
         verify(visitor, times(1)).accept(eq(icon3P.getUri()));
         verify(visitor, times(1)).accept(eq(icon4P.getUri()));
+    }
+
+    @Test
+    public void visitUris_sizedViews() {
+        final RemoteViews large = new RemoteViews(mPackage, R.layout.remote_views_test);
+        final Uri imageUriL = Uri.parse("content://large/image");
+        final Icon icon1L = Icon.createWithContentUri("content://large/icon1");
+        final Icon icon2L = Icon.createWithContentUri("content://large/icon2");
+        final Icon icon3L = Icon.createWithContentUri("content://large/icon3");
+        final Icon icon4L = Icon.createWithContentUri("content://large/icon4");
+        large.setImageViewUri(R.id.image, imageUriL);
+        large.setTextViewCompoundDrawables(R.id.text, icon1L, icon2L, icon3L, icon4L);
+
+        final RemoteViews small = new RemoteViews(mPackage, 33);
+        final Uri imageUriS = Uri.parse("content://small/image");
+        final Icon icon1S = Icon.createWithContentUri("content://small/icon1");
+        final Icon icon2S = Icon.createWithContentUri("content://small/icon2");
+        final Icon icon3S = Icon.createWithContentUri("content://small/icon3");
+        final Icon icon4S = Icon.createWithContentUri("content://small/icon4");
+        small.setImageViewUri(R.id.image, imageUriS);
+        small.setTextViewCompoundDrawables(R.id.text, icon1S, icon2S, icon3S, icon4S);
+
+        HashMap<SizeF, RemoteViews> sizedViews = new HashMap<>();
+        sizedViews.put(new SizeF(300, 300), large);
+        sizedViews.put(new SizeF(100, 100), small);
+        RemoteViews views = new RemoteViews(sizedViews);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        views.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(imageUriL));
+        verify(visitor, times(1)).accept(eq(icon1L.getUri()));
+        verify(visitor, times(1)).accept(eq(icon2L.getUri()));
+        verify(visitor, times(1)).accept(eq(icon3L.getUri()));
+        verify(visitor, times(1)).accept(eq(icon4L.getUri()));
+        verify(visitor, times(1)).accept(eq(imageUriS));
+        verify(visitor, times(1)).accept(eq(icon1S.getUri()));
+        verify(visitor, times(1)).accept(eq(icon2S.getUri()));
+        verify(visitor, times(1)).accept(eq(icon3S.getUri()));
+        verify(visitor, times(1)).accept(eq(icon4S.getUri()));
     }
 }

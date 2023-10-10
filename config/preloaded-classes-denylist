@@ -10,3 +10,4 @@ android.net.rtp.AudioStream
 android.net.rtp.RtpStream
 java.util.concurrent.ThreadLocalRandom
 java.util.ImmutableCollections
+com.android.internal.jank.InteractionJankMonitor$InstanceHolder

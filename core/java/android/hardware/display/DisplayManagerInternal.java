@@ -21,21 +21,22 @@ import android.annotation.Nullable;
 import android.companion.virtual.IVirtualDevice;
 import android.graphics.Point;
 import android.hardware.SensorManager;
+import android.hardware.input.HostUsiVersion;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.util.IntArray;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.RefreshRateRange;
 import android.view.SurfaceControl.Transaction;
 import android.window.DisplayWindowPolicyController;
+import android.window.ScreenCapture;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -118,7 +119,7 @@ public abstract class DisplayManagerInternal {
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotHardwareBuffer systemScreenshot(int displayId);
+    public abstract ScreenCapture.ScreenshotHardwareBuffer systemScreenshot(int displayId);
 
     /**
      * General screenshot functionality that excludes secure layers and applies appropriate
@@ -127,7 +128,7 @@ public abstract class DisplayManagerInternal {
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotHardwareBuffer userScreenshot(int displayId);
+    public abstract ScreenCapture.ScreenshotHardwareBuffer userScreenshot(int displayId);
 
     /**
      * Returns information about the specified logical display.
@@ -233,13 +234,14 @@ public abstract class DisplayManagerInternal {
      * @param requestedMinimalPostProcessing The preferred minimal post processing setting for the
      * display. This is true when there is at least one visible window that wants minimal post
      * processng on.
+     * @param disableHdrConversion The preferred HDR conversion setting for the window.
      * @param inTraversal True if called from WindowManagerService during a window traversal
      * prior to call to performTraversalInTransactionFromWindowManager.
      */
     public abstract void setDisplayProperties(int displayId, boolean hasContent,
             float requestedRefreshRate, int requestedModeId, float requestedMinRefreshRate,
             float requestedMaxRefreshRate, boolean requestedMinimalPostProcessing,
-            boolean inTraversal);
+            boolean disableHdrConversion, boolean inTraversal);
 
     /**
      * Applies an offset to the contents of a display, for example to avoid burn-in.
@@ -374,6 +376,15 @@ public abstract class DisplayManagerInternal {
     public abstract Point getDisplaySurfaceDefaultSize(int displayId);
 
     /**
+     * Get a new displayId which represents the display you want to mirror. If mirroring is not
+     * enabled on the display, {@link Display#INVALID_DISPLAY} will be returned.
+     *
+     * @param displayId The id of the display.
+     * @return The displayId that should be mirrored or INVALID_DISPLAY if mirroring is not enabled.
+     */
+    public abstract int getDisplayIdToMirror(int displayId);
+
+    /**
      * Receives early interactivity changes from power manager.
      *
      * @param interactive The interactive state that the device is moving into.
@@ -389,6 +400,24 @@ public abstract class DisplayManagerInternal {
     public abstract DisplayWindowPolicyController getDisplayWindowPolicyController(int displayId);
 
     /**
+     * Get DisplayPrimaries from SF for a particular display.
+     */
+    public abstract SurfaceControl.DisplayPrimaries getDisplayNativePrimaries(int displayId);
+
+    /**
+     * Get the version of the Universal Stylus Initiative (USI) Protocol supported by the display.
+     * @param displayId The id of the display.
+     * @return The USI version, or null if not supported
+     */
+    @Nullable
+    public abstract HostUsiVersion getHostUsiVersion(int displayId);
+
+    /**
+     * Get all available DisplayGroupIds.
+     */
+    public abstract IntArray getDisplayGroupIds();
+
+    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the
@@ -398,7 +427,7 @@ public abstract class DisplayManagerInternal {
      * the PowerManagerService to focus on the global power state and not
      * have to micro-manage screen off animations, auto-brightness and other effects.
      */
-    public static final class DisplayPowerRequest {
+    public static class DisplayPowerRequest {
         // Policy: Turn screen off as if the user pressed the power button
         // including playing a screen off animation if applicable.
         public static final int POLICY_OFF = 0;
@@ -409,8 +438,6 @@ public abstract class DisplayManagerInternal {
         public static final int POLICY_DIM = 2;
         // Policy: Make the screen bright as usual.
         public static final int POLICY_BRIGHT = 3;
-        // Policy: Keep the screen and display optimized for VR mode.
-        public static final int POLICY_VR = 4;
 
         // The basic overall policy to apply: off, doze, dim or bright.
         public int policy;
@@ -469,10 +496,6 @@ public abstract class DisplayManagerInternal {
 
         public boolean isBrightOrDim() {
             return policy == POLICY_BRIGHT || policy == POLICY_DIM;
-        }
-
-        public boolean isVr() {
-            return policy == POLICY_VR;
         }
 
         public void copyFrom(DisplayPowerRequest other) {
@@ -545,8 +568,6 @@ public abstract class DisplayManagerInternal {
                     return "DIM";
                 case POLICY_BRIGHT:
                     return "BRIGHT";
-                case POLICY_VR:
-                    return "VR";
                 default:
                     return Integer.toString(policy);
             }
@@ -626,72 +647,6 @@ public abstract class DisplayManagerInternal {
          * </ol>
          */
         void onDisplayGroupChanged(int groupId);
-    }
-
-    /**
-     * Information about the min and max refresh rate DM would like to set the display to.
-     */
-    public static final class RefreshRateRange {
-        public static final String TAG = "RefreshRateRange";
-
-        // The tolerance within which we consider something approximately equals.
-        public static final float FLOAT_TOLERANCE = 0.01f;
-
-        /**
-         * The lowest desired refresh rate.
-         */
-        public float min;
-
-        /**
-         * The highest desired refresh rate.
-         */
-        public float max;
-
-        public RefreshRateRange() {}
-
-        public RefreshRateRange(float min, float max) {
-            if (min < 0 || max < 0 || min > max + FLOAT_TOLERANCE) {
-                Slog.e(TAG, "Wrong values for min and max when initializing RefreshRateRange : "
-                        + min + " " + max);
-                this.min = this.max = 0;
-                return;
-            }
-            if (min > max) {
-                // Min and max are within epsilon of each other, but in the wrong order.
-                float t = min;
-                min = max;
-                max = t;
-            }
-            this.min = min;
-            this.max = max;
-        }
-
-        /**
-         * Checks whether the two objects have the same values.
-         */
-        @Override
-        public boolean equals(Object other) {
-            if (other == this) {
-                return true;
-            }
-
-            if (!(other instanceof RefreshRateRange)) {
-                return false;
-            }
-
-            RefreshRateRange refreshRateRange = (RefreshRateRange) other;
-            return (min == refreshRateRange.min && max == refreshRateRange.max);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(min, max);
-        }
-
-        @Override
-        public String toString() {
-            return "(" + min + " " + max + ")";
-        }
     }
 
     /**

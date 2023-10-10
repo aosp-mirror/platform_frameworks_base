@@ -23,11 +23,13 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -70,6 +72,16 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             mTaskOperations = new TaskOperations(null, mContext, mSyncQueue);
         }
     }
+
+    @Override
+    public void onTransitionReady(IBinder transition, TransitionInfo info,
+            TransitionInfo.Change change) {}
+
+    @Override
+    public void onTransitionMerged(IBinder merged, IBinder playing) {}
+
+    @Override
+    public void onTransitionFinished(IBinder transition) {}
 
     @Override
     public void setFreeformTaskTransitionStarter(FreeformTaskTransitionStarter transitionStarter) {
@@ -115,7 +127,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) {
             createWindowDecoration(taskInfo, taskSurface, startT, finishT);
         } else {
-            decoration.relayout(taskInfo, startT, finishT);
+            decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */);
         }
     }
 
@@ -127,7 +139,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
         if (decoration == null) return;
 
-        decoration.relayout(taskInfo, startT, finishT);
+        decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */);
     }
 
     @Override
@@ -173,14 +185,16 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        final TaskPositioner taskPositioner =
-                new TaskPositioner(mTaskOrganizer, windowDecoration, mDisplayController);
+        final DragPositioningCallback dragPositioningCallback =
+                new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration, mDisplayController,
+                        null /* disallowedAreaForEndBounds */);
         final CaptionTouchEventListener touchEventListener =
-                new CaptionTouchEventListener(taskInfo, taskPositioner);
+                new CaptionTouchEventListener(taskInfo, dragPositioningCallback);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
-        windowDecoration.setDragPositioningCallback(taskPositioner);
+        windowDecoration.setDragPositioningCallback(dragPositioningCallback);
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
-        windowDecoration.relayout(taskInfo, startT, finishT);
+        windowDecoration.relayout(taskInfo, startT, finishT,
+                false /* applyStartTransactionOnDraw */);
         setupCaptionColor(taskInfo, windowDecoration);
     }
 

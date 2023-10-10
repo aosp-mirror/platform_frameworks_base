@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"已断开连接"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"已停用"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP 配置失败"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"网络质量较差，因此未连接"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WLAN 连接失败"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"身份验证出现问题"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"无法连接"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"无法连接到“<xliff:g id="AP_NAME">%1$s</xliff:g>”"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"无法自动连接"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"无法访问互联网"</string>
     <string name="saved_network" msgid="7143698034077223645">"由“<xliff:g id="NAME">%1$s</xliff:g>”保存"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"已连接到按流量计费的网络"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"已通过%1$s自动连接"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"已自动连接（通过网络评分服务提供方）"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"已通过%1$s连接"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"已通过<xliff:g id="NAME">%1$s</xliff:g>连接到网络"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"可通过%1$s连接"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"点按即可注册"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"无法访问互联网"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"无法访问私人 DNS 服务器"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"无法访问互联网"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"必须登录"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"接入点暂时满载"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"已通过%1$s连接"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"可通过%1$s连接"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"正在打开<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"无法连接"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"正在完成注册…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"无法完成注册。点按即可重试。"</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"注册完毕。正在连接…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"很慢"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"慢"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"良好"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"适中"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"快"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"很快"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"已失效"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"正在配对..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"已连接（无手机信号）<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"已连接（无媒体信号）<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"已连接（无消息访问权限）<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"已连接（无手机或媒体信号）<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"已连接，电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"已连接（无手机信号），电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -125,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD 音频：<xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD 音频"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"助听器"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE 音频"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE 音频"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"已连接到助听器"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"已连接到 LE 音频"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"已连接到媒体音频"</string>
@@ -212,19 +202,20 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"重置语音音调"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"将文字的读出音调重置为默认值。"</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"很慢"</item>
-    <item msgid="1815382991399815061">"慢"</item>
-    <item msgid="3075292553049300105">"正常"</item>
-    <item msgid="1158955023692670059">"快"</item>
-    <item msgid="5664310435707146591">"较快"</item>
-    <item msgid="5491266922147715962">"非常快"</item>
-    <item msgid="7659240015901486196">"超快"</item>
-    <item msgid="7147051179282410945">"极快"</item>
-    <item msgid="581904787661470707">"最快"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"选择个人资料"</string>
     <string name="category_personal" msgid="6236798763159385225">"个人"</string>
     <string name="category_work" msgid="4014193632325996115">"工作"</string>
+    <string name="category_clone" msgid="1554511758987195974">"克隆"</string>
     <string name="development_settings_title" msgid="140296922921597393">"开发者选项"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"启用开发者选项"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"设置应用开发选项"</string>
@@ -302,11 +293,11 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"蓝牙音频 LDAC 编解码器：播放质量"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"触发蓝牙音频 LDAC\n编解码器选择：播放质量"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"正在流式传输：<xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"私人 DNS"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"专用 DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"选择私人 DNS 模式"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"已关闭"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"自动"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"私人 DNS 提供商主机名"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"专用 DNS 提供商主机名"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"输入 DNS 提供商的主机名"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"无法连接"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"显示无线显示认证选项"</string>
@@ -381,6 +372,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"显示剪辑边界、边距等。"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"强制使用从右到左的布局方向"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"强制将所有语言区域的屏幕布局方向改为从右到左"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"透明导航栏"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"默认将导航栏背景颜色设为透明"</string>
     <string name="window_blurs" msgid="6831008984828425106">"允许窗口级模糊处理"</string>
     <string name="force_msaa" msgid="4081288296137775550">"强制启用 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"在 OpenGL ES 2.0 应用中启用 4x MSAA"</string>
@@ -527,6 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"增加时间。"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"减少时间。"</string>
     <string name="cancel" msgid="5665114069455378395">"取消"</string>
+    <string name="next" msgid="2699398661093607009">"继续"</string>
+    <string name="back" msgid="5554327870352703710">"返回"</string>
+    <string name="save" msgid="3745809743277153149">"保存"</string>
     <string name="okay" msgid="949938843324579502">"确定"</string>
     <string name="done" msgid="381184316122520313">"完成"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"闹钟和提醒"</string>
@@ -549,11 +545,21 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"刚刚"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"这部手机"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"这台平板电脑"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"基座音箱"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"外部设备"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"连接的设备"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"这部手机"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"无法在此设备上播放"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"升级账号后才能切换"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"无法在此设备上播放下载的内容"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"广告之后重试"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"若要在此设备上播放，请唤醒设备"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"设备未获准播放"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"无法在此设备上播放该媒体内容"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"连接时遇到问题。请关闭并重新开启设备"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有线音频设备"</string>
     <string name="help_label" msgid="3528360748637781274">"帮助和反馈"</string>
-    <string name="storage_category" msgid="2287342585424631813">"存储"</string>
+    <string name="storage_category" msgid="2287342585424631813">"存储空间"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"共享数据"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"查看和修改共享数据"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"此用户没有共享数据。"</string>
@@ -568,12 +574,15 @@
     <string name="delete_blob_text" msgid="2819192607255625697">"删除共享数据"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"确定要删除这些共享数据吗？"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"用户拥有个人专属的应用和内容"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"您可以限制其他人使用来自您的帐号的应用和内容"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"您可以限制其他人使用来自您的账号的应用和内容"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"用户"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"受限个人资料"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"要添加新用户吗？"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"创建新用户后，您就能够与其他人共用此设备。每位用户都有自己的专属空间，而且在自己的个人空间内还可以自行安装自己想要的应用、设置壁纸等。此外，用户还可以调整会影响所有用户的设备设置（例如 WLAN 设置）。\n\n当您添加新用户后，该用户需要自行设置个人空间。\n\n任何用户都可以为所有其他用户更新应用。无障碍功能设置和服务可能无法转移给新用户。"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"当您添加新用户后，该用户需要自行设置个人空间。\n\n任何用户都可以为所有其他用户更新应用。"</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"将此用户设为管理员？"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"管理员拥有其他用户没有的特殊权限。管理员可以管理所有用户、更新或重置此设备、修改设置、查看所有已安装的应用，以及授予或撤消其他用户的管理员权限。"</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"设为管理员"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"要现在设置该用户吗？"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"请让相应用户操作设备并设置他们自己的空间。"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"要立即设置个人资料吗？"</string>
@@ -605,6 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"此操作会开始新的访客会话，并删除当前会话中的所有应用和数据"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"要退出访客模式吗？"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"此操作会删除当前访客会话中的所有应用和数据"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"是，将其设为管理员"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"不，不要将其设为管理员"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"退出"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"要保存访客活动吗？"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"您可以保存当前会话中的活动，也可以删除所有应用和数据"</string>
@@ -672,4 +683,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"预见式返回动画"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"启用系统动画作为预见式返回动画。"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"此设置将启用系统动画作为预测性手势动画。这要求在清单文件中将单个应用的 enableOnBackInvokedCallback 设为 true。"</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"左移"</item>
+    <item msgid="5425394847942513942">"下移"</item>
+    <item msgid="7728484337962740316">"右移"</item>
+    <item msgid="324200556467459329">"上移"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

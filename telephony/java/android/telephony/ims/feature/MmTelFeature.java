@@ -16,23 +16,35 @@
 
 package android.telephony.ims.feature;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.telecom.TelecomManager;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
+import android.telephony.ims.ImsCallSessionListener;
+import android.telephony.ims.ImsException;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsService;
+import android.telephony.ims.MediaQualityStatus;
+import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtensionType;
+import android.telephony.ims.SrvccCall;
+import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsMmTelListener;
 import android.telephony.ims.aidl.IImsSmsListener;
+import android.telephony.ims.aidl.IImsTrafficSessionCallback;
+import android.telephony.ims.aidl.ISrvccStartedCallback;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.telephony.ims.stub.ImsEcbmImplBase;
 import android.telephony.ims.stub.ImsMultiEndpointImplBase;
@@ -50,6 +62,8 @@ import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -57,7 +71,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -70,8 +86,12 @@ public class MmTelFeature extends ImsFeature {
 
     private static final String LOG_TAG = "MmTelFeature";
     private Executor mExecutor;
+    private ImsSmsImplBase mSmsImpl;
 
+    private HashMap<ImsTrafficSessionCallback, ImsTrafficSessionCallbackWrapper> mTrafficCallbacks =
+            new HashMap<>();
     /**
+     * Creates a new MmTelFeature using the Executor set in {@link ImsService#getExecutor}
      * @hide
      */
     @SystemApi
@@ -239,7 +259,7 @@ public class MmTelFeature extends ImsFeature {
         public void changeCapabilitiesConfiguration(CapabilityChangeRequest request,
                 IImsCapabilityCallback c) {
             executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .requestChangeEnabledCapabilities(request, c),
+                            .requestChangeEnabledCapabilities(request, c),
                     "changeCapabilitiesConfiguration");
         }
 
@@ -251,40 +271,121 @@ public class MmTelFeature extends ImsFeature {
         }
 
         @Override
+        public void setMediaQualityThreshold(@MediaQualityStatus.MediaSessionType int sessionType,
+                MediaThreshold mediaThreshold) {
+            if (mediaThreshold != null) {
+                executeMethodAsyncNoException(() -> setMediaThreshold(sessionType, mediaThreshold),
+                        "setMediaQualityThreshold");
+            } else {
+                executeMethodAsyncNoException(() -> clearMediaThreshold(sessionType),
+                        "clearMediaQualityThreshold");
+            }
+        }
+
+        @Override
+        public MediaQualityStatus queryMediaQualityStatus(
+                @MediaQualityStatus.MediaSessionType int sessionType)
+                throws RemoteException {
+            return executeMethodAsyncForResult(() -> MmTelFeature.this.queryMediaQualityStatus(
+                    sessionType), "queryMediaQualityStatus");
+        }
+
+        @Override
         public void setSmsListener(IImsSmsListener l) {
             executeMethodAsyncNoException(() -> MmTelFeature.this.setSmsListener(l),
-                    "setSmsListener");
+                    "setSmsListener", getImsSmsImpl().getExecutor());
         }
 
         @Override
         public void sendSms(int token, int messageRef, String format, String smsc, boolean retry,
                 byte[] pdu) {
             executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .sendSms(token, messageRef, format, smsc, retry, pdu), "sendSms");
+                    .sendSms(token, messageRef, format, smsc, retry, pdu), "sendSms",
+                    getImsSmsImpl().getExecutor());
+        }
+
+        @Override
+        public void onMemoryAvailable(int token) {
+            executeMethodAsyncNoException(() -> MmTelFeature.this
+                    .onMemoryAvailable(token), "onMemoryAvailable", getImsSmsImpl().getExecutor());
         }
 
         @Override
         public void acknowledgeSms(int token, int messageRef, int result) {
             executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .acknowledgeSms(token, messageRef, result), "acknowledgeSms");
+                    .acknowledgeSms(token, messageRef, result), "acknowledgeSms",
+                    getImsSmsImpl().getExecutor());
+        }
+
+        @Override
+        public void acknowledgeSmsWithPdu(int token, int messageRef, int result, byte[] pdu) {
+            executeMethodAsyncNoException(() -> MmTelFeature.this
+                    .acknowledgeSms(token, messageRef, result, pdu), "acknowledgeSms",
+                    getImsSmsImpl().getExecutor());
         }
 
         @Override
         public void acknowledgeSmsReport(int token, int messageRef, int result) {
             executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .acknowledgeSmsReport(token, messageRef, result), "acknowledgeSmsReport");
+                    .acknowledgeSmsReport(token, messageRef, result), "acknowledgeSmsReport",
+                    getImsSmsImpl().getExecutor());
         }
 
         @Override
         public String getSmsFormat() {
             return executeMethodAsyncForResultNoException(() -> MmTelFeature.this
-                    .getSmsFormat(), "getSmsFormat");
+                    .getSmsFormat(), "getSmsFormat", getImsSmsImpl().getExecutor());
         }
 
         @Override
         public void onSmsReady() {
             executeMethodAsyncNoException(() -> MmTelFeature.this.onSmsReady(),
-                    "onSmsReady");
+                    "onSmsReady", getImsSmsImpl().getExecutor());
+        }
+
+        @Override
+        public void notifySrvccStarted(final ISrvccStartedCallback cb) {
+            executeMethodAsyncNoException(
+                    () -> MmTelFeature.this.notifySrvccStarted(
+                            (profiles) -> {
+                                try {
+                                    cb.onSrvccCallNotified(profiles);
+                                } catch (Exception e) {
+                                    Log.e(LOG_TAG, "onSrvccCallNotified e=" + e);
+                                }
+                            }),
+                    "notifySrvccStarted");
+        }
+
+        @Override
+        public void notifySrvccCompleted() {
+            executeMethodAsyncNoException(
+                    () -> MmTelFeature.this.notifySrvccCompleted(), "notifySrvccCompleted");
+        }
+
+        @Override
+        public void notifySrvccFailed() {
+            executeMethodAsyncNoException(
+                    () -> MmTelFeature.this.notifySrvccFailed(), "notifySrvccFailed");
+        }
+
+        @Override
+        public void notifySrvccCanceled() {
+            executeMethodAsyncNoException(
+                    () -> MmTelFeature.this.notifySrvccCanceled(), "notifySrvccCanceled");
+        }
+
+        @Override
+        public void setTerminalBasedCallWaitingStatus(boolean enabled) throws RemoteException {
+            synchronized (mLock) {
+                try {
+                    MmTelFeature.this.setTerminalBasedCallWaitingStatus(enabled);
+                } catch (ServiceSpecificException se) {
+                    throw new ServiceSpecificException(se.errorCode, se.getMessage());
+                } catch (Exception e) {
+                    throw new RemoteException(e.getMessage());
+                }
+            }
         }
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
@@ -310,6 +411,17 @@ public class MmTelFeature extends ImsFeature {
             }
         }
 
+        private void executeMethodAsyncNoException(Runnable r, String errorLogName,
+                Executor executor) {
+            try {
+                CompletableFuture.runAsync(
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), executor).join();
+            } catch (CancellationException | CompletionException e) {
+                Log.w(LOG_TAG, "MmTelFeature Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+            }
+        }
+
         private <T> T executeMethodAsyncForResult(Supplier<T> r,
                 String errorLogName) throws RemoteException {
             CompletableFuture<T> future = CompletableFuture.supplyAsync(
@@ -327,6 +439,19 @@ public class MmTelFeature extends ImsFeature {
                 String errorLogName) {
             CompletableFuture<T> future = CompletableFuture.supplyAsync(
                     () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
+            try {
+                return future.get();
+            } catch (ExecutionException | InterruptedException e) {
+                Log.w(LOG_TAG, "MmTelFeature Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+                return null;
+            }
+        }
+
+        private <T> T executeMethodAsyncForResultNoException(Supplier<T> r,
+                String errorLogName, Executor executor) {
+            CompletableFuture<T> future = CompletableFuture.supplyAsync(
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), executor);
             try {
                 return future.get();
             } catch (ExecutionException | InterruptedException e) {
@@ -490,11 +615,19 @@ public class MmTelFeature extends ImsFeature {
         /**
          * Called when the IMS provider receives an incoming call.
          * @param c The {@link ImsCallSession} associated with the new call.
+         * @param callId The call ID of the session of the new incoming call.
+         * @param extras A bundle containing extra parameters related to the call. See
+         * {@link #EXTRA_IS_UNKNOWN_CALL} and {@link #EXTRA_IS_USSD} above.
+         * @return the listener to listen to the session events. An {@link ImsCallSession} can only
+         *         hold one listener at a time. see {@link ImsCallSessionListener}.
+         *         If this method returns {@code null}, then the call could not be placed.
          * @hide
          */
         @Override
-        public void onIncomingCall(IImsCallSession c, Bundle extras) {
-
+        @Nullable
+        public IImsCallSessionListener onIncomingCall(IImsCallSession c,
+                String callId, Bundle extras) {
+            return null;
         }
 
         /**
@@ -516,6 +649,200 @@ public class MmTelFeature extends ImsFeature {
         @Override
         public void onVoiceMessageCountUpdate(int count) {
 
+        }
+
+        /**
+         * Called to set the audio handler for this connection.
+         * @param imsAudioHandler an {@link ImsAudioHandler} used to handle the audio
+         *        for this IMS call.
+         * @hide
+         */
+        @Override
+        public void onAudioModeIsVoipChanged(int imsAudioHandler) {
+
+        }
+
+        /**
+         * Called when the IMS triggers EPS fallback procedure.
+         *
+         * @param reason specifies the reason that causes EPS fallback.
+         * @hide
+         */
+        @Override
+        public void onTriggerEpsFallback(@EpsFallbackReason int reason) {
+
+        }
+
+        /**
+         * Called when the IMS notifies the upcoming traffic type to the radio.
+         *
+         * @param token A nonce to identify the request
+         * @param trafficType The {@link ImsTrafficType} type for IMS traffic.
+         * @param accessNetworkType The {@link AccessNetworkConstants#RadioAccessNetworkType}
+         *        type of the radio access network.
+         * @param trafficDirection Indicates whether traffic is originated by mobile originated or
+         *        mobile terminated use case eg. MO/MT call/SMS etc.
+         * @param callback The callback to receive the result.
+         * @hide
+         */
+        @Override
+        public void onStartImsTrafficSession(int token,
+                @ImsTrafficType int trafficType,
+                @AccessNetworkConstants.RadioAccessNetworkType int accessNetworkType,
+                @ImsTrafficDirection int trafficDirection,
+                IImsTrafficSessionCallback callback) {
+
+        }
+
+        /**
+         * Called when the IMS notifies the traffic type has been stopped.
+         *
+         * @param token A nonce registered with {@link #onStartImsTrafficSession}.
+         * @param accessNetworkType The {@link AccessNetworkConstants#RadioAccessNetworkType}
+         *        type of the radio access network.
+         * @hide
+         */
+        @Override
+        public void onModifyImsTrafficSession(int token,
+                @AccessNetworkConstants.RadioAccessNetworkType int accessNetworkType) {
+
+        }
+
+        /**
+         * Called when the IMS notifies the traffic type has been stopped.
+         *
+         * @param token A nonce registered with {@link #onStartImsTrafficSession}.
+         * @hide
+         */
+        @Override
+        public void onStopImsTrafficSession(int token) {
+
+        }
+
+        /**
+         * Called when the IMS provider notifies {@link MediaQualityStatus}.
+         *
+         * @param status media quality status currently measured.
+         * @hide
+         */
+        @Override
+        public void onMediaQualityStatusChanged(MediaQualityStatus status) {
+
+        }
+    }
+
+    /**
+     * A wrapper class of {@link ImsTrafficSessionCallback}.
+     * @hide
+     */
+    public static class ImsTrafficSessionCallbackWrapper {
+        public static final int INVALID_TOKEN = -1;
+
+        private static final int MAX_TOKEN = 0x10000;
+
+        private static final AtomicInteger sTokenGenerator = new AtomicInteger();
+
+        /** Callback to receive the response */
+        private IImsTrafficSessionCallbackStub mCallback = null;
+        /** Identifier to distinguish each IMS traffic request */
+        private int mToken = INVALID_TOKEN;
+
+        private ImsTrafficSessionCallback mImsTrafficSessionCallback;
+
+        private ImsTrafficSessionCallbackWrapper(ImsTrafficSessionCallback callback) {
+            mImsTrafficSessionCallback = callback;
+        }
+
+        /**
+         * Updates the callback.
+         *
+         * The mToken should be kept since it is used to identify the traffic notified to the modem
+         * until calling {@link MmtelFEature#stopImsTrafficSession}.
+         */
+        final void update(@NonNull @CallbackExecutor Executor executor) {
+            if (executor == null) {
+                throw new IllegalArgumentException(
+                        "ImsTrafficSessionCallback Executor must be non-null");
+            }
+
+            if (mCallback == null) {
+                // initial start of Ims traffic.
+                mCallback = new IImsTrafficSessionCallbackStub(
+                        mImsTrafficSessionCallback, executor);
+                mToken = generateToken();
+            } else {
+                // handover between cellular and Wi-Fi
+                mCallback.update(executor);
+            }
+        }
+
+        /**
+         * Using a static class and weak reference here to avoid memory leak caused by the
+         * {@link IImsTrafficSessionCallback.Stub} callback retaining references to the outside
+         * {@link ImsTrafficSessionCallback}.
+         */
+        private static class IImsTrafficSessionCallbackStub
+                extends IImsTrafficSessionCallback.Stub {
+            private WeakReference<ImsTrafficSessionCallback> mImsTrafficSessionCallbackWeakRef;
+            private Executor mExecutor;
+
+            IImsTrafficSessionCallbackStub(ImsTrafficSessionCallback imsTrafficCallback,
+                    Executor executor) {
+                mImsTrafficSessionCallbackWeakRef =
+                        new WeakReference<ImsTrafficSessionCallback>(imsTrafficCallback);
+                mExecutor = executor;
+            }
+
+            void update(Executor executor) {
+                mExecutor = executor;
+            }
+
+            @Override
+            public void onReady() {
+                ImsTrafficSessionCallback callback = mImsTrafficSessionCallbackWeakRef.get();
+                if (callback == null) return;
+
+                Binder.withCleanCallingIdentity(
+                        () -> mExecutor.execute(() -> callback.onReady()));
+            }
+
+            @Override
+            public void onError(ConnectionFailureInfo info) {
+                ImsTrafficSessionCallback callback = mImsTrafficSessionCallbackWeakRef.get();
+                if (callback == null) return;
+
+                Binder.withCleanCallingIdentity(
+                        () -> mExecutor.execute(() -> callback.onError(info)));
+            }
+        }
+
+        /**
+         * Returns the callback binder.
+         */
+        final IImsTrafficSessionCallbackStub getCallbackBinder() {
+            return mCallback;
+        }
+
+        /**
+         * Returns the token.
+         */
+        final int getToken() {
+            return mToken;
+        }
+
+        /**
+         * Resets the members.
+         * It's called by {@link MmTelFeature#stopImsTrafficSession}.
+         */
+        final void reset() {
+            mCallback = null;
+            mToken = INVALID_TOKEN;
+        }
+
+        private static int generateToken() {
+            int token = sTokenGenerator.incrementAndGet();
+            if (token == MAX_TOKEN) sTokenGenerator.set(0);
+            return token;
         }
     }
 
@@ -565,6 +892,147 @@ public class MmTelFeature extends ImsFeature {
     @SystemApi
     public static final String EXTRA_IS_UNKNOWN_CALL =
             "android.telephony.ims.feature.extra.IS_UNKNOWN_CALL";
+
+    /** @hide */
+    @IntDef(
+        prefix = "AUDIO_HANDLER_",
+        value = {
+            AUDIO_HANDLER_ANDROID,
+            AUDIO_HANDLER_BASEBAND
+        })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ImsAudioHandler {}
+
+    /**
+    * Audio Handler - Android
+    * @hide
+    */
+    @SystemApi
+    public static final int AUDIO_HANDLER_ANDROID = 0;
+
+    /**
+    * Audio Handler - Baseband
+    * @hide
+    */
+    @SystemApi
+    public static final int AUDIO_HANDLER_BASEBAND = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+        prefix = "EPS_FALLBACK_REASON_",
+        value = {
+            EPS_FALLBACK_REASON_INVALID,
+            EPS_FALLBACK_REASON_NO_NETWORK_TRIGGER,
+            EPS_FALLBACK_REASON_NO_NETWORK_RESPONSE,
+        })
+    public @interface EpsFallbackReason {}
+
+    /**
+     * Default value. Internal use only.
+     * This value should not be used to trigger EPS fallback.
+     * @hide
+     */
+    public static final int EPS_FALLBACK_REASON_INVALID = -1;
+
+    /**
+     * If the network only supports the EPS fallback in 5G NR SA for voice calling and the EPS
+     * Fallback procedure by the network during the call setup is not triggered, UE initiated
+     * fallback will be triggered with this reason. The modem shall locally release the 5G NR
+     * SA RRC connection and acquire the LTE network and perform a tracking area update
+     * procedure. After the EPS fallback procedure is completed, the call setup for voice will
+     * be established if there is no problem.
+     *
+     * @hide
+     */
+    public static final int EPS_FALLBACK_REASON_NO_NETWORK_TRIGGER = 1;
+
+    /**
+     * If the UE doesn't receive any response for SIP INVITE within a certain timeout in 5G NR
+     * SA for MO voice calling, the device determines that voice call is not available in 5G and
+     * terminates all active SIP dialogs and SIP requests and enters IMS non-registered state.
+     * In that case, UE initiated fallback will be triggered with this reason. The modem shall
+     * reset modem's data buffer of IMS PDU to prevent the ghost call. After the EPS fallback
+     * procedure is completed, VoLTE call could be tried if there is no problem.
+     *
+     * @hide
+     */
+    public static final int EPS_FALLBACK_REASON_NO_NETWORK_RESPONSE = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+        prefix = "IMS_TRAFFIC_TYPE_",
+        value = {
+            IMS_TRAFFIC_TYPE_NONE,
+            IMS_TRAFFIC_TYPE_EMERGENCY,
+            IMS_TRAFFIC_TYPE_EMERGENCY_SMS,
+            IMS_TRAFFIC_TYPE_VOICE,
+            IMS_TRAFFIC_TYPE_VIDEO,
+            IMS_TRAFFIC_TYPE_SMS,
+            IMS_TRAFFIC_TYPE_REGISTRATION,
+            IMS_TRAFFIC_TYPE_UT_XCAP
+        })
+    public @interface ImsTrafficType {}
+
+    /**
+     * Default value for initialization. Internal use only.
+     * @hide
+     */
+    public static final int IMS_TRAFFIC_TYPE_NONE = -1;
+    /**
+     * Emergency call
+     * @hide
+     */
+    public static final int IMS_TRAFFIC_TYPE_EMERGENCY = 0;
+    /**
+     * Emergency SMS
+     * @hide
+     */
+    public static final int IMS_TRAFFIC_TYPE_EMERGENCY_SMS = 1;
+    /**
+     * Voice call
+     * @hide
+     */
+    public static final int IMS_TRAFFIC_TYPE_VOICE = 2;
+    /**
+     * Video call
+     * @hide
+     */
+    public static final int IMS_TRAFFIC_TYPE_VIDEO = 3;
+    /**
+     * SMS over IMS
+     * @hide
+     */
+    public static final int IMS_TRAFFIC_TYPE_SMS = 4;
+    /**
+     * IMS registration and subscription for reg event package (signaling)
+     * @hide
+     */
+    public static final int IMS_TRAFFIC_TYPE_REGISTRATION = 5;
+    /**
+     * Ut/XCAP (XML Configuration Access Protocol)
+     * @hide
+     */
+    public static final int IMS_TRAFFIC_TYPE_UT_XCAP = 6;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            prefix = { "IMS_TRAFFIC_DIRECTION_" },
+            value = {IMS_TRAFFIC_DIRECTION_INCOMING, IMS_TRAFFIC_DIRECTION_OUTGOING})
+    public @interface ImsTrafficDirection {}
+
+    /**
+     * Indicates that the traffic is an incoming traffic.
+     * @hide
+     */
+    public static final int IMS_TRAFFIC_DIRECTION_INCOMING = 0;
+    /**
+     * Indicates that the traffic is an outgoing traffic.
+     * @hide
+     */
+    public static final int IMS_TRAFFIC_DIRECTION_OUTGOING = 1;
 
     private IImsMmTelListener mListener;
 
@@ -626,12 +1094,41 @@ public class MmTelFeature extends ImsFeature {
     }
 
     /**
+     * Notify the framework that the measured media quality has crossed a threshold set by {@link
+     * MmTelFeature#setMediaThreshold}
+     *
+     * @param status current media quality status measured.
+     * @hide
+     */
+    @SystemApi
+    public final void notifyMediaQualityStatusChanged(
+            @NonNull MediaQualityStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException(
+                    "MediaQualityStatus must be non-null!");
+        }
+        Log.i(LOG_TAG, "notifyMediaQualityStatusChanged " + status);
+        IImsMmTelListener listener = getListener();
+        if (listener == null) {
+            throw new IllegalStateException("Session is not available.");
+        }
+        try {
+            listener.onMediaQualityStatusChanged(status);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Notify the framework of an incoming call.
      * @param c The {@link ImsCallSessionImplBase} of the new incoming call.
      * @param extras A bundle containing extra parameters related to the call. See
      * {@link #EXTRA_IS_UNKNOWN_CALL} and {@link #EXTRA_IS_USSD} above.
-      * @hide
+     * @hide
+     *
+     * @deprecated use {@link #notifyIncomingCall(ImsCallSessionImplBase, String, Bundle)} instead
      */
+    @Deprecated
     @SystemApi
     public final void notifyIncomingCall(@NonNull ImsCallSessionImplBase c,
             @NonNull Bundle extras) {
@@ -645,7 +1142,46 @@ public class MmTelFeature extends ImsFeature {
         }
         try {
             c.setDefaultExecutor(MmTelFeature.this.mExecutor);
-            listener.onIncomingCall(c.getServiceImpl(), extras);
+            listener.onIncomingCall(c.getServiceImpl(), null, extras);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Notify the framework of an incoming call.
+     * @param c The {@link ImsCallSessionImplBase} of the new incoming call.
+     * @param callId The call ID of the session of the new incoming call.
+     * @param extras A bundle containing extra parameters related to the call. See
+     * {@link #EXTRA_IS_UNKNOWN_CALL} and {@link #EXTRA_IS_USSD} above.
+     * @return The listener used by the framework to listen to call session events created
+     *         from the ImsService.
+     *         If this method returns {@code null}, then the call could not be placed.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public final ImsCallSessionListener notifyIncomingCall(
+            @NonNull ImsCallSessionImplBase c, @NonNull String callId, @NonNull Bundle extras) {
+        if (c == null || callId == null || extras == null) {
+            throw new IllegalArgumentException("ImsCallSessionImplBase, callId, and Bundle can "
+                    + "not be null.");
+        }
+        IImsMmTelListener listener = getListener();
+        if (listener == null) {
+            throw new IllegalStateException("Session is not available.");
+        }
+        try {
+            c.setDefaultExecutor(MmTelFeature.this.mExecutor);
+            IImsCallSessionListener isl =
+                    listener.onIncomingCall(c.getServiceImpl(), callId, extras);
+            if (isl != null) {
+                ImsCallSessionListener iCSL = new ImsCallSessionListener(isl);
+                iCSL.setDefaultExecutor(MmTelFeature.this.mExecutor);
+                return iCSL;
+            } else {
+                return null;
+            }
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -687,7 +1223,7 @@ public class MmTelFeature extends ImsFeature {
             throw new IllegalStateException("Session is not available.");
         }
         try {
-            listener.onIncomingCall(c, extras);
+            listener.onIncomingCall(c, null, extras);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -706,6 +1242,176 @@ public class MmTelFeature extends ImsFeature {
         }
         try {
             listener.onVoiceMessageCountUpdate(count);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Sets the audio handler for this connection. The vendor IMS stack will invoke this API
+     * to inform Telephony/Telecom layers about which audio handlers i.e. either Android or Modem
+     * shall be used for handling the IMS call audio.
+     *
+     * @param imsAudioHandler {@link MmTelFeature#ImsAudioHandler} used to handle the audio
+     *        for this IMS call.
+     * @hide
+     */
+    @SystemApi
+    public final void setCallAudioHandler(@ImsAudioHandler int imsAudioHandler) {
+        IImsMmTelListener listener = getListener();
+        if (listener == null) {
+            throw new IllegalStateException("Session is not available.");
+        }
+        try {
+            listener.onAudioModeIsVoipChanged(imsAudioHandler);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Triggers the EPS fallback procedure.
+     *
+     * @param reason specifies the reason that causes EPS fallback.
+     * @hide
+     */
+    public final void triggerEpsFallback(@EpsFallbackReason int reason) {
+        IImsMmTelListener listener = getListener();
+        if (listener == null) {
+            throw new IllegalStateException("Session is not available.");
+        }
+        try {
+            listener.onTriggerEpsFallback(reason);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Starts a new IMS traffic session with the framework.
+     *
+     * This API notifies the NAS and RRC layers of the modem that IMS traffic of type
+     * {@link ImsTrafficType} is starting for the IMS session represented by a
+     * {@link ImsTrafficSessionCallback}. The {@link ImsTrafficSessionCallback}
+     * will notify the caller when IMS traffic is ready to start via the
+     * {@link ImsTrafficSessionCallback#onReady()} callback. If there was an error starting
+     * IMS traffic for the specified traffic type, {@link ImsTrafficSessionCallback#onError()} will
+     * be called, which will also notify the caller of the reason of the failure.
+     *
+     * If there is a handover that changes the {@link AccessNetworkConstants#RadioAccessNetworkType}
+     * of this IMS traffic session, then {@link #modifyImsTrafficSession} should be called. This is
+     * used, for example, when a WiFi <-> cellular handover occurs.
+     *
+     * Once the IMS traffic session is finished, {@link #stopImsTrafficSession} must be called.
+     *
+     * Note: This API will be used to prioritize RF resources in case of DSDS. The service priority
+     * is EMERGENCY > EMERGENCY SMS > VOICE > VIDEO > SMS > REGISTRATION > Ut/XCAP. RF
+     * shall be prioritized to the subscription which handles the higher priority service.
+     * When both subscriptions are handling the same type of service, then RF shall be
+     * prioritized to the voice preferred sub.
+     *
+     * @param trafficType The {@link ImsTrafficType} type for IMS traffic.
+     * @param accessNetworkType The {@link AccessNetworkConstants#RadioAccessNetworkType} type of
+     *        the radio access network.
+     * @param trafficDirection Indicates whether traffic is originated by mobile originated or
+     *        mobile terminated use case eg. MO/MT call/SMS etc.
+     * @param executor The Executor that will be used to call the {@link ImsTrafficSessionCallback}.
+     * @param callback The session representing the IMS Session associated with a specific
+     *        trafficType. This callback instance should only be used for the specified traffic type
+     *        until {@link #stopImsTrafficSession} is called.
+     *
+     * @see modifyImsTrafficSession
+     * @see stopImsTrafficSession
+     *
+     * @hide
+     */
+    public final void startImsTrafficSession(@ImsTrafficType int trafficType,
+            @AccessNetworkConstants.RadioAccessNetworkType int accessNetworkType,
+            @ImsTrafficDirection int trafficDirection,
+            @NonNull Executor executor, @NonNull ImsTrafficSessionCallback callback) {
+        IImsMmTelListener listener = getListener();
+        if (listener == null) {
+            throw new IllegalStateException("Session is not available.");
+        }
+        // TODO: retrieve from the callback list
+        ImsTrafficSessionCallbackWrapper callbackWrapper = mTrafficCallbacks.get(callback);
+        if (callbackWrapper == null) {
+            callbackWrapper = new ImsTrafficSessionCallbackWrapper(callback);
+            mTrafficCallbacks.put(callback, callbackWrapper);
+        }
+        try {
+            callbackWrapper.update(executor);
+            listener.onStartImsTrafficSession(callbackWrapper.getToken(),
+                    trafficType, accessNetworkType, trafficDirection,
+                    callbackWrapper.getCallbackBinder());
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Modifies an existing IMS traffic session represented by the associated
+     * {@link ImsTrafficSessionCallback}.
+     *
+     * The {@link ImsTrafficSessionCallback} will notify the caller when IMS traffic is ready to
+     * start after modification using the {@link ImsTrafficSessionCallback#onReady()} callback.
+     * If there was an error modifying IMS traffic for the new radio access network type type,
+     * {@link ImsTrafficSessionCallback#onError()} will be called, which will also notify the
+     * caller of the reason of the failure.
+     *
+     * @param accessNetworkType The {@link AccessNetworkConstants#RadioAccessNetworkType} type of
+     *        the radio access network.
+     * @param callback The callback registered with {@link #startImsTrafficSession}.
+     *
+     * @see startImsTrafficSession
+     * @see stopImsTrafficSession
+     *
+     * @hide
+     */
+    public final void modifyImsTrafficSession(
+            @AccessNetworkConstants.RadioAccessNetworkType int accessNetworkType,
+            @NonNull ImsTrafficSessionCallback callback) {
+        IImsMmTelListener listener = getListener();
+        if (listener == null) {
+            throw new IllegalStateException("Session is not available.");
+        }
+        ImsTrafficSessionCallbackWrapper callbackWrapper = mTrafficCallbacks.get(callback);
+        if (callbackWrapper == null) {
+            // should not reach here.
+            throw new IllegalStateException("Unknown ImsTrafficSessionCallback instance.");
+        }
+        try {
+            listener.onModifyImsTrafficSession(callbackWrapper.getToken(), accessNetworkType);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Notifies the framework that the IMS traffic session represented by the associated
+     * {@link ImsTrafficSessionCallback} has ended.
+     *
+     * @param callback The callback registered with {@link #startImsTrafficSession}.
+     *
+     * @see startImsTrafficSession
+     * @see modifyImsTrafficSession
+     *
+     * @hide
+     */
+    public final void stopImsTrafficSession(@NonNull ImsTrafficSessionCallback callback) {
+        IImsMmTelListener listener = getListener();
+        if (listener == null) {
+            throw new IllegalStateException("Session is not available.");
+        }
+        ImsTrafficSessionCallbackWrapper callbackWrapper = mTrafficCallbacks.get(callback);
+        if (callbackWrapper == null) {
+            // should not reach here.
+            throw new IllegalStateException("Unknown ImsTrafficSessionCallback instance.");
+        }
+        try {
+            listener.onStopImsTrafficSession(callbackWrapper.getToken());
+            callbackWrapper.reset();
+            mTrafficCallbacks.remove(callback);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -746,6 +1452,62 @@ public class MmTelFeature extends ImsFeature {
     public void changeEnabledCapabilities(@NonNull CapabilityChangeRequest request,
             @NonNull CapabilityCallbackProxy c) {
         // Base implementation, no-op
+    }
+
+    /**
+     * Called by the framework to pass {@link MediaThreshold}. The MmTelFeature should override this
+     * method to get Media quality threshold. This will pass the consolidated threshold values from
+     * Telephony framework. IMS provider needs to monitor media quality of active call and notify
+     * media quality {@link #notifyMediaQualityStatusChanged(MediaQualityStatus)} when the measured
+     * media quality crosses at least one of {@link MediaThreshold} set by this.
+     *
+     * @param mediaSessionType media session type for this Threshold info.
+     * @param mediaThreshold media threshold information
+     * @hide
+     */
+    @SystemApi
+    public void setMediaThreshold(
+            @MediaQualityStatus.MediaSessionType int mediaSessionType,
+            @NonNull MediaThreshold mediaThreshold) {
+        // Base Implementation - Should be overridden.
+        Log.d(LOG_TAG, "setMediaThreshold is not supported." + mediaThreshold);
+    }
+
+    /**
+     * The MmTelFeature should override this method to clear Media quality thresholds that were
+     * registered and stop media quality status updates.
+     *
+     * @param mediaSessionType media session type
+     * @hide
+     */
+    @SystemApi
+    public void clearMediaThreshold(@MediaQualityStatus.MediaSessionType int mediaSessionType) {
+        // Base Implementation - Should be overridden.
+        Log.d(LOG_TAG, "clearMediaThreshold is not supported." + mediaSessionType);
+    }
+
+    /**
+     * IMS provider should override this method to return currently measured media quality status.
+     *
+     * <p/>
+     * If media quality status is not yet measured after call is active, it needs to notify media
+     * quality status {@link #notifyMediaQualityStatusChanged(MediaQualityStatus)} when the first
+     * measurement is done.
+     *
+     * @param mediaSessionType media session type
+     * @return Current media quality status. It could be null if media quality status is not
+     *         measured yet or {@link MediaThreshold} was not set corresponding to the media session
+     *         type.
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public MediaQualityStatus queryMediaQualityStatus(
+            @MediaQualityStatus.MediaSessionType int mediaSessionType) {
+        // Base Implementation - Should be overridden.
+        Log.d(LOG_TAG, "queryMediaQualityStatus is not supported." + mediaSessionType);
+        return null;
     }
 
     /**
@@ -878,6 +1640,19 @@ public class MmTelFeature extends ImsFeature {
     }
 
     /**
+     * @hide
+     */
+    public @NonNull ImsSmsImplBase getImsSmsImpl() {
+        synchronized (mLock) {
+            if (mSmsImpl == null) {
+                mSmsImpl = getSmsImplementation();
+                mSmsImpl.setDefaultExecutor(mExecutor);
+            }
+            return mSmsImpl;
+        }
+    }
+
+    /**
      * @return The {@link ImsUtImplBase} Ut interface implementation for the supplementary service
      * configuration.
      * @hide
@@ -937,27 +1712,123 @@ public class MmTelFeature extends ImsFeature {
         // Base Implementation - Should be overridden
     }
 
+    /**
+     * Notifies the MmTelFeature of the enablement status of terminal based call waiting
+     *
+     * If the terminal based call waiting is provisioned,
+     * IMS controls the enablement of terminal based call waiting which is defined
+     * in 3GPP TS 24.615.
+     *
+     * @param enabled user setting controlling whether or not call waiting is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setTerminalBasedCallWaitingStatus(boolean enabled) {
+        // Base Implementation - Should be overridden by IMS service
+        throw new ServiceSpecificException(ImsException.CODE_ERROR_UNSUPPORTED_OPERATION,
+                "Not implemented on device.");
+    }
+
+    /**
+     * Notifies the MmTelFeature that the network has initiated an SRVCC (Single radio voice
+     * call continuity) for all IMS calls. When the network initiates an SRVCC, calls from
+     * the LTE domain are handed over to the legacy circuit switched domain. The modem requires
+     * knowledge of ongoing calls in the IMS domain in order to complete the SRVCC operation.
+     * <p>
+     * @param consumer The callback used to notify the framework of the list of IMS calls and their
+     * state at the time of the SRVCC.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void notifySrvccStarted(@NonNull Consumer<List<SrvccCall>> consumer) {
+        // Base Implementation - Should be overridden by IMS service
+    }
+
+    /**
+     * Notifies the MmTelFeature that the SRVCC is completed and the calls have been moved
+     * over to the circuit-switched domain.
+     * {@link android.telephony.CarrierConfigManager.ImsVoice#KEY_SRVCC_TYPE_INT_ARRAY}
+     * specifies the calls can be moved. Other calls will be disconnected.
+     * <p>
+     * The MmTelFeature may now release all resources related to the IMS calls.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void notifySrvccCompleted() {
+        // Base Implementation - Should be overridden by IMS service
+    }
+
+    /**
+     * Notifies the MmTelFeature that the SRVCC has failed.
+     *
+     * The handover can fail by encountering a failure at the radio level
+     * or temporary MSC server internal errors in handover procedure.
+     * Refer to 3GPP TS 23.216 section 8 Handover Failure.
+     * <p>
+     * IMS service will recover and continue calls over IMS.
+     * Per TS 24.237 12.2.4.2, UE shall send SIP UPDATE request containing the reason-text
+     * set to "failure to transition to CS domain".
+     *
+     * @hide
+     */
+    @SystemApi
+    public void notifySrvccFailed() {
+        // Base Implementation - Should be overridden by IMS service
+    }
+
+    /**
+     * Notifies the MmTelFeature that the SRVCC has been canceled.
+     *
+     * Since the state of network can be changed, the network can decide to terminate
+     * the handover procedure before its completion and to return to its state before the handover
+     * procedure was triggered.
+     * Refer to 3GPP TS 23.216 section 8.1.3 Handover Cancellation.
+     *
+     * <p>
+     * IMS service will recover and continue calls over IMS.
+     * Per TS 24.237 12.2.4.2, UE shall send SIP UPDATE request containing the reason-text
+     * set to "handover canceled".
+     *
+     * @hide
+     */
+    @SystemApi
+    public void notifySrvccCanceled() {
+        // Base Implementation - Should be overridden by IMS service
+    }
+
     private void setSmsListener(IImsSmsListener listener) {
-        getSmsImplementation().registerSmsListener(listener);
+        getImsSmsImpl().registerSmsListener(listener);
     }
 
     private void sendSms(int token, int messageRef, String format, String smsc, boolean isRetry,
             byte[] pdu) {
-        getSmsImplementation().sendSms(token, messageRef, format, smsc, isRetry, pdu);
+        getImsSmsImpl().sendSms(token, messageRef, format, smsc, isRetry, pdu);
+    }
+
+    private void onMemoryAvailable(int token) {
+        getImsSmsImpl().onMemoryAvailable(token);
     }
 
     private void acknowledgeSms(int token, int messageRef,
             @ImsSmsImplBase.DeliverStatusResult int result) {
-        getSmsImplementation().acknowledgeSms(token, messageRef, result);
+        getImsSmsImpl().acknowledgeSms(token, messageRef, result);
+    }
+
+    private void acknowledgeSms(int token, int messageRef,
+            @ImsSmsImplBase.DeliverStatusResult int result, byte[] pdu) {
+        getImsSmsImpl().acknowledgeSms(token, messageRef, result, pdu);
     }
 
     private void acknowledgeSmsReport(int token, int messageRef,
             @ImsSmsImplBase.StatusReportResult int result) {
-        getSmsImplementation().acknowledgeSmsReport(token, messageRef, result);
+        getImsSmsImpl().acknowledgeSmsReport(token, messageRef, result);
     }
 
     private void onSmsReady() {
-        getSmsImplementation().onReady();
+        getImsSmsImpl().onReady();
     }
 
     /**
@@ -974,7 +1845,7 @@ public class MmTelFeature extends ImsFeature {
     }
 
     private String getSmsFormat() {
-        return getSmsImplementation().getSmsFormat();
+        return getImsSmsImpl().getSmsFormat();
     }
 
     /**

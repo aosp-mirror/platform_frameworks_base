@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,8 +44,10 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.TestLooperManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
+import android.view.Display;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -91,7 +94,9 @@ public class Instrumentation {
 
     private static final String TAG = "Instrumentation";
 
-    private static final long CONNECT_TIMEOUT_MILLIS = 60000;
+    private static final long CONNECT_TIMEOUT_MILLIS = 60_000;
+
+    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
     /**
      * @hide
@@ -390,7 +395,7 @@ public class Instrumentation {
     public void setInTouchMode(boolean inTouch) {
         try {
             IWindowManager.Stub.asInterface(
-                    ServiceManager.getService("window")).setInTouchMode(inTouch);
+                    ServiceManager.getService("window")).setInTouchModeOnAllDisplays(inTouch);
         } catch (RemoteException e) {
             // Shouldn't happen!
         }
@@ -1124,8 +1129,42 @@ public class Instrumentation {
         newEvent.setTime(downTime, eventTime);
         newEvent.setSource(source);
         newEvent.setFlags(event.getFlags() | KeyEvent.FLAG_FROM_SYSTEM);
-        InputManager.getInstance().injectInputEvent(newEvent,
+        setDisplayIfNeeded(newEvent);
+
+        InputManagerGlobal.getInstance().injectInputEvent(newEvent,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+    }
+
+    private void setDisplayIfNeeded(KeyEvent event) {
+        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+            return;
+        }
+        // In devices that support visible background users visible, the display id must be set to
+        // reflect the display the user was started visible on, otherwise the event would be sent to
+        // the main display (which would most likely fail the test).
+        int eventDisplayId = event.getDisplayId();
+        if (eventDisplayId != Display.INVALID_DISPLAY) {
+            if (VERBOSE) {
+                Log.v(TAG, "setDisplayIfNeeded(" + event + "): not changing display id as it's "
+                        + "explicitly set to " + eventDisplayId);
+            }
+            return;
+        }
+
+        UserManager userManager = mInstrContext.getSystemService(UserManager.class);
+        int userDisplayId = userManager.getMainDisplayIdAssignedToUser();
+        if (VERBOSE) {
+            Log.v(TAG, "setDisplayIfNeeded(" + event + "): eventDisplayId=" + eventDisplayId
+                    + ", user=" + mInstrContext.getUser() + ", userDisplayId=" + userDisplayId);
+        }
+        if (userDisplayId == Display.INVALID_DISPLAY) {
+            Log.e(TAG, "setDisplayIfNeeded(" + event + "): UserManager returned INVALID_DISPLAY as "
+                    + "display assigned to user " + mInstrContext.getUser());
+            return;
+
+        }
+
+        event.setDisplayId(userDisplayId);
     }
 
     /**
@@ -1191,7 +1230,7 @@ public class Instrumentation {
             }
 
             // Direct the injected event into windows owned by the instrumentation target.
-            InputManager.getInstance().injectInputEvent(
+            InputManagerGlobal.getInstance().injectInputEvent(
                     event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH, Process.myUid());
 
             if (syncAfter) {
@@ -1221,7 +1260,7 @@ public class Instrumentation {
         if (!event.isFromSource(InputDevice.SOURCE_CLASS_TRACKBALL)) {
             event.setSource(InputDevice.SOURCE_TRACKBALL);
         }
-        InputManager.getInstance().injectInputEvent(event,
+        InputManagerGlobal.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
@@ -2315,8 +2354,7 @@ public class Instrumentation {
                 return mUiAutomation;
             }
             if (mustCreateNewAutomation) {
-                mUiAutomation = new UiAutomation(getTargetContext().getMainLooper(),
-                        mUiAutomationConnection);
+                mUiAutomation = new UiAutomation(getTargetContext(), mUiAutomationConnection);
             } else {
                 mUiAutomation.disconnect();
             }
@@ -2324,10 +2362,13 @@ public class Instrumentation {
                 mUiAutomation.connect(flags);
                 return mUiAutomation;
             }
+            final long startUptime = SystemClock.uptimeMillis();
             try {
                 mUiAutomation.connectWithTimeout(flags, CONNECT_TIMEOUT_MILLIS);
                 return mUiAutomation;
             } catch (TimeoutException e) {
+                final long waited = SystemClock.uptimeMillis() - startUptime;
+                Log.e(TAG, "Unable to connect to UiAutomation. Waited for " + waited + " ms", e);
                 mUiAutomation.destroy();
                 mUiAutomation = null;
             }

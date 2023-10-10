@@ -18,18 +18,17 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
-import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
+import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
-import com.android.systemui.settings.DisplayTracker
-import com.android.systemui.statusbar.CommandQueue
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.test.TestScope
@@ -38,10 +37,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardInteractorTest : SysuiTestCase() {
     private lateinit var commandQueue: FakeCommandQueue
@@ -56,7 +55,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         featureFlags = FakeFeatureFlags().apply { set(FACE_AUTH_REFACTOR, true) }
-        commandQueue = FakeCommandQueue(mock(Context::class.java), mock(DisplayTracker::class.java))
+        commandQueue = FakeCommandQueue()
         testScope = TestScope()
         repository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
@@ -173,23 +172,4 @@ class KeyguardInteractorTest : SysuiTestCase() {
 
             assertThat(secureCameraActive()).isFalse()
         }
-}
-
-class FakeCommandQueue(val context: Context, val displayTracker: DisplayTracker) :
-    CommandQueue(context, displayTracker) {
-    private val callbacks = mutableListOf<Callbacks>()
-
-    override fun addCallback(callback: Callbacks) {
-        callbacks.add(callback)
-    }
-
-    override fun removeCallback(callback: Callbacks) {
-        callbacks.remove(callback)
-    }
-
-    fun doForEachCallback(func: (callback: Callbacks) -> Unit) {
-        callbacks.forEach { func(it) }
-    }
-
-    fun callbackCount(): Int = callbacks.size
 }

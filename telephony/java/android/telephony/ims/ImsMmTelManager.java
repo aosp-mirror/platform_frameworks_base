@@ -549,7 +549,6 @@ public class ImsMmTelManager implements RegistrationManager {
      *     <li>The caller has carrier privileges (see
      *     {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on any
      *     active subscription.</li>
-     *     <li>The caller is the default SMS app for the device.</li>
      * </ul>
      * <p>The profile owner is an app that owns a managed profile on the device; for more details
      * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
@@ -611,7 +610,6 @@ public class ImsMmTelManager implements RegistrationManager {
      *     <li>The caller has carrier privileges (see
      *     {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on any
      *     active subscription.</li>
-     *     <li>The caller is the default SMS app for the device.</li>
      * </ul>
      * <p>The profile owner is an app that owns a managed profile on the device; for more details
      * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
@@ -659,7 +657,6 @@ public class ImsMmTelManager implements RegistrationManager {
      *     <li>The caller has carrier privileges (see
      *     {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on any
      *     active subscription.</li>
-     *     <li>The caller is the default SMS app for the device.</li>
      * </ul>
      * <p>The profile owner is an app that owns a managed profile on the device; for more details
      * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
@@ -872,7 +869,6 @@ public class ImsMmTelManager implements RegistrationManager {
      *     <li>The caller has carrier privileges (see
      *     {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on any
      *     active subscription.</li>
-     *     <li>The caller is the default SMS app for the device.</li>
      * </ul>
      * <p>The profile owner is an app that owns a managed profile on the device; for more details
      * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
@@ -947,7 +943,6 @@ public class ImsMmTelManager implements RegistrationManager {
      *     <li>The caller has carrier privileges (see
      *     {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on any
      *     active subscription.</li>
-     *     <li>The caller is the default SMS app for the device.</li>
      * </ul>
      * <p>The profile owner is an app that owns a managed profile on the device; for more details
      * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
@@ -1121,7 +1116,6 @@ public class ImsMmTelManager implements RegistrationManager {
      *     <li>The caller has carrier privileges (see
      *     {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on any
      *     active subscription.</li>
-     *     <li>The caller is the default SMS app for the device.</li>
      * </ul>
      * <p>The profile owner is an app that owns a managed profile on the device; for more details
      * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
@@ -1236,7 +1230,6 @@ public class ImsMmTelManager implements RegistrationManager {
      *     <li>The caller has carrier privileges (see
      *     {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on any
      *     active subscription.</li>
-     *     <li>The caller is the default SMS app for the device.</li>
      * </ul>
      * <p>The profile owner is an app that owns a managed profile on the device; for more details
      * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
@@ -1425,7 +1418,6 @@ public class ImsMmTelManager implements RegistrationManager {
      *     <li>The caller has carrier privileges (see
      *     {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on any
      *     active subscription.</li>
-     *     <li>The caller is the default SMS app for the device.</li>
      * </ul>
      * <p>The profile owner is an app that owns a managed profile on the device; for more details
      * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.

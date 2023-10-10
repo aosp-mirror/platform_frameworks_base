@@ -18,6 +18,11 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.media.AudioDeviceAttributes;
+import android.media.audiopolicy.AudioProductStrategy;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -27,29 +32,42 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * HearingAidDeviceManager manages the set of remote HearingAid Bluetooth devices.
+ * HearingAidDeviceManager manages the set of remote HearingAid(ASHA) Bluetooth devices.
  */
 public class HearingAidDeviceManager {
     private static final String TAG = "HearingAidDeviceManager";
     private static final boolean DEBUG = BluetoothUtils.D;
 
+    private final ContentResolver mContentResolver;
     private final LocalBluetoothManager mBtManager;
     private final List<CachedBluetoothDevice> mCachedDevices;
-    HearingAidDeviceManager(LocalBluetoothManager localBtManager,
+    private final HearingAidAudioRoutingHelper mRoutingHelper;
+    HearingAidDeviceManager(Context context, LocalBluetoothManager localBtManager,
             List<CachedBluetoothDevice> CachedDevices) {
+        mContentResolver = context.getContentResolver();
         mBtManager = localBtManager;
         mCachedDevices = CachedDevices;
+        mRoutingHelper = new HearingAidAudioRoutingHelper(context);
+    }
+
+    @VisibleForTesting
+    HearingAidDeviceManager(Context context, LocalBluetoothManager localBtManager,
+            List<CachedBluetoothDevice> cachedDevices, HearingAidAudioRoutingHelper routingHelper) {
+        mContentResolver = context.getContentResolver();
+        mBtManager = localBtManager;
+        mCachedDevices = cachedDevices;
+        mRoutingHelper = routingHelper;
     }
 
     void initHearingAidDeviceIfNeeded(CachedBluetoothDevice newDevice) {
         long hiSyncId = getHiSyncId(newDevice.getDevice());
         if (isValidHiSyncId(hiSyncId)) {
-            // Once hiSyncId is valid, assign hiSyncId
-            newDevice.setHiSyncId(hiSyncId);
-            final int side = getDeviceSide(newDevice.getDevice());
-            final int mode = getDeviceMode(newDevice.getDevice());
-            newDevice.setDeviceSide(side);
-            newDevice.setDeviceMode(mode);
+            // Once hiSyncId is valid, assign hearing aid info
+            final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
+                    .setAshaDeviceSide(getDeviceSide(newDevice.getDevice()))
+                    .setAshaDeviceMode(getDeviceMode(newDevice.getDevice()))
+                    .setHiSyncId(hiSyncId);
+            newDevice.setHearingAidInfo(infoBuilder.build());
         }
     }
 
@@ -123,12 +141,14 @@ public class HearingAidDeviceManager {
                 final long newHiSyncId = getHiSyncId(cachedDevice.getDevice());
                 // Do nothing if there is no HiSyncId on Bluetooth device
                 if (isValidHiSyncId(newHiSyncId)) {
-                    cachedDevice.setHiSyncId(newHiSyncId);
+                    // Once hiSyncId is valid, assign hearing aid info
+                    final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
+                            .setAshaDeviceSide(getDeviceSide(cachedDevice.getDevice()))
+                            .setAshaDeviceMode(getDeviceMode(cachedDevice.getDevice()))
+                            .setHiSyncId(newHiSyncId);
+                    cachedDevice.setHearingAidInfo(infoBuilder.build());
+
                     newSyncIdSet.add(newHiSyncId);
-                    final int side = getDeviceSide(cachedDevice.getDevice());
-                    final int mode = getDeviceMode(cachedDevice.getDevice());
-                    cachedDevice.setDeviceSide(side);
-                    cachedDevice.setDeviceMode(mode);
                 }
             }
         }
@@ -190,12 +210,11 @@ public class HearingAidDeviceManager {
             case BluetoothProfile.STATE_CONNECTED:
                 onHiSyncIdChanged(cachedDevice.getHiSyncId());
                 CachedBluetoothDevice mainDevice = findMainDevice(cachedDevice);
-                if (mainDevice != null){
+                if (mainDevice != null) {
                     if (mainDevice.isConnected()) {
                         // When main device exists and in connected state, receiving sub device
                         // connection. To refresh main device UI
                         mainDevice.refresh();
-                        return true;
                     } else {
                         // When both Hearing Aid devices are disconnected, receiving sub device
                         // connection. To switch content and dispatch to notify UI change
@@ -205,8 +224,8 @@ public class HearingAidDeviceManager {
                         // It is necessary to do remove and add for updating the mapping on
                         // preference and device
                         mBtManager.getEventManager().dispatchDeviceAdded(mainDevice);
-                        return true;
                     }
+                    return true;
                 }
                 break;
             case BluetoothProfile.STATE_DISCONNECTED:
@@ -230,11 +249,88 @@ public class HearingAidDeviceManager {
                     // It is necessary to do remove and add for updating the mapping on
                     // preference and device
                     mBtManager.getEventManager().dispatchDeviceAdded(cachedDevice);
+
                     return true;
                 }
                 break;
         }
         return false;
+    }
+
+    void onActiveDeviceChanged(CachedBluetoothDevice device) {
+        if (device.isActiveDevice(BluetoothProfile.HEARING_AID) || device.isActiveDevice(
+                BluetoothProfile.LE_AUDIO)) {
+            setAudioRoutingConfig(device);
+        } else {
+            clearAudioRoutingConfig();
+        }
+    }
+
+    private void setAudioRoutingConfig(CachedBluetoothDevice device) {
+        AudioDeviceAttributes hearingDeviceAttributes =
+                mRoutingHelper.getMatchedHearingDeviceAttributes(device);
+        if (hearingDeviceAttributes == null) {
+            Log.w(TAG, "Can not find expected AudioDeviceAttributes for hearing device: "
+                    + device.getDevice().getAnonymizedAddress());
+            return;
+        }
+
+        final int callRoutingValue = Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.HEARING_AID_CALL_ROUTING,
+                HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+        final int mediaRoutingValue = Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.HEARING_AID_MEDIA_ROUTING,
+                HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+        final int ringtoneRoutingValue = Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
+                HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+        final int systemSoundsRoutingValue = Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+                HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+
+        setPreferredDeviceRoutingStrategies(
+                HearingAidAudioRoutingConstants.CALL_ROUTING_ATTRIBUTES,
+                hearingDeviceAttributes, callRoutingValue);
+        setPreferredDeviceRoutingStrategies(
+                HearingAidAudioRoutingConstants.MEDIA_ROUTING_ATTRIBUTES,
+                hearingDeviceAttributes, mediaRoutingValue);
+        setPreferredDeviceRoutingStrategies(
+                HearingAidAudioRoutingConstants.RINGTONE_ROUTING_ATTRIBUTE,
+                hearingDeviceAttributes, ringtoneRoutingValue);
+        setPreferredDeviceRoutingStrategies(
+                HearingAidAudioRoutingConstants.SYSTEM_SOUNDS_ROUTING_ATTRIBUTES,
+                hearingDeviceAttributes, systemSoundsRoutingValue);
+    }
+
+    private void clearAudioRoutingConfig() {
+        // Don't need to pass hearingDevice when we want to reset it (set to AUTO).
+        setPreferredDeviceRoutingStrategies(
+                HearingAidAudioRoutingConstants.CALL_ROUTING_ATTRIBUTES,
+                /* hearingDevice = */ null, HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+        setPreferredDeviceRoutingStrategies(
+                HearingAidAudioRoutingConstants.MEDIA_ROUTING_ATTRIBUTES,
+                /* hearingDevice = */ null, HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+        setPreferredDeviceRoutingStrategies(
+                HearingAidAudioRoutingConstants.RINGTONE_ROUTING_ATTRIBUTE,
+                /* hearingDevice = */ null, HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+        setPreferredDeviceRoutingStrategies(
+                HearingAidAudioRoutingConstants.SYSTEM_SOUNDS_ROUTING_ATTRIBUTES,
+                /* hearingDevice = */ null, HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+    }
+
+    private void setPreferredDeviceRoutingStrategies(int[] attributeSdkUsageList,
+            AudioDeviceAttributes hearingDevice,
+            @HearingAidAudioRoutingConstants.RoutingValue int routingValue) {
+        final List<AudioProductStrategy> supportedStrategies =
+                mRoutingHelper.getSupportedStrategies(attributeSdkUsageList);
+
+        final boolean status = mRoutingHelper.setPreferredDeviceRoutingStrategies(
+                supportedStrategies, hearingDevice, routingValue);
+
+        if (!status) {
+            Log.w(TAG, "routingStrategies: " + supportedStrategies.toString() + "routingValue: "
+                    + routingValue + " fail to configure AudioProductStrategy");
+        }
     }
 
     CachedBluetoothDevice findMainDevice(CachedBluetoothDevice device) {

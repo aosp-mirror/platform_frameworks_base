@@ -67,6 +67,8 @@ class FakeSecurityController(
 
     override fun getDeviceOwnerType(admin: ComponentName?): Int = 0
 
+    override fun isFinancedDevice(): Boolean = false
+
     override fun isNetworkLoggingEnabled(): Boolean = fakeState.isNetworkLoggingEnabled
 
     override fun isVpnEnabled(): Boolean = fakeState.isVpnEnabled

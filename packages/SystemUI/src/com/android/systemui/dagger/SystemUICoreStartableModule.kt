@@ -17,7 +17,6 @@
 package com.android.systemui.dagger
 
 import com.android.keyguard.KeyguardBiometricLockoutLogger
-import com.android.systemui.ChooserSelector
 import com.android.systemui.CoreStartable
 import com.android.systemui.LatencyTester
 import com.android.systemui.ScreenDecorations
@@ -25,18 +24,20 @@ import com.android.systemui.SliceBroadcastRelayHandler
 import com.android.systemui.accessibility.SystemActions
 import com.android.systemui.accessibility.WindowMagnification
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.BiometricNotificationService
 import com.android.systemui.clipboardoverlay.ClipboardListener
 import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
+import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
 import com.android.systemui.globalactions.GlobalActionsComponent
-import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyboard.KeyboardUI
+import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.data.quickaffordance.MuteQuickAffordanceCoreStartable
 import com.android.systemui.log.SessionTracker
-import com.android.systemui.media.dialog.MediaOutputSwitcherDialogUI
 import com.android.systemui.media.RingtonePlayer
+import com.android.systemui.media.dialog.MediaOutputSwitcherDialogUI
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderCoordinator
@@ -45,10 +46,7 @@ import com.android.systemui.reardisplay.RearDisplayDialogController
 import com.android.systemui.recents.Recents
 import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
-import com.android.systemui.statusbar.notification.fsi.FsiChromeRepo
 import com.android.systemui.statusbar.notification.InstantAppNotifier
-import com.android.systemui.statusbar.notification.fsi.FsiChromeViewModelFactory
-import com.android.systemui.statusbar.notification.fsi.FsiChromeViewBinder
 import com.android.systemui.statusbar.phone.KeyguardLiftController
 import com.android.systemui.stylus.StylusUsiPowerStartable
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
@@ -56,6 +54,7 @@ import com.android.systemui.theme.ThemeOverlayController
 import com.android.systemui.toast.ToastUI
 import com.android.systemui.usb.StorageNotification
 import com.android.systemui.util.NotificationChannels
+import com.android.systemui.util.StartBinderLoggerModule
 import com.android.systemui.volume.VolumeUI
 import com.android.systemui.wmshell.WMShell
 import dagger.Binds
@@ -68,7 +67,8 @@ import dagger.multibindings.IntoMap
  */
 @Module(includes = [
     MultiUserUtilsModule::class,
-    StartControlsStartableModule::class
+    StartControlsStartableModule::class,
+    StartBinderLoggerModule::class,
 ])
 abstract class SystemUICoreStartableModule {
     /** Inject into AuthController.  */
@@ -77,35 +77,19 @@ abstract class SystemUICoreStartableModule {
     @ClassKey(AuthController::class)
     abstract fun bindAuthController(service: AuthController): CoreStartable
 
-    /** Inject into ChooserCoreStartable. */
+    /** Inject into BiometricNotificationService */
     @Binds
     @IntoMap
-    @ClassKey(ChooserSelector::class)
-    abstract fun bindChooserSelector(sysui: ChooserSelector): CoreStartable
+    @ClassKey(BiometricNotificationService::class)
+    abstract fun bindBiometricNotificationService(
+        service: BiometricNotificationService
+    ): CoreStartable
 
     /** Inject into ClipboardListener.  */
     @Binds
     @IntoMap
     @ClassKey(ClipboardListener::class)
     abstract fun bindClipboardListener(sysui: ClipboardListener): CoreStartable
-
-    /** Inject into FsiChromeRepo.  */
-    @Binds
-    @IntoMap
-    @ClassKey(FsiChromeRepo::class)
-    abstract fun bindFSIChromeRepo(sysui: FsiChromeRepo): CoreStartable
-
-    /** Inject into FsiChromeWindowViewModel.  */
-    @Binds
-    @IntoMap
-    @ClassKey(FsiChromeViewModelFactory::class)
-    abstract fun bindFSIChromeWindowViewModel(sysui: FsiChromeViewModelFactory): CoreStartable
-
-    /** Inject into FsiChromeWindowBinder.  */
-    @Binds
-    @IntoMap
-    @ClassKey(FsiChromeViewBinder::class)
-    abstract fun bindFsiChromeWindowBinder(sysui: FsiChromeViewBinder): CoreStartable
 
     /** Inject into GlobalActionsComponent.  */
     @Binds
@@ -305,4 +289,10 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(DreamMonitor::class)
     abstract fun bindDreamMonitor(sysui: DreamMonitor): CoreStartable
+
+    /**Inject into AssistantAttentionMonitor */
+    @Binds
+    @IntoMap
+    @ClassKey(AssistantAttentionMonitor::class)
+    abstract fun bindAssistantAttentionMonitor(sysui: AssistantAttentionMonitor): CoreStartable
 }

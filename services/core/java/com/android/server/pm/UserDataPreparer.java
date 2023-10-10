@@ -54,13 +54,11 @@ class UserDataPreparer {
 
     private final Object mInstallLock;
     private final Context mContext;
-    private final boolean mOnlyCore;
     private final Installer mInstaller;
 
-    UserDataPreparer(Installer installer, Object installLock, Context context, boolean onlyCore) {
+    UserDataPreparer(Installer installer, Object installLock, Context context) {
         mInstallLock = installLock;
         mContext = context;
-        mOnlyCore = onlyCore;
         mInstaller = installer;
     }
 
@@ -92,13 +90,13 @@ class UserDataPreparer {
         try {
             storage.prepareUserStorage(volumeUuid, userId, userSerial, flags);
 
-            if ((flags & StorageManager.FLAG_STORAGE_DE) != 0 && !mOnlyCore) {
+            if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
                 enforceSerialNumber(getDataUserDeDirectory(volumeUuid, userId), userSerial);
                 if (Objects.equals(volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)) {
                     enforceSerialNumber(getDataSystemDeDirectory(userId), userSerial);
                 }
             }
-            if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && !mOnlyCore) {
+            if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
                 enforceSerialNumber(getDataUserCeDirectory(volumeUuid, userId), userSerial);
                 if (Objects.equals(volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)) {
                     enforceSerialNumber(getDataSystemCeDirectory(userId), userSerial);
@@ -235,7 +233,7 @@ class UserDataPreparer {
                 logCriticalInfo(Log.WARN, "Destroying user directory " + file
                         + " because no matching user was found");
                 destroyUser = true;
-            } else if (!mOnlyCore) {
+            } else {
                 try {
                     enforceSerialNumber(file, info.serialNumber);
                 } catch (IOException e) {

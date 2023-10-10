@@ -28,7 +28,7 @@
         app:cardCornerRadius="28dp"
         app:cardBackgroundColor="@color/rear_display_overlay_animation_background_color">
 
-            <com.airbnb.lottie.LottieAnimationView
+            <com.android.systemui.reardisplay.RearDisplayEducationLottieViewWrapper
                 android:id="@+id/rear_display_folded_animation"
                 android:importantForAccessibility="no"
                 android:layout_width="@dimen/rear_display_animation_width"

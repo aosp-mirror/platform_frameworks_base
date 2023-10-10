@@ -21,7 +21,6 @@ import android.content.Context;
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.util.Slog;
@@ -118,7 +117,7 @@ public class BiometricLogger {
     }
 
     /** Log an acquisition event. */
-    public void logOnAcquired(Context context, OperationContext operationContext,
+    public void logOnAcquired(Context context, OperationContextExt operationContext,
             int acquiredInfo, int vendorCode, int targetUserId) {
         if (!mShouldLogMetrics) {
             return;
@@ -139,7 +138,7 @@ public class BiometricLogger {
         if (DEBUG) {
             Slog.v(TAG, "Acquired! Modality: " + mStatsModality
                     + ", User: " + targetUserId
-                    + ", IsCrypto: " + operationContext.isCrypto
+                    + ", IsCrypto: " + operationContext.isCrypto()
                     + ", Action: " + mStatsAction
                     + ", Client: " + mStatsClient
                     + ", AcquiredInfo: " + acquiredInfo
@@ -150,13 +149,14 @@ public class BiometricLogger {
             return;
         }
 
-        mSink.acquired(operationContext, mStatsModality, mStatsAction, mStatsClient,
+        mSink.acquired(operationContext,
+                mStatsModality, mStatsAction, mStatsClient,
                 Utils.isDebugEnabled(context, targetUserId),
                 acquiredInfo, vendorCode, targetUserId);
     }
 
     /** Log an error during an operation. */
-    public void logOnError(Context context, OperationContext operationContext,
+    public void logOnError(Context context, OperationContextExt operationContext,
             int error, int vendorCode, int targetUserId) {
         if (!mShouldLogMetrics) {
             return;
@@ -168,7 +168,7 @@ public class BiometricLogger {
         if (DEBUG) {
             Slog.v(TAG, "Error! Modality: " + mStatsModality
                     + ", User: " + targetUserId
-                    + ", IsCrypto: " + operationContext.isCrypto
+                    + ", IsCrypto: " + operationContext.isCrypto()
                     + ", Action: " + mStatsAction
                     + ", Client: " + mStatsClient
                     + ", Error: " + error
@@ -182,15 +182,16 @@ public class BiometricLogger {
             return;
         }
 
-        mSink.error(operationContext, mStatsModality, mStatsAction, mStatsClient,
+        mSink.error(operationContext,
+                mStatsModality, mStatsAction, mStatsClient,
                 Utils.isDebugEnabled(context, targetUserId), latency,
                 error, vendorCode, targetUserId);
     }
 
     /** Log authentication attempt. */
-    public void logOnAuthenticated(Context context, OperationContext operationContext,
-            boolean authenticated, boolean requireConfirmation,
-            int targetUserId, boolean isBiometricPrompt) {
+    public void logOnAuthenticated(Context context, OperationContextExt operationContext,
+            boolean authenticated, boolean requireConfirmation, int targetUserId,
+            boolean isBiometricPrompt) {
         if (!mShouldLogMetrics) {
             return;
         }
@@ -215,7 +216,7 @@ public class BiometricLogger {
         if (DEBUG) {
             Slog.v(TAG, "Authenticated! Modality: " + mStatsModality
                     + ", User: " + targetUserId
-                    + ", IsCrypto: " + operationContext.isCrypto
+                    + ", IsCrypto: " + operationContext.isCrypto()
                     + ", Client: " + mStatsClient
                     + ", RequireConfirmation: " + requireConfirmation
                     + ", State: " + authState
@@ -229,7 +230,8 @@ public class BiometricLogger {
             return;
         }
 
-        mSink.authenticate(operationContext, mStatsModality, mStatsAction, mStatsClient,
+        mSink.authenticate(operationContext,
+                mStatsModality, mStatsAction, mStatsClient,
                 Utils.isDebugEnabled(context, targetUserId),
                 latency, authState, requireConfirmation, targetUserId, mALSProbe);
     }

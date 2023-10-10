@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (C) 2022 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="no_applications" msgid="5800789569715871963">"Aucune appli."</string>
+    <string name="menu_show_system" msgid="906304605807554788">"Afficher le système"</string>
+    <string name="menu_hide_system" msgid="374571689914923020">"Masquer le système"</string>
+    <string name="app_permission_summary_allowed" msgid="6115213465364138103">"Autorisé"</string>
+    <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"Non autorisé"</string>
+    <string name="version_text" msgid="4001669804596458577">"version <xliff:g id="VERSION_NUM">%1$s</xliff:g>"</string>
+    <string name="cloned_app_info_label" msgid="1765651167024478391">"Clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+</resources>

@@ -46,8 +46,6 @@ import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.text.Selection;
 import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
@@ -465,7 +463,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 flushReason = FLUSH_REASON_VIEW_TREE_APPEARED;
                 break;
             default:
-                flushReason = FLUSH_REASON_FULL;
+                flushReason = forceFlush ? FLUSH_REASON_FORCE_FLUSH : FLUSH_REASON_FULL;
         }
 
         flush(flushReason);
@@ -533,7 +531,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @Override
     @UiThread
     void flush(@FlushReason int reason) {
-        if (mEvents == null) return;
+        if (mEvents == null || mEvents.size() == 0) {
+            if (sVerbose) {
+                Log.v(TAG, "Don't flush for empty event buffer.");
+            }
+            return;
+        }
 
         if (mDisabled.get()) {
             Log.e(TAG, "handleForceFlush(" + getDebugState(reason) + "): should not be when "
@@ -556,8 +559,13 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
         final int numberEvents = mEvents.size();
         final String reasonString = getFlushReasonAsString(reason);
-        if (sDebug) {
-            Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState(reason));
+
+        if (sVerbose) {
+            ContentCaptureEvent event = mEvents.get(numberEvents - 1);
+            String forceString = (reason == FLUSH_REASON_FORCE_FLUSH) ? ". The force flush event "
+                    + ContentCaptureEvent.getTypeAsString(event.getType()) : "";
+            Log.v(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState(reason)
+                    + forceString);
         }
         if (mFlushHistory != null) {
             // Logs reason, size, max size, idle timeout
@@ -730,7 +738,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         // Since the same CharSequence instance may be reused in the TextView, we need to make
         // a copy of its content so that its value will not be changed by subsequent updates
         // in the TextView.
-        final CharSequence eventText = stringOrSpannedStringWithoutNoCopySpans(text);
+        CharSequence trimmed = TextUtils.trimToParcelableSize(text);
+        final CharSequence eventText = trimmed != null && trimmed == text
+                ? trimmed.toString()
+                : trimmed;
 
         final int composingStart;
         final int composingEnd;
@@ -749,16 +760,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                         .setAutofillId(id).setText(eventText)
                         .setComposingIndex(composingStart, composingEnd)
                         .setSelectionIndex(startIndex, endIndex)));
-    }
-
-    private CharSequence stringOrSpannedStringWithoutNoCopySpans(CharSequence source) {
-        if (source == null) {
-            return null;
-        } else if (source instanceof Spanned) {
-            return new SpannableString(source, /* ignoreNoCopySpan= */ true);
-        } else {
-            return source.toString();
-        }
     }
 
     /** Public because is also used by ViewRootImpl */

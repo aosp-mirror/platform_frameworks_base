@@ -440,7 +440,7 @@ public class DynamicSystemInstallationService extends Service
             Log.e(TAG, "Failed to disable DynamicSystem.");
 
             // Dismiss status bar and show a toast.
-            sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+            closeSystemDialogs();
             Toast.makeText(this,
                     getString(R.string.toast_failed_to_disable_dynsystem),
                     Toast.LENGTH_LONG).show();

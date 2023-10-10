@@ -455,8 +455,8 @@ final class ContentCapturePerUserService
             @NonNull Bundle data) {
         final int id = getSessionId(activityToken);
         final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
-        final AssistStructure assistStructure = data.getParcelable(ASSIST_KEY_STRUCTURE);
-        final AssistContent assistContent = data.getParcelable(ASSIST_KEY_CONTENT);
+        final AssistStructure assistStructure = data.getParcelable(ASSIST_KEY_STRUCTURE, android.app.assist.AssistStructure.class);
+        final AssistContent assistContent = data.getParcelable(ASSIST_KEY_CONTENT, android.app.assist.AssistContent.class);
         final SnapshotData snapshotData = new SnapshotData(assistData,
                 assistStructure, assistContent);
         if (id != NO_SESSION_ID) {
@@ -548,12 +548,13 @@ final class ContentCapturePerUserService
     }
 
     @GuardedBy("mLock")
-    void onActivityEventLocked(@NonNull ComponentName componentName, @ActivityEventType int type) {
+    void onActivityEventLocked(@NonNull ActivityId activityId,
+            @NonNull ComponentName componentName, @ActivityEventType int type) {
         if (mRemoteService == null) {
             if (mMaster.debug) Slog.d(mTag, "onActivityEvent(): no remote service");
             return;
         }
-        final ActivityEvent event = new ActivityEvent(componentName, type);
+        final ActivityEvent event = new ActivityEvent(activityId, componentName, type);
 
         if (mMaster.verbose) Slog.v(mTag, "onActivityEvent(): " + event);
 
@@ -727,7 +728,7 @@ final class ContentCapturePerUserService
             if (oldList != null && adding != null) {
                 adding.removeAll(oldList);
             }
-
+            addingCount = CollectionUtils.size(adding);
             EventLog.writeEvent(EventLogTags.CC_UPDATE_OPTIONS, mUserId, addingCount);
             for (int i = 0; i < addingCount; i++) {
                 String packageName = adding.valueAt(i);

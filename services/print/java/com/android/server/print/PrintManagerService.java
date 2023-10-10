@@ -984,6 +984,7 @@ public final class PrintManagerService extends SystemService {
             monitor.register(mContext, BackgroundThread.getHandler().getLooper(),
                     UserHandle.ALL, true);
         }
+
         private UserState getOrCreateUserStateLocked(int userId, boolean lowPriority) {
             return getOrCreateUserStateLocked(userId, lowPriority,
                     true /* enforceUserUnlockingOrUnlocked */);
@@ -991,6 +992,12 @@ public final class PrintManagerService extends SystemService {
 
         private UserState getOrCreateUserStateLocked(int userId, boolean lowPriority,
                 boolean enforceUserUnlockingOrUnlocked) {
+            return getOrCreateUserStateLocked(userId, lowPriority,
+                    enforceUserUnlockingOrUnlocked, false /* shouldUpdateState */);
+        }
+
+        private UserState getOrCreateUserStateLocked(int userId, boolean lowPriority,
+                boolean enforceUserUnlockingOrUnlocked, boolean shouldUpdateState) {
             if (enforceUserUnlockingOrUnlocked && !mUserManager.isUserUnlockingOrUnlocked(userId)) {
                 throw new IllegalStateException(
                         "User " + userId + " must be unlocked for printing to be available");
@@ -1000,6 +1007,8 @@ public final class PrintManagerService extends SystemService {
             if (userState == null) {
                 userState = new UserState(mContext, userId, mLock, lowPriority);
                 mUserStates.put(userId, userState);
+            } else if (shouldUpdateState) {
+                userState.updateIfNeededLocked();
             }
 
             if (!lowPriority) {
@@ -1019,9 +1028,9 @@ public final class PrintManagerService extends SystemService {
 
                     UserState userState;
                     synchronized (mLock) {
-                        userState = getOrCreateUserStateLocked(userId, true,
-                                false /*enforceUserUnlockingOrUnlocked */);
-                        userState.updateIfNeededLocked();
+                        userState = getOrCreateUserStateLocked(userId, /* lowPriority */ true,
+                                /* enforceUserUnlockingOrUnlocked */ false,
+                                /* shouldUpdateState */ true);
                     }
                     // This is the first time we switch to this user after boot, so
                     // now is the time to remove obsolete print jobs since they

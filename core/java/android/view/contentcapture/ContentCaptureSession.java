@@ -15,6 +15,7 @@
  */
 package android.view.contentcapture;
 
+import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
@@ -23,6 +24,9 @@ import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.graphics.Insets;
 import android.util.DebugUtils;
 import android.util.Log;
@@ -41,6 +45,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -177,6 +182,14 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /** @hide */
     public static final int FLUSH_REASON_VIEW_TREE_APPEARED = 10;
 
+    /**
+     * After {@link UPSIDE_DOWN_CAKE}, {@link #notifyViewsDisappeared(AutofillId, long[])} wraps
+     * the virtual children with a pair of view tree appearing and view tree appeared events.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = UPSIDE_DOWN_CAKE)
+    static final long NOTIFY_NODES_DISAPPEAR_NOW_SENDS_TREE_EVENTS = 258825825L;
+
     /** @hide */
     @IntDef(prefix = { "FLUSH_REASON_" }, value = {
             FLUSH_REASON_FULL,
@@ -238,7 +251,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         mId = id;
     }
 
-    // Used by ChildCOntentCaptureSession
+    // Used by ChildContentCaptureSession
     ContentCaptureSession(@NonNull ContentCaptureContext initialContext) {
         this();
         mClientContext = Objects.requireNonNull(initialContext);
@@ -371,6 +384,9 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * automatically by the Android System for views that return {@code true} on
      * {@link View#onProvideContentCaptureStructure(ViewStructure, int)}.
      *
+     * <p>Consider use {@link #notifyViewsAppeared} which has a better performance when notifying
+     * a list of nodes has appeared.
+     *
      * @param node node that has been added.
      */
     public final void notifyViewAppeared(@NonNull ViewStructure node) {
@@ -392,6 +408,9 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * <p>Typically called "manually" by views that handle their own virtual view hierarchy, or
      * automatically by the Android System for standard views.
      *
+     * <p>Consider use {@link #notifyViewsDisappeared} which has a better performance when notifying
+     * a list of nodes has disappeared.
+     *
      * @param id id of the node that has been removed.
      */
     public final void notifyViewDisappeared(@NonNull AutofillId id) {
@@ -404,10 +423,41 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     abstract void internalNotifyViewDisappeared(@NonNull AutofillId id);
 
     /**
+     * Notifies the Content Capture Service that a list of nodes has appeared in the view structure.
+     *
+     * <p>Typically called manually by views that handle their own virtual view hierarchy.
+     *
+     * @param appearedNodes nodes that have appeared. Each element represents a view node that has
+     * been added to the view structure. The order of the elements is important, which should be
+     * preserved as the attached order of when the node is attached to the virtual view hierarchy.
+     */
+    public final void notifyViewsAppeared(@NonNull List<ViewStructure> appearedNodes) {
+        Preconditions.checkCollectionElementsNotNull(appearedNodes, "appearedNodes");
+        if (!isContentCaptureEnabled()) return;
+
+        for (int i = 0; i < appearedNodes.size(); i++) {
+            ViewStructure v = appearedNodes.get(i);
+            if (!(v instanceof ViewNode.ViewStructureImpl)) {
+                throw new IllegalArgumentException("Invalid class: " + v.getClass());
+            }
+        }
+
+        internalNotifyViewTreeEvent(/* started= */ true);
+        for (int i = 0; i < appearedNodes.size(); i++) {
+            ViewStructure v = appearedNodes.get(i);
+            internalNotifyViewAppeared((ViewStructureImpl) v);
+        }
+        internalNotifyViewTreeEvent(/* started= */ false);
+    }
+
+    /**
      * Notifies the Content Capture Service that many nodes has been removed from a virtual view
      * structure.
      *
      * <p>Should only be called by views that handle their own virtual view hierarchy.
+     *
+     * <p>After UPSIDE_DOWN_CAKE, this method wraps the virtual children with a pair of view tree
+     * appearing and view tree appeared events.
      *
      * @param hostId id of the non-virtual view hosting the virtual view hierarchy (it can be
      * obtained by calling {@link ViewStructure#getAutofillId()}).
@@ -422,10 +472,16 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         Preconditions.checkArgument(!ArrayUtils.isEmpty(virtualIds), "virtual ids cannot be empty");
         if (!isContentCaptureEnabled()) return;
 
+        if (CompatChanges.isChangeEnabled(NOTIFY_NODES_DISAPPEAR_NOW_SENDS_TREE_EVENTS)) {
+            internalNotifyViewTreeEvent(/* started= */ true);
+        }
         // TODO(b/123036895): use a internalNotifyViewsDisappeared that optimizes how the event is
         // parcelized
         for (long id : virtualIds) {
             internalNotifyViewDisappeared(new AutofillId(hostId, id, mId));
+        }
+        if (CompatChanges.isChangeEnabled(NOTIFY_NODES_DISAPPEAR_NOW_SENDS_TREE_EVENTS)) {
+            internalNotifyViewTreeEvent(/* started= */ false);
         }
     }
 
