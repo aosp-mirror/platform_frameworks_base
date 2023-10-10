@@ -1845,7 +1845,7 @@ public class SyncStorageEngine {
     private void parseListenForTickles(TypedXmlPullParser parser) {
         int userId = 0;
         try {
-            parser.getAttributeInt(null, XML_ATTR_USER);
+            userId = parser.getAttributeInt(null, XML_ATTR_USER);
         } catch (XmlPullParserException e) {
             Slog.e(TAG, "error parsing the user for listen-for-tickles", e);
         }
