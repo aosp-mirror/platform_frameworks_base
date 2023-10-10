@@ -28,27 +28,23 @@ import com.android.systemui.Dependency
  *   flag-disabled builds, but with a check that should crash eng builds or tests when the
  *   expectation is violated.
  *
- * The constructors prefer that you provide a [FeatureFlags] instance, but does not require it,
+ * The constructors require that you provide a [FeatureFlags] instance. If you're using this in a
+ * View class, it's acceptable to ue the [forView] constructor methods, which do not require one,
  * falling back to [Dependency.get]. This fallback should ONLY be used to flag-guard code changes
- * inside views where injecting flag values after initialization can be error-prone.
+ * inside Views where injecting flag values after initialization can be error-prone.
  */
-class ViewRefactorFlag
+class RefactorFlag
 private constructor(
     private val injectedFlags: FeatureFlags?,
-    private val flag: BooleanFlag,
+    private val flagName: Any,
     private val readFlagValue: (FeatureFlags) -> Boolean
 ) {
-    @JvmOverloads
     constructor(
-        flags: FeatureFlags? = null,
+        flags: FeatureFlags,
         flag: UnreleasedFlag
     ) : this(flags, flag, { it.isEnabled(flag) })
 
-    @JvmOverloads
-    constructor(
-        flags: FeatureFlags? = null,
-        flag: ReleasedFlag
-    ) : this(flags, flag, { it.isEnabled(flag) })
+    constructor(flags: FeatureFlags, flag: ReleasedFlag) : this(flags, flag, { it.isEnabled(flag) })
 
     /** Whether the flag is enabled. Called to switch between an old behavior and a new behavior. */
     val isEnabled by lazy {
@@ -69,7 +65,8 @@ private constructor(
      * }
      * ````
      */
-    fun assertDisabled() = check(!isEnabled) { "Code path not supported when $flag is enabled." }
+    fun assertDisabled() =
+        check(!isEnabled) { "Code path not supported when $flagName is enabled." }
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the
@@ -87,13 +84,25 @@ private constructor(
      */
     fun expectEnabled(): Boolean {
         if (!isEnabled) {
-            val message = "Code path not supported when $flag is disabled."
+            val message = "Code path not supported when $flagName is disabled."
             Log.wtf(TAG, message, Exception(message))
         }
         return isEnabled
     }
 
-    private companion object {
-        private const val TAG = "ViewRefactorFlag"
+    companion object {
+        private const val TAG = "RefactorFlag"
+
+        /** Construct a [RefactorFlag] within View construction where injection is impossible. */
+        @JvmStatic
+        @JvmOverloads
+        fun forView(flag: UnreleasedFlag, flags: FeatureFlags? = null) =
+            RefactorFlag(flags, flag) { it.isEnabled(flag) }
+
+        /** Construct a [RefactorFlag] within View construction where injection is impossible. */
+        @JvmStatic
+        @JvmOverloads
+        fun forView(flag: ReleasedFlag, flags: FeatureFlags? = null) =
+            RefactorFlag(flags, flag) { it.isEnabled(flag) }
     }
 }

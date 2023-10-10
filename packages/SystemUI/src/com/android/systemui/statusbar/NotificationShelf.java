@@ -37,11 +37,11 @@ import androidx.annotation.NonNull;
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
-import com.android.systemui.res.R;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.ViewRefactorFlag;
+import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
@@ -96,10 +96,10 @@ public class NotificationShelf extends ActivatableNotificationView implements St
     private float mCornerAnimationDistance;
     private NotificationShelfController mController;
     private float mActualWidth = -1;
-    private final ViewRefactorFlag mSensitiveRevealAnim =
-            new ViewRefactorFlag(Flags.SENSITIVE_REVEAL_ANIM);
-    private final ViewRefactorFlag mShelfRefactor =
-            new ViewRefactorFlag(Flags.NOTIFICATION_SHELF_REFACTOR);
+    private final RefactorFlag mSensitiveRevealAnim =
+            RefactorFlag.forView(Flags.SENSITIVE_REVEAL_ANIM);
+    private final RefactorFlag mShelfRefactor =
+            RefactorFlag.forView(Flags.NOTIFICATION_SHELF_REFACTOR);
     private boolean mCanModifyColorOfNotifications;
     private boolean mCanInteract;
     private NotificationStackScrollLayout mHostLayout;
