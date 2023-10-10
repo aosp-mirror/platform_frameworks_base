@@ -135,6 +135,9 @@ import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.AlphaTintDrawableWrapper;
 import com.android.systemui.util.RoundedCornerProgressDrawable;
+import com.android.systemui.util.settings.SecureSettings;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -304,6 +307,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private @DevicePostureController.DevicePostureInt int mDevicePosture;
     private int mOrientation;
     private final FeatureFlags mFeatureFlags;
+    private final Lazy<SecureSettings> mSecureSettings;
+    private int mDialogTimeoutMillis;
 
     public VolumeDialogImpl(
             Context context,
@@ -320,7 +325,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             DevicePostureController devicePostureController,
             Looper looper,
             DumpManager dumpManager,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            Lazy<SecureSettings> secureSettings) {
         mFeatureFlags = featureFlags;
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
@@ -351,6 +357,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mUseBackgroundBlur =
             mContext.getResources().getBoolean(R.bool.config_volumeDialogUseBackgroundBlur);
         mInteractionJankMonitor = interactionJankMonitor;
+        mSecureSettings = secureSettings;
+        mDialogTimeoutMillis = DIALOG_TIMEOUT_MILLIS;
 
         dumpManager.registerDumpable("VolumeDialogImpl", this);
 
@@ -515,6 +523,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mDialog.setContentView(R.layout.volume_dialog);
         mDialogView = mDialog.findViewById(R.id.volume_dialog);
         mDialogView.setAlpha(0);
+        mDialogTimeoutMillis = mSecureSettings.get().getInt(
+                Settings.Secure.VOLUME_DIALOG_DISMISS_TIMEOUT, DIALOG_TIMEOUT_MILLIS);
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.setOnShowListener(dialog -> {
             mDialogView.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
@@ -527,7 +537,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                     .alpha(1)
                     .translationX(0)
                     .setDuration(mDialogShowAnimationDurationMs)
-                    .setListener(getJankListener(getDialogView(), TYPE_SHOW, DIALOG_TIMEOUT_MILLIS))
+                    .setListener(getJankListener(getDialogView(), TYPE_SHOW, mDialogTimeoutMillis))
                     .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
                     .withEndAction(() -> {
                         if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
@@ -1514,7 +1524,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                     AccessibilityManager.FLAG_CONTENT_TEXT
                             | AccessibilityManager.FLAG_CONTENT_CONTROLS);
         }
-        return mAccessibilityMgr.getRecommendedTimeoutMillis(DIALOG_TIMEOUT_MILLIS,
+        return mAccessibilityMgr.getRecommendedTimeoutMillis(mDialogTimeoutMillis,
                 AccessibilityManager.FLAG_CONTENT_CONTROLS);
     }
 
