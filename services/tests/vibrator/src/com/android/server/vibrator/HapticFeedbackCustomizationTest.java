@@ -31,6 +31,8 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
+import android.os.vibrator.Flags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.AtomicFile;
 import android.util.SparseArray;
 
@@ -49,6 +51,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 public class HapticFeedbackCustomizationTest {
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     @Rule public MockitoRule rule = MockitoJUnit.rule();
 
     // Pairs of valid vibration XML along with their equivalent VibrationEffect.
@@ -77,6 +81,7 @@ public class HapticFeedbackCustomizationTest {
     @Before
     public void setUp() {
         when(mVibratorInfoMock.areVibrationFeaturesSupported(any())).thenReturn(true);
+        mSetFlagsRule.enableFlags(Flags.FLAG_HAPTIC_FEEDBACK_VIBRATION_OEM_CUSTOMIZATION_ENABLED);
     }
 
     @Test
@@ -84,6 +89,21 @@ public class HapticFeedbackCustomizationTest {
         assertParseCustomizationsSucceeds(
                 /* xml= */ "<haptic-feedback-constants></haptic-feedback-constants>",
                 /* expectedCustomizations= */ new SparseArray<>());
+    }
+
+    @Test
+    public void testParseCustomizations_featureFlagDisabled_returnsNull() throws Exception {
+        mSetFlagsRule.disableFlags(Flags.FLAG_HAPTIC_FEEDBACK_VIBRATION_OEM_CUSTOMIZATION_ENABLED);
+        // Valid customization XML.
+        String xml = "<haptic-feedback-constants>"
+                + "<constant id=\"10\">"
+                + COMPOSITION_VIBRATION_XML
+                + "</constant>"
+                + "</haptic-feedback-constants>";
+        setupCustomizationFile(xml);
+
+        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorInfoMock))
+                .isNull();
     }
 
     @Test
