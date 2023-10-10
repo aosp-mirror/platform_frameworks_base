@@ -48,6 +48,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
+import com.android.text.flags.Flags;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -240,21 +241,35 @@ public final class FontManagerService extends IFontManager.Stub {
         mContext = context;
         mIsSafeMode = safeMode;
 
-        SystemServerInitThreadPool.submit(() -> {
-            initialize();
+        if (Flags.useOptimizedBoottimeFontLoading()) {
+            Slog.i(TAG, "Using optimized boot-time font loading.");
+            SystemServerInitThreadPool.submit(() -> {
+                initialize();
 
-            // Set system font map only if there is updatable font directory.
-            // If there is no updatable font directory, `initialize` will have already loaded the
-            // system font map, so there's no need to set the system font map again here.
-            if  (mUpdatableFontDir != null) {
-                try {
-                    Typeface.setSystemFontMap(getCurrentFontMap());
-                } catch (IOException | ErrnoException e) {
-                    Slog.w(TAG, "Failed to set system font map of system_server");
+                // Set system font map only if there is updatable font directory.
+                // If there is no updatable font directory, `initialize` will have already loaded
+                // the system font map, so there's no need to set the system font map again here.
+                synchronized (mUpdatableFontDirLock) {
+                    if  (mUpdatableFontDir != null) {
+                        setSystemFontMap();
+                    }
                 }
-            }
+                serviceStarted.complete(null);
+            }, "FontManagerService_create");
+        } else {
+            Slog.i(TAG, "Not using optimized boot-time font loading.");
+            initialize();
+            setSystemFontMap();
             serviceStarted.complete(null);
-        }, "FontManagerService_create");
+        }
+    }
+
+    private void setSystemFontMap() {
+        try {
+            Typeface.setSystemFontMap(getCurrentFontMap());
+        } catch (IOException | ErrnoException e) {
+            Slog.w(TAG, "Failed to set system font map of system_server");
+        }
     }
 
     @Nullable
@@ -291,9 +306,11 @@ public final class FontManagerService extends IFontManager.Stub {
         synchronized (mUpdatableFontDirLock) {
             mUpdatableFontDir = createUpdatableFontDir();
             if (mUpdatableFontDir == null) {
-                // If fs-verity is not supported, load preinstalled system font map and use it for
-                // all apps.
-                Typeface.loadPreinstalledSystemFontMap();
+                if (Flags.useOptimizedBoottimeFontLoading()) {
+                    // If fs-verity is not supported, load preinstalled system font map and use it
+                    // for all apps.
+                    Typeface.loadPreinstalledSystemFontMap();
+                }
                 setSerializedFontMap(serializeSystemServerFontMap());
                 return;
             }
