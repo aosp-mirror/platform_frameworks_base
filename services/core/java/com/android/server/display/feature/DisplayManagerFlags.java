@@ -121,7 +121,6 @@ public class DisplayManagerFlags {
             mFlagFunction = flagFunction;
         }
 
-        // TODO(b/297159910): Simplify using READ-ONLY flags when available.
         private boolean isEnabled() {
             if (mEnabledSet) {
                 if (DEBUG) {
@@ -138,14 +137,7 @@ public class DisplayManagerFlags {
         }
 
         private boolean flagOrSystemProperty(Supplier<Boolean> flagFunction, String flagName) {
-            boolean flagValue = false;
-            try {
-                flagValue = flagFunction.get();
-            } catch (Throwable ex) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Flags not ready yet. Return false for " + flagName, ex);
-                }
-            }
+            boolean flagValue = flagFunction.get();
             // TODO(b/299462337) Remove when the infrastructure is ready.
             if (Build.IS_ENG || Build.IS_USERDEBUG) {
                 return SystemProperties.getBoolean("persist.sys." + flagName + "-override",
