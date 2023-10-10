@@ -28,11 +28,13 @@ class AppIdAppOpUpgrade(private val policy: AppIdAppOpPolicy) {
     ) {
         if (version <= 2) {
             with(policy) {
-                val appOpMode = getAppOpMode(
-                    packageState.appId, userId, AppOpsManager.OPSTR_RUN_IN_BACKGROUND
-                )
+                val appOpMode =
+                    getAppOpMode(packageState.appId, userId, AppOpsManager.OPSTR_RUN_IN_BACKGROUND)
                 setAppOpMode(
-                    packageState.appId, userId, AppOpsManager.OPSTR_RUN_ANY_IN_BACKGROUND, appOpMode
+                    packageState.appId,
+                    userId,
+                    AppOpsManager.OPSTR_RUN_ANY_IN_BACKGROUND,
+                    appOpMode
                 )
             }
         }
@@ -40,14 +42,19 @@ class AppIdAppOpUpgrade(private val policy: AppIdAppOpPolicy) {
             val permissionName = AppOpsManager.opToPermission(AppOpsManager.OP_SCHEDULE_EXACT_ALARM)
             if (permissionName in packageState.androidPackage!!.requestedPermissions) {
                 with(policy) {
-                    val appOpMode = getAppOpMode(
-                        packageState.appId, userId, AppOpsManager.OPSTR_SCHEDULE_EXACT_ALARM
-                    )
+                    val appOpMode =
+                        getAppOpMode(
+                            packageState.appId,
+                            userId,
+                            AppOpsManager.OPSTR_SCHEDULE_EXACT_ALARM
+                        )
                     val defaultAppOpMode =
                         AppOpsManager.opToDefaultMode(AppOpsManager.OP_SCHEDULE_EXACT_ALARM)
                     if (appOpMode == defaultAppOpMode) {
                         setAppOpMode(
-                            packageState.appId, userId, AppOpsManager.OPSTR_SCHEDULE_EXACT_ALARM,
+                            packageState.appId,
+                            userId,
+                            AppOpsManager.OPSTR_SCHEDULE_EXACT_ALARM,
                             AppOpsManager.MODE_ALLOWED
                         )
                     }

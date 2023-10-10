@@ -26,8 +26,7 @@ data class Permission(
     val isReconciled: Boolean,
     val type: Int,
     val appId: Int,
-    @Suppress("ArrayInDataClass")
-    val gids: IntArray = EmptyArray.INT,
+    @Suppress("ArrayInDataClass") val gids: IntArray = EmptyArray.INT,
     val areGidsPerUser: Boolean = false
 ) {
     inline val name: String
@@ -43,8 +42,7 @@ data class Permission(
         get() = type == TYPE_DYNAMIC
 
     inline val protectionLevel: Int
-        @Suppress("DEPRECATION")
-        get() = permissionInfo.protectionLevel
+        @Suppress("DEPRECATION") get() = permissionInfo.protectionLevel
 
     inline val protection: Int
         get() = permissionInfo.protection

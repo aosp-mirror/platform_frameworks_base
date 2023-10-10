@@ -23,9 +23,7 @@ import com.android.server.permission.access.immutable.* // ktlint-disable no-wil
 import com.android.server.permission.access.util.PackageVersionMigration
 import com.android.server.pm.permission.PermissionMigrationHelper
 
-/**
- * This class migrate legacy permissions to unified permission subsystem
- */
+/** This class migrate legacy permissions to unified permission subsystem */
 class AppIdPermissionMigration {
     internal fun migrateSystemState(state: MutableAccessState) {
         val legacyPermissionsManager =
@@ -34,10 +32,15 @@ class AppIdPermissionMigration {
             return
         }
 
-        migratePermissions(state.mutateSystemState().mutatePermissions(),
-            legacyPermissionsManager.legacyPermissions)
-        migratePermissions(state.mutateSystemState().mutatePermissionTrees(),
-            legacyPermissionsManager.legacyPermissionTrees, true)
+        migratePermissions(
+            state.mutateSystemState().mutatePermissions(),
+            legacyPermissionsManager.legacyPermissions
+        )
+        migratePermissions(
+            state.mutateSystemState().mutatePermissionTrees(),
+            legacyPermissionsManager.legacyPermissionTrees,
+            true
+        )
     }
 
     private fun migratePermissions(
@@ -46,14 +49,15 @@ class AppIdPermissionMigration {
         isPermissionTree: Boolean = false
     ) {
         legacyPermissions.forEach { (_, legacyPermission) ->
-            val permission = Permission(
-                legacyPermission.permissionInfo, false, legacyPermission.type, 0
-            )
+            val permission =
+                Permission(legacyPermission.permissionInfo, false, legacyPermission.type, 0)
             permissions[permission.name] = permission
             if (DEBUG_MIGRATION) {
-                Slog.v(LOG_TAG, "Migrated permission: ${permission.name}, type: " +
-                    "${permission.type}, appId: ${permission.appId}, protectionLevel: " +
-                    "${permission.protectionLevel}, tree: $isPermissionTree"
+                Slog.v(
+                    LOG_TAG,
+                    "Migrated permission: ${permission.name}, type: " +
+                        "${permission.type}, appId: ${permission.appId}, protectionLevel: " +
+                        "${permission.protectionLevel}, tree: $isPermissionTree"
                 )
             }
         }
@@ -81,25 +85,23 @@ class AppIdPermissionMigration {
 
             val permissionFlags = MutableIndexedMap<String, Int>()
             appIdPermissionFlags[appId] = permissionFlags
-            legacyPermissionStates.forEach forEachPermission@ {
+            legacyPermissionStates.forEach forEachPermission@{
                 (permissionName, legacyPermissionState) ->
                 val permission = state.systemState.permissions[permissionName]
                 if (permission == null) {
                     Slog.w(
-                        LOG_TAG, "Dropping unknown permission $permissionName for app ID $appId" +
+                        LOG_TAG,
+                        "Dropping unknown permission $permissionName for app ID $appId" +
                             " when migrating permission state"
                     )
                     return@forEachPermission
                 }
-                permissionFlags[permissionName] = migratePermissionFlags(
-                    permission, legacyPermissionState, appId, userId
-                )
+                permissionFlags[permissionName] =
+                    migratePermissionFlags(permission, legacyPermissionState, appId, userId)
             }
 
             val packageVersions = userState.mutatePackageVersions()
-            packageNames.forEachIndexed { _, packageName ->
-                packageVersions[packageName] = version
-            }
+            packageNames.forEachIndexed { _, packageName -> packageVersions[packageName] = version }
         }
     }
 
@@ -109,29 +111,35 @@ class AppIdPermissionMigration {
         appId: Int,
         userId: Int
     ): Int {
-        var flags = when {
-            permission.isNormal -> if (legacyPermissionState.isGranted) {
-                PermissionFlags.INSTALL_GRANTED
-            } else {
-                PermissionFlags.INSTALL_REVOKED
-            }
-            permission.isSignature || permission.isInternal ->
-                if (legacyPermissionState.isGranted) {
-                    if (permission.isDevelopment || permission.isRole) {
-                        PermissionFlags.PROTECTION_GRANTED or PermissionFlags.RUNTIME_GRANTED
+        var flags =
+            when {
+                permission.isNormal ->
+                    if (legacyPermissionState.isGranted) {
+                        PermissionFlags.INSTALL_GRANTED
                     } else {
-                        PermissionFlags.PROTECTION_GRANTED
+                        PermissionFlags.INSTALL_REVOKED
                     }
-                } else {
-                    0
-                }
-            permission.isRuntime ->
-                if (legacyPermissionState.isGranted) PermissionFlags.RUNTIME_GRANTED else 0
-            else -> 0
-        }
-        flags = PermissionFlags.updateFlags(
-            permission, flags, legacyPermissionState.flags, legacyPermissionState.flags
-        )
+                permission.isSignature || permission.isInternal ->
+                    if (legacyPermissionState.isGranted) {
+                        if (permission.isDevelopment || permission.isRole) {
+                            PermissionFlags.PROTECTION_GRANTED or PermissionFlags.RUNTIME_GRANTED
+                        } else {
+                            PermissionFlags.PROTECTION_GRANTED
+                        }
+                    } else {
+                        0
+                    }
+                permission.isRuntime ->
+                    if (legacyPermissionState.isGranted) PermissionFlags.RUNTIME_GRANTED else 0
+                else -> 0
+            }
+        flags =
+            PermissionFlags.updateFlags(
+                permission,
+                flags,
+                legacyPermissionState.flags,
+                legacyPermissionState.flags
+            )
         if (DEBUG_MIGRATION) {
             val oldFlagString = PermissionFlags.apiFlagsToString(legacyPermissionState.flags)
             val newFlagString = PermissionFlags.toString(flags)
@@ -139,7 +147,8 @@ class AppIdPermissionMigration {
             val newGrantState = PermissionFlags.isPermissionGranted(flags)
             val flagsMismatch = legacyPermissionState.flags != PermissionFlags.toApiFlags(flags)
             Slog.v(
-                LOG_TAG, "Migrated appId: $appId, permission: " +
+                LOG_TAG,
+                "Migrated appId: $appId, permission: " +
                     "${permission.name}, user: $userId, oldGrantState: $oldGrantState" +
                     ", oldFlags: $oldFlagString, newFlags: $newFlagString, grantMismatch: " +
                     "${oldGrantState != newGrantState}, flagsMismatch: $flagsMismatch"

@@ -33,19 +33,16 @@ import com.android.server.permission.access.UidUri
 import com.android.server.permission.access.collection.forEachIndexed
 import com.android.server.permission.access.collection.set
 
-class AppOpService(
-    private val service: AccessCheckingService
-) : AppOpsCheckingServiceInterface {
-    private val packagePolicy = service.getSchemePolicy(PackageUri.SCHEME, AppOpUri.SCHEME)
-        as PackageAppOpPolicy
-    private val appIdPolicy = service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME)
-        as AppIdAppOpPolicy
+class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingServiceInterface {
+    private val packagePolicy =
+        service.getSchemePolicy(PackageUri.SCHEME, AppOpUri.SCHEME) as PackageAppOpPolicy
+    private val appIdPolicy =
+        service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME) as AppIdAppOpPolicy
 
     private val context = service.context
     private lateinit var handler: Handler
 
-    @Volatile
-    private var listeners = ArraySet<AppOpsModeChangedListener>()
+    @Volatile private var listeners = ArraySet<AppOpsModeChangedListener>()
     private val listenersLock = Any()
 
     fun initialize() {
@@ -86,9 +83,7 @@ class AppOpService(
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
         val opName = AppOpsManager.opToPublicName(op)
-        return service.getState {
-            with(appIdPolicy) { getAppOpMode(appId, userId, opName) }
-        }
+        return service.getState { with(appIdPolicy) { getAppOpMode(appId, userId, opName) } }
     }
 
     private fun getUidModes(uid: Int): ArrayMap<String, Int>? {
@@ -115,10 +110,7 @@ class AppOpService(
         }
     }
 
-    private fun getPackageModes(
-        packageName: String,
-        userId: Int
-    ): ArrayMap<String, Int>? =
+    private fun getPackageModes(packageName: String, userId: Int): ArrayMap<String, Int>? =
         service.getState { with(packagePolicy) { getAppOpModes(packageName, userId) } }?.map
 
     override fun setPackageMode(packageName: String, op: Int, mode: Int, userId: Int) {
@@ -131,15 +123,13 @@ class AppOpService(
     override fun removeUid(uid: Int) {
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
-        service.mutateState {
-            with(appIdPolicy) { removeAppOpModes(appId, userId) }
-        }
+        service.mutateState { with(appIdPolicy) { removeAppOpModes(appId, userId) } }
     }
 
     override fun removePackage(packageName: String, userId: Int): Boolean {
         var wasChanged = false
         service.mutateState {
-            wasChanged = with (packagePolicy) { removeAppOpModes(packageName, userId) }
+            wasChanged = with(packagePolicy) { removeAppOpModes(packageName, userId) }
         }
         return wasChanged
     }

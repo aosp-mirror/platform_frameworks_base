@@ -52,9 +52,7 @@ abstract class BaseAppOpPersistence {
     }
 
     protected fun BinaryXmlSerializer.serializeAppOps(appOpModes: IndexedMap<String, Int>) {
-        appOpModes.forEachIndexed { _, name, mode ->
-            serializeAppOp(name, mode)
-        }
+        appOpModes.forEachIndexed { _, name, mode -> serializeAppOp(name, mode) }
     }
 
     private fun BinaryXmlSerializer.serializeAppOp(name: String, mode: Int) {

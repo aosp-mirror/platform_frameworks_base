@@ -18,12 +18,9 @@ package com.android.server.permission.access.immutable
 
 import android.util.ArrayMap
 
-/**
- * Immutable map with index-based access.
- */
-sealed class IndexedMap<K, V>(
-    internal val map: ArrayMap<K, V>
-) : Immutable<MutableIndexedMap<K, V>> {
+/** Immutable map with index-based access. */
+sealed class IndexedMap<K, V>(internal val map: ArrayMap<K, V>) :
+    Immutable<MutableIndexedMap<K, V>> {
     val size: Int
         get() = map.size
 
@@ -31,8 +28,7 @@ sealed class IndexedMap<K, V>(
 
     operator fun contains(key: K): Boolean = map.containsKey(key)
 
-    @Suppress("ReplaceGetOrSet")
-    operator fun get(key: K): V? = map.get(key)
+    @Suppress("ReplaceGetOrSet") operator fun get(key: K): V? = map.get(key)
 
     fun indexOfKey(key: K): Int = map.indexOfKey(key)
 
@@ -45,12 +41,8 @@ sealed class IndexedMap<K, V>(
     override fun toString(): String = map.toString()
 }
 
-/**
- * Mutable map with index-based access.
- */
-class MutableIndexedMap<K, V>(
-    map: ArrayMap<K, V> = ArrayMap()
-) : IndexedMap<K, V>(map) {
+/** Mutable map with index-based access. */
+class MutableIndexedMap<K, V>(map: ArrayMap<K, V> = ArrayMap()) : IndexedMap<K, V>(map) {
     constructor(indexedMap: IndexedMap<K, V>) : this(ArrayMap(indexedMap.map))
 
     fun put(key: K, value: V): V? = map.put(key, value)

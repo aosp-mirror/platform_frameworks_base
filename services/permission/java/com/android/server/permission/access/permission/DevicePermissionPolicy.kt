@@ -53,8 +53,8 @@ class DevicePermissionPolicy : SchemePolicy() {
     override fun MutateStateScope.onAppIdRemoved(appId: Int) {
         newState.userStates.forEachIndexed { userStateIndex, _, userState ->
             if (appId in userState.appIdDevicePermissionFlags) {
-                newState.mutateUserStateAt(userStateIndex)
-                    .mutateAppIdDevicePermissionFlags() -= appId
+                newState.mutateUserStateAt(userStateIndex).mutateAppIdDevicePermissionFlags() -=
+                    appId
             }
         }
     }
@@ -96,10 +96,11 @@ class DevicePermissionPolicy : SchemePolicy() {
         val appId = packageState.appId
         val appIdPermissionFlags = newState.userStates[userId]!!.appIdDevicePermissionFlags
         androidPackage.requestedPermissions.forEach { permissionName ->
-            val isRequestedByOtherPackages = anyPackageInAppId(appId) {
-                it.packageName != packageName &&
-                    permissionName in it.androidPackage!!.requestedPermissions
-            }
+            val isRequestedByOtherPackages =
+                anyPackageInAppId(appId) {
+                    it.packageName != packageName &&
+                        permissionName in it.androidPackage!!.requestedPermissions
+                }
             if (isRequestedByOtherPackages) {
                 return@forEach
             }
@@ -116,7 +117,9 @@ class DevicePermissionPolicy : SchemePolicy() {
         }
         newState.userStates.forEachIndexed { _, userId, userState ->
             userState.appIdDevicePermissionFlags[appId]?.forEachReversedIndexed {
-                    _, deviceId, permissionFlags ->
+                _,
+                deviceId,
+                permissionFlags ->
                 permissionFlags.forEachReversedIndexed { _, permissionName, _ ->
                     if (permissionName !in requestedPermissions) {
                         setPermissionFlags(appId, deviceId, userId, permissionName, 0)
@@ -166,11 +169,17 @@ class DevicePermissionPolicy : SchemePolicy() {
         userId: Int,
         permissionName: String
     ): Int {
-        val flags = state.userStates[userId]?.appIdDevicePermissionFlags?.get(appId)?.get(deviceId)
-                ?.getWithDefault(permissionName, 0) ?: 0
+        val flags =
+            state.userStates[userId]
+                ?.appIdDevicePermissionFlags
+                ?.get(appId)
+                ?.get(deviceId)
+                ?.getWithDefault(permissionName, 0)
+                ?: 0
         if (PermissionManager.DEBUG_DEVICE_PERMISSIONS) {
             Slog.i(
-                LOG_TAG, "getPermissionFlags: appId=$appId, userId=$userId," +
+                LOG_TAG,
+                "getPermissionFlags: appId=$appId, userId=$userId," +
                     " deviceId=$deviceId, permissionName=$permissionName," +
                     " flags=${PermissionFlags.toString(flags)}"
             )
@@ -186,7 +195,12 @@ class DevicePermissionPolicy : SchemePolicy() {
         flags: Int
     ): Boolean =
         updatePermissionFlags(
-            appId, deviceId, userId, permissionName, PermissionFlags.MASK_ALL, flags
+            appId,
+            deviceId,
+            userId,
+            permissionName,
+            PermissionFlags.MASK_ALL,
+            flags
         )
 
     private fun MutateStateScope.updatePermissionFlags(
@@ -201,20 +215,23 @@ class DevicePermissionPolicy : SchemePolicy() {
             Slog.w(LOG_TAG, "$permissionName is not a device aware permission.")
             return false
         }
-        val oldFlags = newState.userStates[userId]!!.appIdDevicePermissionFlags[appId]
-            ?.get(deviceId).getWithDefault(permissionName, 0)
+        val oldFlags =
+            newState.userStates[userId]!!
+                .appIdDevicePermissionFlags[appId]
+                ?.get(deviceId)
+                .getWithDefault(permissionName, 0)
         val newFlags = (oldFlags andInv flagMask) or (flagValues and flagMask)
         if (oldFlags == newFlags) {
             return false
         }
         val appIdDevicePermissionFlags =
             newState.mutateUserState(userId)!!.mutateAppIdDevicePermissionFlags()
-        val devicePermissionFlags = appIdDevicePermissionFlags.mutateOrPut(appId) {
-            MutableIndexedReferenceMap()
-        }
+        val devicePermissionFlags =
+            appIdDevicePermissionFlags.mutateOrPut(appId) { MutableIndexedReferenceMap() }
         if (PermissionManager.DEBUG_DEVICE_PERMISSIONS) {
             Slog.i(
-                LOG_TAG, "setPermissionFlags(): appId=$appId, userId=$userId," +
+                LOG_TAG,
+                "setPermissionFlags(): appId=$appId, userId=$userId," +
                     " deviceId=$deviceId, permissionName=$permissionName," +
                     " newFlags=${PermissionFlags.toString(newFlags)}"
             )
@@ -229,40 +246,39 @@ class DevicePermissionPolicy : SchemePolicy() {
         }
         listeners.forEachIndexed { _, it ->
             it.onDevicePermissionFlagsChanged(
-                appId, userId, deviceId, permissionName, oldFlags, newFlags
+                appId,
+                userId,
+                deviceId,
+                permissionName,
+                oldFlags,
+                newFlags
             )
         }
         return true
     }
 
     fun addOnPermissionFlagsChangedListener(listener: OnDevicePermissionFlagsChangedListener) {
-        synchronized(listenersLock) {
-            listeners = listeners + listener
-        }
+        synchronized(listenersLock) { listeners = listeners + listener }
     }
 
     fun removeOnPermissionFlagsChangedListener(listener: OnDevicePermissionFlagsChangedListener) {
-        synchronized(listenersLock) {
-            listeners = listeners - listener
-        }
+        synchronized(listenersLock) { listeners = listeners - listener }
     }
 
     private fun isDeviceAwarePermission(permissionName: String): Boolean =
-            DEVICE_AWARE_PERMISSIONS.contains(permissionName)
+        DEVICE_AWARE_PERMISSIONS.contains(permissionName)
 
     companion object {
         private val LOG_TAG = DevicePermissionPolicy::class.java.simpleName
 
-        /**
-         * These permissions are supported for virtual devices.
-         */
+        /** These permissions are supported for virtual devices. */
         // TODO: b/298661870 - Use new API to get the list of device aware permissions.
         val DEVICE_AWARE_PERMISSIONS = emptySet<String>()
     }
 
     /**
-     * TODO: b/289355341 - implement listener for permission changes
-     * Listener for permission flags changes.
+     * TODO: b/289355341 - implement listener for permission changes Listener for permission flags
+     *   changes.
      */
     abstract class OnDevicePermissionFlagsChangedListener {
         /**

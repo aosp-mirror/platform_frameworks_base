@@ -27,21 +27,17 @@ package com.android.server.permission.access.immutable
  * exposed on the immutable interface of the data structure as a `getFoo` method, and the [mutate]
  * method exposed on the mutable interface of the data structure as a `mutateFoo` method. When the
  * data structure is mutated/copied, a new instance of this class should be obtained with
- * [toImmutable], which makes the wrapped reference immutable-only again and thus prevents
- * further modifications to a data structure accessed with its immutable interface.
+ * [toImmutable], which makes the wrapped reference immutable-only again and thus prevents further
+ * modifications to a data structure accessed with its immutable interface.
  *
  * @see MutableIndexedReferenceMap
  * @see MutableIntReferenceMap
  */
-class MutableReference<I : Immutable<M>, M : I> private constructor(
-    private var immutable: I,
-    private var mutable: M?
-) {
+class MutableReference<I : Immutable<M>, M : I>
+private constructor(private var immutable: I, private var mutable: M?) {
     constructor(mutable: M) : this(mutable, mutable)
 
-    /**
-     * Return an immutable reference to the wrapped mutable data structure.
-     */
+    /** Return an immutable reference to the wrapped mutable data structure. */
     fun get(): I = immutable
 
     /**
@@ -50,7 +46,9 @@ class MutableReference<I : Immutable<M>, M : I> private constructor(
      * already mutable.
      */
     fun mutate(): M {
-        mutable?.let { return it }
+        mutable?.let {
+            return it
+        }
         return immutable.toMutable().also {
             immutable = it
             mutable = it

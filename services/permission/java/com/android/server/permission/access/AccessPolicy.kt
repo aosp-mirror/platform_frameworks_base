@@ -37,21 +37,24 @@ import com.android.server.permission.access.util.tagName
 import com.android.server.pm.permission.PermissionAllowlist
 import com.android.server.pm.pkg.PackageState
 
-class AccessPolicy private constructor(
+class AccessPolicy
+private constructor(
     private val schemePolicies: IndexedMap<String, IndexedMap<String, SchemePolicy>>
 ) {
     @Suppress("UNCHECKED_CAST")
-    constructor() : this(
-        MutableIndexedMap<String, MutableIndexedMap<String, SchemePolicy>>().apply {
-            fun addPolicy(policy: SchemePolicy) {
-                getOrPut(policy.subjectScheme) { MutableIndexedMap() }[policy.objectScheme] = policy
-            }
-            addPolicy(AppIdPermissionPolicy())
-            addPolicy(DevicePermissionPolicy())
-            addPolicy(AppIdAppOpPolicy())
-            addPolicy(PackageAppOpPolicy())
-        } as IndexedMap<String, IndexedMap<String, SchemePolicy>>
-    )
+    constructor() :
+        this(
+            MutableIndexedMap<String, MutableIndexedMap<String, SchemePolicy>>().apply {
+                fun addPolicy(policy: SchemePolicy) {
+                    getOrPut(policy.subjectScheme) { MutableIndexedMap() }[policy.objectScheme] =
+                        policy
+                }
+                addPolicy(AppIdPermissionPolicy())
+                addPolicy(DevicePermissionPolicy())
+                addPolicy(AppIdAppOpPolicy())
+                addPolicy(PackageAppOpPolicy())
+            } as IndexedMap<String, IndexedMap<String, SchemePolicy>>
+        )
 
     fun getSchemePolicy(subjectScheme: String, objectScheme: String): SchemePolicy =
         checkNotNull(schemePolicies[subjectScheme]?.get(objectScheme)) {
@@ -92,23 +95,17 @@ class AccessPolicy private constructor(
     }
 
     fun GetStateScope.onStateMutated() {
-        forEachSchemePolicy {
-            with(it) { onStateMutated() }
-        }
+        forEachSchemePolicy { with(it) { onStateMutated() } }
     }
 
     fun MutateStateScope.onInitialized() {
-        forEachSchemePolicy {
-            with(it) { onInitialized() }
-        }
+        forEachSchemePolicy { with(it) { onInitialized() } }
     }
 
     fun MutateStateScope.onUserAdded(userId: Int) {
         newState.mutateExternalState().mutateUserIds() += userId
         newState.mutateUserStatesNoWrite()[userId] = MutableUserState()
-        forEachSchemePolicy {
-            with(it) { onUserAdded(userId) }
-        }
+        forEachSchemePolicy { with(it) { onUserAdded(userId) } }
         newState.externalState.packageStates.forEach { (_, packageState) ->
             upgradePackageVersion(packageState, userId)
         }
@@ -117,9 +114,7 @@ class AccessPolicy private constructor(
     fun MutateStateScope.onUserRemoved(userId: Int) {
         newState.mutateExternalState().mutateUserIds() -= userId
         newState.mutateUserStatesNoWrite() -= userId
-        forEachSchemePolicy {
-            with(it) { onUserRemoved(userId) }
-        }
+        forEachSchemePolicy { with(it) { onUserRemoved(userId) } }
     }
 
     fun MutateStateScope.onStorageVolumeMounted(
@@ -154,9 +149,7 @@ class AccessPolicy private constructor(
             setKnownPackages(knownPackages)
         }
         addedAppIds.forEachIndexed { _, appId ->
-            forEachSchemePolicy {
-                with(it) { onAppIdAdded(appId) }
-            }
+            forEachSchemePolicy { with(it) { onAppIdAdded(appId) } }
         }
         forEachSchemePolicy {
             with(it) { onStorageVolumeMounted(volumeUuid, packageNames, isSystemUpdated) }
@@ -192,13 +185,9 @@ class AccessPolicy private constructor(
             setKnownPackages(knownPackages)
         }
         if (isAppIdAdded) {
-            forEachSchemePolicy {
-                with(it) { onAppIdAdded(appId) }
-            }
+            forEachSchemePolicy { with(it) { onAppIdAdded(appId) } }
         }
-        forEachSchemePolicy {
-            with(it) { onPackageAdded(packageState) }
-        }
+        forEachSchemePolicy { with(it) { onPackageAdded(packageState) } }
         newState.userStates.forEachIndexed { _, userId, _ ->
             upgradePackageVersion(packageState, userId)
         }
@@ -227,13 +216,9 @@ class AccessPolicy private constructor(
             }
             setKnownPackages(knownPackages)
         }
-        forEachSchemePolicy {
-            with(it) { onPackageRemoved(packageName, appId) }
-        }
+        forEachSchemePolicy { with(it) { onPackageRemoved(packageName, appId) } }
         if (isAppIdRemoved) {
-            forEachSchemePolicy {
-                with(it) { onAppIdRemoved(appId) }
-            }
+            forEachSchemePolicy { with(it) { onAppIdRemoved(appId) } }
         }
         newState.userStates.forEachIndexed { userStateIndex, _, userState ->
             if (packageName in userState.packageVersions) {
@@ -258,9 +243,7 @@ class AccessPolicy private constructor(
         checkNotNull(packageState) {
             "Installed package $packageName isn't found in packageStates in onPackageInstalled()"
         }
-        forEachSchemePolicy {
-            with(it) { onPackageInstalled(packageState, userId) }
-        }
+        forEachSchemePolicy { with(it) { onPackageInstalled(packageState, userId) } }
     }
 
     fun MutateStateScope.onPackageUninstalled(
@@ -276,9 +259,7 @@ class AccessPolicy private constructor(
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             setKnownPackages(knownPackages)
         }
-        forEachSchemePolicy {
-            with(it) { onPackageUninstalled(packageName, appId, userId) }
-        }
+        forEachSchemePolicy { with(it) { onPackageUninstalled(packageName, appId, userId) } }
     }
 
     fun MutateStateScope.onSystemReady(
@@ -292,21 +273,15 @@ class AccessPolicy private constructor(
             setKnownPackages(knownPackages)
             setSystemReady(true)
         }
-        forEachSchemePolicy {
-            with(it) { onSystemReady() }
-        }
+        forEachSchemePolicy { with(it) { onSystemReady() } }
     }
 
     fun migrateSystemState(state: MutableAccessState) {
-        forEachSchemePolicy {
-            with(it) { migrateSystemState(state) }
-        }
+        forEachSchemePolicy { with(it) { migrateSystemState(state) } }
     }
 
     fun migrateUserState(state: MutableAccessState, userId: Int) {
-        forEachSchemePolicy {
-            with(it) { migrateUserState(state, userId) }
-        }
+        forEachSchemePolicy { with(it) { migrateUserState(state, userId) } }
     }
 
     private fun MutateStateScope.upgradePackageVersion(packageState: PackageState, userId: Int) {
@@ -330,10 +305,12 @@ class AccessPolicy private constructor(
                     VERSION_LATEST
             }
             version == VERSION_LATEST -> {}
-            else -> Slog.w(
-                LOG_TAG, "Unexpected version $version for package $packageName," +
-                    "latest version is $VERSION_LATEST"
-            )
+            else ->
+                Slog.w(
+                    LOG_TAG,
+                    "Unexpected version $version for package $packageName," +
+                        "latest version is $VERSION_LATEST"
+                )
         }
     }
 
@@ -341,11 +318,7 @@ class AccessPolicy private constructor(
         forEachTag {
             when (tagName) {
                 TAG_ACCESS -> {
-                    forEachTag {
-                        forEachSchemePolicy {
-                            with(it) { parseSystemState(state) }
-                        }
-                    }
+                    forEachTag { forEachSchemePolicy { with(it) { parseSystemState(state) } } }
                 }
                 else -> Slog.w(LOG_TAG, "Ignoring unknown tag $tagName when parsing system state")
             }
@@ -353,11 +326,7 @@ class AccessPolicy private constructor(
     }
 
     fun BinaryXmlSerializer.serializeSystemState(state: AccessState) {
-        tag(TAG_ACCESS) {
-            forEachSchemePolicy {
-                with(it) { serializeSystemState(state) }
-            }
-        }
+        tag(TAG_ACCESS) { forEachSchemePolicy { with(it) { serializeSystemState(state) } } }
     }
 
     fun BinaryXmlPullParser.parseUserState(state: MutableAccessState, userId: Int) {
@@ -370,9 +339,7 @@ class AccessPolicy private constructor(
                             TAG_DEFAULT_PERMISSION_GRANT ->
                                 parseDefaultPermissionGrant(state, userId)
                             else -> {
-                                forEachSchemePolicy {
-                                    with(it) { parseUserState(state, userId) }
-                                }
+                                forEachSchemePolicy { with(it) { parseUserState(state, userId) } }
                             }
                         }
                     }
@@ -428,9 +395,7 @@ class AccessPolicy private constructor(
             serializeDefaultPermissionGrantFingerprint(
                 state.userStates[userId]!!.defaultPermissionGrantFingerprint
             )
-            forEachSchemePolicy {
-                with(it) { serializeUserState(state, userId) }
-            }
+            forEachSchemePolicy { with(it) { serializeUserState(state, userId) } }
         }
     }
 
@@ -451,9 +416,7 @@ class AccessPolicy private constructor(
         fingerprint: String?
     ) {
         if (fingerprint != null) {
-            tag(TAG_DEFAULT_PERMISSION_GRANT) {
-                attributeInterned(ATTR_FINGERPRINT, fingerprint)
-            }
+            tag(TAG_DEFAULT_PERMISSION_GRANT) { attributeInterned(ATTR_FINGERPRINT, fingerprint) }
         }
     }
 
@@ -462,9 +425,7 @@ class AccessPolicy private constructor(
 
     private inline fun forEachSchemePolicy(action: (SchemePolicy) -> Unit) {
         schemePolicies.forEachIndexed { _, _, objectSchemePolicies ->
-            objectSchemePolicies.forEachIndexed { _, _, schemePolicy ->
-                action(schemePolicy)
-            }
+            objectSchemePolicies.forEachIndexed { _, _, schemePolicy -> action(schemePolicy) }
         }
     }
 

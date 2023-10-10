@@ -46,7 +46,9 @@ class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
         newState.userStates.forEachIndexed { userStateIndex, _, userState ->
             val packageNameIndex = userState.packageAppOpModes.indexOfKey(packageName)
             if (packageNameIndex >= 0) {
-                newState.mutateUserStateAt(userStateIndex).mutatePackageAppOpModes()
+                newState
+                    .mutateUserStateAt(userStateIndex)
+                    .mutatePackageAppOpModes()
                     .removeAt(packageNameIndex)
                 // Skip notifying the change listeners since the package no longer exists.
             }
@@ -61,18 +63,22 @@ class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
         if (userStateIndex < 0) {
             return false
         }
-        val packageNameIndex = newState.userStates.valueAt(userStateIndex).packageAppOpModes
-            .indexOfKey(packageName)
+        val packageNameIndex =
+            newState.userStates.valueAt(userStateIndex).packageAppOpModes.indexOfKey(packageName)
         if (packageNameIndex < 0) {
             return false
         }
-        newState.mutateUserStateAt(userStateIndex).mutatePackageAppOpModes()
+        newState
+            .mutateUserStateAt(userStateIndex)
+            .mutatePackageAppOpModes()
             .removeAt(packageNameIndex)
         return true
     }
 
     fun GetStateScope.getAppOpMode(packageName: String, userId: Int, appOpName: String): Int =
-        state.userStates[userId]?.packageAppOpModes?.get(packageName)
+        state.userStates[userId]
+            ?.packageAppOpModes
+            ?.get(packageName)
             .getWithDefault(appOpName, AppOpsManager.opToDefaultMode(appOpName))
 
     fun MutateStateScope.setAppOpMode(
@@ -82,8 +88,10 @@ class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
         mode: Int
     ): Boolean {
         val defaultMode = AppOpsManager.opToDefaultMode(appOpName)
-        val oldMode = newState.userStates[userId]!!.packageAppOpModes[packageName]
-            .getWithDefault(appOpName, defaultMode)
+        val oldMode =
+            newState.userStates[userId]!!
+                .packageAppOpModes[packageName]
+                .getWithDefault(appOpName, defaultMode)
         if (oldMode == mode) {
             return false
         }
@@ -123,9 +131,7 @@ class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
         with(upgrade) { upgradePackageState(packageState, userId, version) }
     }
 
-    /**
-     * Listener for app op mode changes.
-     */
+    /** Listener for app op mode changes. */
     abstract class OnAppOpModeChangedListener {
         /**
          * Called when an app op mode change has been made to the upcoming new state.

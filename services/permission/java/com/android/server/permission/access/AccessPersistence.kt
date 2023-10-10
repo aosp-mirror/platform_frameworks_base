@@ -38,16 +38,11 @@ import com.android.server.permission.access.util.writeWithReserveCopy
 import java.io.File
 import java.io.FileNotFoundException
 
-class AccessPersistence(
-    private val policy: AccessPolicy
-) {
+class AccessPersistence(private val policy: AccessPolicy) {
     private val scheduleLock = Any()
-    @GuardedBy("scheduleLock")
-    private val pendingMutationTimesMillis = SparseLongArray()
-    @GuardedBy("scheduleLock")
-    private val pendingStates = MutableIntMap<AccessState>()
-    @GuardedBy("scheduleLock")
-    private lateinit var writeHandler: WriteHandler
+    @GuardedBy("scheduleLock") private val pendingMutationTimesMillis = SparseLongArray()
+    @GuardedBy("scheduleLock") private val pendingStates = MutableIntMap<AccessState>()
+    @GuardedBy("scheduleLock") private lateinit var writeHandler: WriteHandler
 
     private val writeLock = Any()
 
@@ -60,17 +55,16 @@ class AccessPersistence(
      */
     fun read(state: MutableAccessState) {
         readSystemState(state)
-        state.externalState.userIds.forEachIndexed { _, userId ->
-            readUserState(state, userId)
-        }
+        state.externalState.userIds.forEachIndexed { _, userId -> readUserState(state, userId) }
     }
 
     private fun readSystemState(state: MutableAccessState) {
-        val fileExists = systemFile.parse {
-            // This is the canonical way to call an extension function in a different class.
-            // TODO(b/259469752): Use context receiver for this when it becomes stable.
-            with(policy) { parseSystemState(state) }
-        }
+        val fileExists =
+            systemFile.parse {
+                // This is the canonical way to call an extension function in a different class.
+                // TODO(b/259469752): Use context receiver for this when it becomes stable.
+                with(policy) { parseSystemState(state) }
+            }
 
         if (!fileExists) {
             policy.migrateSystemState(state)
@@ -79,9 +73,8 @@ class AccessPersistence(
     }
 
     private fun readUserState(state: MutableAccessState, userId: Int) {
-        val fileExists = getUserFile(userId).parse {
-            with(policy) { parseUserState(state, userId) }
-        }
+        val fileExists =
+            getUserFile(userId).parse { with(policy) { parseUserState(state, userId) } }
 
         if (!fileExists) {
             policy.migrateUserState(state, userId)
@@ -90,8 +83,8 @@ class AccessPersistence(
     }
 
     /**
-     * @return {@code true} if the file is successfully read from the disk; {@code false} if
-     * the file doesn't exist yet.
+     * @return {@code true} if the file is successfully read from the disk; {@code false} if the
+     *   file doesn't exist yet.
      */
     private inline fun File.parse(block: BinaryXmlPullParser.() -> Unit): Boolean =
         try {
@@ -106,9 +99,7 @@ class AccessPersistence(
 
     fun write(state: AccessState) {
         state.systemState.write(state, UserHandle.USER_ALL)
-        state.userStates.forEachIndexed { _, userId, userState ->
-            userState.write(state, userId)
-        }
+        state.userStates.forEachIndexed { _, userId, userState -> userState.write(state, userId) }
     }
 
     private fun WritableState.write(state: AccessState, userId: Int) {
@@ -127,8 +118,10 @@ class AccessPersistence(
                     if (currentDelayMillis > MAX_WRITE_DELAY_MILLIS) {
                         message.sendToTarget()
                     } else {
-                        val newDelayMillis = WRITE_DELAY_TIME_MILLIS
-                            .coerceAtMost(MAX_WRITE_DELAY_MILLIS - currentDelayMillis)
+                        val newDelayMillis =
+                            WRITE_DELAY_TIME_MILLIS.coerceAtMost(
+                                MAX_WRITE_DELAY_MILLIS - currentDelayMillis
+                            )
                         writeHandler.sendMessageDelayed(message, newDelayMillis)
                     }
                 }
@@ -161,15 +154,11 @@ class AccessPersistence(
     }
 
     private fun writeSystemState(state: AccessState) {
-        systemFile.serialize {
-            with(policy) { serializeSystemState(state) }
-        }
+        systemFile.serialize { with(policy) { serializeSystemState(state) } }
     }
 
     private fun writeUserState(state: AccessState, userId: Int) {
-        getUserFile(userId).serialize {
-            with(policy) { serializeUserState(state, userId) }
-        }
+        getUserFile(userId).serialize { with(policy) { serializeUserState(state, userId) } }
     }
 
     private inline fun File.serialize(block: BinaryXmlSerializer.() -> Unit) {

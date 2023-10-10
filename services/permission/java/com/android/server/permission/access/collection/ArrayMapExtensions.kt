@@ -49,7 +49,9 @@ inline fun <K, V> ArrayMap<K, V>.forEachReversedIndexed(action: (Int, K, V) -> U
 }
 
 inline fun <K, V> ArrayMap<K, V>.getOrPut(key: K, defaultValue: () -> V): V {
-    get(key)?.let { return it }
+    get(key)?.let {
+        return it
+    }
     return defaultValue().also { put(key, it) }
 }
 

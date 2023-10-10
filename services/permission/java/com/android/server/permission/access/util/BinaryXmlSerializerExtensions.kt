@@ -20,9 +20,7 @@ import com.android.modules.utils.BinaryXmlSerializer
 import java.io.IOException
 import java.io.OutputStream
 
-/**
- * Serialize content into [OutputStream] with [BinaryXmlSerializer].
- */
+/** Serialize content into [OutputStream] with [BinaryXmlSerializer]. */
 @Throws(IOException::class)
 inline fun OutputStream.serializeBinaryXml(block: BinaryXmlSerializer.() -> Unit) {
     BinaryXmlSerializer().apply {
@@ -57,54 +55,42 @@ inline fun BinaryXmlSerializer.tag(name: String, block: BinaryXmlSerializer.() -
     endTag(null, name)
 }
 
-/**
- * @see BinaryXmlSerializer.attribute
- */
+/** @see BinaryXmlSerializer.attribute */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attribute(name: String, value: String) {
     attribute(null, name, value)
 }
 
-/**
- * @see BinaryXmlSerializer.attributeInterned
- */
+/** @see BinaryXmlSerializer.attributeInterned */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeInterned(name: String, value: String) {
     attributeInterned(null, name, value)
 }
 
-/**
- * @see BinaryXmlSerializer.attributeBytesHex
- */
+/** @see BinaryXmlSerializer.attributeBytesHex */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeBytesHex(name: String, value: ByteArray) {
     attributeBytesHex(null, name, value)
 }
 
-/**
- * @see BinaryXmlSerializer.attributeBytesBase64
- */
+/** @see BinaryXmlSerializer.attributeBytesBase64 */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeBytesBase64(name: String, value: ByteArray) {
     attributeBytesBase64(null, name, value)
 }
 
-/**
- * @see BinaryXmlSerializer.attributeInt
- */
+/** @see BinaryXmlSerializer.attributeInt */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeInt(name: String, value: Int) {
     attributeInt(null, name, value)
 }
 
-/**
- * @see BinaryXmlSerializer.attributeInt
- */
+/** @see BinaryXmlSerializer.attributeInt */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeIntWithDefault(
@@ -117,18 +103,14 @@ inline fun BinaryXmlSerializer.attributeIntWithDefault(
     }
 }
 
-/**
- * @see BinaryXmlSerializer.attributeIntHex
- */
+/** @see BinaryXmlSerializer.attributeIntHex */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeIntHex(name: String, value: Int) {
     attributeIntHex(null, name, value)
 }
 
-/**
- * @see BinaryXmlSerializer.attributeIntHex
- */
+/** @see BinaryXmlSerializer.attributeIntHex */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeIntHexWithDefault(
@@ -141,18 +123,14 @@ inline fun BinaryXmlSerializer.attributeIntHexWithDefault(
     }
 }
 
-/**
- * @see BinaryXmlSerializer.attributeLong
- */
+/** @see BinaryXmlSerializer.attributeLong */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeLong(name: String, value: Long) {
     attributeLong(null, name, value)
 }
 
-/**
- * @see BinaryXmlSerializer.attributeLong
- */
+/** @see BinaryXmlSerializer.attributeLong */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeLongWithDefault(
@@ -165,18 +143,14 @@ inline fun BinaryXmlSerializer.attributeLongWithDefault(
     }
 }
 
-/**
- * @see BinaryXmlSerializer.attributeLongHex
- */
+/** @see BinaryXmlSerializer.attributeLongHex */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeLongHex(name: String, value: Long) {
     attributeLongHex(null, name, value)
 }
 
-/**
- * @see BinaryXmlSerializer.attributeLongHex
- */
+/** @see BinaryXmlSerializer.attributeLongHex */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeLongHexWithDefault(
@@ -189,18 +163,14 @@ inline fun BinaryXmlSerializer.attributeLongHexWithDefault(
     }
 }
 
-/**
- * @see BinaryXmlSerializer.attributeFloat
- */
+/** @see BinaryXmlSerializer.attributeFloat */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeFloat(name: String, value: Float) {
     attributeFloat(null, name, value)
 }
 
-/**
- * @see BinaryXmlSerializer.attributeFloat
- */
+/** @see BinaryXmlSerializer.attributeFloat */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeFloatWithDefault(
@@ -213,18 +183,14 @@ inline fun BinaryXmlSerializer.attributeFloatWithDefault(
     }
 }
 
-/**
- * @see BinaryXmlSerializer.attributeDouble
- */
+/** @see BinaryXmlSerializer.attributeDouble */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeDouble(name: String, value: Double) {
     attributeDouble(null, name, value)
 }
 
-/**
- * @see BinaryXmlSerializer.attributeDouble
- */
+/** @see BinaryXmlSerializer.attributeDouble */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeDoubleWithDefault(
@@ -237,18 +203,14 @@ inline fun BinaryXmlSerializer.attributeDoubleWithDefault(
     }
 }
 
-/**
- * @see BinaryXmlSerializer.attributeBoolean
- */
+/** @see BinaryXmlSerializer.attributeBoolean */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeBoolean(name: String, value: Boolean) {
     attributeBoolean(null, name, value)
 }
 
-/**
- * @see BinaryXmlSerializer.attributeBoolean
- */
+/** @see BinaryXmlSerializer.attributeBoolean */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IOException::class)
 inline fun BinaryXmlSerializer.attributeBooleanWithDefault(
