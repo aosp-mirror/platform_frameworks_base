@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
@@ -68,6 +69,7 @@ import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.testing.TestableContext;
+import android.util.ArraySet;
 import android.view.Display;
 import android.view.DisplayAdjustments;
 import android.view.DisplayInfo;
@@ -597,6 +599,74 @@ public class AccessibilityManagerServiceTest {
 
         assertStartActivityWithExpectedComponentName(mTestableContext.getMockContext(),
                 ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+    }
+
+    @Test
+    public void testPackagesForceStopped_disablesRelevantService() {
+        final AccessibilityServiceInfo info_a = new AccessibilityServiceInfo();
+        info_a.setComponentName(COMPONENT_NAME);
+        final AccessibilityServiceInfo info_b = new AccessibilityServiceInfo();
+        info_b.setComponentName(new ComponentName("package", "class"));
+
+        AccessibilityUserState userState = mA11yms.getCurrentUserState();
+        userState.mInstalledServices.clear();
+        userState.mInstalledServices.add(info_a);
+        userState.mInstalledServices.add(info_b);
+        userState.mEnabledServices.clear();
+        userState.mEnabledServices.add(info_a.getComponentName());
+        userState.mEnabledServices.add(info_b.getComponentName());
+
+        synchronized (mA11yms.getLock()) {
+            mA11yms.onPackagesForceStoppedLocked(
+                    new String[]{info_a.getComponentName().getPackageName()}, userState);
+        }
+
+        //Assert user state change
+        userState = mA11yms.getCurrentUserState();
+        assertThat(userState.mEnabledServices).containsExactly(info_b.getComponentName());
+        //Assert setting change
+        final Set<ComponentName> componentsFromSetting = new ArraySet<>();
+        mA11yms.readComponentNamesFromSettingLocked(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                userState.mUserId, componentsFromSetting);
+        assertThat(componentsFromSetting).containsExactly(info_b.getComponentName());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DISABLE_CONTINUOUS_SHORTCUT_ON_FORCE_STOP)
+    public void testPackagesForceStopped_fromContinuousService_removesButtonTarget() {
+        final AccessibilityServiceInfo info_a = new AccessibilityServiceInfo();
+        info_a.setComponentName(COMPONENT_NAME);
+        info_a.flags = FLAG_REQUEST_ACCESSIBILITY_BUTTON;
+        final AccessibilityServiceInfo info_b = new AccessibilityServiceInfo();
+        info_b.setComponentName(new ComponentName("package", "class"));
+
+        AccessibilityUserState userState = mA11yms.getCurrentUserState();
+        userState.mInstalledServices.clear();
+        userState.mInstalledServices.add(info_a);
+        userState.mInstalledServices.add(info_b);
+        userState.mAccessibilityButtonTargets.clear();
+        userState.mAccessibilityButtonTargets.add(info_a.getComponentName().flattenToString());
+        userState.mAccessibilityButtonTargets.add(info_b.getComponentName().flattenToString());
+
+        // despite force stopping both packages, only the first service has the relevant flag,
+        // so only the first should be removed.
+        synchronized (mA11yms.getLock()) {
+            mA11yms.onPackagesForceStoppedLocked(
+                    new String[]{
+                            info_a.getComponentName().getPackageName(),
+                            info_b.getComponentName().getPackageName()},
+                    userState);
+        }
+
+        //Assert user state change
+        userState = mA11yms.getCurrentUserState();
+        assertThat(userState.mAccessibilityButtonTargets).containsExactly(
+                info_b.getComponentName().flattenToString());
+        //Assert setting change
+        final Set<String> targetsFromSetting = new ArraySet<>();
+        mA11yms.readColonDelimitedSettingToSet(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                userState.mUserId, str -> str, targetsFromSetting);
+        assertThat(targetsFromSetting).containsExactly(info_b.getComponentName().flattenToString());
     }
 
     @Test
