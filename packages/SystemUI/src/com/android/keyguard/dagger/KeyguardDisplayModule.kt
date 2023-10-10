@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.view.Display
 import com.android.systemui.dagger.qualifiers.DisplaySpecific
+import com.android.systemui.util.kotlin.getOrNull
 import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
@@ -23,11 +24,12 @@ abstract class KeyguardDisplayModule {
     companion object {
         @Provides
         @DisplaySpecific
-        fun getDisplayContext(context: Context, display: Optional<Display>): Context {
-            return if (display.isPresent) {
-                context.createDisplayContext(display.get())
-            } else {
+        fun getDisplayContext(context: Context, optionalDisplay: Optional<Display>): Context {
+            val display = optionalDisplay.getOrNull() ?: return context
+            return if (context.displayId == display.displayId) {
                 context
+            } else {
+                context.createDisplayContext(display)
             }
         }
 
