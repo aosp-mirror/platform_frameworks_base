@@ -28,11 +28,13 @@ import kotlinx.coroutines.flow.Flow
 class CommunalInteractor
 @Inject
 constructor(
-    communalRepository: CommunalRepository,
+    private val communalRepository: CommunalRepository,
     widgetRepository: CommunalWidgetRepository,
 ) {
+
     /** Whether communal features are enabled. */
-    val isCommunalEnabled: Boolean = communalRepository.isCommunalEnabled
+    val isCommunalEnabled: Boolean
+        get() = communalRepository.isCommunalEnabled
 
     /** A flow of info about the widget to be displayed, or null if widget is unavailable. */
     val appWidgetInfo: Flow<CommunalAppWidgetInfo?> = widgetRepository.stopwatchAppWidgetInfo
