@@ -48,6 +48,7 @@
     <protected-broadcast android:name="android.intent.action.CANCEL_ENABLE_ROLLBACK" />
     <protected-broadcast android:name="android.intent.action.ROLLBACK_COMMITTED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_RESTARTED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_UNSTOPPED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_FIRST_LAUNCH" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION" />
