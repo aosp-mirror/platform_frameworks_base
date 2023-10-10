@@ -27,6 +27,7 @@ import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_R
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HIGH_ZONE;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_LOW_ZONE;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.server.display.mode.Vote.INVALID_SIZE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -85,10 +86,12 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.display.BrightnessSynchronizer;
+import com.android.internal.display.RefreshRateSettingsUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
+import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.TestUtils;
 import com.android.server.display.feature.DisplayManagerFlags;
@@ -106,7 +109,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
@@ -252,9 +255,15 @@ public class DisplayModeDirectorTest {
     @Mock
     private DisplayManagerFlags mDisplayManagerFlags;
 
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule =
+            new ExtendedMockitoRule.Builder(this)
+                    .setStrictness(Strictness.LENIENT)
+                    .spyStatic(RefreshRateSettingsUtils.class)
+                    .build();
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         mContext = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         final MockContentResolver resolver = mSettingsProviderRule.mockContentResolver(mContext);
         when(mContext.getContentResolver()).thenReturn(resolver);
@@ -1467,6 +1476,94 @@ public class DisplayModeDirectorTest {
         vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
         assertThat(vote).isNotNull();
         assertThat(vote.disableRefreshRateSwitching).isTrue();
+    }
+
+    @Test
+    public void testPeakRefreshRate_FlagEnabled() {
+        when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
+                .thenReturn(true);
+        float highestRefreshRate = 130;
+        doReturn(highestRefreshRate).when(() ->
+                RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(mContext));
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+
+        setPeakRefreshRate(Float.POSITIVE_INFINITY);
+
+        Vote vote = director.getVote(Display.DEFAULT_DISPLAY,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 0, /* frameRateHigh= */
+                highestRefreshRate);
+    }
+
+    @Test
+    public void testPeakRefreshRate_FlagDisabled() {
+        when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
+                .thenReturn(false);
+        float peakRefreshRate = 130;
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+
+        setPeakRefreshRate(peakRefreshRate);
+
+        Vote vote = director.getVote(Display.DEFAULT_DISPLAY,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 0, /* frameRateHigh= */
+                peakRefreshRate);
+    }
+
+    @Test
+    public void testMinRefreshRate_FlagEnabled() {
+        when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
+                .thenReturn(true);
+        float highestRefreshRate = 130;
+        doReturn(highestRefreshRate).when(() ->
+                RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(mContext));
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+
+        setMinRefreshRate(Float.POSITIVE_INFINITY);
+
+        Vote vote = director.getVote(Display.DEFAULT_DISPLAY,
+                Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ highestRefreshRate,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+    }
+
+    @Test
+    public void testMinRefreshRate_FlagDisabled() {
+        when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
+                .thenReturn(false);
+        float minRefreshRate = 130;
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+
+        setMinRefreshRate(minRefreshRate);
+
+        Vote vote = director.getVote(Display.DEFAULT_DISPLAY,
+                Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ minRefreshRate,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
     }
 
     @Test
@@ -3167,6 +3264,13 @@ public class DisplayModeDirectorTest {
         waitForIdleSync();
     }
 
+    private void setMinRefreshRate(float fps) {
+        Settings.System.putFloat(mContext.getContentResolver(), Settings.System.MIN_REFRESH_RATE,
+                fps);
+        mInjector.notifyMinRefreshRateChanged();
+        waitForIdleSync();
+    }
+
     private static SensorManager createMockSensorManager(Sensor... sensors) {
         SensorManager sensorManager = mock(SensorManager.class);
         when(sensorManager.getSensorList(anyInt())).then((invocation) -> {
@@ -3216,6 +3320,7 @@ public class DisplayModeDirectorTest {
         private final SensorManagerInternal mSensorManagerInternal;
 
         private ContentObserver mPeakRefreshRateObserver;
+        private ContentObserver mMinRefreshRateObserver;
 
         FakesInjector() {
             this(null, null, null);
@@ -3244,6 +3349,12 @@ public class DisplayModeDirectorTest {
         public void registerPeakRefreshRateObserver(@NonNull ContentResolver cr,
                 @NonNull ContentObserver observer) {
             mPeakRefreshRateObserver = observer;
+        }
+
+        @Override
+        public void registerMinRefreshRateObserver(@NonNull ContentResolver cr,
+                @NonNull ContentObserver observer) {
+            mMinRefreshRateObserver = observer;
         }
 
         @Override
@@ -3316,6 +3427,13 @@ public class DisplayModeDirectorTest {
             if (mPeakRefreshRateObserver != null) {
                 mPeakRefreshRateObserver.dispatchChange(false /*selfChange*/,
                         PEAK_REFRESH_RATE_URI);
+            }
+        }
+
+        void notifyMinRefreshRateChanged() {
+            if (mMinRefreshRateObserver != null) {
+                mMinRefreshRateObserver.dispatchChange(false /*selfChange*/,
+                        MIN_REFRESH_RATE_URI);
             }
         }
     }

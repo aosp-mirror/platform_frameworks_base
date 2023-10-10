@@ -21,6 +21,7 @@ import static android.provider.settings.validators.SettingsValidators.ANY_STRING
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COMPONENT_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.LENIENT_IP_ADDRESS_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_FLOAT_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.URI_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.VIBRATION_INTENSITY_VALIDATOR;
@@ -236,5 +237,7 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.CAMERA_FLASH_NOTIFICATION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.SCREEN_FLASH_NOTIFICATION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.SCREEN_FLASH_NOTIFICATION_COLOR, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(System.PEAK_REFRESH_RATE, NON_NEGATIVE_FLOAT_VALIDATOR);
+        VALIDATORS.put(System.MIN_REFRESH_RATE, NON_NEGATIVE_FLOAT_VALIDATOR);
     }
 }
