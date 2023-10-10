@@ -171,7 +171,6 @@ public class LockPatternUtils {
      */
     public static final int USER_FRP = UserHandle.USER_NULL + 1;
 
-    public final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
     @Deprecated
     public final static String PASSWORD_TYPE_ALTERNATE_KEY = "lockscreen.password_type_alternate";
@@ -597,16 +596,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Return true if the user has ever chosen a pattern.  This is true even if the pattern is
-     * currently cleared.
-     *
-     * @return True if the user has ever chosen a pattern.
-     */
-    public boolean isPatternEverChosen(int userId) {
-        return getBoolean(PATTERN_EVER_CHOSEN_KEY, false, userId);
-    }
-
-    /**
      * Returns the length of the PIN set by a particular user.
      * @param userId user id of the user whose pin length we have to return
      * @return
@@ -638,13 +627,6 @@ public class LockPatternUtils {
             Log.e(TAG, "Could not store PIN length on disk " + e);
             return false;
         }
-    }
-    /**
-     * Records that the user has chosen a pattern at some time, even if the pattern is
-     * currently cleared.
-     */
-    public void reportPatternWasChosen(int userId) {
-        setBoolean(PATTERN_EVER_CHOSEN_KEY, true, userId);
     }
 
     /**

@@ -961,7 +961,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                         lockPatternUtils.setOwnerInfo(value, userId);
                         break;
                     case KEY_LOCK_SETTINGS_VISIBLE_PATTERN_ENABLED:
-                        lockPatternUtils.reportPatternWasChosen(userId);
                         lockPatternUtils.setVisiblePatternEnabled("1".equals(value), userId);
                         break;
                     case KEY_LOCK_SETTINGS_POWER_BUTTON_INSTANTLY_LOCKS:
