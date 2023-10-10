@@ -368,6 +368,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_FIRST_INSTALL_TIME = "first-install-time";
     private static final String ATTR_ARCHIVE_ACTIVITY_TITLE = "activity-title";
+    private static final String ATTR_ARCHIVE_ORIGINAL_COMPONENT_NAME = "original-component-name";
     private static final String ATTR_ARCHIVE_INSTALLER_TITLE = "installer-title";
     private static final String ATTR_ARCHIVE_ICON_PATH = "icon-path";
     private static final String ATTR_ARCHIVE_MONOCHROME_ICON_PATH = "monochrome-icon-path";
@@ -2068,6 +2069,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             if (tagName.equals(TAG_ARCHIVE_ACTIVITY_INFO)) {
                 String title = parser.getAttributeValue(null,
                         ATTR_ARCHIVE_ACTIVITY_TITLE);
+                String originalComponentName =
+                        parser.getAttributeValue(null, ATTR_ARCHIVE_ORIGINAL_COMPONENT_NAME);
                 String iconAttribute = parser.getAttributeValue(null,
                         ATTR_ARCHIVE_ICON_PATH);
                 Path iconPath = iconAttribute == null ? null : Path.of(iconAttribute);
@@ -2076,17 +2079,27 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 Path monochromeIconPath = monochromeAttribute == null ? null : Path.of(
                         monochromeAttribute);
 
-                if (title == null || iconPath == null) {
-                    Slog.wtf(TAG,
-                            TextUtils.formatSimple("Missing attributes in tag %s. %s: %s, %s: %s",
-                                    TAG_ARCHIVE_ACTIVITY_INFO, ATTR_ARCHIVE_ACTIVITY_TITLE, title,
+                if (title == null || originalComponentName == null || iconPath == null) {
+                    Slog.wtf(
+                            TAG,
+                            TextUtils.formatSimple(
+                                    "Missing attributes in tag %s. %s: %s, %s: %s, %s: %s",
+                                    TAG_ARCHIVE_ACTIVITY_INFO,
+                                    ATTR_ARCHIVE_ACTIVITY_TITLE,
+                                    title,
+                                    ATTR_ARCHIVE_ORIGINAL_COMPONENT_NAME,
+                                    originalComponentName,
                                     ATTR_ARCHIVE_ICON_PATH,
                                     iconPath));
                     continue;
                 }
 
                 activityInfos.add(
-                        new ArchiveState.ArchiveActivityInfo(title, iconPath, monochromeIconPath));
+                        new ArchiveState.ArchiveActivityInfo(
+                                title,
+                                ComponentName.unflattenFromString(originalComponentName),
+                                iconPath,
+                                monochromeIconPath));
             }
         }
         return activityInfos;
@@ -2458,6 +2471,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         for (ArchiveState.ArchiveActivityInfo activityInfo : archiveState.getActivityInfos()) {
             serializer.startTag(null, TAG_ARCHIVE_ACTIVITY_INFO);
             serializer.attribute(null, ATTR_ARCHIVE_ACTIVITY_TITLE, activityInfo.getTitle());
+            serializer.attribute(
+                    null,
+                    ATTR_ARCHIVE_ORIGINAL_COMPONENT_NAME,
+                    activityInfo.getOriginalComponentName().flattenToString());
             if (activityInfo.getIconBitmap() != null) {
                 serializer.attribute(null, ATTR_ARCHIVE_ICON_PATH,
                         activityInfo.getIconBitmap().toAbsolutePath().toString());

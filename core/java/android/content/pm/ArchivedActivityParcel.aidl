@@ -16,9 +16,12 @@
 
 package android.content.pm;
 
+import android.content.ComponentName;
+
 /** @hide */
 parcelable ArchivedActivityParcel {
     String title;
+    ComponentName originalComponentName;
     // PNG compressed bitmaps.
     byte[] iconBitmap;
     byte[] monochromeIconBitmap;
