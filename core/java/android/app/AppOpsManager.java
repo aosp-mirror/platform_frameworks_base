@@ -1478,7 +1478,8 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_RECORD_AUDIO_SANDBOXED;
 
     /**
-     * Allows the assistant app to receive the PCC-validated hotword and be voice-triggered.
+     * Allows the assistant app to be voice-triggered by detected hotwords from a trusted detection
+     * service.
      *
      * @hide
      */
