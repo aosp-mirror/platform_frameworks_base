@@ -18,6 +18,8 @@ package com.android.systemui.statusbar;
 
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 import com.android.app.animation.Interpolators;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -113,7 +115,16 @@ public class CrossFadeHelper {
         fadeIn(view, ANIMATION_DURATION_LENGTH, 0);
     }
 
+    public static void fadeIn(final View view, Runnable endRunnable) {
+        fadeIn(view, ANIMATION_DURATION_LENGTH, /* delay= */ 0, endRunnable);
+    }
+
     public static void fadeIn(final View view, long duration, int delay) {
+        fadeIn(view, duration, delay, /* endRunnable= */ null);
+    }
+
+    public static void fadeIn(final View view, long duration, int delay,
+            @Nullable Runnable endRunnable) {
         view.animate().cancel();
         if (view.getVisibility() == View.INVISIBLE) {
             view.setAlpha(0.0f);
@@ -124,7 +135,7 @@ public class CrossFadeHelper {
                 .setDuration(duration)
                 .setStartDelay(delay)
                 .setInterpolator(Interpolators.ALPHA_IN)
-                .withEndAction(null);
+                .withEndAction(endRunnable);
         if (view.hasOverlappingRendering() && view.getLayerType() != View.LAYER_TYPE_HARDWARE) {
             view.animate().withLayer();
         }

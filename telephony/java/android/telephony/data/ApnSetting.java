@@ -532,7 +532,7 @@ public class ApnSetting implements Parcelable {
     /**
      * Returns the default MTU (Maximum Transmission Unit) size in bytes of the IPv4 routes brought
      * up by this APN setting. Note this value will only be used when MTU size is not provided
-     * in {@link DataCallResponse#getMtuV4()} during network bring up.
+     * in {@code DataCallResponse#getMtuV4()} during network bring up.
      *
      * @return the MTU size in bytes of the route.
      */
@@ -542,7 +542,7 @@ public class ApnSetting implements Parcelable {
 
     /**
      * Returns the MTU size of the IPv6 mobile interface to which the APN connected. Note this value
-     * will only be used when MTU size is not provided in {@link DataCallResponse#getMtuV6()}
+     * will only be used when MTU size is not provided in {@code DataCallResponse#getMtuV6()}
      * during network bring up.
      *
      * @return the MTU size in bytes of the route.
@@ -1787,7 +1787,7 @@ public class ApnSetting implements Parcelable {
         /**
          * Set the default MTU (Maximum Transmission Unit) size in bytes of the IPv4 routes brought
          * up by this APN setting. Note this value will only be used when MTU size is not provided
-         * in {@link DataCallResponse#getMtuV4()} during network bring up.
+         * in {@code DataCallResponse#getMtuV4()} during network bring up.
          *
          * @param mtuV4 the MTU size in bytes of the route.
          */
@@ -1799,7 +1799,7 @@ public class ApnSetting implements Parcelable {
         /**
          * Set the default MTU (Maximum Transmission Unit) size in bytes of the IPv6 routes brought
          * up by this APN setting. Note this value will only be used when MTU size is not provided
-         * in {@link DataCallResponse#getMtuV6()} during network bring up.
+         * in {@code DataCallResponse#getMtuV6()} during network bring up.
          *
          * @param mtuV6 the MTU size in bytes of the route.
          */

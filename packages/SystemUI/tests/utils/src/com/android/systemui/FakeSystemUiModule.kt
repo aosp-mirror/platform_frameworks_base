@@ -24,6 +24,7 @@ import com.android.systemui.settings.FakeSettingsModule
 import com.android.systemui.statusbar.policy.FakeConfigurationControllerModule
 import com.android.systemui.statusbar.policy.FakeSplitShadeStateControllerModule
 import com.android.systemui.util.concurrency.FakeExecutorModule
+import com.android.systemui.util.time.FakeSystemClockModule
 import dagger.Module
 
 @Module(
@@ -36,6 +37,7 @@ import dagger.Module
             FakeSceneModule::class,
             FakeSettingsModule::class,
             FakeSplitShadeStateControllerModule::class,
+            FakeSystemClockModule::class,
             FakeSystemUiDataLayerModule::class,
             FakeUiEventLoggerModule::class,
         ]

@@ -32,11 +32,16 @@ import android.os.Bundle
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.provider.Settings
+import android.util.proto.ProtoOutputStream
 import android.view.InputDevice
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodSubtype
 import androidx.test.core.R
 import androidx.test.core.app.ApplicationProvider
+import com.android.dx.mockito.inline.extended.ExtendedMockito
+import com.android.internal.os.KeyboardConfiguredProto
+import com.android.internal.util.FrameworkStatsLog
+import com.android.modules.utils.testing.ExtendedMockitoRule
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -46,9 +51,9 @@ import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.junit.MockitoJUnit
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
@@ -96,6 +101,9 @@ class KeyboardLayoutManagerTests {
         private const val ENGLISH_US_LAYOUT_NAME = "keyboard_layout_english_us"
         private const val ENGLISH_UK_LAYOUT_NAME = "keyboard_layout_english_uk"
         private const val VENDOR_SPECIFIC_LAYOUT_NAME = "keyboard_layout_vendorId:1,productId:1"
+        const val LAYOUT_TYPE_QWERTZ = 2
+        const val LAYOUT_TYPE_QWERTY = 1
+        const val LAYOUT_TYPE_DEFAULT = 0
     }
 
     private val ENGLISH_US_LAYOUT_DESCRIPTOR = createLayoutDescriptor(ENGLISH_US_LAYOUT_NAME)
@@ -103,8 +111,10 @@ class KeyboardLayoutManagerTests {
     private val VENDOR_SPECIFIC_LAYOUT_DESCRIPTOR =
         createLayoutDescriptor(VENDOR_SPECIFIC_LAYOUT_NAME)
 
-    @get:Rule
-    val rule = MockitoJUnit.rule()!!
+    @JvmField
+    @Rule
+    val extendedMockitoRule = ExtendedMockitoRule.Builder(this)
+            .mockStatic(FrameworkStatsLog::class.java).build()!!
 
     @Mock
     private lateinit var iInputManager: IInputManager
@@ -145,7 +155,9 @@ class KeyboardLayoutManagerTests {
             override fun finishWrite(fos: FileOutputStream?, success: Boolean) {}
         })
         testLooper = TestLooper()
-        keyboardLayoutManager = KeyboardLayoutManager(context, native, dataStore, testLooper.looper)
+        keyboardLayoutManager = Mockito.spy(
+            KeyboardLayoutManager(context, native, dataStore, testLooper.looper)
+        )
         setupInputDevices()
         setupBroadcastReceiver()
         setupIme()
@@ -827,6 +839,100 @@ class KeyboardLayoutManagerTests {
         }
     }
 
+    @Test
+    fun testConfigurationLogged_onInputDeviceAdded_VirtualKeyboardBasedSelection() {
+        val imeInfos = listOf(
+                KeyboardLayoutManager.ImeInfo(0, imeInfo,
+                        createImeSubtypeForLanguageTagAndLayoutType("de-Latn", "qwertz")))
+        Mockito.doReturn(imeInfos).`when`(keyboardLayoutManager).imeInfoListForLayoutMapping
+        NewSettingsApiFlag(true).use {
+            keyboardLayoutManager.onInputDeviceAdded(keyboardDevice.id)
+            ExtendedMockito.verify {
+                FrameworkStatsLog.write(
+                        ArgumentMatchers.eq(FrameworkStatsLog.KEYBOARD_CONFIGURED),
+                        ArgumentMatchers.anyBoolean(),
+                        ArgumentMatchers.eq(keyboardDevice.vendorId),
+                        ArgumentMatchers.eq(keyboardDevice.productId),
+                        ArgumentMatchers.eq(createByteArray(
+                                KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
+                                LAYOUT_TYPE_DEFAULT,
+                                "German",
+                                KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD,
+                                "de-Latn",
+                                LAYOUT_TYPE_QWERTZ))
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testConfigurationLogged_onInputDeviceAdded_DeviceBasedSelection() {
+        val imeInfos = listOf(
+                KeyboardLayoutManager.ImeInfo(0, imeInfo,
+                        createImeSubtypeForLanguageTagAndLayoutType("de-Latn", "qwertz")))
+        Mockito.doReturn(imeInfos).`when`(keyboardLayoutManager).imeInfoListForLayoutMapping
+        NewSettingsApiFlag(true).use {
+            keyboardLayoutManager.onInputDeviceAdded(englishQwertyKeyboardDevice.id)
+            ExtendedMockito.verify {
+                FrameworkStatsLog.write(
+                        ArgumentMatchers.eq(FrameworkStatsLog.KEYBOARD_CONFIGURED),
+                        ArgumentMatchers.anyBoolean(),
+                        ArgumentMatchers.eq(englishQwertyKeyboardDevice.vendorId),
+                        ArgumentMatchers.eq(englishQwertyKeyboardDevice.productId),
+                        ArgumentMatchers.eq(createByteArray(
+                                "en",
+                                LAYOUT_TYPE_QWERTY,
+                                "English (US)",
+                                KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE,
+                                "de-Latn",
+                                LAYOUT_TYPE_QWERTZ))
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testConfigurationLogged_onInputDeviceAdded_DefaultSelection() {
+        val imeInfos = listOf(KeyboardLayoutManager.ImeInfo(0, imeInfo, createImeSubtype()))
+        Mockito.doReturn(imeInfos).`when`(keyboardLayoutManager).imeInfoListForLayoutMapping
+        NewSettingsApiFlag(true).use {
+            keyboardLayoutManager.onInputDeviceAdded(keyboardDevice.id)
+            ExtendedMockito.verify {
+                FrameworkStatsLog.write(
+                        ArgumentMatchers.eq(FrameworkStatsLog.KEYBOARD_CONFIGURED),
+                        ArgumentMatchers.anyBoolean(),
+                        ArgumentMatchers.eq(keyboardDevice.vendorId),
+                        ArgumentMatchers.eq(keyboardDevice.productId),
+                        ArgumentMatchers.eq(createByteArray(
+                                KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
+                                LAYOUT_TYPE_DEFAULT,
+                                "Default",
+                                KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEFAULT,
+                                KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
+                                LAYOUT_TYPE_DEFAULT))
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testConfigurationNotLogged_onInputDeviceChanged() {
+        val imeInfos = listOf(KeyboardLayoutManager.ImeInfo(0, imeInfo, createImeSubtype()))
+        Mockito.doReturn(imeInfos).`when`(keyboardLayoutManager).imeInfoListForLayoutMapping
+        NewSettingsApiFlag(true).use {
+            keyboardLayoutManager.onInputDeviceChanged(keyboardDevice.id)
+            ExtendedMockito.verify({
+                FrameworkStatsLog.write(
+                        ArgumentMatchers.eq(FrameworkStatsLog.KEYBOARD_CONFIGURED),
+                        ArgumentMatchers.anyBoolean(),
+                        ArgumentMatchers.anyInt(),
+                        ArgumentMatchers.anyInt(),
+                        ArgumentMatchers.any(ByteArray::class.java)
+                )
+            }, Mockito.times(0))
+        }
+    }
+
     private fun assertCorrectLayout(
         device: InputDevice,
         imeSubtype: InputMethodSubtype,
@@ -842,18 +948,60 @@ class KeyboardLayoutManagerTests {
     }
 
     private fun createImeSubtype(): InputMethodSubtype =
-        InputMethodSubtype.InputMethodSubtypeBuilder().setSubtypeId(nextImeSubtypeId++).build()
+            createImeSubtypeForLanguageTagAndLayoutType(null, null)
 
     private fun createImeSubtypeForLanguageTag(languageTag: String): InputMethodSubtype =
-        InputMethodSubtype.InputMethodSubtypeBuilder().setSubtypeId(nextImeSubtypeId++)
-            .setLanguageTag(languageTag).build()
+            createImeSubtypeForLanguageTagAndLayoutType(languageTag, null)
 
     private fun createImeSubtypeForLanguageTagAndLayoutType(
-        languageTag: String,
-        layoutType: String
-    ): InputMethodSubtype =
-        InputMethodSubtype.InputMethodSubtypeBuilder().setSubtypeId(nextImeSubtypeId++)
-            .setPhysicalKeyboardHint(ULocale.forLanguageTag(languageTag), layoutType).build()
+            languageTag: String?,
+            layoutType: String?
+    ): InputMethodSubtype {
+        val builder = InputMethodSubtype.InputMethodSubtypeBuilder()
+                .setSubtypeId(nextImeSubtypeId++)
+                .setIsAuxiliary(false)
+                .setSubtypeMode("keyboard")
+        if (languageTag != null && layoutType != null) {
+            builder.setPhysicalKeyboardHint(ULocale.forLanguageTag(languageTag), layoutType)
+        } else if (languageTag != null) {
+            builder.setLanguageTag(languageTag)
+        }
+        return builder.build()
+    }
+
+    private fun createByteArray(
+            expectedLanguageTag: String, expectedLayoutType: Int, expectedLayoutName: String,
+            expectedCriteria: Int, expectedImeLanguageTag: String, expectedImeLayoutType: Int): ByteArray {
+        val proto = ProtoOutputStream()
+        val keyboardLayoutConfigToken = proto.start(
+                KeyboardConfiguredProto.RepeatedKeyboardLayoutConfig.KEYBOARD_LAYOUT_CONFIG)
+        proto.write(
+                KeyboardConfiguredProto.KeyboardLayoutConfig.KEYBOARD_LANGUAGE_TAG,
+                expectedLanguageTag
+        )
+        proto.write(
+                KeyboardConfiguredProto.KeyboardLayoutConfig.KEYBOARD_LAYOUT_TYPE,
+                expectedLayoutType
+        )
+        proto.write(
+                KeyboardConfiguredProto.KeyboardLayoutConfig.KEYBOARD_LAYOUT_NAME,
+                expectedLayoutName
+        )
+        proto.write(
+                KeyboardConfiguredProto.KeyboardLayoutConfig.LAYOUT_SELECTION_CRITERIA,
+                expectedCriteria
+        )
+        proto.write(
+                KeyboardConfiguredProto.KeyboardLayoutConfig.IME_LANGUAGE_TAG,
+                expectedImeLanguageTag
+        )
+        proto.write(
+                KeyboardConfiguredProto.KeyboardLayoutConfig.IME_LAYOUT_TYPE,
+                expectedImeLayoutType
+        )
+        proto.end(keyboardLayoutConfigToken);
+        return proto.bytes
+    }
 
     private fun hasLayout(layoutList: Array<KeyboardLayout>, layoutDesc: String): Boolean {
         for (kl in layoutList) {

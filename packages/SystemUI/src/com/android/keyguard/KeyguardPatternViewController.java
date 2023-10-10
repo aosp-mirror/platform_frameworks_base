@@ -321,7 +321,7 @@ public class KeyguardPatternViewController
                 resId = R.string.kg_prompt_after_user_lockdown_pattern;
                 break;
             case PROMPT_REASON_PREPARE_FOR_UPDATE:
-                resId = R.string.kg_prompt_unattended_update_pattern;
+                resId = R.string.kg_prompt_reason_timeout_pattern;
                 break;
             case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
                 resId = R.string.kg_prompt_reason_timeout_pattern;

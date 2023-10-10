@@ -130,10 +130,23 @@ interface SceneScope {
 sealed interface UserAction
 
 /** The user navigated back, either using a gesture or by triggering a KEYCODE_BACK event. */
-object Back : UserAction
+data object Back : UserAction
 
 /** The user swiped on the container. */
-enum class Swipe : UserAction {
+data class Swipe(
+    val direction: SwipeDirection,
+    val pointerCount: Int = 1,
+    val fromEdge: Edge? = null,
+) : UserAction {
+    companion object {
+        val Left = Swipe(SwipeDirection.Left)
+        val Up = Swipe(SwipeDirection.Up)
+        val Right = Swipe(SwipeDirection.Right)
+        val Down = Swipe(SwipeDirection.Down)
+    }
+}
+
+enum class SwipeDirection {
     Up,
     Down,
     Left,

@@ -81,7 +81,7 @@ data class TestMocksModule(
     @get:Provides val notificationStackSizeCalculator: NotificationStackSizeCalculator = mock(),
     @get:Provides val notificationWakeUpCoordinator: NotificationWakeUpCoordinator = mock(),
     @get:Provides val screenLifecycle: ScreenLifecycle = mock(),
-    @get:Provides val screenOffAnimController: ScreenOffAnimationController = mock(),
+    @get:Provides val screenOffAnimationController: ScreenOffAnimationController = mock(),
     @get:Provides val scrimController: ScrimController = mock(),
     @get:Provides val statusBarStateController: SysuiStatusBarStateController = mock(),
     @get:Provides val statusBarWindowController: StatusBarWindowController = mock(),

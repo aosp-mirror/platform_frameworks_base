@@ -22,20 +22,24 @@ import static android.view.View.LAYOUT_DIRECTION_LTR;
 import static android.view.View.LAYOUT_DIRECTION_RTL;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
+import android.util.DisplayMetrics;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
@@ -257,6 +261,27 @@ public class BubblePositionerTest extends ShellTestCase {
         assertThat(mPositioner.hasUserModifiedDefaultPosition()).isTrue();
     }
 
+    @Test
+    public void testExpandedViewHeight_onLargeTablet() {
+        Insets insets = Insets.of(10, 20, 5, 15);
+        Rect screenBounds = new Rect(0, 0, 1800, 2600);
+
+        new WindowManagerConfig()
+                .setLargeScreen()
+                .setInsets(insets)
+                .setScreenBounds(screenBounds)
+                .setUpConfig();
+        mPositioner.update();
+
+        Intent intent = new Intent(Intent.ACTION_VIEW).setPackage(mContext.getPackageName());
+        Bubble bubble = Bubble.createAppBubble(intent, new UserHandle(1), null, directExecutor());
+
+        int manageButtonHeight =
+                mContext.getResources().getDimensionPixelSize(R.dimen.bubble_manage_button_height);
+        float expectedHeight = 1800 - 2 * 20 - manageButtonHeight;
+        assertThat(mPositioner.getExpandedViewHeight(bubble)).isWithin(0.1f).of(expectedHeight);
+    }
+
     /**
      * Calculates the Y position bubbles should be placed based on the config. Based on
      * the calculations in {@link BubblePositioner#getDefaultStartPosition()} and
@@ -323,6 +348,8 @@ public class BubblePositionerTest extends ShellTestCase {
                     ? MIN_WIDTH_FOR_TABLET
                     : MIN_WIDTH_FOR_TABLET - 1;
             mConfiguration.orientation = mOrientation;
+            mConfiguration.screenWidthDp = pxToDp(mScreenBounds.width());
+            mConfiguration.screenHeightDp = pxToDp(mScreenBounds.height());
 
             when(mConfiguration.getLayoutDirection()).thenReturn(mLayoutDirection);
             WindowInsets windowInsets = mock(WindowInsets.class);
@@ -330,6 +357,12 @@ public class BubblePositionerTest extends ShellTestCase {
             when(mWindowMetrics.getWindowInsets()).thenReturn(windowInsets);
             when(mWindowMetrics.getBounds()).thenReturn(mScreenBounds);
             when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
+        }
+
+        private int pxToDp(float px) {
+            int dpi = mContext.getResources().getDisplayMetrics().densityDpi;
+            float dp = px / ((float) dpi / DisplayMetrics.DENSITY_DEFAULT);
+            return (int) dp;
         }
     }
 }

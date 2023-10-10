@@ -61,12 +61,17 @@ sealed interface UserAction {
     data class Swipe(
         /** The direction of the swipe. */
         val direction: Direction,
+        /**
+         * The edge from which the swipe originated or `null`, if the swipe didn't start close to an
+         * edge.
+         */
+        val fromEdge: Edge? = null,
         /** The number of pointers that were used (for example, one or two fingers). */
         val pointerCount: Int = 1,
     ) : UserAction
 
     /** The user has hit the back button or performed the back navigation gesture. */
-    object Back : UserAction
+    data object Back : UserAction
 }
 
 /** Enumerates all known "cardinal" directions for user actions. */
@@ -75,4 +80,12 @@ enum class Direction {
     UP,
     RIGHT,
     DOWN,
+}
+
+/** Enumerates all known edges from which a swipe can start. */
+enum class Edge {
+    LEFT,
+    TOP,
+    RIGHT,
+    BOTTOM,
 }

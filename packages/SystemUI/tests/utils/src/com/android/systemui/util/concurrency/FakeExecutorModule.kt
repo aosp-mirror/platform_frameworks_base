@@ -15,6 +15,7 @@
  */
 package com.android.systemui.util.concurrency
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.util.time.FakeSystemClock
 import dagger.Binds
@@ -22,14 +23,12 @@ import dagger.Module
 import dagger.Provides
 import java.util.concurrent.Executor
 
-@Module(includes = [FakeExecutorModule.Bindings::class])
-class FakeExecutorModule(
-    @get:Provides val clock: FakeSystemClock = FakeSystemClock(),
-) {
-    @get:Provides val executor = FakeExecutor(clock)
+@Module
+interface FakeExecutorModule {
+    @Binds @Main @SysUISingleton fun bindMainExecutor(executor: FakeExecutor): Executor
 
-    @Module
-    interface Bindings {
-        @Binds @Main fun bindMainExecutor(executor: FakeExecutor): Executor
+    companion object {
+        @Provides
+        fun provideFake(clock: FakeSystemClock) = FakeExecutor(clock)
     }
 }

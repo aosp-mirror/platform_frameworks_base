@@ -44,6 +44,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
 
 import java.util.function.Supplier;
 
@@ -283,10 +284,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         // Task surface itself
         float shadowRadius = loadDimension(resources, params.mShadowRadiusId);
-        int backgroundColorInt = mTaskInfo.taskDescription.getBackgroundColor();
-        mTmpColor[0] = (float) Color.red(backgroundColorInt) / 255.f;
-        mTmpColor[1] = (float) Color.green(backgroundColorInt) / 255.f;
-        mTmpColor[2] = (float) Color.blue(backgroundColorInt) / 255.f;
         final Point taskPosition = mTaskInfo.positionInParent;
         if (isFullscreen) {
             // Setting the task crop to the width/height stops input events from being sent to
@@ -302,13 +299,22 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             finishT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
         }
         startT.setShadowRadius(mTaskSurface, shadowRadius)
-                .setColor(mTaskSurface, mTmpColor)
                 .show(mTaskSurface);
         finishT.setPosition(mTaskSurface, taskPosition.x, taskPosition.y)
                 .setShadowRadius(mTaskSurface, shadowRadius);
         if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+            if (!DesktopModeStatus.isVeiledResizeEnabled()) {
+                // When fluid resize is enabled, add a background to freeform tasks
+                int backgroundColorInt = mTaskInfo.taskDescription.getBackgroundColor();
+                mTmpColor[0] = (float) Color.red(backgroundColorInt) / 255.f;
+                mTmpColor[1] = (float) Color.green(backgroundColorInt) / 255.f;
+                mTmpColor[2] = (float) Color.blue(backgroundColorInt) / 255.f;
+                startT.setColor(mTaskSurface, mTmpColor);
+            }
             startT.setCornerRadius(mTaskSurface, params.mCornerRadius);
             finishT.setCornerRadius(mTaskSurface, params.mCornerRadius);
+        } else if (!DesktopModeStatus.isVeiledResizeEnabled()) {
+            startT.unsetColor(mTaskSurface);
         }
 
         if (mCaptionWindowManager == null) {
