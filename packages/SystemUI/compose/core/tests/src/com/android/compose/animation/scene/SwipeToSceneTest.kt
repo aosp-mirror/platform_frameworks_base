@@ -63,7 +63,7 @@ class SwipeToSceneTest {
             { currentScene = it },
             EmptyTestTransitions,
             state = layoutState,
-            modifier = Modifier.size(LayoutWidth, LayoutHeight).testTag(TestElements.Foo.name),
+            modifier = Modifier.size(LayoutWidth, LayoutHeight).testTag(TestElements.Foo.debugName),
         ) {
             scene(
                 TestScenes.SceneA,

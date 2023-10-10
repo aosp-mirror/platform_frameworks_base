@@ -117,7 +117,7 @@ class SceneTransitionLayoutTest {
                 .size(size)
                 .background(Color.Red)
                 .element(TestElements.Foo)
-                .testTag(TestElements.Foo.name)
+                .testTag(TestElements.Foo.debugName)
         ) {
             // Offset the single child of Foo by some animated shared offset.
             val offset by animateSharedDpAsState(childOffset, TestValues.Value1, TestElements.Foo)
@@ -129,7 +129,7 @@ class SceneTransitionLayoutTest {
                     }
                     .size(30.dp)
                     .background(Color.Blue)
-                    .testTag(TestElements.Bar.name)
+                    .testTag(TestElements.Bar.debugName)
             )
         }
     }
