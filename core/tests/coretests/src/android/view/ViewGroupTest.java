@@ -49,11 +49,11 @@ public class ViewGroupTest {
     public void testDispatchMouseEventsUnderCursor() {
         final Context context = getInstrumentation().getContext();
         final TestView viewGroup = new TestView(context, 0 /* left */, 0 /* top */,
-                200 /* right */, 200 /* bottom */);
+                200 /* right */, 100 /* bottom */);
         final TestView viewA = spy(new TestView(context, 0 /* left */, 0 /* top */,
-                100 /* right */, 200 /* bottom */));
+                100 /* right */, 100 /* bottom */));
         final TestView viewB = spy(new TestView(context, 100 /* left */, 0 /* top */,
-                200 /* right */, 200 /* bottom */));
+                200 /* right */, 100 /* bottom */));
 
         viewGroup.addView(viewA);
         viewGroup.addView(viewB);
@@ -73,10 +73,10 @@ public class ViewGroupTest {
         MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[2];
         coords[0] = new MotionEvent.PointerCoords();
         coords[0].x = 80;
-        coords[0].y = 100;
+        coords[0].y = 50;
         coords[1] = new MotionEvent.PointerCoords();
         coords[1].x = 240;
-        coords[1].y = 100;
+        coords[1].y = 50;
 
         MotionEvent event;
         // Make sure the down event is active with a pointer which coordinate is different from the
@@ -91,6 +91,10 @@ public class ViewGroupTest {
         viewGroup.onResolvePointerIcon(event, 0 /* pointerIndex */);
         verify(viewB).onResolvePointerIcon(event, 0);
 
+        event.setAction(MotionEvent.ACTION_SCROLL);
+        viewGroup.dispatchGenericMotionEvent(event);
+        verify(viewB).dispatchGenericMotionEvent(event);
+
         event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
                 MotionEvent.ACTION_POINTER_DOWN | (1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT),
                 2 /* pointerCount */, properties, coords, 0 /* metaState */, 0 /* buttonState */,
@@ -102,8 +106,13 @@ public class ViewGroupTest {
         viewGroup.onResolvePointerIcon(event, 1 /* pointerIndex */);
         verify(viewB).onResolvePointerIcon(event, 1);
 
+        event.setAction(MotionEvent.ACTION_SCROLL);
+        viewGroup.dispatchGenericMotionEvent(event);
+        verify(viewB).dispatchGenericMotionEvent(event);
+
         verify(viewA, never()).dispatchTouchEvent(any());
         verify(viewA, never()).onResolvePointerIcon(any(), anyInt());
+        verify(viewA, never()).dispatchGenericMotionEvent(any());
     }
 
     /**
