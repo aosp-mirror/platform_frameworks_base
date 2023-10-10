@@ -841,32 +841,32 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // package changes
         monitor.register(mContext, null,  UserHandle.ALL, true);
 
-        // Register an additional observer for new packages using PackageManagerInternal, which
-        // generally notifies observers much sooner than the BroadcastReceiver-based PackageMonitor.
-        final PackageManagerInternal pm = LocalServices.getService(
-                PackageManagerInternal.class);
-        if (pm != null) {
-            pm.getPackageList(new PackageManagerInternal.PackageListObserver() {
-                @Override
-                public void onPackageAdded(String packageName, int uid) {
-                    final int userId = UserHandle.getUserId(uid);
-                    synchronized (mLock) {
-                        if (userId == mCurrentUserId) {
-                            onSomePackagesChangedLocked();
+        if (!Flags.deprecatePackageListObserver()) {
+            final PackageManagerInternal pm = LocalServices.getService(
+                    PackageManagerInternal.class);
+            if (pm != null) {
+                pm.getPackageList(new PackageManagerInternal.PackageListObserver() {
+                    @Override
+                    public void onPackageAdded(String packageName, int uid) {
+                        final int userId = UserHandle.getUserId(uid);
+                        synchronized (mLock) {
+                            if (userId == mCurrentUserId) {
+                                onSomePackagesChangedLocked();
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onPackageRemoved(String packageName, int uid) {
-                    final int userId = UserHandle.getUserId(uid);
-                    synchronized (mLock) {
-                        if (userId == mCurrentUserId) {
-                            onPackageRemovedLocked(packageName);
+                    @Override
+                    public void onPackageRemoved(String packageName, int uid) {
+                        final int userId = UserHandle.getUserId(uid);
+                        synchronized (mLock) {
+                            if (userId == mCurrentUserId) {
+                                onPackageRemovedLocked(packageName);
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
 
         // user change and unlock
