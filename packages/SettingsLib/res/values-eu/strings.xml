@@ -157,8 +157,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi sarearen bi barra."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi sarearen hiru barra."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Wi-Fi sarearen seinalea osoa."</string>
-    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
-    <skip />
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"Gailura konektatuta."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Sare irekia"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Sare segurua"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android sistema eragilea"</string>
@@ -368,7 +367,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Araztu GPU gainidazketa"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Desgaitu HW gainjartzeak"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Erabili beti GPUa pantaila-muntaietarako"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"Simulatu kolore-eremua"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"Simulatu kolore-espazioa"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Gaitu OpenGL aztarnak"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desgaitu USB bidez audioa bideratzeko aukera"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Desgaitu USB bidezko audio-gailuetara automatikoki bideratzeko aukera"</string>
@@ -441,7 +440,7 @@
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Erabili sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desgaituta"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Ikusmen-monokromia"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Daltonismoa (gorri-berdeak)"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomalia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalia (urdin-horia)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koloreen zuzenketa"</string>

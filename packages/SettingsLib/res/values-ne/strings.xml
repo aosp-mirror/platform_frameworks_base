@@ -157,8 +157,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi दुई पट्टि।"</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi तीन बारहरू।"</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"पूर्ण Wi-Fi सिंग्नल।"</string>
-    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
-    <skip />
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"तपाईंको डिभाइसमा कनेक्ट गरिएको छ।"</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"खुला नेटवर्क"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"सुरक्षित नेटवर्क"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>

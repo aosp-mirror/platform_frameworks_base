@@ -157,8 +157,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"‏Wifi دو بارز۔"</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"‏Wifi تین بارز۔"</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"‏Wifi سگنل پورا ہے۔"</string>
-    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
-    <skip />
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"آپ کے آلے سے منسلک ہے۔"</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"اوپن نیٹ ورک"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"محفوظ نیٹ ورک"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
