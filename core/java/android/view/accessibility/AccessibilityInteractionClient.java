@@ -1731,6 +1731,9 @@ public final class AccessibilityInteractionClient
     @Override
     public void sendAttachOverlayResult(
             @AccessibilityService.AttachOverlayResult int result, int interactionId) {
+        if (!Flags.a11yOverlayCallbacks()) {
+            return;
+        }
         synchronized (mInstanceLock) {
             if (mAttachAccessibilityOverlayCallbacks.contains(interactionId)) {
                 final Pair<Executor, IntConsumer> pair =
