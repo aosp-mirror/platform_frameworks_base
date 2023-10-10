@@ -151,7 +151,10 @@ constructor(
             .onEach {
                 if (it) {
                     faceAuthenticationLogger.faceLockedOut("Fingerprint locked out")
-                    repository.setLockedOut(true)
+                    // We don't care about this if face auth is not enabled.
+                    if (isFaceAuthEnabledAndEnrolled()) {
+                        repository.setLockedOut(true)
+                    }
                 }
             }
             .launchIn(applicationScope)

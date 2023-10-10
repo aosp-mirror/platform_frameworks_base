@@ -95,6 +95,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         FakeDeviceEntryFingerprintAuthRepository
     private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
     private lateinit var powerInteractor: PowerInteractor
+    private lateinit var fakeBiometricSettingsRepository: FakeBiometricSettingsRepository
 
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig
@@ -123,7 +124,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         facePropertyRepository = FakeFacePropertyRepository()
         fakeKeyguardRepository = FakeKeyguardRepository()
         powerInteractor = PowerInteractorFactory.create().powerInteractor
-        val fakeBiometricSettingsRepository = FakeBiometricSettingsRepository()
+        fakeBiometricSettingsRepository = FakeBiometricSettingsRepository()
 
         underTest =
             SystemUIKeyguardFaceAuthInteractor(
@@ -484,6 +485,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
     fun faceUnlockIsDisabledWhenFpIsLockedOut() =
         testScope.runTest {
             underTest.start()
+            fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
 
             fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
             runCurrent()
