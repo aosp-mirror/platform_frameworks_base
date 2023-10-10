@@ -82,6 +82,7 @@ import static android.view.WindowLayoutParamsProto.Y;
 
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -5821,6 +5822,7 @@ public interface WindowManager extends ViewManager {
      *
      * @hide
      */
+    @FlaggedApi("REPLACE_CONTENT_WITH_MIRROR")
     @TestApi
     @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
     default boolean replaceContentOnDisplayWithMirror(int displayId, @NonNull Window window) {
@@ -5836,6 +5838,7 @@ public interface WindowManager extends ViewManager {
      *
      * @hide
      */
+    @FlaggedApi("REPLACE_CONTENT_WITH_MIRROR")
     @TestApi
     @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
     default boolean replaceContentOnDisplayWithSc(int displayId, @NonNull SurfaceControl sc) {
