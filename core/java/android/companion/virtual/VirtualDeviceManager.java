@@ -476,6 +476,7 @@ public final class VirtualDeviceManager {
         /**
          * Returns the persistent ID of this virtual device.
          */
+        @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
         public @Nullable String getPersistentDeviceId() {
             return mVirtualDeviceInternal.getPersistentDeviceId();
         }
