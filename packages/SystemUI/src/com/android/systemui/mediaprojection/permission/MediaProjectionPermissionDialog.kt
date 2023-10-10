@@ -89,15 +89,15 @@ class MediaProjectionPermissionDialog(
                 }
             return listOf(
                 ScreenShareOption(
-                    mode = ENTIRE_SCREEN,
-                    spinnerText = R.string.screen_share_permission_dialog_option_entire_screen,
-                    warningText = entireScreenWarningText
-                ),
-                ScreenShareOption(
                     mode = SINGLE_APP,
                     spinnerText = R.string.screen_share_permission_dialog_option_single_app,
                     warningText = singleAppWarningText,
                     spinnerDisabledText = singleAppDisabledText,
+                ),
+                ScreenShareOption(
+                    mode = ENTIRE_SCREEN,
+                    spinnerText = R.string.screen_share_permission_dialog_option_entire_screen,
+                    warningText = entireScreenWarningText
                 )
             )
         }

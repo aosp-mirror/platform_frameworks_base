@@ -186,14 +186,14 @@ class ScreenRecordPermissionDialog(
         private fun createOptionList(): List<ScreenShareOption> {
             return listOf(
                 ScreenShareOption(
-                    ENTIRE_SCREEN,
-                    R.string.screen_share_permission_dialog_option_entire_screen,
-                    R.string.screenrecord_permission_dialog_warning_entire_screen
-                ),
-                ScreenShareOption(
                     SINGLE_APP,
                     R.string.screen_share_permission_dialog_option_single_app,
                     R.string.screenrecord_permission_dialog_warning_single_app
+                ),
+                ScreenShareOption(
+                    ENTIRE_SCREEN,
+                    R.string.screen_share_permission_dialog_option_entire_screen,
+                    R.string.screenrecord_permission_dialog_warning_entire_screen
                 )
             )
         }
