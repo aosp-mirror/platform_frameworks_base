@@ -21,6 +21,7 @@ import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
@@ -36,8 +37,6 @@ import androidx.compose.ui.unit.IntSize
 
 private const val TAG = "MovableElement"
 
-private object MovableElementScopeImpl : MovableElementScope
-
 @Composable
 internal fun MovableElement(
     layoutImpl: SceneTransitionLayoutImpl,
@@ -51,6 +50,10 @@ internal fun MovableElement(
         // every time an element is added/removed from SceneTransitionLayoutImpl.elements, so we
         // disable read observation during the look-up in that map.
         val element = Snapshot.withoutReadObservation { layoutImpl.elements.getValue(key) }
+        val movableElementScope =
+            remember(layoutImpl, element, scene) {
+                MovableElementScopeImpl(layoutImpl, element, scene)
+            }
 
         // The [Picture] to which we save the last drawing commands of this element. This is
         // necessary because the content of this element might not be composed in this scene, in
@@ -77,7 +80,7 @@ internal fun MovableElement(
                     }
                 }
             ) {
-                element.movableContent { MovableElementScopeImpl.content() }
+                element.movableContent { movableElementScope.content() }
             }
         } else {
             // If we are not composed, we draw the previous drawing commands at the same size as the
@@ -176,5 +179,22 @@ private fun shouldComposeMovableElement(
         !isHighestScene
     } else {
         isHighestScene
+    }
+}
+
+private class MovableElementScopeImpl(
+    private val layoutImpl: SceneTransitionLayoutImpl,
+    private val element: Element,
+    private val scene: Scene,
+) : MovableElementScope {
+    @Composable
+    override fun <T> animateSharedValueAsState(
+        value: T,
+        debugName: String,
+        lerp: (start: T, stop: T, fraction: Float) -> T,
+        canOverflow: Boolean,
+    ): State<T> {
+        val key = remember { ValueKey(debugName) }
+        return animateSharedValueAsState(layoutImpl, scene, element, key, value, lerp, canOverflow)
     }
 }

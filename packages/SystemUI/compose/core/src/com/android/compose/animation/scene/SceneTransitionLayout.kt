@@ -160,7 +160,16 @@ interface SceneScope {
 
 // TODO(b/291053742): Add animateSharedValueAsState(targetValue) without any ValueKey and ElementKey
 // arguments to allow sharing values inside a movable element.
-@ElementDsl interface MovableElementScope
+@ElementDsl
+interface MovableElementScope {
+    @Composable
+    fun <T> animateSharedValueAsState(
+        value: T,
+        debugName: String,
+        lerp: (start: T, stop: T, fraction: Float) -> T,
+        canOverflow: Boolean,
+    ): State<T>
+}
 
 /** An action performed by the user. */
 sealed interface UserAction
