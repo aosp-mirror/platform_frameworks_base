@@ -735,7 +735,6 @@ public class SettingsBackupTest {
                  Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                  Settings.Secure.CONTENT_CAPTURE_ENABLED,
                  Settings.Secure.DEFAULT_INPUT_METHOD,
-                 Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
                  Settings.Secure.DEVICE_PAIRED,
                  Settings.Secure.DIALER_DEFAULT_APPLICATION,
                  Settings.Secure.DISABLED_PRINT_SERVICES,
@@ -805,8 +804,6 @@ public class SettingsBackupTest {
                  Settings.Secure.SLEEP_TIMEOUT,
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
                  Settings.Secure.SPELL_CHECKER_ENABLED,  // Intentionally removed in Q
-                 Settings.Secure.STYLUS_BUTTONS_ENABLED,
-                 Settings.Secure.STYLUS_HANDWRITING_ENABLED,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.KNOWN_TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_APP_USES_NON_SYSTEM_INPUTS,
