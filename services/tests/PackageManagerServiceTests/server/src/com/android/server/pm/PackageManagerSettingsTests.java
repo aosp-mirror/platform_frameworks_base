@@ -24,7 +24,9 @@ import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS;
 import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND;
 import static android.content.pm.parsing.FrameworkParsingPackageUtils.parsePublicKey;
 import static android.content.res.Resources.ID_NULL;
+
 import static com.android.server.pm.PackageManagerService.WRITE_USER_PACKAGE_RESTRICTIONS;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -1065,7 +1067,10 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                false /*isPersistent*/,
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
@@ -1103,7 +1108,10 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                false /*isPersistent*/,
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
@@ -1143,7 +1151,10 @@ public class PackageManagerSettingsTests {
                     null /*usesStaticLibraries*/,
                     null /*usesStaticLibrariesVersions*/,
                     null /*mimeGroups*/,
-                    UUID.randomUUID());
+                    UUID.randomUUID(),
+                    false /*isPersistent*/,
+                    34 /*targetSdkVersion*/,
+                    null /*restrictUpdateHash*/);
             fail("Expected a PackageManagerException");
         } catch (PackageManagerException expected) {
         }
@@ -1179,7 +1190,10 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                false /*isPersistent*/,
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
         assertThat(testPkgSetting01.getFlags(), is(ApplicationInfo.FLAG_SYSTEM));
@@ -1224,7 +1238,10 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                false /*isPersistent*/,
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(0));
         assertThat(testPkgSetting01.getPath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
@@ -1269,7 +1286,10 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                false /*isPersistent*/,
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(10064));
         assertThat(testPkgSetting01.getPath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
@@ -1315,7 +1335,10 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                false /*isPersistent*/,
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(10064));
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
@@ -1358,7 +1381,10 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                false /*isPersistent*/,
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(0));
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));

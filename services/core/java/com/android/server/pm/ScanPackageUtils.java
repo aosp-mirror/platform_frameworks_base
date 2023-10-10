@@ -220,7 +220,8 @@ final class ScanPackageUtils {
                     UserManagerService.getInstance(), usesSdkLibraries,
                     parsedPackage.getUsesSdkLibrariesVersionsMajor(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
-                    newDomainSetId);
+                    newDomainSetId, parsedPackage.isPersistent(),
+                    parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
         } else {
             // make a deep copy to avoid modifying any existing system state.
             pkgSetting = new PackageSetting(pkgSetting);
@@ -240,7 +241,8 @@ final class ScanPackageUtils {
                     UserManagerService.getInstance(),
                     usesSdkLibraries, parsedPackage.getUsesSdkLibrariesVersionsMajor(),
                     usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
-                    parsedPackage.getMimeGroups(), newDomainSetId);
+                    parsedPackage.getMimeGroups(), newDomainSetId, parsedPackage.isPersistent(),
+                    parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
         }
 
         if (createNewPackage && originalPkgSetting != null) {
