@@ -38,6 +38,8 @@
 #include <mediadrm/IDrmMetricsConsumer.h>
 #include <mediadrm/IDrm.h>
 #include <utils/Vector.h>
+#include <map>
+#include <string>
 
 using ::android::os::PersistableBundle;
 namespace drm = ::android::hardware::drm;
@@ -193,6 +195,11 @@ struct LogMessageFields {
     jclass classId;
 };
 
+struct DrmExceptionFields {
+    jmethodID init;
+    jclass classId;
+};
+
 struct fields_t {
     jfieldID context;
     jmethodID post_event;
@@ -215,6 +222,7 @@ struct fields_t {
     jclass parcelCreatorClassId;
     KeyStatusFields keyStatus;
     LogMessageFields logMessage;
+    std::map<std::string, DrmExceptionFields> exceptionCtors;
 };
 
 static fields_t gFields;
@@ -245,18 +253,32 @@ jobject hidlLogMessagesToJavaList(JNIEnv *env, const Vector<drm::V1_4::LogMessag
     return arrayList;
 }
 
-int drmThrowException(JNIEnv* env, const char *className, const DrmStatus &err, const char *msg) {
+void resolveDrmExceptionCtor(JNIEnv *env, const char *className) {
+    jclass clazz;
+    jmethodID init;
+    FIND_CLASS(clazz, className);
+    GET_METHOD_ID(init, clazz, "<init>", "(Ljava/lang/String;III)V");
+    gFields.exceptionCtors[std::string(className)] = {
+        .init = init,
+        .classId = static_cast<jclass>(env->NewGlobalRef(clazz))
+        };
+}
+
+void drmThrowException(JNIEnv* env, const char *className, const DrmStatus &err, const char *msg) {
     using namespace android::jnihelp;
-    jstring _detailMessage = CreateExceptionMsg(env, msg);
-    int _status = ThrowException(env, className, "(Ljava/lang/String;III)V",
-                                 _detailMessage,
-                                 err.getCdmErr(),
-                                 err.getOemErr(),
-                                 err.getContext());
-    if (_detailMessage != NULL) {
-        env->DeleteLocalRef(_detailMessage);
+
+    if (gFields.exceptionCtors.count(std::string(className)) == 0) {
+        jniThrowException(env, className, msg);
+    } else {
+        jstring _detailMessage = CreateExceptionMsg(env, msg);
+        jobject exception = env->NewObject(gFields.exceptionCtors[std::string(className)].classId,
+            gFields.exceptionCtors[std::string(className)].init, _detailMessage,
+            err.getCdmErr(), err.getOemErr(), err.getContext());
+        env->Throw(static_cast<jthrowable>(exception));
+        if (_detailMessage != NULL) {
+            env->DeleteLocalRef(_detailMessage);
+        }
     }
-    return _status;
 }
 }  // namespace anonymous
 
@@ -952,6 +974,10 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     FIND_CLASS(clazz, "android/media/MediaDrm$LogMessage");
     gFields.logMessage.classId = static_cast<jclass>(env->NewGlobalRef(clazz));
     GET_METHOD_ID(gFields.logMessage.init, clazz, "<init>", "(JILjava/lang/String;)V");
+
+    resolveDrmExceptionCtor(env, "android/media/NotProvisionedException");
+    resolveDrmExceptionCtor(env, "android/media/ResourceBusyException");
+    resolveDrmExceptionCtor(env, "android/media/DeniedByServerException");
 }
 
 static void android_media_MediaDrm_native_setup(
