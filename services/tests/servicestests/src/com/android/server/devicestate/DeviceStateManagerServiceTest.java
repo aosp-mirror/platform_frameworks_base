@@ -285,6 +285,7 @@ public final class DeviceStateManagerServiceTest {
         assertEquals(info.currentState, DEFAULT_DEVICE_STATE.getIdentifier());
     }
 
+    @FlakyTest(bugId = 297949293)
     @Test
     public void getDeviceStateInfo_baseStateAndCommittedStateNotSet() throws RemoteException {
         // Create a provider and a service without an initial base state.
